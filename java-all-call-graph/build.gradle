@@ -1,0 +1,169 @@
+apply plugin: 'eclipse'
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+group 'com.github.adrninistrator'
+version = "0.0.1"
+def projectName = "java-all-call-graph"
+description = "${projectName}"
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+def defaultEncoding = 'UTF-8'
+
+[compileJava, compileTestJava]*.options*.encoding = defaultEncoding
+
+project.buildDir = 'build'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+
+        resources {
+            srcDir 'src/test/resources'
+        }
+    }
+}
+
+List apache_common = [
+        'org.apache.commons:commons-lang3:3.11',
+        'commons-io:commons-io:2.8.0',
+        'commons-codec:commons-codec:1.9'
+]
+
+List c3p0 = ['com.mchange:c3p0:0.9.5.5']
+
+List mysql = ['mysql:mysql-connector-java:8.0.20']
+
+List slf4j = ['org.slf4j:log4j-over-slf4j:1.7.30']
+
+List java_callgraph = ['com.github.adrninistrator:java-callgraph:0.0.1']
+
+List log4j = [
+        'org.apache.logging.log4j:log4j-api:2.14.1',
+        'org.apache.logging.log4j:log4j-core:2.14.1',
+        'org.apache.logging.log4j:log4j-slf4j-impl:2.14.1'
+]
+
+dependencies {
+    implementation apache_common, c3p0, mysql, slf4j, java_callgraph
+    testImplementation log4j
+}
+
+compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+
+processResources {
+    setDuplicatesStrategy(DuplicatesStrategy.INCLUDE)
+}
+
+task createProject {
+    doFirst {
+        sourceSets*.java.srcDirs*.each { it.mkdirs() }
+        sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+    }
+}
+
+jar {
+    from(sourceSets.test.allJava) {
+        include 'test/jacg/**'
+        into '/'
+    }
+}
+
+task test_jar(type: Jar) {
+    archiveName 'test.jar'
+    from(sourceSets.test.output) {
+        include 'test/call_graph/**'
+        into '/'
+    }
+}
+
+task sourcesJar(type: Jar) {
+    doFirst {
+        archiveClassifier.set('sources')
+        from sourceSets.main.allJava
+    }
+}
+
+task javadocJar(type: Jar) {
+    doFirst {
+        archiveClassifier.set('javadoc')
+        from javadoc.destinationDir
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version "${version}"
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = "java-all-call-graph"
+                description = "Generate all call graph for Java Code."
+                url = "https://github.com/Adrninistrator/java-all-call-graph"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "Adrninistrator"
+                        name = "zhengyiee"
+                        email = "zhengyiee@qq.com"
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/Adrninistrator/java-all-call-graph.git"
+                    developerConnection = "scm:git:https://github.com/Adrninistrator/java-all-call-graph.git"
+                    url = "https://github.com/Adrninistrator/java-all-call-graph"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name 'sonatypeRepository'
+            url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = "${NEXUS_USERNAME}"
+                password = "${NEXUS_PASSWORD}"
+            }
+        }
+        maven {
+            name = 'sonatypeSnapshotRepository'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            credentials {
+                username = "${NEXUS_USERNAME}"
+                password = "${NEXUS_PASSWORD}"
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
