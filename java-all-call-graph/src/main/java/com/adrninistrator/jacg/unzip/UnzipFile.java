@@ -36,6 +36,7 @@ public class UnzipFile {
         String rootDirName = chooseRootDirName();
 
         if (!isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_CONFIG, true) ||
+                !isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_SQL, true) ||
                 !isDirectoryExists(rootDirName + FLAG_FSP + DIR_JAVA + FLAG_FSP + DIR_TEST_JAVA_FILE, true)) {
             return;
         }
@@ -45,7 +46,7 @@ public class UnzipFile {
             while (ze != null) {
                 if (!ze.isDirectory()) {
                     String fileName = ze.getName();
-                    if (fileName.startsWith(Constants.DIR_CONFIG)) {
+                    if (fileName.startsWith(Constants.DIR_CONFIG) || fileName.startsWith(Constants.DIR_SQL)) {
                         writeFile(ze, zis, rootDirName, DIR_RESOURCES, fileName);
                     } else if (fileName.startsWith(DIR_TEST_JAVA_FILE)) {
                         writeFile(ze, zis, rootDirName, DIR_JAVA, fileName);
