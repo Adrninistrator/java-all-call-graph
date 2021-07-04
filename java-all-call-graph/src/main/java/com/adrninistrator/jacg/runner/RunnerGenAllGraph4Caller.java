@@ -400,10 +400,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         /*
             根据方法名前缀判断是否需要忽略，使用包含参数的方法名进行比较
-            若当前调用类型为Runnable实现类构造函数调用run()方法，则不判断方法名前缀是否需要忽略（Runnable实现类对应的方法名为<init>，可能会被指定为忽略）
+            若当前调用类型为Runnable实现类/Thread子类构造函数调用run()方法，则不判断方法名前缀是否需要忽略（Runnable实现类对应的方法名为<init>，可能会被指定为忽略）
          */
-        if (!Constants.CALL_TYPE_RUNNABLE_INIT_RUN.equals(callType) && (isIgnoredMethodWithPrefixByMethodName(callerMethodNameWithArgs) ||
-                (isIgnoredMethodWithPrefixByMethodName(calleeMethodNameWithArgs)))) {
+        if (!StringUtils.equalsAny(callType, Constants.CALL_TYPE_RUNNABLE_INIT_RUN, Constants.CALL_TYPE_THREAD_INIT_RUN)
+                && (isIgnoredMethodWithPrefixByMethodName(callerMethodNameWithArgs) ||
+                isIgnoredMethodWithPrefixByMethodName(calleeMethodNameWithArgs))) {
             return true;
         }
 

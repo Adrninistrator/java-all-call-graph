@@ -141,6 +141,7 @@ public class Constants {
     public static final int NO_CYCLE_CALL_FLAG = -1;
 
     public static final String CALL_TYPE_RUNNABLE_INIT_RUN = "RIR";
+    public static final String CALL_TYPE_THREAD_INIT_RUN = "TIR";
 
     private Constants() {
         throw new IllegalStateException("illegal");
