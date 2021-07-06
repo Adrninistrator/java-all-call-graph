@@ -2,6 +2,8 @@
 
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-green.svg)](https://github.com/Adrninistrator/java-all-call-graph/blob/master/LICENSE)
 
+[README-en.md](README-en.md)
+
 # 1. 前言
 
 在很多场景下，如果能够生成Java代码中方法之间的调用链，是很有帮助的。
