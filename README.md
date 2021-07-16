@@ -110,7 +110,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.0.5'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.0.6'
 ```
 
 - Maven
@@ -119,7 +119,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.0.5'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
   <type>provided</type>
 </dependency>
 ```
@@ -286,6 +286,8 @@ com.test.Test1
 `show.method.annotation`：调用链中是否显示方法上的注解开关，值为true/false；当开关为开时，会显示当前方法上的全部注解的完整类名，格式为“\[方法信息\]@注解1@注解2...”
 
 `gen.combined.output`：是否生成调用链的合并文件开关，值为true/false；当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“~all-4callee.txt”
+
+`gen.upwards.methods.file`：生成向上的调用链时，是否需要为每个方法生成单独的文件开关，值为true/false；当开关为开时，会为o_g4callee_class_name.properties中指定的每个类的每个方法单独生成一个文件，保存在“~jacg_output_for_callee/\[yyyyMMdd-HHmmss.SSS\]/methods”
 
 ### 4.3.5. 生成指定方法向下完整调用链
 

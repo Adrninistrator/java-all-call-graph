@@ -53,6 +53,11 @@ public class ConfManager {
                 return null;
             }
 
+            String genUpwardsMethodsFile = properties.getProperty(Constants.KEY_GEN_UPWARDS_METHODS_FILE);
+            if (checkBlank(genUpwardsMethodsFile, Constants.KEY_GEN_UPWARDS_METHODS_FILE, configFilePath)) {
+                return null;
+            }
+
             String callGraphOutputDetail = properties.getProperty(Constants.KEY_CALL_GRAPH_OUTPUT_DETAIL);
             if (checkBlank(callGraphOutputDetail, Constants.KEY_CALL_GRAPH_OUTPUT_DETAIL, configFilePath)) {
                 return null;
@@ -121,6 +126,7 @@ public class ConfManager {
             confInfo.setThreadNum(threadNum);
             confInfo.setShowMethodAnnotation(Boolean.parseBoolean(showMethodAnnotation));
             confInfo.setGenCombinedOutput(Boolean.parseBoolean(genCombinedOutput));
+            confInfo.setGenUpwardsMethodsFile(Boolean.parseBoolean(genUpwardsMethodsFile));
             confInfo.setDbDriverName(dbDriverName);
             confInfo.setDbUrl(dbUrl);
             confInfo.setDbUsername(dbUsername);

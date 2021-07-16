@@ -5,6 +5,8 @@ import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.dto.TmpNode4Callee;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.CommonUtil;
+import com.adrninistrator.jacg.util.FileUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -44,6 +46,14 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         if (!createOutputDit(Constants.DIR_OUTPUT_GRAPH_FOR_CALLEE)) {
             return false;
         }
+
+        if (confInfo.isGenUpwardsMethodsFile()) {
+            String dirPath = outputDirPrefix + File.separator + Constants.DIR_METHODS;
+            if (!FileUtil.isDirectoryExists(dirPath)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -101,20 +111,33 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         }
 
         // 确定当前类对应输出文件名，格式：配置文件中指定的类名.txt
-        String outputFileName = outputDirPrefix + File.separator + calleeClassName + Constants.EXT_TXT;
-        logger.info("当前输出文件名 {}", outputFileName);
+        String outputFile4ClassName = outputDirPrefix + File.separator + calleeClassName + Constants.EXT_TXT;
+        logger.info("当前类输出文件名 {}", outputFile4ClassName);
 
-
-        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileName), StandardCharsets.UTF_8))) {
+        try (BufferedWriter out4Class = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile4ClassName),
+                StandardCharsets.UTF_8))) {
             for (Map<String, Object> calleeMethodMap : calleeMethodList) {
                 String calleeMethodHash = (String) calleeMethodMap.get(DC.MC_CALLEE_METHOD_HASH);
                 String calleeFullMethod = (String) calleeMethodMap.get(DC.MC_CALLEE_FULL_METHOD);
 
                 // 处理一个被调用方法
-                handleOneCalleeMethod(calleeClassName, calleeMethodHash, calleeFullMethod, out);
+                if (confInfo.isGenUpwardsMethodsFile()) {
+                    String methodName = CommonUtil.getOnlyMethodName(calleeFullMethod);
+                    String outputFile4Method = outputDirPrefix + File.separator + Constants.DIR_METHODS + File.separator + calleeClassName +
+                            Constants.FLAG_AT + methodName + Constants.FLAG_AT + calleeMethodHash + Constants.EXT_TXT;
+                    logger.info("当前方法输出文件名 {}", outputFile4Method);
+                    BufferedWriter out4Method = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile4Method),
+                            StandardCharsets.UTF_8));
+
+                    handleOneCalleeMethod(calleeClassName, calleeMethodHash, calleeFullMethod, out4Class, out4Method);
+
+                    IOUtils.close(out4Method);
+                } else {
+                    handleOneCalleeMethod(calleeClassName, calleeMethodHash, calleeFullMethod, out4Class, null);
+                }
 
                 // 每个方法信息间插入一条空行
-                out.write(Constants.NEW_LINE);
+                out4Class.write(Constants.NEW_LINE);
             }
             return true;
         } catch (Exception e) {
@@ -124,23 +147,24 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
     }
 
     // 处理一个被调用方法
-    private boolean handleOneCalleeMethod(String calleeClassName, String calleeMethodHash, String calleeFullMethod, BufferedWriter out) throws IOException {
+    private boolean handleOneCalleeMethod(String calleeClassName, String calleeMethodHash, String calleeFullMethod, BufferedWriter out4Class,
+                                          BufferedWriter out4Method) throws IOException {
         // 在文件第1行写入当前方法的完整信息
-        out.write(calleeFullMethod);
-        out.write(Constants.NEW_LINE);
+        writeData2File(calleeFullMethod, out4Class, out4Method);
+        writeData2File(Constants.NEW_LINE, out4Class, out4Method);
 
         // 确定写入输出文件的当前调用方法信息
         String callerInfo = chooseCallerInfo(calleeClassName, calleeFullMethod);
 
         // 第2行写入当前方法的信息
-        out.write(genOutputPrefix(0));
-        out.write(callerInfo);
+        writeData2File(genOutputPrefix(0), out4Class, out4Method);
+        writeData2File(callerInfo, out4Class, out4Method);
         // 写入方法注解
         String methodAnnotation = methodAnnotationsMap.get(calleeMethodHash);
         if (methodAnnotation != null) {
-            out.write(methodAnnotation);
+            writeData2File(methodAnnotation, out4Class, out4Method);
         }
-        out.write(Constants.NEW_LINE);
+        writeData2File(Constants.NEW_LINE, out4Class, out4Method);
 
         // 记录查找到的调用方法信息List
         List<Pair<String, Boolean>> callerMethodList = new ArrayList<>(Constants.BATCH_SIZE);
@@ -152,15 +176,22 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         // 记录所有的调用方法
         for (Pair<String, Boolean> pair : callerMethodList) {
-            out.write(pair.getLeft());
+            writeData2File(pair.getLeft(), out4Class, out4Method);
             if (pair.getRight().booleanValue()) {
                 // 对于入口方法，写入标志
-                out.write(Constants.CALLEE_FLAG_ENTRY);
+                writeData2File(Constants.CALLEE_FLAG_ENTRY, out4Class, out4Method);
             }
-            out.write(Constants.NEW_LINE);
+            writeData2File(Constants.NEW_LINE, out4Class, out4Method);
         }
 
         return true;
+    }
+
+    private void writeData2File(String data, BufferedWriter out4Class, BufferedWriter out4Method) throws IOException {
+        out4Class.write(data);
+        if (out4Method != null) {
+            out4Method.write(data);
+        }
     }
 
     /**

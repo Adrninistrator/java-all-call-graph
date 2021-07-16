@@ -108,7 +108,7 @@ Before using the tool, you first need to introduce the dependency of the tool co
 -Gradle
 
 ```
-testImplementation'com.github.adrninistrator:java-all-call-graph:0.0.5'
+testImplementation'com.github.adrninistrator:java-all-call-graph:0.0.6'
 ```
 
 -Maven
@@ -117,7 +117,7 @@ testImplementation'com.github.adrninistrator:java-all-call-graph:0.0.5'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
   <type>provided</type>
 </dependency>
 ```
@@ -284,6 +284,8 @@ Read the parameters in the configuration file `config.properties`:
 `show.method.annotation`: Whether to display the annotation switch on the method in the call chain, the value is true/false; when the switch is on, the complete class name of all annotations on the current method will be displayed, in the format "\[method Information\]@說解1@說解2..."
 
 `gen.combined.output`: Whether to generate the combined file switch of the call chain, the value is true/false; when the switch is on, after the corresponding call chain file is generated for each class, a merged file will be generated File, the file name is "~all-4callee.txt"
+
+`gen.upwards.methods.file`: When generating an upward call chain, do you need to generate a separate file switch for each method, the value is true/false; when the switch is on, it will be each specified in o_g4callee_class_name.properties Each method of each class generates a separate file and saves it in "~jacg_output_for_callee/\[yyyyMMdd-HHmmss.SSS\]/methods"
 
 ### 4.3.5. Generate a complete downward call chain of the specified method
 

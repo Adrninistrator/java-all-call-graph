@@ -84,7 +84,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
             List<Object> list = dbOperator.queryListOneObject(sql, new Object[]{className});
             if (!CommonUtil.isCollectionEmpty(list)) {
-                logger.error("\r\n\r\n\r\n指定的完整类名请使用简单类名形式 {}->{}\r\n\r\n\r\n", className, list.get(0));
+                logger.error("指定的完整类名请确认是否需要使用简单类名形式 {}->{}", className, list.get(0));
             }
             return;
         }
@@ -99,7 +99,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         List<Object> list = dbOperator.queryListOneObject(sql, new Object[]{className});
         if (!CommonUtil.isCollectionEmpty(list)) {
-            logger.error("\r\n\r\n\r\n指定的简单类名找到同名类，请使用完整类名形式 {}->{}\r\n\r\n\r\n", className, StringUtils.join(list, " "));
+            logger.error("指定的简单类名请确认是否存在同名类，是否需要使用完整类名形式 {}->{}", className, StringUtils.join(list, " "));
         }
     }
 

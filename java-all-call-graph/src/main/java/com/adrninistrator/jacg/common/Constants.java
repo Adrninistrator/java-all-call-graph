@@ -37,6 +37,7 @@ public class Constants {
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLEE = "~jacg_output_for_callee";
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLER = "~jacg_output_for_caller";
     public static final String DIR_SQL = "~jacg_sql";
+    public static final String DIR_METHODS = "methods";
 
     public static final String FILE_CONFIG = "config.properties";
 
@@ -54,7 +55,6 @@ public class Constants {
     public static final String FILE_SQL_METHOD_ANNOTATION = "method_annotation.sql";
     public static final String FILE_SQL_METHOD_CALL = "method_call.sql";
 
-
     public static final String APPNAME_IN_SQL = "{appName}";
 
     public static final String KEY_APPNAME = "app.name";
@@ -64,6 +64,7 @@ public class Constants {
     public static final String KEY_THREAD_NUM = "thread.num";
     public static final String KEY_SHOW_METHOD_ANNOTATION = "show.method.annotation";
     public static final String KEY_GEN_COMBINED_OUTPUT = "gen.combined.output";
+    public static final String KEY_GEN_UPWARDS_METHODS_FILE = "gen.upwards.methods.file";
 
     public static final String KEY_DB_DRIVER_NAME = "db.driver.name";
     public static final String KEY_DB_URL = "db.url";

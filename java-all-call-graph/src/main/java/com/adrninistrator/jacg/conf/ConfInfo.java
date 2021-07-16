@@ -24,6 +24,8 @@ public class ConfInfo {
 
     private boolean genCombinedOutput;
 
+    private boolean genUpwardsMethodsFile;
+
     private String dbDriverName;
 
     private String dbUrl;
@@ -94,6 +96,14 @@ public class ConfInfo {
 
     public void setGenCombinedOutput(boolean genCombinedOutput) {
         this.genCombinedOutput = genCombinedOutput;
+    }
+
+    public boolean isGenUpwardsMethodsFile() {
+        return genUpwardsMethodsFile;
+    }
+
+    public void setGenUpwardsMethodsFile(boolean genUpwardsMethodsFile) {
+        this.genUpwardsMethodsFile = genUpwardsMethodsFile;
     }
 
     public String getDbDriverName() {
