@@ -108,7 +108,7 @@ Before using the tool, you first need to introduce the dependency of the tool co
 -Gradle
 
 ```
-testImplementation'com.github.adrninistrator:java-all-call-graph:0.0.6'
+testImplementation'com.github.adrninistrator:java-all-call-graph:0.0.7'
 ```
 
 -Maven
@@ -117,10 +117,12 @@ testImplementation'com.github.adrninistrator:java-all-call-graph:0.0.6'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.0.6</version>
+  <version>0.0.7</version>
   <type>provided</type>
 </dependency>
 ```
+
+The latest version number can be viewed [https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph](https://search.maven.org/artifact/com.github.adrninistrator /java-all-call-graph).
 
 The corresponding code address is [https://github.com/Adrninistrator/java-all-call-graph](https://github.com/Adrninistrator/java-all-call-graph).
 
