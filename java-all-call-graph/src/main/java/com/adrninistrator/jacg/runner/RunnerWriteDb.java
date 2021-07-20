@@ -167,9 +167,9 @@ public class RunnerWriteDb extends AbstractRunner {
         String sqlMethodAnnotation = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_METHOD_ANNOTATION);
         String sqlMethodCall = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_METHOD_CALL);
 
-        if (!dbOperator.executeSql(sqlClassName) ||
-                !dbOperator.executeSql(sqlMethodAnnotation) ||
-                !dbOperator.executeSql(sqlMethodCall)) {
+        if (!dbOperator.createTable(sqlClassName) ||
+                !dbOperator.createTable(sqlMethodAnnotation) ||
+                !dbOperator.createTable(sqlMethodCall)) {
             return false;
         }
 

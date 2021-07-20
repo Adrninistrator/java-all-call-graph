@@ -80,7 +80,9 @@ public abstract class AbstractRunner {
             logger.info("任务执行完毕");
         }
 
-        threadPoolExecutor.shutdown();
+        if (threadPoolExecutor != null) {
+            threadPoolExecutor.shutdown();
+        }
 
         dbOperator.closeDs();
     }

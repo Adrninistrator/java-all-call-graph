@@ -99,6 +99,9 @@ public class Constants {
     public static final String SQL_KEY_INSERT_METHOD_ANNOTATION = "insert_method_annotation";
     public static final String SQL_KEY_INSERT_METHOD_CALL = "insert_method_call";
 
+    public static final String SQL_CREATE_TABLE_HEAD = "CREATE TABLE if not exists";
+    public static final int SQL_CREATE_TABLE_HEAD_LENGTH = SQL_CREATE_TABLE_HEAD.length();
+
     public static final String FLAG_DOT = ".";
     public static final String FLAG_COLON = ":";
     public static final String FLAG_LEFT_BRACKET = "(";

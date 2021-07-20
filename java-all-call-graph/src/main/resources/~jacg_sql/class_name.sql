@@ -1,5 +1,5 @@
 CREATE TABLE if not exists class_name_{appName} (
-  full_name varchar(300) NOT NULL COMMENT '完整类名',
+  full_name varchar(255) NOT NULL COMMENT '完整类名',
   simple_name varchar(150) NOT NULL COMMENT '唯一类名',
   PRIMARY KEY (full_name),
   INDEX idx_cn_simple_name(simple_name)

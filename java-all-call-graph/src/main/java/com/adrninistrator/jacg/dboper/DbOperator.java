@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.dboper;
 
+import com.adrninistrator.jacg.common.Constants;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.lang3.StringUtils;
@@ -100,6 +101,36 @@ public class DbOperator {
         } catch (Exception e) {
             logger.error("error ", e);
         }
+    }
+
+    public boolean createTable(String sql) {
+        if (!executeSql(sql)) {
+            return false;
+        }
+
+        int indexStart = sql.indexOf(Constants.SQL_CREATE_TABLE_HEAD);
+        if (indexStart == -1) {
+            logger.error("建表SQL语句中未找到指定内容 {} {}", sql, Constants.SQL_CREATE_TABLE_HEAD);
+            return false;
+        }
+
+        int indexEnd = sql.indexOf("(");
+        if (indexEnd == -1) {
+            logger.error("建表SQL语句中未找到) {}", sql, Constants.SQL_CREATE_TABLE_HEAD);
+            return false;
+        }
+
+        String tableName = sql.substring(indexStart + Constants.SQL_CREATE_TABLE_HEAD_LENGTH, indexEnd).trim();
+
+        // 检查数据库表是否创建成功，可能出现上述建表语句执行失败但未抛出异常的情况
+        List<Object> list = queryListOneObject("show tables like ?", new Object[]{tableName});
+        if (list == null || list.isEmpty()) {
+            logger.error("数据库表创建失败 [{}]", tableName);
+            return false;
+        }
+
+        logger.info("数据库表创建成功 [{}]", tableName);
+        return true;
     }
 
     public boolean truncateTable(String tableName) {
