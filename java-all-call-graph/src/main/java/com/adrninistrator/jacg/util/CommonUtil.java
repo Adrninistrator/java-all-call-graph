@@ -60,6 +60,18 @@ public class CommonUtil {
     }
 
     /**
+     * 将方法名中的<替换为(，>替换为)，防止无法在Windows环境生成文件
+     * 用于处理<init>、<clint>等方法
+     *
+     * @param methodName
+     * @return
+     */
+    public static String getSafeMethodName(String methodName) {
+        return methodName.replaceAll("<", "(")
+                .replaceAll(">", ")");
+    }
+
+    /**
      * 从完整方法信息中获取完整类名
      *
      * @param method 完整方法信息
@@ -136,7 +148,8 @@ public class CommonUtil {
 
     public static String currentTime() {
         Calendar calendar = Calendar.getInstance();
-        return String.format("%04d%02d%02d-%02d%02d%02d.%03d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DATE),
+        return String.format("%04d%02d%02d-%02d%02d%02d.%03d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+                calendar.get(Calendar.DATE),
                 calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND));
     }
 

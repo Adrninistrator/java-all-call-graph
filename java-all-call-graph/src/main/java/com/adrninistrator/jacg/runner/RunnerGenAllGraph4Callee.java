@@ -123,8 +123,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                 // 处理一个被调用方法
                 if (confInfo.isGenUpwardsMethodsFile()) {
                     String methodName = CommonUtil.getOnlyMethodName(calleeFullMethod);
+                    String safeMethodName = CommonUtil.getSafeMethodName(methodName);
                     String outputFile4Method = outputDirPrefix + File.separator + Constants.DIR_METHODS + File.separator + calleeClassName +
-                            Constants.FLAG_AT + methodName + Constants.FLAG_AT + calleeMethodHash + Constants.EXT_TXT;
+                            Constants.FLAG_AT + safeMethodName + Constants.FLAG_AT + calleeMethodHash + Constants.EXT_TXT;
                     logger.info("当前方法输出文件名 {}", outputFile4Method);
                     BufferedWriter out4Method = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile4Method),
                             StandardCharsets.UTF_8));
