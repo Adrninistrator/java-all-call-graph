@@ -15,6 +15,7 @@ public class MethodCallEntity {
     private String callerMethodName;
     private String callerFullClassName;
     private String callerFullOrSimpleClassName;
+    private int callerLineNum;
     private String calleeMethodHash;
     private String finalCalleeFullMethod;
     private String calleeMethodName;
@@ -75,6 +76,14 @@ public class MethodCallEntity {
 
     public void setCallerFullOrSimpleClassName(String callerFullOrSimpleClassName) {
         this.callerFullOrSimpleClassName = callerFullOrSimpleClassName;
+    }
+
+    public int getCallerLineNum() {
+        return callerLineNum;
+    }
+
+    public void setCallerLineNum(int callerLineNum) {
+        this.callerLineNum = callerLineNum;
     }
 
     public String getCalleeMethodHash() {

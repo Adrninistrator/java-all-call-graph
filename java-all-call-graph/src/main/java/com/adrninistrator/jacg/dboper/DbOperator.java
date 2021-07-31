@@ -114,9 +114,9 @@ public class DbOperator {
             return false;
         }
 
-        int indexEnd = sql.indexOf("(");
+        int indexEnd = sql.indexOf('(');
         if (indexEnd == -1) {
-            logger.error("建表SQL语句中未找到) {}", sql, Constants.SQL_CREATE_TABLE_HEAD);
+            logger.error("建表SQL语句中未找到\")\" {}", sql);
             return false;
         }
 
@@ -210,7 +210,11 @@ public class DbOperator {
             connection.commit();
             return true;
         } catch (Exception e) {
-            logger.error("error ", e);
+            if (e.getCause() instanceof SQLSyntaxErrorException) {
+                logger.error("请检查数据库表是否需要使用最新版本创建 [{}] ", sql, e);
+            } else {
+                logger.error("error [{}] ", sql, e);
+            }
             return false;
         } finally {
             close(connection, stmt);

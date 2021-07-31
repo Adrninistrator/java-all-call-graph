@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group 'com.github.adrninistrator'
-version = "0.1.0"
+version = "0.2.0"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -54,7 +54,7 @@ List mysql = ['mysql:mysql-connector-java:8.0.20']
 
 List slf4j = ['org.slf4j:log4j-over-slf4j:1.7.30']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph:0.0.5']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph:0.1.0']
 
 List log4j = [
         'org.apache.logging.log4j:log4j-api:2.14.1',

@@ -26,6 +26,7 @@ public class Constants {
             DC.MC_CALLER_METHOD_NAME,
             DC.MC_CALLER_FULL_CLASS_NAME,
             DC.MC_CALLER_CLASS_NAME,
+            DC.MC_CALLER_LINE_NUM,
             DC.MC_CALLEE_METHOD_HASH,
             DC.MC_CALLEE_FULL_METHOD,
             DC.MC_CALLEE_METHOD_NAME,
@@ -64,6 +65,7 @@ public class Constants {
     public static final String KEY_THREAD_NUM = "thread.num";
     public static final String KEY_SHOW_METHOD_ANNOTATION = "show.method.annotation";
     public static final String KEY_GEN_COMBINED_OUTPUT = "gen.combined.output";
+    public static final String KEY_SHOW_CALLER_LINE_NUM = "show.caller.line.num";
     public static final String KEY_GEN_UPWARDS_METHODS_FILE = "gen.upwards.methods.file";
 
     public static final String KEY_DB_DRIVER_NAME = "db.driver.name";
@@ -106,9 +108,12 @@ public class Constants {
     public static final String FLAG_COLON = ":";
     public static final String FLAG_LEFT_BRACKET = "(";
     public static final String FLAG_RIGHT_BRACKET = ")";
+    public static final String FLAG_LEFT_PARENTHESES = "[";
+    public static final String FLAG_RIGHT_PARENTHESES = "]";
     public static final String FLAG_SPACE = " ";
     public static final String FLAG_HASHTAG = "#";
     public static final String FLAG_AT = "@";
+    public static final String FLAG_TAB = "\t";
     public static final String FLAG_COMMA_WITH_SPACE = ", ";
 
     public static final String EXT_TXT = ".txt";
@@ -145,7 +150,10 @@ public class Constants {
     public static final int NO_CYCLE_CALL_FLAG = -1;
 
     public static final String CALL_TYPE_RUNNABLE_INIT_RUN = "RIR";
-    public static final String CALL_TYPE_THREAD_INIT_RUN = "TIR";
+    public static final String CALL_TYPE_CALLABLE_INIT_CALL = "CIC";
+
+    // 是否在结果文件中写入配置信息
+    public static final String PROPERTY_WRITE_CONFIG_IN_RESULT = "write.config";
 
     private Constants() {
         throw new IllegalStateException("illegal");

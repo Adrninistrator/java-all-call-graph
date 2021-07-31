@@ -1,5 +1,5 @@
 # 当前脚本应在向下完整方法调用链文件所在目录执行，以下'\.dao\.'为Mapper所在的包名关键字
-array_string="Class1.func1 Class2.func2"
+array_string="Class1:func1 Class2:func2"
 
 result_dir=result
 [ -d $result_dir ] || mkdir $result_dir
@@ -19,7 +19,7 @@ if [ ! $count -eq 1 ]; then
 fi
 
 file=`ls | grep ^"$class"@ | grep "$method"@ | grep "\.txt"`
-cat "$file" | grep '\.dao\.' | awk -F '#' '{print $2}' | sed 's# ##g' | awk -F '.' '{print $NF}' | sort | uniq | sort >> $file_result
+cat "$file" | grep '\.dao\.' | awk -F '#' '{print $2}' | awk -F '\t' '{print $2}' | sed 's# ##g' | awk -F '.' '{print $NF}' | sort | uniq | sort >> $file_result
 done
 
 all_result=$result_dir/\~all_result.txt

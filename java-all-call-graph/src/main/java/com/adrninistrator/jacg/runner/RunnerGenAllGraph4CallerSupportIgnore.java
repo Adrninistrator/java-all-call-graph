@@ -14,7 +14,7 @@ public class RunnerGenAllGraph4CallerSupportIgnore extends RunnerGenAllGraph4Cal
 
     // 是否支持忽略指定方法
     @Override
-    protected boolean supportIgnore() {
+    public boolean isSupportIgnore() {
         return true;
     }
 }

@@ -36,7 +36,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         value：所有注解排序后拼接，分隔符为半角逗号,
      */
     protected Map<String, String> methodAnnotationsMap = new HashMap<>(100);
-    ;
 
     // 从方法调用关系表查询指定的类是否存在
     protected boolean checkClassNameExists(String className) {

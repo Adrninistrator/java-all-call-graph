@@ -15,10 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author adrninistrator
@@ -106,7 +103,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         List<Map<String, Object>> calleeMethodList = dbOperator.queryList(sql, new Object[]{calleeClassName});
         if (CommonUtil.isCollectionEmpty(calleeMethodList)) {
-            logger.error("从方法调用关系表未找到被调用类对应方法 {} {}", calleeClassName);
+            logger.error("从方法调用关系表未找到被调用类对应方法 [{}] [{}]",sql, calleeClassName);
             return false;
         }
 
@@ -116,6 +113,12 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         try (BufferedWriter out4Class = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile4ClassName),
                 StandardCharsets.UTF_8))) {
+            if (confInfo.isWriteConf()) {
+                // 在结果文件中写入配置信息
+                out4Class.write(confInfo.toString());
+                out4Class.write(Constants.NEW_LINE);
+            }
+
             for (Map<String, Object> calleeMethodMap : calleeMethodList) {
                 String calleeMethodHash = (String) calleeMethodMap.get(DC.MC_CALLEE_METHOD_HASH);
                 String calleeFullMethod = (String) calleeMethodMap.get(DC.MC_CALLEE_FULL_METHOD);
@@ -385,13 +388,13 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
     protected void recordCallerInfo(Map<String, Object> callerMethodMap, int currentNodeLevel, String currentCallerMethodHash, int back2Level,
                                     List<Pair<String, Boolean>> callerMethodList) {
 
-        String fullMethod = (String) callerMethodMap.get(DC.MC_CALLER_FULL_METHOD);
 
         StringBuilder callerInfo = new StringBuilder();
         callerInfo.append(genOutputPrefix(currentNodeLevel + 1));
 
         if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_1)) {
             // # 1: 展示 完整类名+方法名+方法参数
+            String fullMethod = (String) callerMethodMap.get(DC.MC_CALLER_FULL_METHOD);
             callerInfo.append(fullMethod);
         } else if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_2)) {
             // # 2: 展示 完整类名+方法名
@@ -411,6 +414,16 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             if (methodAnnotations != null) {
                 callerInfo.append(methodAnnotations);
             }
+        }
+
+        // 显示调用者代码行号
+        if (confInfo.isShowCallerLineNum()) {
+            callerInfo.append(Constants.FLAG_TAB)
+                    .append(Constants.FLAG_LEFT_BRACKET)
+                    .append((String) callerMethodMap.get(DC.MC_CALLER_CLASS_NAME))
+                    .append(Constants.FLAG_COLON)
+                    .append((int) callerMethodMap.get(DC.MC_CALLER_LINE_NUM))
+                    .append(Constants.FLAG_RIGHT_BRACKET);
         }
 
         // 添加循环调用标志
@@ -440,24 +453,27 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     // 确定查询被调用关系时所需字段
     private String chooseCallerColumns() {
+        Set<String> columnSet = new HashSet<>();
+
         if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_1)) {
             // # 1: 展示 完整类名+方法名+方法参数
-            return DC.MC_CALLER_FULL_METHOD;
+            columnSet.add(DC.MC_CALLER_FULL_METHOD);
         } else if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_2)) {
             // # 2: 展示 完整类名+方法名
-            return StringUtils.join(new String[]{
-                            DC.MC_CALLER_FULL_METHOD,
-                            DC.MC_CALLER_FULL_CLASS_NAME,
-                            DC.MC_CALLER_METHOD_NAME
-                    }, Constants.FLAG_COMMA_WITH_SPACE
-            );
+            columnSet.add(DC.MC_CALLER_FULL_CLASS_NAME);
+            columnSet.add(DC.MC_CALLER_METHOD_NAME);
+        } else {
+            // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
+            columnSet.add(DC.MC_CALLER_CLASS_NAME);
+            columnSet.add(DC.MC_CALLER_METHOD_NAME);
         }
-        // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
-        return StringUtils.join(new String[]{
-                        DC.MC_CALLER_FULL_METHOD,
-                        DC.MC_CALLER_CLASS_NAME,
-                        DC.MC_CALLER_METHOD_NAME
-                }, Constants.FLAG_COMMA_WITH_SPACE
-        );
+
+        if (confInfo.isShowCallerLineNum()) {
+            // 显示调用者代码行号
+            columnSet.add(DC.MC_CALLER_CLASS_NAME);
+            columnSet.add(DC.MC_CALLER_LINE_NUM);
+        }
+
+        return StringUtils.join(columnSet.toArray(), Constants.FLAG_COMMA_WITH_SPACE);
     }
 }

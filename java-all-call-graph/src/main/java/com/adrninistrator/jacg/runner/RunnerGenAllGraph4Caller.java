@@ -36,6 +36,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 当方法名为以下前缀时，忽略
     private Set<String> ignoreMethodPrefixSet;
 
+    // 是否支持忽略指定方法
+    private boolean supportIgnore = false;
+
     static {
         runner = new RunnerGenAllGraph4Caller();
     }
@@ -81,7 +84,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     @Override
     public void operate() {
-        logger.info("{}支持忽略指定的方法", supportIgnore() ? "" : "不");
+        logger.info("{}支持忽略指定的方法", isSupportIgnore() ? "" : "不");
 
         // 读取方法注解
         if (confInfo.isShowMethodAnnotation() && !readMethodAnnotation()) {
@@ -126,9 +129,12 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         combineOutputFile(Constants.COMBINE_FILE_NAME_4_CALLER);
     }
 
-    // 是否支持忽略指定方法
-    protected boolean supportIgnore() {
-        return false;
+    public boolean isSupportIgnore() {
+        return supportIgnore;
+    }
+
+    public void setSupportIgnore(boolean supportIgnore) {
+        this.supportIgnore = supportIgnore;
     }
 
     // 处理一条记录
@@ -203,6 +209,14 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         logger.info("当前输出文件名 {}", outputFileName);
 
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileName), StandardCharsets.UTF_8))) {
+            if (confInfo.isWriteConf()) {
+                // 在结果文件中写入配置信息
+                out.write(confInfo.toString());
+                out.write(Constants.NEW_LINE);
+                out.write("supportIgnore: " + isSupportIgnore());
+                out.write(Constants.NEW_LINE);
+            }
+
             // 在文件第1行写入当前方法的完整信息
             out.write(callerFullMethod);
             out.write(Constants.NEW_LINE);
@@ -281,7 +295,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             int currentMethodCallId = (Integer) methodMapByCaller.get(DC.MC_ID);
 
             // 判断是否需要忽略
-            if (supportIgnore() && ignoreCurrentMethod(methodMapByCaller)) {
+            if (isSupportIgnore() && ignoreCurrentMethod(methodMapByCaller)) {
                 // 当前记录需要忽略
                 // 更新当前处理节点的id
                 node4CallerList.get((currentNodeLevel)).setCurrentCalleeMethodId(currentMethodCallId);
@@ -379,8 +393,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 判断当前找到的被调用方法是否需要处理
     private boolean ignoreCurrentMethod(Map<String, Object> methodMapByCaller) {
         String callType = (String) methodMapByCaller.get(DC.MC_CALL_TYPE);
-        String callerFullMethod = (String) methodMapByCaller.get(DC.MC_CALLEE_FULL_METHOD);
-        String calleeFullMethod = (String) methodMapByCaller.get(DC.MC_CALLER_FULL_METHOD);
+        String callerFullMethod = (String) methodMapByCaller.get(DC.MC_CALLER_FULL_METHOD);
+        String calleeFullMethod = (String) methodMapByCaller.get(DC.MC_CALLEE_FULL_METHOD);
 
         // 当完整方法（类名+方法名+参数）为以下前缀时，忽略
         if (isIgnoredFullMethodWithPrefixByFullMethod(callerFullMethod) || isIgnoredFullMethodWithPrefixByFullMethod(calleeFullMethod)) {
@@ -400,9 +414,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         /*
             根据方法名前缀判断是否需要忽略，使用包含参数的方法名进行比较
-            若当前调用类型为Runnable实现类/Thread子类构造函数调用run()方法，则不判断方法名前缀是否需要忽略（Runnable实现类对应的方法名为<init>，可能会被指定为忽略）
+            若当前调用类型为Runnable/Callable实现类子类构造函数调用run()方法，则不判断方法名前缀是否需要忽略（<init> -> run()，可能会被指定为忽略）
          */
-        if (!StringUtils.equalsAny(callType, Constants.CALL_TYPE_RUNNABLE_INIT_RUN, Constants.CALL_TYPE_THREAD_INIT_RUN)
+        if (!StringUtils.equalsAny(callType, Constants.CALL_TYPE_RUNNABLE_INIT_RUN, Constants.CALL_TYPE_CALLABLE_INIT_CALL)
                 && (isIgnoredMethodWithPrefixByMethodName(callerMethodNameWithArgs) ||
                 isIgnoredMethodWithPrefixByMethodName(calleeMethodNameWithArgs))) {
             return true;
@@ -416,6 +430,16 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                                     BufferedWriter out) throws IOException {
         StringBuilder calleeInfo = new StringBuilder();
         calleeInfo.append(genOutputPrefix(currentNodeLevel + 1));
+
+        // 显示调用者代码行号
+        if (confInfo.isShowCallerLineNum()) {
+            calleeInfo.append(Constants.FLAG_LEFT_PARENTHESES)
+                    .append((String) calleeMethodMap.get(DC.MC_CALLER_CLASS_NAME))
+                    .append(Constants.FLAG_COLON)
+                    .append((int) calleeMethodMap.get(DC.MC_CALLER_LINE_NUM))
+                    .append(Constants.FLAG_RIGHT_PARENTHESES)
+                    .append(Constants.FLAG_TAB);
+        }
 
         if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_1)) {
             // # 1: 展示 完整类名+方法名+方法参数
@@ -471,28 +495,27 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     // 确定查询调用关系时所需字段
     private String chooseSelectMethodColumns() {
+        Set<String> columnSet = new HashSet<>();
+        columnSet.add(DC.MC_CALL_TYPE);
+        columnSet.add(DC.MC_CALLEE_FULL_METHOD);
+        columnSet.add(DC.MC_CALLER_FULL_METHOD);
+
         if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_1)) {
             // # 1: 展示 完整类名+方法名+方法参数
-            return StringUtils.join(new String[]{
-                    DC.MC_CALL_TYPE,
-                    DC.MC_CALLEE_FULL_METHOD,
-                    DC.MC_CALLER_FULL_METHOD
-            }, Constants.FLAG_COMMA_WITH_SPACE);
         } else if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_2)) {
             // # 2: 展示 完整类名+方法名
-            return StringUtils.join(new String[]{
-                    DC.MC_CALL_TYPE,
-                    DC.MC_CALLEE_FULL_METHOD,
-                    DC.MC_CALLER_FULL_METHOD
-            }, Constants.FLAG_COMMA_WITH_SPACE);
+        } else {
+            // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
+            columnSet.add(DC.MC_CALLEE_CLASS_NAME);
         }
-        // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
-        return StringUtils.join(new String[]{
-                DC.MC_CALL_TYPE,
-                DC.MC_CALLEE_FULL_METHOD,
-                DC.MC_CALLER_FULL_METHOD,
-                DC.MC_CALLEE_CLASS_NAME
-        }, Constants.FLAG_COMMA_WITH_SPACE);
+
+        if (confInfo.isShowCallerLineNum()) {
+            // 显示调用者代码行号
+            columnSet.add(DC.MC_CALLER_CLASS_NAME);
+            columnSet.add(DC.MC_CALLER_LINE_NUM);
+        }
+
+        return StringUtils.join(columnSet.toArray(), Constants.FLAG_COMMA_WITH_SPACE);
     }
 
     // 获取调用者完整类名

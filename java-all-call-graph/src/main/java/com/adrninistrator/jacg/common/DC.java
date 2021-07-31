@@ -22,6 +22,7 @@ public class DC {
     public static final String MC_CALLER_METHOD_NAME = "caller_method_name";
     public static final String MC_CALLER_FULL_CLASS_NAME = "caller_full_class_name";
     public static final String MC_CALLER_CLASS_NAME = "caller_class_name";
+    public static final String MC_CALLER_LINE_NUM = "caller_line_num";
     public static final String MC_CALLEE_METHOD_HASH = "callee_method_hash";
     public static final String MC_CALLEE_FULL_METHOD = "callee_full_method";
     public static final String MC_CALLEE_METHOD_NAME = "callee_method_name";

@@ -6,6 +6,7 @@ CREATE TABLE if not exists method_call_{appName} (
   caller_method_name varchar(150) NOT NULL COMMENT '调用方，方法名',
   caller_full_class_name varchar(300) NOT NULL COMMENT '调用方，类名全名',
   caller_class_name varchar(150) NOT NULL COMMENT '调用方，类名（全名或简单类名）',
+  caller_line_num int NOT NULL COMMENT '调用方，源代码行号',
   callee_method_hash varchar(30) NOT NULL COMMENT '被调用方，方法hash+字节数',
   callee_full_method varchar(767) NOT NULL COMMENT '被调用方，完整方法（类名+方法名+参数）',
   callee_method_name varchar(150) NOT NULL COMMENT '被调用方，方法名',

@@ -67,8 +67,8 @@ public class CommonUtil {
      * @return
      */
     public static String getSafeMethodName(String methodName) {
-        return methodName.replaceAll("<", "(")
-                .replaceAll(">", ")");
+        return methodName.replace("<", "(")
+                .replace(">", ")");
     }
 
     /**

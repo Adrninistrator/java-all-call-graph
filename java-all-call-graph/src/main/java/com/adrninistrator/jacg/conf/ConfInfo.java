@@ -24,6 +24,8 @@ public class ConfInfo {
 
     private boolean genCombinedOutput;
 
+    private boolean showCallerLineNum;
+
     private boolean genUpwardsMethodsFile;
 
     private String dbDriverName;
@@ -33,6 +35,31 @@ public class ConfInfo {
     private String dbUsername;
 
     private String dbPassword;
+
+    private boolean writeConf;
+
+    @Override
+    public String toString() {
+        return "ConfInfo{" +
+                "appName='" + appName + '\'' +
+                ", callGraphJarList='" + callGraphJarList + '\'' +
+                ", callGraphInputFile='" + callGraphInputFile + '\'' +
+                ", inputIgnoreOtherPackage=" + inputIgnoreOtherPackage +
+                ", callGraphOutputDetail='" + callGraphOutputDetail + '\'' +
+                ", threadNum=" + threadNum +
+                ", showMethodAnnotation=" + showMethodAnnotation +
+                ", genCombinedOutput=" + genCombinedOutput +
+                ", showCallerLineNum=" + showCallerLineNum +
+                ", genUpwardsMethodsFile=" + genUpwardsMethodsFile +
+                ", dbDriverName='" + dbDriverName + '\'' +
+                ", dbUrl='" + dbUrl + '\'' +
+                ", dbUsername='" + dbUsername + '\'' +
+                ", dbPassword='" + dbPassword + '\'' +
+                ", writeConf=" + writeConf +
+                '}';
+    }
+
+    //
 
     public String getAppName() {
         return appName;
@@ -98,6 +125,14 @@ public class ConfInfo {
         this.genCombinedOutput = genCombinedOutput;
     }
 
+    public boolean isShowCallerLineNum() {
+        return showCallerLineNum;
+    }
+
+    public void setShowCallerLineNum(boolean showCallerLineNum) {
+        this.showCallerLineNum = showCallerLineNum;
+    }
+
     public boolean isGenUpwardsMethodsFile() {
         return genUpwardsMethodsFile;
     }
@@ -136,5 +171,13 @@ public class ConfInfo {
 
     public void setDbPassword(String dbPassword) {
         this.dbPassword = dbPassword;
+    }
+
+    public boolean isWriteConf() {
+        return writeConf;
+    }
+
+    public void setWriteConf(boolean writeConf) {
+        this.writeConf = writeConf;
     }
 }

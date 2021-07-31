@@ -23,7 +23,17 @@ public class ConfManager {
 
     public static final Logger logger = LoggerFactory.getLogger(ConfManager.class);
 
+    private static ConfInfo confInfo = new ConfInfo();
+
+    private static boolean inited = false;
+
     public static ConfInfo getConfInfo() {
+        if (inited) {
+            return confInfo;
+        }
+
+        inited = true;
+
         String configFilePath = Constants.DIR_CONFIG + File.separator + Constants.FILE_CONFIG;
 
         try (Reader reader = new InputStreamReader(new FileInputStream(FileUtil.findFile(configFilePath)), StandardCharsets.UTF_8)) {
@@ -50,6 +60,11 @@ public class ConfManager {
 
             String genCombinedOutput = properties.getProperty(Constants.KEY_GEN_COMBINED_OUTPUT);
             if (checkBlank(genCombinedOutput, Constants.KEY_GEN_COMBINED_OUTPUT, configFilePath)) {
+                return null;
+            }
+
+            String showCallerLineNum = properties.getProperty(Constants.KEY_SHOW_CALLER_LINE_NUM);
+            if (checkBlank(showCallerLineNum, Constants.KEY_SHOW_CALLER_LINE_NUM, configFilePath)) {
                 return null;
             }
 
@@ -117,7 +132,6 @@ public class ConfManager {
                 return null;
             }
 
-            ConfInfo confInfo = new ConfInfo();
             confInfo.setAppName(appName);
             confInfo.setCallGraphJarList(callGraphJarList);
             confInfo.setCallGraphInputFile(callGraphInputFile);
@@ -126,11 +140,15 @@ public class ConfManager {
             confInfo.setThreadNum(threadNum);
             confInfo.setShowMethodAnnotation(Boolean.parseBoolean(showMethodAnnotation));
             confInfo.setGenCombinedOutput(Boolean.parseBoolean(genCombinedOutput));
+            confInfo.setShowCallerLineNum(Boolean.parseBoolean(showCallerLineNum));
             confInfo.setGenUpwardsMethodsFile(Boolean.parseBoolean(genUpwardsMethodsFile));
             confInfo.setDbDriverName(dbDriverName);
             confInfo.setDbUrl(dbUrl);
             confInfo.setDbUsername(dbUsername);
             confInfo.setDbPassword(dbPassword);
+            if (System.getProperty(Constants.PROPERTY_WRITE_CONFIG_IN_RESULT) != null) {
+                confInfo.setWriteConf(true);
+            }
 
             return confInfo;
         } catch (Exception e) {

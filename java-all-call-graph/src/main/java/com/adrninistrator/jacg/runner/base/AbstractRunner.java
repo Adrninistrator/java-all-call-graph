@@ -66,7 +66,7 @@ public abstract class AbstractRunner {
         beforeExit();
 
         long spendTime = System.currentTimeMillis() - startTime;
-        logger.info("{} 执行完毕，耗时: {} ms", this.getClass().getSimpleName(), spendTime);
+        logger.info("{} 执行完毕，耗时: {} s", this.getClass().getSimpleName(), spendTime / 1000.0D);
     }
 
     public abstract boolean init();
@@ -113,7 +113,7 @@ public abstract class AbstractRunner {
     // 等待直到任务执行完毕
     protected void wait4TPEDone() {
         while (true) {
-            if (threadPoolExecutor.getActiveCount() == 0 && threadPoolExecutor.getQueue().size() == 0) {
+            if (threadPoolExecutor.getActiveCount() == 0 && threadPoolExecutor.getQueue().isEmpty()) {
                 return;
             }
             logger.debug("wait4TPEDone ...");

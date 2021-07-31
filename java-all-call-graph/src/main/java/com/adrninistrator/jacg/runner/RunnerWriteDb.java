@@ -128,7 +128,9 @@ public class RunnerWriteDb extends AbstractRunner {
         createThreadPoolExecutor();
 
         // 读取通过java-callgraph生成的直接调用关系文件，处理方法调用
-        handleMethodCall();
+        if (!handleMethodCall()) {
+            someTaskFail = true;
+        }
 
         // 等待直到任务执行完毕
         wait4TPEDone();
@@ -192,7 +194,7 @@ public class RunnerWriteDb extends AbstractRunner {
     private boolean truncateTables() {
         if (!dbOperator.truncateTable(Constants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName()) ||
                 !dbOperator.truncateTable(Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName()) ||
-                !dbOperator.truncateTable(Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName())) {
+                !dbOperator.truncateTable(Constants.TABLE_PREFIX_METHOD_ANNOTATION + confInfo.getAppName())) {
             return false;
         }
         return true;
@@ -305,6 +307,7 @@ public class RunnerWriteDb extends AbstractRunner {
         String sql = sqlCacheMap.get(Constants.SQL_KEY_INSERT_CLASS_NAME);
         if (sql == null) {
             sql = genAndCacheInsertSql(Constants.SQL_KEY_INSERT_CLASS_NAME,
+                    false,
                     Constants.TABLE_PREFIX_CLASS_NAME,
                     Constants.TABLE_COLUMNS_CLASS_NAME);
         }
@@ -383,6 +386,7 @@ public class RunnerWriteDb extends AbstractRunner {
         String sql = sqlCacheMap.get(Constants.SQL_KEY_INSERT_METHOD_ANNOTATION);
         if (sql == null) {
             sql = genAndCacheInsertSql(Constants.SQL_KEY_INSERT_METHOD_ANNOTATION,
+                    false,
                     Constants.TABLE_PREFIX_METHOD_ANNOTATION,
                     Constants.TABLE_COLUMNS_METHOD_ANNOTATION);
         }
@@ -404,7 +408,7 @@ public class RunnerWriteDb extends AbstractRunner {
 
 
     // 读取通过java-callgraph生成的直接调用关系文件，处理方法调用
-    private void handleMethodCall() {
+    private boolean handleMethodCall() {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(confInfo.getCallGraphInputFile())))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -414,35 +418,51 @@ public class RunnerWriteDb extends AbstractRunner {
 
                 if (line.startsWith(Constants.FILE_KEY_METHOD_PREFIX)) {
                     // 处理一条方法调用
-                    handleOneMethodCall(line);
+                    if (!handleOneMethodCall(line)) {
+                        return false;
+                    }
                 }
             }
 
             // 结束前将缓存剩余数据写入数据库
             writeMethodCall2Db();
+
+            return true;
         } catch (Exception e) {
             logger.error("error ", e);
+            return false;
         }
     }
 
     // 处理一条方法调用
-    private void handleOneMethodCall(String data) {
-        int indexBlank = data.indexOf(Constants.FLAG_SPACE);
+    private boolean handleOneMethodCall(String data) {
+        String[] methodCallArray = data.split(Constants.FLAG_SPACE);
+        if (methodCallArray.length != 3) {
+            logger.error("方法调用信息非法 [{}] [{}]", data, methodCallArray.length);
+            return false;
+        }
 
-        String callerFullMethod = data.substring(Constants.FILE_KEY_PREFIX_LENGTH, indexBlank).trim();
-        String calleeFullMethod = data.substring(indexBlank + 1);
+        String callerFullMethod = methodCallArray[0].substring(Constants.FILE_KEY_PREFIX_LENGTH);
+        String calleeFullMethod = methodCallArray[1];
+        String strCallerLineNum = methodCallArray[2];
 
+        if (!CommonUtil.isNumStr(strCallerLineNum)) {
+            logger.error("方法调用信息行号非法 [{}] [{}]", data, strCallerLineNum);
+            return false;
+        }
+
+        int callerLineNum = Integer.parseInt(strCallerLineNum);
         int indexCalleeLeftBracket = calleeFullMethod.indexOf(Constants.FLAG_LEFT_BRACKET);
         int indexCalleeRightBracket = calleeFullMethod.indexOf(Constants.FLAG_RIGHT_BRACKET);
 
         String callType = calleeFullMethod.substring(indexCalleeLeftBracket + 1, indexCalleeRightBracket);
         String finalCalleeFullMethod = calleeFullMethod.substring(indexCalleeRightBracket + 1).trim();
 
-        logger.debug("\r\n[{}]\r\n[{}]\r\n[{}]\r\n[{}]", callType, callerFullMethod, calleeFullMethod, finalCalleeFullMethod);
+        logger.debug("\r\n[{}]\r\n[{}]\r\n[{}]\r\n[{}]\r\n[{}]", callType, callerFullMethod, calleeFullMethod, finalCalleeFullMethod, callerLineNum);
 
         // 根据类名前缀判断是否需要处理
         if (confInfo.isInputIgnoreOtherPackage() && (!isAllowedClassPrefix(callerFullMethod) || !isAllowedClassPrefix(finalCalleeFullMethod))) {
-            return;
+            return true;
         }
 
         String callerMethodHash = CommonUtil.genHashWithLen(callerFullMethod);
@@ -451,7 +471,7 @@ public class RunnerWriteDb extends AbstractRunner {
         if (callerMethodHash.equals(calleeMethodHash)) {
             // 对于递归调用，不写入数据库，防止查询时出现死循环
             logger.info("递归调用不写入数据库 {}", callerFullMethod);
-            return;
+            return true;
         }
 
         String callerMethodName = CommonUtil.getOnlyMethodName(callerFullMethod);
@@ -471,6 +491,7 @@ public class RunnerWriteDb extends AbstractRunner {
         methodCallEntity.setCallerMethodName(callerMethodName);
         methodCallEntity.setCallerFullClassName(callerFullClassName);
         methodCallEntity.setCallerFullOrSimpleClassName(callerFullOrSimpleClassName);
+        methodCallEntity.setCallerLineNum(callerLineNum);
         methodCallEntity.setCalleeMethodHash(calleeMethodHash);
         methodCallEntity.setFinalCalleeFullMethod(finalCalleeFullMethod);
         methodCallEntity.setCalleeMethodName(calleeMethodName);
@@ -482,6 +503,8 @@ public class RunnerWriteDb extends AbstractRunner {
         if (methodCallList.size() >= Constants.BATCH_SIZE) {
             writeMethodCall2Db();
         }
+
+        return true;
     }
 
     private void writeMethodCall2Db() {
@@ -501,6 +524,7 @@ public class RunnerWriteDb extends AbstractRunner {
             String sql = sqlCacheMap.get(Constants.SQL_KEY_INSERT_METHOD_CALL);
             if (sql == null) {
                 sql = genAndCacheInsertSql(Constants.SQL_KEY_INSERT_METHOD_CALL,
+                        false,
                         Constants.TABLE_PREFIX_METHOD_CALL,
                         Constants.TABLE_COLUMNS_METHOD_CALL);
             }
@@ -542,10 +566,11 @@ public class RunnerWriteDb extends AbstractRunner {
         return simpleClassName;
     }
 
-    private String genAndCacheInsertSql(String key, String tableName, String[] columns) {
+    private String genAndCacheInsertSql(String key, boolean replaceInto, String tableName, String[] columns) {
         String sql = sqlCacheMap.get(key);
         if (sql == null) {
-            sql = "insert ignore into " + tableName + confInfo.getAppName() + SqlUtil.genColumnString(columns) +
+            sql = replaceInto ? "replace into " : "insert into ";
+            sql = sql + tableName + confInfo.getAppName() + SqlUtil.genColumnString(columns) +
                     " values " + SqlUtil.genQuestionString(columns.length);
             cacheSql(key, sql);
         }
@@ -563,6 +588,7 @@ public class RunnerWriteDb extends AbstractRunner {
                     methodCallEntity.getCallerMethodName(),
                     methodCallEntity.getCallerFullClassName(),
                     methodCallEntity.getCallerFullOrSimpleClassName(),
+                    methodCallEntity.getCallerLineNum(),
                     methodCallEntity.getCalleeMethodHash(),
                     methodCallEntity.getFinalCalleeFullMethod(),
                     methodCallEntity.getCalleeMethodName(),
