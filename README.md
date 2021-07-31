@@ -103,7 +103,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.2.0'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <type>provided</type>
 </dependency>
 ```
