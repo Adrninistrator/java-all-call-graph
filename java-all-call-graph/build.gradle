@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group 'com.github.adrninistrator'
-version = "0.2.1"
+version = "0.2.3"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -82,7 +82,7 @@ task createProject {
 
 jar {
     from(sourceSets.test.allJava) {
-        include 'test/jacg/**'
+        include 'test/jacg/*.java'
         into '/'
     }
 }

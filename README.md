@@ -94,7 +94,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.2.1'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.2.3'
 ```
 
 - Maven
@@ -103,7 +103,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.2.1'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.2.1</version>
+  <version>0.2.3</version>
   <type>provided</type>
 </dependency>
 ```

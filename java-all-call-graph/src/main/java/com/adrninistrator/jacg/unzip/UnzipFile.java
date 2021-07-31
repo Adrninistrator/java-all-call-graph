@@ -25,6 +25,7 @@ public class UnzipFile {
     public static final String DIR_JAVA = "java";
     public static final String DIR_RESOURCES = "resources";
     public static final String FLAG_FSP = "/";
+    public static final String FILE_JAVA = ".java";
 
     public static void main(String[] args) {
         String jarFilePath = UnzipFile.class.getProtectionDomain().getCodeSource().getLocation().getFile();
@@ -48,7 +49,7 @@ public class UnzipFile {
                     String fileName = ze.getName();
                     if (fileName.startsWith(Constants.DIR_CONFIG) || fileName.startsWith(Constants.DIR_SQL)) {
                         writeFile(ze, zis, rootDirName, DIR_RESOURCES, fileName);
-                    } else if (fileName.startsWith(DIR_TEST_JAVA_FILE)) {
+                    } else if (fileName.startsWith(DIR_TEST_JAVA_FILE) && fileName.endsWith(FILE_JAVA)) {
                         writeFile(ze, zis, rootDirName, DIR_JAVA, fileName);
                     }
                 }
