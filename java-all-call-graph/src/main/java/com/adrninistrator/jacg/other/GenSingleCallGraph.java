@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.other;
 
+import com.adrninistrator.jacg.common.Constants;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -140,11 +142,11 @@ public class GenSingleCallGraph {
         StringBuilder stringBuilder = new StringBuilder();
         if (order4er) {
             for (int i = resultList.size() - 1; i >= 0; i--) {
-                stringBuilder.append(resultList.get(i)).append("\n");
+                stringBuilder.append(resultList.get(i)).append(Constants.NEW_LINE);
             }
         } else {
             for (String str : resultList) {
-                stringBuilder.append(str).append("\n");
+                stringBuilder.append(str).append(Constants.NEW_LINE);
             }
         }
 

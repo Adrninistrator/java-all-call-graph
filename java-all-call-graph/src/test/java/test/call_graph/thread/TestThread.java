@@ -2,6 +2,12 @@ package test.call_graph.thread;
 
 import java.security.SecureRandom;
 
+/**
+ * @author adrninistrator
+ * @date 2021/7/28
+ * @description:
+ */
+
 public class TestThread {
 
     public void test1() {

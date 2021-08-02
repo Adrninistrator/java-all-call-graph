@@ -1,6 +1,7 @@
 CREATE TABLE if not exists method_call_{appName} (
   id integer(18) NOT NULL COMMENT '序号',
   call_type varchar(10) NOT NULL COMMENT '调用类型',
+  enabled int NOT NULL COMMENT '是否启用，1：启用',
   caller_method_hash varchar(30) NOT NULL COMMENT '调用方，方法hash+字节数',
   caller_full_method varchar(767) NOT NULL COMMENT '调用方，完整方法（类名+方法名+参数）',
   caller_method_name varchar(150) NOT NULL COMMENT '调用方，方法名',

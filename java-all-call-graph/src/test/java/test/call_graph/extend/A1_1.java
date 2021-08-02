@@ -8,9 +8,9 @@ package test.call_graph.extend;
 
 public abstract class A1_1 {
 
-    protected abstract void f1();
+    public abstract void f1();
 
-    protected abstract void f2();
+    public abstract void f2();
 
     protected void fa1_1(){
         String a = "123";

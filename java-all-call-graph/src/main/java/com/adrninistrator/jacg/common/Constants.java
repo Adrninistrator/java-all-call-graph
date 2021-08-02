@@ -21,6 +21,7 @@ public class Constants {
     public static final String[] TABLE_COLUMNS_METHOD_CALL = new String[]{
             DC.MC_ID,
             DC.MC_CALL_TYPE,
+            DC.MC_ENABLED,
             DC.MC_CALLER_METHOD_HASH,
             DC.MC_CALLER_FULL_METHOD,
             DC.MC_CALLER_METHOD_NAME,
@@ -96,6 +97,7 @@ public class Constants {
     public static final String SQL_KEY_MC_QUERY_CALLEE_ALL_METHODS = "mc_query_callee_all_methods";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLER1 = "mc_query_one_caller1";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLER2 = "mc_query_one_caller2";
+    public static final String SQL_KEY_MC_QUERY_NOTICE_INFO = "mc_query_notice_info";
 
     public static final String SQL_KEY_INSERT_CLASS_NAME = "insert_class_name";
     public static final String SQL_KEY_INSERT_METHOD_ANNOTATION = "insert_method_annotation";
@@ -149,11 +151,16 @@ public class Constants {
 
     public static final int NO_CYCLE_CALL_FLAG = -1;
 
-    public static final String CALL_TYPE_RUNNABLE_INIT_RUN = "RIR";
-    public static final String CALL_TYPE_CALLABLE_INIT_CALL = "CIC";
-
     // 是否在结果文件中写入配置信息
     public static final String PROPERTY_WRITE_CONFIG_IN_RESULT = "write.config";
+
+    public static final int ENABLED = 1;
+    public static final int DISABLED = 0;
+
+    public static final String NOTICE_MULTI_ITF_MD = "~notice_multi_ITF.md";
+    public static final String NOTICE_MULTI_SCC_MD = "~notice_multi_SCC.md";
+    public static final String NOTICE_DISABLED_ITF_MD = "~notice_disabled_ITF.md";
+    public static final String NOTICE_DISABLED_SCC_MD = "~notice_disabled_SCC.md";
 
     private Constants() {
         throw new IllegalStateException("illegal");

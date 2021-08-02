@@ -83,6 +83,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         // 将输出文件合并
         combineOutputFile(Constants.COMBINE_FILE_NAME_4_CALLEE);
+
+        // 打印提示信息
+        printNoticeInfo();
     }
 
     // 处理一条记录
@@ -103,7 +106,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         List<Map<String, Object>> calleeMethodList = dbOperator.queryList(sql, new Object[]{calleeClassName});
         if (CommonUtil.isCollectionEmpty(calleeMethodList)) {
-            logger.error("从方法调用关系表未找到被调用类对应方法 [{}] [{}]",sql, calleeClassName);
+            logger.error("从方法调用关系表未找到被调用类对应方法 [{}] [{}]", sql, calleeClassName);
             return false;
         }
 
@@ -164,9 +167,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         writeData2File(genOutputPrefix(0), out4Class, out4Method);
         writeData2File(callerInfo, out4Class, out4Method);
         // 写入方法注解
-        String methodAnnotation = methodAnnotationsMap.get(calleeMethodHash);
-        if (methodAnnotation != null) {
-            writeData2File(methodAnnotation, out4Class, out4Method);
+        String methodAnnotations = methodAnnotationsMap.get(calleeMethodHash);
+        if (methodAnnotations != null) {
+            writeData2File(methodAnnotations, out4Class, out4Method);
         }
         writeData2File(Constants.NEW_LINE, out4Class, out4Method);
 
@@ -254,12 +257,28 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             }
 
             String currentCallerMethodHash = (String) methodMapByCallee.get(DC.MC_CALLER_METHOD_HASH);
+            int enabled = (Integer) methodMapByCallee.get(DC.MC_ENABLED);
 
+            // 判断是否需要忽略
+            if (enabled != Constants.ENABLED) {
+                // 当前记录需要忽略
+                // 更新当前处理节点的调用者方法HASH
+                node4CalleeList.get((currentNodeLevel)).setCurrentCallerMethodHash(currentCallerMethodHash);
+
+                Integer id = (Integer) methodMapByCallee.get(DC.MC_ID);
+                String callType = (String) methodMapByCallee.get(DC.MC_CALL_TYPE);
+
+                // 记录被禁用的方法调用
+                recordDisabledMethodCall(id, callType);
+                continue;
+            }
             // 检查是否出现循环调用
             int back2Level = checkCycleCall(node4CalleeList, currentNodeLevel, currentCallerMethodHash);
 
             // 记录调用方法信息
-            recordCallerInfo(methodMapByCallee, currentNodeLevel, currentCallerMethodHash, back2Level, callerMethodList);
+            if (!recordCallerInfo(methodMapByCallee, currentNodeLevel, currentCallerMethodHash, back2Level, callerMethodList)) {
+                return false;
+            }
 
             if (back2Level != Constants.NO_CYCLE_CALL_FLAG) {
                 logger.info("找到循环调用 {} [{}]", currentCallerMethodHash, back2Level);
@@ -343,7 +362,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return null;
         }
 
-        if (CommonUtil.isCollectionEmpty(list)) {
+        if (list.isEmpty()) {
             // 查询不到结果时，返回空Map
             return new HashMap<>(0);
         }
@@ -385,10 +404,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
     }
 
     // 记录调用方法信息
-    protected void recordCallerInfo(Map<String, Object> callerMethodMap, int currentNodeLevel, String currentCallerMethodHash, int back2Level,
-                                    List<Pair<String, Boolean>> callerMethodList) {
-
-
+    protected boolean recordCallerInfo(Map<String, Object> callerMethodMap, int currentNodeLevel, String currentCallerMethodHash, int back2Level,
+                                       List<Pair<String, Boolean>> callerMethodList) {
         StringBuilder callerInfo = new StringBuilder();
         callerInfo.append(genOutputPrefix(currentNodeLevel + 1));
 
@@ -433,6 +450,12 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         Pair<String, Boolean> pair = new MutablePair<>(callerInfo.toString(), Boolean.FALSE);
         callerMethodList.add(pair);
+
+        Integer id = (Integer) callerMethodMap.get(DC.MC_ID);
+        String callType = (String) callerMethodMap.get(DC.MC_CALL_TYPE);
+
+        // 记录可能出现一对多的方法调用
+        return recordMethodCallMayBeMulti(id, callType);
     }
 
     // 确定写入输出文件的当前被调用方法信息
@@ -454,6 +477,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
     // 确定查询被调用关系时所需字段
     private String chooseCallerColumns() {
         Set<String> columnSet = new HashSet<>();
+        columnSet.add(DC.MC_ID);
+        columnSet.add(DC.MC_CALL_TYPE);
+        columnSet.add(DC.MC_ENABLED);
 
         if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_1)) {
             // # 1: 展示 完整类名+方法名+方法参数

@@ -2,17 +2,21 @@ package com.adrninistrator.jacg.runner.base;
 
 import com.adrninistrator.jacg.common.Constants;
 import com.adrninistrator.jacg.common.DC;
+import com.adrninistrator.jacg.dto.MultiCallInfo;
+import com.adrninistrator.jacg.dto.NoticeCallInfo;
+import com.adrninistrator.jacg.enums.CallTypeEnum;
 import com.adrninistrator.jacg.util.CommonUtil;
 import com.adrninistrator.jacg.util.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * @author adrninistrator
@@ -37,6 +41,40 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      */
     protected Map<String, String> methodAnnotationsMap = new HashMap<>(100);
 
+    /*
+        接口调用对应实现类的方法调用
+        key：接口方法
+        value：实现类方法
+     */
+    private Map<String, MultiCallInfo> itfMethodCallMap = new HashMap<>();
+
+    /*
+        抽象父类调用对应子类的方法调用
+        key：抽象父类方法
+        value：子类方法
+     */
+    private Map<String, MultiCallInfo> sccMethodCallMap = new HashMap<>();
+
+    // 接口调用对应实现类的方法调用，存在一对多的接口
+    private Set<String> itfMultiCallerMethodSet = new TreeSet<>();
+
+    // 抽象父类调用对应子类的方法调用，存在一对多的抽象父类
+    private Set<String> sccMultiCallerMethodSet = new TreeSet<>();
+
+    /*
+        被禁用的接口调用对应实现类的方法调用
+        key：接口方法
+        value：实现类方法
+     */
+    private Map<String, MultiCallInfo> disabledItfMethodCallMap = new TreeMap<>();
+
+    /*
+        被禁用的抽象父类调用对应子类的方法调用
+        key：抽象父类方法
+        value：子类方法
+     */
+    private Map<String, MultiCallInfo> disabledSccMethodCallMap = new TreeMap<>();
+
     // 从方法调用关系表查询指定的类是否存在
     protected boolean checkClassNameExists(String className) {
         /*
@@ -54,12 +92,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             cacheSql(Constants.SQL_KEY_MC_QUERY_CLASS_EXISTS, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneObject(sql, new Object[]{className, className});
+        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className, className});
         if (list == null) {
             return false;
         }
 
-        if (CommonUtil.isCollectionEmpty(list)) {
+        if (list.isEmpty()) {
             logger.error("指定的类从调用关系表中未查询到，请检查是否需要使用完整类名，或使用简单类名 {}", className);
 
             // 猜测对应的类名
@@ -81,7 +119,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 cacheSql(Constants.SQL_KEY_CN_QUERY_SIMPLE_CLASS, sql);
             }
 
-            List<Object> list = dbOperator.queryListOneObject(sql, new Object[]{className});
+            List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
             if (!CommonUtil.isCollectionEmpty(list)) {
                 logger.error("指定的完整类名请确认是否需要使用简单类名形式 {}->{}", className, list.get(0));
             }
@@ -96,7 +134,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             cacheSql(Constants.SQL_KEY_CN_QUERY_FULL_CLASS, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneObject(sql, new Object[]{className});
+        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
         if (!CommonUtil.isCollectionEmpty(list)) {
             logger.error("指定的简单类名请确认是否存在同名类，是否需要使用完整类名形式 {}->{}", className, StringUtils.join(list, " "));
         }
@@ -118,7 +156,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return false;
         }
 
-        if (CommonUtil.isCollectionEmpty(list)) {
+        if (list.isEmpty()) {
             return true;
         }
 
@@ -179,5 +217,293 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 FileUtil.combineTextFile(combinedOutputFilePath, outputFileList);
             }
         }
+    }
+
+    // 根据调用关系ID获取用于提示的信息
+    private NoticeCallInfo queryNoticeCallInfo(Integer id) {
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_MC_QUERY_NOTICE_INFO);
+        if (sql == null) {
+            String columns = StringUtils.join(new String[]{
+                    DC.MC_CALLER_METHOD_HASH,
+                    DC.MC_CALLER_FULL_METHOD,
+                    DC.MC_CALLEE_FULL_METHOD
+            }, Constants.FLAG_COMMA_WITH_SPACE);
+            sql = "select " + columns + " from " + Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
+                    " where " + DC.MC_ID + " = ?";
+            cacheSql(Constants.SQL_KEY_MC_QUERY_NOTICE_INFO, sql);
+        }
+
+        Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{id});
+        if (map == null || map.isEmpty()) {
+            logger.error("查询需要提示的信息失败 {}", id);
+            return null;
+        }
+
+        String callerMethodHash = (String) map.get(DC.MC_CALLER_METHOD_HASH);
+        String callerFullMethod = (String) map.get(DC.MC_CALLER_FULL_METHOD);
+        String calleeFullMethod = (String) map.get(DC.MC_CALLEE_FULL_METHOD);
+        if (StringUtils.isAnyBlank(callerMethodHash, callerFullMethod, calleeFullMethod)) {
+            logger.error("查询需要提示的信息存在空值 {}", id);
+            return null;
+        }
+
+        NoticeCallInfo noticeCallInfo = new NoticeCallInfo();
+        noticeCallInfo.setCallerMethodHash(callerMethodHash);
+        noticeCallInfo.setCallerFullMethod(callerFullMethod);
+        noticeCallInfo.setCalleeFullMethod(calleeFullMethod);
+        return noticeCallInfo;
+    }
+
+    // 记录可能出现一对多的方法调用
+    protected boolean recordMethodCallMayBeMulti(Integer id, String callType) {
+        CallTypeEnum callTypeEnum = CallTypeEnum.getFromType(callType);
+        if (callTypeEnum != CallTypeEnum.CTE_ITF && callTypeEnum != CallTypeEnum.CTE_SCC) {
+            return true;
+        }
+
+        // 根据调用关系ID获取用于提示的信息
+        NoticeCallInfo noticeCallInfo = queryNoticeCallInfo(id);
+        if (noticeCallInfo == null) {
+            return false;
+        }
+
+        Map<String, MultiCallInfo> methodCallMap;
+        Set<String> multiCallerMethodSet;
+
+        if (callTypeEnum == CallTypeEnum.CTE_ITF) {
+            methodCallMap = itfMethodCallMap;
+            multiCallerMethodSet = itfMultiCallerMethodSet;
+        } else {
+            methodCallMap = sccMethodCallMap;
+            multiCallerMethodSet = sccMultiCallerMethodSet;
+        }
+
+        String callerMethodHash = noticeCallInfo.getCallerMethodHash();
+        String callerFullMethod = noticeCallInfo.getCallerFullMethod();
+        String calleeFullMethod = noticeCallInfo.getCalleeFullMethod();
+
+        MultiCallInfo multiCallInfo = methodCallMap.get(callerFullMethod);
+        if (multiCallInfo == null) {
+            multiCallInfo = new MultiCallInfo();
+            Set<String> calleeMethodSet = new TreeSet<>();
+            multiCallInfo.setCalleeFullMethodSet(calleeMethodSet);
+            multiCallInfo.setCallerMethodHash(callerMethodHash);
+
+            methodCallMap.put(callerFullMethod, multiCallInfo);
+        }
+
+        Set<String> calleeMethodSet = multiCallInfo.getCalleeFullMethodSet();
+        calleeMethodSet.add(calleeFullMethod);
+        if (calleeMethodSet.size() > 1) {
+            multiCallerMethodSet.add(callerFullMethod);
+        }
+
+        return true;
+    }
+
+    // 记录被禁用的方法调用
+    protected boolean recordDisabledMethodCall(Integer id, String callType) {
+        CallTypeEnum callTypeEnum = CallTypeEnum.getFromType(callType);
+        if (callTypeEnum != CallTypeEnum.CTE_ITF && callTypeEnum != CallTypeEnum.CTE_SCC) {
+            return true;
+        }
+
+        // 根据调用关系ID获取用于提示的信息
+        NoticeCallInfo noticeCallInfo = queryNoticeCallInfo(id);
+        if (noticeCallInfo == null) {
+            return false;
+        }
+
+        Map<String, MultiCallInfo> methodCallMap;
+
+        if (callTypeEnum == CallTypeEnum.CTE_ITF) {
+            methodCallMap = disabledItfMethodCallMap;
+        } else {
+            methodCallMap = disabledSccMethodCallMap;
+        }
+
+        String callerMethodHash = noticeCallInfo.getCallerMethodHash();
+        String callerFullMethod = noticeCallInfo.getCallerFullMethod();
+        String calleeFullMethod = noticeCallInfo.getCalleeFullMethod();
+
+        MultiCallInfo multiCallInfo = methodCallMap.get(callerFullMethod);
+        if (multiCallInfo == null) {
+            multiCallInfo = new MultiCallInfo();
+            Set<String> calleeMethodSet = new TreeSet<>();
+            multiCallInfo.setCalleeFullMethodSet(calleeMethodSet);
+            multiCallInfo.setCallerMethodHash(callerMethodHash);
+
+            methodCallMap.put(callerFullMethod, multiCallInfo);
+        }
+        Set<String> calleeMethodSet = multiCallInfo.getCalleeFullMethodSet();
+        calleeMethodSet.add(calleeFullMethod);
+
+        return true;
+    }
+
+    // 打印存在一对多的方法调用
+    private void printMultiMethodCall(Map<String, MultiCallInfo> methodCallMap, Set<String> multiCallerMethodSet, CallTypeEnum callTypeEnum) {
+        if (multiCallerMethodSet.isEmpty()) {
+            logger.info("{} 不存在一对多的方法调用，不打印相关信息", callTypeEnum);
+            return;
+        }
+
+        String filePath;
+        if (CallTypeEnum.CTE_ITF == callTypeEnum) {
+            filePath = outputDirPrefix + File.separator + Constants.NOTICE_MULTI_ITF_MD;
+        } else {
+            filePath = outputDirPrefix + File.separator + Constants.NOTICE_MULTI_SCC_MD;
+        }
+
+        logger.info("{} 存在一对多的方法调用，打印相关信息 {}", callTypeEnum, filePath);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath),
+                StandardCharsets.UTF_8))) {
+            stringBuilder.append("# 说明").append(Constants.NEW_LINE).append(Constants.NEW_LINE);
+
+            if (CallTypeEnum.CTE_ITF == callTypeEnum) {
+                stringBuilder.append("出现当前文件，说明接口调用对应实现类的方法调用存在一对多的方法调用");
+            } else {
+                stringBuilder.append("出现当前文件，说明抽象父类调用对应子类的方法调用存在一对多的方法调用");
+            }
+            stringBuilder.append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                    .append("可以使用以下SQL语句查找对应的方法调用并禁用，仅保留需要的调用关系").append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                    .append("```sql").append(Constants.NEW_LINE)
+                    // 生成提示信息中的查询SQL
+                    .append(genNoticeSelectSql(callTypeEnum.getType())).append(Constants.NEW_LINE)
+                    // 生成提示信息中的更新为禁用SQL
+                    .append(genNoticeUpdateDisableSql(callTypeEnum.getType())).append(Constants.NEW_LINE)
+                    .append("```");
+
+            for (String multiCallerMethod : multiCallerMethodSet) {
+                MultiCallInfo multiCallInfo = methodCallMap.get(multiCallerMethod);
+                if (multiCallInfo == null || CommonUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
+                    logger.error("未查找到对应的一对多方法调用关系 {}", multiCallerMethod);
+                    continue;
+                }
+                stringBuilder.append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append("## ").append(multiCallerMethod).append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append("- ").append(DC.MC_CALLER_METHOD_HASH).append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append(multiCallInfo.getCallerMethodHash()).append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append("- ").append(DC.MC_CALLEE_FULL_METHOD).append("（被调用的方法）").append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append("```").append(Constants.NEW_LINE);
+                for (String calleeMethod : multiCallInfo.getCalleeFullMethodSet()) {
+                    stringBuilder.append(calleeMethod).append(Constants.NEW_LINE);
+                }
+                stringBuilder.append("```");
+            }
+
+            out.write(stringBuilder.toString());
+        } catch (Exception e) {
+            logger.error("error ", e);
+        }
+    }
+
+    // 打印被禁用的方法调用
+    private void printDisabledMethodCall(Map<String, MultiCallInfo> disabledMethodCallMap, CallTypeEnum callTypeEnum) {
+        if (disabledMethodCallMap.isEmpty()) {
+            logger.info("{} 不存在被禁用的方法调用，不打印相关信息", callTypeEnum);
+            return;
+        }
+
+        String filePath;
+        if (CallTypeEnum.CTE_ITF == callTypeEnum) {
+            filePath = outputDirPrefix + File.separator + Constants.NOTICE_DISABLED_ITF_MD;
+        } else {
+            filePath = outputDirPrefix + File.separator + Constants.NOTICE_DISABLED_SCC_MD;
+        }
+
+        logger.info("{} 存在被禁用的方法调用，打印相关信息 {}", callTypeEnum, filePath);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath),
+                StandardCharsets.UTF_8))) {
+            stringBuilder.append("# 说明").append(Constants.NEW_LINE).append(Constants.NEW_LINE);
+
+            if (CallTypeEnum.CTE_ITF == callTypeEnum) {
+                stringBuilder.append("出现当前文件，说明接口调用对应实现类的方法调用存在被禁用的方法调用");
+            } else {
+                stringBuilder.append("出现当前文件，说明抽象父类调用对应子类的方法调用存在被禁用的方法调用");
+            }
+            stringBuilder.append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                    .append("可以使用以下SQL语句查找对应的方法调用并启用").append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                    .append("```sql").append(Constants.NEW_LINE)
+                    // 生成提示信息中的查询SQL
+                    .append(genNoticeSelectSql(callTypeEnum.getType())).append(Constants.NEW_LINE)
+                    // 生成提示信息中的更新为禁用SQL
+                    .append(genNoticeUpdateEnableSql(callTypeEnum.getType())).append(Constants.NEW_LINE)
+                    .append("```");
+
+            for (Map.Entry<String, MultiCallInfo> entry : disabledMethodCallMap.entrySet()) {
+                String disabledCallerMethod = entry.getKey();
+
+                MultiCallInfo multiCallInfo = entry.getValue();
+                if (multiCallInfo == null || CommonUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
+                    logger.error("未查找到对应的被禁用方法调用关系 {}", disabledCallerMethod);
+                    continue;
+                }
+                stringBuilder.append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append("## ").append(disabledCallerMethod).append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append("- ").append(DC.MC_CALLER_METHOD_HASH).append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append(multiCallInfo.getCallerMethodHash()).append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append("- ").append(DC.MC_CALLEE_FULL_METHOD).append("（被调用的方法）").append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                        .append("```").append(Constants.NEW_LINE);
+                for (String calleeMethod : multiCallInfo.getCalleeFullMethodSet()) {
+                    stringBuilder.append(calleeMethod).append(Constants.NEW_LINE);
+                }
+                stringBuilder.append("```");
+            }
+
+            out.write(stringBuilder.toString());
+        } catch (Exception e) {
+            logger.error("error ", e);
+        }
+    }
+
+    // 打印提示信息
+    protected void printNoticeInfo() {
+        printMultiMethodCall(itfMethodCallMap, itfMultiCallerMethodSet, CallTypeEnum.CTE_ITF);
+        printMultiMethodCall(sccMethodCallMap, sccMultiCallerMethodSet, CallTypeEnum.CTE_SCC);
+        printDisabledMethodCall(disabledItfMethodCallMap, CallTypeEnum.CTE_ITF);
+        printDisabledMethodCall(disabledSccMethodCallMap, CallTypeEnum.CTE_SCC);
+    }
+
+    // 生成提示信息中的查询SQL
+    private String genNoticeSelectSql(String callType) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("select * from ")
+                .append(Constants.TABLE_PREFIX_METHOD_CALL).append(confInfo.getAppName())
+                .append(" where ").append(DC.MC_CALL_TYPE).append(" = '").append(callType)
+                .append("' and ").append(DC.MC_CALLER_METHOD_HASH).append(" = '';");
+        return stringBuilder.toString();
+    }
+
+    // 生成提示信息中的更新为禁用SQL
+    private String genNoticeUpdateDisableSql(String callType) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("update ")
+                .append(Constants.TABLE_PREFIX_METHOD_CALL).append(confInfo.getAppName())
+                .append(" set ").append(DC.MC_ENABLED)
+                .append(" = ").append(Constants.DISABLED)
+                .append(" where ")
+                .append(DC.MC_CALL_TYPE).append(" = '").append(callType)
+                .append("' and ").append(DC.MC_CALLER_METHOD_HASH).append(" = '' and ")
+                .append(DC.MC_CALLEE_FULL_METHOD).append(" <> '';");
+        return stringBuilder.toString();
+    }
+
+    // 生成提示信息中的更新为启用SQL
+    private String genNoticeUpdateEnableSql(String callType) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("update ")
+                .append(Constants.TABLE_PREFIX_METHOD_CALL).append(confInfo.getAppName())
+                .append(" set ").append(DC.MC_ENABLED)
+                .append(" = ").append(Constants.ENABLED)
+                .append(" where ")
+                .append(DC.MC_CALL_TYPE).append(" = '").append(callType)
+                .append("' and ").append(DC.MC_CALLER_METHOD_HASH).append(" = '' and ")
+                .append(DC.MC_CALLEE_FULL_METHOD).append(" = '';");
+        return stringBuilder.toString();
     }
 }

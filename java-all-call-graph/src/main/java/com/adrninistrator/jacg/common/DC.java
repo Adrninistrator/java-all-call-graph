@@ -28,6 +28,7 @@ public class DC {
     public static final String MC_CALLEE_METHOD_NAME = "callee_method_name";
     public static final String MC_CALLEE_FULL_CLASS_NAME = "callee_full_class_name";
     public static final String MC_CALLEE_CLASS_NAME = "callee_class_name";
+    public static final String MC_ENABLED = "enabled";
 
     private DC() {
         throw new IllegalStateException("illegal");

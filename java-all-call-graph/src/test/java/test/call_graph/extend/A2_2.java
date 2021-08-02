@@ -9,7 +9,7 @@ package test.call_graph.extend;
 public abstract class A2_2 extends A1_1 {
 
     @Override
-    protected void f2() {
+    public void f2() {
         String a = "123";
         System.out.println(a);
     }

@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.runner;
 import com.adrninistrator.jacg.common.Constants;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.dto.TmpNode4Caller;
+import com.adrninistrator.jacg.enums.CallTypeEnum;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.CommonUtil;
 import com.adrninistrator.jacg.util.FileUtil;
@@ -127,6 +128,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 将输出文件合并
         combineOutputFile(Constants.COMBINE_FILE_NAME_4_CALLER);
+
+        // 打印提示信息
+        printNoticeInfo();
     }
 
     public boolean isSupportIgnore() {
@@ -228,9 +232,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             out.write(genOutputPrefix(0));
             out.write(calleeInfo);
             // 写入方法注解
-            String methodAnnotation = methodAnnotationsMap.get(callerMethodHash);
-            if (methodAnnotation != null) {
-                out.write(methodAnnotation);
+            String methodAnnotations = methodAnnotationsMap.get(callerMethodHash);
+            if (methodAnnotations != null) {
+                out.write(methodAnnotations);
             }
 
             out.write(Constants.NEW_LINE);
@@ -293,12 +297,23 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             }
 
             int currentMethodCallId = (Integer) methodMapByCaller.get(DC.MC_ID);
+            int enabled = (Integer) methodMapByCaller.get(DC.MC_ENABLED);
 
             // 判断是否需要忽略
-            if (isSupportIgnore() && ignoreCurrentMethod(methodMapByCaller)) {
+            if ((isSupportIgnore() && ignoreCurrentMethod(methodMapByCaller)) ||
+                    enabled != Constants.ENABLED) {
                 // 当前记录需要忽略
                 // 更新当前处理节点的id
                 node4CallerList.get((currentNodeLevel)).setCurrentCalleeMethodId(currentMethodCallId);
+
+                if (enabled != Constants.ENABLED) {
+                    Integer id = (Integer) methodMapByCaller.get(DC.MC_ID);
+                    String callType = (String) methodMapByCaller.get(DC.MC_CALL_TYPE);
+
+                    // 记录被禁用的方法调用
+                    recordDisabledMethodCall(id, callType);
+                }
+
                 continue;
             }
 
@@ -309,7 +324,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             int back2Level = checkCycleCall(node4CallerList, currentNodeLevel, currentCalleeMethodHash);
 
             // 记录被调用方法信息
-            recordCalleeInfo(methodMapByCaller, currentNodeLevel, currentCalleeMethodHash, back2Level, out);
+            if (!recordCalleeInfo(methodMapByCaller, currentNodeLevel, currentCalleeMethodHash, back2Level, out)) {
+                return false;
+            }
 
             if (back2Level != Constants.NO_CYCLE_CALL_FLAG) {
                 logger.info("找到循环调用 {} [{}]", currentCalleeMethodHash, back2Level);
@@ -367,7 +384,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return null;
         }
 
-        if (CommonUtil.isCollectionEmpty(list)) {
+        if (list.isEmpty()) {
             // 查询不到结果时，返回空Map
             return new HashMap<>(0);
         }
@@ -393,32 +410,28 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 判断当前找到的被调用方法是否需要处理
     private boolean ignoreCurrentMethod(Map<String, Object> methodMapByCaller) {
         String callType = (String) methodMapByCaller.get(DC.MC_CALL_TYPE);
-        String callerFullMethod = (String) methodMapByCaller.get(DC.MC_CALLER_FULL_METHOD);
         String calleeFullMethod = (String) methodMapByCaller.get(DC.MC_CALLEE_FULL_METHOD);
 
         // 当完整方法（类名+方法名+参数）为以下前缀时，忽略
-        if (isIgnoredFullMethodWithPrefixByFullMethod(callerFullMethod) || isIgnoredFullMethodWithPrefixByFullMethod(calleeFullMethod)) {
+        if (isIgnoredFullMethodWithPrefixByFullMethod(calleeFullMethod)) {
             return true;
         }
 
-        String callerFullClassName = CommonUtil.getFullClassNameFromMethod(callerFullMethod);
         String calleeFullClassName = CommonUtil.getFullClassNameFromMethod(calleeFullMethod);
 
         // 根据类名特定关键字判断是否需要忽略
-        if (isIgnoredClassWithKeywordByFullClass(callerFullClassName) || isIgnoredClassWithKeywordByFullClass(calleeFullClassName)) {
+        if (isIgnoredClassWithKeywordByFullClass(calleeFullClassName)) {
             return true;
         }
 
-        String callerMethodNameWithArgs = CommonUtil.getMethodWithArgs(callerFullMethod);
         String calleeMethodNameWithArgs = CommonUtil.getMethodWithArgs(calleeFullMethod);
 
         /*
             根据方法名前缀判断是否需要忽略，使用包含参数的方法名进行比较
             若当前调用类型为Runnable/Callable实现类子类构造函数调用run()方法，则不判断方法名前缀是否需要忽略（<init> -> run()，可能会被指定为忽略）
          */
-        if (!StringUtils.equalsAny(callType, Constants.CALL_TYPE_RUNNABLE_INIT_RUN, Constants.CALL_TYPE_CALLABLE_INIT_CALL)
-                && (isIgnoredMethodWithPrefixByMethodName(callerMethodNameWithArgs) ||
-                isIgnoredMethodWithPrefixByMethodName(calleeMethodNameWithArgs))) {
+        if (!StringUtils.equalsAny(callType, CallTypeEnum.CTE_RIR.getType(), CallTypeEnum.CTE_CIC.getType())
+                && isIgnoredMethodWithPrefixByMethodName(calleeMethodNameWithArgs)) {
             return true;
         }
 
@@ -426,8 +439,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     }
 
     // 记录被调用方法信息
-    protected void recordCalleeInfo(Map<String, Object> calleeMethodMap, int currentNodeLevel, String currentCalleeMethodHash, int back2Level,
-                                    BufferedWriter out) throws IOException {
+    protected boolean recordCalleeInfo(Map<String, Object> calleeMethodMap, int currentNodeLevel, String currentCalleeMethodHash, int back2Level,
+                                       BufferedWriter out) throws IOException {
         StringBuilder calleeInfo = new StringBuilder();
         calleeInfo.append(genOutputPrefix(currentNodeLevel + 1));
 
@@ -478,6 +491,12 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         out.write(calleeInfo.toString());
         out.write(Constants.NEW_LINE);
+
+        Integer id = (Integer) calleeMethodMap.get(DC.MC_ID);
+        String callType = (String) calleeMethodMap.get(DC.MC_CALL_TYPE);
+
+        // 记录可能出现一对多的方法调用
+        return recordMethodCallMayBeMulti(id, callType);
     }
 
     // 确定写入输出文件的当前调用方法信息
@@ -496,12 +515,14 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 确定查询调用关系时所需字段
     private String chooseSelectMethodColumns() {
         Set<String> columnSet = new HashSet<>();
+        columnSet.add(DC.MC_ID);
         columnSet.add(DC.MC_CALL_TYPE);
         columnSet.add(DC.MC_CALLEE_FULL_METHOD);
-        columnSet.add(DC.MC_CALLER_FULL_METHOD);
+        columnSet.add(DC.MC_ENABLED);
 
         if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_1)) {
             // # 1: 展示 完整类名+方法名+方法参数
+            columnSet.add(DC.MC_CALLER_FULL_METHOD);
         } else if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_2)) {
             // # 2: 展示 完整类名+方法名
         } else {
@@ -528,7 +549,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             cacheSql(Constants.SQL_KEY_MC_QUERY_CALLER_FULL_CLASS, sql);
         }
 
-        List<Object> fullClassNameList = dbOperator.queryListOneObject(sql, new Object[]{callerClassName});
+        List<Object> fullClassNameList = dbOperator.queryListOneColumn(sql, new Object[]{callerClassName});
         if (CommonUtil.isCollectionEmpty(fullClassNameList)) {
             logger.error("从方法调用关系表未找到对应的完整类名 {}", callerClassName);
             return null;

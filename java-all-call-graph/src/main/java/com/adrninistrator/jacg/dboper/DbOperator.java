@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.dboper;
 
 import com.adrninistrator.jacg.common.Constants;
 import com.adrninistrator.jacg.conf.ConfInfo;
+import com.adrninistrator.jacg.util.CommonUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -123,8 +124,8 @@ public class DbOperator {
         String tableName = sql.substring(indexStart + Constants.SQL_CREATE_TABLE_HEAD_LENGTH, indexEnd).trim();
 
         // 检查数据库表是否创建成功，可能出现上述建表语句执行失败但未抛出异常的情况
-        List<Object> list = queryListOneObject("show tables like ?", new Object[]{tableName});
-        if (list == null || list.isEmpty()) {
+        List<Object> list = queryListOneColumn("show tables like ?", new Object[]{tableName});
+        if (CommonUtil.isCollectionEmpty(list)) {
             logger.error("数据库表创建失败 [{}]", tableName);
             return false;
         }
@@ -221,7 +222,14 @@ public class DbOperator {
         }
     }
 
-    public List<Object> queryListOneObject(String sql, Object[] arguments) {
+    /**
+     * 查询列表，仅包含一个字段
+     *
+     * @param sql
+     * @param arguments
+     * @return
+     */
+    public List<Object> queryListOneColumn(String sql, Object[] arguments) {
         Connection connection = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -251,6 +259,13 @@ public class DbOperator {
         }
     }
 
+    /**
+     * 查询列表，包含多个字段
+     *
+     * @param sql
+     * @param arguments
+     * @return
+     */
     public List<Map<String, Object>> queryList(String sql, Object[] arguments) {
         Connection connection = null;
         PreparedStatement stmt = null;
@@ -282,6 +297,51 @@ public class DbOperator {
                 list.add(map);
             }
             return list;
+        } catch (Exception e) {
+            logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            return null;
+        } finally {
+            close(connection, stmt);
+            closeResultSet(rs);
+        }
+    }
+
+    /**
+     * 查询一行记录
+     *
+     * @param sql
+     * @param arguments
+     * @return
+     */
+    public Map<String, Object> queryOneRow(String sql, Object[] arguments) {
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = getConnection();
+            if (connection == null) {
+                return null;
+            }
+
+            stmt = connection.prepareStatement(sql);
+            setArguments(stmt, arguments);
+            rs = stmt.executeQuery();
+
+            ResultSetMetaData meta = rs.getMetaData();
+            int columnCount = meta.getColumnCount();
+
+            Map<String, Object> map = new HashMap<>(columnCount);
+            if (rs.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    /*
+                        当查询SQL通过AS指定字段别名时，使用getColumnLabel可以获取到别名，未指定别名时，可获取到原始字段名
+                        使用getColumnName只能获取到原始字段名
+                     */
+                    map.put(meta.getColumnLabel(i), rs.getObject(i));
+                }
+            }
+            return map;
         } catch (Exception e) {
             logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             return null;

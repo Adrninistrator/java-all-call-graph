@@ -5,6 +5,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * @author adrninistrator
+ * @date 2021/7/28
+ * @description:
+ */
+
 public class FutureImpl implements Future {
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {

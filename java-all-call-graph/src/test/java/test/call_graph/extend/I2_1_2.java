@@ -8,11 +8,11 @@ package test.call_graph.extend;
 
 public class I2_1_2 extends A2_1 {
     @Override
-    protected void f1() {
+    public void f1() {
     }
 
     @Override
-    protected void f2() {
+    public void f2() {
         fi2_1_2();
     }
 

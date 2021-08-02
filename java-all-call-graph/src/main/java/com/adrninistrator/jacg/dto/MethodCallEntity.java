@@ -10,6 +10,7 @@ public class MethodCallEntity {
 
     private Integer id;
     private String callType;
+    private int enabled;
     private String callerMethodHash;
     private String callerFullMethod;
     private String callerMethodName;
@@ -36,6 +37,14 @@ public class MethodCallEntity {
 
     public void setCallType(String callType) {
         this.callType = callType;
+    }
+
+    public int getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(int enabled) {
+        this.enabled = enabled;
     }
 
     public String getCallerMethodHash() {

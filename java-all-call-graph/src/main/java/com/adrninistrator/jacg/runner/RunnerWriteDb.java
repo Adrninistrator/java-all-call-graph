@@ -20,8 +20,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-//import gr.gousiosg.javacg.stat.JCallGraph;
-
 /**
  * @author adrninistrator
  * @date 2021/6/17
@@ -251,12 +249,12 @@ public class RunnerWriteDb extends AbstractRunner {
             cacheSql(Constants.SQL_KEY_CN_QUERY_DUPLICATE_CLASS, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneObject(sql, null);
+        List<Object> list = dbOperator.queryListOneColumn(sql, null);
         if (list == null) {
             return false;
         }
 
-        if (!CommonUtil.isCollectionEmpty(list)) {
+        if (!list.isEmpty()) {
             for (Object object : list) {
                 duplicateClassNameSet.add((String) object);
             }
@@ -497,6 +495,7 @@ public class RunnerWriteDb extends AbstractRunner {
         methodCallEntity.setCalleeMethodName(calleeMethodName);
         methodCallEntity.setCalleeFullClassName(calleeFullClassName);
         methodCallEntity.setCalleeFullOrSimpleClassName(calleeFullOrSimpleClassName);
+        methodCallEntity.setEnabled(Constants.ENABLED);
 
         methodCallList.add(methodCallEntity);
 
@@ -583,6 +582,7 @@ public class RunnerWriteDb extends AbstractRunner {
             Object[] object = new Object[]{
                     methodCallEntity.getId(),
                     methodCallEntity.getCallType(),
+                    methodCallEntity.getEnabled(),
                     methodCallEntity.getCallerMethodHash(),
                     methodCallEntity.getCallerFullMethod(),
                     methodCallEntity.getCallerMethodName(),

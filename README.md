@@ -94,7 +94,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.2.3'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.3.0'
 ```
 
 - Maven
@@ -103,7 +103,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.2.3'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.2.3</version>
+  <version>0.3.0</version>
   <type>provided</type>
 </dependency>
 ```
@@ -589,23 +589,23 @@ private void f1() {
 - 未被调用的方法；
 - 方法作为流式处理的参数，如“xxx.stream().filter(this::func)”。
 
-# 8. 使用建议
+# 8. 多余的调用关系处理
 
-- 引入接口/抽象父类时生成了不相关的调用关系
+## 8.1. 问题
 
-可能存在以下问题：
+当代码中引入了接口或抽象父类，且对应多个实现类或子类时，生成的方法完整调用链可能存在多余的调用关系。
 
 当一个接口对应多个实现类时，若在某个类中引入了接口，并调用其方法，生成的完整调用链中，可能将当前类未使用的其他实现类相关的调用关系也包含进来；
 
 当一个抽象父类对应多个非抽象子类时，若在某个类中引入了抽象父类，并调用其方法，生成的完整调用链中，可能将当前类未使用的其他非抽象子类相关的调用关系也包含进来。
 
-对于以上问题，可以临时修改代码但不提交，将引入的接口使用实现类替代，或抽象父类使用非抽象子类替代，生成jar包/war包后生成调用关系，再重新生成完整调用链。
+当代码中使用工厂模式获取某个接口/抽象父类的实现类/非抽象子类时，也可能会出现类似的问题。
 
-若被分析的Jar包没有源码无法修改，则可以修改前缀为“method\_call\_”的数据库表，将接口调用不相关实现类、或抽象父类调用不相关子类的调用关系临时删除，再生成完整调用链。
+## 8.2. 解决
 
-- 使用工厂模式获取接口/抽象父类实例时生成了不相关的调用关系
+当存在以上情况时，该工具会在当前目录生成“~notice_multi_ITF.md”或“~notice_multi_SCC.md”文件，可按照文档中的提示，将前缀为“method\_call\_”的数据库表中不需要的方法调用设置为禁用。
 
-当代码中使用工厂模式获取某个接口/抽象父类的实现类/非抽象子类时，若完整调用链中出现了不相关类的调用关系时，可将接口/抽象父类拷贝出一个同名类，将不相关的实现类/非抽象子类改为实现/继承拷贝出的类。
+当需要将禁用的方法调用恢复为启用时，可按照当前目录生成的“~notice_disabled_ITF.md”或“~notice_disabled_SCC.md”文件的说明进行操作。
 
 # 9. 适用场景
 
