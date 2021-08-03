@@ -8,9 +8,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -46,8 +44,6 @@ public class GenSingleCallGraph {
             return null;
         }
 
-        Set<String> printedSet = new HashSet<>(100);
-
         StringBuilder stringBuilder = new StringBuilder();
 
         for (int i = 1; i < args.length; i++) {
@@ -63,7 +59,7 @@ public class GenSingleCallGraph {
                 continue;
             }
 
-            print(args[0], lineNum, ORDER_FOR_ER.equals(order), stringBuilder, printedSet);
+            print(args[0], lineNum, ORDER_FOR_ER.equals(order), stringBuilder);
         }
 
         return stringBuilder.toString();
@@ -110,7 +106,7 @@ public class GenSingleCallGraph {
         return true;
     }
 
-    private void print(String file, int lineNum, boolean order4er, StringBuilder stringBuilder, Set<String> printedSet) {
+    private void print(String file, int lineNum, boolean order4er, StringBuilder stringBuilder) {
 
         List<String> dataList = new ArrayList<>(lineNum);
 
@@ -170,11 +166,8 @@ public class GenSingleCallGraph {
         }
 
         String data = tmpStr.toString();
-        if (!printedSet.contains(data)) {
-            stringBuilder.append("# 行号: ").append(lineNum).append(Constants.NEW_LINE);
-            stringBuilder.append(data).append(Constants.NEW_LINE);
-            printedSet.add(data);
-        }
+        stringBuilder.append("# 行号: ").append(lineNum).append(Constants.NEW_LINE);
+        stringBuilder.append(data).append(Constants.NEW_LINE);
     }
 
     private boolean isValidNum(String str) {

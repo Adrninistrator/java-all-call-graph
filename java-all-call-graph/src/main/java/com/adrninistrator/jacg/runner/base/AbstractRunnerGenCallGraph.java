@@ -377,7 +377,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                     .append(genNoticeUpdateDisableSql(callTypeEnum.getType())).append(Constants.NEW_LINE);
             if (this instanceof RunnerGenAllGraph4Callee) {
                 // 生成向上的方法调用完整调用链时，增加一个显示的update语句
-                stringBuilder.append(genNoticeUpdateDisableSql4Callee(callTypeEnum.getType())).append(Constants.NEW_LINE);
+                stringBuilder.append(Constants.NEW_LINE).append(genNoticeSelectSql4Callee()).append(Constants.NEW_LINE)
+                .append(genNoticeUpdateDisableSql4Callee()).append(Constants.NEW_LINE);
             }
             stringBuilder.append("```");
 
@@ -491,6 +492,14 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         return stringBuilder.toString();
     }
 
+    private String genNoticeSelectSql4Callee() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("select * from ")
+                .append(Constants.TABLE_PREFIX_METHOD_CALL).append(confInfo.getAppName())
+                .append(" where ").append(DC.MC_CALLEE_METHOD_HASH).append(" = '';");
+        return stringBuilder.toString();
+    }
+
     // 生成提示信息中的更新为禁用SQL
     private String genNoticeUpdateDisableSql(String callType) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -505,15 +514,13 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         return stringBuilder.toString();
     }
 
-    private String genNoticeUpdateDisableSql4Callee(String callType) {
+    private String genNoticeUpdateDisableSql4Callee() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("update ")
                 .append(Constants.TABLE_PREFIX_METHOD_CALL).append(confInfo.getAppName())
                 .append(" set ").append(DC.MC_ENABLED)
                 .append(" = ").append(Constants.DISABLED)
-                .append(" where ")
-                .append(DC.MC_CALL_TYPE).append(" = '").append(callType)
-                .append("' and ").append(DC.MC_CALLEE_METHOD_HASH).append(" = '' and ")
+                .append(" where ").append(DC.MC_CALLEE_METHOD_HASH).append(" = '' and ")
                 .append(DC.MC_CALLER_FULL_METHOD).append(" <> '';");
         return stringBuilder.toString();
     }
