@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.dto.MultiCallInfo;
 import com.adrninistrator.jacg.dto.NoticeCallInfo;
 import com.adrninistrator.jacg.enums.CallTypeEnum;
+import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.util.CommonUtil;
 import com.adrninistrator.jacg.util.FileUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -373,8 +374,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                     // 生成提示信息中的查询SQL
                     .append(genNoticeSelectSql(callTypeEnum.getType())).append(Constants.NEW_LINE)
                     // 生成提示信息中的更新为禁用SQL
-                    .append(genNoticeUpdateDisableSql(callTypeEnum.getType())).append(Constants.NEW_LINE)
-                    .append("```");
+                    .append(genNoticeUpdateDisableSql(callTypeEnum.getType())).append(Constants.NEW_LINE);
+            if (this instanceof RunnerGenAllGraph4Callee) {
+                // 生成向上的方法调用完整调用链时，增加一个显示的update语句
+                stringBuilder.append(genNoticeUpdateDisableSql4Callee(callTypeEnum.getType())).append(Constants.NEW_LINE);
+            }
+            stringBuilder.append("```");
 
             for (String multiCallerMethod : multiCallerMethodSet) {
                 MultiCallInfo multiCallInfo = methodCallMap.get(multiCallerMethod);
@@ -392,12 +397,19 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                     stringBuilder.append(calleeMethod).append(Constants.NEW_LINE);
                 }
                 stringBuilder.append("```");
+
+                // 打印存在一对多的方法调用，自定义处理
+                printMultiMethodCallCustom(multiCallInfo.getCallerMethodHash(), stringBuilder);
             }
 
             out.write(stringBuilder.toString());
         } catch (Exception e) {
             logger.error("error ", e);
         }
+    }
+
+    // 打印存在一对多的方法调用，自定义处理
+    protected void printMultiMethodCallCustom(String callerMethodHash, StringBuilder stringBuilder) {
     }
 
     // 打印被禁用的方法调用
@@ -490,6 +502,19 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 .append(DC.MC_CALL_TYPE).append(" = '").append(callType)
                 .append("' and ").append(DC.MC_CALLER_METHOD_HASH).append(" = '' and ")
                 .append(DC.MC_CALLEE_FULL_METHOD).append(" <> '';");
+        return stringBuilder.toString();
+    }
+
+    private String genNoticeUpdateDisableSql4Callee(String callType) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("update ")
+                .append(Constants.TABLE_PREFIX_METHOD_CALL).append(confInfo.getAppName())
+                .append(" set ").append(DC.MC_ENABLED)
+                .append(" = ").append(Constants.DISABLED)
+                .append(" where ")
+                .append(DC.MC_CALL_TYPE).append(" = '").append(callType)
+                .append("' and ").append(DC.MC_CALLEE_METHOD_HASH).append(" = '' and ")
+                .append(DC.MC_CALLER_FULL_METHOD).append(" <> '';");
         return stringBuilder.toString();
     }
 

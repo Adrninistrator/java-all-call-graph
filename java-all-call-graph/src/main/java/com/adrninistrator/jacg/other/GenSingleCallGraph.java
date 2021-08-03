@@ -24,28 +24,31 @@ public class GenSingleCallGraph {
     public static final String ORDER_FOR_ER = "4er";
     public static final String ORDER_FOR_EE = "4ee";
 
-    private static Set<String> printedSet = new HashSet<>(100);
-
     public static void main(String[] args) {
+        GenSingleCallGraph genSingleCallGraph = new GenSingleCallGraph();
+
+        String data = genSingleCallGraph.genCallGraph(args);
+        if (data != null) {
+            String headerInfo = GenSingleCallGraph.genHeaderInfo(args[0]);
+            System.out.println(headerInfo);
+            System.out.println(data);
+        }
+    }
+
+    public String genCallGraph(String[] args) {
         String order = checkOrder();
         if (order == null) {
-            return;
+            return null;
         }
 
-        GenSingleCallGraph genSingleCallGraph = new GenSingleCallGraph();
-        if (!genSingleCallGraph.check(args)) {
-            System.out.println("应按照以下方式指定参数：[文件路径] [行号1] [行号2] ... [行号n]");
-            return;
+        if (!check(args)) {
+            System.err.println("应按照以下方式指定参数：[文件路径] [行号1] [行号2] ... [行号n]");
+            return null;
         }
 
-        System.out.println("# 查看文件：" + args[0]);
+        Set<String> printedSet = new HashSet<>(100);
 
-        boolean order4er = ORDER_FOR_ER.equals(order);
-        if (order4er) {
-            System.out.println("# 查看方法向下调用链时使用，按层级增大方向打印\n");
-        } else {
-            System.out.println("# 查看方法向上调用链时使用，按层级减小方向打印\n");
-        }
+        StringBuilder stringBuilder = new StringBuilder();
 
         for (int i = 1; i < args.length; i++) {
             String strLineNum = args[i];
@@ -60,14 +63,30 @@ public class GenSingleCallGraph {
                 continue;
             }
 
-            genSingleCallGraph.print(args[0], lineNum, order4er);
+            print(args[0], lineNum, ORDER_FOR_ER.equals(order), stringBuilder, printedSet);
         }
+
+        return stringBuilder.toString();
+    }
+
+    public static String genHeaderInfo(String filePath) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("# 处理文件：").append(filePath).append(Constants.NEW_LINE);
+
+        String order = System.getProperty(ORDER_KEY);
+        boolean order4er = ORDER_FOR_ER.equals(order);
+        if (order4er) {
+            stringBuilder.append("# 查看方法向下调用链时使用，按层级增大方向打印").append(Constants.NEW_LINE);
+        } else {
+            stringBuilder.append("# 查看方法向上调用链时使用，按层级减小方向打印").append(Constants.NEW_LINE);
+        }
+        return stringBuilder.toString();
     }
 
     public static String checkOrder() {
         String order = System.getProperty(ORDER_KEY);
         if (!ORDER_FOR_ER.equals(order) && !ORDER_FOR_EE.equals(order)) {
-            System.out.println("请通过-D" + ORDER_KEY + "=" + ORDER_FOR_ER + " 或 -D" + ORDER_KEY + "=" + ORDER_FOR_EE +
+            System.err.println("请通过-D" + ORDER_KEY + "=" + ORDER_FOR_ER + " 或 -D" + ORDER_KEY + "=" + ORDER_FOR_EE +
                     " 指定打印顺序，b代表按层级增大方向，s代表按层级减小方向");
             return null;
         }
@@ -91,7 +110,7 @@ public class GenSingleCallGraph {
         return true;
     }
 
-    private void print(String file, int lineNum, boolean order4er) {
+    private void print(String file, int lineNum, boolean order4er, StringBuilder stringBuilder, Set<String> printedSet) {
 
         List<String> dataList = new ArrayList<>(lineNum);
 
@@ -139,26 +158,26 @@ public class GenSingleCallGraph {
             }
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder tmpStr = new StringBuilder();
         if (order4er) {
             for (int i = resultList.size() - 1; i >= 0; i--) {
-                stringBuilder.append(resultList.get(i)).append(Constants.NEW_LINE);
+                tmpStr.append(resultList.get(i)).append(Constants.NEW_LINE);
             }
         } else {
             for (String str : resultList) {
-                stringBuilder.append(str).append(Constants.NEW_LINE);
+                tmpStr.append(str).append(Constants.NEW_LINE);
             }
         }
 
-        String data = stringBuilder.toString();
+        String data = tmpStr.toString();
         if (!printedSet.contains(data)) {
-            System.out.println("# 行号: " + lineNum);
-            System.out.println(data);
+            stringBuilder.append("# 行号: ").append(lineNum).append(Constants.NEW_LINE);
+            stringBuilder.append(data).append(Constants.NEW_LINE);
             printedSet.add(data);
         }
     }
 
-    private static boolean isValidNum(String str) {
+    private boolean isValidNum(String str) {
         if (str == null || str.isEmpty()) {
             return false;
         }
@@ -171,7 +190,7 @@ public class GenSingleCallGraph {
         return true;
     }
 
-    private static Integer getMethodLevel(String line) {
+    private Integer getMethodLevel(String line) {
         int index1 = line.indexOf('[');
         if (index1 == -1) {
             System.err.println("未找到[: " + line);

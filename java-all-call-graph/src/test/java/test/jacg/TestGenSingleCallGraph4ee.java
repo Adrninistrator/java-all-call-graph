@@ -12,6 +12,12 @@ public class TestGenSingleCallGraph4ee {
 
     public static void main(String[] args) {
         GenSingleCallGraph.setOrder4ee();
-        GenSingleCallGraph.main(args);
+        GenSingleCallGraph genSingleCallGraph = new GenSingleCallGraph();
+        String data = genSingleCallGraph.genCallGraph(args);
+        if (data != null) {
+            String headerInfo = GenSingleCallGraph.genHeaderInfo(args[0]);
+            System.out.println(headerInfo);
+            System.out.println(data);
+        }
     }
 }

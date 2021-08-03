@@ -40,6 +40,7 @@ public class Constants {
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLER = "~jacg_output_for_caller";
     public static final String DIR_SQL = "~jacg_sql";
     public static final String DIR_METHODS = "methods";
+    public static final String DIR_FIND_KEYWORD_ = "find_keyword_";
 
     public static final String FILE_CONFIG = "config.properties";
 
@@ -98,6 +99,7 @@ public class Constants {
     public static final String SQL_KEY_MC_QUERY_ONE_CALLER1 = "mc_query_one_caller1";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLER2 = "mc_query_one_caller2";
     public static final String SQL_KEY_MC_QUERY_NOTICE_INFO = "mc_query_notice_info";
+    public static final String SQL_KEY_MC_QUERY_ALL_CALLER = "mc_query_all_caller";
 
     public static final String SQL_KEY_INSERT_CLASS_NAME = "insert_class_name";
     public static final String SQL_KEY_INSERT_METHOD_ANNOTATION = "insert_method_annotation";
@@ -119,6 +121,7 @@ public class Constants {
     public static final String FLAG_COMMA_WITH_SPACE = ", ";
 
     public static final String EXT_TXT = ".txt";
+    public static final String EXT_MD = ".md";
 
     public static final String NEW_LINE = "\n";
 

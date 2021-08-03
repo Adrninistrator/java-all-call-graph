@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.unzip;
 
 import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.util.FileUtilNoLogger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -36,9 +37,9 @@ public class UnzipFile {
 
         String rootDirName = chooseRootDirName();
 
-        if (!isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_CONFIG, true) ||
-                !isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_SQL, true) ||
-                !isDirectoryExists(rootDirName + FLAG_FSP + DIR_JAVA + FLAG_FSP + DIR_TEST_JAVA_FILE, true)) {
+        if (!FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_CONFIG, true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_SQL, true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_JAVA + FLAG_FSP + DIR_TEST_JAVA_FILE, true)) {
             return;
         }
 
@@ -65,14 +66,14 @@ public class UnzipFile {
     }
 
     private static String chooseRootDirName() {
-        if (isDirectoryExists(DIR_TEST, false)) {
+        if (FileUtilNoLogger.isDirectoryExists(DIR_TEST, false)) {
             return DIR_TEST;
         }
-        if (isDirectoryExists(DIR_UNIT_TEST, false)) {
+        if (FileUtilNoLogger.isDirectoryExists(DIR_UNIT_TEST, false)) {
             return DIR_UNIT_TEST;
         }
         String rootDirName = DIR_DEFAULT_HEAD + System.currentTimeMillis();
-        if (isDirectoryExists(rootDirName, true)) {
+        if (FileUtilNoLogger.isDirectoryExists(rootDirName, true)) {
             return rootDirName;
         }
         return null;
@@ -92,35 +93,4 @@ public class UnzipFile {
         FileUtils.writeByteArrayToFile(destFile, fileContent);
     }
 
-    /**
-     * 判断目录是否存在，不存在时尝试创建
-     *
-     * @param dirPath 需要判断的目录路径
-     * @param tryMake 是否尝试创建目录
-     * @return true：指定路径的目录存在（已存在或新创建），false：目录不存在（指定路径为文件，或创建失败）
-     */
-    public static boolean isDirectoryExists(String dirPath, boolean tryMake) {
-        File file = new File(dirPath);
-        if (file.exists()) {
-            if (file.isDirectory()) {
-                return true;
-            }
-
-            System.err.println("已存在文件: " + dirPath);
-            return false;
-        }
-
-        if (!tryMake) {
-            return false;
-        }
-
-        // 目录不存在，则尝试创建
-        if (file.mkdirs()) {
-            System.out.println("创建目录: " + dirPath);
-            return true;
-        }
-
-        System.err.println("创建目录失败: " + dirPath);
-        return false;
-    }
 }

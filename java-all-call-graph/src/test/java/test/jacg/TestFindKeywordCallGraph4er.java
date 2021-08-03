@@ -13,6 +13,7 @@ public class TestFindKeywordCallGraph4er {
 
     public static void main(String[] args) {
         GenSingleCallGraph.setOrder4er();
-        FindKeywordCallGraph.main(args);
+        FindKeywordCallGraph findKeywordCallGraph = new FindKeywordCallGraph();
+        findKeywordCallGraph.find(args);
     }
 }

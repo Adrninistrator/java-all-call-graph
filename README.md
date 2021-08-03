@@ -94,7 +94,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.3.0'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.3.1'
 ```
 
 - Maven
@@ -103,7 +103,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.3.0'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <type>provided</type>
 </dependency>
 ```
@@ -439,7 +439,7 @@ func1(java.lang.String)
 |test.jacg.TestFindKeywordCallGraph4ee|处理向上的完整调用链文件，按照层级减小的方向显示|
 |test.jacg.TestFindKeywordCallGraph4er|处理向下的完整调用链文件，按照层级增大的方向显示|
 
-在程序参数（即main()方法处理的参数）中指定对应的向上或向下的Java方法完整调用链文件路径，及对应的关键字，格式为“\[完整调用链文件路径\] \[关键字\]”。
+在程序参数（即main()方法处理的参数）中指定对应的向上或向下的Java方法完整调用链文件路径，及对应的关键字，格式为“\[完整调用链文件路径/保存完整调用链文件的目录路径\] \[关键字\]”。
 
 例如完整调用链文件“dir\\a.txt”内容如上所示。
 
@@ -461,6 +461,8 @@ func1(java.lang.String)
 [1]#  ClassC2.funcC2()	(ClassC2:31)
 [2]#    ClassC1.funcC1()	(ClassC1:9)    !entry!
 ```
+
+以上功能也支持对保存完整调用链文件的目录进行处理，生成的文件保存在指定目录的“find_keyword_\[yyyyMMdd-HHmmss.SSS\]”子目录中。
 
 ## 4.3. 处理循环方法调用
 

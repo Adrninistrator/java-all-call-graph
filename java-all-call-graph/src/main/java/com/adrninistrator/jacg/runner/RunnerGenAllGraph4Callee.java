@@ -502,4 +502,35 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         return StringUtils.join(columnSet.toArray(), Constants.FLAG_COMMA_WITH_SPACE);
     }
+
+    // 打印存在一对多的方法调用，自定义处理
+    @Override
+    protected void printMultiMethodCallCustom(String callerMethodHash, StringBuilder stringBuilder) {
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_MC_QUERY_ALL_CALLER);
+        if (sql == null) {
+            sql = "select distinct(" + DC.MC_CALLER_FULL_METHOD + ") from " + Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
+                    " where " + DC.MC_CALLEE_METHOD_HASH + " = ? order by " + DC.MC_CALLER_FULL_METHOD;
+            cacheSql(Constants.SQL_KEY_MC_QUERY_ALL_CALLER, sql);
+        }
+
+        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{callerMethodHash});
+        if (list == null) {
+            logger.error("查询所有的调用方法失败 {}", callerMethodHash);
+            return;
+        }
+
+        if (list.size() <= 1) {
+            return;
+        }
+
+        stringBuilder.append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                .append("- ").append(DC.MC_CALLEE_METHOD_HASH).append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                .append(callerMethodHash).append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                .append("- ").append(DC.MC_CALLER_FULL_METHOD).append("（调用方法）").append(Constants.NEW_LINE).append(Constants.NEW_LINE)
+                .append("```").append(Constants.NEW_LINE);
+        for (Object callerMethod : list) {
+            stringBuilder.append(callerMethod).append(Constants.NEW_LINE);
+        }
+        stringBuilder.append("```");
+    }
 }
