@@ -8,7 +8,7 @@ for i in ${!array_mapper[@]}
 do 
 mapper=${array_mapper[i]}
 xml_file=`find $find_dir -name \*.xml | xargs grep 'mapper [ ]*namespace' | grep "\.$mapper\"" | head -1 | awk -F ':' '{print $1}'`
-table=`grep 'insert into ' $xml_file | head -1 | awk -F 'insert into ' '{print $2}' | awk -F ' ' '{print $1}'`
+entity=`grep 'resultMap' $xml_file | grep ' type=' | head -1 | awk -F '"' '{print $4}' | awk -F '.' '{print $NF}'`
 
-echo $mapper $table
+echo $mapper $entity
 done
