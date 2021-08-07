@@ -94,7 +94,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.3.4'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.4.0'
 ```
 
 - Maven
@@ -103,7 +103,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.3.4'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.3.4</version>
+  <version>0.4.0</version>
   <type>provided</type>
 </dependency>
 ```
@@ -156,6 +156,8 @@ com.adrninistrator.jacg.unzip.UnzipFile
 在生成Java方法调用关系并写入数据库之前，需要确保需要分析的jar包或war包已存在，对于使用源码通过构建工具生成的jar/war包，或者Maven仓库中的jar包，均可支持（需要是包含.class文件的jar包）。
 
 `当需要解析的jar/war包中的class文件内容发生变化时，需要重新执行当前步骤，以重新获取对应jar/war包中的Java方法调用关系，写入文件及数据库；若需要解析的jar/war包文件未发生变化，则不需要重新执行当前步骤。`
+
+在后续生成Java方法完整调用链时，若发现指定的jar包未入库，或内容发生了改变，则工具会提示需要先执行当前步骤生成方法调用关系并入库。
 
 执行当前步骤时，需要执行main()方法的类名如下：
 
@@ -299,17 +301,19 @@ test.jacg.TestRunnerGenAllGraph4Caller
 
 - c.2.1 从数据库读取Java方法调用关系
 
-TestRunnerGenAllGraph4Caller类读取配置文件`o_g4caller_entry_method.properties`，该文件中指定了需要生成向下完整调用链的类名与方法名前缀，格式为\[类名\]:\[方法名\]，或\[类名\]:\[方法名\]+参数；
+TestRunnerGenAllGraph4Caller类读取配置文件`o_g4caller_entry_method.properties`，该文件中指定了需要生成向下完整调用链的类名与方法名前缀，格式为\[类名\]:\[方法名\] \[起始代码行号\]-\[结束代码行号\]，或\[类名\]:\[方法名+参数\] \[起始代码行号\]-\[结束代码行号\]；
+
+\[起始代码行号\]-\[结束代码行号\]为可选参数，若不指定则输出指定的整个方法向下的方法完整调用链，若指定则输出方法指定行号范围内向下的方法完整调用链，即 >= 起始代码行号 且 <= 结束代码行号的范围；
 
 若存在同名类，则类名需要指定完整类名；若不存在同名类，则类名需要指定简单类名；
 
 示例如下：
 
 ```
-Test1:func1
+Test1:func1 139-492
 Test1:func1(
 Test1:func1(java.lang.String)
-com.test.Test1:func1
+com.test.Test1:func1 395-1358
 com.test.Test1:func1(
 com.test.Test1:func1(java.lang.String)
 ```
@@ -334,9 +338,9 @@ func1(java.lang.String)
 
 - c.2.2 将方法完整调用链（向下）写入文件
 
-对于配置文件`o_g4caller_entry_method.properties`中指定的方法，对每个方法生成一个对应的文件，文件名为“\[类名\]@\[方法名\]@\[完整方法名HASH+长度\].txt”；
+对于配置文件`o_g4caller_entry_method.properties`中指定的方法，对每个方法生成一个对应的文件，文件名为“\[类名\]@\[方法名\]@\[完整方法名HASH+长度\].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048.txt”；
 
-以上文件名示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048.txt”；
+若某个方法生成向下的完整调用链时指定了代码行号范围，则对应文件名为“\[类名\]@\[方法名\]@\[完整方法名HASH+长度\]@\[起始代码行号\]-\[结束代码行号\].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048@135-395.txt”；
 
 每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“~jacg_output_for_caller/\[yyyyMMdd-HHmmss.SSS\]”；
 
@@ -403,7 +407,7 @@ func1(java.lang.String)
 
 需要选择classpath对应模块为test。
 
-在程序参数（即main()方法处理的参数）中指定对应的向上或向下的Java方法完整调用链文件路径，及关注的方法所在行号，支持批量查询，格式为“\[完整调用链文件路径\] \[关注方法所在行号1\] \[关注方法所在行号2\]... \[关注方法所在行号n\]”。
+在程序参数（即main()方法处理的参数）中指定对应的向上或向下的Java方法完整调用链文件路径，及关注的方法所在行号，支持批量查询，格式为“\[完整调用链文件路径\] \[关注方法所在行号1\] \[关注方法所在行号2\] ... \[关注方法所在行号n\]”。
 
 当文件路径包含空格时，需要使用""包含。
 
@@ -439,7 +443,7 @@ func1(java.lang.String)
 |test.jacg.TestFindKeywordCallGraph4ee|处理向上的完整调用链文件，按照层级减小的方向显示|
 |test.jacg.TestFindKeywordCallGraph4er|处理向下的完整调用链文件，按照层级增大的方向显示|
 
-在程序参数（即main()方法处理的参数）中指定对应的向上或向下的Java方法完整调用链文件路径，及对应的关键字，格式为“\[完整调用链文件路径/保存完整调用链文件的目录路径\] \[关键字\]”。
+在程序参数（即main()方法处理的参数）中指定对应的向上或向下的Java方法完整调用链文件路径，及对应的关键字，支持批量查询，格式为“\[完整调用链文件路径/保存完整调用链文件的目录路径\] \[关键字1\] \[关键字2\] ... \[关键字n\]”。
 
 例如完整调用链文件“dir\\a.txt”内容如上所示。
 

@@ -33,6 +33,11 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     @Override
     public boolean init() {
+        // 检查Jar包文件是否有更新
+        if (checkJarFileUpdated()) {
+            return false;
+        }
+
         String taskInfoFile = Constants.DIR_CONFIG + File.separator + Constants.FILE_OUT_GRAPH_FOR_CALLEE_CLASS_NAME;
         // 读取配置文件中指定的需要处理的任务
         if (!readTaskInfo(taskInfoFile)) {
@@ -100,7 +105,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         if (sql == null) {
             sql = "select distinct(" + DC.MC_CALLEE_METHOD_HASH + ")," + DC.MC_CALLEE_FULL_METHOD + " from " +
                     Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() + " where " + DC.MC_CALLEE_CLASS_NAME +
-                    "= ? order by " + DC.MC_CALLEE_METHOD_HASH;
+                    "= ? order by " + DC.MC_CALLEE_METHOD_NAME;
             cacheSql(Constants.SQL_KEY_MC_QUERY_CALLEE_ALL_METHODS, sql);
         }
 
@@ -110,7 +115,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return false;
         }
 
-        // 确定当前类对应输出文件名，格式：配置文件中指定的类名.txt
+        // 确定当前类对应输出文件名，格式: 配置文件中指定的类名.txt
         String outputFile4ClassName = outputDirPrefix + File.separator + calleeClassName + Constants.EXT_TXT;
         logger.info("当前类输出文件名 {}", outputFile4ClassName);
 
@@ -321,13 +326,13 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             应该根据当前找到的callerMethodHash，从列表中找到calleeMethodHash相同的节点，以这一层级作为被循环调用的层级
 
             node4CalleeList中的示例
-            层级：   ee   er
+            层级:    ee   er
             [0]:    a <- b
             [1]:    b <- c
             [2]:    c <- d
             [3]:    d <- a
 
-            第3层级：er: a，根据ee为a，找到第0层级
+            第3层级: er: a，根据ee为a，找到第0层级
          */
         for (int i = currentNodeLevel; i >= 0; i--) {
             if (currentCallerMethodHash.equals(node4CalleeList.get(i).getCurrentCalleeMethodHash())) {
@@ -378,10 +383,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             if (sql == null) {
                 // 确定查询被调用关系时所需字段
                 String callerColumns = chooseCallerColumns();
-                sql = "select " + callerColumns + ", " + DC.MC_CALLER_METHOD_HASH + ", " + DC.MC_ID + " from " +
-                        Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() + " where " +
-                        DC.MC_CALLEE_METHOD_HASH + " = ? order by " +
-                        DC.MC_CALLEE_METHOD_HASH + ", " + DC.MC_CALLER_METHOD_HASH + " limit 1";
+                sql = "select " + callerColumns + " from " + Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() + " where " +
+                        DC.MC_CALLEE_METHOD_HASH + " = ? order by " + DC.MC_CALLER_METHOD_HASH + " limit 1";
                 cacheSql(Constants.SQL_KEY_MC_QUERY_ONE_CALLER1, sql);
             }
             return sql;
@@ -392,12 +395,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         if (sql == null) {
             // 确定查询被调用关系时所需字段
             String callerColumns = chooseCallerColumns();
-
-            // 确定查询被调用关系时所需字段
-            sql = "select " + callerColumns + ", " + DC.MC_CALLER_METHOD_HASH + ", " + DC.MC_ID + " from " +
-                    Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() + " where " +
+            sql = "select " + callerColumns + " from " + Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() + " where " +
                     DC.MC_CALLEE_METHOD_HASH + " = ? and " + DC.MC_CALLER_METHOD_HASH + " > ? order by " +
-                    DC.MC_CALLEE_METHOD_HASH + ", " + DC.MC_CALLER_METHOD_HASH + " limit 1";
+                    DC.MC_CALLER_METHOD_HASH + " limit 1";
             cacheSql(Constants.SQL_KEY_MC_QUERY_ONE_CALLER2, sql);
         }
         return sql;
@@ -480,6 +480,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         columnSet.add(DC.MC_ID);
         columnSet.add(DC.MC_CALL_TYPE);
         columnSet.add(DC.MC_ENABLED);
+        columnSet.add(DC.MC_CALLER_METHOD_HASH);
 
         if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_1)) {
             // # 1: 展示 完整类名+方法名+方法参数

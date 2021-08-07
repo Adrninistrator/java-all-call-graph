@@ -22,6 +22,7 @@ public class Constants {
             DC.MC_ID,
             DC.MC_CALL_TYPE,
             DC.MC_ENABLED,
+            DC.MC_CALLER_JAR_NUM,
             DC.MC_CALLER_METHOD_HASH,
             DC.MC_CALLER_FULL_METHOD,
             DC.MC_CALLER_METHOD_NAME,
@@ -33,6 +34,14 @@ public class Constants {
             DC.MC_CALLEE_METHOD_NAME,
             DC.MC_CALLEE_FULL_CLASS_NAME,
             DC.MC_CALLEE_CLASS_NAME
+    };
+
+    public static final String[] TABLE_COLUMNS_JAR_INFO = new String[]{
+            DC.JI_JAR_NUM,
+            DC.JI_JAR_PATH_HASH,
+            DC.JI_JAR_FULL_PATH,
+            DC.JI_LAST_MODIFIED,
+            DC.JI_JAR_HASH
     };
 
     public static final String DIR_CONFIG = "~jacg_config";
@@ -57,6 +66,7 @@ public class Constants {
     public static final String FILE_SQL_CLASS_NAME = "class_name.sql";
     public static final String FILE_SQL_METHOD_ANNOTATION = "method_annotation.sql";
     public static final String FILE_SQL_METHOD_CALL = "method_call.sql";
+    public static final String FILE_SQL_JAR_INFO = "jar_info.sql";
 
     public static final String APPNAME_IN_SQL = "{appName}";
 
@@ -81,6 +91,7 @@ public class Constants {
 
     public static final String FILE_KEY_CLASS_PREFIX = "C:";
     public static final String FILE_KEY_METHOD_PREFIX = "M:";
+    public static final String FILE_KEY_JAR_INFO_PREFIX = "J:";
 
     // 以上开头字符串长度
     public static final int FILE_KEY_PREFIX_LENGTH = 2;
@@ -95,15 +106,19 @@ public class Constants {
     public static final String SQL_KEY_MC_QUERY_CALLER_FULL_CLASS = "mc_query_caller_full_class";
     public static final String SQL_KEY_MC_QUERY_TOP_METHOD = "mc_query_top_method";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLEE = "mc_query_one_callee";
+    public static final String SQL_KEY_MC_QUERY_ONE_CALLEE_CHECK_LINE_NUM = "mc_query_one_callee_cln";
     public static final String SQL_KEY_MC_QUERY_CALLEE_ALL_METHODS = "mc_query_callee_all_methods";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLER1 = "mc_query_one_caller1";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLER2 = "mc_query_one_caller2";
     public static final String SQL_KEY_MC_QUERY_NOTICE_INFO = "mc_query_notice_info";
     public static final String SQL_KEY_MC_QUERY_ALL_CALLER = "mc_query_all_caller";
 
+    public static final String SQL_KEY_JI_QUERY_JAR_INFO = "ji_query_jar_info";
+
     public static final String SQL_KEY_INSERT_CLASS_NAME = "insert_class_name";
     public static final String SQL_KEY_INSERT_METHOD_ANNOTATION = "insert_method_annotation";
     public static final String SQL_KEY_INSERT_METHOD_CALL = "insert_method_call";
+    public static final String SQL_KEY_INSERT_JAR_INFO = "insert_jar_info";
 
     public static final String SQL_CREATE_TABLE_HEAD = "CREATE TABLE if not exists";
     public static final int SQL_CREATE_TABLE_HEAD_LENGTH = SQL_CREATE_TABLE_HEAD.length();
@@ -117,6 +132,7 @@ public class Constants {
     public static final String FLAG_SPACE = " ";
     public static final String FLAG_HASHTAG = "#";
     public static final String FLAG_AT = "@";
+    public static final String FLAG_MINUS = "-";
     public static final String FLAG_TAB = "\t";
     public static final String FLAG_COMMA_WITH_SPACE = ", ";
 
@@ -132,6 +148,7 @@ public class Constants {
     public static final String TABLE_PREFIX_CLASS_NAME = "class_name_";
     public static final String TABLE_PREFIX_METHOD_ANNOTATION = "method_annotation_";
     public static final String TABLE_PREFIX_METHOD_CALL = "method_call_";
+    public static final String TABLE_PREFIX_JAR_INFO = "jar_info_";
 
     public static final String OUTPUT_SPLIT_FLAG = "  ";
 
@@ -164,6 +181,8 @@ public class Constants {
     public static final String NOTICE_MULTI_SCC_MD = "~notice_multi_SCC.md";
     public static final String NOTICE_DISABLED_ITF_MD = "~notice_disabled_ITF.md";
     public static final String NOTICE_DISABLED_SCC_MD = "~notice_disabled_SCC.md";
+
+    public static final int LINE_NUM_NONE = -1;
 
     private Constants() {
         throw new IllegalStateException("illegal");

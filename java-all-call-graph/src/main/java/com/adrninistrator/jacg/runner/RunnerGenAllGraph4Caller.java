@@ -46,6 +46,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     @Override
     public boolean init() {
+        // 检查Jar包文件是否有更新
+        if (checkJarFileUpdated()) {
+            return false;
+        }
+
         String taskInfoFile = Constants.DIR_CONFIG + File.separator + Constants.FILE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD;
         // 读取配置文件中指定的需要处理的任务
         if (!readTaskInfo(taskInfoFile)) {
@@ -97,15 +102,51 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 遍历需要处理的任务
         for (String task : taskSet) {
+            String left = task;
+            int lineNumStart = Constants.LINE_NUM_NONE;
+            int lineNumEnd = Constants.LINE_NUM_NONE;
 
-            String[] array = task.split(Constants.FLAG_COLON);
-            if (array == null || array.length != 2) {
+            if (task.contains(Constants.FLAG_SPACE)) {
+                String[] array = task.split(Constants.FLAG_SPACE);
+                if (array.length != 2) {
+                    logger.error("指定的类名+方法名非法，格式应为 [类名]:[方法名] [起始代码行号]-[结束代码行号] {}", task);
+                    return;
+                }
+
+                left = array[0];
+                String right = array[1];
+                String[] arrayRight = right.split(Constants.FLAG_MINUS);
+                if (arrayRight.length != 2) {
+                    logger.error("指定的行号非法，格式应为 [起始代码行号]-[结束代码行号] {}", task);
+                    return;
+                }
+
+                if (!CommonUtil.isNumStr(arrayRight[0]) || !CommonUtil.isNumStr(arrayRight[1])) {
+                    logger.error("指定的行号非法，应为数字 {}", task);
+                    return;
+                }
+
+                lineNumStart = Integer.parseInt(arrayRight[0]);
+                lineNumEnd = Integer.parseInt(arrayRight[1]);
+                if (lineNumStart <= 0 || lineNumEnd <= 0) {
+                    logger.error("指定的行号非法，应为正整数 {}", task);
+                    return;
+                }
+
+                if (lineNumStart > lineNumEnd) {
+                    logger.error("指定的行号非法，起始代码行号不能大于结束代码行号 {}", task);
+                    return;
+                }
+            }
+
+            String[] arrayLeft = left.split(Constants.FLAG_COLON);
+            if (arrayLeft == null || arrayLeft.length != 2) {
                 logger.error("指定的类名+方法名非法，格式应为 [类名]:[方法名] {}", task);
                 return;
             }
 
-            String callerClassName = array[0];
-            String callerMethodNameInTask = array[1];
+            String callerClassName = arrayLeft[0];
+            String callerMethodNameInTask = arrayLeft[1];
 
             if (StringUtils.isAnyBlank(callerClassName, callerMethodNameInTask)) {
                 logger.error("指定的类名+方法名存在空值，格式应为 [类名]:[方法名] {}", task);
@@ -115,9 +156,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             // 等待直到允许任务执行
             wait4TPEExecute();
 
+            int finalLineNumStart = lineNumStart;
+            int finalLineNumEnd = lineNumEnd;
             threadPoolExecutor.execute(() -> {
                 // 处理一条记录
-                if (!handleOneRecord(callerClassName, callerMethodNameInTask)) {
+                if (!handleOneRecord(callerClassName, callerMethodNameInTask, finalLineNumStart, finalLineNumEnd)) {
                     someTaskFail = true;
                 }
             });
@@ -142,7 +185,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     }
 
     // 处理一条记录
-    private boolean handleOneRecord(String callerClassName, String callerMethodNameInTask) {
+    private boolean handleOneRecord(String callerClassName, String callerMethodNameInTask, int lineNumStart, int lineNumEnd) {
         // 从方法调用关系表查询指定的类是否存在
         if (!checkClassNameExists(callerClassName)) {
             return false;
@@ -207,9 +250,14 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         // 获取当前实际的方法名，而不是使用文件中指定的方法名，文件中指定的方法名可能包含参数，会很长，不可控
         String callerMethodName = CommonUtil.getOnlyMethodName(callerFullMethod);
 
-        // 确定当前方法对应输出文件名，格式：配置文件中指定的类名（简单类名或全名）+方法名+方法名hash.txt
-        String outputFileName = outputDirPrefix + File.separator + callerClassName + Constants.FLAG_AT + callerMethodName +
-                Constants.FLAG_AT + callerMethodHash + Constants.EXT_TXT;
+        // 确定当前方法对应输出文件名，格式: 配置文件中指定的类名（简单类名或全名）+方法名+方法名hash.txt
+        StringBuilder sbOutputFileName = new StringBuilder(outputDirPrefix).append(File.separator).append(callerClassName)
+                .append(Constants.FLAG_AT).append(callerMethodName).append(Constants.FLAG_AT).append(callerMethodHash);
+        if (lineNumStart != Constants.LINE_NUM_NONE && lineNumEnd != Constants.LINE_NUM_NONE) {
+            sbOutputFileName.append(Constants.FLAG_AT).append(lineNumStart).append(Constants.FLAG_MINUS).append(lineNumEnd);
+        }
+        sbOutputFileName.append(Constants.EXT_TXT);
+        String outputFileName = sbOutputFileName.toString();
         logger.info("当前输出文件名 {}", outputFileName);
 
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileName), StandardCharsets.UTF_8))) {
@@ -240,7 +288,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             out.write(Constants.NEW_LINE);
 
             // 根据指定的调用者方法HASH，查找所有被调用的方法信息
-            return genAllGraph4Caller(callerMethodHash, out, callerFullMethod);
+            return genAllGraph4Caller(callerMethodHash, out, callerFullMethod, lineNumStart, lineNumEnd);
         } catch (Exception e) {
             logger.error("error ", e);
             return false;
@@ -253,9 +301,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
      * @param callerMethodHash
      * @param out
      * @param callerFullMethod
+     * @param lineNumStart
+     * @param lineNumEnd
      * @return
      */
-    protected boolean genAllGraph4Caller(String callerMethodHash, BufferedWriter out, String callerFullMethod) throws IOException {
+    protected boolean genAllGraph4Caller(String callerMethodHash, BufferedWriter out, String callerFullMethod, int lineNumStart, int lineNumEnd) throws IOException {
 
         // 通过List记录当前遍历到的节点信息（当作不定长数组使用）
         List<TmpNode4Caller> node4CallerList = new ArrayList<>();
@@ -267,13 +317,21 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         // 记录当前处理的节点层级
         int currentNodeLevel = 0;
 
-        int lineNum = 0;
+        // 输出结果行数
+        int outputLineNum = 0;
 
         while (true) {
+            int currentLineNumStart = Constants.LINE_NUM_NONE;
+            int currentLineNumEnd = Constants.LINE_NUM_NONE;
+            if (currentNodeLevel == 0) {
+                currentLineNumStart = lineNumStart;
+                currentLineNumEnd = lineNumEnd;
+            }
+
             TmpNode4Caller currentNode = node4CallerList.get(currentNodeLevel);
 
             // 查询当前节点的一个下层被调用方法
-            Map<String, Object> methodMapByCaller = queryOneByCallerMethod(currentNode);
+            Map<String, Object> methodMapByCaller = queryOneByCallerMethod(currentNode, currentLineNumStart, currentLineNumEnd);
             if (methodMapByCaller == null) {
                 // 查询失败
                 return false;
@@ -291,9 +349,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 continue;
             }
             // 查询到记录
-            lineNum++;
-            if (lineNum % Constants.NOTICE_LINE_NUM == 0) {
-                logger.info("记录数达到 {} {}", lineNum, callerFullMethod);
+            outputLineNum++;
+            if (outputLineNum % Constants.NOTICE_LINE_NUM == 0) {
+                logger.info("记录数达到 {} {}", outputLineNum, callerFullMethod);
             }
 
             int currentMethodCallId = (Integer) methodMapByCaller.get(DC.MC_ID);
@@ -374,11 +432,19 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     }
 
     // 查询当前节点的一个下层被调用方法
-    private Map<String, Object> queryOneByCallerMethod(TmpNode4Caller node) {
+    private Map<String, Object> queryOneByCallerMethod(TmpNode4Caller node, int currentLineNumStart, int currentLineNumEnd) {
         // 确定通过被调用方法进行查询使用的SQL语句
-        String sql = chooseQueryByCallerMethodSql();
+        String sql = chooseQueryByCallerMethodSql(currentLineNumStart, currentLineNumEnd);
 
-        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{node.getCurrentCalleeMethodHash(), node.getCurrentCalleeMethodId()});
+        List<Object> argList = new ArrayList<>(4);
+        argList.add(node.getCurrentCalleeMethodHash());
+        argList.add(node.getCurrentCalleeMethodId());
+        if (currentLineNumStart != Constants.LINE_NUM_NONE && currentLineNumEnd != Constants.LINE_NUM_NONE) {
+            argList.add(currentLineNumStart);
+            argList.add(currentLineNumEnd);
+        }
+
+        List<Map<String, Object>> list = dbOperator.queryList(sql, argList.toArray());
         if (list == null) {
             // 查询失败
             return null;
@@ -393,16 +459,26 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     }
 
     // 确定通过被调用方法进行查询使用的SQL语句
-    protected String chooseQueryByCallerMethodSql() {
-        String sql = sqlCacheMap.get(Constants.SQL_KEY_MC_QUERY_ONE_CALLEE);
+    protected String chooseQueryByCallerMethodSql(int currentLineNumStart, int currentLineNumEnd) {
+        String sqlKey = Constants.SQL_KEY_MC_QUERY_ONE_CALLEE;
+        if (currentLineNumStart != Constants.LINE_NUM_NONE && currentLineNumEnd != Constants.LINE_NUM_NONE) {
+            sqlKey = Constants.SQL_KEY_MC_QUERY_ONE_CALLEE_CHECK_LINE_NUM;
+        }
+
+        String sql = sqlCacheMap.get(sqlKey);
         if (sql == null) {
             // 确定查询被调用关系时所需字段
             String selectMethodColumns = chooseSelectMethodColumns();
 
-            sql = "select " + selectMethodColumns + ", " + DC.MC_CALLEE_METHOD_HASH + ", " + DC.MC_ID + " from " +
-                    Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() + " where " +
-                    DC.MC_CALLER_METHOD_HASH + " = ? and " + DC.MC_ID + " > ? order by " + DC.MC_ID + " limit 1";
-            cacheSql(Constants.SQL_KEY_MC_QUERY_ONE_CALLEE, sql);
+            StringBuilder sbSql = new StringBuilder("select ").append(selectMethodColumns).append(" from ")
+                    .append(Constants.TABLE_PREFIX_METHOD_CALL).append(confInfo.getAppName()).append(" where ")
+                    .append(DC.MC_CALLER_METHOD_HASH).append(" = ? and ").append(DC.MC_ID).append(" > ?");
+            if (currentLineNumStart != Constants.LINE_NUM_NONE && currentLineNumEnd != Constants.LINE_NUM_NONE) {
+                sbSql.append(" and ").append(DC.MC_CALLER_LINE_NUM).append(" >= ? and ").append(DC.MC_CALLER_LINE_NUM).append(" <= ?");
+            }
+            sbSql.append(" order by ").append(DC.MC_ID).append(" limit 1");
+            sql = sbSql.toString();
+            cacheSql(sqlKey, sql);
         }
         return sql;
     }
@@ -519,6 +595,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         columnSet.add(DC.MC_CALL_TYPE);
         columnSet.add(DC.MC_CALLEE_FULL_METHOD);
         columnSet.add(DC.MC_ENABLED);
+        columnSet.add(DC.MC_CALLEE_METHOD_HASH);
 
         if (confInfo.getCallGraphOutputDetail().equals(Constants.CONFIG_OUTPUT_DETAIL_1)) {
             // # 1: 展示 完整类名+方法名+方法参数
@@ -562,7 +639,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
      * 当方法名为以下前缀时，忽略
      *
      * @param methodNameWithArgs 方法名，包含参数
-     * @return true：忽略，false：需要处理
+     * @return true: 忽略，false: 需要处理
      */
     protected boolean isEntryMethodIgnoredWithPrefixByMethodNameWithArgs(String methodNameWithArgs) {
         for (String entryMethodIgnorePrefix : entryMethodIgnorePrefixSet) {
@@ -578,7 +655,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
      * 当完整方法（类名+方法名+参数）为以下前缀时，忽略
      *
      * @param fullMethod 完整方法（类名+方法名+参数）
-     * @return true：忽略，false：需要处理
+     * @return true: 忽略，false: 需要处理
      */
     private boolean isIgnoredFullMethodWithPrefixByFullMethod(String fullMethod) {
         for (String ignoreFullMethodPrefix : ignoreFullMethodPrefixSet) {
@@ -593,7 +670,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
      * 当方法名为以下前缀时，忽略
      *
      * @param methodName 方法名
-     * @return true：忽略，false：需要处理
+     * @return true: 忽略，false: 需要处理
      */
     private boolean isIgnoredMethodWithPrefixByMethodName(String methodName) {
         for (String ignoreMethodPrefix : ignoreMethodPrefixSet) {
@@ -608,7 +685,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
      * 当类名包含以下关键字时，忽略
      *
      * @param fullClassName 完整类名
-     * @return true：忽略，false：需要处理
+     * @return true: 忽略，false: 需要处理
      */
     private boolean isIgnoredClassWithKeywordByFullClass(String fullClassName) {
         for (String ignoreClassKeyword : ignoreClassKeywordSet) {

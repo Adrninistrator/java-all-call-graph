@@ -36,17 +36,20 @@ public class RunnerWriteDb extends AbstractRunner {
     // 已写入数据库的完整类名
     private Map<String, Boolean> fullClassNameMap = new HashMap<>(Constants.BATCH_SIZE);
 
-    // 完整类名缓存
+    // 记录完整类名
     private List<String> fullClassNameList = new ArrayList<>(Constants.BATCH_SIZE);
 
     // 类名相同但包名不同的类名
     private Set<String> duplicateClassNameSet = new HashSet<>();
 
-    // 方法注解缓存
+    // 记录方法注解
     private List<Pair<String, String>> methodAnnotationList = new ArrayList<>(Constants.BATCH_SIZE);
 
-    // 方法调用缓存
+    // 记录方法调用
     private List<MethodCallEntity> methodCallList = new ArrayList<>(Constants.BATCH_SIZE);
+
+    // 记录Jar包信息
+    private Map<Integer, String> jarInfoMap = new HashMap<>();
 
     // 记录是否读取到文件
     private boolean readFileFlag;
@@ -96,8 +99,8 @@ public class RunnerWriteDb extends AbstractRunner {
             return;
         }
 
-        // 读取通过java-callgraph生成的直接调用关系文件，处理类名
-        if (!handleClassCall()) {
+        // 读取通过java-callgraph生成的直接调用关系文件，处理类名与Jar包信息
+        if (!handleClassCallAndJarInfo()) {
             return;
         }
 
@@ -144,8 +147,7 @@ public class RunnerWriteDb extends AbstractRunner {
 
         String[] array = confInfo.getCallGraphJarList().split(Constants.FLAG_SPACE);
         for (String jarName : array) {
-            File jarFile = new File(jarName);
-            if (!jarFile.exists() || !jarFile.isFile()) {
+            if (!FileUtil.isFileExists(jarName)) {
                 logger.error("文件不存在或不是文件 {}", jarName);
                 return false;
             }
@@ -166,10 +168,16 @@ public class RunnerWriteDb extends AbstractRunner {
         String sqlClassName = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_CLASS_NAME);
         String sqlMethodAnnotation = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_METHOD_ANNOTATION);
         String sqlMethodCall = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_METHOD_CALL);
+        String jarInfo = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_JAR_INFO);
+
+        if (StringUtils.isAnyBlank(sqlClassName, sqlMethodAnnotation, sqlMethodCall, jarInfo)) {
+            return false;
+        }
 
         if (!dbOperator.createTable(sqlClassName) ||
                 !dbOperator.createTable(sqlMethodAnnotation) ||
-                !dbOperator.createTable(sqlMethodCall)) {
+                !dbOperator.createTable(sqlMethodCall) ||
+                !dbOperator.createTable(jarInfo)) {
             return false;
         }
 
@@ -180,6 +188,7 @@ public class RunnerWriteDb extends AbstractRunner {
         String sql = FileUtil.readFile2String(sqlFilePath);
         if (StringUtils.isBlank(sql)) {
             logger.error("文件内容为空 {}", sqlFilePath);
+            return null;
         }
 
         sql = sql.replace(Constants.APPNAME_IN_SQL, confInfo.getAppName());
@@ -192,7 +201,8 @@ public class RunnerWriteDb extends AbstractRunner {
     private boolean truncateTables() {
         if (!dbOperator.truncateTable(Constants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName()) ||
                 !dbOperator.truncateTable(Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName()) ||
-                !dbOperator.truncateTable(Constants.TABLE_PREFIX_METHOD_ANNOTATION + confInfo.getAppName())) {
+                !dbOperator.truncateTable(Constants.TABLE_PREFIX_METHOD_ANNOTATION + confInfo.getAppName()) ||
+                !dbOperator.truncateTable(Constants.TABLE_PREFIX_JAR_INFO + confInfo.getAppName())) {
             return false;
         }
         return true;
@@ -211,8 +221,8 @@ public class RunnerWriteDb extends AbstractRunner {
         return true;
     }
 
-    // 读取通过java-callgraph生成的直接调用关系文件，处理类名
-    private boolean handleClassCall() {
+    // 读取通过java-callgraph生成的直接调用关系文件，处理类名与Jar包信息
+    private boolean handleClassCallAndJarInfo() {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(confInfo.getCallGraphInputFile())))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -226,12 +236,22 @@ public class RunnerWriteDb extends AbstractRunner {
 
                 if (line.startsWith(Constants.FILE_KEY_CLASS_PREFIX)) {
                     // 处理一个类名
-                    handleOneClassCall(line);
+                    if (!handleOneClassCall(line)) {
+                        return false;
+                    }
+                } else if (line.startsWith(Constants.FILE_KEY_JAR_INFO_PREFIX)) {
+                    // 处理一个Jar包信息
+                    handleOneJarInfo(line);
                 }
             }
 
-            // 结束前将缓存剩余数据写入数据库
-            writeClassName2Db();
+            // 结束前将剩余数据写入数据库
+            if (!writeClassName2Db()) {
+                return false;
+            }
+
+            // 将Jar包信息数据写入数据库
+            writeJarInfo2Db();
 
             return true;
         } catch (Exception e) {
@@ -263,7 +283,7 @@ public class RunnerWriteDb extends AbstractRunner {
     }
 
     // 处理一个类名
-    private void handleOneClassCall(String data) {
+    private boolean handleOneClassCall(String data) {
         int indexBlank = data.indexOf(Constants.FLAG_SPACE);
 
         String callerFullClassName = data.substring(Constants.FILE_KEY_PREFIX_LENGTH, indexBlank).trim();
@@ -271,14 +291,13 @@ public class RunnerWriteDb extends AbstractRunner {
 
         logger.debug("[{}] [{}]", callerFullClassName, calleeFullClassName);
 
-        handleClassName(callerFullClassName);
-        handleClassName(calleeFullClassName);
+        return handleClassName(callerFullClassName) && handleClassName(calleeFullClassName);
     }
 
-    private void handleClassName(String fullClassName) {
+    private boolean handleClassName(String fullClassName) {
         // 根据类名前缀判断是否需要处理
         if (confInfo.isInputIgnoreOtherPackage() && !isAllowedClassPrefix(fullClassName)) {
-            return;
+            return true;
         }
 
         // 通过java-callgraph生成的直接类引用关系存在重复，进行去重
@@ -286,14 +305,18 @@ public class RunnerWriteDb extends AbstractRunner {
             fullClassNameList.add(fullClassName);
 
             if (fullClassNameList.size() >= Constants.BATCH_SIZE) {
-                writeClassName2Db();
+                if (!writeClassName2Db()) {
+                    return false;
+                }
             }
         }
+
+        return true;
     }
 
-    private void writeClassName2Db() {
+    private boolean writeClassName2Db() {
         if (fullClassNameList.isEmpty()) {
-            return;
+            return true;
         }
 
         logger.info("写入数据库，保存类名信息表 {}", fullClassNameList.size());
@@ -318,9 +341,59 @@ public class RunnerWriteDb extends AbstractRunner {
             objectList.add(object);
         }
 
-        dbOperator.batchInsert(sql, objectList);
-
+        boolean success = dbOperator.batchInsert(sql, objectList);
         fullClassNameList.clear();
+        return success;
+    }
+
+    // 处理一个Jar包信息
+    private void handleOneJarInfo(String line) {
+        int indexSpace = line.indexOf(Constants.FLAG_SPACE);
+
+        String jarNumStr = line.substring(Constants.FILE_KEY_PREFIX_LENGTH, indexSpace).trim();
+        String jarPath = line.substring(indexSpace + 1).trim();
+
+        jarInfoMap.put(Integer.valueOf(jarNumStr), jarPath);
+    }
+
+    // 将Jar包信息数据写入数据库
+    private boolean writeJarInfo2Db() {
+        if (jarInfoMap.isEmpty()) {
+            logger.error("Jar包信息为空");
+            return false;
+        }
+
+        logger.info("写入数据库，保存Jar包信息 {}", jarInfoMap.size());
+
+        if (!writeDbFlag) {
+            writeDbFlag = true;
+        }
+
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_INSERT_JAR_INFO);
+        if (sql == null) {
+            sql = genAndCacheInsertSql(Constants.SQL_KEY_INSERT_JAR_INFO,
+                    false,
+                    Constants.TABLE_PREFIX_JAR_INFO,
+                    Constants.TABLE_COLUMNS_JAR_INFO);
+        }
+
+        List<Object[]> objectList = new ArrayList<>(jarInfoMap.size());
+        for (Map.Entry<Integer, String> jarInfoEntry : jarInfoMap.entrySet()) {
+            Integer jarNum = jarInfoEntry.getKey();
+            String jarPath = jarInfoEntry.getValue();
+            if (!FileUtil.isFileExists(jarPath)) {
+                logger.error("Jar包文件不存在: {}", jarPath);
+                return false;
+            }
+
+            long lastModified = FileUtil.getFileLastModified(jarPath);
+            String jarFileHash = FileUtil.getFileMd5(jarPath);
+
+            Object[] object = new Object[]{jarNum, CommonUtil.genHashWithLen(jarPath), jarPath, String.valueOf(lastModified), jarFileHash};
+            objectList.add(object);
+        }
+
+        return dbOperator.batchInsert(sql, objectList);
     }
 
     // 读取方法注解信息
@@ -334,11 +407,15 @@ public class RunnerWriteDb extends AbstractRunner {
                 }
 
                 // 处理一个方法注解
-                handleOneMethodAnnotation(line);
+                if (!handleOneMethodAnnotation(line)) {
+                    return false;
+                }
             }
 
-            // 结束前将缓存剩余数据写入数据库
-            writeMethodAnnotation2Db();
+            // 结束前将剩余数据写入数据库
+            if (!writeMethodAnnotation2Db()) {
+                return false;
+            }
 
             return true;
         } catch (Exception e) {
@@ -348,14 +425,14 @@ public class RunnerWriteDb extends AbstractRunner {
     }
 
     // 处理一个方法注解
-    private void handleOneMethodAnnotation(String data) {
+    private boolean handleOneMethodAnnotation(String data) {
 
         String[] array = data.split(Constants.FLAG_SPACE);
         String fullMethod = array[0];
 
         // 根据类名前缀判断是否需要处理
         if (confInfo.isInputIgnoreOtherPackage() && !isAllowedClassPrefix(fullMethod)) {
-            return;
+            return true;
         }
 
         String annotation = array[1];
@@ -366,13 +443,17 @@ public class RunnerWriteDb extends AbstractRunner {
         methodAnnotationList.add(pair);
 
         if (methodAnnotationList.size() >= Constants.BATCH_SIZE) {
-            writeMethodAnnotation2Db();
+            if (!writeMethodAnnotation2Db()) {
+                return false;
+            }
         }
+
+        return true;
     }
 
-    private void writeMethodAnnotation2Db() {
+    private boolean writeMethodAnnotation2Db() {
         if (methodAnnotationList.isEmpty()) {
-            return;
+            return true;
         }
 
         logger.info("写入数据库，保存方法注解信息表 {}", methodAnnotationList.size());
@@ -399,9 +480,9 @@ public class RunnerWriteDb extends AbstractRunner {
             objectList.add(object);
         }
 
-        dbOperator.batchInsert(sql, objectList);
-
+        boolean success = dbOperator.batchInsert(sql, objectList);
         methodAnnotationList.clear();
+        return success;
     }
 
 
@@ -422,7 +503,7 @@ public class RunnerWriteDb extends AbstractRunner {
                 }
             }
 
-            // 结束前将缓存剩余数据写入数据库
+            // 结束前将剩余数据写入数据库
             writeMethodCall2Db();
 
             return true;
@@ -435,7 +516,7 @@ public class RunnerWriteDb extends AbstractRunner {
     // 处理一条方法调用
     private boolean handleOneMethodCall(String data) {
         String[] methodCallArray = data.split(Constants.FLAG_SPACE);
-        if (methodCallArray.length != 3) {
+        if (methodCallArray.length != 4) {
             logger.error("方法调用信息非法 [{}] [{}]", data, methodCallArray.length);
             return false;
         }
@@ -443,9 +524,15 @@ public class RunnerWriteDb extends AbstractRunner {
         String callerFullMethod = methodCallArray[0].substring(Constants.FILE_KEY_PREFIX_LENGTH);
         String calleeFullMethod = methodCallArray[1];
         String strCallerLineNum = methodCallArray[2];
+        String callerJarNum = methodCallArray[3];
 
         if (!CommonUtil.isNumStr(strCallerLineNum)) {
             logger.error("方法调用信息行号非法 [{}] [{}]", data, strCallerLineNum);
+            return false;
+        }
+
+        if (!CommonUtil.isNumStr(callerJarNum)) {
+            logger.error("Jar包序号非法 [{}] [{}]", data, callerJarNum);
             return false;
         }
 
@@ -484,6 +571,8 @@ public class RunnerWriteDb extends AbstractRunner {
         MethodCallEntity methodCallEntity = new MethodCallEntity();
         methodCallEntity.setId(Integer.valueOf(++id));
         methodCallEntity.setCallType(callType);
+        methodCallEntity.setEnabled(Constants.ENABLED);
+        methodCallEntity.setCallerJarNum(callerJarNum);
         methodCallEntity.setCallerMethodHash(callerMethodHash);
         methodCallEntity.setCallerFullMethod(callerFullMethod);
         methodCallEntity.setCallerMethodName(callerMethodName);
@@ -495,7 +584,6 @@ public class RunnerWriteDb extends AbstractRunner {
         methodCallEntity.setCalleeMethodName(calleeMethodName);
         methodCallEntity.setCalleeFullClassName(calleeFullClassName);
         methodCallEntity.setCalleeFullOrSimpleClassName(calleeFullOrSimpleClassName);
-        methodCallEntity.setEnabled(Constants.ENABLED);
 
         methodCallList.add(methodCallEntity);
 
@@ -538,7 +626,7 @@ public class RunnerWriteDb extends AbstractRunner {
      * 判断当类名为以下前缀时，才处理
      *
      * @param className 类名，或完整方法（类名+方法名+参数）
-     * @return true：需要处理，false：忽略
+     * @return true: 需要处理，false: 忽略
      */
     private boolean isAllowedClassPrefix(String className) {
         for (String allowedClassPrefix : allowedClassPrefixSet) {
@@ -583,6 +671,7 @@ public class RunnerWriteDb extends AbstractRunner {
                     methodCallEntity.getId(),
                     methodCallEntity.getCallType(),
                     methodCallEntity.getEnabled(),
+                    methodCallEntity.getCallerJarNum(),
                     methodCallEntity.getCallerMethodHash(),
                     methodCallEntity.getCallerFullMethod(),
                     methodCallEntity.getCallerMethodName(),

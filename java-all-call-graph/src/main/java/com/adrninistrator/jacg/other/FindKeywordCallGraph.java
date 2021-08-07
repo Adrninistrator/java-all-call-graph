@@ -6,10 +6,7 @@ import com.adrninistrator.jacg.util.FileUtilNoLogger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author adrninistrator
@@ -19,26 +16,27 @@ import java.util.Set;
 
 public class FindKeywordCallGraph {
 
-    public static void main(String[] args) {
-        FindKeywordCallGraph findKeywordCallGraph = new FindKeywordCallGraph();
-        findKeywordCallGraph.find(args);
-    }
-
     public void find(String[] args) {
         String order = GenSingleCallGraph.checkOrder();
         if (order == null) {
             return;
         }
 
-        if (args.length != 2) {
-            System.err.println("参数数量不是2: " + args.length);
-            System.err.println("应按照以下方式指定参数：[文件/目录路径] [关键字]");
+        int argsLength = args.length;
+        if (argsLength < 2) {
+            System.err.println("参数数量小于2: " + argsLength);
+            System.err.println("应按照以下方式指定参数: [文件/目录路径] [关键字1] [关键字2] ... [关键字n]");
             return;
         }
 
         String filePath = args[0].replace("/", File.separator).replace("\\", File.separator);
         if (!filePath.endsWith(File.separator)) {
             filePath += File.separator;
+        }
+
+        Set<String> keywordSet = new TreeSet<>();
+        for (int i = 1; i < argsLength; i++) {
+            keywordSet.add(args[i]);
         }
 
         File file = new File(filePath);
@@ -48,18 +46,18 @@ public class FindKeywordCallGraph {
         }
 
         if (file.isFile()) {
-            String data = handleOneFile(filePath, args[1]);
+            String data = handleOneFile(filePath, keywordSet);
             if (data != null) {
-                String headerInfo = GenSingleCallGraph.genHeaderInfo(args[0]);
+                String headerInfo = GenSingleCallGraph.genHeaderInfo(filePath, keywordSet);
                 System.out.println(headerInfo);
                 System.out.println(data);
             }
         } else {
-            handleDir(filePath, args[1]);
+            handleDir(filePath, keywordSet);
         }
     }
 
-    private void handleDir(String dirPath, String keyword) {
+    private void handleDir(String dirPath, Set<String> keywordSet) {
         Set<String> subDirPathSet = new HashSet<>();
         List<String> subFilePathList = new ArrayList<>();
 
@@ -81,10 +79,10 @@ public class FindKeywordCallGraph {
         }
         for (String subFilePath : subFilePathList) {
             System.out.println("处理文件: " + subFilePath);
-            String data = handleOneFile(subFilePath, keyword);
+            String data = handleOneFile(subFilePath, keywordSet);
             String newFilePath = dirPath + currentDirPathFlag + File.separator + subFilePath.substring(dirPathLength) + Constants.EXT_MD;
             if (data != null) {
-                String headerInfo = GenSingleCallGraph.genHeaderInfo(subFilePath);
+                String headerInfo = GenSingleCallGraph.genHeaderInfo(subFilePath, keywordSet);
                 try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFilePath), StandardCharsets.UTF_8))) {
                     out.write(headerInfo);
                     out.write(Constants.NEW_LINE);
@@ -112,11 +110,11 @@ public class FindKeywordCallGraph {
         }
     }
 
-    private String handleOneFile(String filePath, String keyword) {
-        List<String> lineNumList = findKeywordLineNumList(filePath, keyword);
+    private String handleOneFile(String filePath, Set<String> keywordSet) {
+        List<String> lineNumList = findKeywordLineNumList(filePath, keywordSet);
 
         if (lineNumList.size() == 1) {
-            System.err.println(filePath + " 未查找到指定关键字: " + keyword);
+            System.err.println(filePath + " 未查找到指定关键字: " + keywordSet);
             return null;
         }
 
@@ -124,7 +122,7 @@ public class FindKeywordCallGraph {
         return genSingleCallGraph.genCallGraph(lineNumList.toArray(new String[]{}));
     }
 
-    private List<String> findKeywordLineNumList(String file, String keyword) {
+    private List<String> findKeywordLineNumList(String file, Set<String> keywordSet) {
         List<String> lineNumList = new ArrayList<>(100);
         lineNumList.add(file);
 
@@ -132,8 +130,10 @@ public class FindKeywordCallGraph {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line;
             while ((line = in.readLine()) != null) {
-                if (line.contains(keyword)) {
-                    lineNumList.add(String.valueOf(index));
+                for (String keyword : keywordSet) {
+                    if (line.contains(keyword)) {
+                        lineNumList.add(String.valueOf(index));
+                    }
                 }
                 index++;
             }

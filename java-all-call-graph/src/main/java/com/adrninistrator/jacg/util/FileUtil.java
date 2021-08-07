@@ -1,6 +1,8 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.Constants;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -104,7 +106,7 @@ public class FileUtil {
      * 判断目录是否存在，不存在时尝试创建
      *
      * @param dirPath 需要判断的目录路径
-     * @return true：指定路径的目录存在（已存在或新创建），false：目录不存在（指定路径为文件，或创建失败）
+     * @return true: 指定路径的目录存在（已存在或新创建），false: 目录不存在（指定路径为文件，或创建失败）
      */
     public static boolean isDirectoryExists(String dirPath) {
         File file = new File(dirPath);
@@ -181,6 +183,39 @@ public class FileUtil {
         } catch (Exception e) {
             logger.error("error ", e);
             return false;
+        }
+    }
+
+    public static boolean isFileExists(String filePath) {
+        File file = new File(filePath);
+        return file.exists() && file.isFile();
+    }
+
+    public static String getCanonicalPath(String filePath) {
+        try {
+            return new File(filePath).getCanonicalPath();
+        } catch (IOException e) {
+            logger.error("error ", e);
+            return null;
+        }
+    }
+
+    public static String getFileMd5(String filePath) {
+        try (InputStream input = new FileInputStream(filePath)) {
+            byte[] md5 = DigestUtils.md5(input);
+            return Base64.encodeBase64String(md5);
+        } catch (Exception e) {
+            logger.error("error ", e);
+            return null;
+        }
+    }
+
+    public static long getFileLastModified(String filePath) {
+        try {
+            return new File(filePath).lastModified();
+        } catch (Exception e) {
+            logger.error("error ", e);
+            return 0L;
         }
     }
 

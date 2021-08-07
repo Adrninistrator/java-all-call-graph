@@ -1,14 +1,15 @@
 package com.adrninistrator.jacg.other;
 
 import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.util.FileUtil;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -22,17 +23,6 @@ public class GenSingleCallGraph {
     public static final String ORDER_FOR_ER = "4er";
     public static final String ORDER_FOR_EE = "4ee";
 
-    public static void main(String[] args) {
-        GenSingleCallGraph genSingleCallGraph = new GenSingleCallGraph();
-
-        String data = genSingleCallGraph.genCallGraph(args);
-        if (data != null) {
-            String headerInfo = GenSingleCallGraph.genHeaderInfo(args[0]);
-            System.out.println(headerInfo);
-            System.out.println(data);
-        }
-    }
-
     public String genCallGraph(String[] args) {
         String order = checkOrder();
         if (order == null) {
@@ -40,41 +30,50 @@ public class GenSingleCallGraph {
         }
 
         if (!check(args)) {
-            System.err.println("应按照以下方式指定参数：[文件路径] [行号1] [行号2] ... [行号n]");
+            System.err.println("应按照以下方式指定参数: [文件路径] [行号1] [行号2] ... [行号n]");
             return null;
         }
+
+        String filePath = args[0];
 
         StringBuilder stringBuilder = new StringBuilder();
 
         for (int i = 1; i < args.length; i++) {
             String strLineNum = args[i];
             if (!isValidNum(strLineNum)) {
-                System.err.println("第" + i + "个行号非法: " + strLineNum);
+                System.err.println(filePath + " 第" + i + "个行号非法: " + strLineNum);
                 continue;
             }
 
             int lineNum = Integer.parseInt(strLineNum);
             if (lineNum < 2) {
-                System.err.println("第" + i + "个行号过小: " + strLineNum);
+                System.err.println(filePath + " 第" + i + "个行号过小: " + strLineNum);
                 continue;
             }
 
-            print(args[0], lineNum, ORDER_FOR_ER.equals(order), stringBuilder);
+            print(filePath, lineNum, ORDER_FOR_ER.equals(order), stringBuilder);
         }
 
         return stringBuilder.toString();
     }
 
-    public static String genHeaderInfo(String filePath) {
+    public static String genHeaderInfo(String filePath, Set<String> keywordSet) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("# 处理文件：").append(filePath).append(Constants.NEW_LINE);
+        stringBuilder.append("- 处理文件: ").append(filePath).append(Constants.NEW_LINE);
 
         String order = System.getProperty(ORDER_KEY);
         boolean order4er = ORDER_FOR_ER.equals(order);
         if (order4er) {
-            stringBuilder.append("# 查看方法向下调用链时使用，按层级增大方向打印").append(Constants.NEW_LINE);
+            stringBuilder.append("- 查看方法向下调用链时使用，按层级增大方向打印").append(Constants.NEW_LINE);
         } else {
-            stringBuilder.append("# 查看方法向上调用链时使用，按层级减小方向打印").append(Constants.NEW_LINE);
+            stringBuilder.append("- 查看方法向上调用链时使用，按层级减小方向打印").append(Constants.NEW_LINE);
+        }
+        if (keywordSet != null) {
+            stringBuilder.append("- 查找关键字: ").append(Constants.NEW_LINE).append("```").append(Constants.NEW_LINE);
+            for (String keyword : keywordSet) {
+                stringBuilder.append(keyword).append(Constants.NEW_LINE);
+            }
+            stringBuilder.append("```").append(Constants.NEW_LINE);
         }
         return stringBuilder.toString();
     }
@@ -97,8 +96,7 @@ public class GenSingleCallGraph {
         }
 
         String filePath = args[0];
-        File file = new File(filePath);
-        if (!file.exists() || !file.isFile()) {
+        if (!FileUtil.isFileExists(filePath)) {
             System.err.println("文件不存在或不是文件，请确认文件路径中是否存在空格，若是则需要使用双引号\"\"将文件路径包含: " + filePath);
             return false;
         }
@@ -129,7 +127,7 @@ public class GenSingleCallGraph {
 
         Integer startLevel = getMethodLevel(calledMethod);
         if (startLevel == null) {
-            System.err.println("文件指定行未找到方法调用级别: " + lineNum);
+            System.err.println(file + " 文件指定行未找到方法调用级别: " + lineNum);
             return;
         }
 
@@ -166,8 +164,9 @@ public class GenSingleCallGraph {
         }
 
         String data = tmpStr.toString();
-        stringBuilder.append("# 行号: ").append(lineNum).append(Constants.NEW_LINE);
-        stringBuilder.append(data).append(Constants.NEW_LINE);
+        stringBuilder.append("# 行号: ").append(lineNum).append(Constants.NEW_LINE)
+                .append("```").append(Constants.NEW_LINE)
+                .append(data).append("```").append(Constants.NEW_LINE).append(Constants.NEW_LINE);
     }
 
     private boolean isValidNum(String str) {

@@ -15,7 +15,7 @@ public class FileUtilNoLogger {
      *
      * @param dirPath 需要判断的目录路径
      * @param tryMake 是否尝试创建目录
-     * @return true：指定路径的目录存在（已存在或新创建），false：目录不存在（指定路径为文件，或创建失败）
+     * @return true: 指定路径的目录存在（已存在或新创建），false: 目录不存在（指定路径为文件，或创建失败）
      */
     public static boolean isDirectoryExists(String dirPath, boolean tryMake) {
         File file = new File(dirPath);

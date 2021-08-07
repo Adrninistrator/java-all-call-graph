@@ -15,7 +15,7 @@ public class TestGenSingleCallGraph4er {
         GenSingleCallGraph genSingleCallGraph = new GenSingleCallGraph();
         String data = genSingleCallGraph.genCallGraph(args);
         if (data != null) {
-            String headerInfo = GenSingleCallGraph.genHeaderInfo(args[0]);
+            String headerInfo = GenSingleCallGraph.genHeaderInfo(args[0], null);
             System.out.println(headerInfo);
             System.out.println(data);
         }

@@ -17,6 +17,8 @@ public class DC {
 
     public static final String MC_ID = "id";
     public static final String MC_CALL_TYPE = "call_type";
+    public static final String MC_ENABLED = "enabled";
+    public static final String MC_CALLER_JAR_NUM = "caller_jar_num";
     public static final String MC_CALLER_METHOD_HASH = "caller_method_hash";
     public static final String MC_CALLER_FULL_METHOD = "caller_full_method";
     public static final String MC_CALLER_METHOD_NAME = "caller_method_name";
@@ -28,7 +30,12 @@ public class DC {
     public static final String MC_CALLEE_METHOD_NAME = "callee_method_name";
     public static final String MC_CALLEE_FULL_CLASS_NAME = "callee_full_class_name";
     public static final String MC_CALLEE_CLASS_NAME = "callee_class_name";
-    public static final String MC_ENABLED = "enabled";
+
+    public static final String JI_JAR_NUM = "jar_num";
+    public static final String JI_JAR_PATH_HASH = "jar_path_hash";
+    public static final String JI_JAR_FULL_PATH = "jar_full_path";
+    public static final String JI_LAST_MODIFIED = "last_modified";
+    public static final String JI_JAR_HASH = "jar_hash";
 
     private DC() {
         throw new IllegalStateException("illegal");

@@ -51,13 +51,13 @@ public abstract class AbstractRunner {
             return;
         }
 
-        if (!init()) {
-            logger.error("{} 初始化失败", this.getClass().getSimpleName());
+        dbOperator = DbOperator.getInstance();
+        if (!dbOperator.init(confInfo)) {
             return;
         }
 
-        dbOperator = DbOperator.getInstance();
-        if (!dbOperator.init(confInfo)) {
+        if (!init()) {
+            logger.error("{} 初始化失败", this.getClass().getSimpleName());
             return;
         }
 

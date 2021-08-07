@@ -212,7 +212,7 @@ public class DbOperator {
             return true;
         } catch (Exception e) {
             if (e.getCause() instanceof SQLSyntaxErrorException) {
-                logger.error("请检查数据库表是否需要使用最新版本创建 [{}] ", sql, e);
+                logger.error("请检查数据库表是否需要使用最新版本创建，是否需要执行 com.adrninistrator.jacg.unzip.UnzipFile 释放最新的SQL语句\n[{}] ", sql, e);
             } else {
                 logger.error("error [{}] ", sql, e);
             }

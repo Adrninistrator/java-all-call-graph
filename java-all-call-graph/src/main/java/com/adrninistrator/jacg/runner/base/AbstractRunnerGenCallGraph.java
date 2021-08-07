@@ -37,22 +37,22 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     /*
         方法注解信息
-        key：方法HASH+长度
-        value：所有注解排序后拼接，分隔符为半角逗号,
+        key: 方法HASH+长度
+        value: 所有注解排序后拼接，分隔符为半角逗号,
      */
     protected Map<String, String> methodAnnotationsMap = new HashMap<>(100);
 
     /*
         接口调用对应实现类的方法调用
-        key：接口方法
-        value：实现类方法
+        key: 接口方法
+        value: 实现类方法
      */
     private Map<String, MultiCallInfo> itfMethodCallMap = new HashMap<>();
 
     /*
         抽象父类调用对应子类的方法调用
-        key：抽象父类方法
-        value：子类方法
+        key: 抽象父类方法
+        value: 子类方法
      */
     private Map<String, MultiCallInfo> sccMethodCallMap = new HashMap<>();
 
@@ -64,15 +64,15 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     /*
         被禁用的接口调用对应实现类的方法调用
-        key：接口方法
-        value：实现类方法
+        key: 接口方法
+        value: 实现类方法
      */
     private Map<String, MultiCallInfo> disabledItfMethodCallMap = new TreeMap<>();
 
     /*
         被禁用的抽象父类调用对应子类的方法调用
-        key：抽象父类方法
-        value：子类方法
+        key: 抽象父类方法
+        value: 子类方法
      */
     private Map<String, MultiCallInfo> disabledSccMethodCallMap = new TreeMap<>();
 
@@ -378,7 +378,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             if (this instanceof RunnerGenAllGraph4Callee) {
                 // 生成向上的方法调用完整调用链时，增加一个显示的update语句
                 stringBuilder.append(Constants.NEW_LINE).append(genNoticeSelectSql4Callee()).append(Constants.NEW_LINE)
-                .append(genNoticeUpdateDisableSql4Callee()).append(Constants.NEW_LINE);
+                        .append(genNoticeUpdateDisableSql4Callee()).append(Constants.NEW_LINE);
             }
             stringBuilder.append("```");
 
@@ -537,5 +537,78 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 .append("' and ").append(DC.MC_CALLER_METHOD_HASH).append(" = '' and ")
                 .append(DC.MC_CALLEE_FULL_METHOD).append(" = '';");
         return stringBuilder.toString();
+    }
+
+    /**
+     * 检查Jar包文件是否有更新
+     *
+     * @return true: 有更新，false: 没有更新
+     */
+    protected boolean checkJarFileUpdated() {
+        if (StringUtils.isBlank(confInfo.getCallGraphJarList())) {
+            return false;
+        }
+
+        Map<String, Map<String, Object>> jarInfoMap = queryJarFileInfo();
+        if (jarInfoMap == null) {
+            return false;
+        }
+
+        logger.info("检查Jar包文件是否有更新 {}", confInfo.getCallGraphJarList());
+
+        String[] array = confInfo.getCallGraphJarList().split(Constants.FLAG_SPACE);
+        for (String jarName : array) {
+            if (FileUtil.isFileExists(jarName)) {
+                String jarFilePath = FileUtil.getCanonicalPath(jarName);
+                if (jarFilePath == null) {
+                    logger.error("获取文件路径失败: {}", jarName);
+                    return true;
+                }
+
+                String jarPathHash = CommonUtil.genHashWithLen(jarFilePath);
+                Map<String, Object> jarInfo = jarInfoMap.get(jarPathHash);
+                if (jarInfo == null) {
+                    String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
+                    logger.error("指定的Jar包未导入数据库中，请先执行 TestRunnerWriteDb 类导入数据库\n{} {}", jarName, jarFullPath);
+                    return true;
+                }
+
+                long lastModified = FileUtil.getFileLastModified(jarFilePath);
+                String lastModifiedStr = String.valueOf(lastModified);
+                if (!lastModifiedStr.equals(jarInfo.get(DC.JI_LAST_MODIFIED))) {
+                    String jarFileHash = FileUtil.getFileMd5(jarFilePath);
+                    if (!jarFileHash.equals(jarInfo.get(DC.JI_JAR_HASH))) {
+                        String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
+                        logger.error("指定的Jar包文件内容有变化，请先执行 TestRunnerWriteDb 类导入数据库\n{} {} {}", new Date(lastModified), jarName, jarFullPath);
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private Map<String, Map<String, Object>> queryJarFileInfo() {
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_JI_QUERY_JAR_INFO);
+        if (sql == null) {
+            sql = "select * from " + Constants.TABLE_PREFIX_JAR_INFO + confInfo.getAppName();
+            cacheSql(Constants.SQL_KEY_JI_QUERY_JAR_INFO, sql);
+        }
+
+        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{});
+        if (CommonUtil.isCollectionEmpty(list)) {
+            logger.error("查询到Jar包信息为空");
+            return null;
+        }
+
+        Map<String, Map<String, Object>> rtnMap = new HashMap<>(list.size());
+
+        for (Map<String, Object> map : list) {
+            String jarPathHash = (String) map.get(DC.JI_JAR_PATH_HASH);
+            rtnMap.putIfAbsent(jarPathHash, map);
+        }
+
+        return rtnMap;
     }
 }
