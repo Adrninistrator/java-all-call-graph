@@ -6,5 +6,5 @@ package test.call_graph.extend;
  * @description:
  */
 
-public class I3_1_1_1 extends I2_1_1{
+public class I3_1_1_1 extends I2_1_1 {
 }

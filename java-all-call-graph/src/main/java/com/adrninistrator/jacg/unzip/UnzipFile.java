@@ -39,6 +39,7 @@ public class UnzipFile {
 
         if (!FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_CONFIG, true) ||
                 !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_SQL, true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_KEYWORD_CONF, true) ||
                 !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_JAVA + FLAG_FSP + DIR_TEST_JAVA_FILE, true)) {
             return;
         }

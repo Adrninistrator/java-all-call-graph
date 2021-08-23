@@ -174,6 +174,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 打印提示信息
         printNoticeInfo();
+
+        runSuccess = true;
     }
 
     public boolean isSupportIgnore() {

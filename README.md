@@ -123,7 +123,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.4.0'
 该工具的总体使用步骤如下：
 
 - a. 将后续步骤使用的几个启动类对应的Java文件，及配置文件解压到当前Java项目的test模块的对应目录中，该步骤只需要执行一次（当组件更新时需要再次执行，以释放新的文件）；
-- b. 调用增强后的java-callgraph.jar（详细内容见后续“原理说明”部分），解析指定jar包中的class文件，将Java方法调用关系写入文件；从该文件读取Java方法调用关系，再写入MySQL数据库；
+- b. 调用增强后的java-callgraph2.jar（详细内容见后续“原理说明”部分），解析指定jar包中的class文件，将Java方法调用关系写入文件；从该文件读取Java方法调用关系，再写入MySQL数据库；
 - c.1 需要生成调用指定类的向上完整方法调用链时，从数据库读取方法调用关系，再将完整的方法调用链写入文件；
 - c.2 需要生成指定方法的向下完整方法调用链时，从数据库读取方法调用关系，再将完整的方法调用链写入文件；
 
@@ -143,7 +143,7 @@ com.adrninistrator.jacg.unzip.UnzipFile
 
 需要选择classpath对应模块为test。
 
-执行以上类后，会将java-all-callgraph.jar中保存配置文件的~jacg_config、~jacg_sql目录，保存启动类（下文涉及的Test...类）的“test/jacg”目录，分别释放到当前Java项目的test模块的resources、java目录中（仅在本地生效，避免发布到服务器中）。
+执行以上类后，会将java-all-callgraph.jar中保存配置文件的~jacg_config、~jacg_find_keyword、~jacg_sql目录，保存启动类（下文涉及的Test...类）的“test/jacg”目录，分别释放到当前Java项目的test模块的resources、java目录中（仅在本地生效，避免发布到服务器中）。
 
 若当前Java项目存在“src/test”或“src/unit.test”目录，则将配置文件与Java文件分别释放在该目录的resources、java目录中；
 
@@ -171,7 +171,7 @@ test.jacg.TestRunnerWriteDb
 
 ![](pic/args-use-b.png)
 
-- b.1 调用增强后的java-callgraph.jar中的类的方法
+- b.1 调用增强后的java-callgraph2.jar中的类的方法
 
 TestRunnerWriteDb类读取配置文件`config.properties`中的参数：
 
@@ -179,15 +179,15 @@ TestRunnerWriteDb类读取配置文件`config.properties`中的参数：
 
 将第1个jar包路径后面加上“.txt”作为本次保存Java方法调用关系文件路径；
 
-设置JVM参数“output.file”值为本次保存Java方法调用关系文件的路径，调用增强后的java-callgraph.jar中的类的方法，通过方法的参数传递上述jar包路径列表；
+设置JVM参数“output.file”值为本次保存Java方法调用关系文件的路径，调用增强后的java-callgraph2.jar中的类的方法，通过方法的参数传递上述jar包路径列表；
 
 - b.2 解析指定jar包
 
-增强后的java-callgraph.jar中的类的方法开始解析指定的jar包；
+增强后的java-callgraph2.jar中的类的方法开始解析指定的jar包；
 
 - b.3 将Java方法调用关系写入文件
 
-增强后的java-callgraph.jar中的类的方法将解析出的Java方法调用关系写入指定的文件中；
+增强后的java-callgraph2.jar中的类的方法将解析出的Java方法调用关系写入指定的文件中；
 
 - b.4 读取Java方法调用关系文件
 
@@ -222,7 +222,7 @@ com.test.Test1
 
 根据配置文件`config.properties`中的`input.ignore.other.package`参数值及配置文件`i_allowed_class_prefix.properties`，将Java方法调用关系逐条写入数据库中；
 
-增强后的java-callgraph.jar除了会将Java方法调用关系写入文件外，还会将各个方法上的注解信息写入文件（文件名为保存方法调用关系的文件名加上“-annotation.txt”）；TestRunnerWriteDb类也会读取对应文件，将各方法上的注解信息写入数据库中。
+增强后的java-callgraph2.jar除了会将Java方法调用关系写入文件外，还会将各个方法上的注解信息写入文件（文件名为保存方法调用关系的文件名加上“-annotation.txt”）；TestRunnerWriteDb类也会读取对应文件，将各方法上的注解信息写入数据库中。
 
 ### 3.3.4. 生成调用指定类方法向上的完整调用链
 
@@ -432,6 +432,8 @@ func1(java.lang.String)
 [2]#    ClassC1.funcC1()	(ClassC1:9)    !entry!
 ```
 
+*以上功能通常不需要使用，可以使用下述功能代替。*
+
 ## 4.2. 生成包含关键字的所有方法到起始方法之间的调用链
 
 如果需要生成包含关键字的所有方法到起始方法之间的调用链，例如获得入口方法到被调用的起始方法之间的调用链，或起始方法到Mybatis的Mapper之间的调用链等场景，可以按照以下步骤生成：
@@ -443,7 +445,19 @@ func1(java.lang.String)
 |test.jacg.TestFindKeywordCallGraph4ee|处理向上的完整调用链文件，按照层级减小的方向显示|
 |test.jacg.TestFindKeywordCallGraph4er|处理向下的完整调用链文件，按照层级增大的方向显示|
 
-在程序参数（即main()方法处理的参数）中指定对应的向上或向下的Java方法完整调用链文件路径，及对应的关键字，支持批量查询，格式为“\[完整调用链文件路径/保存完整调用链文件的目录路径\] \[关键字1\] \[关键字2\] ... \[关键字n\]”。
+以上类在执行时支持不指定程序参数（即main()方法处理的参数），或指定程序参数，建议使用不指定程序参数的方式。
+
+- 不指定程序参数
+
+执行以上类时不指定程序参数，则会先生成对应的向上（或向下）方法完整调用链，再对生成目录的文件根据关键字生成到起始方法的调用链。
+
+执行TestFindKeywordCallGraph4ee类时，关键字在配置文件“~jacg_find_keyword/find_keyword_4callee.properties”中指定；执行TestFindKeywordCallGraph4er类时，关键字在配置文件“~jacg_find_keyword/find_keyword_4caller.properties”中指定。
+
+- 指定程序参数
+
+在程序参数中指定对应的向上或向下的Java方法完整调用链文件路径，及对应的关键字，支持批量查询，格式为“\[完整调用链文件路径/保存完整调用链文件的目录路径\] \[关键字1\] \[关键字2\] ... \[关键字n\]”。
+
+- 生成结果示例
 
 例如完整调用链文件“dir\\a.txt”内容如上所示。
 
@@ -504,9 +518,15 @@ org.springframework.transaction.support.TransactionTemplate:execute(org.springfr
 
 ## 6.1. Java方法调用关系获取
 
-在获取Java方法调用关系时，使用了 [https://github.com/gousiosg/java-callgraph](https://github.com/gousiosg/java-callgraph) 项目，并对其进行了增强，java-callgraph使用Apache Commons BCEL（Byte Code Engineering Library）解析Java方法调用关系，Matthieu Vergne（[https://www.matthieu-vergne.fr/](https://www.matthieu-vergne.fr/)）为该项目增加了解析动态调用的能力（lambda表达式等）。
+在获取Java方法调用关系时，参考了 [https://github.com/gousiosg/java-callgraph](https://github.com/gousiosg/java-callgraph) 项目，使用Apache Commons BCEL（Byte Code Engineering Library）解析Java方法调用关系。
 
-原始java-callgraph在多数场景下能够获取到Java方法调用关系，但以下场景的调用关系会缺失：
+原始java-callgraph在多数场景下能够获取到Java方法调用关系，但存在一些场景调用关系会缺失。
+
+针对调用关系缺失的问题，在java-callgraph2项目中进行了优化和其他功能的增强，地址为[https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)。
+
+java-callgraph2能够生成缺失的调用关系。对于更复杂的情况，例如存在接口Interface1，及其抽象实现类Abstract1，及其子类ChildImpl1，若在某个类中引入了抽象实现类Abstract1并调用其方法的情况，生成的方法调用关系中也不会出现缺失。
+
+原始java-callgraph缺失的调用关系如下所示：
 
 - 接口与实现类方法
 
@@ -555,6 +575,15 @@ private void f1() {
 
 对于其他使用lambda表达式的情况，存在相同的问题，原方法调用lambda表达式中执行的方法，及继续向下的调用关系会缺失。
 
+- Stream调用
+
+在使用Stream时，通过xxx::func方式调用方法，原始java-callgraph生成的方法调用关系中会缺失。如以下示例中，当前方法调用当前类的map2()、filter2()，及TestDto1类的getStr()方法的调用关系会缺失。
+
+```java
+list.stream().map(this::map2).filter(this::filter2).collect(Collectors.toList());
+list.stream().map(TestDto1::getStr).collect(Collectors.toList());
+```
+
 - 父类调用子类的实现方法
 
 假如存在抽象父类Abstract1，及其非抽象子类ChildImpl1，若在某个类Class1中引入了抽象父类Abstract1，实际为子类ChildImpl1的实例（使用Spring时的常见场景），在其方法Class1.func1()中调用了Abstract1.fa()方法；
@@ -566,12 +595,6 @@ private void f1() {
 假如存在抽象父类Abstract1，及其非抽象子类ChildImpl1，若在ChildImpl1.fc1()方法中调用了父类Abstract1实现的方法fi()；
 
 原始java-callgraph生成的方法调用关系中，ChildImpl1.fc1()调用Abstract1.fi()的关系会缺失。
-
-针对以上问题，增强后的java-callgraph都进行了优化，能够生成缺失的调用关系。
-
-增强后的java-callgraph地址为[https://github.com/Adrninistrator/java-callgraph](https://github.com/Adrninistrator/java-callgraph)。
-
-对于更复杂的情况，例如存在接口Interface1，及其抽象实现类Abstract1，及其子类ChildImpl1，若在某个类中引入了抽象实现类Abstract1并调用其方法的情况，生成的方法调用关系中也不会出现缺失。
 
 ## 6.2. Java方法完整调用链生成
 
@@ -592,8 +615,7 @@ private void f1() {
 以下情况，对应的方法找不到被调用关系，可能会被误识别为入口方法：
 
 - 不是直接通过Java方法进行调用的情况（例如在XML文件中配置代码执行流程、通过注解配置代码执行流程、使用AOP处理等）；
-- 未被调用的方法；
-- 方法作为流式处理的参数，如“xxx.stream().filter(this::func)”。
+- 未被调用的方法。
 
 # 8. 多余的调用关系处理
 

@@ -8,6 +8,10 @@ package test.call_graph.extend;
 
 public class I2_1_1 extends A2_1 {
 
+    public I2_1_1() {
+        super();
+    }
+
     @Override
     public void f1() {
         fi2_1_1();

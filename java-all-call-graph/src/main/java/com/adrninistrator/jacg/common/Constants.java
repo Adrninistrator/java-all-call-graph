@@ -50,6 +50,7 @@ public class Constants {
     public static final String DIR_SQL = "~jacg_sql";
     public static final String DIR_METHODS = "methods";
     public static final String DIR_FIND_KEYWORD_ = "find_keyword_";
+    public static final String DIR_KEYWORD_CONF = "~jacg_find_keyword";
 
     public static final String FILE_CONFIG = "config.properties";
 
@@ -67,6 +68,9 @@ public class Constants {
     public static final String FILE_SQL_METHOD_ANNOTATION = "method_annotation.sql";
     public static final String FILE_SQL_METHOD_CALL = "method_call.sql";
     public static final String FILE_SQL_JAR_INFO = "jar_info.sql";
+
+    public static final String FILE_FIND_KEYWORD_4CALLEE = "find_keyword_4callee.properties";
+    public static final String FILE_FIND_KEYWORD_4CALLER = "find_keyword_4caller.properties";
 
     public static final String APPNAME_IN_SQL = "{appName}";
 

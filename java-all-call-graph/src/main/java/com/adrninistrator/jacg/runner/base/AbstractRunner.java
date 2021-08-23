@@ -39,11 +39,16 @@ public abstract class AbstractRunner {
     // 有任务执行失败
     protected boolean someTaskFail = false;
 
+    // 记录执行是否成功
+    protected boolean runSuccess = false;
+
     public static void main(String[] args) {
         runner.run();
     }
 
     public void run() {
+        runSuccess = false;
+
         long startTime = System.currentTimeMillis();
 
         confInfo = ConfManager.getConfInfo();

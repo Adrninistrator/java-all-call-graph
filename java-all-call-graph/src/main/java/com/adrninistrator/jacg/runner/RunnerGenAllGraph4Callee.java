@@ -91,6 +91,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         // 打印提示信息
         printNoticeInfo();
+
+        runSuccess = true;
     }
 
     // 处理一条记录

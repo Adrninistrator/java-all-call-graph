@@ -7,7 +7,7 @@ import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.CommonUtil;
 import com.adrninistrator.jacg.util.FileUtil;
 import com.adrninistrator.jacg.util.SqlUtil;
-import gr.gousiosg.javacg.stat.JCallGraph;
+import com.adrninistrator.javacg.stat.JCallGraph;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -56,9 +56,6 @@ public class RunnerWriteDb extends AbstractRunner {
 
     // 记录是否有写数据库
     private boolean writeDbFlag;
-
-    // 当前处理的调用关系序号
-    private int id = Constants.METHOD_CALL_ID_START;
 
     static {
         runner = new RunnerWriteDb();
@@ -135,6 +132,8 @@ public class RunnerWriteDb extends AbstractRunner {
 
         // 等待直到任务执行完毕
         wait4TPEDone();
+
+        runSuccess = true;
     }
 
     // 判断是否需要调用java-callgraph生成jar包的方法调用关系
@@ -156,7 +155,8 @@ public class RunnerWriteDb extends AbstractRunner {
         System.setProperty(Constants.JAVA_CALL_GRAPH_FLAG_OUT_FILE, confInfo.getCallGraphInputFile());
 
         // 调用java-callgraph
-        boolean success = JCallGraph.run(array);
+        JCallGraph jCallGraph = new JCallGraph();
+        boolean success = jCallGraph.run(array);
         if (!success) {
             logger.error("调用java-callgraph生成jar包的方法调用关系失败");
         }
@@ -516,15 +516,21 @@ public class RunnerWriteDb extends AbstractRunner {
     // 处理一条方法调用
     private boolean handleOneMethodCall(String data) {
         String[] methodCallArray = data.split(Constants.FLAG_SPACE);
-        if (methodCallArray.length != 4) {
+        if (methodCallArray.length != 5) {
             logger.error("方法调用信息非法 [{}] [{}]", data, methodCallArray.length);
             return false;
         }
 
-        String callerFullMethod = methodCallArray[0].substring(Constants.FILE_KEY_PREFIX_LENGTH);
-        String calleeFullMethod = methodCallArray[1];
-        String strCallerLineNum = methodCallArray[2];
-        String callerJarNum = methodCallArray[3];
+        String callIdStr = methodCallArray[0].substring(Constants.FILE_KEY_PREFIX_LENGTH);
+        String callerFullMethod = methodCallArray[1];
+        String calleeFullMethod = methodCallArray[2];
+        String strCallerLineNum = methodCallArray[3];
+        String callerJarNum = methodCallArray[4];
+
+        if (!CommonUtil.isNumStr(callIdStr)) {
+            logger.error("方法调用ID非法 [{}] [{}]", data, callIdStr);
+            return false;
+        }
 
         if (!CommonUtil.isNumStr(strCallerLineNum)) {
             logger.error("方法调用信息行号非法 [{}] [{}]", data, strCallerLineNum);
@@ -569,7 +575,7 @@ public class RunnerWriteDb extends AbstractRunner {
         String calleeFullOrSimpleClassName = getFullOrSimpleClassName(calleeFullClassName);
 
         MethodCallEntity methodCallEntity = new MethodCallEntity();
-        methodCallEntity.setId(Integer.valueOf(++id));
+        methodCallEntity.setId(Integer.valueOf(Integer.parseInt(callIdStr)));
         methodCallEntity.setCallType(callType);
         methodCallEntity.setEnabled(Constants.ENABLED);
         methodCallEntity.setCallerJarNum(callerJarNum);

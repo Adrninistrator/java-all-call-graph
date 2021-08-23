@@ -103,6 +103,22 @@ public class FileUtil {
     }
 
     /**
+     * 读取文件内容到List中
+     *
+     * @param filePath 文件路径
+     * @return
+     */
+    public static List<String> readFile2List(String filePath) {
+        try {
+            File file = findFile(filePath);
+            return FileUtils.readLines(file, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            logger.error("error ", e);
+            return null;
+        }
+    }
+
+    /**
      * 判断目录是否存在，不存在时尝试创建
      *
      * @param dirPath 需要判断的目录路径

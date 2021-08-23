@@ -611,4 +611,15 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         return rtnMap;
     }
+
+    /**
+     * 获取本次执行时的输出目录
+     * @return null: 执行失败，非null: 执行成功
+     */
+    public String getSuccessOutputDir() {
+        if (!runSuccess) {
+            return null;
+        }
+        return outputDirPrefix;
+    }
 }
