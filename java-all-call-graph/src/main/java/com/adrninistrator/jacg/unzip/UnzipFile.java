@@ -49,7 +49,7 @@ public class UnzipFile {
             while (ze != null) {
                 if (!ze.isDirectory()) {
                     String fileName = ze.getName();
-                    if (fileName.startsWith(Constants.DIR_CONFIG) || fileName.startsWith(Constants.DIR_SQL)) {
+                    if (fileName.startsWith(Constants.DIR_CONFIG) || fileName.startsWith(Constants.DIR_SQL) || fileName.startsWith(Constants.DIR_KEYWORD_CONF)) {
                         writeFile(ze, zis, rootDirName, DIR_RESOURCES, fileName);
                     } else if (fileName.startsWith(DIR_TEST_JAVA_FILE) && fileName.endsWith(FILE_JAVA)) {
                         writeFile(ze, zis, rootDirName, DIR_JAVA, fileName);
