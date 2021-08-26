@@ -95,6 +95,16 @@ task test_jar(type: Jar) {
     }
 }
 
+// 拷贝依赖jar包到对应目录
+task copy_lib(){
+    doLast {
+        copy {
+            from configurations.runtimeClasspath
+            into 'build/other_lib'
+        }
+    }
+}
+
 task sourcesJar(type: Jar) {
     doFirst {
         archiveClassifier.set('sources')
