@@ -95,12 +95,45 @@ task test_jar(type: Jar) {
     }
 }
 
-// 拷贝依赖jar包到对应目录
-task copy_lib(){
-    doLast {
+// 生成可以直接执行的jar包，并拷贝相关文件
+task gen_run_jar(type: Jar) {
+    archiveName 'run_jacg.jar'
+    from(sourceSets.main.output) {
+        into '/'
+    }
+    from(sourceSets.test.output) {
+        include 'test/jacg/**'
+        into '/'
+    }
+
+    doLast{
         copy {
-            from configurations.runtimeClasspath
-            into 'build/other_lib'
+            from 'build/libs/run_jacg.jar'
+            into 'output_dir/jar/'
+        }
+        copy {
+            from 'src/main/resources/~jacg_config/'
+            into 'output_dir/~jacg_config/'
+        }
+        copy {
+            from 'src/main/resources/~jacg_find_keyword/'
+            into 'output_dir/~jacg_find_keyword/'
+        }
+        copy {
+            from 'src/main/resources/~jacg_sql/'
+            into 'output_dir/~jacg_sql/'
+        }
+        copy {
+            from 'run.bat'
+            into 'output_dir/'
+        }
+        copy {
+            from 'run.sh'
+            into 'output_dir/'
+        }
+        copy {
+            from configurations.testRuntimeClasspath
+            into 'output_dir/lib'
         }
     }
 }

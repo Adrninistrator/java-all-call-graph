@@ -118,6 +118,8 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.4.3'
 
 ## 3.3. 执行步骤
 
+以下所述执行步骤，需要在IDE中执行。
+
 ### 3.3.1. 总体步骤
 
 该工具的总体使用步骤如下：
@@ -391,6 +393,28 @@ func1(
 func1()
 func1(java.lang.String)
 ```
+
+## 3.4. 使用命令行方式执行
+
+以上所述执行方式，需要在IDE中执行，假如需要使用命令行方式执行，可参考以下方法。
+
+在项目根目录执行`gradlew gen_run_jar`命令，生成可以直接执行的jar包，并拷贝相关文件。
+
+在生成的output_dir目录中，包含了当前项目生成的jar包、依赖jar包，以及资源文件、启动脚本等，如下所示：
+
+```
+~jacg_config
+~jacg_find_keyword
+~jacg_sql
+jar
+lib
+run.bat
+run.sh
+```
+
+可选择run.bat或run.sh脚本，以命令行方式执行，脚本中执行的类可为test.jacg包中的类，可选择的类可参考前文内容。
+
+在执行脚本前，需要根据需要修改脚本中执行的类名。
 
 # 4. 其他功能
 
