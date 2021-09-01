@@ -94,7 +94,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.4.3'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.4.4'
 ```
 
 - Maven
@@ -103,7 +103,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.4.3'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.4.3</version>
+  <version>0.4.4</version>
   <type>provided</type>
 </dependency>
 ```
@@ -244,7 +244,11 @@ test.jacg.TestRunnerGenAllGraph4Callee
 
 - c.1.1 从数据库读取Java方法调用关系
 
-TestRunnerGenAllGraph4Callee类读取配置文件`o_g4callee_class_name.properties`，该文件中指定了需要生成向上完整调用链的类名；若存在同名类，则类名需要指定完整类名；若不存在同名类，则类名需要指定简单类名；示例如下：
+TestRunnerGenAllGraph4Callee类读取配置文件`o_g4callee_class_name.properties`，该文件中指定了需要生成向上完整调用链的类名；
+
+类名可指定简单类名或完整类名；若存在同名类，则需要指定完整类名；
+
+示例如下：
 
 ```
 Test1
@@ -307,7 +311,7 @@ TestRunnerGenAllGraph4Caller类读取配置文件`o_g4caller_entry_method.proper
 
 \[起始代码行号\]-\[结束代码行号\]为可选参数，若不指定则输出指定的整个方法向下的方法完整调用链，若指定则输出方法指定行号范围内向下的方法完整调用链，即 >= 起始代码行号 且 <= 结束代码行号的范围；
 
-若存在同名类，则类名需要指定完整类名；若不存在同名类，则类名需要指定简单类名；
+类名可指定简单类名或完整类名；若存在同名类，则需要指定完整类名；
 
 示例如下：
 
@@ -622,17 +626,36 @@ list.stream().map(TestDto1::getStr).collect(Collectors.toList());
 
 ## 6.2. Java方法完整调用链生成
 
-在获取了Java方法调用关系之后，将其保存在数据库中，涉及到3个数据库表，可查看java-all-callgraph.jar释放的~jacg_sql目录中的.sql文件，相关数据库表如下所示：
+- 数据库表
+
+在获取了Java方法调用关系之后，将其保存在数据库中，可查看java-all-callgraph.jar释放的~jacg_sql目录中的.sql文件，相关数据库表如下所示：
 
 |表名前缀|注释|作用|
 |---|---|---|
 |class\_name\_|类名信息表|保存相关类的完整类名及简单类名|
 |method\_annotation\_|方法注解表|保存方法及方法上的注解信息|
 |method\_call\_|方法调用关系表|保存各方法之间调用信息|
+|jar\_info\_|jar包信息表|保存用于解析方法调用关系的jar包信息|
 
 上述数据库表在创建时使用表名前缀加上配置文件`config.properties`中的`app.name`参数值。
 
 该工具会主要从方法调用关系表中逐级查询数据，生成完整的方法调用链。
+
+- 禁用sql_mode中的ONLY_FULL_GROUP_BY
+
+在MySQL 5.7中，执行类似以下SQL语句时，使用默认配置会出现以下报错：
+
+```sql
+select distinct(callee_method_hash),callee_full_method from method_call_xxx where callee_class_name= 'xxx' order by callee_method_name
+```
+
+```
+Expression #1 of ORDER BY clause is not in SELECT list, references column 'xxxx' which is not in SELECT list; this is incompatible with DISTINCT
+```
+
+说明可见[https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html](https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html)。
+
+为了使MySQL支持以上查询语句，需要禁用sql_mode中的ONLY_FULL_GROUP_BY，该工具会在查询时自动禁用。
 
 # 7. 无法正确处理的情况
 

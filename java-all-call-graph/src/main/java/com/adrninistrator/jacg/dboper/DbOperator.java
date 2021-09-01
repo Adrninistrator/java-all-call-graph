@@ -62,13 +62,13 @@ public class DbOperator {
         }
     }
 
-    private Connection getConnection() {
+    public Connection getConnection() {
         synchronized (DbOperator.class) {
             try {
 //            return DriverManager.getConnection(confInfo.getDbUrl(), confInfo.getDbUsername(), confInfo.getDbPassword());
                 return cpds.getConnection();
             } catch (Exception e) {
-                logger.error("error ", e);
+                logger.error("getConnection error ", e);
                 return null;
             }
         }
@@ -80,11 +80,26 @@ public class DbOperator {
         }
     }
 
-    private void close(Connection connection, PreparedStatement stmt) {
+    private void close(Connection connection, PreparedStatement stmt, boolean closeConnection) {
         try {
             if (stmt != null) {
                 stmt.close();
             }
+            if (closeConnection && connection != null) {
+                // 使用数据源，只是将连接释放回连接池，不会断开与数据库的连接
+                connection.close();
+            }
+        } catch (Exception e) {
+            logger.error("error ", e);
+        }
+    }
+
+    private void close(Connection connection, PreparedStatement stmt) {
+        close(connection, stmt, true);
+    }
+
+    public void closeConnection(Connection connection) {
+        try {
             if (connection != null) {
                 // 使用数据源，只是将连接释放回连接池，不会断开与数据库的连接
                 connection.close();
@@ -161,16 +176,14 @@ public class DbOperator {
         }
     }
 
-    public Integer update(String sql, Object[] arguments) {
-        Connection connection = null;
+    public Integer update(Connection connection, boolean closeConnection, String sql, Object[] arguments) {
+        if (connection == null) {
+            return null;
+        }
+
         PreparedStatement stmt = null;
 
         try {
-            connection = getConnection();
-            if (connection == null) {
-                return null;
-            }
-
             stmt = connection.prepareStatement(sql);
             setArguments(stmt, arguments);
             int row = stmt.executeUpdate();
@@ -179,8 +192,16 @@ public class DbOperator {
             logger.error("error [{}] ", sql, e);
             return null;
         } finally {
-            close(connection, stmt);
+            close(connection, stmt, closeConnection);
         }
+    }
+
+    public Integer update(String sql, Object[] arguments) {
+        Connection connection = getConnection();
+        if (connection == null) {
+            return null;
+        }
+        return update(connection, true, sql, arguments);
     }
 
     public boolean batchInsert(String sql, List<Object[]> argumentList) {
@@ -225,21 +246,21 @@ public class DbOperator {
     /**
      * 查询列表，仅包含一个字段
      *
+     * @param connection
+     * @param closeConnection
      * @param sql
      * @param arguments
      * @return
      */
-    public List<Object> queryListOneColumn(String sql, Object[] arguments) {
-        Connection connection = null;
+    public List<Object> queryListOneColumn(Connection connection, boolean closeConnection, String sql, Object[] arguments) {
+        if (connection == null) {
+            return null;
+        }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
-            connection = getConnection();
-            if (connection == null) {
-                return null;
-            }
-
             stmt = connection.prepareStatement(sql);
             setArguments(stmt, arguments);
 
@@ -254,29 +275,43 @@ public class DbOperator {
             logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             return null;
         } finally {
-            close(connection, stmt);
+            close(connection, stmt, closeConnection);
             closeResultSet(rs);
         }
     }
 
     /**
-     * 查询列表，包含多个字段
+     * 查询列表，仅包含一个字段
      *
      * @param sql
      * @param arguments
      * @return
      */
-    public List<Map<String, Object>> queryList(String sql, Object[] arguments) {
-        Connection connection = null;
+    public List<Object> queryListOneColumn(String sql, Object[] arguments) {
+        Connection connection = getConnection();
+        if (connection == null) {
+            return null;
+        }
+        return queryListOneColumn(connection, true, sql, arguments);
+    }
+
+    /**
+     * 查询列表，包含多个字段
+     *
+     * @param connection
+     * @param closeConnection
+     * @param sql
+     * @param arguments
+     * @return
+     */
+    public List<Map<String, Object>> queryList(Connection connection, boolean closeConnection, String sql, Object[] arguments) {
+        if (connection == null) {
+            return null;
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
-            connection = getConnection();
-            if (connection == null) {
-                return null;
-            }
-
             stmt = connection.prepareStatement(sql);
             setArguments(stmt, arguments);
             rs = stmt.executeQuery();
@@ -301,9 +336,17 @@ public class DbOperator {
             logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             return null;
         } finally {
-            close(connection, stmt);
+            close(connection, stmt, closeConnection);
             closeResultSet(rs);
         }
+    }
+
+    public List<Map<String, Object>> queryList(String sql, Object[] arguments) {
+        Connection connection = getConnection();
+        if (connection == null) {
+            return null;
+        }
+        return queryList(connection, true, sql, arguments);
     }
 
     /**

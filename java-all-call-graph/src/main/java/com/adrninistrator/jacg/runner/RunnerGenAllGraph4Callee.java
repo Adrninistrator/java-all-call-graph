@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -26,6 +27,9 @@ import java.util.*;
 public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     private static final Logger logger = LoggerFactory.getLogger(RunnerGenAllGraph4Callee.class);
+
+    // 记录是否需要处理MySQL的sql_mode
+    private boolean handleSqlMode = false;
 
     static {
         runner = new RunnerGenAllGraph4Callee();
@@ -66,18 +70,44 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return;
         }
 
+        // 生成需要处理的类名Set
+        Set<String> classNameSet = new HashSet<>(taskSet.size());
+        for (String task : taskSet) {
+            // 获取简单类名
+            String className = getSimpleClassName(task);
+            if (className == null) {
+                return;
+            }
+            classNameSet.add(className);
+        }
+
+        // 判断是否需要处理sql_mode
+        Connection connection = dbOperator.getConnection();
+        if (connection == null) {
+            return;
+        }
+        String sqlMode = querySqlMode(connection, true);
+        if (sqlMode == null) {
+            return;
+        }
+
+        handleSqlMode = sqlMode.contains(Constants.MYSQL_ONLY_FULL_GROUP_BY);
+        if (handleSqlMode) {
+            logger.info("需要处理MySQL的sql_mode");
+        }
+
         // 创建线程
         createThreadPoolExecutor();
 
         // 遍历需要处理的任务
-        for (String task : taskSet) {
+        for (String className : classNameSet) {
 
             // 等待直到允许任务执行
             wait4TPEExecute();
 
             threadPoolExecutor.execute(() -> {
                 // 处理一条记录
-                if (!handleOneRecord(task)) {
+                if (!handleOneRecord(className)) {
                     someTaskFail = true;
                 }
             });
@@ -93,6 +123,70 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         printNoticeInfo();
 
         runSuccess = true;
+    }
+
+    /**
+     * 查询sql_mode
+     *
+     * @param connection
+     * @param closeConnection
+     * @return null: 查询失败，非null: 查询成功
+     */
+    private String querySqlMode(Connection connection, boolean closeConnection) {
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_SQL_MODE_SELECT);
+        if (sql == null) {
+            sql = "SELECT @@SESSION.sql_mode";
+            cacheSql(Constants.SQL_KEY_SQL_MODE_SELECT, sql);
+        }
+
+        List<Object> list = dbOperator.queryListOneColumn(connection, closeConnection, sql, null);
+        if (list == null) {
+            logger.error("查询sql_mode失败");
+            return null;
+        }
+
+        if (list.isEmpty()) {
+            return "";
+        }
+
+        return (String) list.get(0);
+    }
+
+    /**
+     * 将sql_mode中的ONLY_FULL_GROUP_BY去除
+     *
+     * @param connection
+     * @param oldSqlMode
+     * @return true: 成功，false: 失败
+     */
+    private boolean setSqlModeRemoveOnlyFullGroupBy(Connection connection, String oldSqlMode) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        String[] array = oldSqlMode.split(",");
+        for (String str : array) {
+            String strTrim = str.trim();
+
+            if (!strTrim.equals(Constants.MYSQL_ONLY_FULL_GROUP_BY)) {
+                if (stringBuilder.length() > 0) {
+                    stringBuilder.append(",");
+                }
+                stringBuilder.append(strTrim);
+            }
+        }
+
+        String newSqlMode = stringBuilder.toString();
+
+        logger.info("修改sql_mode [{}] -> [{}]", oldSqlMode, newSqlMode);
+
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_SQL_MODE_SET);
+        if (sql == null) {
+            sql = "SET SESSION sql_mode = ?";
+            cacheSql(Constants.SQL_KEY_SQL_MODE_SET, sql);
+        }
+
+        Integer row = dbOperator.update(connection, false, sql, new Object[]{newSqlMode});
+        // 这里不用判断返回行数
+        return row != null;
     }
 
     // 处理一条记录
@@ -111,7 +205,33 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             cacheSql(Constants.SQL_KEY_MC_QUERY_CALLEE_ALL_METHODS, sql);
         }
 
-        List<Map<String, Object>> calleeMethodList = dbOperator.queryList(sql, new Object[]{calleeClassName});
+        Connection connection = dbOperator.getConnection();
+        if (connection == null) {
+            return false;
+        }
+
+        /*
+            以下处理是因为在MySQL 5.7中，执行以下SQL语句默认会出错
+            select distinct(callee_method_hash),callee_full_method from method_call_xxx where callee_class_name= 'xxx' order by callee_method_name
+            Expression #1 of ORDER BY clause is not in SELECT list, references column 'xxxx' which is not in SELECT list; this is incompatible with DISTINCT
+            需要禁用sql_mode中的ONLY_FULL_GROUP_BY
+         */
+        if (handleSqlMode) {
+            // 需要处理MySQL的sql_mode
+            String sqlMode = querySqlMode(connection, false);
+            if (sqlMode == null) {
+                return false;
+            }
+
+            // 修改MySQL的sql_mode
+            if (sqlMode.contains(Constants.MYSQL_ONLY_FULL_GROUP_BY) && !setSqlModeRemoveOnlyFullGroupBy(connection, sqlMode)) {
+                return false;
+            }
+        }
+
+        List<Map<String, Object>> calleeMethodList = dbOperator.queryList(connection, false, sql, new Object[]{calleeClassName});
+        dbOperator.closeConnection(connection);
+
         if (CommonUtil.isCollectionEmpty(calleeMethodList)) {
             logger.error("从方法调用关系表未找到被调用类对应方法 [{}] [{}]", sql, calleeClassName);
             return false;

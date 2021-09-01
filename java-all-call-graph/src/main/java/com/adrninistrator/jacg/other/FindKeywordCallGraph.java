@@ -145,7 +145,7 @@ public class FindKeywordCallGraph {
         searchDir(dirPath, subDirPathSet, subFilePathList);
 
         if (subFilePathList.isEmpty()) {
-            logger.error("{} 目录中未找到后缀为[{}}]的文件", dirPath, Constants.EXT_TXT);
+            logger.error("{} 目录中未找到后缀为[{}]的文件", dirPath, Constants.EXT_TXT);
             return;
         }
 

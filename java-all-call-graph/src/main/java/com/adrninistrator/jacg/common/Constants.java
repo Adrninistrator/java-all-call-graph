@@ -124,6 +124,9 @@ public class Constants {
     public static final String SQL_KEY_INSERT_METHOD_CALL = "insert_method_call";
     public static final String SQL_KEY_INSERT_JAR_INFO = "insert_jar_info";
 
+    public static final String SQL_KEY_SQL_MODE_SELECT = "sql_mode_select";
+    public static final String SQL_KEY_SQL_MODE_SET = "sql_mode_set";
+
     public static final String SQL_CREATE_TABLE_HEAD = "CREATE TABLE if not exists";
     public static final int SQL_CREATE_TABLE_HEAD_LENGTH = SQL_CREATE_TABLE_HEAD.length();
 
@@ -170,6 +173,7 @@ public class Constants {
 
     public static final String MYSQL_FLAG = "mysql";
     public static final String MYSQL_REWRITEBATCHEDSTATEMENTS = "rewriteBatchedStatements=true";
+    public static final String MYSQL_ONLY_FULL_GROUP_BY = "ONLY_FULL_GROUP_BY";
 
     public static final int METHOD_CALL_ID_START = 0;
 

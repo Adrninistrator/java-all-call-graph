@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.Constants;
 import com.adrninistrator.jacg.common.DC;
+import com.adrninistrator.jacg.dto.CallerTaskInfo;
 import com.adrninistrator.jacg.dto.TmpNode4Caller;
 import com.adrninistrator.jacg.enums.CallTypeEnum;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
@@ -100,67 +101,17 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         // 创建线程
         createThreadPoolExecutor();
 
+        // 生成需要执行的任务信息
+        List<CallerTaskInfo> callerTaskInfoList = genCallerTaskInfo();
+
         // 遍历需要处理的任务
-        for (String task : taskSet) {
-            String left = task;
-            int lineNumStart = Constants.LINE_NUM_NONE;
-            int lineNumEnd = Constants.LINE_NUM_NONE;
-
-            if (task.contains(Constants.FLAG_SPACE)) {
-                String[] array = task.split(Constants.FLAG_SPACE);
-                if (array.length != 2) {
-                    logger.error("指定的类名+方法名非法，格式应为 [类名]:[方法名] [起始代码行号]-[结束代码行号] {}", task);
-                    return;
-                }
-
-                left = array[0];
-                String right = array[1];
-                String[] arrayRight = right.split(Constants.FLAG_MINUS);
-                if (arrayRight.length != 2) {
-                    logger.error("指定的行号非法，格式应为 [起始代码行号]-[结束代码行号] {}", task);
-                    return;
-                }
-
-                if (!CommonUtil.isNumStr(arrayRight[0]) || !CommonUtil.isNumStr(arrayRight[1])) {
-                    logger.error("指定的行号非法，应为数字 {}", task);
-                    return;
-                }
-
-                lineNumStart = Integer.parseInt(arrayRight[0]);
-                lineNumEnd = Integer.parseInt(arrayRight[1]);
-                if (lineNumStart <= 0 || lineNumEnd <= 0) {
-                    logger.error("指定的行号非法，应为正整数 {}", task);
-                    return;
-                }
-
-                if (lineNumStart > lineNumEnd) {
-                    logger.error("指定的行号非法，起始代码行号不能大于结束代码行号 {}", task);
-                    return;
-                }
-            }
-
-            String[] arrayLeft = left.split(Constants.FLAG_COLON);
-            if (arrayLeft == null || arrayLeft.length != 2) {
-                logger.error("指定的类名+方法名非法，格式应为 [类名]:[方法名] {}", task);
-                return;
-            }
-
-            String callerClassName = arrayLeft[0];
-            String callerMethodNameInTask = arrayLeft[1];
-
-            if (StringUtils.isAnyBlank(callerClassName, callerMethodNameInTask)) {
-                logger.error("指定的类名+方法名存在空值，格式应为 [类名]:[方法名] {}", task);
-                return;
-            }
-
+        for (CallerTaskInfo callerTaskInfo : callerTaskInfoList) {
             // 等待直到允许任务执行
             wait4TPEExecute();
 
-            int finalLineNumStart = lineNumStart;
-            int finalLineNumEnd = lineNumEnd;
             threadPoolExecutor.execute(() -> {
                 // 处理一条记录
-                if (!handleOneRecord(callerClassName, callerMethodNameInTask, finalLineNumStart, finalLineNumEnd)) {
+                if (!handleOneRecord(callerTaskInfo)) {
                     someTaskFail = true;
                 }
             });
@@ -178,6 +129,86 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         runSuccess = true;
     }
 
+    // 生成需要执行的任务信息
+    private List<CallerTaskInfo> genCallerTaskInfo() {
+        List<CallerTaskInfo> callerTaskInfoList = new ArrayList<>(taskSet.size());
+        Map<String, String> simpleClassNameMap = new HashMap<>(taskSet.size());
+
+        for (String task : taskSet) {
+            String left = task;
+            int lineNumStart = Constants.LINE_NUM_NONE;
+            int lineNumEnd = Constants.LINE_NUM_NONE;
+
+            if (task.contains(Constants.FLAG_SPACE)) {
+                String[] array = task.split(Constants.FLAG_SPACE);
+                if (array.length != 2) {
+                    logger.error("指定的类名+方法名非法，格式应为 [类名]:[方法名] [起始代码行号]-[结束代码行号] {}", task);
+                    return null;
+                }
+
+                left = array[0];
+                String right = array[1];
+                String[] arrayRight = right.split(Constants.FLAG_MINUS);
+                if (arrayRight.length != 2) {
+                    logger.error("指定的行号非法，格式应为 [起始代码行号]-[结束代码行号] {}", task);
+                    return null;
+                }
+
+                if (!CommonUtil.isNumStr(arrayRight[0]) || !CommonUtil.isNumStr(arrayRight[1])) {
+                    logger.error("指定的行号非法，应为数字 {}", task);
+                    return null;
+                }
+
+                lineNumStart = Integer.parseInt(arrayRight[0]);
+                lineNumEnd = Integer.parseInt(arrayRight[1]);
+                if (lineNumStart <= 0 || lineNumEnd <= 0) {
+                    logger.error("指定的行号非法，应为正整数 {}", task);
+                    return null;
+                }
+
+                if (lineNumStart > lineNumEnd) {
+                    logger.error("指定的行号非法，起始代码行号不能大于结束代码行号 {}", task);
+                    return null;
+                }
+            }
+
+            String[] arrayLeft = left.split(Constants.FLAG_COLON);
+            if (arrayLeft.length != 2) {
+                logger.error("指定的类名+方法名非法，格式应为 [类名]:[方法名] {}", task);
+                return null;
+            }
+
+            String callerClassName = arrayLeft[0];
+            String callerMethodNameInTask = arrayLeft[1];
+
+            if (StringUtils.isAnyBlank(callerClassName, callerMethodNameInTask)) {
+                logger.error("指定的类名+方法名存在空值，格式应为 [类名]:[方法名] {}", task);
+                return null;
+            }
+
+            String simpleClassName = simpleClassNameMap.get(callerClassName);
+            if (simpleClassName == null) {
+                // 获取简单类名
+                simpleClassName = getSimpleClassName(callerClassName);
+                if (simpleClassName == null) {
+                    return null;
+                }
+
+                simpleClassNameMap.put(callerClassName, simpleClassName);
+            }
+
+            CallerTaskInfo callerTaskInfo = new CallerTaskInfo();
+            callerTaskInfo.setCallerClassName(simpleClassName);
+            callerTaskInfo.setCallerMethodName(callerMethodNameInTask);
+            callerTaskInfo.setLineNumStart(lineNumStart);
+            callerTaskInfo.setLineNumEnd(lineNumEnd);
+
+            callerTaskInfoList.add(callerTaskInfo);
+        }
+
+        return callerTaskInfoList;
+    }
+
     public boolean isSupportIgnore() {
         return supportIgnore;
     }
@@ -187,7 +218,12 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     }
 
     // 处理一条记录
-    private boolean handleOneRecord(String callerClassName, String callerMethodNameInTask, int lineNumStart, int lineNumEnd) {
+    private boolean handleOneRecord(CallerTaskInfo callerTaskInfo) {
+        String callerClassName = callerTaskInfo.getCallerClassName();
+        String callerMethodNameInTask = callerTaskInfo.getCallerMethodName();
+        int lineNumStart = callerTaskInfo.getLineNumStart();
+        int lineNumEnd = callerTaskInfo.getLineNumEnd();
+
         // 从方法调用关系表查询指定的类是否存在
         if (!checkClassNameExists(callerClassName)) {
             return false;

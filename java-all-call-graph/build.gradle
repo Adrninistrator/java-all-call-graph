@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group 'com.github.adrninistrator'
-version = "0.4.3"
+version = "0.4.4"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -95,7 +95,7 @@ task test_jar(type: Jar) {
     }
 }
 
-// Éú³É¿ÉÒÔÖ±½ÓÖ´ĞĞµÄjar°ü£¬²¢¿½±´Ïà¹ØÎÄ¼ş
+// ç”Ÿæˆå¯ä»¥ç›´æ¥æ‰§è¡Œçš„jaråŒ…ï¼Œå¹¶æ‹·è´ç›¸å…³æ–‡ä»¶
 task gen_run_jar(type: Jar) {
     archiveName 'run_jacg.jar'
     from(sourceSets.main.output) {

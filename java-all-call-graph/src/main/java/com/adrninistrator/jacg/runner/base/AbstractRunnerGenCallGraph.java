@@ -76,6 +76,46 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      */
     private Map<String, MultiCallInfo> disabledSccMethodCallMap = new TreeMap<>();
 
+    /**
+     * 获取简单类名
+     *
+     * @param className
+     * @return null: 未获取到，非null: 若不存在同名类，则返回简单类名；若存在同名类，则返回完整类名
+     */
+    protected String getSimpleClassName(String className) {
+        if (className.contains(Constants.FLAG_DOT)) {
+            // 完整类名，查找对应的简单类名
+            String sql = sqlCacheMap.get(Constants.SQL_KEY_CN_QUERY_SIMPLE_CLASS);
+            if (sql == null) {
+                sql = "select " + DC.CN_SIMPLE_NAME + " from " + Constants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName() +
+                        " where " + DC.CN_FULL_NAME + " = ?";
+                cacheSql(Constants.SQL_KEY_CN_QUERY_SIMPLE_CLASS, sql);
+            }
+
+            List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
+            if (CommonUtil.isCollectionEmpty(list)) {
+                logger.error("指定的完整类名不存在，请检查 {}", className);
+                return null;
+            }
+            return (String) list.get(0);
+        }
+
+        // 简单类名
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_CN_QUERY_FULL_CLASS);
+        if (sql == null) {
+            sql = "select " + DC.CN_SIMPLE_NAME + " from " + Constants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName() +
+                    " where " + DC.CN_SIMPLE_NAME + " = ?";
+            cacheSql(Constants.SQL_KEY_CN_QUERY_FULL_CLASS, sql);
+        }
+
+        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
+        if (CommonUtil.isCollectionEmpty(list)) {
+            logger.error("指定的类名不存在，请检查是否需要使用完整类名形式 {}", className);
+            return null;
+        }
+        return (String) list.get(0);
+    }
+
     // 从方法调用关系表查询指定的类是否存在
     protected boolean checkClassNameExists(String className) {
         /*
@@ -99,46 +139,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         if (list.isEmpty()) {
-            logger.error("指定的类从调用关系表中未查询到，请检查是否需要使用完整类名，或使用简单类名 {}", className);
-
-            // 猜测对应的类名
-            guessClassName(className);
+            logger.error("指定的类从调用关系表中未查询到 {}", className);
             return false;
         }
 
         return true;
-    }
-
-    // 猜测对应的类名
-    protected void guessClassName(String className) {
-        if (className.contains(Constants.FLAG_DOT)) {
-            // 完整类名，查找对应的简单类名
-            String sql = sqlCacheMap.get(Constants.SQL_KEY_CN_QUERY_SIMPLE_CLASS);
-            if (sql == null) {
-                sql = "select " + DC.CN_SIMPLE_NAME + " from " + Constants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName() +
-                        " where " + DC.CN_FULL_NAME + " = ?";
-                cacheSql(Constants.SQL_KEY_CN_QUERY_SIMPLE_CLASS, sql);
-            }
-
-            List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
-            if (!CommonUtil.isCollectionEmpty(list)) {
-                logger.error("指定的完整类名请确认是否需要使用简单类名形式 {}->{}", className, list.get(0));
-            }
-            return;
-        }
-
-        // 简单类名，查找对应的完整类名
-        String sql = sqlCacheMap.get(Constants.SQL_KEY_CN_QUERY_FULL_CLASS);
-        if (sql == null) {
-            sql = "select " + DC.CN_FULL_NAME + " from " + Constants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName() +
-                    " where " + DC.CN_SIMPLE_NAME + " = ?";
-            cacheSql(Constants.SQL_KEY_CN_QUERY_FULL_CLASS, sql);
-        }
-
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
-        if (!CommonUtil.isCollectionEmpty(list)) {
-            logger.error("指定的简单类名请确认是否存在同名类，是否需要使用完整类名形式 {}->{}", className, StringUtils.join(list, " "));
-        }
     }
 
     // 读取方法注解
@@ -614,6 +619,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     /**
      * 获取本次执行时的输出目录
+     *
      * @return null: 执行失败，非null: 执行成功
      */
     public String getSuccessOutputDir() {
