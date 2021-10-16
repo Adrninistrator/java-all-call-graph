@@ -41,4 +41,8 @@ public class FileUtilNoLogger {
         System.err.println("创建目录失败: " + dirPath);
         return false;
     }
+
+    private FileUtilNoLogger() {
+        throw new IllegalStateException("illegal");
+    }
 }

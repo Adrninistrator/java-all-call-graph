@@ -240,7 +240,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{id});
-        if (map == null || map.isEmpty()) {
+        if (CommonUtil.isMapEmpty(map)) {
             logger.error("查询需要提示的信息失败 {}", id);
             return null;
         }
@@ -555,7 +555,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         Map<String, Map<String, Object>> jarInfoMap = queryJarFileInfo();
-        if (jarInfoMap == null) {
+        if (CommonUtil.isMapEmpty(jarInfoMap)) {
             return false;
         }
 

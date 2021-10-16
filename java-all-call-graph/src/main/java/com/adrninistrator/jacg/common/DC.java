@@ -37,6 +37,10 @@ public class DC {
     public static final String JI_LAST_MODIFIED = "last_modified";
     public static final String JI_JAR_HASH = "jar_hash";
 
+    public static final String ED_CALL_ID = "call_id";
+    public static final String ED_DATA_TYPE = "data_type";
+    public static final String ED_DATA_VALUE = "data_value";
+
     private DC() {
         throw new IllegalStateException("illegal");
     }

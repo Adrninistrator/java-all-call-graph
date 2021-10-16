@@ -101,7 +101,6 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         // 遍历需要处理的任务
         for (String className : classNameSet) {
-
             // 等待直到允许任务执行
             wait4TPEExecute();
 
@@ -298,6 +297,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         if (methodAnnotations != null) {
             writeData2File(methodAnnotations, out4Class, out4Method);
         }
+
+
         writeData2File(Constants.NEW_LINE, out4Class, out4Method);
 
         // 记录查找到的调用方法信息List

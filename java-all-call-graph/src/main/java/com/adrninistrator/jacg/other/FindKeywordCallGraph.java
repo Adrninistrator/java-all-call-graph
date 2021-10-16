@@ -24,23 +24,29 @@ public class FindKeywordCallGraph {
 
     private static final Logger logger = LoggerFactory.getLogger(FindKeywordCallGraph.class);
 
-    public void find(String[] args) {
+    /**
+     * 在生成的方法调用链文件中搜索指定关键字
+     *
+     * @param args 为空时先生成方法调用链文件
+     * @return 生成的搜索结果目录的完整路径
+     */
+    public String find(String[] args) {
         String order = GenSingleCallGraph.checkOrder();
         if (order == null) {
-            return;
+            return null;
         }
 
         if (args.length == 0) {
             // 当未指定参数时，先生成对应的方法完整调用链，再对生成目录的文件根据关键字生成到起始方法的调用链
             String[] args2 = prepare(order);
             if (args2 != null) {
-                doFind(args2);
+                return doFind(args2);
             }
-            return;
+            return null;
         }
 
         // 当有指定参数时则直接使用
-        doFind(args);
+        return doFind(args);
     }
 
     /**
@@ -101,12 +107,12 @@ public class FindKeywordCallGraph {
         return args;
     }
 
-    private void doFind(String[] args) {
+    private String doFind(String[] args) {
         int argsLength = args.length;
         if (argsLength < 2) {
             logger.error("参数数量小于2: {}", argsLength);
             logger.error("应按照以下方式指定参数: [文件/目录路径] [关键字1] [关键字2] ... [关键字n]");
-            return;
+            return null;
         }
 
         String filePath = args[0].replace("/", File.separator).replace("\\", File.separator);
@@ -122,23 +128,26 @@ public class FindKeywordCallGraph {
         File file = new File(filePath);
         if (!file.exists()) {
             logger.error("文件或目录不存，请确认路径中是否存在空格，若是则需要使用双引号\"\"将路径包含: {}", filePath);
-            return;
+            return null;
         }
 
-        if (file.isFile()) {
-            String data = handleOneFile(filePath, keywordSet);
-            if (data != null) {
-                String headerInfo = GenSingleCallGraph.genHeaderInfo(filePath, keywordSet);
-                // 指定文件时将结果直接输出到STDOUT
-                System.out.println(headerInfo);
-                System.out.println(data);
-            }
-        } else {
-            handleDir(filePath, keywordSet);
+        if (!file.isFile()) {
+            // 处理目录
+            return handleDir(filePath, keywordSet);
         }
+
+        // 处理文件
+        String data = handleOneFile(filePath, keywordSet);
+        if (data != null) {
+            String headerInfo = GenSingleCallGraph.genHeaderInfo(filePath, keywordSet);
+            // 指定文件时将结果直接输出到STDOUT
+            System.out.println(headerInfo);
+            System.out.println(data);
+        }
+        return null;
     }
 
-    private void handleDir(String dirPath, Set<String> keywordSet) {
+    private String handleDir(String dirPath, Set<String> keywordSet) {
         Set<String> subDirPathSet = new HashSet<>();
         List<String> subFilePathList = new ArrayList<>();
 
@@ -146,22 +155,23 @@ public class FindKeywordCallGraph {
 
         if (subFilePathList.isEmpty()) {
             logger.error("{} 目录中未找到后缀为[{}]的文件", dirPath, Constants.EXT_TXT);
-            return;
+            return null;
         }
 
         int dirPathLength = dirPath.length();
-        String currentDirPathFlag = Constants.DIR_FIND_KEYWORD_ + CommonUtil.currentTime();
+        String currentDirPath = Constants.DIR_FIND_KEYWORD_ + CommonUtil.currentTime();
 
         for (String subDirPath : subDirPathSet) {
-            String newDirPath = dirPath + currentDirPathFlag + File.separator + subDirPath.substring(dirPathLength);
+            String newDirPath = dirPath + currentDirPath + File.separator + subDirPath.substring(dirPathLength);
             if (!FileUtil.isDirectoryExists(newDirPath)) {
-                return;
+                return null;
             }
         }
+
         for (String subFilePath : subFilePathList) {
             logger.info("处理文件: {}", subFilePath);
             String data = handleOneFile(subFilePath, keywordSet);
-            String newFilePath = dirPath + currentDirPathFlag + File.separator + subFilePath.substring(dirPathLength) + Constants.EXT_MD;
+            String newFilePath = dirPath + currentDirPath + File.separator + subFilePath.substring(dirPathLength) + Constants.EXT_MD;
             if (data != null) {
                 String headerInfo = GenSingleCallGraph.genHeaderInfo(subFilePath, keywordSet);
                 try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFilePath), StandardCharsets.UTF_8))) {
@@ -169,10 +179,13 @@ public class FindKeywordCallGraph {
                     out.write(Constants.NEW_LINE);
                     out.write(data);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("error ", e);
+                    return null;
                 }
             }
         }
+
+        return new File(dirPath + currentDirPath).getAbsolutePath();
     }
 
     private void searchDir(String dirPath, Set<String> subDirPathSet, List<String> subFilePathList) {
@@ -194,7 +207,7 @@ public class FindKeywordCallGraph {
     private String handleOneFile(String filePath, Set<String> keywordSet) {
         List<String> lineNumList = findKeywordLineNumList(filePath, keywordSet);
 
-        if (lineNumList.size() == 1) {
+        if (lineNumList == null || lineNumList.size() == 1) {
             logger.error("{} 未查找到指定关键字: {}", filePath, keywordSet);
             return null;
         }
@@ -221,7 +234,7 @@ public class FindKeywordCallGraph {
 
             return lineNumList;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("error ", e);
             return null;
         }
     }

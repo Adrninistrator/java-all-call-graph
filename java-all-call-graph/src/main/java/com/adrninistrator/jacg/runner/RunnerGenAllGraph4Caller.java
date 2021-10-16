@@ -41,6 +41,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 是否支持忽略指定方法
     private boolean supportIgnore = false;
 
+    // 保存存在自定义数据的方法调用序号
+    private Set<Integer> callIdWithExtensionDataSet;
+
     static {
         runner = new RunnerGenAllGraph4Caller();
     }
@@ -98,6 +101,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return;
         }
 
+        // 查询存在自定义数据的方法调用序号
+        if (!queryCallIdWithExtensionData()) {
+            return;
+        }
+
         // 创建线程
         createThreadPoolExecutor();
 
@@ -127,6 +135,29 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         printNoticeInfo();
 
         runSuccess = true;
+    }
+
+    // 查询存在自定义数据的方法调用序号
+    private boolean queryCallIdWithExtensionData() {
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_ED_QUERY_CALL_ID_WITH_EXTENSION_DATA);
+        if (sql == null) {
+            sql = "select distinct(" + DC.ED_CALL_ID + ") from " + Constants.TABLE_PREFIX_EXTENSION_DATA + confInfo.getAppName();
+            cacheSql(Constants.SQL_KEY_ED_QUERY_CALL_ID_WITH_EXTENSION_DATA, sql);
+        }
+
+        List<Object> callIdWithExtensionDataList = dbOperator.queryListOneColumn(sql, new Object[]{});
+        if (callIdWithExtensionDataList == null) {
+            return false;
+        }
+        if (callIdWithExtensionDataList.isEmpty()) {
+            return true;
+        }
+
+        callIdWithExtensionDataSet = new HashSet<>(callIdWithExtensionDataList.size());
+        for (Object callIdWithExtensionData : callIdWithExtensionDataList) {
+            callIdWithExtensionDataSet.add((Integer) callIdWithExtensionData);
+        }
+        return true;
     }
 
     // 生成需要执行的任务信息
@@ -603,14 +634,47 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             calleeInfo.append(String.format(Constants.CALL_FLAG_CYCLE, back2Level));
         }
 
+        Integer id = (Integer) calleeMethodMap.get(DC.MC_ID);
+
+        // 添加自定义数据
+        if (!addExtensionData(id, calleeInfo)) {
+            return false;
+        }
+
         out.write(calleeInfo.toString());
         out.write(Constants.NEW_LINE);
-
-        Integer id = (Integer) calleeMethodMap.get(DC.MC_ID);
         String callType = (String) calleeMethodMap.get(DC.MC_CALL_TYPE);
 
         // 记录可能出现一对多的方法调用
         return recordMethodCallMayBeMulti(id, callType);
+    }
+
+    // 添加自定义数据
+    private boolean addExtensionData(Integer callId, StringBuilder calleeInfo) {
+        if (!callIdWithExtensionDataSet.contains(callId)) {
+            return true;
+        }
+
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_ED_QUERY_EXTENSION_DATA);
+        if (sql == null) {
+            String columns = StringUtils.join(Constants.TABLE_COLUMNS_EXTENSION_DATA, Constants.FLAG_COMMA_WITH_SPACE);
+            sql = "select " + columns + " from " + Constants.TABLE_PREFIX_EXTENSION_DATA + confInfo.getAppName() +
+                    " where " + DC.ED_CALL_ID + " = ?";
+            cacheSql(Constants.SQL_KEY_ED_QUERY_EXTENSION_DATA, sql);
+        }
+
+        Map<String, Object> extensionDataMap = dbOperator.queryOneRow(sql, new Object[]{callId});
+        if (CommonUtil.isMapEmpty(extensionDataMap)) {
+            logger.error("查询自定义数据不存在 {}", callId);
+            return false;
+        }
+
+        calleeInfo.append(Constants.CALL_FLAG_EXTENSION_DATA)
+                .append((String) extensionDataMap.get(DC.ED_DATA_TYPE))
+                .append(Constants.FLAG_AT)
+                .append((String) extensionDataMap.get(DC.ED_DATA_VALUE));
+
+        return true;
     }
 
     // 确定写入输出文件的当前调用方法信息

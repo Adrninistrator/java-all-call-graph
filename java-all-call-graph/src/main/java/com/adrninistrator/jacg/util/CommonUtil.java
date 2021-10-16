@@ -119,6 +119,10 @@ public class CommonUtil {
         return collection == null || collection.isEmpty();
     }
 
+    public static boolean isMapEmpty(Map map) {
+        return map == null || map.isEmpty();
+    }
+
     public static String genOutputFlag(int level) {
         if (level <= 0) {
             return "";
@@ -149,8 +153,8 @@ public class CommonUtil {
     public static String currentTime() {
         Calendar calendar = Calendar.getInstance();
         return String.format("%04d%02d%02d-%02d%02d%02d.%03d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DATE),
-                calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND));
+                calendar.get(Calendar.DATE), calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND));
     }
 
     private CommonUtil() {

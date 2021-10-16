@@ -7,6 +7,8 @@ import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.CommonUtil;
 import com.adrninistrator.jacg.util.FileUtil;
 import com.adrninistrator.jacg.util.SqlUtil;
+import com.adrninistrator.javacg.extension.dto.CustomData;
+import com.adrninistrator.javacg.extension.interfaces.CustomHandlerInterface;
 import com.adrninistrator.javacg.stat.JCallGraph;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -18,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -51,6 +54,9 @@ public class RunnerWriteDb extends AbstractRunner {
     // 记录Jar包信息
     private Map<Integer, String> jarInfoMap = new HashMap<>();
 
+    // 记录自定义处理类
+    private List<CustomHandlerInterface> customHandlerInterfaceList;
+
     // 记录是否读取到文件
     private boolean readFileFlag;
 
@@ -81,11 +87,6 @@ public class RunnerWriteDb extends AbstractRunner {
 
     @Override
     public void operate() {
-        // 判断是否需要调用java-callgraph生成jar包的方法调用关系
-        if (!callJavaCallGraph()) {
-            return;
-        }
-
         // 创建数据库表
         if (!createTables()) {
             return;
@@ -93,6 +94,12 @@ public class RunnerWriteDb extends AbstractRunner {
 
         // 清理数据库表
         if (!truncateTables()) {
+            return;
+        }
+
+        // 判断是否需要调用java-callgraph生成jar包的方法调用关系
+        if (!callJavaCallGraph()) {
+            someTaskFail = true;
             return;
         }
 
@@ -154,13 +161,115 @@ public class RunnerWriteDb extends AbstractRunner {
 
         System.setProperty(Constants.JAVA_CALL_GRAPH_FLAG_OUT_FILE, confInfo.getCallGraphInputFile());
 
-        // 调用java-callgraph
+        // 调用java-callgraph2
         JCallGraph jCallGraph = new JCallGraph();
+        // 添加自定义处理类
+        if (!addExtensionHandler(jCallGraph)) {
+            return false;
+        }
+
         boolean success = jCallGraph.run(array);
         if (!success) {
             logger.error("调用java-callgraph生成jar包的方法调用关系失败");
+            return false;
         }
-        return success;
+
+        // 处理自定义数据
+        return handleExtensionData();
+    }
+
+    // 添加自定义处理类
+    private boolean addExtensionHandler(JCallGraph jCallGraph) {
+        String extensionFilePath = Constants.DIR_CONFIG + File.separator + Constants.FILE_EXTENSION;
+
+        Set<String> extensionClasses = FileUtil.readFile2Set(extensionFilePath);
+        if (CommonUtil.isCollectionEmpty(extensionClasses)) {
+            logger.info("未指定自定义处理类，跳过 {}", extensionFilePath);
+            return true;
+        }
+
+        customHandlerInterfaceList = new ArrayList<>(extensionClasses.size());
+
+        try {
+            for (String extensionClass : extensionClasses) {
+                Class clazz = Class.forName(extensionClass);
+                Object obj = clazz.newInstance();
+                if (!(obj instanceof CustomHandlerInterface)) {
+                    logger.error("指定的类 {} 不是 {} 的实现类", extensionClass, CustomHandlerInterface.class.getName());
+                    return false;
+                }
+
+                CustomHandlerInterface customHandlerInterface = (CustomHandlerInterface) obj;
+                customHandlerInterface.init();
+
+                customHandlerInterfaceList.add(customHandlerInterface);
+                jCallGraph.addCustomHandler(customHandlerInterface);
+            }
+        } catch (Exception e) {
+            logger.error("error ", e);
+            return false;
+        }
+        return true;
+    }
+
+    // 处理自定义数据
+    private boolean handleExtensionData() {
+        if (CommonUtil.isCollectionEmpty(customHandlerInterfaceList)) {
+            return true;
+        }
+
+        List<Object[]> objectList = new ArrayList<>(Constants.BATCH_SIZE);
+        for (CustomHandlerInterface customHandlerInterface : customHandlerInterfaceList) {
+            List<CustomData> customDataList = customHandlerInterface.getCustomDataList();
+            if (CommonUtil.isCollectionEmpty(customDataList)) {
+                continue;
+            }
+
+            // 插入自定义数据
+            logger.info("自定义数据 {}", customHandlerInterface.getClass().getName());
+            if (!insertExtensionData(customDataList, objectList)) {
+                logger.error("插入自定义数据失败 {}", customHandlerInterface.getClass().getName());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 插入自定义数据
+    private boolean insertExtensionData(List<CustomData> customDataList, List<Object[]> objectList) {
+        String sql = sqlCacheMap.get(Constants.SQL_KEY_INSERT_EXTENSION_DATA);
+        if (sql == null) {
+            sql = genAndCacheInsertSql(Constants.SQL_KEY_INSERT_EXTENSION_DATA,
+                    false,
+                    Constants.TABLE_PREFIX_EXTENSION_DATA,
+                    Constants.TABLE_COLUMNS_EXTENSION_DATA);
+        }
+
+        // 分批插入数据
+        int customDataListSize = customDataList.size();
+        int insertTimes = (customDataListSize + Constants.BATCH_SIZE - 1) / Constants.BATCH_SIZE;
+
+        for (int i = 0; i < insertTimes; i++) {
+            for (int j = 0; j < Constants.BATCH_SIZE; j++) {
+                int seq = i * Constants.BATCH_SIZE + j;
+                if (seq >= customDataListSize) {
+                    break;
+                }
+                CustomData customData = customDataList.get(seq);
+
+                Object[] object = new Object[]{customData.getCallId(), customData.getDataType(), customData.getDataValue()};
+                objectList.add(object);
+            }
+            logger.info("写入数据库，自定义数据表 {}", objectList.size());
+            boolean success = dbOperator.batchInsert(sql, objectList);
+            objectList.clear();
+
+            if (!success) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // 创建数据库表
@@ -169,15 +278,17 @@ public class RunnerWriteDb extends AbstractRunner {
         String sqlMethodAnnotation = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_METHOD_ANNOTATION);
         String sqlMethodCall = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_METHOD_CALL);
         String jarInfo = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_JAR_INFO);
+        String extensionData = readCreateTableSql(Constants.DIR_SQL + File.separator + Constants.FILE_SQL_EXTENSION_DATA);
 
-        if (StringUtils.isAnyBlank(sqlClassName, sqlMethodAnnotation, sqlMethodCall, jarInfo)) {
+        if (StringUtils.isAnyBlank(sqlClassName, sqlMethodAnnotation, sqlMethodCall, jarInfo, extensionData)) {
             return false;
         }
 
         if (!dbOperator.createTable(sqlClassName) ||
                 !dbOperator.createTable(sqlMethodAnnotation) ||
                 !dbOperator.createTable(sqlMethodCall) ||
-                !dbOperator.createTable(jarInfo)) {
+                !dbOperator.createTable(jarInfo) ||
+                !dbOperator.createTable(extensionData)) {
             return false;
         }
 
@@ -202,7 +313,8 @@ public class RunnerWriteDb extends AbstractRunner {
         if (!dbOperator.truncateTable(Constants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName()) ||
                 !dbOperator.truncateTable(Constants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName()) ||
                 !dbOperator.truncateTable(Constants.TABLE_PREFIX_METHOD_ANNOTATION + confInfo.getAppName()) ||
-                !dbOperator.truncateTable(Constants.TABLE_PREFIX_JAR_INFO + confInfo.getAppName())) {
+                !dbOperator.truncateTable(Constants.TABLE_PREFIX_JAR_INFO + confInfo.getAppName()) ||
+                !dbOperator.truncateTable(Constants.TABLE_PREFIX_EXTENSION_DATA + confInfo.getAppName())) {
             return false;
         }
         return true;
@@ -223,7 +335,7 @@ public class RunnerWriteDb extends AbstractRunner {
 
     // 读取通过java-callgraph生成的直接调用关系文件，处理类名与Jar包信息
     private boolean handleClassCallAndJarInfo() {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(confInfo.getCallGraphInputFile())))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(confInfo.getCallGraphInputFile()), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (StringUtils.isBlank(line)) {
@@ -399,7 +511,7 @@ public class RunnerWriteDb extends AbstractRunner {
     // 读取方法注解信息
     private boolean handleMethodAnnotation() {
         String annotationInfoFilePath = confInfo.getCallGraphInputFile() + Constants.FILE_IN_ANNOTATION_TAIL;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(annotationInfoFilePath)))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(annotationInfoFilePath), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (StringUtils.isBlank(line)) {
@@ -488,7 +600,7 @@ public class RunnerWriteDb extends AbstractRunner {
 
     // 读取通过java-callgraph生成的直接调用关系文件，处理方法调用
     private boolean handleMethodCall() {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(confInfo.getCallGraphInputFile())))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(confInfo.getCallGraphInputFile()), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (StringUtils.isBlank(line)) {
