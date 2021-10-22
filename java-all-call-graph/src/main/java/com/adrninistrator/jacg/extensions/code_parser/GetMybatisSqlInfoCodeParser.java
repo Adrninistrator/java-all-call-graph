@@ -29,7 +29,7 @@ import java.util.jar.JarFile;
 /**
  * @author adrninistrator
  * @date 2021/8/25
- * @description:
+ * @description: 从MyBatis的XML文件获取对应的数据库操作语句及被操作的数据库表名
  */
 public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
 
@@ -60,9 +60,20 @@ public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
         }
     }
 
+    /**
+     * 判断当前被调用的类名及方法名是否需要处理
+     *
+     * @param calleeClassName  被调用的类名
+     * @param calleeMethodName 被调用的方法名
+     * @return true: 需要处理； false: 不需要处理
+     */
+    protected boolean checkClassNameAndMethod(String calleeClassName, String calleeMethodName) {
+        return calleeClassName.contains(".dao.");
+    }
+
     @Override
     public void handleMethodCall(int callId, String calleeClassName, String calleeMethodName, Type[] arguments, InstructionHandle mcIh, MethodGen methodGen) {
-        if (!calleeClassName.contains(".dao.")) {
+        if (!checkClassNameAndMethod(calleeClassName, calleeMethodName)) {
             return;
         }
 
