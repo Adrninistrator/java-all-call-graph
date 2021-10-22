@@ -41,6 +41,13 @@ public class DC {
     public static final String ED_DATA_TYPE = "data_type";
     public static final String ED_DATA_VALUE = "data_value";
 
+    public static final String MAED_DATA_ID = "data_id";
+    public static final String MAED_CALLER_FULL_METHOD = "caller_full_method";
+    public static final String MAED_CALLEE_FULL_METHOD = "callee_full_method";
+    public static final String MAED_CALLEE_SEQ_IN_CALLER = "callee_seq_in_caller";
+    public static final String MAED_DATA_TYPE = "data_type";
+    public static final String MAED_DATA_VALUE = "data_value";
+
     private DC() {
         throw new IllegalStateException("illegal");
     }

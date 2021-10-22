@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.extension.dto;
+package com.adrninistrator.jacg.extensions.dto;
 
 import java.util.List;
 

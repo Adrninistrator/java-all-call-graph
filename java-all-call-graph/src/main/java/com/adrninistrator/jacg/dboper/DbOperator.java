@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.dboper;
 
-import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.util.CommonUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -124,9 +124,9 @@ public class DbOperator {
             return false;
         }
 
-        int indexStart = sql.indexOf(Constants.SQL_CREATE_TABLE_HEAD);
+        int indexStart = sql.indexOf(JACGConstants.SQL_CREATE_TABLE_HEAD);
         if (indexStart == -1) {
-            logger.error("建表SQL语句中未找到指定内容 {} {}", sql, Constants.SQL_CREATE_TABLE_HEAD);
+            logger.error("建表SQL语句中未找到指定内容 {} {}", sql, JACGConstants.SQL_CREATE_TABLE_HEAD);
             return false;
         }
 
@@ -136,7 +136,7 @@ public class DbOperator {
             return false;
         }
 
-        String tableName = sql.substring(indexStart + Constants.SQL_CREATE_TABLE_HEAD_LENGTH, indexEnd).trim();
+        String tableName = sql.substring(indexStart + JACGConstants.SQL_CREATE_TABLE_HEAD_LENGTH, indexEnd).trim();
 
         // 检查数据库表是否创建成功，可能出现上述建表语句执行失败但未抛出异常的情况
         List<Object> list = queryListOneColumn("show tables like ?", new Object[]{tableName});

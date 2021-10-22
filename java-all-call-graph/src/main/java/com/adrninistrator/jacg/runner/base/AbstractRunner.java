@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.runner.base;
 
-import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.dboper.DbOperator;
@@ -39,31 +39,32 @@ public abstract class AbstractRunner {
     // 有任务执行失败
     protected boolean someTaskFail = false;
 
-    // 记录执行是否成功
-    protected boolean runSuccess = false;
-
     public static void main(String[] args) {
         runner.run();
     }
 
-    public void run() {
-        runSuccess = false;
-
+    /**
+     * 执行任务
+     *
+     * @return true: 成功；false: 失败
+     */
+    public boolean run() {
         long startTime = System.currentTimeMillis();
+        someTaskFail = false;
 
         confInfo = ConfManager.getConfInfo();
         if (confInfo == null) {
-            return;
+            return false;
         }
 
         dbOperator = DbOperator.getInstance();
         if (!dbOperator.init(confInfo)) {
-            return;
+            return false;
         }
 
         if (!init()) {
             logger.error("{} 初始化失败", this.getClass().getSimpleName());
-            return;
+            return false;
         }
 
         operate();
@@ -71,11 +72,21 @@ public abstract class AbstractRunner {
         beforeExit();
 
         long spendTime = System.currentTimeMillis() - startTime;
-        logger.info("{} 执行完毕，耗时: {} s", this.getClass().getSimpleName(), spendTime / 1000.0D);
+        logger.info("{} 耗时: {} s", this.getClass().getSimpleName(), spendTime / 1000.0D);
+
+        return !someTaskFail;
     }
 
+    /**
+     * 初始化
+     *
+     * @return true: 成功；false: 失败
+     */
     public abstract boolean init();
 
+    /**
+     * 执行操作
+     */
     public abstract void operate();
 
     protected void beforeExit() {
@@ -101,13 +112,13 @@ public abstract class AbstractRunner {
     // 创建线程池
     protected void createThreadPoolExecutor() {
         threadPoolExecutor = new ThreadPoolExecutor(confInfo.getThreadNum(), confInfo.getThreadNum(), 30, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(Constants.THREAD_POOL_MAX_QUEUE_SIZE), new ThreadFactory4TPE("worker"));
+                new LinkedBlockingQueue<>(JACGConstants.THREAD_POOL_MAX_QUEUE_SIZE), new ThreadFactory4TPE("worker"));
     }
 
     // 等待直到允许任务执行
     protected void wait4TPEExecute() {
         while (true) {
-            if (threadPoolExecutor.getQueue().size() < Constants.THREAD_POOL_WAIT_QUEUE_SIZE) {
+            if (threadPoolExecutor.getQueue().size() < JACGConstants.THREAD_POOL_WAIT_QUEUE_SIZE) {
                 return;
             }
             logger.debug("wait4TPEExecute ...");

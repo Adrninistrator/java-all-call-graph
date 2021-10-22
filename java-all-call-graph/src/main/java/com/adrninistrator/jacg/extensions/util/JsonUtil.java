@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.extension.util;
+package com.adrninistrator.jacg.extensions.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -35,6 +35,15 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(jsonStr, new TypeReference<Map<String, Object>>() {
             });
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static <T> T getObjFromJsonStr(String jsonStr, Class<T> clazz) {
+        try {
+            return objectMapper.readValue(jsonStr, clazz);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

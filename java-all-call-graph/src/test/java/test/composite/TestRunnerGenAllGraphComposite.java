@@ -1,6 +1,6 @@
 package test.composite;
 
-import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
@@ -17,12 +17,12 @@ public class TestRunnerGenAllGraphComposite {
     public static final Boolean[] BOOLEAN_ARRAY = new Boolean[]{Boolean.FALSE, Boolean.TRUE};
 
     public static final String[] OUTPUT_DETAIL_ARRAY = new String[]{
-            Constants.CONFIG_OUTPUT_DETAIL_1,
-            Constants.CONFIG_OUTPUT_DETAIL_2,
-            Constants.CONFIG_OUTPUT_DETAIL_3};
+            JACGConstants.CONFIG_OUTPUT_DETAIL_1,
+            JACGConstants.CONFIG_OUTPUT_DETAIL_2,
+            JACGConstants.CONFIG_OUTPUT_DETAIL_3};
 
     public static void main(String[] args) {
-        System.setProperty(Constants.PROPERTY_WRITE_CONFIG_IN_RESULT, "1");
+        System.setProperty(JACGConstants.PROPERTY_WRITE_CONFIG_IN_RESULT, "1");
 
         ConfInfo confInfo = ConfManager.getConfInfo();
 

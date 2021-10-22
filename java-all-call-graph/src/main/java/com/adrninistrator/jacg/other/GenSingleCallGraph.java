@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.other;
 
-import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.FileUtil;
 
 import java.io.BufferedReader;
@@ -59,21 +59,21 @@ public class GenSingleCallGraph {
 
     public static String genHeaderInfo(String filePath, Set<String> keywordSet) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("- 处理文件: ").append(filePath).append(Constants.NEW_LINE);
+        stringBuilder.append("- 处理文件: ").append(filePath).append(JACGConstants.NEW_LINE);
 
         String order = System.getProperty(ORDER_KEY);
         boolean order4er = ORDER_FOR_ER.equals(order);
         if (order4er) {
-            stringBuilder.append("- 查看方法向下调用链时使用，按层级增大方向打印").append(Constants.NEW_LINE);
+            stringBuilder.append("- 查看方法向下调用链时使用，按层级增大方向打印").append(JACGConstants.NEW_LINE);
         } else {
-            stringBuilder.append("- 查看方法向上调用链时使用，按层级减小方向打印").append(Constants.NEW_LINE);
+            stringBuilder.append("- 查看方法向上调用链时使用，按层级减小方向打印").append(JACGConstants.NEW_LINE);
         }
         if (keywordSet != null) {
-            stringBuilder.append("- 查找关键字: ").append(Constants.NEW_LINE).append("```").append(Constants.NEW_LINE);
+            stringBuilder.append("- 查找关键字: ").append(JACGConstants.NEW_LINE).append("```").append(JACGConstants.NEW_LINE);
             for (String keyword : keywordSet) {
-                stringBuilder.append(keyword).append(Constants.NEW_LINE);
+                stringBuilder.append(keyword).append(JACGConstants.NEW_LINE);
             }
-            stringBuilder.append("```").append(Constants.NEW_LINE);
+            stringBuilder.append("```").append(JACGConstants.NEW_LINE);
         }
         return stringBuilder.toString();
     }
@@ -155,18 +155,18 @@ public class GenSingleCallGraph {
         StringBuilder tmpStr = new StringBuilder();
         if (order4er) {
             for (int i = resultList.size() - 1; i >= 0; i--) {
-                tmpStr.append(resultList.get(i)).append(Constants.NEW_LINE);
+                tmpStr.append(resultList.get(i)).append(JACGConstants.NEW_LINE);
             }
         } else {
             for (String str : resultList) {
-                tmpStr.append(str).append(Constants.NEW_LINE);
+                tmpStr.append(str).append(JACGConstants.NEW_LINE);
             }
         }
 
         String data = tmpStr.toString();
-        stringBuilder.append("# 行号: ").append(lineNum).append(Constants.NEW_LINE)
-                .append("```").append(Constants.NEW_LINE)
-                .append(data).append("```").append(Constants.NEW_LINE).append(Constants.NEW_LINE);
+        stringBuilder.append("# 行号: ").append(lineNum).append(JACGConstants.NEW_LINE)
+                .append("```").append(JACGConstants.NEW_LINE)
+                .append(data).append("```").append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE);
     }
 
     private boolean isValidNum(String str) {
@@ -203,11 +203,13 @@ public class GenSingleCallGraph {
         return Integer.valueOf(strLevel);
     }
 
+    // 设置生成的调用链顺序为向下
     public static void setOrder4er() {
-        System.setProperty(GenSingleCallGraph.ORDER_KEY, GenSingleCallGraph.ORDER_FOR_ER);
+        System.setProperty(ORDER_KEY, ORDER_FOR_ER);
     }
 
+    // 设置生成的调用链顺序为向上
     public static void setOrder4ee() {
-        System.setProperty(GenSingleCallGraph.ORDER_KEY, GenSingleCallGraph.ORDER_FOR_EE);
+        System.setProperty(ORDER_KEY, ORDER_FOR_EE);
     }
 }

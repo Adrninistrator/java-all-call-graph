@@ -6,7 +6,7 @@ package com.adrninistrator.jacg.common;
  * @description:
  */
 
-public class Constants {
+public class JACGConstants {
 
     public static final String[] TABLE_COLUMNS_CLASS_NAME = new String[]{
             DC.CN_FULL_NAME,
@@ -44,7 +44,7 @@ public class Constants {
             DC.JI_JAR_HASH
     };
 
-    public static final String[] TABLE_COLUMNS_EXTENSION_DATA = new String[]{
+    public static final String[] TABLE_COLUMNS_EXTENDED_DATA = new String[]{
             DC.ED_CALL_ID,
             DC.ED_DATA_TYPE,
             DC.ED_DATA_VALUE
@@ -57,10 +57,12 @@ public class Constants {
     public static final String DIR_METHODS = "methods";
     public static final String DIR_FIND_KEYWORD_ = "find_keyword_";
     public static final String DIR_KEYWORD_CONF = "~jacg_find_keyword";
+    public static final String DIR_EXTENSIONS = "~jacg_extensions";
 
     public static final String FILE_CONFIG = "config.properties";
 
-    public static final String FILE_EXTENSION = "extension.properties";
+    public static final String FILE_EXTENSIONS_CODE_PARSER = "code_parser.properties";
+    public static final String FILE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT = "extended_data_supplement.properties";
 
     public static final String FILE_IN_ALLOWED_CLASS_PREFIX = "i_allowed_class_prefix.properties";
     public static final String FILE_IN_ANNOTATION_TAIL = "-annotation.txt";
@@ -76,7 +78,8 @@ public class Constants {
     public static final String FILE_SQL_METHOD_ANNOTATION = "method_annotation.sql";
     public static final String FILE_SQL_METHOD_CALL = "method_call.sql";
     public static final String FILE_SQL_JAR_INFO = "jar_info.sql";
-    public static final String FILE_SQL_EXTENSION_DATA = "extension_data.sql";
+    public static final String FILE_SQL_EXTENDED_DATA = "extended_data.sql";
+    public static final String FILE_SQL_MANUAL_ADD_EXTENDED_DATA = "manual_add_extended_data.sql";
 
     public static final String FILE_FIND_KEYWORD_4CALLEE = "find_keyword_4callee.properties";
     public static final String FILE_FIND_KEYWORD_4CALLER = "find_keyword_4caller.properties";
@@ -125,17 +128,19 @@ public class Constants {
     public static final String SQL_KEY_MC_QUERY_ONE_CALLER2 = "mc_query_one_caller2";
     public static final String SQL_KEY_MC_QUERY_NOTICE_INFO = "mc_query_notice_info";
     public static final String SQL_KEY_MC_QUERY_ALL_CALLER = "mc_query_all_caller";
+    public static final String SQL_KEY_MC_QUERY_CALLEE_SEQ_IN_CALLER = "mc_query_callee_in_caller_seq";
 
     public static final String SQL_KEY_JI_QUERY_JAR_INFO = "ji_query_jar_info";
 
-    public static final String SQL_KEY_ED_QUERY_CALL_ID_WITH_EXTENSION_DATA = "ed_query_call_id_with_extension_data";
-    public static final String SQL_KEY_ED_QUERY_EXTENSION_DATA = "ed_query_extension_data";
+    public static final String SQL_KEY_ED_QUERY_EXTENDED_DATA = "ed_query_extended_data";
+
+    public static final String SQL_KEY_MAED_QUERY_MANUAL_ADD_EXTENDED_DATA = "ed_query_manual_add_extended_data";
 
     public static final String SQL_KEY_INSERT_CLASS_NAME = "insert_class_name";
     public static final String SQL_KEY_INSERT_METHOD_ANNOTATION = "insert_method_annotation";
     public static final String SQL_KEY_INSERT_METHOD_CALL = "insert_method_call";
     public static final String SQL_KEY_INSERT_JAR_INFO = "insert_jar_info";
-    public static final String SQL_KEY_INSERT_EXTENSION_DATA = "insert_extension_data";
+    public static final String SQL_KEY_INSERT_EXTENDED_DATA = "insert_extended_data";
 
     public static final String SQL_KEY_SQL_MODE_SELECT = "sql_mode_select";
     public static final String SQL_KEY_SQL_MODE_SET = "sql_mode_set";
@@ -169,7 +174,8 @@ public class Constants {
     public static final String TABLE_PREFIX_METHOD_ANNOTATION = "method_annotation_";
     public static final String TABLE_PREFIX_METHOD_CALL = "method_call_";
     public static final String TABLE_PREFIX_JAR_INFO = "jar_info_";
-    public static final String TABLE_PREFIX_EXTENSION_DATA = "extension_data_";
+    public static final String TABLE_PREFIX_EXTENDED_DATA = "extended_data_";
+    public static final String TABLE_PREFIX_MANUAL_ADD_EXTENDED_DATA = "manual_add_extended_data_";
 
     public static final String OUTPUT_SPLIT_FLAG = "  ";
 
@@ -180,9 +186,12 @@ public class Constants {
     public static final int THREAD_POOL_MAX_QUEUE_SIZE = 100;
     public static final int THREAD_POOL_WAIT_QUEUE_SIZE = 80;
 
-    public static final String CALLEE_FLAG_ENTRY = "\t!entry!";
-    public static final String CALL_FLAG_CYCLE = "\t!cycle[%d]!";
-    public static final String CALL_FLAG_EXTENSION_DATA = "\t!ext_data!";
+    public static final String CALLEE_FLAG_ENTRY = FLAG_TAB + "!entry!";
+    public static final String CALL_FLAG_CYCLE = FLAG_TAB + "!cycle[%d]!";
+    public static final String CALL_FLAG_EXTENDED_DATA_NO_TAB = "!ext_data!";
+    public static final String CALL_FLAG_EXTENDED_DATA_MANUAL_ADD_NO_TAB = "!ext_data_ma!";
+    public static final String CALL_FLAG_EXTENDED_DATA = FLAG_TAB + CALL_FLAG_EXTENDED_DATA_NO_TAB;
+    public static final String CALL_FLAG_EXTENDED_DATA_MANUAL_ADD = FLAG_TAB + CALL_FLAG_EXTENDED_DATA_MANUAL_ADD_NO_TAB;
 
     public static final String JAVA_CALL_GRAPH_FLAG_OUT_FILE = "output.file";
 
@@ -207,7 +216,7 @@ public class Constants {
 
     public static final int LINE_NUM_NONE = -1;
 
-    private Constants() {
+    private JACGConstants() {
         throw new IllegalStateException("illegal");
     }
 }

@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group 'com.github.adrninistrator'
-version = "0.5.0"
+version = "0.5.1"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -54,9 +54,7 @@ List mysql = ['mysql:mysql-connector-java:8.0.20']
 
 List slf4j = ['org.slf4j:log4j-over-slf4j:1.7.30']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:0.0.2']
-
-List bcel = ['org.apache.bcel:bcel:6.5.0']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:0.0.3']
 
 def jackson_ver = "2.12.4"
 List jackson = [
@@ -73,7 +71,7 @@ List log4j = [
 ]
 
 dependencies {
-    implementation apache_common, c3p0, mysql, slf4j, java_callgraph, bcel, jackson, dom4j
+    compile apache_common, c3p0, mysql, slf4j, java_callgraph, jackson, dom4j
     testImplementation log4j
 }
 
@@ -124,6 +122,10 @@ task gen_run_jar(type: Jar) {
         copy {
             from 'src/main/resources/~jacg_config/'
             into 'output_dir/~jacg_config/'
+        }
+        copy {
+            from 'src/main/resources/~jacg_extensions/'
+            into 'output_dir/~jacg_extensions/'
         }
         copy {
             from 'src/main/resources/~jacg_find_keyword/'

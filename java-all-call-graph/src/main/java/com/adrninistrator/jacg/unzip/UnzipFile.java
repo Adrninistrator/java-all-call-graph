@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.unzip;
 
-import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.FileUtilNoLogger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,9 +37,10 @@ public class UnzipFile {
 
         String rootDirName = chooseRootDirName();
 
-        if (!FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_CONFIG, true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_SQL, true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + Constants.DIR_KEYWORD_CONF, true) ||
+        if (!FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + JACGConstants.DIR_CONFIG, true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + JACGConstants.DIR_SQL, true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + JACGConstants.DIR_KEYWORD_CONF, true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + JACGConstants.DIR_EXTENSIONS, true) ||
                 !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_JAVA + FLAG_FSP + DIR_TEST_JAVA_FILE, true)) {
             return;
         }
@@ -49,7 +50,10 @@ public class UnzipFile {
             while (ze != null) {
                 if (!ze.isDirectory()) {
                     String fileName = ze.getName();
-                    if (fileName.startsWith(Constants.DIR_CONFIG) || fileName.startsWith(Constants.DIR_SQL) || fileName.startsWith(Constants.DIR_KEYWORD_CONF)) {
+                    if (fileName.startsWith(JACGConstants.DIR_CONFIG) ||
+                            fileName.startsWith(JACGConstants.DIR_SQL) ||
+                            fileName.startsWith(JACGConstants.DIR_KEYWORD_CONF) ||
+                            fileName.startsWith(JACGConstants.DIR_EXTENSIONS)) {
                         writeFile(ze, zis, rootDirName, DIR_RESOURCES, fileName);
                     } else if (fileName.startsWith(DIR_TEST_JAVA_FILE) && fileName.endsWith(FILE_JAVA)) {
                         writeFile(ze, zis, rootDirName, DIR_JAVA, fileName);

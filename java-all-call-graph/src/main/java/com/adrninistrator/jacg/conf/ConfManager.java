@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.conf;
 
-import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,64 +34,68 @@ public class ConfManager {
 
         inited = true;
 
-        String configFilePath = Constants.DIR_CONFIG + File.separator + Constants.FILE_CONFIG;
+        String configFilePath = JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_CONFIG;
 
         try (Reader reader = new InputStreamReader(new FileInputStream(FileUtil.findFile(configFilePath)), StandardCharsets.UTF_8)) {
             Properties properties = new Properties();
             properties.load(reader);
 
-            String appName = properties.getProperty(Constants.KEY_APPNAME);
-            if (checkBlank(appName, Constants.KEY_APPNAME, configFilePath)) {
+            String appName = properties.getProperty(JACGConstants.KEY_APPNAME);
+            if (checkBlank(appName, JACGConstants.KEY_APPNAME, configFilePath)) {
                 return null;
             }
 
-            String callGraphJarList = properties.getProperty(Constants.KEY_CALL_GRAPH_JAR_LIST);
-            if (checkBlank(callGraphJarList, Constants.KEY_CALL_GRAPH_JAR_LIST, configFilePath)) {
+            String callGraphJarList = properties.getProperty(JACGConstants.KEY_CALL_GRAPH_JAR_LIST);
+            if (checkBlank(callGraphJarList, JACGConstants.KEY_CALL_GRAPH_JAR_LIST, configFilePath)) {
                 return null;
             }
 
             // 生成的Java方法调用关系文件路径，使用指定的第1个jar包的路径加上“.txt”
-            String callGraphInputFile = callGraphJarList.split(Constants.FLAG_SPACE)[0] + Constants.EXT_TXT;
+            String callGraphInputFile = callGraphJarList.split(JACGConstants.FLAG_SPACE)[0] + JACGConstants.EXT_TXT;
 
-            String inputIgnoreOtherPackage = properties.getProperty(Constants.KEY_INPUT_IGNORE_OTHER_PACKAGE);
-            if (checkBlank(inputIgnoreOtherPackage, Constants.KEY_INPUT_IGNORE_OTHER_PACKAGE, configFilePath)) {
+            String inputIgnoreOtherPackage = properties.getProperty(JACGConstants.KEY_INPUT_IGNORE_OTHER_PACKAGE);
+            if (checkBlank(inputIgnoreOtherPackage, JACGConstants.KEY_INPUT_IGNORE_OTHER_PACKAGE, configFilePath)) {
                 return null;
             }
 
-            String genCombinedOutput = properties.getProperty(Constants.KEY_GEN_COMBINED_OUTPUT);
-            if (checkBlank(genCombinedOutput, Constants.KEY_GEN_COMBINED_OUTPUT, configFilePath)) {
+            String genCombinedOutput = properties.getProperty(JACGConstants.KEY_GEN_COMBINED_OUTPUT);
+            if (checkBlank(genCombinedOutput, JACGConstants.KEY_GEN_COMBINED_OUTPUT, configFilePath)) {
                 return null;
             }
 
-            String showCallerLineNum = properties.getProperty(Constants.KEY_SHOW_CALLER_LINE_NUM);
-            if (checkBlank(showCallerLineNum, Constants.KEY_SHOW_CALLER_LINE_NUM, configFilePath)) {
+            String showCallerLineNum = properties.getProperty(JACGConstants.KEY_SHOW_CALLER_LINE_NUM);
+            if (checkBlank(showCallerLineNum, JACGConstants.KEY_SHOW_CALLER_LINE_NUM, configFilePath)) {
                 return null;
             }
 
-            String genUpwardsMethodsFile = properties.getProperty(Constants.KEY_GEN_UPWARDS_METHODS_FILE);
-            if (checkBlank(genUpwardsMethodsFile, Constants.KEY_GEN_UPWARDS_METHODS_FILE, configFilePath)) {
+            String genUpwardsMethodsFile = properties.getProperty(JACGConstants.KEY_GEN_UPWARDS_METHODS_FILE);
+            if (checkBlank(genUpwardsMethodsFile, JACGConstants.KEY_GEN_UPWARDS_METHODS_FILE, configFilePath)) {
                 return null;
             }
 
-            String callGraphOutputDetail = properties.getProperty(Constants.KEY_CALL_GRAPH_OUTPUT_DETAIL);
-            if (checkBlank(callGraphOutputDetail, Constants.KEY_CALL_GRAPH_OUTPUT_DETAIL, configFilePath)) {
+            // 生成调用链时的详细程度，首先从JVM参数获取，为空时再从配置文件获取
+            String callGraphOutputDetail = System.getProperty(JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL);
+            if (callGraphOutputDetail == null) {
+                callGraphOutputDetail = properties.getProperty(JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL);
+            }
+            if (checkBlank(callGraphOutputDetail, JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL, configFilePath)) {
                 return null;
             }
 
-            if (!StringUtils.equalsAny(callGraphOutputDetail, Constants.CONFIG_OUTPUT_DETAIL_1, Constants.CONFIG_OUTPUT_DETAIL_2,
-                    Constants.CONFIG_OUTPUT_DETAIL_3)) {
-                logger.error("参数配置非法，可选值为 {} {} {} {}", Constants.KEY_CALL_GRAPH_OUTPUT_DETAIL, Constants.CONFIG_OUTPUT_DETAIL_1,
-                        Constants.CONFIG_OUTPUT_DETAIL_2, Constants.CONFIG_OUTPUT_DETAIL_3);
+            if (!StringUtils.equalsAny(callGraphOutputDetail, JACGConstants.CONFIG_OUTPUT_DETAIL_1, JACGConstants.CONFIG_OUTPUT_DETAIL_2,
+                    JACGConstants.CONFIG_OUTPUT_DETAIL_3)) {
+                logger.error("参数配置非法，可选值为 {} {} {} {}", JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL, JACGConstants.CONFIG_OUTPUT_DETAIL_1,
+                        JACGConstants.CONFIG_OUTPUT_DETAIL_2, JACGConstants.CONFIG_OUTPUT_DETAIL_3);
                 return null;
             }
 
-            String strThreadNum = properties.getProperty(Constants.KEY_THREAD_NUM);
-            if (checkBlank(strThreadNum, Constants.KEY_THREAD_NUM, configFilePath)) {
+            String strThreadNum = properties.getProperty(JACGConstants.KEY_THREAD_NUM);
+            if (checkBlank(strThreadNum, JACGConstants.KEY_THREAD_NUM, configFilePath)) {
                 return null;
             }
 
-            String showMethodAnnotation = properties.getProperty(Constants.KEY_SHOW_METHOD_ANNOTATION);
-            if (checkBlank(showMethodAnnotation, Constants.KEY_SHOW_METHOD_ANNOTATION, configFilePath)) {
+            String showMethodAnnotation = properties.getProperty(JACGConstants.KEY_SHOW_METHOD_ANNOTATION);
+            if (checkBlank(showMethodAnnotation, JACGConstants.KEY_SHOW_METHOD_ANNOTATION, configFilePath)) {
                 return null;
             }
 
@@ -99,36 +103,36 @@ public class ConfManager {
             try {
                 threadNum = Integer.parseInt(strThreadNum);
             } catch (NumberFormatException e) {
-                logger.error("非法线程数 {} {}", Constants.KEY_THREAD_NUM, strThreadNum);
+                logger.error("非法线程数 {} {}", JACGConstants.KEY_THREAD_NUM, strThreadNum);
                 return null;
             }
 
             if (threadNum <= 0) {
-                logger.error("线程数过小 {} {}", Constants.KEY_THREAD_NUM, strThreadNum);
+                logger.error("线程数过小 {} {}", JACGConstants.KEY_THREAD_NUM, strThreadNum);
                 return null;
             }
-            if (threadNum > Constants.MAX_THREAD_NUM) {
-                logger.error("线程数过大 {} {}", Constants.KEY_THREAD_NUM, strThreadNum);
-                return null;
-            }
-
-            String dbDriverName = properties.getProperty(Constants.KEY_DB_DRIVER_NAME);
-            if (checkBlank(dbDriverName, Constants.KEY_DB_DRIVER_NAME, configFilePath)) {
+            if (threadNum > JACGConstants.MAX_THREAD_NUM) {
+                logger.error("线程数过大 {} {}", JACGConstants.KEY_THREAD_NUM, strThreadNum);
                 return null;
             }
 
-            String dbUrl = properties.getProperty(Constants.KEY_DB_URL);
-            if (checkBlank(dbUrl, Constants.KEY_DB_URL, configFilePath)) {
+            String dbDriverName = properties.getProperty(JACGConstants.KEY_DB_DRIVER_NAME);
+            if (checkBlank(dbDriverName, JACGConstants.KEY_DB_DRIVER_NAME, configFilePath)) {
                 return null;
             }
 
-            String dbUsername = properties.getProperty(Constants.KEY_DB_USERNAME);
-            if (checkBlank(dbUsername, Constants.KEY_DB_USERNAME, configFilePath)) {
+            String dbUrl = properties.getProperty(JACGConstants.KEY_DB_URL);
+            if (checkBlank(dbUrl, JACGConstants.KEY_DB_URL, configFilePath)) {
                 return null;
             }
 
-            String dbPassword = properties.getProperty(Constants.KEY_DB_PASSWORD);
-            if (checkBlank(dbPassword, Constants.KEY_DB_PASSWORD, configFilePath)) {
+            String dbUsername = properties.getProperty(JACGConstants.KEY_DB_USERNAME);
+            if (checkBlank(dbUsername, JACGConstants.KEY_DB_USERNAME, configFilePath)) {
+                return null;
+            }
+
+            String dbPassword = properties.getProperty(JACGConstants.KEY_DB_PASSWORD);
+            if (checkBlank(dbPassword, JACGConstants.KEY_DB_PASSWORD, configFilePath)) {
                 return null;
             }
 
@@ -146,7 +150,7 @@ public class ConfManager {
             confInfo.setDbUrl(dbUrl);
             confInfo.setDbUsername(dbUsername);
             confInfo.setDbPassword(dbPassword);
-            if (System.getProperty(Constants.PROPERTY_WRITE_CONFIG_IN_RESULT) != null) {
+            if (System.getProperty(JACGConstants.PROPERTY_WRITE_CONFIG_IN_RESULT) != null) {
                 confInfo.setWriteConf(true);
             }
 

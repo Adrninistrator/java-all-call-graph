@@ -6,7 +6,7 @@
 
 在很多场景下，如果能够生成Java代码中方法之间的调用链，是很有帮助的，例如分析代码执行流程、确认被修改代码的影响范围、代码审计/漏洞分析等。
 
-IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可以通过“Navigate -> Call Hierarchy”菜单(快捷键：Ctrl+Alt+H)使用；Eclipse也提供了相同的功能。但以上都需要针对每个方法进行手工处理，拷贝出来的文本无法展示调用层级，且不支持生成指定Java方法向下的完整调用链。
+IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可以通过“Navigate -> Call Hierarchy”菜单(快捷键：Ctrl+Alt+H)使用；Eclipse也提供了相同的功能。但以上都需要针对每个方法进行手工处理，不支持对方法进行过滤或者其他扩展功能。
 
 以下实现了一个工具，能够批量生成指定Java方法向下的完整调用链，对于关注的Java方法，能够生成其向下调用的方法信息，及被调用方法再向下调用的方法，直到最下层被调用的方法。
 
@@ -15,6 +15,8 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 该工具生成的Java方法完整调用链中，支持显示相关的包名、类名、方法名、方法参数、调用者源代码行号、方法注解、循环调用，入口方法。
 
 该工具支持生成某个方法到起始方法之间的调用链，也支持根据关键字查找关注的方法，生成其到起即方法之间的调用链。
+
+`当前项目提供了插件功能，可用于为Java代码自动生成UML时序图`，可参考[https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram](https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram)。
 
 # 2. 输出结果示例
 
@@ -94,7 +96,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.4.4'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.5.1'
 ```
 
 - Maven
@@ -103,7 +105,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.4.4'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.4.4</version>
+  <version>0.5.1</version>
   <type>provided</type>
 </dependency>
 ```
@@ -137,6 +139,8 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.4.4'
 
 当前步骤在每个Java项目只需要执行一次。
 
+`当组件升级后，若对配置文件有新增或修改，则需要再执行当前步骤，否则可能会因为缺少配置文件导致执行失败。`
+
 执行当前步骤时，需要执行main()方法的类名如下：
 
 ```
@@ -145,7 +149,7 @@ com.adrninistrator.jacg.unzip.UnzipFile
 
 需要选择classpath对应模块为test。
 
-执行以上类后，会将java-all-callgraph.jar中保存配置文件的~jacg_config、~jacg_find_keyword、~jacg_sql目录，保存启动类（下文涉及的Test...类）的“test/jacg”目录，分别释放到当前Java项目的test模块的resources、java目录中（仅在本地生效，避免发布到服务器中）。
+执行以上类后，会将java-all-callgraph.jar中保存配置文件的~jacg_config、~jacg_extensions、~jacg_find_keyword、~jacg_sql目录，保存启动类（下文涉及的Test...类）的“test/jacg”目录，分别释放到当前Java项目的test模块的resources、java目录中（仅在本地生效，避免发布到服务器中）。
 
 若当前Java项目存在“src/test”或“src/unit.test”目录，则将配置文件与Java文件分别释放在该目录的resources、java目录中；
 
@@ -408,6 +412,7 @@ func1(java.lang.String)
 
 ```
 ~jacg_config
+~jacg_extensions
 ~jacg_find_keyword
 ~jacg_sql
 jar
@@ -636,6 +641,8 @@ list.stream().map(TestDto1::getStr).collect(Collectors.toList());
 |method\_annotation\_|方法注解表|保存方法及方法上的注解信息|
 |method\_call\_|方法调用关系表|保存各方法之间调用信息|
 |jar\_info\_|jar包信息表|保存用于解析方法调用关系的jar包信息|
+|extended\_data\_|自定义数据表|
+|manual\_add\_extended\_data\_|手工添加的自定义数据表|
 
 上述数据库表在创建时使用表名前缀加上配置文件`config.properties`中的`app.name`参数值。
 

@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.util;
 
-import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -65,7 +65,7 @@ public class FileUtil {
      * @return
      */
     public static Set<String> readFile2Set(String filePath) {
-        return readFile2Set(filePath, Constants.FLAG_HASHTAG);
+        return readFile2Set(filePath, JACGConstants.FLAG_HASHTAG);
     }
 
     /**
@@ -193,7 +193,7 @@ public class FileUtil {
                 String fileContent = readFile2String(file);
 
                 out.write(fileContent);
-                out.write(Constants.NEW_LINE);
+                out.write(JACGConstants.NEW_LINE);
             }
             return true;
         } catch (Exception e) {

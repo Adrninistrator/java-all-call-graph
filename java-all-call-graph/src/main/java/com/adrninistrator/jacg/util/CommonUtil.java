@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.util;
 
-import com.adrninistrator.jacg.common.Constants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class CommonUtil {
      * @return
      */
     public static String getSimpleClassNameFromFull(String fullClassName) {
-        int indexLastDot = fullClassName.lastIndexOf(Constants.FLAG_DOT);
+        int indexLastDot = fullClassName.lastIndexOf(JACGConstants.FLAG_DOT);
         if (indexLastDot == -1) {
             return fullClassName;
         }
@@ -43,7 +43,7 @@ public class CommonUtil {
      * @return
      */
     public static String getMethodWithArgs(String method) {
-        int indexColon = method.indexOf(Constants.FLAG_COLON);
+        int indexColon = method.indexOf(JACGConstants.FLAG_COLON);
         return method.substring(indexColon + 1);
     }
 
@@ -54,8 +54,8 @@ public class CommonUtil {
      * @return
      */
     public static String getOnlyMethodName(String method) {
-        int indexColon = method.indexOf(Constants.FLAG_COLON);
-        int indexLeftBrackets = method.indexOf(Constants.FLAG_LEFT_BRACKET);
+        int indexColon = method.indexOf(JACGConstants.FLAG_COLON);
+        int indexLeftBrackets = method.indexOf(JACGConstants.FLAG_LEFT_BRACKET);
         return method.substring(indexColon + 1, indexLeftBrackets);
     }
 
@@ -78,7 +78,7 @@ public class CommonUtil {
      * @return
      */
     public static String getFullClassNameFromMethod(String method) {
-        int indexLastColon = method.lastIndexOf(Constants.FLAG_COLON);
+        int indexLastColon = method.lastIndexOf(JACGConstants.FLAG_COLON);
         return method.substring(0, indexLastColon);
     }
 
@@ -132,7 +132,7 @@ public class CommonUtil {
         if (flag == null) {
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < level; i++) {
-                stringBuilder.append(Constants.OUTPUT_SPLIT_FLAG);
+                stringBuilder.append(JACGConstants.OUTPUT_SPLIT_FLAG);
             }
             flag = stringBuilder.toString();
             outputFlagMap.put(level, flag);

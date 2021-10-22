@@ -1,11 +1,11 @@
-package com.adrninistrator.jacg.extension.handler;
+package com.adrninistrator.jacg.extensions.code_parser;
 
-import com.adrninistrator.jacg.extension.dto.DbOperateData;
-import com.adrninistrator.jacg.extension.enums.DbStatementEnum;
-import com.adrninistrator.jacg.extension.util.JsonUtil;
+import com.adrninistrator.jacg.extensions.dto.DbOperateData;
+import com.adrninistrator.jacg.extensions.enums.DbStatementEnum;
+import com.adrninistrator.jacg.extensions.util.JsonUtil;
 import com.adrninistrator.jacg.util.CommonUtil;
-import com.adrninistrator.javacg.extension.dto.CustomData;
-import com.adrninistrator.javacg.extension.handler.AbstractCustomHandler;
+import com.adrninistrator.javacg.extensions.code_parser.AbstractCustomCodeParser;
+import com.adrninistrator.javacg.extensions.dto.ExtendedData;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.Type;
@@ -31,7 +31,9 @@ import java.util.jar.JarFile;
  * @date 2021/8/25
  * @description:
  */
-public class GetMybatisSqlInfoHandler extends AbstractCustomHandler {
+public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
+
+    public static final String DATA_TYPE = "MB_SQL";
 
     // 保存简单处理后的SQL语句
     private Map<String, Map<String, String>> mapperSqlMap = new HashMap<>(200);
@@ -41,7 +43,7 @@ public class GetMybatisSqlInfoHandler extends AbstractCustomHandler {
 
     @Override
     public void init() {
-        customDataList = new ArrayList<>(1000);
+        extendedDataList = new ArrayList<>(1000);
     }
 
     @Override
@@ -68,8 +70,8 @@ public class GetMybatisSqlInfoHandler extends AbstractCustomHandler {
         DbOperateData dbOperateData = dbOperateDataMap.get(calleeMethodName);
         if (dbOperateData != null) {
             // 当前被调用的Mapper的方法已被记录
-            CustomData customData = CustomData.genCustomData(callId, getDataType(), JsonUtil.getJsonStr(dbOperateData));
-            customDataList.add(customData);
+            ExtendedData extendedData = ExtendedData.genExtendedData(callId, getDataType(), JsonUtil.getJsonStr(dbOperateData));
+            extendedDataList.add(extendedData);
             return;
         }
 
@@ -90,13 +92,13 @@ public class GetMybatisSqlInfoHandler extends AbstractCustomHandler {
         // 记录当前被调用的Mapper的方法
         dbOperateDataMap.put(calleeMethodName, dbOperateDataNew);
 
-        CustomData customData = CustomData.genCustomData(callId, getDataType(), JsonUtil.getJsonStr(dbOperateDataNew));
-        customDataList.add(customData);
+        ExtendedData extendedData = ExtendedData.genExtendedData(callId, getDataType(), JsonUtil.getJsonStr(dbOperateDataNew));
+        extendedDataList.add(extendedData);
     }
 
     @Override
     public String getDataType() {
-        return "MB_SQL";
+        return DATA_TYPE;
     }
 
     // 获取Mybatis的XML中的SQL语句
@@ -214,7 +216,7 @@ public class GetMybatisSqlInfoHandler extends AbstractCustomHandler {
                 break;
         }
 
-        dbOperateData.setStatement(dbStatementEnum.getValue());
+        dbOperateData.setStatement(dbStatementEnum.getStatement());
         dbOperateData.setTableList(tableList);
         return dbOperateData;
     }
@@ -231,7 +233,7 @@ public class GetMybatisSqlInfoHandler extends AbstractCustomHandler {
         int minIndex = -1;
 
         for (DbStatementEnum dbStatementEnum : DbStatementEnum.values()) {
-            int index = StringUtils.indexOfIgnoreCase(sql, dbStatementEnum.getValue());
+            int index = StringUtils.indexOfIgnoreCase(sql, dbStatementEnum.getStatement());
             if (index == 0) {
                 return dbStatementEnum;
             }
@@ -258,7 +260,7 @@ public class GetMybatisSqlInfoHandler extends AbstractCustomHandler {
     /**
      * 从数据库表名相关的sql语句中获得表名
      *
-     * @param sql 示例： table1、table1, table2、table1 as t1, table2 as t2
+     * @param sql 示例： "table1"    "table1, table2"    "table1 as t1, table2 as t2"
      * @return
      */
     private List<String> getTablesFromPartSql(String sql) {
