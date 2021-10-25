@@ -217,7 +217,7 @@ public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
                 break;
             case DSE_INSERT:
             case DSE_REPLACE:
-                tableList = getTablesFromSql(sql, " into ", new String[]{"(", " values", ";"});
+                tableList = getTablesFromSql(sql, " into ", new String[]{"(", " values", ";", "select"});
                 break;
             case DSE_UPDATE:
                 tableList = getTablesFromSql(sql, "update ", new String[]{" set "});
