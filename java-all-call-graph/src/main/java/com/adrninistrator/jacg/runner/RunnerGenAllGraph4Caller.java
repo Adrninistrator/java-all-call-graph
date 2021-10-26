@@ -2,6 +2,8 @@ package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.conf.ConfInfo;
+import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.dto.CallerTaskInfo;
 import com.adrninistrator.jacg.dto.TmpNode4Caller;
 import com.adrninistrator.jacg.enums.CallTypeEnum;
@@ -172,6 +174,14 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 设置生成调用链时的详细程度为最详细
     public static void setCallGraphOutputDetailMost() {
         System.setProperty(JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL, JACGConstants.CONFIG_OUTPUT_DETAIL_1);
+
+        if (ConfManager.isInited()) {
+            // 当已经完成初始化配置时，再设置生成调用链时的详细程度为最详细
+            ConfInfo confInfo = ConfManager.getConfInfo();
+            if (confInfo != null) {
+                confInfo.setCallGraphOutputDetail(JACGConstants.CONFIG_OUTPUT_DETAIL_1);
+            }
+        }
     }
 
     // 添加用于对自定义数据进行补充的处理类

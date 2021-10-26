@@ -27,6 +27,10 @@ public class ConfManager {
 
     private static boolean inited = false;
 
+    public static boolean isInited() {
+        return inited;
+    }
+
     public static ConfInfo getConfInfo() {
         if (inited) {
             return confInfo;
