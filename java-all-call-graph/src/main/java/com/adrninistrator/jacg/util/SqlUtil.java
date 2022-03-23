@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.util;
 
+import com.adrninistrator.jacg.common.JACGConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +78,16 @@ public class SqlUtil {
             stringBuilder.append(columns[i]).append(" as ").append(alias[i]);
         }
         return stringBuilder.toString();
+    }
+
+    /**
+     * 通过数据库驱动类名判断是否使用MySQL
+     *
+     * @param driverClassName
+     * @return
+     */
+    public static boolean isMySQLDb(String driverClassName) {
+        return StringUtils.contains(driverClassName, JACGConstants.MYSQL_FLAG);
     }
 
     private SqlUtil() {

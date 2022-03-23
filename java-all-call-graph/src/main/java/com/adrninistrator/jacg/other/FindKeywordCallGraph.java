@@ -1,11 +1,12 @@
 package com.adrninistrator.jacg.other;
 
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.extensions.find_filter.BaseFindKeywordFilter;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
-import com.adrninistrator.jacg.util.CommonUtil;
 import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,24 @@ public class FindKeywordCallGraph {
 
     private static final Logger logger = LoggerFactory.getLogger(FindKeywordCallGraph.class);
 
-    public static final String RETURN_RESULT_FILE_LIST_KEY = "return_result_file_list";
+    public static final String GEN_FOR_CALLER_SUPPORT_IGNORE_KEY = "gen_for_caller_support_ignore";
+
+    public static final String NO_RESULT = "未查找到指定关键字";
+
+    // 记录当前处理的目录
+    private String currentDirPath;
+
+    // 处理目录时，需要返回生成文件路径列表
+    private boolean returnResultFileListKey = false;
+
+    // 关键字搜索自定义过滤处理类
+    private BaseFindKeywordFilter baseFindKeywordFilter;
+
+    // 额外指定的关键字
+    private List<String> extraKeywordList = new ArrayList<>();
+
+    // 生成目录名使用固定值，不指定时间
+    private boolean outputDirUseFixedValue = false;
 
     /**
      * 在生成的方法调用链文件中搜索指定关键字
@@ -51,9 +69,32 @@ public class FindKeywordCallGraph {
         return doFind(args);
     }
 
+    // 返回当前处理的目录
+    public String getCurrentDirPath() {
+        return currentDirPath;
+    }
+
+    public void setBaseFindKeywordFilter(BaseFindKeywordFilter baseFindKeywordFilter) {
+        this.baseFindKeywordFilter = baseFindKeywordFilter;
+    }
+
+    public void addExtraKeyword(String extraKeyword) {
+        extraKeywordList.add(extraKeyword);
+    }
+
     // 设置处理目录时，需要返回生成文件路径列表
-    public static void setReturnResultFileList() {
-        System.setProperty(RETURN_RESULT_FILE_LIST_KEY, "1");
+    public void setReturnResultFileList() {
+        returnResultFileListKey = true;
+    }
+
+    // 设置生成向下的完整方法调用链时，支持忽略特定的包名、类、方法
+    public static void setGenForCallerSupportIgnore() {
+        System.setProperty(GEN_FOR_CALLER_SUPPORT_IGNORE_KEY, "1");
+    }
+
+    // 设置生成目录名使用固定值，不指定时间
+    public void setOutputDirUseFixedValue(boolean outputDirUseFixedValue) {
+        this.outputDirUseFixedValue = outputDirUseFixedValue;
     }
 
     /**
@@ -66,12 +107,20 @@ public class FindKeywordCallGraph {
         boolean order4ee = GenSingleCallGraph.ORDER_FOR_EE.equals(order);
 
         // 读取指定的关键字
-        String keywordConfigFilePath = JACGConstants.DIR_KEYWORD_CONF + File.separator + (order4ee ? JACGConstants.FILE_FIND_KEYWORD_4CALLEE : JACGConstants.FILE_FIND_KEYWORD_4CALLER);
+        String keywordConfigFilePath = JACGConstants.DIR_KEYWORD_CONF + File.separator + (order4ee ? JACGConstants.FILE_FIND_KEYWORD_4CALLEE :
+                JACGConstants.FILE_FIND_KEYWORD_4CALLER);
 
         List<String> keywordList = FileUtil.readFile2List(keywordConfigFilePath);
-        if (CommonUtil.isCollectionEmpty(keywordList)) {
+        if (JACGUtil.isCollectionEmpty(keywordList)) {
             logger.error("请在配置文件中指定需要生成到起始方法之间调用链的关键字 {}", keywordConfigFilePath);
             return null;
+        }
+
+        // 添加额外关键字
+        for (String extraKeyword : extraKeywordList) {
+            if (!keywordList.contains(extraKeyword)) {
+                keywordList.add(extraKeyword);
+            }
         }
 
         int keywordNum = 0;
@@ -92,6 +141,10 @@ public class FindKeywordCallGraph {
             runnerGenCallGraph = new RunnerGenAllGraph4Callee();
         } else {
             runnerGenCallGraph = new RunnerGenAllGraph4Caller();
+
+            if (System.getProperty(GEN_FOR_CALLER_SUPPORT_IGNORE_KEY) != null) {
+                ((RunnerGenAllGraph4Caller) runnerGenCallGraph).setSupportIgnore(true);
+            }
         }
 
         boolean success = runnerGenCallGraph.run();
@@ -129,10 +182,7 @@ public class FindKeywordCallGraph {
             filePath += File.separator;
         }
 
-        Set<String> keywordSet = new TreeSet<>();
-        for (int i = 1; i < argsLength; i++) {
-            keywordSet.add(args[i]);
-        }
+        Set<String> keywordSet = new TreeSet<>(Arrays.asList(args).subList(1, argsLength));
 
         File file = new File(filePath);
         if (!file.exists()) {
@@ -149,17 +199,19 @@ public class FindKeywordCallGraph {
         String data = handleOneFile(filePath, keywordSet);
         if (data != null) {
             String headerInfo = GenSingleCallGraph.genHeaderInfo(filePath, keywordSet);
-            // 指定文件时将结果直接输出到STDOUT
+            // 指定处理文件时将结果直接输出到STDOUT
             System.out.println(headerInfo);
             System.out.println(data);
         }
         return null;
     }
 
+    // 处理目录
     private List<String> handleDir(String dirPath, Set<String> keywordSet) {
         Set<String> subDirPathSet = new HashSet<>();
         List<String> subFilePathList = new ArrayList<>();
 
+        // 从目录中查找需要处理的文件
         searchDir(dirPath, subDirPathSet, subFilePathList);
 
         if (subFilePathList.isEmpty()) {
@@ -168,10 +220,14 @@ public class FindKeywordCallGraph {
         }
 
         int dirPathLength = dirPath.length();
-        String currentDirPath = JACGConstants.DIR_FIND_KEYWORD_ + CommonUtil.currentTime();
+        // 记录当前处理的目录
+        currentDirPath = dirPath + JACGConstants.DIR_FIND_KEYWORD_;
+        if (!outputDirUseFixedValue) {
+            currentDirPath = currentDirPath + "_" + JACGUtil.currentTime();
+        }
 
         for (String subDirPath : subDirPathSet) {
-            String newDirPath = dirPath + currentDirPath + File.separator + subDirPath.substring(dirPathLength);
+            String newDirPath = currentDirPath + File.separator + subDirPath.substring(dirPathLength);
             if (!FileUtil.isDirectoryExists(newDirPath)) {
                 return null;
             }
@@ -182,13 +238,16 @@ public class FindKeywordCallGraph {
             String data = handleOneFile(subFilePath, keywordSet);
             // 生成.md文件，将.txt后缀去掉
             int lastPointIndex = subFilePath.lastIndexOf(JACGConstants.FLAG_DOT);
-            String newFilePath = dirPath + currentDirPath + File.separator + subFilePath.substring(dirPathLength, lastPointIndex) + JACGConstants.EXT_MD;
+            String newFilePath = currentDirPath + File.separator + subFilePath.substring(dirPathLength, lastPointIndex) + JACGConstants.EXT_MD;
             if (data != null) {
                 String headerInfo = GenSingleCallGraph.genHeaderInfo(subFilePath, keywordSet);
                 try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFilePath), StandardCharsets.UTF_8))) {
-                    out.write(headerInfo);
-                    out.write(JACGConstants.NEW_LINE);
-                    out.write(data);
+                    if (!NO_RESULT.equals(data)) {
+                        // 查找到结果时写入文件，未查找到时创建空文件
+                        out.write(headerInfo);
+                        out.write(JACGConstants.NEW_LINE);
+                        out.write(data);
+                    }
                 } catch (Exception e) {
                     logger.error("error ", e);
                     return null;
@@ -196,23 +255,35 @@ public class FindKeywordCallGraph {
             }
         }
 
-        if (System.getProperty(RETURN_RESULT_FILE_LIST_KEY) == null) {
+        if (!returnResultFileListKey) {
             return null;
         }
 
+        List<String> resultFileList = new ArrayList<>();
+
         // 返回生成的结果文件路径列表
-        return getResultFileList(dirPath + currentDirPath);
+        getResultFileList(currentDirPath, resultFileList);
+
+        return resultFileList;
     }
 
+    // 从目录中查找需要处理的文件
     private void searchDir(String dirPath, Set<String> subDirPathSet, List<String> subFilePathList) {
         File dir = new File(dirPath);
         File[] files = dir.listFiles();
+        if (files == null) {
+            return;
+        }
+
         for (File file : files) {
             if (file.isDirectory()) {
+                // 目录，递归
                 searchDir(file.getPath(), subDirPathSet, subFilePathList);
             } else {
+                // 文件
                 String filePath = file.getPath();
-                if (filePath.endsWith(JACGConstants.EXT_TXT)) {
+                if (filePath.endsWith(JACGConstants.EXT_TXT) && !file.getName().startsWith(JACGConstants.COMBINE_FILE_NAME_PREFIX)) {
+                    // 跳过合并文件
                     subDirPathSet.add(dirPath);
                     subFilePathList.add(filePath);
                 }
@@ -221,17 +292,19 @@ public class FindKeywordCallGraph {
     }
 
     private String handleOneFile(String filePath, Set<String> keywordSet) {
+        // 获得包含关键字的文件行号
         List<String> lineNumList = findKeywordLineNumList(filePath, keywordSet);
 
         if (lineNumList == null || lineNumList.size() == 1) {
             logger.error("{} 未查找到指定关键字: {}", filePath, keywordSet);
-            return null;
+            return NO_RESULT;
         }
 
         GenSingleCallGraph genSingleCallGraph = new GenSingleCallGraph();
         return genSingleCallGraph.genCallGraph(lineNumList.toArray(new String[]{}));
     }
 
+    // 获得包含关键字的文件行号
     private List<String> findKeywordLineNumList(String file, Set<String> keywordSet) {
         List<String> lineNumList = new ArrayList<>(100);
         lineNumList.add(file);
@@ -241,7 +314,9 @@ public class FindKeywordCallGraph {
             String line;
             while ((line = in.readLine()) != null) {
                 for (String keyword : keywordSet) {
-                    if (line.contains(keyword)) {
+                    // 根据关键字判断当前行是否需要显示
+                    if (line.contains(keyword) &&
+                            (baseFindKeywordFilter == null || baseFindKeywordFilter.filter(keyword, line))) {
                         lineNumList.add(String.valueOf(index));
                     }
                 }
@@ -255,14 +330,17 @@ public class FindKeywordCallGraph {
         }
     }
 
-    private List<String> getResultFileList(String dirPath) {
+    private void getResultFileList(String dirPath, List<String> resultFileList) {
         File dir = new File(dirPath);
         File[] files = dir.listFiles();
-
-        List<String> resultFileList = new ArrayList<>(files.length);
+        if (files == null) {
+            return;
+        }
 
         for (File file : files) {
-            if (file.isFile() && file.getName().endsWith(JACGConstants.EXT_MD)) {
+            if (file.isDirectory()) {
+                getResultFileList(file.getPath(), resultFileList);
+            } else if (file.getName().endsWith(JACGConstants.EXT_MD)) {
                 if (file.getName().startsWith(JACGConstants.COMBINE_FILE_NAME_PREFIX)) {
                     // 跳过合并文件
                     continue;
@@ -271,7 +349,5 @@ public class FindKeywordCallGraph {
                 resultFileList.add(file.getAbsolutePath());
             }
         }
-
-        return resultFileList;
     }
 }

@@ -5,12 +5,16 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.dto.CallerTaskInfo;
+import com.adrninistrator.jacg.dto.MultiImplMethodInfo;
 import com.adrninistrator.jacg.dto.TmpNode4Caller;
-import com.adrninistrator.jacg.enums.CallTypeEnum;
+import com.adrninistrator.jacg.extensions.dto.BaseExtendedData;
+import com.adrninistrator.jacg.extensions.enums.ExtendedDataResultEnum;
+import com.adrninistrator.jacg.extensions.extended_data_add.ExtendedDataAddInterface;
 import com.adrninistrator.jacg.extensions.extended_data_supplement.ExtendedDataSupplementInterface;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
-import com.adrninistrator.jacg.util.CommonUtil;
 import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.enums.CallTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author adrninistrator
@@ -50,11 +55,50 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 保存存在手工添加的自定义数据的调用方与被调用方完整方法
     private Map<String, Set<String>> callFullMethodWithMAEDMap;
 
+    // 保存用于添加自定义数据的处理类
+    private List<ExtendedDataAddInterface> extendedDataAddExtList;
+
     // 保存用于对自定义数据进行补充的处理类
-    private Map<String, ExtendedDataSupplementInterface> extendedDataSupplementMap;
+    private Map<String, ExtendedDataSupplementInterface> extendedDataSupplementExtMap;
+
+    // 存在多个实现类的接口方法HASH
+    private Set<String> multiImplMethodHashSet;
+
+    // 存在多个子类的父类方法HASH
+    private Set<String> multiChildrenMethodHashSet;
+
+    // 本次执行时查询到存在多个实现类的接口或父类方法信息
+    private Map<String, MultiImplMethodInfo> currentFoundMultiImplMethodMap;
+
+    // 所有查询到存在多个实现类的接口或父类方法信息
+    private Map<String, Boolean> allFoundMultiImplMethodMap = new ConcurrentHashMap<>();
+
+    // 用于打印的向自定义数据表插入的SQL语句
+    private static String insertManualTableSql = null;
 
     static {
         runner = new RunnerGenAllGraph4Caller();
+    }
+
+    // 返回用于打印的向自定义数据表插入的SQL语句
+    public static String getInsertManualTableSql() {
+        if (insertManualTableSql != null) {
+            return insertManualTableSql;
+        }
+
+        ConfInfo confInfo = ConfManager.getConfInfo();
+        if (confInfo == null) {
+            return null;
+        }
+        insertManualTableSql = "insert into " + JACGConstants.TABLE_PREFIX_MANUAL_ADD_EXTENDED_DATA + confInfo.getAppName() +
+                " (" + StringUtils.join(JACGConstants.TABLE_COLUMNS_MANUAL_ADD_EXTENDED_DATA, JACGConstants.FLAG_COMMA_WITH_SPACE) +
+                ") values (\n" +
+                "'',\n" +
+                "'',\n" +
+                ",\n" +
+                "'',\n" +
+                "'');";
+        return insertManualTableSql;
     }
 
     @Override
@@ -77,7 +121,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         // 创建输出文件所在目录
-        if (!createOutputDit(JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER)) {
+        if (!createOutputDir(JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER)) {
             return false;
         }
 
@@ -99,8 +143,18 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return false;
         }
 
+        // 添加用于添加自定义数据处理类
+        if (!addExtendedDataAddExtensions()) {
+            return false;
+        }
+
         // 添加用于对自定义数据进行补充的处理类
         if (!addExtendedDataSupplementExtensions()) {
+            return false;
+        }
+
+        // 查询存在多个实现类的接口或父类方法HASH
+        if (!queryMultiImplMethodHash()) {
             return false;
         }
 
@@ -120,9 +174,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 将输出文件合并
         combineOutputFile(JACGConstants.COMBINE_FILE_NAME_4_CALLER);
-
-        // 打印提示信息
-        printNoticeInfo();
     }
 
     private boolean doOperate() {
@@ -146,11 +197,76 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         // 创建线程
         createThreadPoolExecutor();
 
-        // 生成需要执行的任务信息
+        // 生成文件中指定的需要执行的任务信息
         List<CallerTaskInfo> callerTaskInfoList = genCallerTaskInfo();
-        if (CommonUtil.isCollectionEmpty(callerTaskInfoList)) {
+        if (JACGUtil.isCollectionEmpty(callerTaskInfoList)) {
             return false;
         }
+
+        // 执行任务并等待
+        runAndWait(callerTaskInfoList);
+
+        while (true) {
+            // 根据记录本次执行时查询到存在多个实现类的接口或父类方法信息，生成继续执行的任务信息
+            List<CallerTaskInfo> callerTaskInfoList2 = genTaskFromMultiImplMethod();
+            if (JACGUtil.isCollectionEmpty(callerTaskInfoList2)) {
+                logger.info("需要继续执行的任务已执行完毕");
+                break;
+            }
+
+            // 重新设置线程数，若当前线程数需要调大则修改
+            resetPoolSize(callerTaskInfoList2.size());
+
+            // 执行任务并等待
+            runAndWait(callerTaskInfoList2);
+        }
+
+        return true;
+    }
+
+    // 设置生成调用链时的详细程度为最详细
+    public static void setCallGraphOutputDetailMost() {
+        System.setProperty(JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL, JACGConstants.CONFIG_OUTPUT_DETAIL_1);
+
+        if (ConfManager.isInited()) {
+            // 当已经完成初始化配置时，再修改对应设置
+            ConfInfo confInfo = ConfManager.getConfInfo();
+            if (confInfo != null) {
+                confInfo.setCallGraphOutputDetail(JACGConstants.CONFIG_OUTPUT_DETAIL_1);
+            }
+        }
+    }
+
+    // 设置生成向下的完整方法调用链时，忽略在一个调用方法中出现多次的被调用方法（包含自定义数据）
+    public static void setIgnoreDupCalleeInOneCaller() {
+        System.setProperty(JACGConstants.KEY_IGNORE_DUP_CALLEE_IN_ONE_CALLER, String.valueOf(true));
+
+        if (ConfManager.isInited()) {
+            // 当已经完成初始化配置时，再修改对应设置
+            ConfInfo confInfo = ConfManager.getConfInfo();
+            if (confInfo != null) {
+                confInfo.setIgnoreDupCalleeInOneCaller(true);
+            }
+        }
+    }
+
+    // 设置生成向下的完整方法调用链时，显示调用者源代码行号
+    public static void setShowCallerLineNum() {
+        System.setProperty(JACGConstants.KEY_SHOW_CALLER_LINE_NUM, String.valueOf(true));
+
+        if (ConfManager.isInited()) {
+            // 当已经完成初始化配置时，再修改对应设置
+            ConfInfo confInfo = ConfManager.getConfInfo();
+            if (confInfo != null) {
+                confInfo.setShowCallerLineNum(true);
+            }
+        }
+    }
+
+    // 执行任务并等待
+    private void runAndWait(List<CallerTaskInfo> callerTaskInfoList) {
+        // 本次执行时查询到存在多个实现类的接口或父类方法信息，初始化
+        currentFoundMultiImplMethodMap = new ConcurrentHashMap<>();
 
         // 遍历需要处理的任务
         for (CallerTaskInfo callerTaskInfo : callerTaskInfoList) {
@@ -167,20 +283,85 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 等待直到任务执行完毕
         wait4TPEDone();
-
-        return true;
     }
 
-    // 设置生成调用链时的详细程度为最详细
-    public static void setCallGraphOutputDetailMost() {
-        System.setProperty(JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL, JACGConstants.CONFIG_OUTPUT_DETAIL_1);
+    // 根据记录本次执行时查询到存在多个实现类的接口或父类方法信息，生成继续执行的任务信息
+    private List<CallerTaskInfo> genTaskFromMultiImplMethod() {
+        if (JACGUtil.isMapEmpty(currentFoundMultiImplMethodMap)) {
+            return null;
+        }
 
-        if (ConfManager.isInited()) {
-            // 当已经完成初始化配置时，再设置生成调用链时的详细程度为最详细
-            ConfInfo confInfo = ConfManager.getConfInfo();
-            if (confInfo != null) {
-                confInfo.setCallGraphOutputDetail(JACGConstants.CONFIG_OUTPUT_DETAIL_1);
+        List<CallerTaskInfo> callerTaskInfoList = new ArrayList<>();
+
+        for (Map.Entry<String, MultiImplMethodInfo> currentFoundMultiImplMethod : currentFoundMultiImplMethodMap.entrySet()) {
+            String sqlKey = JACGConstants.SQL_KEY_MC_QUERY_IMPL_METHODS;
+            String sql = sqlCacheMap.get(sqlKey);
+            if (sql == null) {
+                sql = "select " + StringUtils.joinWith(JACGConstants.FLAG_COMMA_WITH_SPACE, DC.MC_CALLEE_CLASS_NAME, DC.MC_CALLEE_FULL_METHOD) +
+                        " from " + JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
+                        " where " + DC.MC_CALLER_METHOD_HASH + " = ? and " + DC.MC_CALL_TYPE + " = ? and " + DC.MC_ENABLED + " = ?";
+                cacheSql(sqlKey, sql);
             }
+
+            String methodHash = currentFoundMultiImplMethod.getKey();
+            MultiImplMethodInfo multiImplMethodInfo = currentFoundMultiImplMethod.getValue();
+            CallTypeEnum callType = multiImplMethodInfo.getMultiImplMethodCallType();
+            String dirPath = multiImplMethodInfo.getDirPath();
+
+            List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{methodHash, callType.getType(), JACGConstants.ENABLED});
+            if (JACGUtil.isCollectionEmpty(list)) {
+                logger.error("未查找到接口或父类的实现类方法信息 {} {} {}", methodHash, callType.getType(), dirPath);
+                return null;
+            }
+
+            logger.info("查找到接口或父类的实现类方法数量 {} {} {} {}", methodHash, callType.getType(), dirPath, list.size());
+
+            for (Map<String, Object> map : list) {
+                CallerTaskInfo callerTaskInfo = new CallerTaskInfo();
+                callerTaskInfo.setCallerClassName((String) map.get(DC.MC_CALLEE_CLASS_NAME));
+
+                String methodWithArgs = JACGUtil.getMethodWithArgs((String) map.get(DC.MC_CALLEE_FULL_METHOD));
+                callerTaskInfo.setCallerMethodName(methodWithArgs);
+                callerTaskInfo.setLineNumStart(JACGConstants.LINE_NUM_NONE);
+                callerTaskInfo.setLineNumEnd(JACGConstants.LINE_NUM_NONE);
+                callerTaskInfo.setSaveDirPath(dirPath);
+
+                callerTaskInfoList.add(callerTaskInfo);
+            }
+        }
+
+        logger.info("需要继续执行的任务 {}", callerTaskInfoList);
+        return callerTaskInfoList;
+    }
+
+    // 添加用于添加自定义数据处理类
+    private boolean addExtendedDataAddExtensions() {
+        String extendedDataAddFilePath = JACGConstants.DIR_EXTENSIONS + File.separator + JACGConstants.FILE_EXTENSIONS_EXTENDED_DATA_ADD;
+
+        Set<String> extendedDataAddClasses = FileUtil.readFile2Set(extendedDataAddFilePath);
+        if (JACGUtil.isCollectionEmpty(extendedDataAddClasses)) {
+            logger.info("未指定用于添加自定义数据处理类，跳过 {}", extendedDataAddFilePath);
+            return true;
+        }
+
+        extendedDataAddExtList = new ArrayList<>(extendedDataAddClasses.size());
+
+        try {
+            for (String extensionClass : extendedDataAddClasses) {
+                ExtendedDataAddInterface extendedDataAddExt = JACGUtil.getClassObject(extensionClass, ExtendedDataAddInterface.class);
+                if (extendedDataAddExt == null) {
+                    return false;
+                }
+
+                extendedDataAddExt.init();
+
+                extendedDataAddExtList.add(extendedDataAddExt);
+            }
+
+            return true;
+        } catch (Exception e) {
+            logger.error("error ", e);
+            return false;
         }
     }
 
@@ -189,35 +370,61 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         String extendedDataSupplementFilePath = JACGConstants.DIR_EXTENSIONS + File.separator + JACGConstants.FILE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT;
 
         Set<String> extendedDataSupplementClasses = FileUtil.readFile2Set(extendedDataSupplementFilePath);
-        if (CommonUtil.isCollectionEmpty(extendedDataSupplementClasses)) {
+        if (JACGUtil.isCollectionEmpty(extendedDataSupplementClasses)) {
             logger.info("未指定用于对自定义数据进行补充的类，跳过 {}", extendedDataSupplementFilePath);
             return true;
         }
 
-        extendedDataSupplementMap = new HashMap<>(extendedDataSupplementClasses.size());
+        extendedDataSupplementExtMap = new HashMap<>(extendedDataSupplementClasses.size());
 
         try {
             for (String extensionClass : extendedDataSupplementClasses) {
-                Class clazz = Class.forName(extensionClass);
-                Object obj = clazz.newInstance();
-                if (!(obj instanceof ExtendedDataSupplementInterface)) {
-                    logger.error("指定的用于对自定义数据进行补充的类 {} 不是 {} 的实现类", extensionClass, ExtendedDataSupplementInterface.class.getName());
+                ExtendedDataSupplementInterface extendedDataSupplementExt = JACGUtil.getClassObject(extensionClass, ExtendedDataSupplementInterface.class);
+                if (extendedDataSupplementExt == null) {
                     return false;
                 }
 
-                ExtendedDataSupplementInterface extendedDataSupplement = (ExtendedDataSupplementInterface) obj;
-                extendedDataSupplement.init();
+                extendedDataSupplementExt.init();
 
-                ExtendedDataSupplementInterface existedClass = extendedDataSupplementMap.putIfAbsent(extendedDataSupplement.getDataType(), extendedDataSupplement);
+                ExtendedDataSupplementInterface existedClass = extendedDataSupplementExtMap.putIfAbsent(extendedDataSupplementExt.getDataType(), extendedDataSupplementExt);
                 if (existedClass != null) {
-                    logger.error("指定的用于对自定义数据进行补充的类，存在重复的类型 {} {} {}", extendedDataSupplement.getDataType(), extensionClass, existedClass.getClass().getName());
+                    logger.error("指定的用于对自定义数据进行补充的类，存在重复的类型 {} {} {}", extendedDataSupplementExt.getDataType(), extensionClass, existedClass.getClass().getName());
                     return false;
                 }
             }
+
+            return true;
         } catch (Exception e) {
             logger.error("error ", e);
             return false;
         }
+    }
+
+    // 查询存在多个实现类的接口或父类方法HASH
+    private boolean queryMultiImplMethodHash() {
+        // 只查询一次，不需要缓存
+        String sql = "select " + DC.MC_CALLER_METHOD_HASH + " from " + JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() + " where " + DC.MC_CALL_TYPE
+                + " = ? and " + DC.MC_ENABLED + " = ? group by " + DC.MC_CALLER_METHOD_HASH + " having count(" + DC.MC_CALLER_METHOD_HASH + ") > 1";
+        List<Object> multiImplMethodHashList = dbOperator.queryListOneColumn(sql, new Object[]{CallTypeEnum.CTE_ITF.getType(), JACGConstants.ENABLED});
+        if (multiImplMethodHashList == null) {
+            return false;
+        }
+
+        multiImplMethodHashSet = new HashSet<>(multiImplMethodHashList.size());
+        for (Object multiImplMethodHash : multiImplMethodHashList) {
+            multiImplMethodHashSet.add((String) multiImplMethodHash);
+        }
+
+        List<Object> multiChildrenMethodHashList = dbOperator.queryListOneColumn(sql, new Object[]{CallTypeEnum.CTE_SCC.getType(), JACGConstants.ENABLED});
+        if (multiChildrenMethodHashList == null) {
+            return false;
+        }
+
+        multiChildrenMethodHashSet = new HashSet<>(multiChildrenMethodHashList.size());
+        for (Object multiChildrenMethodHash : multiChildrenMethodHashList) {
+            multiChildrenMethodHashSet.add((String) multiChildrenMethodHash);
+        }
+
         return true;
     }
 
@@ -237,6 +444,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         for (Object callIdWithExtendedData : callIdWithExtendedDataList) {
             callIdWithExtendedDataSet.add((Integer) callIdWithExtendedData);
         }
+
         return true;
     }
 
@@ -245,7 +453,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         callFullMethodWithMAEDMap = new HashMap<>();
 
         // 只查询一次，不需要缓存
-        String sql = "select distinct(" + DC.MAED_CALLER_FULL_METHOD + "), " + DC.MAED_CALLEE_FULL_METHOD + " from " + JACGConstants.TABLE_PREFIX_MANUAL_ADD_EXTENDED_DATA + confInfo.getAppName();
+        String sql =
+                "select distinct(" + DC.MAED_CALLER_FULL_METHOD + "), " + DC.MAED_CALLEE_FULL_METHOD + " from " + JACGConstants.TABLE_PREFIX_MANUAL_ADD_EXTENDED_DATA + confInfo.getAppName();
         List<Map<String, Object>> callFullMethodWithMAEDList = dbOperator.queryList(sql, new Object[]{});
         if (callFullMethodWithMAEDList == null) {
             return false;
@@ -291,7 +500,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                     return null;
                 }
 
-                if (!CommonUtil.isNumStr(arrayRight[0]) || !CommonUtil.isNumStr(arrayRight[1])) {
+                if (!JACGUtil.isNumStr(arrayRight[0]) || !JACGUtil.isNumStr(arrayRight[1])) {
                     logger.error("指定的行号非法，应为数字 {}", task);
                     return null;
                 }
@@ -339,6 +548,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             callerTaskInfo.setCallerMethodName(callerMethodNameInTask);
             callerTaskInfo.setLineNumStart(lineNumStart);
             callerTaskInfo.setLineNumEnd(lineNumEnd);
+            callerTaskInfo.setSaveDirPath(null);
 
             callerTaskInfoList.add(callerTaskInfo);
         }
@@ -363,13 +573,15 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 从方法调用关系表查询指定的类是否存在
         if (!checkClassNameExists(callerClassName)) {
-            return false;
+            // 生成空文件并返回成功
+            return genEmptyFile(callerTaskInfo, callerClassName);
         }
 
         // 获取调用者完整类名
         String callerFullClassName = getCallerFullClassName(callerClassName);
         if (StringUtils.isBlank(callerFullClassName)) {
-            return false;
+            // 生成空文件并返回成功
+            return genEmptyFile(callerTaskInfo, callerClassName);
         }
 
         // 获取调用者最上层方法
@@ -385,9 +597,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         String fullMethodPrefix = callerFullClassName + JACGConstants.FLAG_COLON + callerMethodNameInTask;
 
         List<Map<String, Object>> callerMethodList = dbOperator.queryList(sql, new Object[]{callerClassName, fullMethodPrefix});
-        if (CommonUtil.isCollectionEmpty(callerMethodList)) {
-            logger.error("从方法调用关系表未找到指定的调用方法 {} {}", callerClassName, fullMethodPrefix);
-            return false;
+        if (JACGUtil.isCollectionEmpty(callerMethodList)) {
+            logger.warn("从方法调用关系表未找到指定的调用方法 {} {}", callerClassName, fullMethodPrefix);
+
+            // 生成空文件并返回成功
+            return genEmptyFile(callerTaskInfo, callerClassName);
         }
 
         boolean findMethod = false;
@@ -397,7 +611,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         // 遍历找到的方法
         for (Map<String, Object> callerMethodMap : callerMethodList) {
             String currentCallerFullMethod = (String) callerMethodMap.get(DC.MC_CALLER_FULL_METHOD);
-            String currentMethodWithArgs = CommonUtil.getMethodWithArgs(currentCallerFullMethod);
+            String currentMethodWithArgs = JACGUtil.getMethodWithArgs(currentCallerFullMethod);
 
             // 当方法名为以下前缀时，忽略
             if (isEntryMethodIgnoredWithPrefixByMethodNameWithArgs(currentMethodWithArgs)) {
@@ -424,16 +638,25 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         logger.debug("找到入口方法 {} {}", callerMethodHash, callerFullMethod);
 
         // 获取当前实际的方法名，而不是使用文件中指定的方法名，文件中指定的方法名可能包含参数，会很长，不可控
-        String callerMethodName = CommonUtil.getOnlyMethodName(callerFullMethod);
+        String callerMethodName = JACGUtil.getOnlyMethodName(callerFullMethod);
+        String safeMethodName = JACGUtil.getSafeMethodName(callerMethodName);
 
-        // 确定当前方法对应输出文件名，格式: 配置文件中指定的类名（简单类名或全名）+方法名+方法名hash.txt
-        StringBuilder sbOutputFileName = new StringBuilder(outputDirPrefix).append(File.separator).append(callerClassName)
-                .append(JACGConstants.FLAG_AT).append(callerMethodName).append(JACGConstants.FLAG_AT).append(callerMethodHash);
-        if (lineNumStart != JACGConstants.LINE_NUM_NONE && lineNumEnd != JACGConstants.LINE_NUM_NONE) {
-            sbOutputFileName.append(JACGConstants.FLAG_AT).append(lineNumStart).append(JACGConstants.FLAG_MINUS).append(lineNumEnd);
+        // 确定当前方法对应输出文件路径，格式: 配置文件中指定的类名（简单类名或全名）+方法名+方法名hash.txt
+        StringBuilder sbOutputFilePath = new StringBuilder(outputDirPrefix).append(File.separator);
+        if (callerTaskInfo.getSaveDirPath() != null) {
+            sbOutputFilePath.append(callerTaskInfo.getSaveDirPath()).append(File.separator);
+
+            // 创建对应目录
+            if (!FileUtil.isDirectoryExists(sbOutputFilePath.toString())) {
+                return false;
+            }
         }
-        sbOutputFileName.append(JACGConstants.EXT_TXT);
-        String outputFileName = sbOutputFileName.toString();
+        sbOutputFilePath.append(callerClassName).append(JACGConstants.FLAG_AT).append(safeMethodName).append(JACGConstants.FLAG_AT).append(callerMethodHash);
+        if (lineNumStart != JACGConstants.LINE_NUM_NONE && lineNumEnd != JACGConstants.LINE_NUM_NONE) {
+            sbOutputFilePath.append(JACGConstants.FLAG_AT).append(lineNumStart).append(JACGConstants.FLAG_MINUS).append(lineNumEnd);
+        }
+        sbOutputFilePath.append(JACGConstants.EXT_TXT);
+        String outputFileName = sbOutputFilePath.toString();
         logger.info("当前输出文件名 {}", outputFileName);
 
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileName), StandardCharsets.UTF_8))) {
@@ -471,12 +694,31 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
     }
 
+    // 生成空文件
+    private boolean genEmptyFile(CallerTaskInfo callerTaskInfo, String callerClassName) {
+        // 生成空文件并返回成功
+        String emptyFilePath = outputDirPrefix + File.separator;
+        if (callerTaskInfo.getSaveDirPath() != null) {
+            emptyFilePath = emptyFilePath + callerTaskInfo.getSaveDirPath() + File.separator;
+
+            // 创建对应目录
+            if (!FileUtil.isDirectoryExists(emptyFilePath)) {
+                return false;
+            }
+        }
+
+        emptyFilePath = emptyFilePath + callerClassName + JACGConstants.EMPTY_FILE_FLAG + JACGConstants.EXT_TXT;
+
+        // 创建文件
+        return FileUtil.createNewFile(emptyFilePath);
+    }
+
     /**
      * 根据指定的调用者方法HASH，查找所有被调用方法信息
      *
      * @param callerMethodHash
      * @param out
-     * @param callerFullMethod
+     * @param callerFullMethod 仅代表调用当前方法时的调用者方法，不代表以下while循环中每次处理到的调用者方法
      * @param lineNumStart
      * @param lineNumEnd
      * @return
@@ -495,6 +737,17 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 输出结果行数
         int outputLineNum = 0;
+
+        // 在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略
+        boolean ignoreDupCalleeInOneCaller = confInfo.isIgnoreDupCalleeInOneCaller();
+
+        // 记录各个层级的调用方法中有被调用过的方法（包含方法注解、自定义数据）
+        Map<Integer, Set<String>> recordedCalleeMap = null;
+        if (ignoreDupCalleeInOneCaller) {
+            recordedCalleeMap = new HashMap<>();
+            // 为第0层的调用者添加Set，不能在以下while循环的if (currentNodeLevel == 0)中添加，因为会执行多次
+            recordedCalleeMap.put(0, new HashSet<>());
+        }
 
         while (true) {
             int currentLineNumStart = JACGConstants.LINE_NUM_NONE;
@@ -521,6 +774,10 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 }
 
                 // 当前处理的节点不是最上层节点，返回上一层处理
+                if (ignoreDupCalleeInOneCaller) {
+                    // 清空不再使用的下一层Set
+                    recordedCalleeMap.put(currentNodeLevel, null);
+                }
                 currentNodeLevel--;
                 continue;
             }
@@ -538,7 +795,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                     enabled != JACGConstants.ENABLED) {
                 // 当前记录需要忽略
                 // 更新当前处理节点的id
-                node4CallerList.get((currentNodeLevel)).setCurrentCalleeMethodId(currentMethodCallId);
+                node4CallerList.get(currentNodeLevel).setCurrentCalleeMethodId(currentMethodCallId);
 
                 if (enabled != JACGConstants.ENABLED) {
                     String callType = (String) calleeMethodMap.get(DC.MC_CALL_TYPE);
@@ -553,12 +810,48 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             // 当前记录需要处理
             String currentCalleeMethodHash = (String) calleeMethodMap.get(DC.MC_CALLEE_METHOD_HASH);
 
+            // 判断被调用的方法是否为存在多个实现类的接口或父类方法
+            CallTypeEnum multiImplMethodCallType = null;
+            if (multiImplMethodHashSet.contains(currentCalleeMethodHash)) {
+                multiImplMethodCallType = CallTypeEnum.CTE_ITF;
+            } else if (multiChildrenMethodHashSet.contains(currentCalleeMethodHash)) {
+                multiImplMethodCallType = CallTypeEnum.CTE_SCC;
+            }
+
+            // 获取被调用方法信息（包含方法注解信息、自定义数据）
+            String calleeInfo = getCalleeInfo(calleeMethodMap, currentCalleeMethodHash, currentMethodCallId, multiImplMethodCallType);
+            if (calleeInfo == null) {
+                return false;
+            }
+
+            if (ignoreDupCalleeInOneCaller) {
+                Set<String> callerRecordedCalleeSet = recordedCalleeMap.get(currentNodeLevel);
+                if (callerRecordedCalleeSet.contains(calleeInfo)) {
+                    // 当前被调用方法在调用方法中已被调用过，忽略
+                    logger.debug("忽略一个方法中被调用多次的方法 {} {}", currentNodeLevel, calleeInfo);
+
+                    // 更新当前处理节点的id
+                    node4CallerList.get(currentNodeLevel).setCurrentCalleeMethodId(currentMethodCallId);
+                    continue;
+                }
+
+                // 当前被调用方法在调用方法中未被调用过，记录
+                callerRecordedCalleeSet.add(calleeInfo);
+            }
+
             // 检查是否出现循环调用
             int back2Level = checkCycleCall(node4CallerList, currentNodeLevel, currentCalleeMethodHash);
 
             // 记录被调用方法信息
-            if (!recordCalleeInfo(calleeMethodMap, currentNodeLevel, currentCalleeMethodHash, back2Level, out, currentMethodCallId)) {
+            if (!recordCalleeInfo(calleeMethodMap, currentNodeLevel, back2Level, out, currentMethodCallId, calleeInfo)) {
                 return false;
+            }
+
+            if (multiImplMethodCallType != null) {
+                // 被调用的方法是否为存在多个实现类的接口或父类方法时，不再往下找被调用的方法
+                // 更新当前处理节点的id
+                node4CallerList.get(currentNodeLevel).setCurrentCalleeMethodId(currentMethodCallId);
+                continue;
             }
 
             if (back2Level != JACGConstants.NO_CYCLE_CALL_FLAG) {
@@ -570,10 +863,14 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             }
 
             // 更新当前处理节点的id
-            node4CallerList.get((currentNodeLevel)).setCurrentCalleeMethodId(currentMethodCallId);
+            node4CallerList.get(currentNodeLevel).setCurrentCalleeMethodId(currentMethodCallId);
 
             // 继续下一层处理
             currentNodeLevel++;
+            if (ignoreDupCalleeInOneCaller) {
+                // 开始处理下一层，设置对应的Set
+                recordedCalleeMap.put(currentNodeLevel, new HashSet<>());
+            }
 
             // 获取下一层节点
             if (currentNodeLevel + 1 > node4CallerList.size()) {
@@ -668,14 +965,14 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return true;
         }
 
-        String calleeFullClassName = CommonUtil.getFullClassNameFromMethod(calleeFullMethod);
+        String calleeFullClassName = JACGUtil.getFullClassNameFromMethod(calleeFullMethod);
 
         // 根据类名特定关键字判断是否需要忽略
         if (isIgnoredClassWithKeywordByFullClass(calleeFullClassName)) {
             return true;
         }
 
-        String calleeMethodNameWithArgs = CommonUtil.getMethodWithArgs(calleeFullMethod);
+        String calleeMethodNameWithArgs = JACGUtil.getMethodWithArgs(calleeFullMethod);
 
         /*
             根据方法名前缀判断是否需要忽略，使用包含参数的方法名进行比较
@@ -689,39 +986,27 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         return false;
     }
 
-    // 记录被调用方法信息
-    protected boolean recordCalleeInfo(Map<String, Object> calleeMethodMap, int currentNodeLevel, String currentCalleeMethodHash, int back2Level,
-                                       BufferedWriter out, int callId) throws IOException {
+    // 获取被调用方法信息（包含方法注解信息、自定义数据）
+    protected String getCalleeInfo(Map<String, Object> calleeMethodMap, String currentCalleeMethodHash, int currentMethodCallId, CallTypeEnum multiImplMethodCallType) {
         StringBuilder calleeInfo = new StringBuilder();
-        calleeInfo.append(genOutputPrefix(currentNodeLevel + 1));
 
         String callerFullMethod = (String) calleeMethodMap.get(DC.MC_CALLER_FULL_METHOD);
         String calleeFullMethod = (String) calleeMethodMap.get(DC.MC_CALLEE_FULL_METHOD);
-
-        // 显示调用者代码行号
-        if (confInfo.isShowCallerLineNum()) {
-            calleeInfo.append(JACGConstants.FLAG_LEFT_PARENTHESES)
-                    .append((String) calleeMethodMap.get(DC.MC_CALLER_CLASS_NAME))
-                    .append(JACGConstants.FLAG_COLON)
-                    .append((int) calleeMethodMap.get(DC.MC_CALLER_LINE_NUM))
-                    .append(JACGConstants.FLAG_RIGHT_PARENTHESES)
-                    .append(JACGConstants.FLAG_TAB);
-        }
 
         if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_1)) {
             // # 1: 展示 完整类名+方法名+方法参数
             calleeInfo.append(calleeFullMethod);
         } else if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_2)) {
             // # 2: 展示 完整类名+方法名
-            String calleeFullClassName = CommonUtil.getFullClassNameFromMethod(calleeFullMethod);
-            String calleeMethodName = CommonUtil.getOnlyMethodName(calleeFullMethod);
+            String calleeFullClassName = JACGUtil.getFullClassNameFromMethod(calleeFullMethod);
+            String calleeMethodName = JACGUtil.getOnlyMethodName(calleeFullMethod);
 
             calleeInfo.append(calleeFullClassName)
                     .append(JACGConstants.FLAG_COLON)
                     .append(calleeMethodName);
         } else {
             // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
-            String calleeMethodName = CommonUtil.getOnlyMethodName(calleeFullMethod);
+            String calleeMethodName = JACGUtil.getOnlyMethodName(calleeFullMethod);
 
             calleeInfo.append(calleeMethodMap.get(DC.MC_CALLEE_CLASS_NAME))
                     .append(JACGConstants.FLAG_COLON)
@@ -736,43 +1021,131 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             }
         }
 
-        // 添加循环调用标志
-        if (back2Level != JACGConstants.NO_CYCLE_CALL_FLAG) {
-            calleeInfo.append(String.format(JACGConstants.CALL_FLAG_CYCLE, back2Level));
+        if (multiImplMethodCallType != null) {
+            // 对存在多个实现类的接口或父类方法进行处理
+            if (!handleMultiImplMethod(calleeInfo, currentMethodCallId, currentCalleeMethodHash, multiImplMethodCallType)) {
+                return null;
+            }
+            return calleeInfo.toString();
         }
 
         // 添加自定义数据
-        if (!addExtendedData(callId, calleeInfo, currentCalleeMethodHash, callerFullMethod, calleeFullMethod)) {
+        if (!addExtendedData(currentMethodCallId, calleeInfo, currentCalleeMethodHash, callerFullMethod, calleeFullMethod)) {
+            return null;
+        }
+
+        return calleeInfo.toString();
+    }
+
+    // 对存在多个实现类的接口或父类方法进行处理
+    private boolean handleMultiImplMethod(StringBuilder calleeInfo, int currentMethodCallId, String currentCalleeMethodHash, CallTypeEnum multiImplMethodCallType) {
+        logger.info("对存在多个实现类的接口或父类方法进行处理 {} {} {}", currentMethodCallId, currentCalleeMethodHash, multiImplMethodCallType);
+
+        // 查询被调用方法类名与方法名
+        String sqlKey = JACGConstants.SQL_KEY_MC_QUERY_CALLEE_BY_ID;
+        String sql = sqlCacheMap.get(sqlKey);
+        if (sql == null) {
+            sql = "select " + StringUtils.joinWith(JACGConstants.FLAG_COMMA_WITH_SPACE, DC.MC_CALLEE_CLASS_NAME, DC.MC_CALLEE_METHOD_NAME) + " from " + JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
+                    " where " + DC.MC_ID + " = ?";
+            cacheSql(sqlKey, sql);
+        }
+
+        Map<String, Object> calleeWithMultiImplInfoMap = dbOperator.queryOneRow(sql, new Object[]{currentMethodCallId});
+        if (JACGUtil.isMapEmpty(calleeWithMultiImplInfoMap)) {
+            logger.error("根据调用序号查找对应被调用方法信息失败 {}", currentMethodCallId);
             return false;
         }
 
-        out.write(calleeInfo.toString());
-        out.write(JACGConstants.NEW_LINE);
-        String callType = (String) calleeMethodMap.get(DC.MC_CALL_TYPE);
+        String safeMethodName = JACGUtil.getSafeMethodName((String) calleeWithMultiImplInfoMap.get(DC.MC_CALLEE_METHOD_NAME));
+        // 写入结果文件的数据格式：[完整或简单类名]@[方法名]@[方法HASH]
+        String calleeWithMultiImplName = calleeWithMultiImplInfoMap.get(DC.MC_CALLEE_CLASS_NAME) + JACGConstants.FLAG_AT + safeMethodName +
+                JACGConstants.FLAG_AT + currentCalleeMethodHash;
 
+        // 将被调用方法信息作为自定义数据加入被调用方法信息中
+        addExtendedData2CalleeInfo(true, JACGConstants.DATA_TYPE_JUMP_MULTI_IMPL, calleeWithMultiImplName, calleeInfo);
+
+        // 记录本次执行时查询到存在多个实现类的接口或父类方法信息
+        if (allFoundMultiImplMethodMap.putIfAbsent(currentCalleeMethodHash, Boolean.TRUE) == null) {
+            // 仅记录未被处理过的方法信息
+            MultiImplMethodInfo multiImplMethodInfo = new MultiImplMethodInfo();
+            multiImplMethodInfo.setMultiImplMethodCallType(multiImplMethodCallType);
+            multiImplMethodInfo.setDirPath(calleeWithMultiImplName);
+
+            currentFoundMultiImplMethodMap.put(currentCalleeMethodHash, multiImplMethodInfo);
+        }
+
+        return true;
+    }
+
+    // 记录被调用方法信息
+    protected boolean recordCalleeInfo(Map<String, Object> calleeMethodMap, int currentNodeLevel, int back2Level, BufferedWriter out, int currentMethodCallId, String calleeInfo) throws IOException {
+        // 生成输出文件前缀，包含了当前方法的调用层级
+        String prefix = genOutputPrefix(currentNodeLevel + 1);
+
+        // 写入前缀：    "[2]#    "
+        out.write(prefix);
+
+        // 写入调用者行号信息：   "[Service1Impl:29]	"
+        if (confInfo.isShowCallerLineNum()) {
+            // 显示调用者代码行号
+            String callerLineNumber = JACGConstants.FLAG_LEFT_PARENTHESES +
+                    calleeMethodMap.get(DC.MC_CALLER_CLASS_NAME) +
+                    JACGConstants.FLAG_COLON +
+                    calleeMethodMap.get(DC.MC_CALLER_LINE_NUM) +
+                    JACGConstants.FLAG_RIGHT_PARENTHESES +
+                    JACGConstants.FLAG_TAB;
+            out.write(callerLineNumber);
+        }
+
+        // 写入被调用者信息（包含方法注解信息、自定义数据）：    test.example.service.impl.Service1Impl:test1
+        out.write(calleeInfo);
+
+        // 写入循环调用标志
+        if (back2Level != JACGConstants.NO_CYCLE_CALL_FLAG) {
+            out.write(String.format(JACGConstants.CALL_FLAG_CYCLE, back2Level));
+        }
+
+        // 写入换行符
+        out.write(JACGConstants.NEW_LINE);
+
+        String callType = (String) calleeMethodMap.get(DC.MC_CALL_TYPE);
         // 记录可能出现一对多的方法调用
-        return recordMethodCallMayBeMulti(callId, callType);
+        return recordMethodCallMayBeMulti(currentMethodCallId, callType);
     }
 
     // 添加自定义数据
-    private boolean addExtendedData(int callId, StringBuilder calleeInfo, String calleeMethodHash, String callerFullMethod, String calleeFullMethod) {
-        // 处理手工添加的自定义数据
-        Boolean success = handleManualAddExtendedData(callId, calleeMethodHash, callerFullMethod, calleeFullMethod, calleeInfo);
-        if (success == null) {
+    private boolean addExtendedData(int currentMethodCallId, StringBuilder calleeInfo, String calleeMethodHash, String callerFullMethod, String calleeFullMethod) {
+        // 处理数据库中手工添加的自定义数据
+        ExtendedDataResultEnum result = handleManualAddExtendedDataInDb(currentMethodCallId, calleeMethodHash, callerFullMethod, calleeFullMethod, calleeInfo);
+        if (result == ExtendedDataResultEnum.EDRE_FAIL) {
             // 处理失败
             return false;
         }
-        if (Boolean.TRUE == success) {
+        if (result == ExtendedDataResultEnum.EDRE_SUCCESS) {
             // 处理了手工添加的自定义数据，返回成功
             return true;
         }
 
-        // 不存在手工添加的自定义数据，需要继续处理程序识别的自定义数据
-        if (callIdWithExtendedDataSet == null || !callIdWithExtendedDataSet.contains(callId)) {
+        // 数据库中不存在手工添加的自定义数据
+        // 调用自定义处理类添加自定义数据
+        result = addExtendedDataByExtensions(currentMethodCallId, calleeMethodHash, callerFullMethod, calleeFullMethod, calleeInfo);
+        if (result == ExtendedDataResultEnum.EDRE_FAIL) {
+            // 处理失败
+            return false;
+        }
+        if (result == ExtendedDataResultEnum.EDRE_SUCCESS) {
+            // 处理了手工添加的自定义数据，返回成功
+            return true;
+        }
+
+        // 自定义处理类未添加数据
+        // 继续处理程序识别的自定义数据
+        if (callIdWithExtendedDataSet == null || !callIdWithExtendedDataSet.contains(currentMethodCallId)) {
             // 不存在程序识别的自定义数据，返回成功
             return true;
         }
 
+        // 存在程序识别的自定义数据，从数据库查询
         String sqlKey = JACGConstants.SQL_KEY_ED_QUERY_EXTENDED_DATA;
         String sql = sqlCacheMap.get(sqlKey);
         if (sql == null) {
@@ -782,15 +1155,37 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             cacheSql(sqlKey, sql);
         }
 
-        Map<String, Object> extendedDataMap = dbOperator.queryOneRow(sql, new Object[]{callId});
-        if (CommonUtil.isMapEmpty(extendedDataMap)) {
-            logger.error("查询自定义数据不存在 {}", callId);
+        Map<String, Object> extendedDataMap = dbOperator.queryOneRow(sql, new Object[]{currentMethodCallId});
+        if (JACGUtil.isMapEmpty(extendedDataMap)) {
+            logger.error("查询自定义数据不存在 {}", currentMethodCallId);
             return false;
         }
 
-        String dataType = (String) extendedDataMap.get(DC.ED_DATA_TYPE);
+        // 将自定义数据加入被调用方法信息中
+        return addExtendedData2CalleeInfo(false, (String) extendedDataMap.get(DC.ED_DATA_TYPE), (String) extendedDataMap.get(DC.ED_DATA_VALUE), calleeInfo);
+    }
+
+    /**
+     * 将自定义数据加入被调用方法信息中
+     *
+     * @param addJumpMultiImpl 是否为处理存在多个实现类的接口或父类方法
+     * @param dataType         自定义数据类型
+     * @param dataValue        自定义数据值
+     * @param calleeInfo       被调用方法信息
+     */
+    private boolean addExtendedData2CalleeInfo(boolean addJumpMultiImpl, String dataType, String dataValue, StringBuilder calleeInfo) {
+        if (!addJumpMultiImpl && JACGConstants.DATA_TYPE_JUMP_MULTI_IMPL.equals(dataType)) {
+            logger.error("当前的数据类型不允许使用，请使用其他值 {}", dataType);
+            return false;
+        }
+
+        if (dataType.contains(JACGConstants.FLAG_AT)) {
+            logger.error("当前的数据类型不允许使用当前标志，请使用其他值 {} {}", JACGConstants.FLAG_AT, dataType);
+            return false;
+        }
+
         // 对自定义数据进行补充
-        String dataValueAfterSupplement = supplementExtendedData(dataType, (String) extendedDataMap.get(DC.ED_DATA_VALUE));
+        String dataValueAfterSupplement = supplementExtendedData(dataType, dataValue);
 
         calleeInfo.append(JACGConstants.CALL_FLAG_EXTENDED_DATA)
                 .append(dataType)
@@ -801,23 +1196,69 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     }
 
     /**
-     * 处理手工添加的自定义数据
+     * 处理数据库中手工添加的自定义数据
      *
-     * @param callId
+     * @param currentMethodCallId
      * @param calleeMethodHash
      * @param callerFullMethod
      * @param calleeFullMethod
      * @param calleeInfo
      * @return TRUE: 处理成功, FALSE: 不存在手工添加的自定义数据, null: 处理失败
      */
-    private Boolean handleManualAddExtendedData(int callId, String calleeMethodHash, String callerFullMethod, String calleeFullMethod, StringBuilder calleeInfo) {
+    private ExtendedDataResultEnum handleManualAddExtendedDataInDb(int currentMethodCallId, String calleeMethodHash, String callerFullMethod, String calleeFullMethod,
+                                                                   StringBuilder calleeInfo) {
+        // 根据缓存数据判断当前调用者及被调用者方法是否存在手工添加的自定义数据
         Set<String> calleeFullMethodSet = callFullMethodWithMAEDMap.get(callerFullMethod);
         if (calleeFullMethodSet == null || !calleeFullMethodSet.contains(calleeFullMethod)) {
-            // 当前调用者及被调用者方法不存在手工添加的自定义数据
-            return Boolean.FALSE;
+            // 匹配调用者方法查询不存在时，再使用*查询
+            calleeFullMethodSet = callFullMethodWithMAEDMap.get(JACGConstants.SQL_VALUE_MAED_CALLER_FULL_METHOD_ALL);
+            if (calleeFullMethodSet == null || !calleeFullMethodSet.contains(calleeFullMethod)) {
+                // 当前调用者及被调用者方法不存在手工添加的自定义数据
+                return ExtendedDataResultEnum.EDRE_NONE;
+            }
         }
 
         // 查询当前调用者中，被调用者方法出现的序号
+        long calleeSeqInCaller = getCalleeSeqInCaller(calleeMethodHash, callerFullMethod, currentMethodCallId);
+        if (calleeSeqInCaller == 0) {
+            return ExtendedDataResultEnum.EDRE_FAIL;
+        }
+
+        // 查询当前调用关系手工添加的自定义数据
+        List<Map<String, Object>> list4MAED = queryMAED(callerFullMethod, calleeFullMethod, calleeSeqInCaller);
+        if (list4MAED == null) {
+            logger.error("查询当前调用关系手工添加的自定义数据失败 {} {} {}", callerFullMethod, calleeFullMethod, calleeSeqInCaller);
+            return ExtendedDataResultEnum.EDRE_FAIL;
+        }
+        if (list4MAED.isEmpty()) {
+            // 当前调用关系不存在手工添加的自定义数据
+            return ExtendedDataResultEnum.EDRE_NONE;
+        }
+
+        if (list4MAED.size() > 1) {
+            logger.error("当前调用关系存在多条手工添加的自定义数据，请仅保留一条 {} {} {}", callerFullMethod, calleeFullMethod, calleeSeqInCaller);
+            return ExtendedDataResultEnum.EDRE_FAIL;
+        }
+
+        Map<String, Object> map4MAED = list4MAED.get(0);
+
+        // 将自定义数据加入被调用方法信息中
+        if (!addExtendedData2CalleeInfo(false, (String) map4MAED.get(DC.MAED_DATA_TYPE), (String) map4MAED.get(DC.MAED_DATA_VALUE), calleeInfo)) {
+            return ExtendedDataResultEnum.EDRE_FAIL;
+        }
+
+        return ExtendedDataResultEnum.EDRE_SUCCESS;
+    }
+
+    /**
+     * 查询当前被调用方法在调用方法中的序号
+     *
+     * @param calleeMethodHash    被调用完整方法HASH
+     * @param callerFullMethod    调用完整方法
+     * @param currentMethodCallId 当前方法调用id
+     * @return 0: 查找失败；非0: 查找成功
+     */
+    private long getCalleeSeqInCaller(String calleeMethodHash, String callerFullMethod, int currentMethodCallId) {
         String sqlKey = JACGConstants.SQL_KEY_MC_QUERY_CALLEE_SEQ_IN_CALLER;
         String sql4CalleeSeq = sqlCacheMap.get(sqlKey);
         if (sql4CalleeSeq == null) {
@@ -826,20 +1267,75 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             cacheSql(sqlKey, sql4CalleeSeq);
         }
 
-        List<Object> list4CalleeSeq = dbOperator.queryListOneColumn(sql4CalleeSeq, new Object[]{calleeMethodHash, callerFullMethod, callId});
-        if (CommonUtil.isCollectionEmpty(list4CalleeSeq)) {
-            logger.error("查询当前调用者中，被调用者方法出现的序号失败 {} {} {}", calleeMethodHash, callerFullMethod, callId);
-            return null;
+        List<Object> list4CalleeSeq = dbOperator.queryListOneColumn(sql4CalleeSeq, new Object[]{calleeMethodHash, callerFullMethod, currentMethodCallId});
+        if (JACGUtil.isCollectionEmpty(list4CalleeSeq)) {
+            logger.error("查询当前调用者中，被调用者方法出现的序号失败 {} {} {}", calleeMethodHash, callerFullMethod, currentMethodCallId);
+            return 0;
         }
 
         long calleeSeqInCaller = (long) list4CalleeSeq.get(0);
         if (calleeSeqInCaller <= 0) {
-            logger.error("查询当前调用者中，被调用者方法出现的序号失败2 {} {} {}", calleeMethodHash, callerFullMethod, callId);
-            return null;
+            logger.error("查询当前调用者中，被调用者方法出现的序号失败2 {} {} {}", calleeMethodHash, callerFullMethod, currentMethodCallId);
+            return 0;
         }
 
-        // 查询当前调用关系手工添加的自定义数据
-        String sqlKey4MAED = JACGConstants.SQL_KEY_MAED_QUERY_MANUAL_ADD_EXTENDED_DATA;
+        return calleeSeqInCaller;
+    }
+
+    /**
+     * 调用自定义处理类添加自定义数据
+     *
+     * @param currentMethodCallId
+     * @param calleeMethodHash
+     * @param callerFullMethod
+     * @param calleeFullMethod
+     * @param calleeInfo
+     * @return
+     */
+    private ExtendedDataResultEnum addExtendedDataByExtensions(int currentMethodCallId, String calleeMethodHash, String callerFullMethod, String calleeFullMethod,
+                                                               StringBuilder calleeInfo) {
+        if (JACGUtil.isCollectionEmpty(extendedDataAddExtList)) {
+            // 用于添加自定义数据的处理类为空，返回不存在自定义数据
+            return ExtendedDataResultEnum.EDRE_NONE;
+        }
+
+        for (ExtendedDataAddInterface extendedDataAddExt : extendedDataAddExtList) {
+            // 判断当前方法调用是否需要由自定义处理类处理
+            if (!extendedDataAddExt.checkMethodCall(callerFullMethod, calleeFullMethod)) {
+                continue;
+            }
+
+            // 查询当前调用者中，被调用者方法出现的序号
+            long calleeSeqInCaller = getCalleeSeqInCaller(calleeMethodHash, callerFullMethod, currentMethodCallId);
+            if (calleeSeqInCaller == 0) {
+                // 获取序号失败
+                return ExtendedDataResultEnum.EDRE_FAIL;
+            }
+
+            BaseExtendedData extendedData = extendedDataAddExt.getExtendedData(callerFullMethod, calleeFullMethod, calleeSeqInCaller);
+            if (extendedData != null) {
+                if (extendedData.getDataType() == null || extendedData.getDataValue() == null) {
+                    logger.error("返回的自定义数据存在字段为空 {}", extendedData);
+                    return ExtendedDataResultEnum.EDRE_FAIL;
+                }
+
+                // 将自定义数据加入被调用方法信息中
+                if (!addExtendedData2CalleeInfo(false, extendedData.getDataType(), extendedData.getDataValue(), calleeInfo)) {
+                    return ExtendedDataResultEnum.EDRE_FAIL;
+                }
+
+                return ExtendedDataResultEnum.EDRE_SUCCESS;
+            }
+        }
+
+        // 返回不存在自定义数据
+        return ExtendedDataResultEnum.EDRE_NONE;
+    }
+
+    // 查询手工添加的自定义数据
+    private List<Map<String, Object>> queryMAED(String callerFullMethod, String calleeFullMethod, long calleeSeqInCaller) {
+        // 查询当前调用关系手工添加的自定义数据，先指定调用者进行查询
+        String sqlKey4MAED = JACGConstants.SQL_KEY_MAED_QUERY;
         String sql4MAED = sqlCacheMap.get(sqlKey4MAED);
         if (sql4MAED == null) {
             String columns = StringUtils.joinWith(JACGConstants.FLAG_COMMA_WITH_SPACE, DC.MAED_DATA_TYPE, DC.MAED_DATA_VALUE);
@@ -849,48 +1345,39 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         List<Map<String, Object>> list4MAED = dbOperator.queryList(sql4MAED, new Object[]{callerFullMethod, calleeFullMethod, calleeSeqInCaller});
-        if (list4MAED == null) {
-            logger.error("查询当前调用关系手工添加的自定义数据失败 {} {} {}", callerFullMethod, calleeFullMethod, calleeSeqInCaller);
-            return null;
-        }
-        if (list4MAED.isEmpty()) {
-            // 当前调用关系不存在手工添加的自定义数据
-            return Boolean.FALSE;
+
+        if (list4MAED == null || !list4MAED.isEmpty()) {
+            // 等于null，代表查询失败，返回；查询结果非空，返回；只有查询成功且结果为空时，才继续
+            return list4MAED;
         }
 
-        if (list4MAED.size() > 1) {
-            logger.error("当前调用关系存在多条手工添加的自定义数据，请仅保留一条 {} {} {}", callerFullMethod, calleeFullMethod, calleeSeqInCaller);
-            return null;
+        // 查询当前调用关系手工添加的自定义数据，再不限制调用者进行查询
+        String sqlKey4MAEDIgnoreCaller = JACGConstants.SQL_KEY_MAED_QUERY_IGNORE_CALLER;
+        String sql4MAEDIgnoreCaller = sqlCacheMap.get(sqlKey4MAEDIgnoreCaller);
+        if (sql4MAEDIgnoreCaller == null) {
+            String columns = StringUtils.joinWith(JACGConstants.FLAG_COMMA_WITH_SPACE, DC.MAED_DATA_TYPE, DC.MAED_DATA_VALUE);
+            sql4MAEDIgnoreCaller = "select " + columns + " from " + JACGConstants.TABLE_PREFIX_MANUAL_ADD_EXTENDED_DATA + confInfo.getAppName() +
+                    " where " + DC.MAED_CALLER_FULL_METHOD + " = ? and " + DC.MAED_CALLEE_FULL_METHOD + " = ?";
+            cacheSql(sqlKey4MAEDIgnoreCaller, sql4MAEDIgnoreCaller);
         }
 
-        Map<String, Object> map4MAED = list4MAED.get(0);
-
-        String dataType = (String) map4MAED.get(DC.MAED_DATA_TYPE);
-        // 对自定义数据进行补充
-        String dataValueAfterSupplement = supplementExtendedData(dataType, (String) map4MAED.get(DC.MAED_DATA_VALUE));
-
-        calleeInfo.append(JACGConstants.CALL_FLAG_EXTENDED_DATA_MANUAL_ADD)
-                .append(dataType)
-                .append(JACGConstants.FLAG_AT)
-                .append(dataValueAfterSupplement);
-
-        return Boolean.TRUE;
+        return dbOperator.queryList(sql4MAEDIgnoreCaller, new Object[]{JACGConstants.SQL_VALUE_MAED_CALLER_FULL_METHOD_ALL, calleeFullMethod});
     }
 
     // 对自定义数据进行补充
     private String supplementExtendedData(String dataType, String dataValue) {
-        if (CommonUtil.isMapEmpty(extendedDataSupplementMap)) {
+        if (JACGUtil.isMapEmpty(extendedDataSupplementExtMap)) {
             // 未指定用于对自定义数据进行补充的处理类
             return dataValue;
         }
 
-        ExtendedDataSupplementInterface extendedDataSupplement = extendedDataSupplementMap.get(dataType);
-        if (extendedDataSupplement == null) {
+        ExtendedDataSupplementInterface extendedDataSupplementExt = extendedDataSupplementExtMap.get(dataType);
+        if (extendedDataSupplementExt == null) {
             // 未指定用于对当前自定义数据进行补充的处理类
             return dataValue;
         }
 
-        return extendedDataSupplement.supplement(dataValue);
+        return extendedDataSupplementExt.supplement(dataValue);
     }
 
     // 确定写入输出文件的当前调用方法信息
@@ -947,8 +1434,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         List<Object> fullClassNameList = dbOperator.queryListOneColumn(sql, new Object[]{callerClassName});
-        if (CommonUtil.isCollectionEmpty(fullClassNameList)) {
-            logger.error("从方法调用关系表未找到对应的完整类名 {}", callerClassName);
+        if (JACGUtil.isCollectionEmpty(fullClassNameList)) {
+            logger.warn("从方法调用关系表未找到对应的完整类名 {}", callerClassName);
             return null;
         }
 

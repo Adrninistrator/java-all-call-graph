@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.extensions.extended_data_supplement;
 /**
  * @author adrninistrator
  * @date 2021/10/20
- * @description:
+ * @description: 对自定义数据进行补充的自定义处理类接口
  */
 public interface ExtendedDataSupplementInterface {
 

@@ -13,6 +13,10 @@ public class DbOperateData {
 
     private List<String> tableList;
 
+    private String simpleClassName;
+
+    private String methodName;
+
     public String getStatement() {
         return statement;
     }
@@ -27,5 +31,21 @@ public class DbOperateData {
 
     public void setTableList(List<String> tableList) {
         this.tableList = tableList;
+    }
+
+    public String getSimpleClassName() {
+        return simpleClassName;
+    }
+
+    public void setSimpleClassName(String simpleClassName) {
+        this.simpleClassName = simpleClassName;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 }

@@ -2,12 +2,13 @@ package com.adrninistrator.jacg.dboper;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
-import com.adrninistrator.jacg.util.CommonUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.beans.PropertyVetoException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +29,8 @@ public class DbOperator {
 
     private ComboPooledDataSource cpds;
 
+    private boolean useH2Db = false;
+
 //    private ConfInfo confInfo = null;
 
     public static DbOperator getInstance() {
@@ -47,19 +50,48 @@ public class DbOperator {
 //            Class.forName(confInfo.getDbDriverName());
 
             cpds = new ComboPooledDataSource();
-            cpds.setDriverClass(confInfo.getDbDriverName()); //loads the jdbc driver
-            cpds.setJdbcUrl(confInfo.getDbUrl());
-            cpds.setUser(confInfo.getDbUsername());
-            cpds.setPassword(confInfo.getDbPassword());
             cpds.setMaxPoolSize(confInfo.getThreadNum());
             cpds.setTestConnectionOnCheckin(false);
             cpds.setTestConnectionOnCheckout(false);
+
+            if (confInfo.isDbUseH2()) {
+                initH2Db(confInfo);
+            } else {
+                initNonH2Db(confInfo);
+            }
 
             return true;
         } catch (Exception e) {
             logger.error("error ", e);
             return false;
         }
+    }
+
+    private void initH2Db(ConfInfo confInfo) throws PropertyVetoException {
+        useH2Db = true;
+
+        cpds.setDriverClass("org.h2.Driver");
+        String h2DbJdbcUrl = JACGConstants.H2_PROTOCOL + confInfo.getDbH2FilePath() +
+                ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS " +
+                JACGConstants.H2_SCHEMA + "\\;SET SCHEMA " + JACGConstants.H2_SCHEMA;
+        logger.info("H2数据库的JDBC URL: {}", h2DbJdbcUrl);
+
+        cpds.setJdbcUrl(h2DbJdbcUrl);
+        cpds.setUser("");
+        cpds.setPassword("");
+    }
+
+    private void initNonH2Db(ConfInfo confInfo) throws PropertyVetoException {
+        useH2Db = false;
+
+        cpds.setDriverClass(confInfo.getDbDriverName());
+        cpds.setJdbcUrl(confInfo.getDbUrl());
+        cpds.setUser(confInfo.getDbUsername());
+        cpds.setPassword(confInfo.getDbPassword());
+    }
+
+    public void setMaxPoolSize(int maxPoolSize) {
+        cpds.setMaxPoolSize(maxPoolSize);
     }
 
     public Connection getConnection() {
@@ -139,13 +171,36 @@ public class DbOperator {
         String tableName = sql.substring(indexStart + JACGConstants.SQL_CREATE_TABLE_HEAD_LENGTH, indexEnd).trim();
 
         // 检查数据库表是否创建成功，可能出现上述建表语句执行失败但未抛出异常的情况
-        List<Object> list = queryListOneColumn("show tables like ?", new Object[]{tableName});
-        if (CommonUtil.isCollectionEmpty(list)) {
-            logger.error("数据库表创建失败 [{}]", tableName);
-            return false;
+        if (useH2Db) {
+            if (!checkTableExistsH2(tableName)) {
+                return false;
+            }
+        } else {
+            if (!checkTableExistsNonH2(tableName)) {
+                return false;
+            }
         }
 
         logger.info("数据库表创建成功 [{}]", tableName);
+        return true;
+    }
+
+    private boolean checkTableExistsH2(String tableName) {
+        List<Object> list = queryListOneColumn("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?",
+                new Object[]{JACGConstants.H2_SCHEMA, tableName});
+        if (JACGUtil.isCollectionEmpty(list)) {
+            logger.error("数据库表创建失败 [{}]", tableName);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkTableExistsNonH2(String tableName) {
+        List<Object> list = queryListOneColumn("show tables like ?", new Object[]{tableName});
+        if (JACGUtil.isCollectionEmpty(list)) {
+            logger.error("数据库表创建失败 [{}]", tableName);
+            return false;
+        }
         return true;
     }
 

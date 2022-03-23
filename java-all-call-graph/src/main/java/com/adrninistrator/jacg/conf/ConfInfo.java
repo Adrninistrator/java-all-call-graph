@@ -12,13 +12,13 @@ public class ConfInfo {
 
     private String callGraphJarList;
 
-    private String callGraphInputFile;
-
     private boolean inputIgnoreOtherPackage;
 
     private String callGraphOutputDetail;
 
     private int threadNum;
+
+    private int originalThreadNum;
 
     private boolean showMethodAnnotation;
 
@@ -27,6 +27,12 @@ public class ConfInfo {
     private boolean showCallerLineNum;
 
     private boolean genUpwardsMethodsFile;
+
+    private boolean ignoreDupCalleeInOneCaller;
+
+    private boolean dbUseH2;
+
+    private String dbH2FilePath;
 
     private String dbDriverName;
 
@@ -43,14 +49,17 @@ public class ConfInfo {
         return "ConfInfo{" +
                 "appName='" + appName + '\'' +
                 ", callGraphJarList='" + callGraphJarList + '\'' +
-                ", callGraphInputFile='" + callGraphInputFile + '\'' +
                 ", inputIgnoreOtherPackage=" + inputIgnoreOtherPackage +
                 ", callGraphOutputDetail='" + callGraphOutputDetail + '\'' +
                 ", threadNum=" + threadNum +
+                ", originalThreadNum=" + originalThreadNum +
                 ", showMethodAnnotation=" + showMethodAnnotation +
                 ", genCombinedOutput=" + genCombinedOutput +
                 ", showCallerLineNum=" + showCallerLineNum +
                 ", genUpwardsMethodsFile=" + genUpwardsMethodsFile +
+                ", ignoreDupCalleeInOneCaller=" + ignoreDupCalleeInOneCaller +
+                ", dbUseH2=" + dbUseH2 +
+                ", dbH2FilePath='" + dbH2FilePath + '\'' +
                 ", dbDriverName='" + dbDriverName + '\'' +
                 ", dbUrl='" + dbUrl + '\'' +
                 ", dbUsername='" + dbUsername + '\'' +
@@ -60,7 +69,6 @@ public class ConfInfo {
     }
 
     //
-
     public String getAppName() {
         return appName;
     }
@@ -75,14 +83,6 @@ public class ConfInfo {
 
     public void setCallGraphJarList(String callGraphJarList) {
         this.callGraphJarList = callGraphJarList;
-    }
-
-    public String getCallGraphInputFile() {
-        return callGraphInputFile;
-    }
-
-    public void setCallGraphInputFile(String callGraphInputFile) {
-        this.callGraphInputFile = callGraphInputFile;
     }
 
     public boolean isInputIgnoreOtherPackage() {
@@ -107,6 +107,14 @@ public class ConfInfo {
 
     public void setThreadNum(int threadNum) {
         this.threadNum = threadNum;
+    }
+
+    public int getOriginalThreadNum() {
+        return originalThreadNum;
+    }
+
+    public void setOriginalThreadNum(int originalThreadNum) {
+        this.originalThreadNum = originalThreadNum;
     }
 
     public boolean isShowMethodAnnotation() {
@@ -139,6 +147,30 @@ public class ConfInfo {
 
     public void setGenUpwardsMethodsFile(boolean genUpwardsMethodsFile) {
         this.genUpwardsMethodsFile = genUpwardsMethodsFile;
+    }
+
+    public boolean isIgnoreDupCalleeInOneCaller() {
+        return ignoreDupCalleeInOneCaller;
+    }
+
+    public void setIgnoreDupCalleeInOneCaller(boolean ignoreDupCalleeInOneCaller) {
+        this.ignoreDupCalleeInOneCaller = ignoreDupCalleeInOneCaller;
+    }
+
+    public boolean isDbUseH2() {
+        return dbUseH2;
+    }
+
+    public void setDbUseH2(boolean dbUseH2) {
+        this.dbUseH2 = dbUseH2;
+    }
+
+    public String getDbH2FilePath() {
+        return dbH2FilePath;
+    }
+
+    public void setDbH2FilePath(String dbH2FilePath) {
+        this.dbH2FilePath = dbH2FilePath;
     }
 
     public String getDbDriverName() {

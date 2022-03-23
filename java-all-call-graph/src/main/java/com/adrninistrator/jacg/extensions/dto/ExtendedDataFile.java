@@ -12,8 +12,11 @@ public class ExtendedDataFile {
     // 当前处理的查找关键字生成文件的路径
     private String filePath;
 
+    // 当前处理的查找关键字生成文件的名称
+    private String fileName;
+
     // 自定义数据列表
-    private List<ExtendedDataTypeAndValue> extendedDataTypeAndValueList;
+    private List<ExtendedDataInfo> extendedDataInfoList;
 
     public String getFilePath() {
         return filePath;
@@ -23,11 +26,19 @@ public class ExtendedDataFile {
         this.filePath = filePath;
     }
 
-    public List<ExtendedDataTypeAndValue> getExtendedDataTypeAndValueList() {
-        return extendedDataTypeAndValueList;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setExtendedDataTypeAndValueList(List<ExtendedDataTypeAndValue> extendedDataTypeAndValueList) {
-        this.extendedDataTypeAndValueList = extendedDataTypeAndValueList;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public List<ExtendedDataInfo> getExtendedDataInfoList() {
+        return extendedDataInfoList;
+    }
+
+    public void setExtendedDataInfoList(List<ExtendedDataInfo> extendedDataInfoList) {
+        this.extendedDataInfoList = extendedDataInfoList;
     }
 }

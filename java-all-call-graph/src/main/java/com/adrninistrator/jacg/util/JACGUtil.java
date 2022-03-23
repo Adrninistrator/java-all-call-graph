@@ -6,8 +6,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +18,8 @@ import java.util.Map;
  * @description:
  */
 
-public class CommonUtil {
-    private static final Logger logger = LoggerFactory.getLogger(CommonUtil.class);
+public class JACGUtil {
+    private static final Logger logger = LoggerFactory.getLogger(JACGUtil.class);
 
     private static Map<Integer, String> outputFlagMap = new HashMap<>();
 
@@ -151,13 +152,90 @@ public class CommonUtil {
     }
 
     public static String currentTime() {
-        Calendar calendar = Calendar.getInstance();
-        return String.format("%04d%02d%02d-%02d%02d%02d.%03d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DATE), calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss.SSS");
+        return sdf.format(new Date());
     }
 
-    private CommonUtil() {
+    /**
+     * 从生成的向下方法完整调用链的某行中获取对应的被调用类名（有显示调用者代码行号信息）
+     *
+     * @param line 指定行的内容
+     * @return
+     */
+    public static String getCalleeClassNameWithCaller(String line) {
+        if (line == null) {
+            logger.error("指定的字符串为空");
+            return null;
+        }
+
+        int tabIndex = line.indexOf(JACGConstants.FLAG_TAB);
+        if (tabIndex == -1) {
+            logger.error("指定的字符串不包含 {}", JACGConstants.FLAG_TAB);
+            return null;
+        }
+
+        int colonAfterTabIndex = line.indexOf(JACGConstants.FLAG_COLON, tabIndex);
+        if (colonAfterTabIndex == -1) {
+            logger.error("指定的字符串 {} 之后不包含 {}", JACGConstants.FLAG_TAB, JACGConstants.FLAG_COLON);
+            return null;
+        }
+
+        return line.substring(tabIndex + JACGConstants.FLAG_TAB.length(), colonAfterTabIndex);
+    }
+
+    /**
+     * 从[完整或简单类名]@[方法名]@[方法HASH]格式的文件名转换为[完整或简单类名]:[方法名]()格式的方法名
+     *
+     * @param fileName
+     * @return
+     */
+    public static String getMethodNameFromFileName(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+
+        int firstAtIndex = fileName.indexOf(JACGConstants.FLAG_AT);
+        if (firstAtIndex == -1) {
+            return fileName;
+        }
+
+        int secondAtIndex = fileName.indexOf(JACGConstants.FLAG_AT, firstAtIndex + JACGConstants.FLAG_AT.length());
+        if (secondAtIndex == -1) {
+            return fileName;
+        }
+
+        String className = fileName.substring(0, firstAtIndex);
+        String methodName = fileName.substring(firstAtIndex + JACGConstants.FLAG_AT.length(), secondAtIndex);
+
+        return className + JACGConstants.FLAG_COLON + methodName + JACGConstants.FLAG_LEFT_BRACKET + JACGConstants.FLAG_RIGHT_BRACKET;
+    }
+
+    /**
+     * 根据类名获取对应实例
+     *
+     * @param className
+     * @param classType
+     * @param <T>
+     * @return
+     */
+    public static <T> T getClassObject(String className, Class<T> classType) {
+        try {
+            Class clazz = Class.forName(className);
+            Object obj = clazz.newInstance();
+
+            if (!classType.isAssignableFrom(clazz)) {
+                logger.error("指定的类 {} 不是 {} 的实现类", className, classType.getName());
+                return null;
+            }
+
+            return (T) obj;
+        } catch (Exception e) {
+            logger.error("根据指定类名 {} 获得 {} 类的实例异常 ", className, classType.getName(), e);
+            return null;
+        }
+    }
+
+    private JACGUtil() {
         throw new IllegalStateException("illegal");
     }
 }

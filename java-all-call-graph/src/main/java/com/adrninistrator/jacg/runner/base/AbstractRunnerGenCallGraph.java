@@ -4,10 +4,10 @@ import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.MultiCallInfo;
 import com.adrninistrator.jacg.dto.NoticeCallInfo;
-import com.adrninistrator.jacg.enums.CallTypeEnum;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
-import com.adrninistrator.jacg.util.CommonUtil;
 import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.enums.CallTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +76,22 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      */
     private Map<String, MultiCallInfo> disabledSccMethodCallMap = new TreeMap<>();
 
+    // 预检查
+    @Override
+    public boolean preCheck() {
+        // 使用H2数据库时，检查数据库文件
+        if (confInfo.isDbUseH2() && !checkH2DbFile()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // 设置输出文件根目录
+    public static void setOutputRootPath(String outputRootPath) {
+        System.setProperty(JACGConstants.PROPERTY_OUTPUT_ROOT_PATH, outputRootPath);
+    }
+
     /**
      * 获取简单类名
      *
@@ -94,7 +110,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             }
 
             List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
-            if (CommonUtil.isCollectionEmpty(list)) {
+            if (JACGUtil.isCollectionEmpty(list)) {
                 logger.error("指定的完整类名不存在，请检查 {}", className);
                 return null;
             }
@@ -111,7 +127,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
-        if (CommonUtil.isCollectionEmpty(list)) {
+        if (JACGUtil.isCollectionEmpty(list)) {
             logger.error("指定的类名不存在，请检查是否需要使用完整类名形式 {}", className);
             return null;
         }
@@ -137,12 +153,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className, className});
-        if (list == null) {
-            return false;
-        }
-
-        if (list.isEmpty()) {
-            logger.error("指定的类从调用关系表中未查询到 {}", className);
+        if (JACGUtil.isCollectionEmpty(list)) {
+            logger.warn("指定的类从调用关系表中未查询到 {}", className);
             return false;
         }
 
@@ -188,7 +200,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 读取配置文件中指定的需要处理的任务
     protected boolean readTaskInfo(String taskFile) {
         taskSet = FileUtil.readFile2Set(taskFile);
-        if (CommonUtil.isCollectionEmpty(taskSet)) {
+        if (JACGUtil.isCollectionEmpty(taskSet)) {
             logger.error("读取文件不存在或内容为空 {}", taskFile);
             return false;
         }
@@ -202,8 +214,16 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     // 创建输出文件所在目录
-    protected boolean createOutputDit(String prefix) {
-        outputDirPrefix = prefix + File.separator + CommonUtil.currentTime();
+    protected boolean createOutputDir(String prefix) {
+        String outputRootPath = System.getProperty(JACGConstants.PROPERTY_OUTPUT_ROOT_PATH);
+        if (StringUtils.isNotBlank(outputRootPath)) {
+            // 使用指定的生成结果文件根目录，并指定当前应用名称
+            outputDirPrefix = outputRootPath + prefix + File.separator + confInfo.getAppName() + JACGConstants.FLAG_MINUS + JACGUtil.currentTime();
+        } else {
+            // 使用当前目录作为生成结果文件根目录
+            outputDirPrefix = prefix + File.separator + JACGUtil.currentTime();
+        }
+
         logger.info("创建保存输出文件的目录 {}", outputDirPrefix);
         // 判断目录是否存在，不存在时尝试创建
         return FileUtil.isDirectoryExists(outputDirPrefix);
@@ -214,15 +234,15 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(JACGConstants.FLAG_LEFT_PARENTHESES).append(level).append(JACGConstants.FLAG_RIGHT_PARENTHESES)
                 .append(JACGConstants.FLAG_HASHTAG)
-                .append(CommonUtil.genOutputFlag(level));
+                .append(JACGUtil.genOutputFlag(level));
         return stringBuilder.toString();
     }
 
     // 将输出文件合并
     protected void combineOutputFile(String fileName) {
         if (confInfo.isGenCombinedOutput()) {
-            List<File> outputFileList = FileUtil.findFileInDir(outputDirPrefix, JACGConstants.EXT_TXT);
-            if (!CommonUtil.isCollectionEmpty(outputFileList) && outputFileList.size() > 1) {
+            List<File> outputFileList = FileUtil.findFileInCurrentDir(outputDirPrefix, JACGConstants.EXT_TXT);
+            if (!JACGUtil.isCollectionEmpty(outputFileList) && outputFileList.size() > 1) {
                 String combinedOutputFilePath = outputDirPrefix + File.separator + JACGConstants.COMBINE_FILE_NAME_PREFIX + fileName + JACGConstants.EXT_TXT;
                 FileUtil.combineTextFile(combinedOutputFilePath, outputFileList);
             }
@@ -230,7 +250,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     // 根据调用关系ID获取用于提示的信息
-    private NoticeCallInfo queryNoticeCallInfo(int callId) {
+    private NoticeCallInfo queryNoticeCallInfo(int currentMethodCallId) {
         String sqlKey = JACGConstants.SQL_KEY_MC_QUERY_NOTICE_INFO;
         String sql = sqlCacheMap.get(sqlKey);
         if (sql == null) {
@@ -244,9 +264,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             cacheSql(sqlKey, sql);
         }
 
-        Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{callId});
-        if (CommonUtil.isMapEmpty(map)) {
-            logger.error("查询需要提示的信息失败 {}", callId);
+        Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{currentMethodCallId});
+        if (JACGUtil.isMapEmpty(map)) {
+            logger.error("查询需要提示的信息失败 {}", currentMethodCallId);
             return null;
         }
 
@@ -254,7 +274,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         String callerFullMethod = (String) map.get(DC.MC_CALLER_FULL_METHOD);
         String calleeFullMethod = (String) map.get(DC.MC_CALLEE_FULL_METHOD);
         if (StringUtils.isAnyBlank(callerMethodHash, callerFullMethod, calleeFullMethod)) {
-            logger.error("查询需要提示的信息存在空值 {}", callId);
+            logger.error("查询需要提示的信息存在空值 {}", currentMethodCallId);
             return null;
         }
 
@@ -266,14 +286,14 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     // 记录可能出现一对多的方法调用
-    protected boolean recordMethodCallMayBeMulti(int callId, String callType) {
+    protected boolean recordMethodCallMayBeMulti(int currentMethodCallId, String callType) {
         CallTypeEnum callTypeEnum = CallTypeEnum.getFromType(callType);
         if (callTypeEnum != CallTypeEnum.CTE_ITF && callTypeEnum != CallTypeEnum.CTE_SCC) {
             return true;
         }
 
         // 根据调用关系ID获取用于提示的信息
-        NoticeCallInfo noticeCallInfo = queryNoticeCallInfo(callId);
+        NoticeCallInfo noticeCallInfo = queryNoticeCallInfo(currentMethodCallId);
         if (noticeCallInfo == null) {
             return false;
         }
@@ -394,7 +414,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
             for (String multiCallerMethod : multiCallerMethodSet) {
                 MultiCallInfo multiCallInfo = methodCallMap.get(multiCallerMethod);
-                if (multiCallInfo == null || CommonUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
+                if (multiCallInfo == null || JACGUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
                     logger.error("未查找到对应的一对多方法调用关系 {}", multiCallerMethod);
                     continue;
                 }
@@ -462,7 +482,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 String disabledCallerMethod = entry.getKey();
 
                 MultiCallInfo multiCallInfo = entry.getValue();
-                if (multiCallInfo == null || CommonUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
+                if (multiCallInfo == null || JACGUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
                     logger.error("未查找到对应的被禁用方法调用关系 {}", disabledCallerMethod);
                     continue;
                 }
@@ -555,18 +575,14 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      * @return true: 有更新，false: 没有更新
      */
     protected boolean checkJarFileUpdated() {
-        if (StringUtils.isBlank(confInfo.getCallGraphJarList())) {
-            return false;
-        }
-
         Map<String, Map<String, Object>> jarInfoMap = queryJarFileInfo();
-        if (CommonUtil.isMapEmpty(jarInfoMap)) {
+        if (JACGUtil.isMapEmpty(jarInfoMap)) {
             return false;
         }
 
         logger.info("检查Jar包文件是否有更新 {}", confInfo.getCallGraphJarList());
 
-        String[] array = confInfo.getCallGraphJarList().split(JACGConstants.FLAG_SPACE);
+        String[] array = getJarArray();
         for (String jarName : array) {
             if (FileUtil.isFileExists(jarName)) {
                 String jarFilePath = FileUtil.getCanonicalPath(jarName);
@@ -575,7 +591,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                     return true;
                 }
 
-                String jarPathHash = CommonUtil.genHashWithLen(jarFilePath);
+                String jarPathHash = JACGUtil.genHashWithLen(jarFilePath);
                 Map<String, Object> jarInfo = jarInfoMap.get(jarPathHash);
                 if (jarInfo == null) {
                     String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
@@ -587,7 +603,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 String lastModifiedStr = String.valueOf(lastModified);
                 if (!lastModifiedStr.equals(jarInfo.get(DC.JI_LAST_MODIFIED))) {
                     String jarFileHash = FileUtil.getFileMd5(jarFilePath);
-                    if (!jarFileHash.equals(jarInfo.get(DC.JI_JAR_HASH))) {
+                    if (!StringUtils.equals(jarFileHash, (String) jarInfo.get(DC.JI_JAR_HASH))) {
                         String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
                         logger.error("指定的Jar包文件内容有变化，请先执行 TestRunnerWriteDb 类导入数据库\n{} {} {}", new Date(lastModified), jarName, jarFullPath);
                         return true;
@@ -599,6 +615,23 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         return false;
     }
 
+    protected boolean checkH2DbFile() {
+        File h2DbFile = getH2DbFile();
+        if (!h2DbFile.exists()) {
+            logger.error("H2数据库文件不存在，请先执行 TestRunnerWriteDb 类导入数据库 {}", FileUtil.getCanonicalPath(h2DbFile));
+            return false;
+        }
+
+        // 数据库文件存在
+        if (!h2DbFile.isFile()) {
+            logger.error("H2数据库文件不是文件 {}", FileUtil.getCanonicalPath(h2DbFile));
+            return false;
+        }
+
+        // 检查H2数据库文件是否可写
+        return checkH2DbFileWritable(h2DbFile);
+    }
+
     private Map<String, Map<String, Object>> queryJarFileInfo() {
         String sqlKey = JACGConstants.SQL_KEY_JI_QUERY_JAR_INFO;
         String sql = sqlCacheMap.get(sqlKey);
@@ -608,7 +641,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{});
-        if (CommonUtil.isCollectionEmpty(list)) {
+        if (JACGUtil.isCollectionEmpty(list)) {
             logger.error("查询到Jar包信息为空");
             return null;
         }
@@ -633,5 +666,27 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return null;
         }
         return outputDirPrefix;
+    }
+
+    /**
+     * 重新设置线程数，若当前线程数需要调大则修改
+     *
+     * @param taskNum 任务数量
+     */
+    protected void resetPoolSize(int taskNum) {
+        int currentPoolSize = confInfo.getThreadNum();
+
+        int newPoolSize = Math.min(confInfo.getOriginalThreadNum(), taskNum);
+
+        if (currentPoolSize >= newPoolSize) {
+            // 当前线程数比准备修改的线程数大，不处理
+            return;
+        }
+
+        confInfo.setThreadNum(newPoolSize);
+        threadPoolExecutor.setCorePoolSize(newPoolSize);
+        threadPoolExecutor.setMaximumPoolSize(newPoolSize);
+
+        dbOperator.setMaxPoolSize(newPoolSize);
     }
 }

@@ -36,7 +36,7 @@ public class GenSingleCallGraph {
 
         String filePath = args[0];
 
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder result = new StringBuilder();
 
         for (int i = 1; i < args.length; i++) {
             String strLineNum = args[i];
@@ -51,10 +51,10 @@ public class GenSingleCallGraph {
                 continue;
             }
 
-            print(filePath, lineNum, ORDER_FOR_ER.equals(order), stringBuilder);
+            print(filePath, i, lineNum, ORDER_FOR_ER.equals(order), result);
         }
 
-        return stringBuilder.toString();
+        return result.toString();
     }
 
     public static String genHeaderInfo(String filePath, Set<String> keywordSet) {
@@ -104,7 +104,7 @@ public class GenSingleCallGraph {
         return true;
     }
 
-    private void print(String file, int lineNum, boolean order4er, StringBuilder stringBuilder) {
+    private void print(String file, int seq, int lineNum, boolean order4er, StringBuilder result) {
 
         List<String> dataList = new ArrayList<>(lineNum);
 
@@ -152,21 +152,21 @@ public class GenSingleCallGraph {
             }
         }
 
-        StringBuilder tmpStr = new StringBuilder();
+        StringBuilder content = new StringBuilder();
         if (order4er) {
             for (int i = resultList.size() - 1; i >= 0; i--) {
-                tmpStr.append(resultList.get(i)).append(JACGConstants.NEW_LINE);
+                content.append(resultList.get(i)).append(JACGConstants.NEW_LINE);
             }
         } else {
             for (String str : resultList) {
-                tmpStr.append(str).append(JACGConstants.NEW_LINE);
+                content.append(str).append(JACGConstants.NEW_LINE);
             }
         }
 
-        String data = tmpStr.toString();
-        stringBuilder.append("# 行号: ").append(lineNum).append(JACGConstants.NEW_LINE)
+        result.append(JACGConstants.FLAG_HASHTAG).append(JACGConstants.FLAG_SPACE).append(seq).append(JACGConstants.FLAG_DOT)
+                .append(" 行号: ").append(lineNum).append(JACGConstants.NEW_LINE)
                 .append("```").append(JACGConstants.NEW_LINE)
-                .append(data).append("```").append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE);
+                .append(content).append("```").append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE);
     }
 
     private boolean isValidNum(String str) {

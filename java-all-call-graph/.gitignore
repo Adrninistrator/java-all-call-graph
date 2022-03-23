@@ -16,6 +16,6 @@ out/
 /.DS_Store
 *.iml
 .classpath
-~jacg_output_for_callee/
-~jacg_output_for_caller/
+~jacg_o_ee/
+~jacg_o_er/
 output_dir/

@@ -5,10 +5,15 @@ import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
-import com.adrninistrator.jacg.util.CommonUtil;
+import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -57,6 +62,11 @@ public abstract class AbstractRunner {
             return false;
         }
 
+        if (!preCheck()) {
+            logger.error("{} 预检查失败", this.getClass().getSimpleName());
+            return false;
+        }
+
         dbOperator = DbOperator.getInstance();
         if (!dbOperator.init(confInfo)) {
             return false;
@@ -76,6 +86,13 @@ public abstract class AbstractRunner {
 
         return !someTaskFail;
     }
+
+    /**
+     * 预检查
+     *
+     * @return true: 成功；false: 失败
+     */
+    public abstract boolean preCheck();
 
     /**
      * 初始化
@@ -122,7 +139,7 @@ public abstract class AbstractRunner {
                 return;
             }
             logger.debug("wait4TPEExecute ...");
-            CommonUtil.sleep(100L);
+            JACGUtil.sleep(100L);
         }
     }
 
@@ -133,7 +150,35 @@ public abstract class AbstractRunner {
                 return;
             }
             logger.debug("wait4TPEDone ...");
-            CommonUtil.sleep(100L);
+            JACGUtil.sleep(100L);
+        }
+    }
+
+    // 获取H2数据库文件对象
+    protected File getH2DbFile() {
+        return new File(confInfo.getDbH2FilePath() + JACGConstants.H2_FILE_EXT);
+    }
+
+    // 获得需要处理的jar包数组
+    protected String[] getJarArray() {
+        return confInfo.getCallGraphJarList().split(JACGConstants.FLAG_SPACE);
+    }
+
+    // 检查H2数据库文件是否可写
+    protected boolean checkH2DbFileWritable(File h2DbFile) {
+        // 尝试以写方式打开，检查数据库文件是否被占用
+        try (FileChannel channel = FileChannel.open(h2DbFile.toPath(), StandardOpenOption.WRITE)) {
+            FileLock fileLock = channel.tryLock();
+            if (fileLock == null) {
+                logger.error("H2数据库文件无法写入，请先关闭H2数据库工具打开的H2数据库文件 {}", FileUtil.getCanonicalPath(h2DbFile));
+                return false;
+            }
+
+            fileLock.release();
+            return true;
+        } catch (Exception e) {
+            logger.error("检查H2数据库文件是否可以写入失败 {}", FileUtil.getCanonicalPath(h2DbFile));
+            return false;
         }
     }
 }

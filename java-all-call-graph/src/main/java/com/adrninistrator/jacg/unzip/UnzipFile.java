@@ -8,6 +8,8 @@ import org.apache.commons.io.IOUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -27,6 +29,8 @@ public class UnzipFile {
     public static final String DIR_RESOURCES = "resources";
     public static final String FLAG_FSP = "/";
     public static final String FILE_JAVA = ".java";
+
+    public static Set<String> handledFilePathSet = new HashSet<>();
 
     public static void main(String[] args) {
         String jarFilePath = UnzipFile.class.getProtectionDomain().getCodeSource().getLocation().getFile();
@@ -86,6 +90,12 @@ public class UnzipFile {
 
     private static void writeFile(ZipEntry ze, ZipInputStream zis, String rootDirName, String destDirName, String fileName) throws IOException {
         String destFilePath = rootDirName + FLAG_FSP + destDirName + FLAG_FSP + fileName;
+
+        if (handledFilePathSet.contains(destFilePath)) {
+            return;
+        }
+        handledFilePathSet.add(destFilePath);
+
         File destFile = new File(destFilePath);
         if (destFile.exists()) {
             System.out.println("文件已存在，不覆盖: " + destFilePath);

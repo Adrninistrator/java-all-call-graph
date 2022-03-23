@@ -12,6 +12,8 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,9 +29,9 @@ public class FileUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
-    private static ClassLoader classLoader = FileUtil.class.getClassLoader();
+    private static final ClassLoader CLASS_LOADER = FileUtil.class.getClassLoader();
 
-    private static String classpath = FileUtil.class.getResource("/").getPath();
+    private static final String CLASS_PATH = FileUtil.class.getResource("/").getPath();
 
     public static File findFile(String filePath) throws URISyntaxException {
         File file = new File(filePath);
@@ -37,11 +39,11 @@ public class FileUtil {
             return file;
         }
 
-        URL url = classLoader.getResource(filePath);
+        URL url = CLASS_LOADER.getResource(filePath);
         if (url != null) {
             return new File(url.toURI());
         }
-        return new File(classpath + filePath);
+        return new File(CLASS_PATH + filePath);
     }
 
     public static String readFile2String(String filePath) {
@@ -136,14 +138,17 @@ public class FileUtil {
             return false;
         }
 
-        // 目录不存在，则尝试创建
-        if (file.mkdirs()) {
-            logger.info("mkdirs: {}", dirPath);
+        try {
+            Files.createDirectories(file.toPath());
+            logger.info("create directory: {}", dirPath);
+            return true;
+        } catch (FileAlreadyExistsException e) {
+            logger.warn("try to create directory but exists: {}", dirPath);
+            return true;
+        } catch (IOException e) {
+            logger.error("error ", e);
             return true;
         }
-
-        logger.error("mkdirs fail: {}", dirPath);
-        return false;
     }
 
     /**
@@ -153,7 +158,7 @@ public class FileUtil {
      * @param fileExt
      * @return
      */
-    public static List<File> findFileInDir(String dirPath, String fileExt) {
+    public static List<File> findFileInCurrentDir(String dirPath, String fileExt) {
         File dir = new File(dirPath);
         if (!dir.exists() || !dir.isDirectory()) {
             logger.error("目录不存在，或不是目录 {}", dirPath);
@@ -176,6 +181,29 @@ public class FileUtil {
     }
 
     /**
+     * 查找指定目录中指定类型的文件，遍历子目录
+     *
+     * @param dirPath
+     * @param fileExt
+     * @param resultFileList
+     */
+    public static void findFileInSubDir(String dirPath, String fileExt, List<File> resultFileList) {
+        File dir = new File(dirPath);
+        File[] files = dir.listFiles();
+        if (files == null) {
+            return;
+        }
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                findFileInSubDir(file.getPath(), fileExt, resultFileList);
+            } else if (file.getName().endsWith(fileExt)) {
+                resultFileList.add(file);
+            }
+        }
+    }
+
+    /**
      * 将指定的一个或多个文本类型的源文件合并为目录文件
      *
      * @param destFilePath 目标文件路径
@@ -183,7 +211,7 @@ public class FileUtil {
      * @return
      */
     public static boolean combineTextFile(String destFilePath, List<File> srcFileList) {
-        if (CommonUtil.isCollectionEmpty(srcFileList)) {
+        if (JACGUtil.isCollectionEmpty(srcFileList)) {
             logger.error("指定的源文件列表为空");
             return false;
         }
@@ -216,6 +244,15 @@ public class FileUtil {
         }
     }
 
+    public static String getCanonicalPath(File file) {
+        try {
+            return file.getCanonicalPath();
+        } catch (IOException e) {
+            logger.error("error ", e);
+            return null;
+        }
+    }
+
     public static String getFileMd5(String filePath) {
         try (InputStream input = new FileInputStream(filePath)) {
             byte[] md5 = DigestUtils.md5(input);
@@ -232,6 +269,32 @@ public class FileUtil {
         } catch (Exception e) {
             logger.error("error ", e);
             return 0L;
+        }
+    }
+
+    /**
+     * 生成文件
+     *
+     * @param filePath 文件路径
+     * @return true: 文件已存在，或创建成功，false: 文件不存在且创建失败
+     */
+    public static boolean createNewFile(String filePath) {
+        File file = new File(filePath);
+        if (file.exists() && file.isFile()) {
+            logger.info("文件已存在1 {}", filePath);
+            return true;
+        }
+
+        try {
+            Files.createFile(file.toPath());
+            logger.info("生成文件 {}", filePath);
+            return true;
+        } catch (FileAlreadyExistsException e) {
+            logger.warn("文件已存在2 {}", filePath);
+            return true;
+        } catch (IOException e) {
+            logger.error("error ", e);
+            return false;
         }
     }
 

@@ -19,7 +19,7 @@ public class TestRunnable {
     }
 
     private void f3() {
-        new Thread(new RunnableImpl1()).start();
+        new Thread(new RunnableImpl1()).run();
     }
 
     private void f4() {

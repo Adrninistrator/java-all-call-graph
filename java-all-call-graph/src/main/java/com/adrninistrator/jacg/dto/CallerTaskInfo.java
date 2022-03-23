@@ -15,6 +15,8 @@ public class CallerTaskInfo {
 
     private int lineNumEnd;
 
+    private String saveDirPath;
+
     public String getCallerClassName() {
         return callerClassName;
     }
@@ -45,5 +47,24 @@ public class CallerTaskInfo {
 
     public void setLineNumEnd(int lineNumEnd) {
         this.lineNumEnd = lineNumEnd;
+    }
+
+    public String getSaveDirPath() {
+        return saveDirPath;
+    }
+
+    public void setSaveDirPath(String saveDirPath) {
+        this.saveDirPath = saveDirPath;
+    }
+
+    @Override
+    public String toString() {
+        return "CallerTaskInfo{" +
+                "callerClassName='" + callerClassName + '\'' +
+                ", callerMethodName='" + callerMethodName + '\'' +
+                ", lineNumStart=" + lineNumStart +
+                ", lineNumEnd=" + lineNumEnd +
+                ", saveDirPath='" + saveDirPath + '\'' +
+                '}';
     }
 }

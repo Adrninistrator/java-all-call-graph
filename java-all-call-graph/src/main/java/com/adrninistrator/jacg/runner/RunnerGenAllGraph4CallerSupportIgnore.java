@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.runner;
 /**
  * @author adrninistrator
  * @date 2021/6/24
- * @description:
+ * @description: 从数据库读取数据，生成指定类调用的所有向下的调用关系，支持忽略特定的包名、类、方法
  */
 
 public class RunnerGenAllGraph4CallerSupportIgnore extends RunnerGenAllGraph4Caller {
@@ -12,7 +12,6 @@ public class RunnerGenAllGraph4CallerSupportIgnore extends RunnerGenAllGraph4Cal
         runner = new RunnerGenAllGraph4CallerSupportIgnore();
     }
 
-    // 是否支持忽略指定方法
     @Override
     public boolean isSupportIgnore() {
         return true;

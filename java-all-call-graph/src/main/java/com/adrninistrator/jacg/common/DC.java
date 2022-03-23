@@ -32,6 +32,7 @@ public class DC {
     public static final String MC_CALLEE_CLASS_NAME = "callee_class_name";
 
     public static final String JI_JAR_NUM = "jar_num";
+    public static final String JI_JAR_TYPE = "jar_type";
     public static final String JI_JAR_PATH_HASH = "jar_path_hash";
     public static final String JI_JAR_FULL_PATH = "jar_full_path";
     public static final String JI_LAST_MODIFIED = "last_modified";

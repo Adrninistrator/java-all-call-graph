@@ -2,11 +2,13 @@ package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.dto.JarInfo;
 import com.adrninistrator.jacg.dto.MethodCallEntity;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
-import com.adrninistrator.jacg.util.CommonUtil;
 import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.jacg.util.SqlUtil;
+import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.extensions.code_parser.CustomCodeParserInterface;
 import com.adrninistrator.javacg.extensions.dto.ExtendedData;
 import com.adrninistrator.javacg.stat.JCallGraph;
@@ -26,7 +28,7 @@ import java.util.*;
 /**
  * @author adrninistrator
  * @date 2021/6/17
- * @description: 将通过java-callgraph生成的直接调用关系文件写入数据库
+ * @description: 将通过java-callgraph2生成的直接调用关系文件写入数据库
  */
 
 public class RunnerWriteDb extends AbstractRunner {
@@ -52,7 +54,7 @@ public class RunnerWriteDb extends AbstractRunner {
     private List<MethodCallEntity> methodCallList = new ArrayList<>(JACGConstants.BATCH_SIZE);
 
     // 记录Jar包信息
-    private Map<Integer, String> jarInfoMap = new HashMap<>();
+    private Map<Integer, JarInfo> jarInfoMap = new HashMap<>();
 
     // 记录自定义处理类
     private List<CustomCodeParserInterface> customCodeParserList;
@@ -63,13 +65,33 @@ public class RunnerWriteDb extends AbstractRunner {
     // 记录是否有写数据库
     private boolean writeDbFlag;
 
+    // 指定java-callgraph2是否需要记录所有的接口调用实现类，及子类调用父类方法，默认不需要
+    private boolean javaCGRecordAll = false;
+
+    // Java方法调用关系输出文件路径
+    private String callGraphOutputFilePath = null;
+
+    // 注解相关内容输出文件路径
+    private String callGraphAnnotationOutputFilePath = null;
+
     static {
         runner = new RunnerWriteDb();
     }
 
+    // 预检查
+    @Override
+    public boolean preCheck() {
+        if (confInfo.isDbUseH2() && !checkH2DbFile()) {
+            // 使用H2数据库时，检查H2数据库文件
+            return false;
+        }
+
+        return true;
+    }
+
     @Override
     public boolean init() {
-        if (confInfo.getDbDriverName().contains(JACGConstants.MYSQL_FLAG) &&
+        if (SqlUtil.isMySQLDb(confInfo.getDbDriverName()) &&
                 !confInfo.getDbUrl().contains(JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS)) {
             logger.info("使用MYSQL时，请在{}参数指定{}", JACGConstants.KEY_DB_URL, JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS);
             return false;
@@ -92,6 +114,23 @@ public class RunnerWriteDb extends AbstractRunner {
         }
     }
 
+    // 检查H2数据库文件
+    private boolean checkH2DbFile() {
+        File h2DbFile = getH2DbFile();
+        if (!h2DbFile.exists()) {
+            return true;
+        }
+
+        // 数据库文件存在
+        if (!h2DbFile.isFile()) {
+            logger.error("H2数据库文件不是文件 {}", FileUtil.getCanonicalPath(h2DbFile));
+            return false;
+        }
+
+        // 检查H2数据库文件是否可写
+        return checkH2DbFileWritable(h2DbFile);
+    }
+
     private boolean doOperate() {
         // 创建数据库表
         if (!createTables()) {
@@ -103,25 +142,25 @@ public class RunnerWriteDb extends AbstractRunner {
             return false;
         }
 
-        // 判断是否需要调用java-callgraph生成jar包的方法调用关系
+        // 判断是否需要调用java-callgraph2生成jar包的方法调用关系
         if (!callJavaCallGraph()) {
             return false;
         }
 
-        // 读取通过java-callgraph生成的直接调用关系文件，处理类名与Jar包信息
+        // 读取通过java-callgraph2生成的直接调用关系文件，处理类名与Jar包信息
         if (!handleClassCallAndJarInfo()) {
             return false;
         }
 
         if (!readFileFlag) {
             if (confInfo.isInputIgnoreOtherPackage()) {
-                logger.warn("未从文件读取到内容，请检查文件 {} ，以及配置文件指定的包名 {}", confInfo.getCallGraphInputFile(), JACGConstants.FILE_IN_ALLOWED_CLASS_PREFIX);
+                logger.warn("未从文件读取到内容，请检查文件 {} ，以及配置文件指定的包名 {}", callGraphOutputFilePath, JACGConstants.FILE_IN_ALLOWED_CLASS_PREFIX);
             } else {
-                logger.warn("未从文件读取到内容，请检查文件 {}", confInfo.getCallGraphInputFile());
+                logger.warn("未从文件读取到内容，请检查文件 {}", callGraphOutputFilePath);
             }
         }
         if (!writeDbFlag) {
-            logger.warn("未向数据库写入数据，请检查文件内容 {}", confInfo.getCallGraphInputFile());
+            logger.warn("未向数据库写入数据，请检查文件内容 {}", callGraphOutputFilePath);
         }
 
         // 查找类名相同但包名不同的类
@@ -137,7 +176,7 @@ public class RunnerWriteDb extends AbstractRunner {
         // 创建线程
         createThreadPoolExecutor();
 
-        // 读取通过java-callgraph生成的直接调用关系文件，处理方法调用
+        // 读取通过java-callgraph2生成的直接调用关系文件，处理方法调用
         if (!handleMethodCall()) {
             return false;
         }
@@ -145,26 +184,30 @@ public class RunnerWriteDb extends AbstractRunner {
         // 等待直到任务执行完毕
         wait4TPEDone();
 
+        if (confInfo.isDbUseH2()) {
+            // 显示H2数据库JDBC URL
+            printH2JdbcUrl();
+        }
+
         return true;
     }
 
-    // 判断是否需要调用java-callgraph生成jar包的方法调用关系
+    // 判断是否需要调用java-callgraph2生成jar包的方法调用关系
     private boolean callJavaCallGraph() {
-        if (StringUtils.isBlank(confInfo.getCallGraphJarList())) {
-            return true;
-        }
+        logger.info("尝试调用java-callgraph2生成jar包的方法调用关系 {}", confInfo.getCallGraphJarList());
 
-        logger.info("尝试调用java-callgraph生成jar包的方法调用关系 {}", confInfo.getCallGraphJarList());
-
-        String[] array = confInfo.getCallGraphJarList().split(JACGConstants.FLAG_SPACE);
+        String[] array = getJarArray();
         for (String jarName : array) {
-            if (!FileUtil.isFileExists(jarName)) {
-                logger.error("文件不存在或不是文件 {}", jarName);
+            if (!new File(jarName).exists()) {
+                logger.error("文件或目录不存在 {}", jarName);
                 return false;
             }
         }
 
-        System.setProperty(JACGConstants.JAVA_CALL_GRAPH_FLAG_OUT_FILE, confInfo.getCallGraphInputFile());
+        if (isJavaCGRecordAll()) {
+            // 指定需要记录所有的接口调用实现类，及子类调用父类方法
+            JCallGraph.setRecordAll();
+        }
 
         // 调用java-callgraph2
         JCallGraph jCallGraph = new JCallGraph();
@@ -175,12 +218,20 @@ public class RunnerWriteDb extends AbstractRunner {
 
         boolean success = jCallGraph.run(array);
         if (!success) {
-            logger.error("调用java-callgraph生成jar包的方法调用关系失败");
+            logger.error("调用java-callgraph2生成jar包的方法调用关系失败");
             return false;
         }
 
         // 处理自定义数据
-        return handleExtendedData();
+        if (!handleExtendedData()) {
+            return false;
+        }
+
+        // 记录Java方法调用关系输出文件路径
+        callGraphOutputFilePath = jCallGraph.getOutputFilePath();
+        // 记录注解相关内容输出文件路径
+        callGraphAnnotationOutputFilePath = jCallGraph.getAnnotationOutputFilePath();
+        return true;
     }
 
     // 添加用于对代码进行解析的自定义处理类
@@ -188,7 +239,7 @@ public class RunnerWriteDb extends AbstractRunner {
         String codeParserExtensionFilePath = JACGConstants.DIR_EXTENSIONS + File.separator + JACGConstants.FILE_EXTENSIONS_CODE_PARSER;
 
         Set<String> codeParserExtensionClasses = FileUtil.readFile2Set(codeParserExtensionFilePath);
-        if (CommonUtil.isCollectionEmpty(codeParserExtensionClasses)) {
+        if (JACGUtil.isCollectionEmpty(codeParserExtensionClasses)) {
             logger.info("未指定用于对代码进行解析的类，跳过 {}", codeParserExtensionFilePath);
             return true;
         }
@@ -197,14 +248,15 @@ public class RunnerWriteDb extends AbstractRunner {
 
         try {
             for (String extensionClass : codeParserExtensionClasses) {
-                Class clazz = Class.forName(extensionClass);
-                Object obj = clazz.newInstance();
-                if (!(obj instanceof CustomCodeParserInterface)) {
-                    logger.error("指定的用于对代码进行解析的类 {} 不是 {} 的实现类", extensionClass, CustomCodeParserInterface.class.getName());
+                CustomCodeParserInterface customCodeParserInterface = JACGUtil.getClassObject(extensionClass, CustomCodeParserInterface.class);
+                if (customCodeParserInterface == null) {
                     return false;
                 }
 
-                CustomCodeParserInterface customCodeParserInterface = (CustomCodeParserInterface) obj;
+                if (customCodeParserList.contains(customCodeParserInterface)) {
+                    continue;
+                }
+
                 customCodeParserInterface.init();
 
                 customCodeParserList.add(customCodeParserInterface);
@@ -219,14 +271,14 @@ public class RunnerWriteDb extends AbstractRunner {
 
     // 处理自定义数据
     private boolean handleExtendedData() {
-        if (CommonUtil.isCollectionEmpty(customCodeParserList)) {
+        if (JACGUtil.isCollectionEmpty(customCodeParserList)) {
             return true;
         }
 
         List<Object[]> objectList = new ArrayList<>(JACGConstants.BATCH_SIZE);
         for (CustomCodeParserInterface customCodeParserInterface : customCodeParserList) {
             List<ExtendedData> extendedDataList = customCodeParserInterface.getExtendedDataList();
-            if (CommonUtil.isCollectionEmpty(extendedDataList)) {
+            if (JACGUtil.isCollectionEmpty(extendedDataList)) {
                 continue;
             }
 
@@ -312,6 +364,13 @@ public class RunnerWriteDb extends AbstractRunner {
 
         sql = sql.replace(JACGConstants.APPNAME_IN_SQL, confInfo.getAppName());
 
+        if (confInfo.isDbUseH2()) {
+            // 使用H2数据库时，对建表的SQL语句进行处理
+            sql = sql.replace("ENGINE=InnoDB", "")
+                    .replace("COLLATE=utf8_bin", "")
+                    .replace(" text ", " varchar(3000) ");
+        }
+
         logger.info("建表sql: {}", sql);
         return sql;
     }
@@ -334,7 +393,7 @@ public class RunnerWriteDb extends AbstractRunner {
         if (confInfo.isInputIgnoreOtherPackage()) {
             String allowedClassPrefixFile = JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_IN_ALLOWED_CLASS_PREFIX;
             allowedClassPrefixSet = FileUtil.readFile2Set(allowedClassPrefixFile);
-            if (CommonUtil.isCollectionEmpty(allowedClassPrefixSet)) {
+            if (JACGUtil.isCollectionEmpty(allowedClassPrefixSet)) {
                 logger.error("读取文件不存在或内容为空 {}", allowedClassPrefixFile);
                 return false;
             }
@@ -342,9 +401,9 @@ public class RunnerWriteDb extends AbstractRunner {
         return true;
     }
 
-    // 读取通过java-callgraph生成的直接调用关系文件，处理类名与Jar包信息
+    // 读取通过java-callgraph2生成的直接调用关系文件，处理类名与Jar包信息
     private boolean handleClassCallAndJarInfo() {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(confInfo.getCallGraphInputFile()), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(callGraphOutputFilePath), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (StringUtils.isBlank(line)) {
@@ -355,14 +414,17 @@ public class RunnerWriteDb extends AbstractRunner {
                     readFileFlag = true;
                 }
 
-                if (line.startsWith(JACGConstants.FILE_KEY_CLASS_PREFIX)) {
+                if (line.startsWith(JavaCGConstants.FILE_KEY_CLASS_PREFIX)) {
                     // 处理一个类名
                     if (!handleOneClassCall(line)) {
                         return false;
                     }
-                } else if (line.startsWith(JACGConstants.FILE_KEY_JAR_INFO_PREFIX)) {
-                    // 处理一个Jar包信息
-                    handleOneJarInfo(line);
+                } else if (line.startsWith(JavaCGConstants.FILE_KEY_JAR_INFO_PREFIX)) {
+                    // 处理一个Jar包信息，类型为jar包
+                    handleOneJarInfo(line, true);
+                } else if (line.startsWith(JavaCGConstants.FILE_KEY_DIR_INFO_PREFIX)) {
+                    // 处理一个Jar包信息，类型为文件
+                    handleOneJarInfo(line, false);
                 }
             }
 
@@ -398,10 +460,28 @@ public class RunnerWriteDb extends AbstractRunner {
 
         if (!list.isEmpty()) {
             for (Object object : list) {
-                duplicateClassNameSet.add((String) object);
+                String duplicateClassName = (String) object;
+                duplicateClassNameSet.add(duplicateClassName);
+
+                // 将简单类名重复的类名，更新为完整类名
+                updateSimpleName2Full(duplicateClassName);
             }
         }
         return true;
+    }
+
+    // 将class_name_表的simple_name更新为full_name
+    private boolean updateSimpleName2Full(String simpleName) {
+        String sqlKey = JACGConstants.SQL_KEY_CN_UPDATE_SIMPLE_2_FULL;
+        String sql = sqlCacheMap.get(sqlKey);
+        if (sql == null) {
+            sql = "update " + JACGConstants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName() +
+                    " set " + DC.CN_SIMPLE_NAME + " = " + DC.CN_FULL_NAME + " where " + DC.CN_SIMPLE_NAME + " = ?";
+            cacheSql(sqlKey, sql);
+        }
+
+        Integer row = dbOperator.update(sql, new Object[]{simpleName});
+        return row != null;
     }
 
     // 处理一个类名
@@ -422,7 +502,7 @@ public class RunnerWriteDb extends AbstractRunner {
             return true;
         }
 
-        // 通过java-callgraph生成的直接类引用关系存在重复，进行去重
+        // 通过java-callgraph2生成的直接类引用关系存在重复，进行去重
         if (fullClassNameMap.putIfAbsent(fullClassName, Boolean.TRUE) == null) {
             fullClassNameList.add(fullClassName);
 
@@ -458,7 +538,7 @@ public class RunnerWriteDb extends AbstractRunner {
 
         List<Object[]> objectList = new ArrayList<>(fullClassNameList.size());
         for (String fullClassName : fullClassNameList) {
-            String simpleClassName = CommonUtil.getSimpleClassNameFromFull(fullClassName);
+            String simpleClassName = JACGUtil.getSimpleClassNameFromFull(fullClassName);
 
             Object[] object = new Object[]{fullClassName, simpleClassName};
             objectList.add(object);
@@ -470,13 +550,17 @@ public class RunnerWriteDb extends AbstractRunner {
     }
 
     // 处理一个Jar包信息
-    private void handleOneJarInfo(String line) {
+    private void handleOneJarInfo(String line, boolean isJar) {
         int indexSpace = line.indexOf(JACGConstants.FLAG_SPACE);
 
         String jarNumStr = line.substring(JACGConstants.FILE_KEY_PREFIX_LENGTH, indexSpace).trim();
-        String jarPath = line.substring(indexSpace + 1).trim();
+        String jarFilePath = line.substring(indexSpace + 1).trim();
 
-        jarInfoMap.put(Integer.valueOf(jarNumStr), jarPath);
+        JarInfo jarInfo = new JarInfo();
+        jarInfo.setJarFilePath(jarFilePath);
+        jarInfo.setJarType(isJar ? JACGConstants.JAR_TYPE_JAR : JACGConstants.JAR_TYPE_DIR);
+
+        jarInfoMap.put(Integer.valueOf(jarNumStr), jarInfo);
     }
 
     // 将Jar包信息数据写入数据库
@@ -502,18 +586,26 @@ public class RunnerWriteDb extends AbstractRunner {
         }
 
         List<Object[]> objectList = new ArrayList<>(jarInfoMap.size());
-        for (Map.Entry<Integer, String> jarInfoEntry : jarInfoMap.entrySet()) {
+        for (Map.Entry<Integer, JarInfo> jarInfoEntry : jarInfoMap.entrySet()) {
             Integer jarNum = jarInfoEntry.getKey();
-            String jarPath = jarInfoEntry.getValue();
-            if (!FileUtil.isFileExists(jarPath)) {
-                logger.error("Jar包文件不存在: {}", jarPath);
-                return false;
+            JarInfo jarInfo = jarInfoEntry.getValue();
+            String jarFilePath = jarInfo.getJarFilePath();
+
+            String lastModified = "";
+            String jarFileHash = "";
+
+            if (JACGConstants.JAR_TYPE_JAR.equals(jarInfo.getJarType())) {
+                if (!FileUtil.isFileExists(jarFilePath)) {
+                    logger.error("Jar包文件不存在: {}", jarFilePath);
+                    return false;
+                }
+
+                // 为jar包时，获取文件修改时间及HASH
+                lastModified = String.valueOf(FileUtil.getFileLastModified(jarFilePath));
+                jarFileHash = FileUtil.getFileMd5(jarFilePath);
             }
 
-            long lastModified = FileUtil.getFileLastModified(jarPath);
-            String jarFileHash = FileUtil.getFileMd5(jarPath);
-
-            Object[] object = new Object[]{jarNum, CommonUtil.genHashWithLen(jarPath), jarPath, String.valueOf(lastModified), jarFileHash};
+            Object[] object = new Object[]{jarNum, jarInfo.getJarType(), JACGUtil.genHashWithLen(jarFilePath), jarFilePath, lastModified, jarFileHash};
             objectList.add(object);
         }
 
@@ -522,8 +614,7 @@ public class RunnerWriteDb extends AbstractRunner {
 
     // 读取方法注解信息
     private boolean handleMethodAnnotation() {
-        String annotationInfoFilePath = confInfo.getCallGraphInputFile() + JACGConstants.FILE_IN_ANNOTATION_TAIL;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(annotationInfoFilePath), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(callGraphAnnotationOutputFilePath), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (StringUtils.isBlank(line)) {
@@ -599,7 +690,7 @@ public class RunnerWriteDb extends AbstractRunner {
         for (Pair<String, String> pair : methodAnnotationList) {
             String fullMethod = pair.getLeft();
             String annotation = pair.getRight();
-            String methodHash = CommonUtil.genHashWithLen(fullMethod);
+            String methodHash = JACGUtil.genHashWithLen(fullMethod);
 
             Object[] object = new Object[]{methodHash, annotation, fullMethod};
             objectList.add(object);
@@ -611,16 +702,16 @@ public class RunnerWriteDb extends AbstractRunner {
     }
 
 
-    // 读取通过java-callgraph生成的直接调用关系文件，处理方法调用
+    // 读取通过java-callgraph2生成的直接调用关系文件，处理方法调用
     private boolean handleMethodCall() {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(confInfo.getCallGraphInputFile()), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(callGraphOutputFilePath), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (StringUtils.isBlank(line)) {
                     continue;
                 }
 
-                if (line.startsWith(JACGConstants.FILE_KEY_METHOD_PREFIX)) {
+                if (line.startsWith(JavaCGConstants.FILE_KEY_METHOD_PREFIX)) {
                     // 处理一条方法调用
                     if (!handleOneMethodCall(line)) {
                         return false;
@@ -652,17 +743,17 @@ public class RunnerWriteDb extends AbstractRunner {
         String strCallerLineNum = methodCallArray[3];
         String callerJarNum = methodCallArray[4];
 
-        if (!CommonUtil.isNumStr(callIdStr)) {
+        if (!JACGUtil.isNumStr(callIdStr)) {
             logger.error("方法调用ID非法 [{}] [{}]", data, callIdStr);
             return false;
         }
 
-        if (!CommonUtil.isNumStr(strCallerLineNum)) {
+        if (!JACGUtil.isNumStr(strCallerLineNum)) {
             logger.error("方法调用信息行号非法 [{}] [{}]", data, strCallerLineNum);
             return false;
         }
 
-        if (!CommonUtil.isNumStr(callerJarNum)) {
+        if (!JACGUtil.isNumStr(callerJarNum)) {
             logger.error("Jar包序号非法 [{}] [{}]", data, callerJarNum);
             return false;
         }
@@ -681,8 +772,8 @@ public class RunnerWriteDb extends AbstractRunner {
             return true;
         }
 
-        String callerMethodHash = CommonUtil.genHashWithLen(callerFullMethod);
-        String calleeMethodHash = CommonUtil.genHashWithLen(finalCalleeFullMethod);
+        String callerMethodHash = JACGUtil.genHashWithLen(callerFullMethod);
+        String calleeMethodHash = JACGUtil.genHashWithLen(finalCalleeFullMethod);
 
         if (callerMethodHash.equals(calleeMethodHash)) {
             // 对于递归调用，不写入数据库，防止查询时出现死循环
@@ -690,17 +781,17 @@ public class RunnerWriteDb extends AbstractRunner {
             return true;
         }
 
-        String callerMethodName = CommonUtil.getOnlyMethodName(callerFullMethod);
-        String calleeMethodName = CommonUtil.getOnlyMethodName(finalCalleeFullMethod);
+        String callerMethodName = JACGUtil.getOnlyMethodName(callerFullMethod);
+        String calleeMethodName = JACGUtil.getOnlyMethodName(finalCalleeFullMethod);
 
-        String callerFullClassName = CommonUtil.getFullClassNameFromMethod(callerFullMethod);
-        String calleeFullClassName = CommonUtil.getFullClassNameFromMethod(finalCalleeFullMethod);
+        String callerFullClassName = JACGUtil.getFullClassNameFromMethod(callerFullMethod);
+        String calleeFullClassName = JACGUtil.getFullClassNameFromMethod(finalCalleeFullMethod);
 
         String callerFullOrSimpleClassName = getFullOrSimpleClassName(callerFullClassName);
         String calleeFullOrSimpleClassName = getFullOrSimpleClassName(calleeFullClassName);
 
         MethodCallEntity methodCallEntity = new MethodCallEntity();
-        methodCallEntity.setId(Integer.valueOf(Integer.parseInt(callIdStr)));
+        methodCallEntity.setId(Integer.valueOf(callIdStr));
         methodCallEntity.setCallType(callType);
         methodCallEntity.setEnabled(JACGConstants.ENABLED);
         methodCallEntity.setCallerJarNum(callerJarNum);
@@ -778,7 +869,7 @@ public class RunnerWriteDb extends AbstractRunner {
      * @return 完整类名或简单类名
      */
     private String getFullOrSimpleClassName(String fullClassName) {
-        String simpleClassName = CommonUtil.getSimpleClassNameFromFull(fullClassName);
+        String simpleClassName = JACGUtil.getSimpleClassNameFromFull(fullClassName);
         if (duplicateClassNameSet.contains(simpleClassName)) {
             return fullClassName;
         }
@@ -819,6 +910,24 @@ public class RunnerWriteDb extends AbstractRunner {
             tmpMethodCallList.add(object);
         }
         return tmpMethodCallList;
+    }
+
+    // 显示H2数据库JDBC URL
+    private void printH2JdbcUrl() {
+        String h2DbFilePath = FileUtil.getCanonicalPath(getH2DbFile());
+        if (h2DbFilePath == null) {
+            return;
+        }
+        String h2DbFilePathWithoutExt = h2DbFilePath.substring(0, h2DbFilePath.length() - JACGConstants.H2_FILE_EXT.length());
+        logger.info("可用于连接H2数据库的JDBC URL:\n{}{}", JACGConstants.H2_PROTOCOL, h2DbFilePathWithoutExt);
+    }
+
+    public boolean isJavaCGRecordAll() {
+        return javaCGRecordAll;
+    }
+
+    public void setJavaCGRecordAll(boolean javaCGRecordAll) {
+        this.javaCGRecordAll = javaCGRecordAll;
     }
 }
 

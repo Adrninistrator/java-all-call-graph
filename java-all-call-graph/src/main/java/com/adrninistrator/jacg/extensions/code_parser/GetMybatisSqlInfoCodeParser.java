@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.extensions.code_parser;
 import com.adrninistrator.jacg.extensions.dto.DbOperateData;
 import com.adrninistrator.jacg.extensions.enums.DbStatementEnum;
 import com.adrninistrator.jacg.extensions.util.JsonUtil;
-import com.adrninistrator.jacg.util.CommonUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.extensions.code_parser.AbstractCustomCodeParser;
 import com.adrninistrator.javacg.extensions.dto.ExtendedData;
 import org.apache.bcel.generic.InstructionHandle;
@@ -15,6 +15,7 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultAttribute;
+import org.dom4j.tree.DefaultCDATA;
 import org.dom4j.tree.DefaultElement;
 import org.dom4j.tree.DefaultText;
 import org.xml.sax.EntityResolver;
@@ -29,9 +30,9 @@ import java.util.jar.JarFile;
 /**
  * @author adrninistrator
  * @date 2021/8/25
- * @description: 从MyBatis的XML文件获取对应的数据库操作语句及被操作的数据库表名
+ * @description: 从MyBatis的XML文件获取对应的数据库操作语句及被操作的数据库表名，基类
  */
-public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
+public abstract class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
 
     public static final String DATA_TYPE = "MB_SQL";
 
@@ -67,9 +68,7 @@ public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
      * @param calleeMethodName 被调用的方法名
      * @return true: 需要处理； false: 不需要处理
      */
-    protected boolean checkClassNameAndMethod(String calleeClassName, String calleeMethodName) {
-        return calleeClassName.contains(".dao.");
-    }
+    protected abstract boolean checkClassNameAndMethod(String calleeClassName, String calleeMethodName);
 
     @Override
     public void handleMethodCall(int callId, String calleeClassName, String calleeMethodName, Type[] arguments, InstructionHandle mcIh, MethodGen methodGen) {
@@ -88,7 +87,7 @@ public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
 
         // 获取当前被调用的Mapper的方法对应的数据库操作
         Map<String, String> sqlMap = mapperSqlMap.get(calleeClassName);
-        if (CommonUtil.isMapEmpty(sqlMap)) {
+        if (JACGUtil.isMapEmpty(sqlMap)) {
             System.err.println("### 未查找到对应的mapper " + calleeClassName);
             return;
         }
@@ -100,6 +99,9 @@ public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
         }
 
         DbOperateData dbOperateDataNew = getDbOperateData(sql);
+        dbOperateDataNew.setSimpleClassName(JACGUtil.getSimpleClassNameFromFull(calleeClassName));
+        dbOperateDataNew.setMethodName(calleeMethodName);
+
         // 记录当前被调用的Mapper的方法
         dbOperateDataMap.put(calleeMethodName, dbOperateDataNew);
 
@@ -166,7 +168,7 @@ public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
                 // 处理一个SQL Element中的Element
                 DefaultElement defaultElement = (DefaultElement) content;
                 String elementName = defaultElement.getName();
-                if (StringUtils.equalsAny(elementName, "foreach", "if")) {
+                if (StringUtils.equalsAny(elementName, "foreach", "if", "choose", "when", "otherwise")) {
                     getElementSql(defaultElement, stringBuilder);
                 } else if (StringUtils.equalsAny(elementName, "where", "set")) {
                     addData(stringBuilder, elementName);
@@ -183,6 +185,11 @@ public class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
                         }
                     }
                 }
+            } else if (content instanceof DefaultCDATA) {
+                // 处理一个SQL Element中的文本
+                DefaultCDATA defaultCDATA = (DefaultCDATA) content;
+                String text = defaultCDATA.getText();
+                addData(stringBuilder, text);
             }
         }
     }
