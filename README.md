@@ -20,7 +20,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 # 2. 更新说明
 
-- 0.6.0
+- 0.6.1
 
 支持使用本地文件形式的H2数据库，可不依赖外部的其他数据库
 
@@ -112,7 +112,7 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.0'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.1'
 ```
 
 - Maven
@@ -121,7 +121,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.0'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.6.0</version>
+  <version>0.6.1</version>
 </dependency>
 ```
 
@@ -231,7 +231,7 @@ com.test.Test1
 
 `db.use.h2`：是否使用H2数据库，值为true/false；当开关为开时，还需要配置db.h2.file.path参数，当开关为关时，还需要配置db.driver.name、db.url、db.username、db.password参数
 
-`db.h2.file.path`：H2数据库文件路径（仅当使用H2数据库时需要指定），示例：./build/h2db，不需要指定“.mv.db”
+`db.h2.file.path`：H2数据库文件路径（仅当使用H2数据库时需要指定），示例：./build/jacg_h2db，不需要指定“.mv.db”
 
 `db.driver.name`：数据库驱动类名（仅当使用非H2数据库时需要指定）
 
