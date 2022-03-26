@@ -20,15 +20,27 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 # 2. 更新说明
 
-- 0.6.1
+## 2.1. (0.6.2)
 
-支持使用本地文件形式的H2数据库，可不依赖外部的其他数据库
+- 支持使用本地文件数据库
+
+支持使用本地文件形式的H2数据库，可不依赖外部的其他数据库，可以无法连接其他数据库（如MySQL）的环境中运行
 
 H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details/108029222](https://blog.csdn.net/a82514921/article/details/108029222)
 
 当前工具生成的H2数据库中，schema为“jacg”
 
-除了支持对jar包进行处理外，也支持对目录中的class文件进行处理，支持指定一个或多个jar包，或一个或多个目录，或jar包与目录混合进行处理（该功能在java-callgraph2中实现，通过call.graph.jar.list参数进行配置）
+- 支持对目录进行处理
+
+除了支持对jar包进行处理外，也支持对目录中的class、jar文件进行处理
+
+支持指定一个或多个jar包，或一个或多个目录，或jar包与目录混合进行处理
+
+该功能在java-callgraph2中实现，通过call.graph.jar.list参数进行配置
+
+可参考[https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)
+
+- 支持插件功能
 
 提供用于生成Java方法UML时序图的插件功能
 
@@ -112,7 +124,7 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.1'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.2'
 ```
 
 - Maven
@@ -121,7 +133,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.1'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.6.1</version>
+  <version>0.6.2</version>
 </dependency>
 ```
 
@@ -427,7 +439,7 @@ func1(java.lang.String)
 
 在项目根目录执行`gradlew gen_run_jar`命令，生成可以直接执行的jar包，并拷贝相关文件。
 
-在生成的output_dir目录中，包含了当前项目生成的jar包、依赖jar包，以及资源文件、启动脚本等，如下所示：
+在生成的`output_dir`目录中，包含了当前项目生成的jar包、依赖jar包，以及资源文件、启动脚本等，如下所示：
 
 ```
 ~jacg_config
