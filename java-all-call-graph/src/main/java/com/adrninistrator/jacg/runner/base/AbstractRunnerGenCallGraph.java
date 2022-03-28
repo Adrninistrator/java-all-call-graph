@@ -575,6 +575,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      * @return true: 有更新，false: 没有更新
      */
     protected boolean checkJarFileUpdated() {
+        if (System.getProperty(JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED) != null) {
+            logger.info("已在启动参数中指定 -D{}=xx，不检查Jar包文件是否有更新", JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED);
+            return false;
+        }
+
         Map<String, Map<String, Object>> jarInfoMap = queryJarFileInfo();
         if (JACGUtil.isMapEmpty(jarInfoMap)) {
             return false;
@@ -595,7 +600,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 Map<String, Object> jarInfo = jarInfoMap.get(jarPathHash);
                 if (jarInfo == null) {
                     String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
-                    logger.error("指定的Jar包未导入数据库中，请先执行 TestRunnerWriteDb 类导入数据库\n{} {}", jarName, jarFullPath);
+                    logger.error("指定的Jar包未导入数据库中，请先执行 TestRunnerWriteDb 类导入数据库\n{} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
+                            jarName, jarFullPath, JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED);
                     return true;
                 }
 
@@ -605,7 +611,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                     String jarFileHash = FileUtil.getFileMd5(jarFilePath);
                     if (!StringUtils.equals(jarFileHash, (String) jarInfo.get(DC.JI_JAR_HASH))) {
                         String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
-                        logger.error("指定的Jar包文件内容有变化，请先执行 TestRunnerWriteDb 类导入数据库\n{} {} {}", new Date(lastModified), jarName, jarFullPath);
+                        logger.error("指定的Jar包文件内容有变化，请先执行 TestRunnerWriteDb 类导入数据库\n{} {} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
+                                new Date(lastModified), jarName, jarFullPath, JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED);
                         return true;
                     }
                 }

@@ -20,7 +20,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 # 2. 更新说明
 
-## 2.1. (0.6.2)
+## 2.1. (0.6.3)
 
 - 支持使用本地文件数据库
 
@@ -32,11 +32,11 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 - 支持对目录进行处理
 
-除了支持对jar包进行处理外，也支持对目录中的class、jar文件进行处理
+除了支持对jar/war包进行处理外，也支持对目录中的class、jar/war文件进行处理
 
-支持指定一个或多个jar包，或一个或多个目录，或jar包与目录混合进行处理
+支持指定一个或多个jar/war包，或一个或多个目录，或jar/war包与目录混合进行处理
 
-该功能在java-callgraph2中实现，通过call.graph.jar.list参数进行配置
+该功能在java-callgraph2中实现，通过当前工具的config.properties配置文件中的call.graph.jar.list参数进行配置
 
 可参考[https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)
 
@@ -124,7 +124,7 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.2'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.3'
 ```
 
 - Maven
@@ -133,7 +133,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.2'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.6.2</version>
+  <version>0.6.3</version>
 </dependency>
 ```
 

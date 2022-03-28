@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group 'com.github.adrninistrator'
-version = "0.6.2"
+version = "0.6.3"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -56,7 +56,7 @@ List h2database = ["com.h2database:h2:2.1.210"]
 
 List slf4j = ['org.slf4j:log4j-over-slf4j:1.7.30']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:0.1.1']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:0.1.2']
 
 def jackson_ver = "2.12.4"
 List jackson = [

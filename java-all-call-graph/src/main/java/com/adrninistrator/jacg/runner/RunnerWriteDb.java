@@ -209,6 +209,12 @@ public class RunnerWriteDb extends AbstractRunner {
             JCallGraph.setRecordAll();
         }
 
+        if (confInfo.isInputIgnoreOtherPackage()) {
+            String mergeClassInJarPackage = StringUtils.join(allowedClassPrefixSet, JavaCGConstants.FLAG_VERTICAL_BAR);
+            // 设置合并jar/war包中的class文件时，需要合并的包名
+            JCallGraph.setMergeClassInJarPackage(mergeClassInJarPackage);
+        }
+
         // 调用java-callgraph2
         JCallGraph jCallGraph = new JCallGraph();
         // 添加自定义处理类

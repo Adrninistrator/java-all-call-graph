@@ -219,6 +219,8 @@ public class JACGConstants {
     public static final String PROPERTY_WRITE_CONFIG_IN_RESULT = "write.config";
     // 生成结果文件根目录
     public static final String PROPERTY_OUTPUT_ROOT_PATH = "output.root.path";
+    // 跳过检查Jar包文件是否有更新
+    public static final String PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED = "skip.check.jar.file.updated";
 
     public static final int ENABLED = 1;
     public static final int DISABLED = 0;
