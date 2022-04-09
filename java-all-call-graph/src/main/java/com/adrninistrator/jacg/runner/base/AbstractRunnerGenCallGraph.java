@@ -1,9 +1,14 @@
 package com.adrninistrator.jacg.runner.base;
 
+import com.adrninistrator.jacg.annotation.AnnotationStorage;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.MultiCallInfo;
 import com.adrninistrator.jacg.dto.NoticeCallInfo;
+import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Method;
+import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Read;
+import com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler;
+import com.adrninistrator.jacg.extensions.annotation_handler.DefaultAnnotationHandler;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.util.FileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -34,13 +39,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 保存当前生成输出文件时的目录前缀
     protected String outputDirPrefix;
-
-    /*
-        方法注解信息
-        key: 方法HASH+长度
-        value: 所有注解排序后拼接，分隔符为半角逗号,
-     */
-    protected Map<String, String> methodAnnotationsMap = new HashMap<>(100);
 
     /*
         接口调用对应实现类的方法调用
@@ -75,6 +73,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         value: 子类方法
      */
     private Map<String, MultiCallInfo> disabledSccMethodCallMap = new TreeMap<>();
+
+    // 保存用于对方法上的注解进行处理的类
+    protected List<AbstractAnnotationHandler> annotationHandlerList;
+
+    // 保存各个方法已处理过的所有注解信息
+    protected Map<String, String> methodAllAnnotationInfoMap = new HashMap<>();
 
     // 预检查
     @Override
@@ -156,42 +160,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         if (JACGUtil.isCollectionEmpty(list)) {
             logger.warn("指定的类从调用关系表中未查询到 {}", className);
             return false;
-        }
-
-        return true;
-    }
-
-    // 读取方法注解
-    protected boolean readMethodAnnotation() {
-        logger.info("读取方法注解");
-        String sqlKey = JACGConstants.SQL_KEY_MA_QUERY_METHOD_ANNOTATION;
-        String sql = sqlCacheMap.get(sqlKey);
-        if (sql == null) {
-            String columns = StringUtils.join(JACGConstants.TABLE_COLUMNS_METHOD_ANNOTATION, JACGConstants.FLAG_COMMA_WITH_SPACE);
-            sql = "select " + columns + " from " + JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION + confInfo.getAppName() +
-                    " order by " + DC.MA_METHOD_HASH + ", " + DC.MA_ANNOTATION_NAME;
-            cacheSql(sqlKey, sql);
-        }
-
-        List<Map<String, Object>> list = dbOperator.queryList(sql, null);
-        if (list == null) {
-            return false;
-        }
-
-        if (list.isEmpty()) {
-            return true;
-        }
-
-        for (Map<String, Object> map : list) {
-            String methodhash = (String) map.get(DC.MA_METHOD_HASH);
-            String annotationName = (String) map.get(DC.MA_ANNOTATION_NAME);
-
-            String existedAnnotationName = methodAnnotationsMap.get(methodhash);
-            if (existedAnnotationName == null) {
-                methodAnnotationsMap.put(methodhash, JACGConstants.FLAG_AT + annotationName);
-            } else {
-                methodAnnotationsMap.put(methodhash, existedAnnotationName + JACGConstants.FLAG_AT + annotationName);
-            }
         }
 
         return true;
@@ -695,5 +663,78 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         threadPoolExecutor.setMaximumPoolSize(newPoolSize);
 
         dbOperator.setMaxPoolSize(newPoolSize);
+    }
+
+    // 添加用于添加对方法上的注解进行处理的类
+    protected boolean addMethodAnnotationHandlerExtensions() {
+        String methodAnnotationHandlerFilePath = JACGConstants.DIR_EXTENSIONS + File.separator + JACGConstants.FILE_EXTENSIONS_METHOD_ANNOTATION_HANDLER;
+        Set<String> methodAnnotationHandlerClasses = FileUtil.readFile2Set(methodAnnotationHandlerFilePath);
+        if (JACGUtil.isCollectionEmpty(methodAnnotationHandlerClasses)) {
+            annotationHandlerList = new ArrayList<>(1);
+            // 添加默认的处理类
+            annotationHandlerList.add(new DefaultAnnotationHandler());
+            return true;
+        }
+
+        annotationHandlerList = new ArrayList<>(methodAnnotationHandlerClasses.size());
+        try {
+            for (String extensionClass : methodAnnotationHandlerClasses) {
+                AbstractAnnotationHandler annotationHandler = JACGUtil.getClassObject(extensionClass, AbstractAnnotationHandler.class);
+                if (annotationHandler == null) {
+                    return false;
+                }
+
+                annotationHandlerList.add(annotationHandler);
+            }
+            // 在最后添加默认的处理类
+            annotationHandlerList.add(new DefaultAnnotationHandler());
+            return true;
+        } catch (Exception e) {
+            logger.error("error ", e);
+            return false;
+        }
+    }
+
+    /**
+     * 获取方法对应的注解信息
+     *
+     * @param methodHash 完整方法HASH+长度
+     * @return
+     */
+    protected String getMethodAnnotationInfo(String methodHash) {
+        // 根据完整方法HASH+长度获取对应的注解信息
+        AnnotationInfo4Method annotationInfo4Method = AnnotationStorage.getAnnotationInfo4Method(methodHash);
+        if (annotationInfo4Method == null) {
+            // 当前方法上没有注解
+            return "";
+        }
+
+        // 当前方法上有注解
+        String existedAnnotationInfo = methodAllAnnotationInfoMap.get(methodHash);
+        if (existedAnnotationInfo != null) {
+            // 当前方法对应的注解信息已查询过，直接使用
+            return existedAnnotationInfo;
+        }
+
+        // 当前方法对应的注解信息未查询过
+        StringBuilder stringBuilder = new StringBuilder();
+
+        // 遍历当前方法上的所有注解进行处理
+        for (AnnotationInfo4Read annotationInfo4Read : annotationInfo4Method.getAnnotationInfo4ReadList()) {
+            // 遍历用于对方法上的注解进行处理的类
+            for (AbstractAnnotationHandler annotationHandler : annotationHandlerList) {
+                if (annotationHandler.checkHandleAnnotation(annotationInfo4Read.getAnnotationName())) {
+                    // 找到能够处理的类进行处理
+                    String annotationInfo = annotationHandler.handleAnnotation(annotationInfo4Method.getFullMethod(), annotationInfo4Method.getFullClassName(),
+                            annotationInfo4Read);
+                    stringBuilder.append(annotationInfo);
+                    break;
+                }
+            }
+        }
+
+        String allAnnotationInfo = stringBuilder.toString();
+        methodAllAnnotationInfoMap.put(methodHash, allAnnotationInfo);
+        return allAnnotationInfo;
     }
 }

@@ -2,8 +2,10 @@ package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Write;
 import com.adrninistrator.jacg.dto.JarInfo;
 import com.adrninistrator.jacg.dto.MethodCallEntity;
+import com.adrninistrator.jacg.extensions.util.JsonUtil;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.FileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -12,9 +14,8 @@ import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.extensions.code_parser.CustomCodeParserInterface;
 import com.adrninistrator.javacg.extensions.dto.ExtendedData;
 import com.adrninistrator.javacg.stat.JCallGraph;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +48,11 @@ public class RunnerWriteDb extends AbstractRunner {
     // 类名相同但包名不同的类名
     private Set<String> duplicateClassNameSet = new HashSet<>();
 
-    // 记录方法注解
-    private List<Pair<String, String>> methodAnnotationList = new ArrayList<>(JACGConstants.BATCH_SIZE);
+    // 记录方法注解信息
+    private List<AnnotationInfo4Write> methodAnnotationInfoList = new ArrayList<>(JACGConstants.BATCH_SIZE);
+
+    // 记录类注解信息
+    private List<AnnotationInfo4Write> classAnnotationInfoList = new ArrayList<>(JACGConstants.BATCH_SIZE);
 
     // 记录方法调用
     private List<MethodCallEntity> methodCallList = new ArrayList<>(JACGConstants.BATCH_SIZE);
@@ -338,23 +342,25 @@ public class RunnerWriteDb extends AbstractRunner {
 
     // 创建数据库表
     private boolean createTables() {
-        String sqlClassName = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_CLASS_NAME);
-        String sqlMethodAnnotation = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_METHOD_ANNOTATION);
-        String sqlMethodCall = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_METHOD_CALL);
-        String jarInfo = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_JAR_INFO);
-        String extendedData = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_EXTENDED_DATA);
-        String manualAddExtendedData = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_MANUAL_ADD_EXTENDED_DATA);
+        String classNameSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_CLASS_NAME);
+        String methodAnnotationSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_METHOD_ANNOTATION);
+        String classAnnotationSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_CLASS_ANNOTATION);
+        String methodCallSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_METHOD_CALL);
+        String jarInfoSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_JAR_INFO);
+        String extendedDataSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_EXTENDED_DATA);
+        String manualAddExtendedDataSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_MANUAL_ADD_EXTENDED_DATA);
 
-        if (StringUtils.isAnyBlank(sqlClassName, sqlMethodAnnotation, sqlMethodCall, jarInfo, extendedData, manualAddExtendedData)) {
+        if (StringUtils.isAnyBlank(classNameSql, methodAnnotationSql, classAnnotationSql, methodCallSql, jarInfoSql, extendedDataSql, manualAddExtendedDataSql)) {
             return false;
         }
 
-        if (!dbOperator.createTable(sqlClassName) ||
-                !dbOperator.createTable(sqlMethodAnnotation) ||
-                !dbOperator.createTable(sqlMethodCall) ||
-                !dbOperator.createTable(jarInfo) ||
-                !dbOperator.createTable(extendedData) ||
-                !dbOperator.createTable(manualAddExtendedData)) {
+        if (!dbOperator.createTable(classNameSql) ||
+                !dbOperator.createTable(methodAnnotationSql) ||
+                !dbOperator.createTable(classAnnotationSql) ||
+                !dbOperator.createTable(methodCallSql) ||
+                !dbOperator.createTable(jarInfoSql) ||
+                !dbOperator.createTable(extendedDataSql) ||
+                !dbOperator.createTable(manualAddExtendedDataSql)) {
             return false;
         }
 
@@ -386,6 +392,7 @@ public class RunnerWriteDb extends AbstractRunner {
         if (!dbOperator.truncateTable(JACGConstants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName()) ||
                 !dbOperator.truncateTable(JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName()) ||
                 !dbOperator.truncateTable(JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION + confInfo.getAppName()) ||
+                !dbOperator.truncateTable(JACGConstants.TABLE_PREFIX_CLASS_ANNOTATION + confInfo.getAppName()) ||
                 !dbOperator.truncateTable(JACGConstants.TABLE_PREFIX_JAR_INFO + confInfo.getAppName()) ||
                 !dbOperator.truncateTable(JACGConstants.TABLE_PREFIX_EXTENDED_DATA + confInfo.getAppName())) {
             // TABLE_PREFIX_MANUAL_ADD_EXTENDED_DATA，不清除数据
@@ -627,14 +634,24 @@ public class RunnerWriteDb extends AbstractRunner {
                     continue;
                 }
 
-                // 处理一个方法注解
-                if (!handleOneMethodAnnotation(line)) {
-                    return false;
+                if (line.startsWith(JavaCGConstants.FILE_KEY_METHOD_PREFIX)) {
+                    // 处理一个方法注解信息
+                    if (!handleOneAnnotationInfo(line, true, methodAnnotationInfoList)) {
+                        return false;
+                    }
+                } else if (line.startsWith(JavaCGConstants.FILE_KEY_CLASS_PREFIX)) {
+                    // 处理一个类注解信息
+                    if (!handleOneAnnotationInfo(line, false, classAnnotationInfoList)) {
+                        return false;
+                    }
+                } else {
+                    logger.error("注解文件内容开头非法 {} {}", callGraphAnnotationOutputFilePath, line);
                 }
             }
 
             // 结束前将剩余数据写入数据库
-            if (!writeMethodAnnotation2Db()) {
+            if (!writeAnnotationInfo2Db(true, methodAnnotationInfoList) ||
+                    !writeAnnotationInfo2Db(false, classAnnotationInfoList)) {
                 return false;
             }
 
@@ -645,26 +662,61 @@ public class RunnerWriteDb extends AbstractRunner {
         }
     }
 
-    // 处理一个方法注解
-    private boolean handleOneMethodAnnotation(String data) {
-
+    /**
+     * 处理一个注解信息
+     *
+     * @param data
+     * @param methodOrClass            true: 处理方法注解信息 false: 处理类注解信息
+     * @param annotationInfo4WriteList
+     * @return
+     */
+    private boolean handleOneAnnotationInfo(String data, boolean methodOrClass, List<AnnotationInfo4Write> annotationInfo4WriteList) {
         String[] array = data.split(JACGConstants.FLAG_SPACE);
-        String fullMethod = array[0];
+        if (array.length != JavaCGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE && array.length != JavaCGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE) {
+            logger.error("保存注解信息文件的列数非法 {} [{}]", array.length, data);
+            return false;
+        }
 
-        // 根据类名前缀判断是否需要处理
-        if (confInfo.isInputIgnoreOtherPackage() && !isAllowedClassPrefix(fullMethod)) {
+        String classOrMethodName = array[1];
+
+        // 根据类名或完整方法前缀判断是否需要处理
+        if (confInfo.isInputIgnoreOtherPackage() && !isAllowedClassPrefix(classOrMethodName)) {
             return true;
         }
 
-        String annotation = array[1];
+        String annotationName = array[2];
+        AnnotationInfo4Write annotationInfo4Write = new AnnotationInfo4Write();
+        annotationInfo4Write.setClassOrMethodName(classOrMethodName);
+        annotationInfo4Write.setAnnotationName(annotationName);
+        annotationInfo4Write.setAnnotationAttributeMap(new HashMap<>());
 
-        logger.debug("[{}] [{}]", fullMethod, annotation);
+        if (array.length == JavaCGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE) {
+            // 当前行的注解信息有属性
+            String annotationAttributeKey = array[3];
+            String annotationAttributeValue = JavaCGUtil.decodeAnnotationValue(array[4]);
 
-        Pair<String, String> pair = new ImmutablePair<>(fullMethod, annotation);
-        methodAnnotationList.add(pair);
+            // 判断列表中上一条记录与当前记录是否是同一个类的同一个注解信息
+            AnnotationInfo4Write getLastSameAnnotation = getLastSameAnnotation(annotationInfo4WriteList, classOrMethodName, annotationName);
+            if (getLastSameAnnotation != null) {
+                // 列表中上一条记录与当前记录是同一个类的同一个注解信息
+                // 增加注解属性信息，不向列表中增加元素
+                getLastSameAnnotation.getAnnotationAttributeMap().put(annotationAttributeKey, annotationAttributeValue);
+            } else {
+                // 列表中上一条记录与当前记录不是同一个类的同一个注解信息
+                // 记录注解属性信息
+                annotationInfo4Write.getAnnotationAttributeMap().put(annotationAttributeKey, annotationAttributeValue);
 
-        if (methodAnnotationList.size() >= JACGConstants.BATCH_SIZE) {
-            if (!writeMethodAnnotation2Db()) {
+                // 向列表中增加元素
+                annotationInfo4WriteList.add(annotationInfo4Write);
+            }
+        } else {
+            // 当前行的注解信息没有属性
+            // 向列表中增加元素
+            annotationInfo4WriteList.add(annotationInfo4Write);
+        }
+
+        if (annotationInfo4WriteList.size() >= JACGConstants.BATCH_SIZE) {
+            if (!writeAnnotationInfo2Db(methodOrClass, annotationInfo4WriteList)) {
                 return false;
             }
         }
@@ -672,38 +724,87 @@ public class RunnerWriteDb extends AbstractRunner {
         return true;
     }
 
-    private boolean writeMethodAnnotation2Db() {
-        if (methodAnnotationList.isEmpty()) {
+    /**
+     * 获取列表中上一条记录，仅当上一条记录与当前记录是同一个类的同一个注解信息时才返回
+     *
+     * @param annotationInfo4WriteList
+     * @param classOrMethodName
+     * @param annotationName
+     * @return 非null: 当上一条记录 null: 上一条记录与当前记录不是同一个类的同一个注解信息
+     */
+    private AnnotationInfo4Write getLastSameAnnotation(List<AnnotationInfo4Write> annotationInfo4WriteList, String classOrMethodName, String annotationName) {
+        if (annotationInfo4WriteList.isEmpty()) {
+            return null;
+        }
+
+        AnnotationInfo4Write lastAnnotationInfo4Write = annotationInfo4WriteList.get(annotationInfo4WriteList.size() - 1);
+        if (StringUtils.equals(lastAnnotationInfo4Write.getClassOrMethodName(), classOrMethodName) &&
+                StringUtils.equals(lastAnnotationInfo4Write.getAnnotationName(), annotationName)) {
+            return lastAnnotationInfo4Write;
+        }
+
+        return null;
+    }
+
+    private boolean writeAnnotationInfo2Db(boolean methodOrClass, List<AnnotationInfo4Write> annotationInfo4WriteList) {
+        if (annotationInfo4WriteList.isEmpty()) {
             return true;
         }
 
-        logger.info("写入数据库，保存方法注解信息表 {}", methodAnnotationList.size());
+        logger.info("写入数据库，保存方法注解信息表 {}", annotationInfo4WriteList.size());
 
         if (!writeDbFlag) {
             writeDbFlag = true;
         }
 
-        String sqlKey = JACGConstants.SQL_KEY_INSERT_METHOD_ANNOTATION;
-        String sql = sqlCacheMap.get(sqlKey);
-        if (sql == null) {
-            sql = genAndCacheInsertSql(sqlKey,
-                    false,
-                    JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION,
-                    JACGConstants.TABLE_COLUMNS_METHOD_ANNOTATION);
-        }
+        String sql;
+        List<Object[]> objectList;
 
-        List<Object[]> objectList = new ArrayList<>(methodAnnotationList.size());
-        for (Pair<String, String> pair : methodAnnotationList) {
-            String fullMethod = pair.getLeft();
-            String annotation = pair.getRight();
-            String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        if (methodOrClass) {
+            // 写入方法注解信息
+            String sqlKey = JACGConstants.SQL_KEY_INSERT_METHOD_ANNOTATION;
+            sql = sqlCacheMap.get(sqlKey);
+            if (sql == null) {
+                sql = genAndCacheInsertSql(sqlKey,
+                        false,
+                        JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION,
+                        JACGConstants.TABLE_COLUMNS_METHOD_ANNOTATION);
+            }
 
-            Object[] object = new Object[]{methodHash, annotation, fullMethod};
-            objectList.add(object);
+            objectList = new ArrayList<>(annotationInfo4WriteList.size());
+            for (AnnotationInfo4Write annotationInfo4Write : annotationInfo4WriteList) {
+                String fullMethod = annotationInfo4Write.getClassOrMethodName();
+                String annotationName = annotationInfo4Write.getAnnotationName();
+                String methodHash = JACGUtil.genHashWithLen(fullMethod);
+                String annotationAttributes = JsonUtil.getJsonStr(annotationInfo4Write.getAnnotationAttributeMap());
+
+                Object[] object = new Object[]{methodHash, annotationName, annotationAttributes, fullMethod};
+                objectList.add(object);
+            }
+        } else {
+            // 写入类注解信息
+            String sqlKey = JACGConstants.SQL_KEY_INSERT_CLASS_ANNOTATION;
+            sql = sqlCacheMap.get(sqlKey);
+            if (sql == null) {
+                sql = genAndCacheInsertSql(sqlKey,
+                        false,
+                        JACGConstants.TABLE_PREFIX_CLASS_ANNOTATION,
+                        JACGConstants.TABLE_COLUMNS_CLASS_ANNOTATION);
+            }
+
+            objectList = new ArrayList<>(annotationInfo4WriteList.size());
+            for (AnnotationInfo4Write annotationInfo4Write : annotationInfo4WriteList) {
+                String className = annotationInfo4Write.getClassOrMethodName();
+                String annotationName = annotationInfo4Write.getAnnotationName();
+                String annotationAttributes = JsonUtil.getJsonStr(annotationInfo4Write.getAnnotationAttributeMap());
+
+                Object[] object = new Object[]{className, annotationName, annotationAttributes};
+                objectList.add(object);
+            }
         }
 
         boolean success = dbOperator.batchInsert(sql, objectList);
-        methodAnnotationList.clear();
+        annotationInfo4WriteList.clear();
         return success;
     }
 

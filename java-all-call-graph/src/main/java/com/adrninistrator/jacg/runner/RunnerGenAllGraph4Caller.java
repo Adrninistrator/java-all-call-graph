@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.runner;
 
+import com.adrninistrator.jacg.annotation.AnnotationStorage;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
@@ -7,6 +8,7 @@ import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.dto.CallerTaskInfo;
 import com.adrninistrator.jacg.dto.MultiImplMethodInfo;
 import com.adrninistrator.jacg.dto.TmpNode4Caller;
+import com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler;
 import com.adrninistrator.jacg.extensions.dto.BaseExtendedData;
 import com.adrninistrator.jacg.extensions.enums.ExtendedDataResultEnum;
 import com.adrninistrator.jacg.extensions.extended_data_add.ExtendedDataAddInterface;
@@ -153,6 +155,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return false;
         }
 
+        // 添加用于添加对方法上的注解进行处理的类
+        if(!addMethodAnnotationHandlerExtensions()){
+            return false;
+        }
+
         // 查询存在多个实现类的接口或父类方法HASH
         if (!queryMultiImplMethodHash()) {
             return false;
@@ -180,7 +187,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         logger.info("{}忽略指定的方法", isSupportIgnore() ? "" : "不");
 
         // 读取方法注解
-        if (confInfo.isShowMethodAnnotation() && !readMethodAnnotation()) {
+        if (confInfo.isShowMethodAnnotation() && !AnnotationStorage.init(dbOperator, confInfo.getAppName())) {
             return false;
         }
 
@@ -679,7 +686,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             out.write(genOutputPrefix(0));
             out.write(calleeInfo);
             // 写入方法注解
-            String methodAnnotations = methodAnnotationsMap.get(callerMethodHash);
+            String methodAnnotations = getMethodAnnotationInfo(callerMethodHash);
             if (methodAnnotations != null) {
                 out.write(methodAnnotations);
             }
@@ -1015,7 +1022,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 添加方法注解信息
         if (confInfo.isShowMethodAnnotation()) {
-            String methodAnnotations = methodAnnotationsMap.get(currentCalleeMethodHash);
+            String methodAnnotations = getMethodAnnotationInfo(currentCalleeMethodHash);
             if (methodAnnotations != null) {
                 calleeInfo.append(methodAnnotations);
             }
@@ -1263,7 +1270,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         String sql4CalleeSeq = sqlCacheMap.get(sqlKey);
         if (sql4CalleeSeq == null) {
             sql4CalleeSeq = "select count(*) from " + JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
-                    " where " + DC.MC_CALLEE_METHOD_HASH + " = ? and " + DC.MC_CALLER_FULL_METHOD + " = ? and " + DC.MC_ID + " <= ? order by " + DC.MC_ID;
+                    " where " + DC.MC_CALLEE_METHOD_HASH + " = ? and " + DC.MC_CALLER_FULL_METHOD + " = ? and " + DC.MC_ID + " <= ?";
             cacheSql(sqlKey, sql4CalleeSeq);
         }
 

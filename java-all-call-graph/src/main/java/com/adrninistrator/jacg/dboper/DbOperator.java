@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -287,8 +288,15 @@ public class DbOperator {
             connection.commit();
             return true;
         } catch (Exception e) {
-            if (e.getCause() instanceof SQLSyntaxErrorException) {
-                logger.error("请检查数据库表是否需要使用最新版本创建，是否需要执行 com.adrninistrator.jacg.unzip.UnzipFile 释放最新的SQL语句\n[{}] ", sql, e);
+            /*
+                使用H2数据库时，e的类型为org.h2.jdbc.JdbcSQLSyntaxErrorException
+                使用MySQL数据库时，e.getCause()的类型为SQLSyntaxErrorException
+             */
+            if (ExceptionUtils.indexOfType(e, SQLSyntaxErrorException.class) != -1) {
+                logger.error("\n请检查数据库表是否需要使用最新版本创建" +
+                        "\n请重新执行 com.adrninistrator.jacg.unzip.UnzipFile 类释放最新的SQL语句（需要先删除现有的SQL语句）" +
+                        "\n若使用H2数据库，还需要删除对应的数据库文件 {}" +
+                        "\n[{}] ", cpds.getJdbcUrl(), sql, e);
             } else {
                 logger.error("error [{}] ", sql, e);
             }

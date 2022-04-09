@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.type.ReferenceType;
 
 import java.util.Map;
 
@@ -42,6 +43,15 @@ public class JsonUtil {
     }
 
     public static <T> T getObjFromJsonStr(String jsonStr, Class<T> clazz) {
+        try {
+            return objectMapper.readValue(jsonStr, clazz);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static <T> T getObjFromJsonStr(String jsonStr, TypeReference<T> clazz) {
         try {
             return objectMapper.readValue(jsonStr, clazz);
         } catch (Exception e) {

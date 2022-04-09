@@ -15,7 +15,14 @@ public class JACGConstants {
     public static final String[] TABLE_COLUMNS_METHOD_ANNOTATION = new String[]{
             DC.MA_METHOD_HASH,
             DC.MA_ANNOTATION_NAME,
+            DC.MA_ANNOTATION_ATTRIBUTES,
             DC.MA_FULL_METHOD,
+    };
+
+    public static final String[] TABLE_COLUMNS_CLASS_ANNOTATION = new String[]{
+            DC.CA_FULL_CLASS_NAME,
+            DC.CA_ANNOTATION_NAME,
+            DC.CA_ANNOTATION_ATTRIBUTES,
     };
 
     public static final String[] TABLE_COLUMNS_METHOD_CALL = new String[]{
@@ -73,6 +80,7 @@ public class JACGConstants {
     public static final String FILE_EXTENSIONS_CODE_PARSER = "code_parser.properties";
     public static final String FILE_EXTENSIONS_EXTENDED_DATA_ADD = "extended_data_add.properties";
     public static final String FILE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT = "extended_data_supplement.properties";
+    public static final String FILE_EXTENSIONS_METHOD_ANNOTATION_HANDLER = "method_annotation_handler.properties";
 
     public static final String FILE_IN_ALLOWED_CLASS_PREFIX = "i_allowed_class_prefix.properties";
 
@@ -85,6 +93,7 @@ public class JACGConstants {
 
     public static final String FILE_SQL_CLASS_NAME = "class_name.sql";
     public static final String FILE_SQL_METHOD_ANNOTATION = "method_annotation.sql";
+    public static final String FILE_SQL_CLASS_ANNOTATION = "class_annotation.sql";
     public static final String FILE_SQL_METHOD_CALL = "method_call.sql";
     public static final String FILE_SQL_JAR_INFO = "jar_info.sql";
     public static final String FILE_SQL_EXTENDED_DATA = "extended_data.sql";
@@ -125,8 +134,6 @@ public class JACGConstants {
     public static final String SQL_KEY_CN_QUERY_FULL_CLASS = "cn_query_full_class";
     public static final String SQL_KEY_CN_UPDATE_SIMPLE_2_FULL = "cn_update_simple_2_full";
 
-    public static final String SQL_KEY_MA_QUERY_METHOD_ANNOTATION = "ma_query_method_annotation";
-
     public static final String SQL_KEY_MC_QUERY_CLASS_EXISTS = "mc_query_class_exists";
     public static final String SQL_KEY_MC_QUERY_CALLER_FULL_CLASS = "mc_query_caller_full_class";
     public static final String SQL_KEY_MC_QUERY_TOP_METHOD = "mc_query_top_method";
@@ -150,6 +157,7 @@ public class JACGConstants {
 
     public static final String SQL_KEY_INSERT_CLASS_NAME = "insert_class_name";
     public static final String SQL_KEY_INSERT_METHOD_ANNOTATION = "insert_method_annotation";
+    public static final String SQL_KEY_INSERT_CLASS_ANNOTATION = "insert_class_annotation";
     public static final String SQL_KEY_INSERT_METHOD_CALL = "insert_method_call";
     public static final String SQL_KEY_INSERT_JAR_INFO = "insert_jar_info";
     public static final String SQL_KEY_INSERT_EXTENDED_DATA = "insert_extended_data";
@@ -168,6 +176,8 @@ public class JACGConstants {
     public static final String FLAG_RIGHT_BRACKET = ")";
     public static final String FLAG_LEFT_PARENTHESES = "[";
     public static final String FLAG_RIGHT_PARENTHESES = "]";
+    public static final String FLAG_LEFT_BIG_PARENTHESES = "{";
+    public static final String FLAG_RIGHT_BIG_PARENTHESES = "}";
     public static final String FLAG_SPACE = " ";
     public static final String FLAG_HASHTAG = "#";
     public static final String FLAG_AT = "@";
@@ -186,6 +196,7 @@ public class JACGConstants {
 
     public static final String TABLE_PREFIX_CLASS_NAME = "class_name_";
     public static final String TABLE_PREFIX_METHOD_ANNOTATION = "method_annotation_";
+    public static final String TABLE_PREFIX_CLASS_ANNOTATION = "class_annotation_";
     public static final String TABLE_PREFIX_METHOD_CALL = "method_call_";
     public static final String TABLE_PREFIX_JAR_INFO = "jar_info_";
     public static final String TABLE_PREFIX_EXTENDED_DATA = "extended_data_";

@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.util;
 import com.adrninistrator.jacg.common.JACGConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -233,6 +234,14 @@ public class JACGUtil {
             logger.error("根据指定类名 {} 获得 {} 类的实例异常 ", className, classType.getName(), e);
             return null;
         }
+    }
+
+    public static String getAnnotationArrayAttributeValue(String value) {
+        if (!StringUtils.startsWith(value, JACGConstants.FLAG_LEFT_BIG_PARENTHESES) || !StringUtils.endsWith(value, JACGConstants.FLAG_RIGHT_BIG_PARENTHESES)) {
+            return value;
+        }
+
+        return value.substring(JACGConstants.FLAG_LEFT_BIG_PARENTHESES.length(), value.length() - JACGConstants.FLAG_RIGHT_BIG_PARENTHESES.length());
     }
 
     private JACGUtil() {

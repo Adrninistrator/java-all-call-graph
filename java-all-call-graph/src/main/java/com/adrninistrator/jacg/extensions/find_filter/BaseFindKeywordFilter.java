@@ -8,7 +8,7 @@ package com.adrninistrator.jacg.extensions.find_filter;
 public class BaseFindKeywordFilter {
 
     /**
-     * 判断通过关键字keyword找到的当前行line是否需要显示
+     * 判断通过关键字keyword在方法向上/向下的完整调用链找到的当前行line是否需要显示
      *
      * @param keyword
      * @param line

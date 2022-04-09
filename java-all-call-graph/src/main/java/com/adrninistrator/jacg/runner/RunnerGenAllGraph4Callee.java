@@ -1,8 +1,10 @@
 package com.adrninistrator.jacg.runner;
 
+import com.adrninistrator.jacg.annotation.AnnotationStorage;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.TmpNode4Callee;
+import com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.FileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -61,6 +63,11 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             }
         }
 
+        // 添加用于添加对方法上的注解进行处理的类
+        if(!addMethodAnnotationHandlerExtensions()){
+            return false;
+        }
+
         return true;
     }
 
@@ -84,7 +91,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     private boolean doOperate() {
         // 读取方法注解
-        if (confInfo.isShowMethodAnnotation() && !readMethodAnnotation()) {
+        if (confInfo.isShowMethodAnnotation() && !AnnotationStorage.init(dbOperator, confInfo.getAppName())) {
             return false;
         }
 
@@ -321,7 +328,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         writeData2File(genOutputPrefix(0), out4Class, out4Method);
         writeData2File(callerInfo, out4Class, out4Method);
         // 写入方法注解
-        String methodAnnotations = methodAnnotationsMap.get(calleeMethodHash);
+        String methodAnnotations = getMethodAnnotationInfo(calleeMethodHash);
         if (methodAnnotations != null) {
             writeData2File(methodAnnotations, out4Class, out4Method);
         }
@@ -579,7 +586,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         // 添加方法注解信息
         if (confInfo.isShowMethodAnnotation()) {
-            String methodAnnotations = methodAnnotationsMap.get(currentCallerMethodHash);
+            String methodAnnotations = getMethodAnnotationInfo(currentCallerMethodHash);
             if (methodAnnotations != null) {
                 callerInfo.append(methodAnnotations);
             }

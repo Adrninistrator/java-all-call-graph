@@ -13,7 +13,12 @@ public class DC {
 
     public static final String MA_METHOD_HASH = "method_hash";
     public static final String MA_ANNOTATION_NAME = "annotation_name";
+    public static final String MA_ANNOTATION_ATTRIBUTES = "annotation_attributes";
     public static final String MA_FULL_METHOD = "full_method";
+
+    public static final String CA_FULL_CLASS_NAME = "full_class_name";
+    public static final String CA_ANNOTATION_NAME = "annotation_name";
+    public static final String CA_ANNOTATION_ATTRIBUTES = "annotation_attributes";
 
     public static final String MC_ID = "id";
     public static final String MC_CALL_TYPE = "call_type";
