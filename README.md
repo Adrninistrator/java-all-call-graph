@@ -200,7 +200,7 @@ public class TestRest2Controller {
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.4'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.5'
 ```
 
 - Maven
@@ -209,7 +209,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.4'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.6.4</version>
+  <version>0.6.5</version>
 </dependency>
 ```
 
@@ -284,7 +284,7 @@ test.jacg.TestRunnerWriteDb
 
 TestRunnerWriteDb类读取配置文件`~jacg_config/config.properties`中的参数：
 
-`call.graph.jar.list`：等待解析的jar包，或保存class文件目录路径列表，各jar包路径之间使用空格分隔（若路径中包含空格，则需要使用""包含对应的路径）
+`call.graph.jar.list`：等待解析的jar包，或保存class、jar文件的目录路径列表，各jar包路径之间使用空格分隔（若路径中包含空格，则需要使用""包含对应的路径）
 
 将第1个jar包路径后面加上“.txt”作为本次保存Java方法调用关系文件路径；
 
