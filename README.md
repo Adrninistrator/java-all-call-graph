@@ -12,11 +12,13 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 也可以生成调用指定Java类方法向上的完整调用链，对于关注的Java类的方法，能够生成调用对应方法的方法信息，及调用上述方法的信息，直到最上层未被其他方法调用的方法（通常是对外提供的服务，或定时任务等）。
 
-该工具生成的Java方法完整调用链中，支持显示相关的包名、类名、方法名、方法参数、调用者源代码行号、方法注解、循环调用，入口方法。
+本工具生成的Java方法完整调用链中，支持显示相关的包名、类名、方法名、方法参数、调用者源代码行号、方法注解、循环调用，入口方法。
 
-该工具支持生成某个方法到起始方法之间的调用链，也支持根据关键字查找关注的方法，生成其到起即方法之间的调用链。
+本工具支持生成某个方法到起始方法之间的调用链，也支持根据关键字查找关注的方法，生成其到起即方法之间的调用链。
 
-`当前项目提供了插件功能，可用于为Java代码自动生成UML时序图`，可参考[https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram](https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram)。
+`当前项目提供了插件功能，可用于为Java代码自动生成UML时序图`，可参考[https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram](https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram)，根据关键字查找关注的方法时，可使用自定义Java代码判断是否满足关键字，在该文档中会有说明。
+
+本工具的输出结果示例及使用说明分别见后续“输出结果示例”与“使用说明”部分。
 
 # 2. 更新说明
 
@@ -28,7 +30,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details/108029222](https://blog.csdn.net/a82514921/article/details/108029222)
 
-当前工具生成的H2数据库中，schema为“jacg”
+本工具生成的H2数据库中，schema为“jacg”
 
 - 支持对目录进行处理
 
@@ -36,13 +38,87 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 支持指定一个或多个jar/war包，或一个或多个目录，或jar/war包与目录混合进行处理
 
-该功能在java-callgraph2中实现，通过当前工具的config.properties配置文件中的call.graph.jar.list参数进行配置
+该功能在java-callgraph2中实现，通过本工具的config.properties配置文件中的call.graph.jar.list参数进行配置
 
 可参考[https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)
 
 - 支持插件功能
 
 提供用于生成Java方法UML时序图的插件功能
+
+## 2.2. (0.6.4)
+
+- 增加及修改的配置文件
+
+|增加或修改文件|文件路径|文件作用|
+|---|---|---|
+|增加|resources/~jacg_extensions/method_annotation_handler.properties|定义用于对方法上的注解进行处理的类完整类名|
+|增加|resources/~jacg_sql/class_annotation.sql|用于保存类上的注解信息数据库表|
+|修改|resources/~jacg_sql/method_annotation.sql|增加了保存注解属性的字段|
+
+- 提供处理方法上的注解信息的插件功能
+
+在新增的method_annotation_handler.properties配置文件中，可以定义用于对方法上的注解进行处理的类完整类名，该文件每行指定一项配置，可指定多行
+
+对方法上的注解进行处理的类需要继承自com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler，并实现以下方法
+
+|方法名|方法作用|
+|---|---|
+|checkHandleAnnotation|判断当前类是否处理对应的注解|
+|handleAnnotation|返回方法上的注解处理后的结果|
+
+本工具在生成方法完整调用链时，会先遍历method_annotation_handler.properties配置文件中指定所有的AbstractAnnotationHandler子类，即对方法上的注解进行处理的类，调用checkHandleAnnotation判断当前类是否会处理的注解，若是则调用handleAnnotation方法获取处理后的注解信息。
+
+最后会调用默认的方法注解处理类com.adrninistrator.jacg.extensions.annotation_handler.DefaultAnnotationHandler进行处理，该类会处理所有的注解，生成的注解信息格式为“@注解类名”，例如“@org.aspectj.lang.annotation.Around”
+
+`假如一个方法上存在多个注解，则每个注解的信息会按照注解类名升序排序后，依次拼接在方法信息后`
+
+DefaultAnnotationHandler类不需要在method_annotation_handler.properties配置文件中指定
+
+- 支持显示Spring MVC的@RequestMapping等注解中的路径信息
+
+本工具提供了获取Spring MVC的@RequestMapping等注解中的路径信息的处理类，为com.adrninistrator.jacg.extensions.annotation_handler.SpringMvcRequestMappingHandler，该类已在method_annotation_handler.properties配置文件中指定
+
+SpringMvcRequestMappingHandler类会获取类及方法上的@RequestMapping注解（或包含了该注解的其他注解）的路径信息，生成的注解信息格式为“@注解类名("/类注解中的path/方法注解中的path")”
+
+```java
+@Controller
+@RequestMapping("test")
+public class TestController {
+
+    @RequestMapping(value = "test1", method = RequestMethod.POST)
+    public void test1() {
+        logger.info("");
+    }
+}
+```
+
+例如存在以上方法，则在生成的向上方法完整调用链中，TestController.test1()方法及相关的注解信息输出内容如下：
+
+```
+[0]#org.slf4j.Logger:info
+[1]#  com.test.controller.TestController:test1@org.springframework.web.bind.annotation.RequestMapping("/test/test1")	(TestController:57)	!entry!
+```
+
+```java
+@RestController
+@RequestMapping("testrest2")
+public class TestRest2Controller {
+
+    @PostMapping(value = "post")
+    @TestAttributeAnnotation
+    public String post(HttpServletRequest httpRequest, @RequestBody final String req) {
+        logger.info("");
+    }
+}
+```
+
+例如存在以上方法，则在生成的向上方法完整调用链中，TestRest2Controller.post()方法及相关的注解信息输出内容如下：
+
+```
+[0]#org.slf4j.Logger:info
+[1]#  com.test.controller.TestRest2Controller:post@com.test.common.annotation.TestAttributeAnnotation@org.springframework.web.bind.annotation.PostMapping("/testrest2/post")	(TestRest2Controller:42)	!entry!
+```
 
 # 3. 输出结果示例
 
@@ -64,13 +140,13 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 ![](pic/example-cg-4callee.png)
 
-调用指定类方法向上的完整调用链输出结果格式类似一棵树，每行代表一个调用者Java方法，与实际的代码执行顺序无关，前面的数字越大代表调用层级越靠上，0代表被调用的指定类中的方法。
+调用指定类方法向上的完整调用链输出结果格式类似一棵树，每行代表一个调用者Java方法，前面的数字越大代表调用层级越靠上，0代表被调用的指定类中的方法。
 
 每行后部的“(TestClass:39)”格式的类名及数字代表当前调用者类名，及调用者方法对应的源代码行号。
 
 对于不被其他方法调用的方法，认为是入口方法，在对应行的最后会显示“!entry!”。
 
-以下为使用该工具生成的调用Mybatis的MyBatisExceptionTranslator类的部分方法向上完整调用链（方法参数太长，已省略）：
+以下为使用本工具生成的调用Mybatis的MyBatisExceptionTranslator类的部分方法向上完整调用链（方法参数太长，已省略）：
 
 ![](pic/example-callgraph-4callee.png)
 
@@ -99,7 +175,7 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 每行前部的“\[TestClass:39\]”格式的类名及数字，代表当前调用者类名，及调用者方法及对应的源代码行号。
 
-以下为使用该工具生成的Mybatis的BatchExecutor:doUpdate()方法向下的完整调用链：
+以下为使用本工具生成的Mybatis的BatchExecutor:doUpdate()方法向下的完整调用链：
 
 ![](pic/example-callgraph-4caller.png)
 
@@ -111,7 +187,7 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 ## 4.1. 依赖环境
 
-该工具将Java方法调用关系写入文件之后，会将数据保存在数据库中，需要访问MySQL或H2数据库（理论上支持其他数据库，但可能需要对SQL语句进行调整）。
+本工具将Java方法调用关系写入文件之后，会将数据保存在数据库中，需要访问MySQL或H2数据库（理论上支持其他数据库，但可能需要对SQL语句进行调整）。
 
 `建议使用本地文件形式的H2数据库`，可不依赖外部的其他数据库，使用更简单；且经过简单测试，H2比MySQL数据库的读写速度更快
 
@@ -119,12 +195,12 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 ## 4.2. 引入组件
 
-在使用该工具前，首先需要在对应的项目引入该工具组件的依赖，将其引入到test模块或使用provided类型，可以避免发布到服务器中。
+在使用本工具前，首先需要在对应的项目引入本工具组件的依赖，将其引入到test模块或使用provided类型，可以避免发布到服务器中。
 
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.3'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.4'
 ```
 
 - Maven
@@ -133,7 +209,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.3'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.6.3</version>
+  <version>0.6.4</version>
 </dependency>
 ```
 
@@ -143,7 +219,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.3'
 
 建议在需要生成方法调用链的项目中分别引入依赖，可以使每个项目使用单独的配置，不会相互影响。
 
-该工具仅引入了log4j-over-slf4j组件，在引入该工具组件的项目中，还需要引入log4j2、logback等日志组件，且保证配置正确，能够在本地正常运行。
+本工具仅引入了log4j-over-slf4j组件，在引入本工具组件的项目中，还需要引入log4j2、logback等日志组件，且保证配置正确，能够在本地正常运行。
 
 ## 4.3. 执行步骤
 
@@ -151,10 +227,10 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.3'
 
 ### 4.3.1. 总体步骤
 
-该工具的总体使用步骤如下：
+本工具的总体使用步骤如下：
 
 - a. 将后续步骤使用的几个启动类对应的Java文件，及配置文件解压到当前Java项目的test模块的对应目录中，该步骤只需要执行一次（当组件更新时需要再次执行，以释放新的文件）；
-- b. 调用增强后的java-callgraph2.jar（详细内容见后续“原理说明”部分），解析指定jar包中的class文件，将Java方法调用关系写入文件；从该文件读取Java方法调用关系，再写入MySQL数据库；
+- b. 调用增强后的java-callgraph2.jar（详细内容见后续“原理说明”部分），解析指定jar包中的class文件，将Java方法调用关系写入文件；从该文件读取Java方法调用关系，再写入数据库；
 - c.1 需要生成调用指定类的向上完整方法调用链时，从数据库读取方法调用关系，再将完整的方法调用链写入文件；
 - c.2 需要生成指定方法的向下完整方法调用链时，从数据库读取方法调用关系，再将完整的方法调用链写入文件；
 
@@ -460,7 +536,7 @@ run.sh
 
 ## 5.1. 生成某个方法到起始方法之间的调用链
 
-该工具生成的向上或向下的Java方法完整调用链内容通常会比较多，如果只关注某个方法到起始方法之间的调用链时，可以按照以下步骤生成：
+本工具生成的向上或向下的Java方法完整调用链内容通常会比较多，如果只关注某个方法到起始方法之间的调用链时，可以按照以下步骤生成：
 
 执行以下java类：
 
@@ -548,7 +624,7 @@ run.sh
 
 ## 5.3. 处理循环方法调用
 
-在生成Java方法完整调用链时，若出现了循环方法调用，该工具会从循环调用中跳出，并在生成的方法调用链中对出现循环调用的方法增加标记“!cycle\[n\]!”，其中n代表被循环调用的方法对应层级。
+在生成Java方法完整调用链时，若出现了循环方法调用，本工具会从循环调用中跳出，并在生成的方法调用链中对出现循环调用的方法增加标记“!cycle\[n\]!”，其中n代表被循环调用的方法对应层级。
 
 生成向上的Java方法完整调用链时，出现循环方法调用的示例如下：
 
@@ -668,16 +744,17 @@ list.stream().map(TestDto1::getStr).collect(Collectors.toList());
 
 |表名前缀|注释|作用|
 |---|---|---|
+|class\_annotation\_|类上的注解信息表||
 |class\_name\_|类名信息表|保存相关类的完整类名及简单类名|
-|method\_annotation\_|方法注解表|保存方法及方法上的注解信息|
-|method\_call\_|方法调用关系表|保存各方法之间调用信息|
+|extended\_data\_|自定义数据表||
 |jar\_info\_|jar包信息表|保存用于解析方法调用关系的jar包信息|
-|extended\_data\_|自定义数据表|
-|manual\_add\_extended\_data\_|手工添加的自定义数据表|
+|manual\_add\_extended\_data\_|手工添加的自定义数据表||
+|method\_annotation\_|方法上的注解信息表||
+|method\_call\_|方法调用关系表|保存各方法之间调用信息|
 
 上述数据库表在创建时使用表名前缀加上配置文件`~jacg_config/config.properties`中的`app.name`参数值。
 
-该工具会主要从方法调用关系表中逐级查询数据，生成完整的方法调用链。
+本工具会主要从方法调用关系表中逐级查询数据，生成完整的方法调用链。
 
 - 禁用sql_mode中的ONLY_FULL_GROUP_BY
 
@@ -693,7 +770,7 @@ Expression #1 of ORDER BY clause is not in SELECT list, references column 'xxxx'
 
 说明可见[https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html](https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html)。
 
-为了使MySQL支持以上查询语句，需要禁用sql_mode中的ONLY_FULL_GROUP_BY，该工具会在查询时自动禁用。
+为了使MySQL支持以上查询语句，需要禁用sql_mode中的ONLY_FULL_GROUP_BY，本工具会在查询时自动禁用。
 
 # 8. 无法正确处理的情况
 
@@ -716,7 +793,7 @@ Expression #1 of ORDER BY clause is not in SELECT list, references column 'xxxx'
 
 ## 9.2. 解决
 
-当存在以上情况时，该工具会在当前目录生成“~notice_multi_ITF.md”或“~notice_multi_SCC.md”文件，可按照文档中的提示，将前缀为“method\_call\_”的数据库表中不需要的方法调用设置为禁用。
+当存在以上情况时，本工具会在当前目录生成“~notice_multi_ITF.md”或“~notice_multi_SCC.md”文件，可按照文档中的提示，将前缀为“method\_call\_”的数据库表中不需要的方法调用设置为禁用。
 
 当需要将禁用的方法调用恢复为启用时，可按照当前目录生成的“~notice_disabled_ITF.md”或“~notice_disabled_SCC.md”文件的说明进行操作。
 
@@ -724,7 +801,7 @@ Expression #1 of ORDER BY clause is not in SELECT list, references column 'xxxx'
 
 ## 10.1. 分析代码执行流程
 
-使用该工具生成指定方法向下调用链的功能，可以将代码中复杂的方法调用转换为相对简单的方法调用链形式展示。
+使用本工具生成指定方法向下调用链的功能，可以将代码中复杂的方法调用转换为相对简单的方法调用链形式展示。
 
 人工查看生成的调用链时，能够通过类名及方法名识别出对应含义。
 
@@ -734,7 +811,7 @@ Expression #1 of ORDER BY clause is not in SELECT list, references column 'xxxx'
 
 ## 10.2. 确认被修改代码的影响范围
 
-使用该工具生成指定方法向上调用链的功能，可以生成调用指定类的所有方法的调用链。
+使用本工具生成指定方法向上调用链的功能，可以生成调用指定类的所有方法的调用链。
 
 能识别入口方法，减少人工逐层确认入口方法的工作量。
 
@@ -744,14 +821,14 @@ Expression #1 of ORDER BY clause is not in SELECT list, references column 'xxxx'
 
 在进行应用功能拆分时，需要准确定位指定功能涉及的数据库表，及使用了对应数据库表的相关入口方法。
 
-使用该工具生成指定方法向下调用链的功能，生成指定入口方法向下的调用链，能够根据类的包名快速找到Mapper接口（使用Mybatis的场景），即可找到相关的数据库表。
+使用本工具生成指定方法向下调用链的功能，生成指定入口方法向下的调用链，能够根据类的包名快速找到Mapper接口（使用Mybatis的场景），即可找到相关的数据库表。
 
-使用该工具生成指定方法向上调用链的功能，生成调用指定Mapper接口向上的调用链，能够根据“!entry!”找到入口方法。
+使用本工具生成指定方法向上调用链的功能，生成调用指定Mapper接口向上的调用链，能够根据“!entry!”找到入口方法。
 
 重复执行以上过程，直到没有再找到新的Mapper接口（即数据库表）和入口方法，即可确认指定功能涉及的数据库表及相关入口方法。
 
 ## 10.4. 代码审计/漏洞分析
 
-在进行代码审计时，可使用该工具梳理交易流程，生成指定方法向下的调用链，查找是否有调用敏感API；或者生成指定方法向上的调用链，查找调用敏感API的场景。
+在进行代码审计时，可使用本工具梳理交易流程，生成指定方法向下的调用链，查找是否有调用敏感API；或者生成指定方法向上的调用链，查找调用敏感API的场景。
 
-在进行漏洞分析时，结合该工具生成的完整调用链辅助分析，也能提高效率。
+在进行漏洞分析时，结合本工具生成的完整调用链辅助分析，也能提高效率。
