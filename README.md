@@ -200,7 +200,7 @@ public class TestRest2Controller {
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.5'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.6'
 ```
 
 - Maven
@@ -209,7 +209,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.5'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.6.5</version>
+  <version>0.6.6</version>
 </dependency>
 ```
 

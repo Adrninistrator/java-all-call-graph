@@ -153,7 +153,7 @@ public class DbOperator {
     }
 
     public boolean createTable(String sql) {
-        if (!executeSql(sql)) {
+        if (!executeDDLSql(sql)) {
             return false;
         }
 
@@ -208,10 +208,10 @@ public class DbOperator {
     public boolean truncateTable(String tableName) {
         String sql = "truncate table " + tableName;
         logger.info("truncate table sql: [{}]", sql);
-        return executeSql(sql);
+        return executeDDLSql(sql);
     }
 
-    public boolean executeSql(String sql) {
+    public boolean executeDDLSql(String sql) {
         Connection connection = null;
         PreparedStatement stmt = null;
 
@@ -245,7 +245,9 @@ public class DbOperator {
             int row = stmt.executeUpdate();
             return Integer.valueOf(row);
         } catch (Exception e) {
-            logger.error("error [{}] ", sql, e);
+            if (!noticeDropTable(e, sql)) {
+                logger.error("error [{}] ", sql, e);
+            }
             return null;
         } finally {
             close(connection, stmt, closeConnection);
@@ -288,16 +290,7 @@ public class DbOperator {
             connection.commit();
             return true;
         } catch (Exception e) {
-            /*
-                使用H2数据库时，e的类型为org.h2.jdbc.JdbcSQLSyntaxErrorException
-                使用MySQL数据库时，e.getCause()的类型为SQLSyntaxErrorException
-             */
-            if (ExceptionUtils.indexOfType(e, SQLSyntaxErrorException.class) != -1) {
-                logger.error("\n请检查数据库表是否需要使用最新版本创建" +
-                        "\n请重新执行 com.adrninistrator.jacg.unzip.UnzipFile 类释放最新的SQL语句（需要先删除现有的SQL语句）" +
-                        "\n若使用H2数据库，还需要删除对应的数据库文件 {}" +
-                        "\n[{}] ", cpds.getJdbcUrl(), sql, e);
-            } else {
+            if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] ", sql, e);
             }
             return false;
@@ -335,7 +328,9 @@ public class DbOperator {
             }
             return list;
         } catch (Exception e) {
-            logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            if (!noticeDropTable(e, sql)) {
+                logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            }
             return null;
         } finally {
             close(connection, stmt, closeConnection);
@@ -396,7 +391,9 @@ public class DbOperator {
             }
             return list;
         } catch (Exception e) {
-            logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            if (!noticeDropTable(e, sql)) {
+                logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            }
             return null;
         } finally {
             close(connection, stmt, closeConnection);
@@ -449,7 +446,9 @@ public class DbOperator {
             }
             return map;
         } catch (Exception e) {
-            logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            if (!noticeDropTable(e, sql)) {
+                logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            }
             return null;
         } finally {
             close(connection, stmt);
@@ -464,5 +463,27 @@ public class DbOperator {
                 stmt.setObject(i + 1, arguments[i]);
             }
         }
+    }
+
+    /**
+     * 出现异常时，判断是否需要提示drop对应的数据库表
+     *
+     * @param e
+     * @param sql
+     * @return true: 需要 false: 不需要
+     */
+    private boolean noticeDropTable(Exception e, String sql) {
+      /*
+            使用H2数据库时，e的类型为org.h2.jdbc.JdbcSQLSyntaxErrorException
+            使用MySQL数据库时，e.getCause()的类型为SQLSyntaxErrorException
+         */
+        if (ExceptionUtils.indexOfType(e, SQLSyntaxErrorException.class) != -1) {
+            logger.error("\n请检查数据库表是否需要使用最新版本重新创建，可先drop对应的数据库表" +
+                    "\n请重新执行 com.adrninistrator.jacg.unzip.UnzipFile 类释放最新的SQL语句（需要先删除现有的SQL语句）" +
+                    "\n若使用H2数据库，还需要删除对应的数据库文件 {}" +
+                    "\n[{}] ", cpds.getJdbcUrl(), sql, e);
+            return true;
+        }
+        return false;
     }
 }
