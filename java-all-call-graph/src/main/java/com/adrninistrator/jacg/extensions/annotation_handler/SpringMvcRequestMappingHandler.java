@@ -27,12 +27,18 @@ public class SpringMvcRequestMappingHandler extends AbstractAnnotationHandler {
         // 获取Spring MVC对应类上的注解中的path
         String springMvcClassPath = getSpringMvcClassPath(fullClassName);
         if (springMvcClassPath != null) {
-            path.append("/").append(springMvcClassPath);
+            if (!StringUtils.startsWith(springMvcClassPath, "/")) {
+                path.append("/");
+            }
+            path.append(springMvcClassPath);
         }
 
         // 获取Spring MVC对应方法上的注解中的path
         String springMvcMethodPath = getPathInRequestMappingAnnotation(annotationInfo4Read.getAnnotationAttributeMap());
-        path.append("/").append(springMvcMethodPath);
+        if (!StringUtils.startsWith(springMvcMethodPath, "/")) {
+            path.append("/");
+        }
+        path.append(springMvcMethodPath);
 
         // 返回@注解类名("path")
         return JACGConstants.FLAG_AT + annotationInfo4Read.getAnnotationName() + JACGConstants.FLAG_LEFT_BRACKET + "\"" + path + "\"" + JACGConstants.FLAG_RIGHT_BRACKET;

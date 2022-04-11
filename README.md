@@ -46,7 +46,7 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 提供用于生成Java方法UML时序图的插件功能
 
-## 2.2. (0.6.4)
+## 2.2. (0.6.7)
 
 - 增加及修改的配置文件
 
@@ -200,7 +200,7 @@ public class TestRest2Controller {
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.6'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.7'
 ```
 
 - Maven
@@ -209,7 +209,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.6'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.6.6</version>
+  <version>0.6.7</version>
 </dependency>
 ```
 
