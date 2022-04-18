@@ -200,7 +200,7 @@ public class TestRest2Controller {
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.7'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.8'
 ```
 
 - Maven
@@ -209,7 +209,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.7'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.6.7</version>
+  <version>0.6.8</version>
 </dependency>
 ```
 
@@ -286,9 +286,9 @@ TestRunnerWriteDb类读取配置文件`~jacg_config/config.properties`中的参�
 
 `call.graph.jar.list`：等待解析的jar包，或保存class、jar文件的目录路径列表，各jar包路径之间使用空格分隔（若路径中包含空格，则需要使用""包含对应的路径）
 
-将第1个jar包路径后面加上“.txt”作为本次保存Java方法调用关系文件路径；
+设置JVM参数“merge.class.in.jar.package”值为`~jacg_config/i_allowed_class_prefix.properties`配置文件中指定的信息，并以“#”作为多行数据的分隔符；
 
-设置JVM参数“output.file”值为本次保存Java方法调用关系文件的路径，调用增强后的java-callgraph2.jar中的类的方法，通过方法的参数传递上述jar包路径列表；
+调用增强后的java-callgraph2.jar中的JCallGraph类的run方法，通过方法的参数传递上述jar包路径列表；
 
 - b.2 解析指定jar包
 

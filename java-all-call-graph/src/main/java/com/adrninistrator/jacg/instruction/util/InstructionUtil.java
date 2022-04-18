@@ -1,13 +1,18 @@
 package com.adrninistrator.jacg.instruction.util;
 
 import com.adrninistrator.jacg.instruction.extractor.StringConstantExtractor;
+import org.apache.bcel.classfile.AnnotationEntry;
+import org.apache.bcel.classfile.ElementValuePair;
 import org.apache.bcel.classfile.LineNumberTable;
 import org.apache.bcel.generic.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -326,6 +331,60 @@ public class InstructionUtil {
         }
 
         return stringList;
+    }
+
+    /**
+     * 获取指定注解中指定名称的属性值
+     *
+     * @param annotationEntry
+     * @param key
+     * @return
+     */
+    public static String getAnnotationAttributesValue(AnnotationEntry annotationEntry, String key) {
+        for (ElementValuePair elementValuePair : annotationEntry.getElementValuePairs()) {
+            if (StringUtils.equals(key, elementValuePair.getNameString())) {
+                return elementValuePair.getValue().toString();
+            }
+        }
+
+        return "";
+    }
+
+    /**
+     * 获取指定注解中所有属性名称及对应值，返回Map类型
+     *
+     * @param annotationEntry
+     * @return
+     */
+    public static Map<String, String> getAnnotationAttributesMap(AnnotationEntry annotationEntry) {
+        Map<String, String> map = new HashMap<>();
+        for (ElementValuePair elementValuePair : annotationEntry.getElementValuePairs()) {
+            String value = elementValuePair.getValue().toString();
+            if (StringUtils.isNotBlank(value)) {
+                map.put(elementValuePair.getNameString(), value);
+            }
+        }
+
+        return map;
+    }
+
+    /**
+     * 获取指定注解中所有属性名称及对应值，返回Map类型
+     *
+     * @param annotationEntryGen
+     * @return
+     */
+    public static Map<String, String> getAnnotationGenAttributesMap(AnnotationEntryGen annotationEntryGen) {
+        Map<String, String> map = new HashMap<>();
+        for (ElementValuePairGen elementValuePairGen : annotationEntryGen.getValues()) {
+            ElementValuePair elementValuePair = elementValuePairGen.getElementNameValuePair();
+            String value = elementValuePair.getValue().toString();
+            if (StringUtils.isNotBlank(value)) {
+                map.put(elementValuePair.getNameString(), value);
+            }
+        }
+
+        return map;
     }
 
     private InstructionUtil() {

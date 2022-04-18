@@ -214,7 +214,7 @@ public class RunnerWriteDb extends AbstractRunner {
         }
 
         if (confInfo.isInputIgnoreOtherPackage()) {
-            String mergeClassInJarPackage = StringUtils.join(allowedClassPrefixSet, JavaCGConstants.FLAG_VERTICAL_BAR);
+            String mergeClassInJarPackage = StringUtils.join(allowedClassPrefixSet, JavaCGConstants.FLAG_HASHTAG);
             // 设置合并jar/war包中的class文件时，需要合并的包名
             JCallGraph.setMergeClassInJarPackage(mergeClassInJarPackage);
         }

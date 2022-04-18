@@ -4,6 +4,8 @@ import com.adrninistrator.jacg.extensions.dto.DbOperateData;
 import com.adrninistrator.jacg.extensions.enums.DbStatementEnum;
 import com.adrninistrator.jacg.extensions.util.JsonUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.dto.CallIdCounter;
+import com.adrninistrator.javacg.dto.MethodCallDto;
 import com.adrninistrator.javacg.extensions.code_parser.AbstractCustomCodeParser;
 import com.adrninistrator.javacg.extensions.dto.ExtendedData;
 import org.apache.bcel.generic.InstructionHandle;
@@ -18,6 +20,8 @@ import org.dom4j.tree.DefaultAttribute;
 import org.dom4j.tree.DefaultCDATA;
 import org.dom4j.tree.DefaultElement;
 import org.dom4j.tree.DefaultText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
@@ -33,6 +37,8 @@ import java.util.jar.JarFile;
  * @description: 从MyBatis的XML文件获取对应的数据库操作语句及被操作的数据库表名，基类
  */
 public abstract class GetMybatisSqlInfoCodeParser extends AbstractCustomCodeParser {
+
+    private static final Logger logger = LoggerFactory.getLogger(GetMybatisSqlInfoCodeParser.class);
 
     public static final String DATA_TYPE = "MB_SQL";
 
@@ -71,7 +77,8 @@ public abstract class GetMybatisSqlInfoCodeParser extends AbstractCustomCodePars
     protected abstract boolean checkClassNameAndMethod(String calleeClassName, String calleeMethodName);
 
     @Override
-    public void handleMethodCall(int callId, String calleeClassName, String calleeMethodName, Type[] arguments, InstructionHandle mcIh, MethodGen methodGen) {
+    public void handleMethodCall(CallIdCounter callIdCounter, String calleeClassName, String calleeMethodName, Type[] arguments, InstructionHandle mcIh, MethodGen methodGen,
+                                 List<MethodCallDto> methodCalls) {
         if (!checkClassNameAndMethod(calleeClassName, calleeMethodName)) {
             return;
         }
@@ -80,7 +87,7 @@ public abstract class GetMybatisSqlInfoCodeParser extends AbstractCustomCodePars
         DbOperateData dbOperateData = dbOperateDataMap.get(calleeMethodName);
         if (dbOperateData != null) {
             // 当前被调用的Mapper的方法已被记录
-            ExtendedData extendedData = ExtendedData.genExtendedData(callId, getDataType(), JsonUtil.getJsonStr(dbOperateData));
+            ExtendedData extendedData = ExtendedData.genExtendedData(callIdCounter.getCurrentCallId(), getDataType(), JsonUtil.getJsonStr(dbOperateData));
             extendedDataList.add(extendedData);
             return;
         }
@@ -88,13 +95,13 @@ public abstract class GetMybatisSqlInfoCodeParser extends AbstractCustomCodePars
         // 获取当前被调用的Mapper的方法对应的数据库操作
         Map<String, String> sqlMap = mapperSqlMap.get(calleeClassName);
         if (JACGUtil.isMapEmpty(sqlMap)) {
-            System.err.println("### 未查找到对应的mapper " + calleeClassName);
+            logger.error("### 未查找到对应的mapper {}", calleeClassName);
             return;
         }
 
         String sql = sqlMap.get(calleeMethodName);
         if (sql == null) {
-            System.err.println("### 未查找到对应的sql语句 " + calleeClassName + " " + calleeMethodName);
+            logger.error("### 未查找到对应的sql语句 {} {}", calleeClassName, calleeMethodName);
             return;
         }
 
@@ -105,7 +112,7 @@ public abstract class GetMybatisSqlInfoCodeParser extends AbstractCustomCodePars
         // 记录当前被调用的Mapper的方法
         dbOperateDataMap.put(calleeMethodName, dbOperateDataNew);
 
-        ExtendedData extendedData = ExtendedData.genExtendedData(callId, getDataType(), JsonUtil.getJsonStr(dbOperateDataNew));
+        ExtendedData extendedData = ExtendedData.genExtendedData(callIdCounter.getCurrentCallId(), getDataType(), JsonUtil.getJsonStr(dbOperateDataNew));
         extendedDataList.add(extendedData);
     }
 
@@ -125,16 +132,16 @@ public abstract class GetMybatisSqlInfoCodeParser extends AbstractCustomCodePars
         Element root = document.getRootElement();
         String rootName = root.getName();
         if (!StringUtils.equals(rootName, "mapper")) {
-            System.out.println("跳过非Mybatis xml 1: " + filePath);
+            logger.info("跳过非Mybatis xml 1: {}", filePath);
             return;
         }
         String namespace = root.attributeValue("namespace");
         if (StringUtils.isBlank(namespace)) {
-            System.out.println("跳过非Mybatis xml 2: " + filePath);
+            logger.info("跳过非Mybatis xml 2: {}", filePath);
             return;
         }
         // 以上用于跳过非Mybatis mapper的XML文件
-        System.out.println("开始处理Mybatis xml: " + filePath);
+        logger.info("开始处理Mybatis xml: {}", filePath);
 
         Map<String, String> sqlMap = new HashMap<>();
         for (Iterator it = root.elementIterator(); it.hasNext(); ) {
