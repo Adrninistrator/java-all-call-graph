@@ -15,7 +15,7 @@
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.8'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.0'
 ```
 
 - Maven
@@ -24,7 +24,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.6.8'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.6.8</version>
+  <version>0.7.0</version>
 </dependency>
 ```
 
@@ -354,3 +354,68 @@ run.sh
 可选择run.bat或run.sh脚本，以命令行方式执行，脚本中执行的类可为test.jacg包中的类，可选择的类可参考前文内容。
 
 在执行脚本前，需要根据需要修改脚本中执行的类名。
+
+## 1.5. 通过Java代码对参数配置进行设置
+
+支持通过Java代码对参数配置进行设置，可覆盖配置文件中的参数（或仅使用Java代码中设置的参数，不使用配置文件中的参数）
+
+可通过以下类的方法对参数配置进行设置
+
+```java
+com.adrninistrator.jacg.conf.ConfigureWrapper
+```
+
+在执行释放到项目中的test.jacg包中的入口类（如TestRunnerWriteDb），或执行jar包中com.adrninistrator.jacg.runner包中的入口类（如RunnerWriteDb）之前，需要先调用ConfigureWrapper类的方法设置参数配置
+
+以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中调用了ConfigureWrapper类的方法
+
+### 1.5.1. 设置~jacg_config/config.properties配置文件参数
+
+```java
+ConfigureWrapper.addConfig(ConfigKeyEnum configKeyEnum, String value);
+```
+
+`对于app.name参数，在以上方法中会将参数值中的-替换为_`
+
+ConfigKeyEnum枚举类中定义了~jacg_config/config.properties配置文件中的参数key
+
+通过value参数指定需要设置的参数值
+
+示例如下：
+
+```java
+ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
+```
+
+### 1.5.2. 设置~jacg_config目录其他配置文件参数
+
+```java
+ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
+```
+
+OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置文件的文件名
+
+通过configSet参数指定需要设置的Set类型的参数值
+
+示例如下：
+
+```java
+ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX, new HashSet(Arrays.asList(
+        "test.call_graph.method_call", "test.call_graph.argument", "java.")));
+```
+
+### 1.5.3. 设置~jacg_find_keyword目录配置文件参数
+
+```java
+ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList);
+```
+
+OtherConfigFileUseListEnum枚举类中定义了~jacg_find_keyword目录中配置文件的文件名
+
+通过configList参数指定需要设置的List类型的参数值
+
+示例如下：
+
+```java
+ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE, Arrays.asList("!entry!", "<init>"));
+```

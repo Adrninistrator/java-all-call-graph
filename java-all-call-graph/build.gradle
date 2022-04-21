@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group 'com.github.adrninistrator'
-version = "0.6.8"
+version = "0.7.0"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -72,9 +72,11 @@ List log4j = [
         'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
 ]
 
+List junit = ['junit:junit:4.13.2']
+
 dependencies {
     compile apache_common, c3p0, mysql, h2database, slf4j, java_callgraph, jackson, dom4j
-    testImplementation log4j
+    testImplementation log4j, junit
 }
 
 compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"

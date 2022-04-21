@@ -3,6 +3,8 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.annotation.AnnotationStorage;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.MultiCallInfo;
 import com.adrninistrator.jacg.dto.NoticeCallInfo;
 import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Method;
@@ -166,10 +168,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     // 读取配置文件中指定的需要处理的任务
-    protected boolean readTaskInfo(String taskFile) {
-        taskSet = FileUtil.readFile2Set(taskFile);
+    protected boolean readTaskInfo(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum) {
+        taskSet = ConfigureWrapper.getOtherConfigSet(otherConfigFileUseSetEnum);
         if (JACGUtil.isCollectionEmpty(taskSet)) {
-            logger.error("读取文件不存在或内容为空 {}", taskFile);
+            logger.error("读取文件不存在或内容为空 {}", otherConfigFileUseSetEnum.getFileName());
             return false;
         }
 

@@ -1,6 +1,10 @@
 package com.adrninistrator.jacg.extensions.extractor;
 
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
+import com.adrninistrator.jacg.conf.ConfInfo;
+import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.extensions.dto.ExtendedDataFile;
 import com.adrninistrator.jacg.extensions.dto.ExtendedDataInfo;
 import com.adrninistrator.jacg.extensions.dto.MultiImplMethodData;
@@ -8,7 +12,6 @@ import com.adrninistrator.jacg.extensions.find_filter.BaseFindKeywordFilter;
 import com.adrninistrator.jacg.extensions.util.JsonUtil;
 import com.adrninistrator.jacg.other.FindKeywordCallGraph;
 import com.adrninistrator.jacg.other.GenSingleCallGraph;
-import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import com.adrninistrator.jacg.util.JACGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,8 +48,12 @@ public class ExtendedDataExtractor {
     public List<ExtendedDataFile> extract() {
         // 设置生成的调用链顺序为向下
         GenSingleCallGraph.setOrder4er();
-        // 设置生成调用链时的详细程度为最详细
-        RunnerGenAllGraph4Caller.setCallGraphOutputDetailMost();
+        // 判断生成调用链时的详细程度是否为最详细
+        ConfInfo confInfo = ConfManager.getConfInfo();
+        if (confInfo != null && !OutputDetailEnum.ODE_1.getDetail().equals(confInfo.getCallGraphOutputDetail())) {
+            logger.error("生成调用链时的详细程度需要设置为最详细 {} {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getKey(), OutputDetailEnum.ODE_1.getDetail());
+            return null;
+        }
 
         FindKeywordCallGraph findKeywordCallGraph = new FindKeywordCallGraph();
         // 设置处理目录时，需要返回生成文件路径列表

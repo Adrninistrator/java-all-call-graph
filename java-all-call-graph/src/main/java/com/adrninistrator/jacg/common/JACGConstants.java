@@ -82,15 +82,6 @@ public class JACGConstants {
     public static final String FILE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT = "extended_data_supplement.properties";
     public static final String FILE_EXTENSIONS_METHOD_ANNOTATION_HANDLER = "method_annotation_handler.properties";
 
-    public static final String FILE_IN_ALLOWED_CLASS_PREFIX = "i_allowed_class_prefix.properties";
-
-    public static final String FILE_OUT_GRAPH_FOR_CALLEE_CLASS_NAME = "o_g4callee_class_name.properties";
-    public static final String FILE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD = "o_g4caller_entry_method.properties";
-    public static final String FILE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD_IGNORE_PREFIX = "o_g4caller_entry_method_ignore_prefix.properties";
-    public static final String FILE_OUT_GRAPH_FOR_CALLER_IGNORE_CLASS_KEYWORD = "o_g4caller_ignore_class_keyword.properties";
-    public static final String FILE_OUT_GRAPH_FOR_CALLER_IGNORE_FULL_METHOD_PREFIX = "o_g4caller_ignore_full_method_prefix.properties";
-    public static final String FILE_OUT_GRAPH_FOR_CALLER_IGNORE_METHOD_PREFIX = "o_g4caller_ignore_method_prefix.properties";
-
     public static final String FILE_SQL_CLASS_NAME = "class_name.sql";
     public static final String FILE_SQL_METHOD_ANNOTATION = "method_annotation.sql";
     public static final String FILE_SQL_CLASS_ANNOTATION = "class_annotation.sql";
@@ -99,32 +90,7 @@ public class JACGConstants {
     public static final String FILE_SQL_EXTENDED_DATA = "extended_data.sql";
     public static final String FILE_SQL_MANUAL_ADD_EXTENDED_DATA = "manual_add_extended_data.sql";
 
-    public static final String FILE_FIND_KEYWORD_4CALLEE = "find_keyword_4callee.properties";
-    public static final String FILE_FIND_KEYWORD_4CALLER = "find_keyword_4caller.properties";
-
     public static final String APPNAME_IN_SQL = "{appName}";
-
-    public static final String KEY_APPNAME = "app.name";
-    public static final String KEY_CALL_GRAPH_JAR_LIST = "call.graph.jar.list";
-    public static final String KEY_INPUT_IGNORE_OTHER_PACKAGE = "input.ignore.other.package";
-    public static final String KEY_CALL_GRAPH_OUTPUT_DETAIL = "call.graph.output.detail";
-    public static final String KEY_THREAD_NUM = "thread.num";
-    public static final String KEY_SHOW_METHOD_ANNOTATION = "show.method.annotation";
-    public static final String KEY_GEN_COMBINED_OUTPUT = "gen.combined.output";
-    public static final String KEY_SHOW_CALLER_LINE_NUM = "show.caller.line.num";
-    public static final String KEY_GEN_UPWARDS_METHODS_FILE = "gen.upwards.methods.file";
-    public static final String KEY_IGNORE_DUP_CALLEE_IN_ONE_CALLER = "ignore.dup.callee.in.one.caller";
-
-    public static final String KEY_DB_USE_H2 = "db.use.h2";
-    public static final String KEY_DB_H2_FILE_PATH = "db.h2.file.path";
-    public static final String KEY_DB_DRIVER_NAME = "db.driver.name";
-    public static final String KEY_DB_URL = "db.url";
-    public static final String KEY_DB_USERNAME = "db.username";
-    public static final String KEY_DB_PASSWORD = "db.password";
-
-    public static final String CONFIG_OUTPUT_DETAIL_1 = "1";
-    public static final String CONFIG_OUTPUT_DETAIL_2 = "2";
-    public static final String CONFIG_OUTPUT_DETAIL_3 = "3";
 
     // 以上开头字符串长度
     public static final int FILE_KEY_PREFIX_LENGTH = 2;

@@ -177,7 +177,7 @@ public abstract class AbstractRunner {
             fileLock.release();
             return true;
         } catch (Exception e) {
-            logger.error("检查H2数据库文件是否可以写入失败 {}", FileUtil.getCanonicalPath(h2DbFile));
+            logger.error("检查H2数据库文件是否可以写入失败 {} ", FileUtil.getCanonicalPath(h2DbFile), e);
             return false;
         }
     }

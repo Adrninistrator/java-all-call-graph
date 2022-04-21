@@ -1,6 +1,8 @@
 package com.adrninistrator.jacg.other;
 
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extensions.find_filter.BaseFindKeywordFilter;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
@@ -107,10 +109,11 @@ public class FindKeywordCallGraph {
         boolean order4ee = GenSingleCallGraph.ORDER_FOR_EE.equals(order);
 
         // 读取指定的关键字
-        String keywordConfigFilePath = JACGConstants.DIR_KEYWORD_CONF + File.separator + (order4ee ? JACGConstants.FILE_FIND_KEYWORD_4CALLEE :
-                JACGConstants.FILE_FIND_KEYWORD_4CALLER);
+        OtherConfigFileUseListEnum otherConfigFileUseListEnum = order4ee ? OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE :
+                OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLER;
+        String keywordConfigFilePath = otherConfigFileUseListEnum.getFileName();
 
-        List<String> keywordList = FileUtil.readFile2List(keywordConfigFilePath);
+        List<String> keywordList = ConfigureWrapper.getOtherConfigList(otherConfigFileUseListEnum);
         if (JACGUtil.isCollectionEmpty(keywordList)) {
             logger.error("请在配置文件中指定需要生成到起始方法之间调用链的关键字 {}", keywordConfigFilePath);
             return null;
@@ -296,7 +299,7 @@ public class FindKeywordCallGraph {
         List<String> lineNumList = findKeywordLineNumList(filePath, keywordSet);
 
         if (lineNumList == null || lineNumList.size() == 1) {
-            logger.error("{} 未查找到指定关键字: {}", filePath, keywordSet);
+            logger.warn("{} 未查找到指定关键字: {}", filePath, keywordSet);
             return NO_RESULT;
         }
 

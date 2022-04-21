@@ -1,6 +1,8 @@
 package com.adrninistrator.jacg.conf;
 
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.util.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,64 +44,65 @@ public class ConfManager {
         inited = true;
 
         String configFilePath = JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_CONFIG;
-
         try (Reader reader = new InputStreamReader(new FileInputStream(FileUtil.findFile(configFilePath)), StandardCharsets.UTF_8)) {
             Properties properties = new Properties();
             properties.load(reader);
 
-            String appName = properties.getProperty(JACGConstants.KEY_APPNAME);
-            if (checkBlank(appName, JACGConstants.KEY_APPNAME, configFilePath) || !checkAppName(appName)) {
+            String appName = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_APPNAME);
+            if (checkBlank(appName, ConfigKeyEnum.CKE_APPNAME, configFilePath) || !checkAppName(appName)) {
                 return null;
             }
 
-            String callGraphJarList = properties.getProperty(JACGConstants.KEY_CALL_GRAPH_JAR_LIST);
-            if (checkBlank(callGraphJarList, JACGConstants.KEY_CALL_GRAPH_JAR_LIST, configFilePath)) {
+            String callGraphJarList = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_CALL_GRAPH_JAR_LIST);
+            if (checkBlank(callGraphJarList, ConfigKeyEnum.CKE_CALL_GRAPH_JAR_LIST, configFilePath)) {
                 return null;
             }
 
-            String inputIgnoreOtherPackage = properties.getProperty(JACGConstants.KEY_INPUT_IGNORE_OTHER_PACKAGE);
-            if (checkBlank(inputIgnoreOtherPackage, JACGConstants.KEY_INPUT_IGNORE_OTHER_PACKAGE, configFilePath)) {
+            String inputIgnoreOtherPackage = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_INPUT_IGNORE_OTHER_PACKAGE);
+            if (checkBlank(inputIgnoreOtherPackage, ConfigKeyEnum.CKE_INPUT_IGNORE_OTHER_PACKAGE, configFilePath)) {
                 return null;
             }
 
-            String genCombinedOutput = properties.getProperty(JACGConstants.KEY_GEN_COMBINED_OUTPUT);
-            if (checkBlank(genCombinedOutput, JACGConstants.KEY_GEN_COMBINED_OUTPUT, configFilePath)) {
+            String genCombinedOutput = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_GEN_COMBINED_OUTPUT);
+            if (checkBlank(genCombinedOutput, ConfigKeyEnum.CKE_GEN_COMBINED_OUTPUT, configFilePath)) {
                 return null;
             }
 
-            // 是否需要显示调用者源代码行号，首先从JVM参数获取，为空时再从配置文件获取
-            String showCallerLineNum = getPropertiesOrder(properties, JACGConstants.KEY_SHOW_CALLER_LINE_NUM);
-            if (checkBlank(showCallerLineNum, JACGConstants.KEY_SHOW_CALLER_LINE_NUM, configFilePath)) {
+            // 是否需要显示调用者源代码行号
+            String showCallerLineNum = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_SHOW_CALLER_LINE_NUM);
+            if (checkBlank(showCallerLineNum, ConfigKeyEnum.CKE_SHOW_CALLER_LINE_NUM, configFilePath)) {
                 return null;
             }
 
-            String genUpwardsMethodsFile = properties.getProperty(JACGConstants.KEY_GEN_UPWARDS_METHODS_FILE);
-            if (checkBlank(genUpwardsMethodsFile, JACGConstants.KEY_GEN_UPWARDS_METHODS_FILE, configFilePath)) {
+            String genUpwardsMethodsFile = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_GEN_UPWARDS_METHODS_FILE);
+            if (checkBlank(genUpwardsMethodsFile, ConfigKeyEnum.CKE_GEN_UPWARDS_METHODS_FILE, configFilePath)) {
                 return null;
             }
 
-            // 在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略，首先从JVM参数获取，为空时再从配置文件获取
-            String ignoreDupCalleeInOneCaller = getPropertiesOrder(properties, JACGConstants.KEY_IGNORE_DUP_CALLEE_IN_ONE_CALLER);
+            // 在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略
+            String ignoreDupCalleeInOneCaller = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER);
             if (StringUtils.isBlank(ignoreDupCalleeInOneCaller)) {
                 // 允许对应配置为空
                 ignoreDupCalleeInOneCaller = String.valueOf(false);
             }
 
-            // 生成调用链时的详细程度，首先从JVM参数获取，为空时再从配置文件获取
-            String callGraphOutputDetail = getPropertiesOrder(properties, JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL);
-            if (checkBlank(callGraphOutputDetail, JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL, configFilePath)) {
+            // 生成调用链时的详细程度
+            String callGraphOutputDetail = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL);
+            if (checkBlank(callGraphOutputDetail, ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, configFilePath)) {
                 return null;
             }
 
-            if (!StringUtils.equalsAny(callGraphOutputDetail, JACGConstants.CONFIG_OUTPUT_DETAIL_1, JACGConstants.CONFIG_OUTPUT_DETAIL_2,
-                    JACGConstants.CONFIG_OUTPUT_DETAIL_3)) {
-                logger.error("参数配置非法，可选值为 {} {} {} {}", JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL, JACGConstants.CONFIG_OUTPUT_DETAIL_1,
-                        JACGConstants.CONFIG_OUTPUT_DETAIL_2, JACGConstants.CONFIG_OUTPUT_DETAIL_3);
+            OutputDetailEnum outputDetailEnum = OutputDetailEnum.getFromDetail(callGraphOutputDetail);
+            if (OutputDetailEnum.ODE_ILLEGAL == outputDetailEnum) {
+                logger.error("参数配置非法，可选值如下 {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL);
+                for (OutputDetailEnum outputDetailEnum1 : OutputDetailEnum.values()) {
+                    logger.info("{}", outputDetailEnum1.getDetail());
+                }
                 return null;
             }
 
-            String strThreadNum = properties.getProperty(JACGConstants.KEY_THREAD_NUM);
-            if (checkBlank(strThreadNum, JACGConstants.KEY_THREAD_NUM, configFilePath)) {
+            String strThreadNum = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_THREAD_NUM);
+            if (checkBlank(strThreadNum, ConfigKeyEnum.CKE_THREAD_NUM, configFilePath)) {
                 return null;
             }
             int threadNum = handleThreadNum(strThreadNum);
@@ -107,13 +110,13 @@ public class ConfManager {
                 return null;
             }
 
-            String showMethodAnnotation = properties.getProperty(JACGConstants.KEY_SHOW_METHOD_ANNOTATION);
-            if (checkBlank(showMethodAnnotation, JACGConstants.KEY_SHOW_METHOD_ANNOTATION, configFilePath)) {
+            String showMethodAnnotation = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_SHOW_METHOD_ANNOTATION);
+            if (checkBlank(showMethodAnnotation, ConfigKeyEnum.CKE_SHOW_METHOD_ANNOTATION, configFilePath)) {
                 return null;
             }
 
-            String strDbUseH2 = properties.getProperty(JACGConstants.KEY_DB_USE_H2);
-            if (checkBlank(strDbUseH2, JACGConstants.KEY_DB_USE_H2, configFilePath)) {
+            String strDbUseH2 = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_DB_USE_H2);
+            if (checkBlank(strDbUseH2, ConfigKeyEnum.CKE_DB_USE_H2, configFilePath)) {
                 return null;
             }
 
@@ -154,7 +157,7 @@ public class ConfManager {
 
     private static boolean checkAppName(String appName) {
         if (!APP_NAME_PATTERN.matcher(appName).matches()) {
-            logger.error("{} 属性只支持字母、数字及下划线 {}", JACGConstants.KEY_APPNAME, appName);
+            logger.error("{} 属性只支持字母、数字及下划线 {}", ConfigKeyEnum.CKE_APPNAME, appName);
             return false;
         }
         return true;
@@ -166,38 +169,24 @@ public class ConfManager {
         try {
             threadNum = Integer.parseInt(strThreadNum);
         } catch (NumberFormatException e) {
-            logger.error("非法线程数 {} {}", JACGConstants.KEY_THREAD_NUM, strThreadNum);
+            logger.error("非法线程数 {} {}", ConfigKeyEnum.CKE_THREAD_NUM, strThreadNum);
             return 0;
         }
 
         if (threadNum <= 0) {
-            logger.error("线程数过小 {} {}", JACGConstants.KEY_THREAD_NUM, strThreadNum);
+            logger.error("线程数过小 {} {}", ConfigKeyEnum.CKE_THREAD_NUM, strThreadNum);
             return 0;
         }
         if (threadNum > JACGConstants.MAX_THREAD_NUM) {
-            logger.error("线程数过大 {} {}", JACGConstants.KEY_THREAD_NUM, strThreadNum);
+            logger.error("线程数过大 {} {}", ConfigKeyEnum.CKE_THREAD_NUM, strThreadNum);
             return 0;
         }
 
         return threadNum;
     }
 
-    /**
-     * 获取属性，优先通过JVM系统参数获取，再从配置文件获取
-     *
-     * @param properties
-     * @param propKey
-     * @return
-     */
-    private static String getPropertiesOrder(Properties properties, String propKey) {
-        String propertiesInJVMArgs = System.getProperty(propKey);
-        if (propertiesInJVMArgs != null) {
-            return propertiesInJVMArgs;
-        }
-        return properties.getProperty(propKey);
-    }
-
-    private static boolean checkBlank(String value, String key, String configFilePath) {
+    private static boolean checkBlank(String value, ConfigKeyEnum configKeyEnum, String configFilePath) {
+        String key = configKeyEnum.getKey();
         if (StringUtils.isBlank(value)) {
             logger.error("配置文件中未指定参数 {} {}", configFilePath, key);
             return true;
@@ -209,13 +198,13 @@ public class ConfManager {
     }
 
     private static boolean handleH2Db(Properties properties, String configFilePath) {
-        String dbH2FilePath = properties.getProperty(JACGConstants.KEY_DB_H2_FILE_PATH);
-        if (checkBlank(dbH2FilePath, JACGConstants.KEY_DB_H2_FILE_PATH, configFilePath)) {
+        String dbH2FilePath = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_DB_H2_FILE_PATH);
+        if (checkBlank(dbH2FilePath, ConfigKeyEnum.CKE_DB_H2_FILE_PATH, configFilePath)) {
             return false;
         }
 
         if (StringUtils.endsWithIgnoreCase(dbH2FilePath, JACGConstants.H2_FILE_EXT)) {
-            logger.error("{} 属性不需要指定H2数据库的后缀 {} {}", JACGConstants.KEY_DB_H2_FILE_PATH, JACGConstants.H2_FILE_EXT, dbH2FilePath);
+            logger.error("{} 属性不需要指定H2数据库的后缀 {} {}", ConfigKeyEnum.CKE_DB_H2_FILE_PATH, JACGConstants.H2_FILE_EXT, dbH2FilePath);
             return false;
         }
 
@@ -225,23 +214,23 @@ public class ConfManager {
     }
 
     private static boolean handleNonH2Db(Properties properties, String configFilePath) {
-        String dbDriverName = properties.getProperty(JACGConstants.KEY_DB_DRIVER_NAME);
-        if (checkBlank(dbDriverName, JACGConstants.KEY_DB_DRIVER_NAME, configFilePath)) {
+        String dbDriverName = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_DB_DRIVER_NAME);
+        if (checkBlank(dbDriverName, ConfigKeyEnum.CKE_DB_DRIVER_NAME, configFilePath)) {
             return false;
         }
 
-        String dbUrl = properties.getProperty(JACGConstants.KEY_DB_URL);
-        if (checkBlank(dbUrl, JACGConstants.KEY_DB_URL, configFilePath)) {
+        String dbUrl = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_DB_URL);
+        if (checkBlank(dbUrl, ConfigKeyEnum.CKE_DB_URL, configFilePath)) {
             return false;
         }
 
-        String dbUsername = properties.getProperty(JACGConstants.KEY_DB_USERNAME);
-        if (checkBlank(dbUsername, JACGConstants.KEY_DB_USERNAME, configFilePath)) {
+        String dbUsername = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_DB_USERNAME);
+        if (checkBlank(dbUsername, ConfigKeyEnum.CKE_DB_USERNAME, configFilePath)) {
             return false;
         }
 
-        String dbPassword = properties.getProperty(JACGConstants.KEY_DB_PASSWORD);
-        if (checkBlank(dbPassword, JACGConstants.KEY_DB_PASSWORD, configFilePath)) {
+        String dbPassword = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_DB_PASSWORD);
+        if (checkBlank(dbPassword, ConfigKeyEnum.CKE_DB_PASSWORD, configFilePath)) {
             return false;
         }
 

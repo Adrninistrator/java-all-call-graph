@@ -3,8 +3,9 @@ package com.adrninistrator.jacg.runner;
 import com.adrninistrator.jacg.annotation.AnnotationStorage;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.dto.TmpNode4Callee;
-import com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.FileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -45,9 +46,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return false;
         }
 
-        String taskInfoFile = JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_OUT_GRAPH_FOR_CALLEE_CLASS_NAME;
         // 读取配置文件中指定的需要处理的任务
-        if (!readTaskInfo(taskInfoFile)) {
+        if (!readTaskInfo(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLEE_CLASS_NAME)) {
             return false;
         }
 
@@ -64,7 +64,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         }
 
         // 添加用于添加对方法上的注解进行处理的类
-        if(!addMethodAnnotationHandlerExtensions()){
+        if (!addMethodAnnotationHandlerExtensions()) {
             return false;
         }
 
@@ -568,11 +568,11 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         StringBuilder callerInfo = new StringBuilder();
         callerInfo.append(genOutputPrefix(currentNodeLevel + 1));
 
-        if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_1)) {
+        if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_1.getDetail())) {
             // # 1: 展示 完整类名+方法名+方法参数
             String fullMethod = (String) callerMethodMap.get(DC.MC_CALLER_FULL_METHOD);
             callerInfo.append(fullMethod);
-        } else if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_2)) {
+        } else if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_2.getDetail())) {
             // # 2: 展示 完整类名+方法名
             callerInfo.append(callerMethodMap.get(DC.MC_CALLER_FULL_CLASS_NAME))
                     .append(JACGConstants.FLAG_COLON)
@@ -619,10 +619,10 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     // 确定写入输出文件的当前被调用方法信息
     private String chooseCallerInfo(String calleeClassName, String calleeFullMethod) {
-        if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_1)) {
+        if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_1.getDetail())) {
             // # 1: 展示 完整类名+方法名+方法参数
             return calleeFullMethod;
-        } else if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_2)) {
+        } else if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_2.getDetail())) {
             // # 2: 展示 完整类名+方法名
             String calleeFullClassName = JACGUtil.getFullClassNameFromMethod(calleeFullMethod);
             String calleeMethodName = JACGUtil.getOnlyMethodName(calleeFullMethod);
@@ -641,10 +641,10 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         columnSet.add(DC.MC_ENABLED);
         columnSet.add(DC.MC_CALLER_METHOD_HASH);
 
-        if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_1)) {
+        if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_1.getDetail())) {
             // # 1: 展示 完整类名+方法名+方法参数
             columnSet.add(DC.MC_CALLER_FULL_METHOD);
-        } else if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_2)) {
+        } else if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_2.getDetail())) {
             // # 2: 展示 完整类名+方法名
             columnSet.add(DC.MC_CALLER_FULL_CLASS_NAME);
             columnSet.add(DC.MC_CALLER_METHOD_NAME);

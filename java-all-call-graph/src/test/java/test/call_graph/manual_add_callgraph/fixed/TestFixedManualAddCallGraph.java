@@ -10,7 +10,7 @@ public class TestFixedManualAddCallGraph {
         return new FixedService1b().invoke();
     }
 
-    public String test2() {
+    public String test2(String s) {
         return new AbstractFixedService1() {
             @Override
             protected String execute() {

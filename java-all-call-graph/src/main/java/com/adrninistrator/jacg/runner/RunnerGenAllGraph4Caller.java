@@ -3,12 +3,14 @@ package com.adrninistrator.jacg.runner;
 import com.adrninistrator.jacg.annotation.AnnotationStorage;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfManager;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.CallerTaskInfo;
 import com.adrninistrator.jacg.dto.MultiImplMethodInfo;
 import com.adrninistrator.jacg.dto.TmpNode4Caller;
-import com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler;
 import com.adrninistrator.jacg.extensions.dto.BaseExtendedData;
 import com.adrninistrator.jacg.extensions.enums.ExtendedDataResultEnum;
 import com.adrninistrator.jacg.extensions.extended_data_add.ExtendedDataAddInterface;
@@ -110,14 +112,12 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return false;
         }
 
-        String taskInfoFile = JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD;
         // 读取配置文件中指定的需要处理的任务
-        if (!readTaskInfo(taskInfoFile)) {
+        if (!readTaskInfo(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD)) {
             return false;
         }
 
-        String entryMethodIgnorePrefixFile = JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD_IGNORE_PREFIX;
-        entryMethodIgnorePrefixSet = FileUtil.readFile2Set(entryMethodIgnorePrefixFile);
+        entryMethodIgnorePrefixSet = ConfigureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD_IGNORE_PREFIX);
         if (entryMethodIgnorePrefixSet == null) {
             return false;
         }
@@ -127,20 +127,17 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return false;
         }
 
-        ignoreClassKeywordSet =
-                FileUtil.readFile2Set(JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_OUT_GRAPH_FOR_CALLER_IGNORE_CLASS_KEYWORD);
+        ignoreClassKeywordSet = ConfigureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_IGNORE_CLASS_KEYWORD);
         if (ignoreClassKeywordSet == null) {
             return false;
         }
 
-        ignoreFullMethodPrefixSet =
-                FileUtil.readFile2Set(JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_OUT_GRAPH_FOR_CALLER_IGNORE_FULL_METHOD_PREFIX);
+        ignoreFullMethodPrefixSet = ConfigureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_IGNORE_FULL_METHOD_PREFIX);
         if (ignoreFullMethodPrefixSet == null) {
             return false;
         }
 
-        ignoreMethodPrefixSet =
-                FileUtil.readFile2Set(JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_OUT_GRAPH_FOR_CALLER_IGNORE_METHOD_PREFIX);
+        ignoreMethodPrefixSet = ConfigureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_IGNORE_METHOD_PREFIX);
         if (ignoreMethodPrefixSet == null) {
             return false;
         }
@@ -156,7 +153,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         // 添加用于添加对方法上的注解进行处理的类
-        if(!addMethodAnnotationHandlerExtensions()){
+        if (!addMethodAnnotationHandlerExtensions()) {
             return false;
         }
 
@@ -229,45 +226,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         return true;
-    }
-
-    // 设置生成调用链时的详细程度为最详细
-    public static void setCallGraphOutputDetailMost() {
-        System.setProperty(JACGConstants.KEY_CALL_GRAPH_OUTPUT_DETAIL, JACGConstants.CONFIG_OUTPUT_DETAIL_1);
-
-        if (ConfManager.isInited()) {
-            // 当已经完成初始化配置时，再修改对应设置
-            ConfInfo confInfo = ConfManager.getConfInfo();
-            if (confInfo != null) {
-                confInfo.setCallGraphOutputDetail(JACGConstants.CONFIG_OUTPUT_DETAIL_1);
-            }
-        }
-    }
-
-    // 设置生成向下的完整方法调用链时，忽略在一个调用方法中出现多次的被调用方法（包含自定义数据）
-    public static void setIgnoreDupCalleeInOneCaller() {
-        System.setProperty(JACGConstants.KEY_IGNORE_DUP_CALLEE_IN_ONE_CALLER, String.valueOf(true));
-
-        if (ConfManager.isInited()) {
-            // 当已经完成初始化配置时，再修改对应设置
-            ConfInfo confInfo = ConfManager.getConfInfo();
-            if (confInfo != null) {
-                confInfo.setIgnoreDupCalleeInOneCaller(true);
-            }
-        }
-    }
-
-    // 设置生成向下的完整方法调用链时，显示调用者源代码行号
-    public static void setShowCallerLineNum() {
-        System.setProperty(JACGConstants.KEY_SHOW_CALLER_LINE_NUM, String.valueOf(true));
-
-        if (ConfManager.isInited()) {
-            // 当已经完成初始化配置时，再修改对应设置
-            ConfInfo confInfo = ConfManager.getConfInfo();
-            if (confInfo != null) {
-                confInfo.setShowCallerLineNum(true);
-            }
-        }
     }
 
     // 执行任务并等待
@@ -628,7 +586,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             // 找到一个方法
             if (findMethod) {
                 logger.error("通过方法前缀找到多于一个入口方法 {} {} ，请指定完整方法名，或在文件 {} 中指定排除", callerFullMethod, currentCallerFullMethod,
-                        JACGConstants.FILE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD_IGNORE_PREFIX);
+                        OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD_IGNORE_PREFIX);
                 return false;
             }
 
@@ -1000,10 +958,10 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         String callerFullMethod = (String) calleeMethodMap.get(DC.MC_CALLER_FULL_METHOD);
         String calleeFullMethod = (String) calleeMethodMap.get(DC.MC_CALLEE_FULL_METHOD);
 
-        if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_1)) {
+        if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_1.getDetail())) {
             // # 1: 展示 完整类名+方法名+方法参数
             calleeInfo.append(calleeFullMethod);
-        } else if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_2)) {
+        } else if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_2.getDetail())) {
             // # 2: 展示 完整类名+方法名
             String calleeFullClassName = JACGUtil.getFullClassNameFromMethod(calleeFullMethod);
             String calleeMethodName = JACGUtil.getOnlyMethodName(calleeFullMethod);
@@ -1389,10 +1347,10 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     // 确定写入输出文件的当前调用方法信息
     private String chooseCalleeInfo(String callerFullMethod, String callerFullClassName, String callerMethodName, String callerClassName) {
-        if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_1)) {
+        if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_1.getDetail())) {
             // # 1: 展示 完整类名+方法名+方法参数
             return callerFullMethod;
-        } else if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_2)) {
+        } else if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_2.getDetail())) {
             // # 2: 展示 完整类名+方法名
             return callerFullClassName + JACGConstants.FLAG_COLON + callerMethodName;
         }
@@ -1411,9 +1369,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         // 以下为查询手工添加的自定义数据时需要使用
         columnSet.add(DC.MC_CALLER_FULL_METHOD);
 
-        if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_1)) {
+        if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_1.getDetail())) {
             // # 1: 展示 完整类名+方法名+方法参数
-        } else if (confInfo.getCallGraphOutputDetail().equals(JACGConstants.CONFIG_OUTPUT_DETAIL_2)) {
+        } else if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_2.getDetail())) {
             // # 2: 展示 完整类名+方法名
         } else {
             // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名

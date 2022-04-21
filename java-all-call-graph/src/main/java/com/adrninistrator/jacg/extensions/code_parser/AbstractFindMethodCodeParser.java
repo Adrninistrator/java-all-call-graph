@@ -82,11 +82,6 @@ public abstract class AbstractFindMethodCodeParser implements CustomCodeParserIn
     }
 
     @Override
-    public String getDataType() {
-        return null;
-    }
-
-    @Override
     public void handleClass(JavaClass javaClass) {
         if (javaClass.isAbstract() || javaClass.isInterface()) {
             return;

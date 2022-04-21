@@ -2,9 +2,12 @@ package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Write;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.JarInfo;
 import com.adrninistrator.jacg.dto.MethodCallEntity;
+import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Write;
 import com.adrninistrator.jacg.extensions.util.JsonUtil;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.FileUtil;
@@ -97,7 +100,7 @@ public class RunnerWriteDb extends AbstractRunner {
     public boolean init() {
         if (SqlUtil.isMySQLDb(confInfo.getDbDriverName()) &&
                 !confInfo.getDbUrl().contains(JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS)) {
-            logger.info("使用MYSQL时，请在{}参数指定{}", JACGConstants.KEY_DB_URL, JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS);
+            logger.info("使用MYSQL时，请在{}参数指定{}", ConfigKeyEnum.CKE_DB_URL, JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS);
             return false;
         }
 
@@ -158,7 +161,7 @@ public class RunnerWriteDb extends AbstractRunner {
 
         if (!readFileFlag) {
             if (confInfo.isInputIgnoreOtherPackage()) {
-                logger.warn("未从文件读取到内容，请检查文件 {} ，以及配置文件指定的包名 {}", callGraphOutputFilePath, JACGConstants.FILE_IN_ALLOWED_CLASS_PREFIX);
+                logger.warn("未从文件读取到内容，请检查文件 {} ，以及配置文件指定的包名 {}", callGraphOutputFilePath, OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX.getFileName());
             } else {
                 logger.warn("未从文件读取到内容，请检查文件 {}", callGraphOutputFilePath);
             }
@@ -404,10 +407,9 @@ public class RunnerWriteDb extends AbstractRunner {
     // 读取其他配置文件
     private boolean readOtherConfig() {
         if (confInfo.isInputIgnoreOtherPackage()) {
-            String allowedClassPrefixFile = JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_IN_ALLOWED_CLASS_PREFIX;
-            allowedClassPrefixSet = FileUtil.readFile2Set(allowedClassPrefixFile);
+            allowedClassPrefixSet = ConfigureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX);
             if (JACGUtil.isCollectionEmpty(allowedClassPrefixSet)) {
-                logger.error("读取文件不存在或内容为空 {}", allowedClassPrefixFile);
+                logger.error("读取文件不存在或内容为空 {}", OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX.getFileName());
                 return false;
             }
         }
