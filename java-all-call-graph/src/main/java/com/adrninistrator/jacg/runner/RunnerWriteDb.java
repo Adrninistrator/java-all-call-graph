@@ -249,11 +249,9 @@ public class RunnerWriteDb extends AbstractRunner {
 
     // 添加用于对代码进行解析的自定义处理类
     private boolean addCodeParserExtensions(JCallGraph jCallGraph) {
-        String codeParserExtensionFilePath = JACGConstants.DIR_EXTENSIONS + File.separator + JACGConstants.FILE_EXTENSIONS_CODE_PARSER;
-
-        Set<String> codeParserExtensionClasses = FileUtil.readFile2Set(codeParserExtensionFilePath);
+        Set<String> codeParserExtensionClasses = ConfigureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_EXTENSIONS_CODE_PARSER);
         if (JACGUtil.isCollectionEmpty(codeParserExtensionClasses)) {
-            logger.info("未指定用于对代码进行解析的类，跳过 {}", codeParserExtensionFilePath);
+            logger.info("未指定用于对代码进行解析的类，跳过 {}", OtherConfigFileUseSetEnum.OCFUSE_EXTENSIONS_CODE_PARSER.getFileName());
             return true;
         }
 
@@ -674,7 +672,7 @@ public class RunnerWriteDb extends AbstractRunner {
      */
     private boolean handleOneAnnotationInfo(String data, boolean methodOrClass, List<AnnotationInfo4Write> annotationInfo4WriteList) {
         String[] array = data.split(JACGConstants.FLAG_SPACE);
-        if (array.length != JavaCGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE && array.length != JavaCGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE) {
+        if (array.length > JavaCGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE || array.length < JavaCGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE) {
             logger.error("保存注解信息文件的列数非法 {} [{}]", array.length, data);
             return false;
         }
@@ -692,10 +690,14 @@ public class RunnerWriteDb extends AbstractRunner {
         annotationInfo4Write.setAnnotationName(annotationName);
         annotationInfo4Write.setAnnotationAttributeMap(new HashMap<>());
 
-        if (array.length == JavaCGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE) {
+        if (array.length > JavaCGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE) {
             // 当前行的注解信息有属性
             String annotationAttributeKey = array[3];
-            String annotationAttributeValue = JavaCGUtil.decodeAnnotationValue(array[4]);
+            String annotationAttributeValue = "";
+            if (array.length == JavaCGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE) {
+                // 有可能注解属性值为空（""），这样列会少一个，因此需要判断列数
+                annotationAttributeValue = JavaCGUtil.decodeAnnotationValue(array[4]);
+            }
 
             // 判断列表中上一条记录与当前记录是否是同一个类的同一个注解信息
             AnnotationInfo4Write getLastSameAnnotation = getLastSameAnnotation(annotationInfo4WriteList, classOrMethodName, annotationName);

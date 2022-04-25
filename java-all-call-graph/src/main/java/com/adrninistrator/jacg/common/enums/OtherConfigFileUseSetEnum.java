@@ -24,6 +24,14 @@ public enum OtherConfigFileUseSetEnum {
             "生成指定类调用的所有向下的方法完整调用链时的配置文件，指定忽略的完整方法前缀"),
     OCFUSE_OUT_GRAPH_FOR_CALLER_IGNORE_METHOD_PREFIX(JACGConstants.DIR_CONFIG + File.separator + "o_g4caller_ignore_method_prefix.properties",
             "生成指定类调用的所有向下的方法完整调用链时的配置文件，指定忽略的方法名前缀"),
+    OCFUSE_EXTENSIONS_CODE_PARSER(JACGConstants.DIR_EXTENSIONS + File.separator + "code_parser.properties",
+            "定义用于对代码进行解析的自定义处理类的完整类名"),
+    OCFUSE_EXTENSIONS_EXTENDED_DATA_ADD(JACGConstants.DIR_EXTENSIONS + File.separator + "extended_data_add.properties",
+            "定义用于添加自定义数据处理类的完整类名"),
+    OCFUSE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT(JACGConstants.DIR_EXTENSIONS + File.separator + "extended_data_supplement.properties",
+            "定义用于对自定义数据进行补充的自定义处理类的完整类名"),
+    OCFUSE_EXTENSIONS_METHOD_ANNOTATION_HANDLER(JACGConstants.DIR_EXTENSIONS + File.separator + "method_annotation_handler.properties",
+            "定义用于对方法上的注解进行处理的类完整类名"),
     ;
 
     private String fileName;

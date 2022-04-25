@@ -16,7 +16,9 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 本工具支持生成某个方法到起始方法之间的调用链，也支持根据关键字查找关注的方法，生成其到起即方法之间的调用链。
 
-`当前项目提供了插件功能，可用于为Java代码自动生成UML时序图`，可参考[https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram](https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram)，根据关键字查找关注的方法时，可使用自定义Java代码判断是否满足关键字，在该文档中会有说明。
+`本项目提供了扩展功能，可用于为Java代码自动生成UML时序图`，可参考[https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram](https://github.com/Adrninistrator/gen-java-code-uml-sequence-diagram)，根据关键字查找关注的方法时，可使用自定义Java代码判断是否满足关键字，在该文档中会有说明。
+
+本项目用于获取Java方法调用关系的功能在[https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)中实现
 
 # 2. 输出结果示例
 
@@ -49,3 +51,4 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 # 9. 其他说明
 
 [其他说明](other_instructions.md)
+

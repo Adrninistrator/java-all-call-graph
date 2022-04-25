@@ -6,4 +6,4 @@ CREATE TABLE if not exists manual_add_extended_data_{appName} (
   data_type text NOT NULL COMMENT '自定义数据类型，MB_SQL: Mybatis的Mapper的数据库操作及表名',
   data_value text NOT NULL COMMENT '自定义数据内容，JSON字符串格式',
   PRIMARY KEY (data_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='手工添加的自定义数据表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='人工添加的自定义数据表';

@@ -56,7 +56,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 保存存在自定义数据的方法调用序号
     private Set<Integer> callIdWithExtendedDataSet;
 
-    // 保存存在手工添加的自定义数据的调用方与被调用方完整方法
+    // 保存存在人工添加的自定义数据的调用方与被调用方完整方法
     private Map<String, Set<String>> callFullMethodWithMAEDMap;
 
     // 保存用于添加自定义数据的处理类
@@ -193,7 +193,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return false;
         }
 
-        // 查询存在手工添加的自定义数据的调用方与被调用方完整方法
+        // 查询存在人工添加的自定义数据的调用方与被调用方完整方法
         if (!queryCallFullMethodWithMAEDMap()) {
             return false;
         }
@@ -301,11 +301,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     // 添加用于添加自定义数据处理类
     private boolean addExtendedDataAddExtensions() {
-        String extendedDataAddFilePath = JACGConstants.DIR_EXTENSIONS + File.separator + JACGConstants.FILE_EXTENSIONS_EXTENDED_DATA_ADD;
-
-        Set<String> extendedDataAddClasses = FileUtil.readFile2Set(extendedDataAddFilePath);
+        Set<String> extendedDataAddClasses = ConfigureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_EXTENSIONS_EXTENDED_DATA_ADD);
         if (JACGUtil.isCollectionEmpty(extendedDataAddClasses)) {
-            logger.info("未指定用于添加自定义数据处理类，跳过 {}", extendedDataAddFilePath);
+            logger.info("未指定用于添加自定义数据处理类，跳过 {}", OtherConfigFileUseSetEnum.OCFUSE_EXTENSIONS_EXTENDED_DATA_ADD.getFileName());
             return true;
         }
 
@@ -332,11 +330,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     // 添加用于对自定义数据进行补充的处理类
     private boolean addExtendedDataSupplementExtensions() {
-        String extendedDataSupplementFilePath = JACGConstants.DIR_EXTENSIONS + File.separator + JACGConstants.FILE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT;
-
-        Set<String> extendedDataSupplementClasses = FileUtil.readFile2Set(extendedDataSupplementFilePath);
+        Set<String> extendedDataSupplementClasses = ConfigureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT);
         if (JACGUtil.isCollectionEmpty(extendedDataSupplementClasses)) {
-            logger.info("未指定用于对自定义数据进行补充的类，跳过 {}", extendedDataSupplementFilePath);
+            logger.info("未指定用于对自定义数据进行补充的类，跳过 {}", OtherConfigFileUseSetEnum.OCFUSE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT.getFileName());
             return true;
         }
 
@@ -413,7 +409,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         return true;
     }
 
-    // 查询存在手工添加的自定义数据的调用方与被调用方完整方法
+    // 查询存在人工添加的自定义数据的调用方与被调用方完整方法
     private boolean queryCallFullMethodWithMAEDMap() {
         callFullMethodWithMAEDMap = new HashMap<>();
 
@@ -1080,18 +1076,18 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     // 添加自定义数据
     private boolean addExtendedData(int currentMethodCallId, StringBuilder calleeInfo, String calleeMethodHash, String callerFullMethod, String calleeFullMethod) {
-        // 处理数据库中手工添加的自定义数据
+        // 处理数据库中人工添加的自定义数据
         ExtendedDataResultEnum result = handleManualAddExtendedDataInDb(currentMethodCallId, calleeMethodHash, callerFullMethod, calleeFullMethod, calleeInfo);
         if (result == ExtendedDataResultEnum.EDRE_FAIL) {
             // 处理失败
             return false;
         }
         if (result == ExtendedDataResultEnum.EDRE_SUCCESS) {
-            // 处理了手工添加的自定义数据，返回成功
+            // 处理了人工添加的自定义数据，返回成功
             return true;
         }
 
-        // 数据库中不存在手工添加的自定义数据
+        // 数据库中不存在人工添加的自定义数据
         // 调用自定义处理类添加自定义数据
         result = addExtendedDataByExtensions(currentMethodCallId, calleeMethodHash, callerFullMethod, calleeFullMethod, calleeInfo);
         if (result == ExtendedDataResultEnum.EDRE_FAIL) {
@@ -1099,7 +1095,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return false;
         }
         if (result == ExtendedDataResultEnum.EDRE_SUCCESS) {
-            // 处理了手工添加的自定义数据，返回成功
+            // 处理了人工添加的自定义数据，返回成功
             return true;
         }
 
@@ -1161,24 +1157,24 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     }
 
     /**
-     * 处理数据库中手工添加的自定义数据
+     * 处理数据库中人工添加的自定义数据
      *
      * @param currentMethodCallId
      * @param calleeMethodHash
      * @param callerFullMethod
      * @param calleeFullMethod
      * @param calleeInfo
-     * @return TRUE: 处理成功, FALSE: 不存在手工添加的自定义数据, null: 处理失败
+     * @return TRUE: 处理成功, FALSE: 不存在人工添加的自定义数据, null: 处理失败
      */
     private ExtendedDataResultEnum handleManualAddExtendedDataInDb(int currentMethodCallId, String calleeMethodHash, String callerFullMethod, String calleeFullMethod,
                                                                    StringBuilder calleeInfo) {
-        // 根据缓存数据判断当前调用者及被调用者方法是否存在手工添加的自定义数据
+        // 根据缓存数据判断当前调用者及被调用者方法是否存在人工添加的自定义数据
         Set<String> calleeFullMethodSet = callFullMethodWithMAEDMap.get(callerFullMethod);
         if (calleeFullMethodSet == null || !calleeFullMethodSet.contains(calleeFullMethod)) {
             // 匹配调用者方法查询不存在时，再使用*查询
             calleeFullMethodSet = callFullMethodWithMAEDMap.get(JACGConstants.SQL_VALUE_MAED_CALLER_FULL_METHOD_ALL);
             if (calleeFullMethodSet == null || !calleeFullMethodSet.contains(calleeFullMethod)) {
-                // 当前调用者及被调用者方法不存在手工添加的自定义数据
+                // 当前调用者及被调用者方法不存在人工添加的自定义数据
                 return ExtendedDataResultEnum.EDRE_NONE;
             }
         }
@@ -1189,19 +1185,19 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return ExtendedDataResultEnum.EDRE_FAIL;
         }
 
-        // 查询当前调用关系手工添加的自定义数据
+        // 查询当前调用关系人工添加的自定义数据
         List<Map<String, Object>> list4MAED = queryMAED(callerFullMethod, calleeFullMethod, calleeSeqInCaller);
         if (list4MAED == null) {
-            logger.error("查询当前调用关系手工添加的自定义数据失败 {} {} {}", callerFullMethod, calleeFullMethod, calleeSeqInCaller);
+            logger.error("查询当前调用关系人工添加的自定义数据失败 {} {} {}", callerFullMethod, calleeFullMethod, calleeSeqInCaller);
             return ExtendedDataResultEnum.EDRE_FAIL;
         }
         if (list4MAED.isEmpty()) {
-            // 当前调用关系不存在手工添加的自定义数据
+            // 当前调用关系不存在人工添加的自定义数据
             return ExtendedDataResultEnum.EDRE_NONE;
         }
 
         if (list4MAED.size() > 1) {
-            logger.error("当前调用关系存在多条手工添加的自定义数据，请仅保留一条 {} {} {}", callerFullMethod, calleeFullMethod, calleeSeqInCaller);
+            logger.error("当前调用关系存在多条人工添加的自定义数据，请仅保留一条 {} {} {}", callerFullMethod, calleeFullMethod, calleeSeqInCaller);
             return ExtendedDataResultEnum.EDRE_FAIL;
         }
 
@@ -1297,9 +1293,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         return ExtendedDataResultEnum.EDRE_NONE;
     }
 
-    // 查询手工添加的自定义数据
+    // 查询人工添加的自定义数据
     private List<Map<String, Object>> queryMAED(String callerFullMethod, String calleeFullMethod, long calleeSeqInCaller) {
-        // 查询当前调用关系手工添加的自定义数据，先指定调用者进行查询
+        // 查询当前调用关系人工添加的自定义数据，先指定调用者进行查询
         String sqlKey4MAED = JACGConstants.SQL_KEY_MAED_QUERY;
         String sql4MAED = sqlCacheMap.get(sqlKey4MAED);
         if (sql4MAED == null) {
@@ -1316,7 +1312,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return list4MAED;
         }
 
-        // 查询当前调用关系手工添加的自定义数据，再不限制调用者进行查询
+        // 查询当前调用关系人工添加的自定义数据，再不限制调用者进行查询
         String sqlKey4MAEDIgnoreCaller = JACGConstants.SQL_KEY_MAED_QUERY_IGNORE_CALLER;
         String sql4MAEDIgnoreCaller = sqlCacheMap.get(sqlKey4MAEDIgnoreCaller);
         if (sql4MAEDIgnoreCaller == null) {
@@ -1366,7 +1362,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         columnSet.add(DC.MC_CALLEE_FULL_METHOD);
         columnSet.add(DC.MC_ENABLED);
         columnSet.add(DC.MC_CALLEE_METHOD_HASH);
-        // 以下为查询手工添加的自定义数据时需要使用
+        // 以下为查询人工添加的自定义数据时需要使用
         columnSet.add(DC.MC_CALLER_FULL_METHOD);
 
         if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_1.getDetail())) {

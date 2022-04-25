@@ -36,7 +36,7 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 ### 1.2.2. 提供处理方法上的注解信息的插件功能
 
-在新增的method_annotation_handler.properties配置文件中，可以定义用于对方法上的注解进行处理的类完整类名，该文件每行指定一项配置，可指定多行
+在method_annotation_handler.properties配置文件中，可以定义用于对方法上的注解进行处理的类完整类名，该文件每行指定一项配置，可指定多行
 
 对方法上的注解进行处理的类需要继承自com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler，并实现以下方法
 
@@ -102,7 +102,7 @@ public class TestRest2Controller {
 
 支持通过Java代码对参数配置进行设置，可覆盖配置文件中的参数（或仅使用Java代码中设置的参数，不使用配置文件中的参数）
 
-新增了以下类，可通过其方法对参数配置进行设置
+可通过以下类的方法对参数配置进行设置
 
 ```java
 com.adrninistrator.jacg.conf.ConfigureWrapper
@@ -130,13 +130,13 @@ ConfigKeyEnum枚举类中定义了~jacg_config/config.properties配置文件中�
 ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
 ```
 
-### 1.3.2. 设置~jacg_config目录其他配置文件参数
+### 1.3.2. 设置~jacg_config、~jacg_extensions目录配置文件参数
 
 ```java
 ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
 ```
 
-OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置文件的文件名
+OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置文件的文件名，以及~jacg_extensions目录中的配置文件名
 
 通过configSet参数指定需要设置的Set类型的参数值
 
@@ -144,7 +144,9 @@ OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置�
 
 ```java
 ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX, new HashSet(Arrays.asList(
-        "test.call_graph.method_call", "test.call_graph.argument", "java.")));
+        "test.call_graph.method_call",
+        "test.call_graph.argument",
+        "java.")));
 ```
 
 ### 1.3.3. 设置~jacg_find_keyword目录配置文件参数
@@ -162,3 +164,9 @@ OtherConfigFileUseListEnum枚举类中定义了~jacg_find_keyword目录中配置
 ```java
 ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE, Arrays.asList("!entry!", "<init>"));
 ```
+
+## 1.4. (0.7.1)
+
+- 支持人工添加缺失的方法调用关系（定制化代码开发）
+
+请查看[extensions.md](extensions.md)，搜索“人工添加缺失的方法调用关系（定制化代码开发）”

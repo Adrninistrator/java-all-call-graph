@@ -33,17 +33,31 @@ public abstract class TestRunByCodeBase {
         ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_DB_H2_FILE_PATH, "./build/jacg_h2db_rbc");
 
         ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX, new HashSet(Arrays.asList(
-                "test.call_graph.method_call", "test.call_graph.argument", "java.")));
-        ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLEE_CLASS_NAME, new HashSet(Arrays.asList("TestMCCallee", "System")));
+                "test.call_graph.method_call",
+                "test.call_graph.argument",
+                "java.")));
+        ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLEE_CLASS_NAME, new HashSet(Arrays.asList(
+                "TestMCCallee",
+                "System")));
         ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD, new HashSet(Arrays.asList(
-                "TestMCCaller:test1a", "TestMCCaller:test1b", "TestMCCaller:test1c", "TestArgument1:test", "TestArgument2:test")));
-        ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD_IGNORE_PREFIX, new HashSet(Arrays.asList("test4i", "test5")));
+                "TestMCCaller:test1a",
+                "TestMCCaller:test1b",
+                "TestMCCaller:test1c",
+                "TestArgument1:test",
+                "TestArgument2:test")));
+        ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_ENTRY_METHOD_IGNORE_PREFIX, new HashSet(Arrays.asList(
+                "test4i",
+                "test5")));
         ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_IGNORE_CLASS_KEYWORD, new HashSet(Arrays.asList("TestArgument1")));
         ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_IGNORE_FULL_METHOD_PREFIX, new HashSet(Arrays.asList(
                 "test.call_graph.argument.TestArgument2")));
         ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLER_IGNORE_METHOD_PREFIX, new HashSet(Arrays.asList("test1")));
 
-        ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE, Arrays.asList("!entry!", "<init>"));
-        ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLER, Arrays.asList("System", "Deprecated"));
+        ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE, Arrays.asList(
+                "!entry!",
+                "<init>"));
+        ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLER, Arrays.asList(
+                "System",
+                "Deprecated"));
     }
 }

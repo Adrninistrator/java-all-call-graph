@@ -77,11 +77,6 @@ public class JACGConstants {
 
     public static final String FILE_CONFIG = "config.properties";
 
-    public static final String FILE_EXTENSIONS_CODE_PARSER = "code_parser.properties";
-    public static final String FILE_EXTENSIONS_EXTENDED_DATA_ADD = "extended_data_add.properties";
-    public static final String FILE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT = "extended_data_supplement.properties";
-    public static final String FILE_EXTENSIONS_METHOD_ANNOTATION_HANDLER = "method_annotation_handler.properties";
-
     public static final String FILE_SQL_CLASS_NAME = "class_name.sql";
     public static final String FILE_SQL_METHOD_ANNOTATION = "method_annotation.sql";
     public static final String FILE_SQL_CLASS_ANNOTATION = "class_annotation.sql";

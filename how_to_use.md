@@ -15,7 +15,7 @@
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.0'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.1'
 ```
 
 - Maven
@@ -24,7 +24,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.0'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.7.0</version>
+  <version>0.7.1</version>
 </dependency>
 ```
 
@@ -387,13 +387,13 @@ ConfigKeyEnum枚举类中定义了~jacg_config/config.properties配置文件中�
 ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
 ```
 
-### 1.5.2. 设置~jacg_config目录其他配置文件参数
+### 1.5.2. 设置~jacg_config、~jacg_extensions目录配置文件参数
 
 ```java
 ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
 ```
 
-OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置文件的文件名
+OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置文件的文件名，以及~jacg_extensions目录中的配置文件名
 
 通过configSet参数指定需要设置的Set类型的参数值
 
@@ -401,7 +401,9 @@ OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置�
 
 ```java
 ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX, new HashSet(Arrays.asList(
-        "test.call_graph.method_call", "test.call_graph.argument", "java.")));
+        "test.call_graph.method_call",
+        "test.call_graph.argument",
+        "java.")));
 ```
 
 ### 1.5.3. 设置~jacg_find_keyword目录配置文件参数

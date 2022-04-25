@@ -669,8 +669,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 添加用于添加对方法上的注解进行处理的类
     protected boolean addMethodAnnotationHandlerExtensions() {
-        String methodAnnotationHandlerFilePath = JACGConstants.DIR_EXTENSIONS + File.separator + JACGConstants.FILE_EXTENSIONS_METHOD_ANNOTATION_HANDLER;
-        Set<String> methodAnnotationHandlerClasses = FileUtil.readFile2Set(methodAnnotationHandlerFilePath);
+        Set<String> methodAnnotationHandlerClasses = ConfigureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_EXTENSIONS_METHOD_ANNOTATION_HANDLER);
         if (JACGUtil.isCollectionEmpty(methodAnnotationHandlerClasses)) {
             annotationHandlerList = new ArrayList<>(1);
             // 添加默认的处理类

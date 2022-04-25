@@ -92,7 +92,7 @@ list.stream().map(TestDto1::getStr).collect(Collectors.toList());
 |class\_name\_|类名信息表|保存相关类的完整类名及简单类名|
 |extended\_data\_|自定义数据表||
 |jar\_info\_|jar包信息表|保存用于解析方法调用关系的jar包信息|
-|manual\_add\_extended\_data\_|手工添加的自定义数据表||
+|manual\_add\_extended\_data\_|人工添加的自定义数据表||
 |method\_annotation\_|方法上的注解信息表||
 |method\_call\_|方法调用关系表|保存各方法之间调用信息|
 

@@ -13,6 +13,7 @@ public class TestActionListener {
     public void test1() {
         ActionListener1 testActionListener = new ActionListener1();
         new Button().addActionListener(testActionListener);
+        new Button().addActionListener(testActionListener);
     }
 
     public void test2() {
