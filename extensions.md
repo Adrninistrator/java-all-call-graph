@@ -141,6 +141,19 @@ public String invoke() {
 protected abstract String execute();
 ```
 
+其他方法使用AbstractFixedService1子类的示例如下：
+
+```java
+public String test2(String s) {
+    return new AbstractFixedService1() {
+        @Override
+        protected String execute() {
+            return String.valueOf(System.currentTimeMillis());
+        }
+    }.invoke();
+}
+```
+
 若不进行专门的处理，在生成的方法调用关系中，其他方法调用AbstractFixedService1子类的execute()方法的调用关系会不准确
 
 为AbstractFixedService1子类补充缺失调用方法的类为MACGFixedService1Parser，如下所示：
@@ -219,6 +232,20 @@ protected synthetic bridge Collection execute(Object req, Collection rsp) {
 
 总结如下：`方法参数使用了范型的抽象父类的子类中，编译器会自动为使用了范型参数的方法增加同名方法，该方法的参数类型与范型类型一致，在该方法中会调用子类实现的实际方法。因此可以增加一个调用子类方法的固定类型参数的方法，即可关联到子类的参数不固定的实现方法`
 
+其他方法使用AbstractUnFixedService1子类的示例如下：
+
+```java
+public ArrayList test2() {
+    return new AbstractUnFixedService1<Integer, ArrayList>() {
+        @Override
+        protected ArrayList execute(Integer integer, ArrayList list) {
+            System.setProperty("", "");
+            return null;
+        }
+    }.invoke(null, null);
+}
+```
+
 若不进行专门的处理，在生成的方法调用关系中，其他方法调用AbstractUnFixedService1子类的execute()方法的调用关系会不准确
 
 为AbstractUnFixedService1子类补充缺失调用方法的类为MACGFixedService1Parser，如下所示：
@@ -270,7 +297,7 @@ M:200 test.call_graph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph
 
 java-all-call-graph提供的扩展功能在生成方法向上/向下完整调用链阶段执行，因此新增或修改了扩展功能的代码后，需要重新生成方法向上/向下完整调用链，即调用`TestRunnerGenAllGraph4Callee`等类
 
-## 2.1. 处理方法上的注解信息的插件功能
+## 2.1. 处理方法上的注解信息的扩展功能
 
 在method_annotation_handler.properties配置文件中，可以定义用于对方法上的注解进行处理的类完整类名，该文件每行指定一项配置，可指定多行
 

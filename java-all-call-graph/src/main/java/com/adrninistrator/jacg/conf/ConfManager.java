@@ -74,11 +74,6 @@ public class ConfManager {
                 return null;
             }
 
-            String genUpwardsMethodsFile = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_GEN_UPWARDS_METHODS_FILE);
-            if (checkBlank(genUpwardsMethodsFile, ConfigKeyEnum.CKE_GEN_UPWARDS_METHODS_FILE, configFilePath)) {
-                return null;
-            }
-
             // 在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略
             String ignoreDupCalleeInOneCaller = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER);
             if (StringUtils.isBlank(ignoreDupCalleeInOneCaller)) {
@@ -142,7 +137,6 @@ public class ConfManager {
             CONF_INFO.setShowMethodAnnotation(Boolean.parseBoolean(showMethodAnnotation));
             CONF_INFO.setGenCombinedOutput(Boolean.parseBoolean(genCombinedOutput));
             CONF_INFO.setShowCallerLineNum(Boolean.parseBoolean(showCallerLineNum));
-            CONF_INFO.setGenUpwardsMethodsFile(Boolean.parseBoolean(genUpwardsMethodsFile));
             CONF_INFO.setIgnoreDupCalleeInOneCaller(Boolean.parseBoolean(ignoreDupCalleeInOneCaller));
             if (System.getProperty(JACGConstants.PROPERTY_WRITE_CONFIG_IN_RESULT) != null) {
                 CONF_INFO.setWriteConf(true);

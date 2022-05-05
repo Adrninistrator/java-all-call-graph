@@ -11,14 +11,14 @@ public class DC {
     public static final String CN_FULL_NAME = "full_name";
     public static final String CN_SIMPLE_NAME = "simple_name";
 
+    public static final String CA_FULL_CLASS_NAME = "full_class_name";
+    public static final String CA_ANNOTATION_NAME = "annotation_name";
+    public static final String CA_ANNOTATION_ATTRIBUTES = "annotation_attributes";
+
     public static final String MA_METHOD_HASH = "method_hash";
     public static final String MA_ANNOTATION_NAME = "annotation_name";
     public static final String MA_ANNOTATION_ATTRIBUTES = "annotation_attributes";
     public static final String MA_FULL_METHOD = "full_method";
-
-    public static final String CA_FULL_CLASS_NAME = "full_class_name";
-    public static final String CA_ANNOTATION_NAME = "annotation_name";
-    public static final String CA_ANNOTATION_ATTRIBUTES = "annotation_attributes";
 
     public static final String MC_ID = "id";
     public static final String MC_CALL_TYPE = "call_type";
@@ -35,6 +35,12 @@ public class DC {
     public static final String MC_CALLEE_METHOD_NAME = "callee_method_name";
     public static final String MC_CALLEE_FULL_CLASS_NAME = "callee_full_class_name";
     public static final String MC_CALLEE_CLASS_NAME = "callee_class_name";
+
+    public static final String MLN_METHOD_HASH = "method_hash";
+    public static final String MLN_MIN_LINE_NUMBER = "min_line_number";
+    public static final String MLN_MAX_LINE_NUMBER = "max_line_number";
+    public static final String MLN_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String MLN_FULL_METHOD = "full_method";
 
     public static final String JI_JAR_NUM = "jar_num";
     public static final String JI_JAR_TYPE = "jar_type";

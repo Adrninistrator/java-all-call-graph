@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.dto;
+package com.adrninistrator.jacg.dto.entity;
 
 /**
  * @author adrninistrator
@@ -16,13 +16,13 @@ public class MethodCallEntity {
     private String callerFullMethod;
     private String callerMethodName;
     private String callerFullClassName;
-    private String callerFullOrSimpleClassName;
+    private String callerSimpleClassName;
     private int callerLineNum;
     private String calleeMethodHash;
     private String finalCalleeFullMethod;
     private String calleeMethodName;
     private String calleeFullClassName;
-    private String calleeFullOrSimpleClassName;
+    private String calleeSimpleClassName;
 
     public Integer getId() {
         return id;
@@ -88,12 +88,12 @@ public class MethodCallEntity {
         this.callerFullClassName = callerFullClassName;
     }
 
-    public String getCallerFullOrSimpleClassName() {
-        return callerFullOrSimpleClassName;
+    public String getCallerSimpleClassName() {
+        return callerSimpleClassName;
     }
 
-    public void setCallerFullOrSimpleClassName(String callerFullOrSimpleClassName) {
-        this.callerFullOrSimpleClassName = callerFullOrSimpleClassName;
+    public void setCallerSimpleClassName(String callerSimpleClassName) {
+        this.callerSimpleClassName = callerSimpleClassName;
     }
 
     public int getCallerLineNum() {
@@ -136,11 +136,11 @@ public class MethodCallEntity {
         this.calleeFullClassName = calleeFullClassName;
     }
 
-    public String getCalleeFullOrSimpleClassName() {
-        return calleeFullOrSimpleClassName;
+    public String getCalleeSimpleClassName() {
+        return calleeSimpleClassName;
     }
 
-    public void setCalleeFullOrSimpleClassName(String calleeFullOrSimpleClassName) {
-        this.calleeFullOrSimpleClassName = calleeFullOrSimpleClassName;
+    public void setCalleeSimpleClassName(String calleeSimpleClassName) {
+        this.calleeSimpleClassName = calleeSimpleClassName;
     }
 }

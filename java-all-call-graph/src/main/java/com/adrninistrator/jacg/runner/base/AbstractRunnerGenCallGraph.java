@@ -3,12 +3,14 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.annotation.AnnotationStorage;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.MultiCallInfo;
 import com.adrninistrator.jacg.dto.NoticeCallInfo;
 import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Method;
 import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Read;
+import com.adrninistrator.jacg.dto.task.FindMethodInfo;
 import com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler;
 import com.adrninistrator.jacg.extensions.annotation_handler.DefaultAnnotationHandler;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
@@ -25,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author adrninistrator
@@ -38,6 +41,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 配置文件中指定的需要处理的任务
     protected Set<String> taskSet;
+
+    /*
+        key: 配置文件中指定的类名
+        value: 对应的简单类名或完整类名
+     */
+    protected Map<String, String> simpleClassNameMap = new HashMap<>();
 
     // 保存当前生成输出文件时的目录前缀
     protected String outputDirPrefix;
@@ -82,6 +91,16 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 保存各个方法已处理过的所有注解信息
     protected Map<String, String> methodAllAnnotationInfoMap = new HashMap<>();
 
+    /*
+        保存配置文件中指定的方法信息与生成文件名之间的映射关系
+        key: 配置文件中指定的方法信息
+        value: 生成文件名
+     */
+    protected Map<String, String> methodInConfAndFileMap = new ConcurrentHashMap<>();
+
+    // 保存已生成的过方法文件名
+    protected Map<String, Boolean> writtenFileNameMap = new ConcurrentHashMap<>();
+
     // 预检查
     @Override
     public boolean preCheck() {
@@ -99,14 +118,31 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     /**
-     * 获取简单类名
+     * 获取简单类名或完整类名
      *
      * @param className
      * @return null: 未获取到，非null: 若不存在同名类，则返回简单类名；若存在同名类，则返回完整类名
      */
     protected String getSimpleClassName(String className) {
+        String simpleClassName = simpleClassNameMap.get(className);
+        if (simpleClassName != null) {
+            return simpleClassName;
+        }
+
+        // 执行获取简单类名或完整类名
+        simpleClassName = doGetSimpleClassName(className);
+        if (simpleClassName == null) {
+            return null;
+        }
+
+        simpleClassNameMap.put(className, simpleClassName);
+        return simpleClassName;
+    }
+
+    // 执行获取简单类名或完整类名
+    protected String doGetSimpleClassName(String className) {
         if (className.contains(JACGConstants.FLAG_DOT)) {
-            // 完整类名，查找对应的简单类名
+            // 当前指定的是完整类名，查找对应的简单类名
             String sqlKey = JACGConstants.SQL_KEY_CN_QUERY_SIMPLE_CLASS;
             String sql = sqlCacheMap.get(sqlKey);
             if (sql == null) {
@@ -117,13 +153,14 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
             List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
             if (JACGUtil.isCollectionEmpty(list)) {
-                logger.error("指定的完整类名不存在，请检查 {}", className);
+                logger.error("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {} 参数 {} 中指定",
+                        className, JACGConstants.FILE_CONFIG, ConfigKeyEnum.CKE_CALL_GRAPH_JAR_LIST);
                 return null;
             }
             return (String) list.get(0);
         }
 
-        // 简单类名
+        // 当前指定的是简单类名
         String sqlKey = JACGConstants.SQL_KEY_CN_QUERY_FULL_CLASS;
         String sql = sqlCacheMap.get(sqlKey);
         if (sql == null) {
@@ -134,37 +171,13 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
         if (JACGUtil.isCollectionEmpty(list)) {
-            logger.error("指定的类名不存在，请检查是否需要使用完整类名形式 {}", className);
+            logger.error("指定的简单类名 {} 不存在，请检查，可能因为以下原因\n" +
+                            "1. 指定的类所在的jar包未在配置文件 {} 参数 {} 中指定\n" +
+                            "2. 指定的类存在同名类，需要使用完整类名形式",
+                    className, JACGConstants.FILE_CONFIG, ConfigKeyEnum.CKE_CALL_GRAPH_JAR_LIST);
             return null;
         }
         return (String) list.get(0);
-    }
-
-    // 从方法调用关系表查询指定的类是否存在
-    protected boolean checkClassNameExists(String className) {
-        /*
-            对于 select xxx limit n union all select xxx limit n 写法
-            10.0.10-MariaDB-V2.0R132D001-20170821-1540 版本允许
-            10.1.9-MariaDBV1.0R012D003-20180427-1600 版本不允许
-            因此使用 select xxx from ((select xxx limit n) union all (select xxx limit n)) as a的写法
-         */
-        String sqlKey = JACGConstants.SQL_KEY_MC_QUERY_CLASS_EXISTS;
-        String sql = sqlCacheMap.get(sqlKey);
-        if (sql == null) {
-            sql = "select class_name from ((select " + DC.MC_CALLER_CLASS_NAME + " as class_name from " + JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
-                    " where " + DC.MC_CALLER_CLASS_NAME + " = ? limit 1) union all (select " + DC.MC_CALLEE_CLASS_NAME + " as class_name " +
-                    "from " + JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
-                    " where " + DC.MC_CALLEE_CLASS_NAME + " = ? limit 1)) as az";
-            cacheSql(sqlKey, sql);
-        }
-
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className, className});
-        if (JACGUtil.isCollectionEmpty(list)) {
-            logger.warn("指定的类从调用关系表中未查询到 {}", className);
-            return false;
-        }
-
-        return true;
     }
 
     // 读取配置文件中指定的需要处理的任务
@@ -173,11 +186,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         if (JACGUtil.isCollectionEmpty(taskSet)) {
             logger.error("读取文件不存在或内容为空 {}", otherConfigFileUseSetEnum.getFileName());
             return false;
-        }
-
-        if (taskSet.size() < confInfo.getThreadNum()) {
-            logger.info("将线程数修改为需要处理的任务数 {}", taskSet.size());
-            confInfo.setThreadNum(taskSet.size());
         }
 
         return true;
@@ -559,32 +567,34 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         String[] array = getJarArray();
         for (String jarName : array) {
-            if (FileUtil.isFileExists(jarName)) {
-                String jarFilePath = FileUtil.getCanonicalPath(jarName);
-                if (jarFilePath == null) {
-                    logger.error("获取文件路径失败: {}", jarName);
-                    return true;
-                }
+            if (!FileUtil.isFileExists(jarName)) {
+                continue;
+            }
 
-                String jarPathHash = JACGUtil.genHashWithLen(jarFilePath);
-                Map<String, Object> jarInfo = jarInfoMap.get(jarPathHash);
-                if (jarInfo == null) {
+            String jarFilePath = FileUtil.getCanonicalPath(jarName);
+            if (jarFilePath == null) {
+                logger.error("获取文件路径失败: {}", jarName);
+                return true;
+            }
+
+            String jarPathHash = JACGUtil.genHashWithLen(jarFilePath);
+            Map<String, Object> jarInfo = jarInfoMap.get(jarPathHash);
+            if (jarInfo == null) {
+                String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
+                logger.error("指定的Jar包未导入数据库中，请先执行 TestRunnerWriteDb 类导入数据库\n{} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
+                        jarName, jarFullPath, JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED);
+                return true;
+            }
+
+            long lastModified = FileUtil.getFileLastModified(jarFilePath);
+            String lastModifiedStr = String.valueOf(lastModified);
+            if (!lastModifiedStr.equals(jarInfo.get(DC.JI_LAST_MODIFIED))) {
+                String jarFileHash = FileUtil.getFileMd5(jarFilePath);
+                if (!StringUtils.equals(jarFileHash, (String) jarInfo.get(DC.JI_JAR_HASH))) {
                     String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
-                    logger.error("指定的Jar包未导入数据库中，请先执行 TestRunnerWriteDb 类导入数据库\n{} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
-                            jarName, jarFullPath, JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED);
+                    logger.error("指定的Jar包文件内容有变化，请先执行 TestRunnerWriteDb 类导入数据库\n{} {} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
+                            new Date(lastModified), jarName, jarFullPath, JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED);
                     return true;
-                }
-
-                long lastModified = FileUtil.getFileLastModified(jarFilePath);
-                String lastModifiedStr = String.valueOf(lastModified);
-                if (!lastModifiedStr.equals(jarInfo.get(DC.JI_LAST_MODIFIED))) {
-                    String jarFileHash = FileUtil.getFileMd5(jarFilePath);
-                    if (!StringUtils.equals(jarFileHash, (String) jarInfo.get(DC.JI_JAR_HASH))) {
-                        String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
-                        logger.error("指定的Jar包文件内容有变化，请先执行 TestRunnerWriteDb 类导入数据库\n{} {} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
-                                new Date(lastModified), jarName, jarFullPath, JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED);
-                        return true;
-                    }
                 }
             }
         }
@@ -652,7 +662,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      */
     protected void resetPoolSize(int taskNum) {
         int currentPoolSize = confInfo.getThreadNum();
-
         int newPoolSize = Math.min(confInfo.getOriginalThreadNum(), taskNum);
 
         if (currentPoolSize >= newPoolSize) {
@@ -737,5 +746,53 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         String allAnnotationInfo = stringBuilder.toString();
         methodAllAnnotationInfoMap.put(methodHash, allAnnotationInfo);
         return allAnnotationInfo;
+    }
+
+    // 生成映射文件
+    protected void writeMappingFile() {
+        String mappingFilePath = outputDirPrefix + File.separator + JACGConstants.FILE_MAPPING_NAME;
+        logger.info("生成映射文件 {}", mappingFilePath);
+
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(mappingFilePath), StandardCharsets.UTF_8))) {
+            out.write("# 配置文件中指定的任务信息" + JACGConstants.FLAG_TAB + "生成结果文件路径" + JACGConstants.NEW_LINE);
+            for (Map.Entry<String, String> entry : methodInConfAndFileMap.entrySet()) {
+                // 以TAB作为分隔，因为key中可能存在空格
+                out.write(entry.getKey() + JACGConstants.FLAG_TAB + entry.getValue() + JACGConstants.NEW_LINE);
+            }
+        } catch (Exception e) {
+            logger.error("error ", e);
+        }
+    }
+
+    // 执行通过代码行号获取调用者方法
+    protected FindMethodInfo doFindCallerMethodByLineNumber(String className, int methodLineNum) {
+        String sqlKey = JACGConstants.SQL_KEY_MLN_QUERY_METHOD;
+        String sql = sqlCacheMap.get(sqlKey);
+        if (sql == null) {
+            sql = "select " + StringUtils.joinWith(JACGConstants.FLAG_COMMA_WITH_SPACE, DC.MLN_METHOD_HASH, DC.MLN_FULL_METHOD) +
+                    " from " + JACGConstants.TABLE_PREFIX_METHOD_LINE_NUMBER + confInfo.getAppName() +
+                    " where " + DC.MLN_SIMPLE_CLASS_NAME + " = ? and " +
+                    DC.MLN_MIN_LINE_NUMBER + " <= ? and " +
+                    DC.MLN_MAX_LINE_NUMBER + " >= ? limit 1";
+            cacheSql(sqlKey, sql);
+        }
+
+        Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{className, methodLineNum, methodLineNum});
+        if (map == null) {
+            return FindMethodInfo.genFindMethodInfoFail();
+        }
+
+        if (JACGUtil.isMapEmpty(map)) {
+            logger.warn("指定类的代码行号未查找到对应方法，请检查，可能因为以下原因\n" +
+                    "1. 指定的类所在的jar包未在配置文件 {} 参数 {} 中指定\n" +
+                    "2. 指定的方法是接口中未实现的方法\n" +
+                    "3. 指定的方法是抽象方法\n" +
+                    "{} {}", JACGConstants.FILE_CONFIG, ConfigKeyEnum.CKE_CALL_GRAPH_JAR_LIST, className, methodLineNum);
+            // 在此不生成空文件
+            return FindMethodInfo.genFindMethodInfoGenEmptyFile();
+        }
+
+        // 指定类的代码行号查找到对应方法
+        return FindMethodInfo.genFindMethodInfoSuccess((String) map.get(DC.MLN_METHOD_HASH), (String) map.get(DC.MLN_FULL_METHOD));
     }
 }

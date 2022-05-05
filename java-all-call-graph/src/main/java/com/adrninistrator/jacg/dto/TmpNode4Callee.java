@@ -20,8 +20,6 @@ public class TmpNode4Callee {
     }
 
     //
-
-
     public String getCurrentCalleeMethodHash() {
         return currentCalleeMethodHash;
     }

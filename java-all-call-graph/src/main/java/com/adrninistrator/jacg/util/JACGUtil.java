@@ -44,7 +44,7 @@ public class JACGUtil {
      * @param method 完整方法信息
      * @return
      */
-    public static String getMethodWithArgs(String method) {
+    public static String getMethodNameWithArgs(String method) {
         int indexColon = method.indexOf(JACGConstants.FLAG_COLON);
         return method.substring(indexColon + 1);
     }
@@ -68,7 +68,7 @@ public class JACGUtil {
      * @param methodName
      * @return
      */
-    public static String getSafeMethodName(String methodName) {
+    public static String getSafeFileName(String methodName) {
         return methodName.replace("<", "(")
                 .replace(">", ")");
     }

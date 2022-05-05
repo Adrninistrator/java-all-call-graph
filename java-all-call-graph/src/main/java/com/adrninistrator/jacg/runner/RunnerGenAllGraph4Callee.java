@@ -6,11 +6,12 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.dto.TmpNode4Callee;
+import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
+import com.adrninistrator.jacg.dto.task.CalleeTmpMethodInfo;
+import com.adrninistrator.jacg.dto.task.FindMethodInfo;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.FileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.jacg.util.SqlUtil;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -31,9 +31,6 @@ import java.util.*;
 public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     private static final Logger logger = LoggerFactory.getLogger(RunnerGenAllGraph4Callee.class);
-
-    // 记录是否需要处理MySQL的sql_mode
-    private boolean needHandleMySqlMode = false;
 
     static {
         runner = new RunnerGenAllGraph4Callee();
@@ -56,11 +53,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return false;
         }
 
-        if (confInfo.isGenUpwardsMethodsFile()) {
-            String dirPath = outputDirPrefix + File.separator + JACGConstants.DIR_METHODS;
-            if (!FileUtil.isDirectoryExists(dirPath)) {
-                return false;
-            }
+        String dirPath = outputDirPrefix + File.separator + JACGConstants.DIR_METHODS;
+        if (!FileUtil.isDirectoryExists(dirPath)) {
+            return false;
         }
 
         // 添加用于添加对方法上的注解进行处理的类
@@ -74,7 +69,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
     @Override
     public void operate() {
         if (!doOperate()) {
-            someTaskFail = true;
+            // 记录执行失败的任务信息
+            recordTaskFail();
             return;
         }
 
@@ -82,8 +78,14 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return;
         }
 
+        // 将输出的方法文件合并为类对应的文件
+        combineClassFile();
+
         // 将输出文件合并
         combineOutputFile(JACGConstants.COMBINE_FILE_NAME_4_CALLEE);
+
+        // 生成映射文件
+        writeMappingFile();
 
         // 打印提示信息
         printNoticeInfo();
@@ -95,245 +97,257 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return false;
         }
 
-        // 生成需要处理的类名Set
-        Set<String> classNameSet = new HashSet<>(taskSet.size());
-        for (String task : taskSet) {
-            // 获取简单类名
-            String className = getSimpleClassName(task);
-            if (className == null) {
-                return false;
-            }
-            classNameSet.add(className);
-        }
-
-        // 判断是否需要处理MySQL的sql_mode
-        if (SqlUtil.isMySQLDb(confInfo.getDbDriverName()) && !handleMySqlMode()) {
+        // 生成需要处理的任务信息
+        Map<String, CalleeTaskInfo> calleeTaskInfoMap = genCalleeTaskInfo();
+        if (JACGUtil.isMapEmpty(calleeTaskInfoMap)) {
+            logger.error("执行失败，请检查配置文件 {} 的内容", OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLEE_CLASS_NAME);
             return false;
         }
 
-        // 创建线程
-        createThreadPoolExecutor();
+        // 创建线程，不指定任务数量，因为在对类进行处理时实际需要处理的方法数无法提前知道
+        createThreadPoolExecutor(null);
 
         // 遍历需要处理的任务
-        for (String className : classNameSet) {
-            // 等待直到允许任务执行
-            wait4TPEExecute();
-
-            threadPoolExecutor.execute(() -> {
-                // 处理一条记录
-                if (!handleOneRecord(className)) {
-                    someTaskFail = true;
-                }
-            });
+        for (Map.Entry<String, CalleeTaskInfo> calleeTaskInfoEntry : calleeTaskInfoMap.entrySet()) {
+            // 处理一个被调用类
+            if (!handleOneCalleeClass(calleeTaskInfoEntry)) {
+                // 等待直到任务执行完毕
+                wait4TPEDone();
+                return false;
+            }
         }
 
         // 等待直到任务执行完毕
         wait4TPEDone();
-
         return true;
     }
 
-    private boolean handleMySqlMode() {
-        Connection connection = dbOperator.getConnection();
-        if (connection == null) {
-            return false;
-        }
-        String sqlMode = queryMySqlMode(connection, true);
-        if (sqlMode == null) {
-            return false;
-        }
+    // 生成需要处理的任务信息
+    private Map<String, CalleeTaskInfo> genCalleeTaskInfo() {
+        /*
+            当前方法返回的Map，每个键值对代表一个类
+            含义
+            key: 类名（简单类名或完整类名）
+            value: 任务信息
+         */
+        Map<String, CalleeTaskInfo> calleeTaskInfoMap = new HashMap<>();
+        // 生成需要处理的类名Set
+        for (String task : taskSet) {
+            String[] taskArray = task.split(JACGConstants.FLAG_COLON);
+            if (taskArray.length != 1 && taskArray.length != 2) {
+                logger.error("配置文件 {} 中指定的任务信息非法\n{}\n格式应为以下之一:\n" +
+                                "1. [类名] （代表生成指定类所有方法向上的调用链）\n" +
+                                "2. [类名]:[方法名] （代表生成指定类指定名称方法向上的调用链）\n" +
+                                "3. [类名]:[方法中的代码行号] （代表生成指定类指定代码行号对应方法向上的调用链）",
+                        OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLEE_CLASS_NAME, task);
+                return null;
+            }
 
-        needHandleMySqlMode = sqlMode.contains(JACGConstants.MYSQL_ONLY_FULL_GROUP_BY);
-        if (needHandleMySqlMode) {
-            logger.info("需要处理MySQL的sql_mode");
-        }
+            String className = taskArray[0];
 
-        return true;
-    }
+            // 获取简单类名
+            String simpleClassName = getSimpleClassName(className);
+            if (simpleClassName == null) {
+                return null;
+            }
 
-    /**
-     * 查询MySql的sql_mode
-     *
-     * @param connection
-     * @param closeConnection
-     * @return null: 查询失败，非null: 查询成功
-     */
-    private String queryMySqlMode(Connection connection, boolean closeConnection) {
-        String sqlKey = JACGConstants.SQL_KEY_SQL_MODE_SELECT;
-        String sql = sqlCacheMap.get(sqlKey);
-        if (sql == null) {
-            sql = "SELECT @@SESSION.sql_mode";
-            cacheSql(sqlKey, sql);
-        }
-
-        List<Object> list = dbOperator.queryListOneColumn(connection, closeConnection, sql, null);
-        if (list == null) {
-            logger.error("查询sql_mode失败");
-            return null;
-        }
-
-        if (list.isEmpty()) {
-            return "";
-        }
-
-        return (String) list.get(0);
-    }
-
-    /**
-     * 将sql_mode中的ONLY_FULL_GROUP_BY去除
-     *
-     * @param connection
-     * @param oldSqlMode
-     * @return true: 成功，false: 失败
-     */
-    private boolean setSqlModeRemoveOnlyFullGroupBy(Connection connection, String oldSqlMode) {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        String[] array = oldSqlMode.split(",");
-        for (String str : array) {
-            String strTrim = str.trim();
-
-            if (!strTrim.equals(JACGConstants.MYSQL_ONLY_FULL_GROUP_BY)) {
-                if (stringBuilder.length() > 0) {
-                    stringBuilder.append(",");
+            CalleeTaskInfo calleeTaskInfo = calleeTaskInfoMap.computeIfAbsent(simpleClassName, k -> new CalleeTaskInfo());
+            if (taskArray.length == 1) {
+                // 仅指定了类名，需要处理所有的方法
+                if (calleeTaskInfo.getMethodInfoMap() != null) {
+                    logger.warn("{} 类指定了处理指定方法，也指定了处理全部方法，对该类的全部方法都会进行处理", simpleClassName);
                 }
-                stringBuilder.append(strTrim);
+
+                calleeTaskInfo.setGenAllMethods(true);
+            } else {
+                // 除类名外还指定了方法信息，只处理指定的方法
+                if (calleeTaskInfo.isGenAllMethods()) {
+                    logger.warn("{} 类指定了处理全部方法，也指定了处理指定方法，对该类的全部方法都会进行处理", simpleClassName);
+                    continue;
+                }
+
+                Map<String, String> methodInfoMap = calleeTaskInfo.getMethodInfoMap();
+                if (methodInfoMap == null) {
+                    methodInfoMap = new HashMap<>();
+                    calleeTaskInfo.setMethodInfoMap(methodInfoMap);
+                }
+                String methodInfo = taskArray[1];
+                 /*
+                    以下put的数据：
+                    key: 配置文件中指定的任务原始文本
+                    value: 配置文件中指定的方法名或代码行号
+                  */
+                methodInfoMap.put(task, methodInfo);
+
+                if (!JACGUtil.isNumStr(methodInfo)) {
+                    // 当有指定通过方法名而不是代码行号获取方法时，设置对应标志 
+                    calleeTaskInfo.setFindMethodByName(true);
+                }
             }
         }
 
-        String newSqlMode = stringBuilder.toString();
-
-        logger.info("修改sql_mode [{}] -> [{}]", oldSqlMode, newSqlMode);
-
-        String sqlKey = JACGConstants.SQL_KEY_SQL_MODE_SET;
-        String sql = sqlCacheMap.get(sqlKey);
-        if (sql == null) {
-            sql = "SET SESSION sql_mode = ?";
-            cacheSql(sqlKey, sql);
-        }
-
-        Integer row = dbOperator.update(connection, false, sql, new Object[]{newSqlMode});
-        // 这里不用判断返回行数
-        return row != null;
+        return calleeTaskInfoMap;
     }
 
-    // 处理一条记录
-    private boolean handleOneRecord(String calleeClassName) {
-        // 确定当前类对应输出文件名，格式: 配置文件中指定的类名.txt
-        String outputFile4ClassName = outputDirPrefix + File.separator + calleeClassName + JACGConstants.EXT_TXT;
-        logger.info("当前类输出文件名 {}", outputFile4ClassName);
+    // 处理一个被调用类
+    private boolean handleOneCalleeClass(Map.Entry<String, CalleeTaskInfo> calleeTaskInfoEntry) {
+        String calleeSimpleClassName = calleeTaskInfoEntry.getKey();
+        CalleeTaskInfo calleeTaskInfo = calleeTaskInfoEntry.getValue();
 
-        // 从方法调用关系表查询指定的类是否存在
-        if (!checkClassNameExists(calleeClassName)) {
-            // 创建空文件
-            return FileUtil.createNewFile(outputFile4ClassName);
+        // 查询被调用类的全部方法信息
+        List<CalleeTmpMethodInfo> calleeTmpMethodInfoList = Collections.emptyList();
+
+        if (calleeTaskInfo.isGenAllMethods() || calleeTaskInfo.isFindMethodByName()) {
+            // 假如需要生成指定类的全部方法向上调用链，或需要根据方法名称查询方法时，需要查询被调用类的全部方法信息
+            calleeTmpMethodInfoList = queryMethodsOfCalleeClass(calleeSimpleClassName);
+            if (calleeTmpMethodInfoList == null) {
+                return false;
+            }
         }
+
+        if (calleeTaskInfo.isGenAllMethods()) {
+            // 需要生成指定类的全部方法向上调用链
+            if (calleeTmpMethodInfoList.isEmpty()) {
+                logger.error("以下类需要为所有方法生成向上方法调用链，但未查找到其他方法调用该类的方法 {}", calleeSimpleClassName);
+                return false;
+            }
+
+            for (CalleeTmpMethodInfo calleeTmpMethodInfo : calleeTmpMethodInfoList) {
+                // 处理一个被调用方法
+                handleOneCalleeMethod(calleeSimpleClassName, calleeTmpMethodInfo.getMethodHash(), calleeTmpMethodInfo.getFullMethod(), null);
+            }
+            return true;
+        }
+
+        // 生成指定类的名称或代码行号匹配的方法向上调用链
+        for (Map.Entry<String, String> methodInfoEntry : calleeTaskInfo.getMethodInfoMap().entrySet()) {
+            String origTaskText = methodInfoEntry.getKey();
+            String methodInfoInTask = methodInfoEntry.getValue();
+            if (!JACGUtil.isNumStr(methodInfoInTask)) {
+                // 通过方法名查找对应的方法并处理
+                if (!handleOneCalleeMethodByName(calleeSimpleClassName, calleeTmpMethodInfoList, origTaskText, methodInfoInTask)) {
+                    return false;
+                }
+            } else {
+                // 通过代码行号查找对应的方法并处理
+                if (!handleOneCalleeMethodByLineNumber(calleeSimpleClassName, origTaskText, methodInfoInTask)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // 查询被调用类的全部方法信息
+    private List<CalleeTmpMethodInfo> queryMethodsOfCalleeClass(String calleeSimpleClassName) {
+        List<CalleeTmpMethodInfo> calleeTmpMethodInfoList = new ArrayList<>();
 
         // 查找指定被调用类的全部方法
         String sqlKey = JACGConstants.SQL_KEY_MC_QUERY_CALLEE_ALL_METHODS;
         String sql = sqlCacheMap.get(sqlKey);
         if (sql == null) {
             sql = "select distinct(" + DC.MC_CALLEE_METHOD_HASH + ")," + DC.MC_CALLEE_FULL_METHOD + " from " +
-                    JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() + " where " + DC.MC_CALLEE_CLASS_NAME +
-                    "= ? order by " + DC.MC_CALLEE_FULL_METHOD;
+                    JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() + " where " + DC.MC_CALLEE_CLASS_NAME + " = ?";
             cacheSql(sqlKey, sql);
         }
 
-        Connection connection = dbOperator.getConnection();
-        if (connection == null) {
-            return false;
+        List<Map<String, Object>> calleeMethodList = dbOperator.queryList(sql, new Object[]{calleeSimpleClassName});
+        if (calleeMethodList == null) {
+            return null;
         }
 
-        /*
-            以下处理是因为在MySQL 5.7中，执行以下SQL语句默认会出错
-            select distinct(callee_method_hash),callee_full_method from method_call_xxx where callee_class_name= 'xxx' order by callee_method_name
-            Expression #1 of ORDER BY clause is not in SELECT list, references column 'xxxx' which is not in SELECT list; this is incompatible with DISTINCT
-            需要禁用sql_mode中的ONLY_FULL_GROUP_BY
-         */
-        if (needHandleMySqlMode) {
-            // 需要处理MySQL的sql_mode
-            String sqlMode = queryMySqlMode(connection, false);
-            if (sqlMode == null) {
-                return false;
+        if (calleeMethodList.isEmpty()) {
+            logger.warn("从方法调用关系表未找到被调用类对应方法 [{}] [{}]", sql, calleeSimpleClassName);
+            return calleeTmpMethodInfoList;
+        }
+
+        for (Map<String, Object> map : calleeMethodList) {
+            String calleeMethodHash = (String) map.get(DC.MC_CALLEE_METHOD_HASH);
+            String calleeFullMethod = (String) map.get(DC.MC_CALLEE_FULL_METHOD);
+
+            CalleeTmpMethodInfo calleeTmpMethodInfo = new CalleeTmpMethodInfo();
+            calleeTmpMethodInfo.setMethodHash(calleeMethodHash);
+            calleeTmpMethodInfo.setFullMethod(calleeFullMethod);
+            calleeTmpMethodInfo.setMethodNameAndArgs(JACGUtil.getMethodNameWithArgs(calleeFullMethod));
+            calleeTmpMethodInfoList.add(calleeTmpMethodInfo);
+        }
+
+        return calleeTmpMethodInfoList;
+    }
+
+    // 处理一个被调用方法
+    private void handleOneCalleeMethod(String calleeSimpleClassName, String calleeMethodHash, String calleeFullMethod, String origTaskText) {
+        // 等待直到允许任务执行
+        wait4TPEExecute();
+
+        threadPoolExecutor.execute(() -> {
+            try {
+                // 执行处理一个被调用方法
+                if (!doHandleOneCalleeMethod(calleeSimpleClassName, calleeMethodHash, calleeFullMethod, origTaskText)) {
+                    // 记录执行失败的任务信息
+                    recordTaskFail(origTaskText);
+                }
+            } catch (Exception e) {
+                logger.error("error {} ", origTaskText, e);
+                // 记录执行失败的任务信息
+                recordTaskFail(origTaskText);
             }
+        });
+    }
 
-            // 修改MySQL的sql_mode
-            if (sqlMode.contains(JACGConstants.MYSQL_ONLY_FULL_GROUP_BY) && !setSqlModeRemoveOnlyFullGroupBy(connection, sqlMode)) {
-                return false;
-            }
+    // 执行处理一个被调用方法
+    private boolean doHandleOneCalleeMethod(String calleeSimpleClassName, String calleeMethodHash, String calleeFullMethod, String origTaskText) {
+        String methodName = JACGUtil.getOnlyMethodName(calleeFullMethod);
+        // 生成文件名格式: [完整或简单类名]@[方法名]@[方法HASH]
+        String tmpOutputFilePath4Method = outputDirPrefix + File.separator + JACGConstants.DIR_METHODS + File.separator + calleeSimpleClassName +
+                JACGConstants.FLAG_AT + methodName + JACGConstants.FLAG_AT + calleeMethodHash + JACGConstants.EXT_TXT;
+        String outputFilePath4Method = JACGUtil.getSafeFileName(tmpOutputFilePath4Method);
+        logger.info("当前方法输出文件名 {}", outputFilePath4Method);
+
+        if (origTaskText != null) {
+            // 指定的配置文件中任务原始文本非空时，记录映射关系
+            methodInConfAndFileMap.put(origTaskText, outputFilePath4Method);
         }
 
-        List<Map<String, Object>> calleeMethodList = dbOperator.queryList(connection, false, sql, new Object[]{calleeClassName});
-        dbOperator.closeConnection(connection);
-
-        if (JACGUtil.isCollectionEmpty(calleeMethodList)) {
-            logger.warn("从方法调用关系表未找到被调用类对应方法 [{}] [{}]", sql, calleeClassName);
-            // 创建空文件
-            return FileUtil.createNewFile(outputFile4ClassName);
+        // 判断文件是否生成过
+        if (writtenFileNameMap.putIfAbsent(outputFilePath4Method, Boolean.TRUE) != null) {
+            logger.info("当前文件已生成过，不再处理 {} {} {}", origTaskText, calleeFullMethod, outputFilePath4Method);
+            return true;
         }
 
-        try (BufferedWriter out4Class = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile4ClassName),
-                StandardCharsets.UTF_8))) {
+        try (BufferedWriter out4Method = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFilePath4Method), StandardCharsets.UTF_8))) {
             if (confInfo.isWriteConf()) {
                 // 在结果文件中写入配置信息
-                out4Class.write(confInfo.toString());
-                out4Class.write(JACGConstants.NEW_LINE);
+                out4Method.write(confInfo.toString() + JACGConstants.NEW_LINE);
             }
-
-            for (Map<String, Object> calleeMethodMap : calleeMethodList) {
-                String calleeMethodHash = (String) calleeMethodMap.get(DC.MC_CALLEE_METHOD_HASH);
-                String calleeFullMethod = (String) calleeMethodMap.get(DC.MC_CALLEE_FULL_METHOD);
-
-                // 处理一个被调用方法
-                if (confInfo.isGenUpwardsMethodsFile()) {
-                    String methodName = JACGUtil.getOnlyMethodName(calleeFullMethod);
-                    String safeMethodName = JACGUtil.getSafeMethodName(methodName);
-                    // 生成文件名格式: [完整或简单类名]@[方法名]@[方法HASH]
-                    String outputFile4Method = outputDirPrefix + File.separator + JACGConstants.DIR_METHODS + File.separator + calleeClassName +
-                            JACGConstants.FLAG_AT + safeMethodName + JACGConstants.FLAG_AT + calleeMethodHash + JACGConstants.EXT_TXT;
-                    logger.info("当前方法输出文件名 {}", outputFile4Method);
-                    BufferedWriter out4Method = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile4Method),
-                            StandardCharsets.UTF_8));
-
-                    // 处理一个被调用方法，写入类及方法对应文件
-                    handleOneCalleeMethod(calleeClassName, calleeMethodHash, calleeFullMethod, out4Class, out4Method);
-
-                    IOUtils.close(out4Method);
-                } else {
-                    // 处理一个被调用方法，仅写入类对应文件
-                    handleOneCalleeMethod(calleeClassName, calleeMethodHash, calleeFullMethod, out4Class, null);
-                }
-
-                // 每个方法信息间插入一条空行
-                out4Class.write(JACGConstants.NEW_LINE);
-            }
-            return true;
+            // 记录一个被调用方法的调用链信息
+            return recordOneCalleeMethod(calleeSimpleClassName, calleeMethodHash, calleeFullMethod, out4Method);
         } catch (Exception e) {
-            logger.error("error ", e);
+            logger.error("error {} {} ", calleeSimpleClassName, outputFilePath4Method, e);
             return false;
         }
     }
 
-    // 处理一个被调用方法
-    private boolean handleOneCalleeMethod(String calleeClassName, String calleeMethodHash, String calleeFullMethod, BufferedWriter out4Class,
-                                          BufferedWriter out4Method) throws IOException {
+    // 记录一个被调用方法的调用链信息
+    private boolean recordOneCalleeMethod(String calleeClassName, String calleeMethodHash, String calleeFullMethod, BufferedWriter out4Method) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+
         // 在文件第1行写入当前方法的完整信息
-        writeData2File(calleeFullMethod, out4Class, out4Method);
-        writeData2File(JACGConstants.NEW_LINE, out4Class, out4Method);
+        stringBuilder.append(calleeFullMethod).append(JACGConstants.NEW_LINE);
 
         // 确定写入输出文件的当前调用方法信息
         String callerInfo = chooseCallerInfo(calleeClassName, calleeFullMethod);
 
         // 第2行写入当前方法的信息
-        writeData2File(genOutputPrefix(0), out4Class, out4Method);
-        writeData2File(callerInfo, out4Class, out4Method);
+        stringBuilder.append(genOutputPrefix(0)).append(callerInfo);
         // 写入方法注解
         String methodAnnotations = getMethodAnnotationInfo(calleeMethodHash);
         if (methodAnnotations != null) {
-            writeData2File(methodAnnotations, out4Class, out4Method);
+            stringBuilder.append(methodAnnotations);
         }
 
-        writeData2File(JACGConstants.NEW_LINE, out4Class, out4Method);
+        stringBuilder.append(JACGConstants.NEW_LINE);
 
         // 记录查找到的调用方法信息List
         List<Pair<String, Boolean>> callerMethodList = new ArrayList<>(JACGConstants.BATCH_SIZE);
@@ -345,22 +359,75 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         // 记录所有的调用方法
         for (Pair<String, Boolean> pair : callerMethodList) {
-            writeData2File(pair.getLeft(), out4Class, out4Method);
+            stringBuilder.append(pair.getLeft());
             if (pair.getRight()) {
                 // 对于入口方法，写入标志
-                writeData2File(JACGConstants.CALLEE_FLAG_ENTRY, out4Class, out4Method);
+                stringBuilder.append(JACGConstants.CALLEE_FLAG_ENTRY);
             }
-            writeData2File(JACGConstants.NEW_LINE, out4Class, out4Method);
+            stringBuilder.append(JACGConstants.NEW_LINE);
         }
 
+        out4Method.write(stringBuilder.toString());
         return true;
     }
 
-    private void writeData2File(String data, BufferedWriter out4Class, BufferedWriter out4Method) throws IOException {
-        out4Class.write(data);
-        if (out4Method != null) {
-            out4Method.write(data);
+    // 通过方法名查找对应的方法并处理
+    private boolean handleOneCalleeMethodByName(String calleeSimpleClassName, List<CalleeTmpMethodInfo> calleeTmpMethodInfoList, String origTaskText, String methodInfoInTask) {
+        String calleeMethodHash = null;
+        List<String> calleeFullMethodList = new ArrayList<>();
+
+        // 遍历从数据库中查找到的方法信息，查找当前指定的方法名称或参数匹配的方法
+        for (CalleeTmpMethodInfo calleeTmpMethodInfo : calleeTmpMethodInfoList) {
+            if (StringUtils.startsWith(calleeTmpMethodInfo.getMethodNameAndArgs(), methodInfoInTask)) {
+                calleeMethodHash = calleeTmpMethodInfo.getMethodHash();
+                calleeFullMethodList.add(calleeTmpMethodInfo.getFullMethod());
+            }
         }
+
+        if (calleeFullMethodList.isEmpty()) {
+            // 未查找到匹配的方法，生成空文件
+            return genEmptyFile(calleeSimpleClassName, methodInfoInTask);
+        }
+
+        if (calleeFullMethodList.size() > 1) {
+            // 查找到匹配的方法多于1个，返回处理失败
+            logger.error("根据配置文件 {} 中的方法前缀 {} 查找到的方法多于1个，请指定更精确的方法信息\n{}", OtherConfigFileUseSetEnum.OCFUSE_OUT_GRAPH_FOR_CALLEE_CLASS_NAME,
+                    origTaskText, StringUtils.join(calleeFullMethodList, "\n"));
+            return false;
+        }
+
+        // 处理一个被调用方法
+        handleOneCalleeMethod(calleeSimpleClassName, calleeMethodHash, calleeFullMethodList.get(0), origTaskText);
+        return true;
+    }
+
+    // 通过代码行号查找对应的方法并处理
+    private boolean handleOneCalleeMethodByLineNumber(String calleeSimpleClassName, String origTaskText, String methodInfoInTask) {
+        int methodLineNum = Integer.parseInt(methodInfoInTask);
+
+        // 执行通过代码行号获取调用者方法
+        FindMethodInfo findMethodInfo = doFindCallerMethodByLineNumber(calleeSimpleClassName, methodLineNum);
+        if (findMethodInfo.isError()) {
+            // 返回处理失败
+            return false;
+        } else if (findMethodInfo.isGenEmptyFile()) {
+            // 需要生成空文件
+            return genEmptyFile(calleeSimpleClassName, methodInfoInTask);
+        }
+
+        // 处理一个被调用方法
+        handleOneCalleeMethod(calleeSimpleClassName, findMethodInfo.getMethodHash(), findMethodInfo.getFullMethod(), origTaskText);
+        return true;
+    }
+
+    // 生成空文件
+    private boolean genEmptyFile(String calleeSimpleClassName, String methodInfoInTask) {
+        String tmpOutputFilePath4EmptyFile = outputDirPrefix + File.separator + JACGConstants.DIR_METHODS + File.separator + calleeSimpleClassName +
+                JACGConstants.FLAG_AT + methodInfoInTask + JACGConstants.EXT_EMPTY_TXT;
+        String outputFilePath4EmptyFile = JACGUtil.getSafeFileName(tmpOutputFilePath4EmptyFile);
+        logger.info("生成空文件 {} {} {}", calleeSimpleClassName, methodInfoInTask, outputFilePath4EmptyFile);
+        // 创建文件
+        return FileUtil.createNewFile(outputFilePath4EmptyFile);
     }
 
     /**
@@ -693,5 +760,45 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             stringBuilder.append(callerMethod).append(JACGConstants.NEW_LINE);
         }
         stringBuilder.append("```");
+    }
+
+    // 将输出的方法文件合并为类对应的文件
+    private void combineClassFile() {
+        List<File> methodOutputFileList = FileUtil.findFileInCurrentDir(outputDirPrefix + File.separator + JACGConstants.DIR_METHODS, JACGConstants.EXT_TXT);
+        if (JACGUtil.isCollectionEmpty(methodOutputFileList)) {
+            return;
+        }
+
+        String lastClassName = null;
+        List<File> combineMethodFileList = new ArrayList<>();
+        for (File methodOutputFile : methodOutputFileList) {
+            String methodOutputFileName = methodOutputFile.getName();
+            if (methodOutputFileName.endsWith(JACGConstants.EXT_EMPTY_TXT)) {
+                // 跳过空文件
+                continue;
+            }
+
+            String className = methodOutputFileName.split(JACGConstants.FLAG_AT)[0];
+            if (lastClassName != null && !className.equals(lastClassName)) {
+                // 处理到下一个类的文件，合并之前类的文件
+                doCombineClassFile(lastClassName, combineMethodFileList);
+                combineMethodFileList.clear();
+            }
+
+            combineMethodFileList.add(methodOutputFile);
+            lastClassName = className;
+        }
+
+        if (!combineMethodFileList.isEmpty()) {
+            // 合并最后一个类的文件
+            doCombineClassFile(lastClassName, combineMethodFileList);
+        }
+    }
+
+    // 执行将输出的方法文件合并为类对应的文件
+    private void doCombineClassFile(String lastClassName, List<File> combineMethodFileList) {
+        String classFilePath = outputDirPrefix + File.separator + lastClassName + JACGConstants.EXT_TXT;
+        logger.info("将以下类对应的方法文件合并为类对应的文件 {}", classFilePath);
+        FileUtil.combineTextFile(classFilePath, combineMethodFileList);
     }
 }

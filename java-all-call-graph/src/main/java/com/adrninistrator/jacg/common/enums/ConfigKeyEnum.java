@@ -14,7 +14,6 @@ public enum ConfigKeyEnum {
     CKE_SHOW_METHOD_ANNOTATION("show.method.annotation", "生成调用链时，是否显示方法注解"),
     CKE_GEN_COMBINED_OUTPUT("gen.combined.output", "生成调用链时，是否需要生成合并的文件"),
     CKE_SHOW_CALLER_LINE_NUM("show.caller.line.num", "生成调用链时，是否需要显示调用者源代码行号"),
-    CKE_GEN_UPWARDS_METHODS_FILE("gen.upwards.methods.file", "生成向上的调用链时，是否需要为每个方法生成单独的文件"),
     CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER("ignore.dup.callee.in.one.caller", "生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略"),
     CKE_DB_USE_H2("db.use.h2", "是否使用H2数据库"),
     CKE_DB_H2_FILE_PATH("db.h2.file.path", "H2数据库文件路径（仅当使用H2数据库时需要指定）"),
@@ -38,5 +37,10 @@ public enum ConfigKeyEnum {
 
     public String getDesc() {
         return desc;
+    }
+
+    @Override
+    public String toString() {
+        return key;
     }
 }

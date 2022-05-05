@@ -219,9 +219,10 @@ public class FileUtil {
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFilePath), StandardCharsets.UTF_8))) {
             for (File file : srcFileList) {
                 String fileContent = readFile2String(file);
-
-                out.write(fileContent);
-                out.write(JACGConstants.NEW_LINE);
+                if (StringUtils.isNotBlank(fileContent)) {
+                    // 仅当文件内容非空时才进行合并
+                    out.write(fileContent + JACGConstants.NEW_LINE);
+                }
             }
             return true;
         } catch (Exception e) {

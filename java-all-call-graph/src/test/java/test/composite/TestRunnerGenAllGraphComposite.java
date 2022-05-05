@@ -29,16 +29,13 @@ public class TestRunnerGenAllGraphComposite {
             for (boolean annotation : BOOLEAN_ARRAY) {
                 for (boolean combined : BOOLEAN_ARRAY) {
                     for (boolean line : BOOLEAN_ARRAY) {
-                        for (boolean methods : BOOLEAN_ARRAY) {
-                            confInfo.setCallGraphOutputDetail(outputDetailEnum.getDetail());
-                            confInfo.setShowMethodAnnotation(annotation);
-                            confInfo.setGenCombinedOutput(combined);
-                            confInfo.setShowCallerLineNum(line);
-                            confInfo.setGenUpwardsMethodsFile(methods);
+                        confInfo.setCallGraphOutputDetail(outputDetailEnum.getDetail());
+                        confInfo.setShowMethodAnnotation(annotation);
+                        confInfo.setGenCombinedOutput(combined);
+                        confInfo.setShowCallerLineNum(line);
 
-                            RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee();
-                            runnerGenAllGraph4Callee.run();
-                        }
+                        RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee();
+                        runnerGenAllGraph4Callee.run();
                     }
                 }
             }

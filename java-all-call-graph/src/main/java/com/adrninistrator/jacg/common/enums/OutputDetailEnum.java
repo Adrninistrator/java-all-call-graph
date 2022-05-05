@@ -36,4 +36,9 @@ public enum OutputDetailEnum {
         }
         return OutputDetailEnum.ODE_ILLEGAL;
     }
+
+    @Override
+    public String toString() {
+        return detail;
+    }
 }

@@ -15,7 +15,7 @@
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.1'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.2'
 ```
 
 - Maven
@@ -24,13 +24,15 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.1'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.7.1</version>
+  <version>0.7.2</version>
 </dependency>
 ```
 
-最新版本号可查看[https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph](https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph)。
+`由于在Maven中间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定java-all-call-graph依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过以下文件查看java-all-call-graph使用的依赖组件版本`[https://hub.fastgit.xyz/Adrninistrator/java-all-call-graph/blob/main/java-all-call-graph/build.gradle](https://hub.fastgit.xyz/Adrninistrator/java-all-call-graph/blob/main/java-all-call-graph/build.gradle)
 
-对应代码地址为[https://github.com/Adrninistrator/java-all-call-graph](https://github.com/Adrninistrator/java-all-call-graph)。
+java-all-call-graph最新版本号可查看[https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph](https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph)。
+
+java-all-call-graph对应代码地址为[https://github.com/Adrninistrator/java-all-call-graph](https://github.com/Adrninistrator/java-all-call-graph)。
 
 建议在需要生成方法调用链的项目中分别引入依赖，可以使每个项目使用单独的配置，不会相互影响。
 
@@ -71,7 +73,7 @@ com.adrninistrator.jacg.unzip.UnzipFile
 
 若当前Java项目存在“src/test”或“src/unit.test”目录，则将配置文件与Java文件分别释放在该目录的resources、java目录中；
 
-若当前Java项目不存在以上目录，则将上述文件释放在“~jacg-\[当前时间戳\]”目录中，之后需要手工将对应目录拷贝至test模块对应目录中。
+若当前Java项目不存在以上目录，则将上述文件释放在“~jacg-[当前时间戳]”目录中，之后需要手工将对应目录拷贝至test模块对应目录中。
 
 当目标文件不存在时，则会进行释放；若目标文件已存在，则不会覆盖。
 
@@ -178,15 +180,34 @@ test.jacg.TestRunnerGenAllGraph4Callee
 
 - c.1.1 从数据库读取Java方法调用关系
 
-TestRunnerGenAllGraph4Callee类读取配置文件`~jacg_config/o_g4callee_class_name.properties`，该文件中指定了需要生成向上完整调用链的类名；
+TestRunnerGenAllGraph4Callee类读取配置文件`~jacg_config/o_g4callee_class_name.properties`，该文件中指定了需要生成向上完整调用链的类名，或类名+方法名前缀/代码行号；
 
-类名可指定简单类名或完整类名；若存在同名类，则需要指定完整类名；
+格式如下：
+
+```
+[类名]
+[类名]:[方法名]
+[类名]:[方法名+参数]
+[类名]:[代码行号]
+```
+
+假如只指定了类名，没有指定方法名或代码行号，则处理指定类的全部方法；假如指定了方法名或代码行号，则处理指定类的对应方法
+
+[类名]可指定简单类名或完整类名；若存在同名类，则需要指定完整类名
+
+[代码行号]可指定某个方法对应的任意代码行号，如C:f1()方法代码起止行号范围为[100,203]，则可指定以上范围的任意数字代表需要处理C:f1()方法
+
+假如某个方法是接口中未实现的方法或抽象方法，则不支持指定代码行号的方式，需要指定方法前缀
 
 示例如下：
 
 ```
 Test1
 com.test.Test1
+Test1:test
+Test1:test(
+Test1:test(java.lang.String)
+Test1:234
 ```
 
 读取配置文件`~jacg_config/config.properties`中的参数：
@@ -197,11 +218,13 @@ com.test.Test1
 
 - c.1.2 将方法完整调用链（向上）写入文件
 
-对于配置文件`~jacg_config/o_g4callee_class_name.properties`中指定的类，对每个类生成一个对应的文件，文件名为“\[类名\].txt”，在某个类对应的文件中，会为对应类的每个方法生成向上完整调用链；
+对于配置文件`~jacg_config/o_g4callee_class_name.properties`中指定的类，对每个类生成一个对应的文件，文件名为“[类名].txt”，在某个类对应的文件中，会为对应类的每个方法生成向上完整调用链；
 
-以上文件名示例为“TestClass1.txt”；
+以上文件名示例为“TestClass1.txt”
 
-每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“~jacg_o_ee/\[yyyyMMdd-HHmmss.SSS\]”；
+每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“~jacg_o_ee/[yyyyMMdd-HHmmss.SSS]
+
+生成向上的调用链时，会为~jacg_config/o_g4callee_class_name.properties中指定的每个类的每个方法单独生成一个文件，保存在“~jacg_o_ee/[yyyyMMdd-HHmmss.SSS]/methods”目录中，文件名格式为“[类名]@[方法名]@[完整方法名HASH+长度].txt”
 
 读取配置文件`~jacg_config/config.properties`中的参数：
 
@@ -213,13 +236,32 @@ com.test.Test1
 |2|com.test.Test1.func1|
 |3|Test1.func1|
 
-`show.method.annotation`：调用链中是否显示方法上的注解开关，值为true/false；当开关为开时，会显示当前方法上的全部注解的完整类名，格式为“\[方法信息\]@注解1@注解2...”
+`show.method.annotation`：调用链中是否显示方法上的注解开关，值为true/false；当开关为开时，会显示当前方法上的全部注解的完整类名，格式为“[方法信息]@注解1@注解2...”
 
 `gen.combined.output`：是否生成调用链的合并文件开关，值为true/false；当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“~all-4callee.txt”
 
 `show.caller.line.num`：生成调用链时，是否需要显示调用者源代码行号开关，值为true/false；当开关为开时，会在向上的调用链每行后部显示当前调用者类名，及调用者方法对应的源代码行号，如“(TestClass:39)”
 
-`gen.upwards.methods.file`：生成向上的调用链时，是否需要为每个方法生成单独的文件开关，值为true/false；当开关为开时，会为~jacg_config/o_g4callee_class_name.properties中指定的每个类的每个方法单独生成一个文件，保存在“~jacg_o_ee/\[yyyyMMdd-HHmmss.SSS\]/methods”目录中，文件名格式为“\[类名\]@\[方法名\]@\[完整方法名HASH+长度\].txt”
+#### 1.3.4.1. 生成配置文件中的任务信息与结果文件的映射关系
+
+每次生成方法调用链后，会在本次生成的目录中创建~mapping.txt文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
+
+该文件内容包含两列，以“\t”进行分隔，第1列为配置文件中指定的任务信息，第2列为生成结果文件路径，内容如下所示：
+
+```
+# 配置文件中指定的任务信息	生成结果文件路径
+DbOperator:batchInsert(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
+DbOperator:getInstance(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@getInstance@Fg85cQ0J0brkEXpMPCoHUA#037.txt
+DbOperator:268	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
+DbOperator:close(java.sql.Connection,java.sql.PreparedStatement)	~jacg_o_ee\20220505-211209.427\methods\DbOperator@close@9e5dsbPVD8648nV8on9Efw#05f.txt
+
+RunnerGenAllGraph4Callee:101 101-101	~jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043@101-101.txt
+RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043.txt
+```
+
+以上文件仅包含成功生成了调用链的任务及结果文件信息
+
+假如在生成向上方法调用链时，在配置文件中指定了生成某个类的全部方法的调用链，也不会出现在以上文件中
 
 ### 1.3.5. 生成指定方法向下完整调用链
 
@@ -241,11 +283,23 @@ test.jacg.TestRunnerGenAllGraph4Caller
 
 - c.2.1 从数据库读取Java方法调用关系
 
-TestRunnerGenAllGraph4Caller类读取配置文件`~jacg_config/o_g4caller_entry_method.properties`，该文件中指定了需要生成向下完整调用链的类名与方法名前缀，格式为\[类名\]:\[方法名\] \[起始代码行号\]-\[结束代码行号\]，或\[类名\]:\[方法名+参数\] \[起始代码行号\]-\[结束代码行号\]；
+TestRunnerGenAllGraph4Caller类读取配置文件`~jacg_config/o_g4caller_entry_method.properties`，该文件中指定了需要生成向下完整调用链的类名+方法名前缀/代码行号，可指定起始代码行号、结束代码行号
 
-\[起始代码行号\]-\[结束代码行号\]为可选参数，若不指定则输出指定的整个方法向下的方法完整调用链，若指定则输出方法指定行号范围内向下的方法完整调用链，即 >= 起始代码行号 且 <= 结束代码行号的范围；
+格式如下所示：
 
-类名可指定简单类名或完整类名；若存在同名类，则需要指定完整类名；
+```
+[类名]:[方法名] [起始代码行号]-[结束代码行号]
+[类名]:[方法名+参数] [起始代码行号]-[结束代码行号]
+[类名]:[代码行号] [起始代码行号]-[结束代码行号]
+```
+
+[类名]可指定简单类名或完整类名；若存在同名类，则需要指定完整类名
+
+若存在同名方法，则需要指定方法参数以区分，或者在o_g4caller_entry_method_ignore_prefix.properties中指定需要忽略的方法前缀
+
+[起始代码行号]-[结束代码行号]为可选参数，若不指定则输出指定的整个方法向下的方法完整调用链；若指定则输出方法指定行号范围内向下的方法完整调用链，即 >= 起始代码行号 且 <= 结束代码行号的范围
+
+[代码行号]可指定某个方法对应的任意代码行号，如C:f1()方法代码起止行号范围为[100,203]，则可指定以上范围的任意数字代表需要处理C:f1()方法
 
 示例如下：
 
@@ -256,6 +310,8 @@ Test1:func1(java.lang.String)
 com.test.Test1:func1 395-1358
 com.test.Test1:func1(
 com.test.Test1:func1(java.lang.String)
+Test1:139
+Test1:139 139-492
 ```
 
 若`~jacg_config/o_g4caller_entry_method.properties`配置文件中指定的方法前缀对应多个方法，则可在`~jacg_config/o_g4caller_entry_method_ignore_prefix.properties`配置文件中指定需要忽略的方法前缀；
@@ -278,19 +334,21 @@ func1(java.lang.String)
 
 - c.2.2 将方法完整调用链（向下）写入文件
 
-对于配置文件`~jacg_config/o_g4caller_entry_method.properties`中指定的方法，对每个方法生成一个对应的文件，文件名为“\[类名\]@\[方法名\]@\[完整方法名HASH+长度\].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048.txt”；
+对于配置文件`~jacg_config/o_g4caller_entry_method.properties`中指定的方法，对每个方法生成一个对应的文件，文件名为“[类名]@[方法名]@[完整方法名HASH+长度].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048.txt”；
 
-若某个方法生成向下的完整调用链时指定了代码行号范围，则对应文件名为“\[类名\]@\[方法名\]@\[完整方法名HASH+长度\]@\[起始代码行号\]-\[结束代码行号\].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048@135-395.txt”；
+若某个方法生成向下的完整调用链时指定了代码行号范围，则对应文件名为“[类名]@[方法名]@[完整方法名HASH+长度]@[起始代码行号]-[结束代码行号].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048@135-395.txt”；
 
-每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“~jacg_o_er/\[yyyyMMdd-HHmmss.SSS\]”；
+每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“~jacg_o_er/[yyyyMMdd-HHmmss.SSS]”；
 
 读取配置文件`~jacg_config/config.properties`中的参数：
 
 `gen.combined.output`：是否生成调用链的合并文件开关，值为true/false；当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“~all-4caller.txt”
 
-`show.caller.line.num`：生成调用链时，是否需要显示调用者源代码行号开关，值为true/false；当开关为开时，会在向下的调用链每行前部显示当前调用者类名，及调用者方法对应的源代码行号，如“\[TestClass:39\]”
+`show.caller.line.num`：生成调用链时，是否需要显示调用者源代码行号开关，值为true/false；当开关为开时，会在向下的调用链每行前部显示当前调用者类名，及调用者方法对应的源代码行号，如“[TestClass:39]”
 
 以下参数说明略：call.graph.output.detail、show.method.annotation。
+
+假如某个接口或抽象类存在多个实现类，当调用了以上接口或抽象类方法时，会在当前结果目录中生成名称中包含了接口或抽象类的目录，其中的文件保存了相关实现类方法的调用链
 
 #### 1.3.5.2. 忽略特定的调用关系
 
@@ -331,6 +389,10 @@ func1(
 func1()
 func1(java.lang.String)
 ```
+
+#### 1.3.5.3. 生成配置文件中的任务信息与结果文件的映射关系
+
+见前文
 
 ## 1.4. 使用命令行方式执行
 

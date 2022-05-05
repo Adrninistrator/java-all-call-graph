@@ -88,30 +88,15 @@ list.stream().map(TestDto1::getStr).collect(Collectors.toList());
 
 |表名前缀|注释|作用|
 |---|---|---|
-|class\_annotation\_|类上的注解信息表||
-|class\_name\_|类名信息表|保存相关类的完整类名及简单类名|
-|extended\_data\_|自定义数据表||
-|jar\_info\_|jar包信息表|保存用于解析方法调用关系的jar包信息|
-|manual\_add\_extended\_data\_|人工添加的自定义数据表||
-|method\_annotation\_|方法上的注解信息表||
-|method\_call\_|方法调用关系表|保存各方法之间调用信息|
+|class_annotation_|类上的注解信息表||
+|class_name_|类名信息表|保存相关类的完整类名及简单类名|
+|extended_data_|自定义数据表||
+|jar_info_|jar包信息表|保存用于解析方法调用关系的jar包信息|
+|manual_add_extended_data_|人工添加的自定义数据表||
+|method_annotation_|方法上的注解信息表||
+|method_call_|方法调用关系表|保存各方法之间调用信息|
+|method_line_number_|方法代码行号信息表|保存各方法的起始代码行号|
 
 上述数据库表在创建时使用表名前缀加上配置文件`~jacg_config/config.properties`中的`app.name`参数值。
 
 本工具会主要从方法调用关系表中逐级查询数据，生成完整的方法调用链。
-
-- 禁用sql_mode中的ONLY_FULL_GROUP_BY
-
-在MySQL 5.7中，执行类似以下SQL语句时，使用默认配置会出现以下报错：
-
-```sql
-select distinct(callee_method_hash),callee_full_method from method_call_xxx where callee_class_name= 'xxx' order by callee_method_name
-```
-
-```
-Expression #1 of ORDER BY clause is not in SELECT list, references column 'xxxx' which is not in SELECT list; this is incompatible with DISTINCT
-```
-
-说明可见[https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html](https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html)。
-
-为了使MySQL支持以上查询语句，需要禁用sql_mode中的ONLY_FULL_GROUP_BY，本工具会在查询时自动禁用。

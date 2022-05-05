@@ -247,9 +247,7 @@ public class FindKeywordCallGraph {
                 try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFilePath), StandardCharsets.UTF_8))) {
                     if (!NO_RESULT.equals(data)) {
                         // 查找到结果时写入文件，未查找到时创建空文件
-                        out.write(headerInfo);
-                        out.write(JACGConstants.NEW_LINE);
-                        out.write(data);
+                        out.write(headerInfo + JACGConstants.NEW_LINE + data);
                     }
                 } catch (Exception e) {
                     logger.error("error ", e);
@@ -285,8 +283,9 @@ public class FindKeywordCallGraph {
             } else {
                 // 文件
                 String filePath = file.getPath();
-                if (filePath.endsWith(JACGConstants.EXT_TXT) && !file.getName().startsWith(JACGConstants.COMBINE_FILE_NAME_PREFIX)) {
-                    // 跳过合并文件
+                if (filePath.endsWith(JACGConstants.EXT_TXT) &&
+                        !StringUtils.startsWithAny(file.getName(), JACGConstants.COMBINE_FILE_NAME_PREFIX, JACGConstants.FILE_MAPPING_NAME)) {
+                    // 跳过合并文件，跳过映射文件
                     subDirPathSet.add(dirPath);
                     subFilePathList.add(filePath);
                 }

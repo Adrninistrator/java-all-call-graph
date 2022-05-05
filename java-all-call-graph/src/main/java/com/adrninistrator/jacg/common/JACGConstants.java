@@ -10,19 +10,20 @@ public class JACGConstants {
 
     public static final String[] TABLE_COLUMNS_CLASS_NAME = new String[]{
             DC.CN_FULL_NAME,
-            DC.CN_SIMPLE_NAME};
-
-    public static final String[] TABLE_COLUMNS_METHOD_ANNOTATION = new String[]{
-            DC.MA_METHOD_HASH,
-            DC.MA_ANNOTATION_NAME,
-            DC.MA_ANNOTATION_ATTRIBUTES,
-            DC.MA_FULL_METHOD,
+            DC.CN_SIMPLE_NAME
     };
 
     public static final String[] TABLE_COLUMNS_CLASS_ANNOTATION = new String[]{
             DC.CA_FULL_CLASS_NAME,
             DC.CA_ANNOTATION_NAME,
-            DC.CA_ANNOTATION_ATTRIBUTES,
+            DC.CA_ANNOTATION_ATTRIBUTES
+    };
+
+    public static final String[] TABLE_COLUMNS_METHOD_ANNOTATION = new String[]{
+            DC.MA_METHOD_HASH,
+            DC.MA_ANNOTATION_NAME,
+            DC.MA_ANNOTATION_ATTRIBUTES,
+            DC.MA_FULL_METHOD
     };
 
     public static final String[] TABLE_COLUMNS_METHOD_CALL = new String[]{
@@ -41,6 +42,14 @@ public class JACGConstants {
             DC.MC_CALLEE_METHOD_NAME,
             DC.MC_CALLEE_FULL_CLASS_NAME,
             DC.MC_CALLEE_CLASS_NAME
+    };
+
+    public static final String[] TABLE_COLUMNS_METHOD_LINE_NUMBER = new String[]{
+            DC.MLN_METHOD_HASH,
+            DC.MLN_SIMPLE_CLASS_NAME,
+            DC.MLN_MIN_LINE_NUMBER,
+            DC.MLN_MAX_LINE_NUMBER,
+            DC.MLN_FULL_METHOD
     };
 
     public static final String[] TABLE_COLUMNS_JAR_INFO = new String[]{
@@ -78,12 +87,15 @@ public class JACGConstants {
     public static final String FILE_CONFIG = "config.properties";
 
     public static final String FILE_SQL_CLASS_NAME = "class_name.sql";
-    public static final String FILE_SQL_METHOD_ANNOTATION = "method_annotation.sql";
     public static final String FILE_SQL_CLASS_ANNOTATION = "class_annotation.sql";
+    public static final String FILE_SQL_METHOD_ANNOTATION = "method_annotation.sql";
     public static final String FILE_SQL_METHOD_CALL = "method_call.sql";
+    public static final String FILE_SQL_METHOD_LINE_NUMBER = "method_line_number.sql";
     public static final String FILE_SQL_JAR_INFO = "jar_info.sql";
     public static final String FILE_SQL_EXTENDED_DATA = "extended_data.sql";
     public static final String FILE_SQL_MANUAL_ADD_EXTENDED_DATA = "manual_add_extended_data.sql";
+
+    public static final String FILE_MAPPING_NAME = "~mapping.txt";
 
     public static final String APPNAME_IN_SQL = "{appName}";
 
@@ -95,7 +107,6 @@ public class JACGConstants {
     public static final String SQL_KEY_CN_QUERY_FULL_CLASS = "cn_query_full_class";
     public static final String SQL_KEY_CN_UPDATE_SIMPLE_2_FULL = "cn_update_simple_2_full";
 
-    public static final String SQL_KEY_MC_QUERY_CLASS_EXISTS = "mc_query_class_exists";
     public static final String SQL_KEY_MC_QUERY_CALLER_FULL_CLASS = "mc_query_caller_full_class";
     public static final String SQL_KEY_MC_QUERY_TOP_METHOD = "mc_query_top_method";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLEE = "mc_query_one_callee";
@@ -109,6 +120,8 @@ public class JACGConstants {
     public static final String SQL_KEY_MC_QUERY_CALLEE_BY_ID = "mc_query_callee_by_id";
     public static final String SQL_KEY_MC_QUERY_IMPL_METHODS = "mc_query_impl_methods";
 
+    public static final String SQL_KEY_MLN_QUERY_METHOD = "mln_query_method";
+
     public static final String SQL_KEY_JI_QUERY_JAR_INFO = "ji_query_jar_info";
 
     public static final String SQL_KEY_ED_QUERY_EXTENDED_DATA = "ed_query_extended_data";
@@ -117,14 +130,12 @@ public class JACGConstants {
     public static final String SQL_KEY_MAED_QUERY_IGNORE_CALLER = "ed_query_MAED_ignore_caller";
 
     public static final String SQL_KEY_INSERT_CLASS_NAME = "insert_class_name";
-    public static final String SQL_KEY_INSERT_METHOD_ANNOTATION = "insert_method_annotation";
     public static final String SQL_KEY_INSERT_CLASS_ANNOTATION = "insert_class_annotation";
+    public static final String SQL_KEY_INSERT_METHOD_ANNOTATION = "insert_method_annotation";
     public static final String SQL_KEY_INSERT_METHOD_CALL = "insert_method_call";
+    public static final String SQL_KEY_INSERT_METHOD_LINE_NUMBER = "insert_method_line_number";
     public static final String SQL_KEY_INSERT_JAR_INFO = "insert_jar_info";
     public static final String SQL_KEY_INSERT_EXTENDED_DATA = "insert_extended_data";
-
-    public static final String SQL_KEY_SQL_MODE_SELECT = "sql_mode_select";
-    public static final String SQL_KEY_SQL_MODE_SET = "sql_mode_set";
 
     public static final String SQL_VALUE_MAED_CALLER_FULL_METHOD_ALL = "*";
 
@@ -147,6 +158,7 @@ public class JACGConstants {
     public static final String FLAG_COMMA_WITH_SPACE = ", ";
 
     public static final String EXT_TXT = ".txt";
+    public static final String EXT_EMPTY_TXT = "-empty" + EXT_TXT;
     public static final String EXT_MD = ".md";
 
     public static final String NEW_LINE = "\n";
@@ -159,6 +171,7 @@ public class JACGConstants {
     public static final String TABLE_PREFIX_METHOD_ANNOTATION = "method_annotation_";
     public static final String TABLE_PREFIX_CLASS_ANNOTATION = "class_annotation_";
     public static final String TABLE_PREFIX_METHOD_CALL = "method_call_";
+    public static final String TABLE_PREFIX_METHOD_LINE_NUMBER = "method_line_number_";
     public static final String TABLE_PREFIX_JAR_INFO = "jar_info_";
     public static final String TABLE_PREFIX_EXTENDED_DATA = "extended_data_";
     public static final String TABLE_PREFIX_MANUAL_ADD_EXTENDED_DATA = "manual_add_extended_data_";
@@ -169,9 +182,6 @@ public class JACGConstants {
     public static final String COMBINE_FILE_NAME_4_CALLEE = "-4callee";
     public static final String COMBINE_FILE_NAME_4_CALLER = "-4caller";
 
-    public static final int THREAD_POOL_MAX_QUEUE_SIZE = 100;
-    public static final int THREAD_POOL_WAIT_QUEUE_SIZE = 80;
-
     public static final String CALLEE_FLAG_ENTRY = FLAG_TAB + "!entry!";
     public static final String CALL_FLAG_CYCLE = FLAG_TAB + "!cycle[%d]!";
     public static final String CALL_FLAG_EXTENDED_DATA_NO_TAB = "!ext_data!";
@@ -181,7 +191,6 @@ public class JACGConstants {
 
     public static final String MYSQL_FLAG = "mysql";
     public static final String MYSQL_REWRITEBATCHEDSTATEMENTS = "rewriteBatchedStatements=true";
-    public static final String MYSQL_ONLY_FULL_GROUP_BY = "ONLY_FULL_GROUP_BY";
 
     public static final int METHOD_CALL_ID_START = 0;
 
@@ -205,8 +214,6 @@ public class JACGConstants {
     public static final int LINE_NUM_NONE = -1;
 
     public static final String DATA_TYPE_JUMP_MULTI_IMPL = "JUMP_MULTI_IMPL";
-
-    public static final String EMPTY_FILE_FLAG = "-empty";
 
     public static final String H2_PROTOCOL = "jdbc:h2:file:";
     public static final String H2_SCHEMA = "jacg";

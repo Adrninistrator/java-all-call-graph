@@ -26,7 +26,6 @@ public abstract class TestRunByCodeBase {
         ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_SHOW_METHOD_ANNOTATION, Boolean.TRUE.toString());
         ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_GEN_COMBINED_OUTPUT, Boolean.TRUE.toString());
         ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_SHOW_CALLER_LINE_NUM, Boolean.TRUE.toString());
-        ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_GEN_UPWARDS_METHODS_FILE, Boolean.TRUE.toString());
         ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
 
         ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_DB_USE_H2, Boolean.TRUE.toString());

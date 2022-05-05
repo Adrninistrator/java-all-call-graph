@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
 import com.adrninistrator.jacg.util.FileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,8 @@ import java.io.File;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -41,8 +44,14 @@ public abstract class AbstractRunner {
     // 预编译SQL语句缓存
     protected Map<String, String> sqlCacheMap = new ConcurrentHashMap<>();
 
-    // 有任务执行失败
+    // 任务执行失败标志
     protected boolean someTaskFail = false;
+
+    // 记录执行失败的任务信息
+    protected List<String> failTaskList = new ArrayList<>();
+
+    // 任务队列最大长度
+    protected int taskQueueMaxSize;
 
     public static void main(String[] args) {
         runner.run();
@@ -108,7 +117,7 @@ public abstract class AbstractRunner {
 
     protected void beforeExit() {
         if (someTaskFail) {
-            logger.error("有任务执行失败，请检查");
+            logger.error("有任务执行失败，请检查\n{}", StringUtils.join(failTaskList, "\n"));
         } else {
             logger.info("任务执行完毕");
         }
@@ -126,16 +135,28 @@ public abstract class AbstractRunner {
         }
     }
 
-    // 创建线程池
-    protected void createThreadPoolExecutor() {
-        threadPoolExecutor = new ThreadPoolExecutor(confInfo.getThreadNum(), confInfo.getThreadNum(), 30, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(JACGConstants.THREAD_POOL_MAX_QUEUE_SIZE), new ThreadFactory4TPE("worker"));
+    /**
+     * 创建线程池
+     *
+     * @param taskNum 任务数量，非空时尝试根据任务数量调中实际创建的线程数
+     */
+    protected void createThreadPoolExecutor(Integer taskNum) {
+        if (taskNum != null && taskNum < confInfo.getThreadNum()) {
+            // 任务数量比配置文件中指定的线程数少，则调小实际创建的线程数
+            logger.info("将线程数修改为需要处理的任务数 {}", taskNum);
+            confInfo.setThreadNum(taskNum);
+        }
+
+        // 任务队列最大长度，设置为线程数2倍
+        taskQueueMaxSize = confInfo.getThreadNum() * 2;
+        threadPoolExecutor = new ThreadPoolExecutor(confInfo.getThreadNum(), confInfo.getThreadNum(), 10, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(taskQueueMaxSize), new ThreadFactory4TPE("jacg_worker"));
     }
 
     // 等待直到允许任务执行
     protected void wait4TPEExecute() {
         while (true) {
-            if (threadPoolExecutor.getQueue().size() < JACGConstants.THREAD_POOL_WAIT_QUEUE_SIZE) {
+            if (threadPoolExecutor.getQueue().size() < taskQueueMaxSize) {
                 return;
             }
             logger.debug("wait4TPEExecute ...");
@@ -179,6 +200,20 @@ public abstract class AbstractRunner {
         } catch (Exception e) {
             logger.error("检查H2数据库文件是否可以写入失败 {} ", FileUtil.getCanonicalPath(h2DbFile), e);
             return false;
+        }
+    }
+
+    // 记录执行失败
+    protected void recordTaskFail() {
+        someTaskFail = true;
+    }
+
+    // 记录执行失败的任务信息
+    protected void recordTaskFail(String taskInfo) {
+        someTaskFail = true;
+
+        synchronized (AbstractRunner.class) {
+            failTaskList.add(taskInfo);
         }
     }
 }

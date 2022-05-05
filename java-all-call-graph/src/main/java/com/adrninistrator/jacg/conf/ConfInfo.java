@@ -26,8 +26,6 @@ public class ConfInfo {
 
     private boolean showCallerLineNum;
 
-    private boolean genUpwardsMethodsFile;
-
     private boolean ignoreDupCalleeInOneCaller;
 
     private boolean dbUseH2;
@@ -56,7 +54,6 @@ public class ConfInfo {
                 ", showMethodAnnotation=" + showMethodAnnotation +
                 ", genCombinedOutput=" + genCombinedOutput +
                 ", showCallerLineNum=" + showCallerLineNum +
-                ", genUpwardsMethodsFile=" + genUpwardsMethodsFile +
                 ", ignoreDupCalleeInOneCaller=" + ignoreDupCalleeInOneCaller +
                 ", dbUseH2=" + dbUseH2 +
                 ", dbH2FilePath='" + dbH2FilePath + '\'' +
@@ -139,14 +136,6 @@ public class ConfInfo {
 
     public void setShowCallerLineNum(boolean showCallerLineNum) {
         this.showCallerLineNum = showCallerLineNum;
-    }
-
-    public boolean isGenUpwardsMethodsFile() {
-        return genUpwardsMethodsFile;
-    }
-
-    public void setGenUpwardsMethodsFile(boolean genUpwardsMethodsFile) {
-        this.genUpwardsMethodsFile = genUpwardsMethodsFile;
     }
 
     public boolean isIgnoreDupCalleeInOneCaller() {

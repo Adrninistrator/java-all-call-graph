@@ -114,8 +114,7 @@ public abstract class AbstractFindMethodCodeParser implements CustomCodeParserIn
 
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(getResultFileName()), StandardCharsets.UTF_8))) {
             for (String childClassMethod : childClassMethodList) {
-                out.write(childClassMethod);
-                out.write(JACGConstants.NEW_LINE);
+                out.write(childClassMethod + JACGConstants.NEW_LINE);
             }
         } catch (Exception e) {
             logger.error("error ", e);

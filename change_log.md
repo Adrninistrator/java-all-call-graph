@@ -170,3 +170,77 @@ ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWO
 - 支持人工添加缺失的方法调用关系（定制化代码开发）
 
 请查看[extensions.md](extensions.md)，搜索“人工添加缺失的方法调用关系（定制化代码开发）”
+
+## 1.5. (0.7.2)
+
+### 1.5.1. 增加的配置文件
+
+|文件路径|文件作用|
+|---|---|
+|resources/~jacg_sql/method_line_number.sql|方法代码行号信息表|
+
+### 1.5.2. 支持指定方法名称生成向上方法调用链
+
+在`~jacg_config/o_g4callee_class_name.properties`配置文件中，支持指定类名+方法名前缀，代表需要处理指定类的对应方法
+
+格式如下：
+
+```
+[类名]:[方法名]
+[类名]:[方法名+参数]
+```
+
+示例如下：
+
+```
+Test1:test
+Test1:test(
+Test1:test(java.lang.String)
+```
+
+配置文件`~jacg_config/config.properties`中的参数`gen.upwards.methods.file`不再使用
+
+### 1.5.3. 支持指定代码行号生成向上方法调用链
+
+在`~jacg_config/o_g4callee_class_name.properties`配置文件中，支持指定类名+代码行号，代表需要处理指定类的对应方法
+
+格式如下：
+
+```
+[类名]:[代码行号]
+```
+
+[代码行号]可指定某个方法对应的任意代码行号，如C:f1()方法代码起止行号范围为[100,203]，则可指定以上范围的任意数字代表需要处理C:f1()方法
+
+示例如下：
+
+```
+Test1:234
+```
+
+### 1.5.4. 支持指定代码行号生成向下方法调用链
+
+在`~jacg_config/o_g4caller_entry_method.properties`配置文件中，支持指定类名+代码行号，代表需要处理指定类的对应方法
+
+说明同上
+
+### 1.5.5. 生成配置文件中的任务信息与结果文件的映射关系
+
+每次生成方法调用链后，会在本次生成的目录中创建~mapping.txt文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
+
+该文件内容包含两列，以“\t”进行分隔，第1列为配置文件中指定的任务信息，第2列为生成结果文件路径，内容如下所示：
+
+```
+# 配置文件中指定的任务信息	生成结果文件路径
+DbOperator:batchInsert(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
+DbOperator:getInstance(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@getInstance@Fg85cQ0J0brkEXpMPCoHUA#037.txt
+DbOperator:268	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
+DbOperator:close(java.sql.Connection,java.sql.PreparedStatement)	~jacg_o_ee\20220505-211209.427\methods\DbOperator@close@9e5dsbPVD8648nV8on9Efw#05f.txt
+
+RunnerGenAllGraph4Callee:101 101-101	~jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043@101-101.txt
+RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043.txt
+```
+
+以上文件仅包含成功生成了调用链的任务及结果文件信息
+
+假如在生成向上方法调用链时，在配置文件中指定了生成某个类的全部方法的调用链，也不会出现在以上文件中

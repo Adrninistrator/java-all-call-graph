@@ -1,11 +1,11 @@
-package com.adrninistrator.jacg.dto;
+package com.adrninistrator.jacg.dto.entity;
 
 /**
  * @author adrninistrator
  * @date 2022/2/8
  * @description:
  */
-public class JarInfo {
+public class JarInfoEntity {
 
     // jar包文件路径
     private String jarFilePath;
