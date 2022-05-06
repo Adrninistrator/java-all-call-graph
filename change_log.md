@@ -171,7 +171,7 @@ ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWO
 
 请查看[extensions.md](extensions.md)，搜索“人工添加缺失的方法调用关系（定制化代码开发）”
 
-## 1.5. (0.7.2)
+## 1.5. (0.7.3)
 
 ### 1.5.1. 增加的配置文件
 
