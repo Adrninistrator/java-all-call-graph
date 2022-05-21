@@ -244,3 +244,7 @@ RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGr
 以上文件仅包含成功生成了调用链的任务及结果文件信息
 
 假如在生成向上方法调用链时，在配置文件中指定了生成某个类的全部方法的调用链，也不会出现在以上文件中
+
+## 1.6. （0.7.4）
+
+生成向下完整方法调用链的配置文件`~jacg_config/o_g4caller_entry_method.properties`中，支持指定类名，代表需要处理对应类的所有方法

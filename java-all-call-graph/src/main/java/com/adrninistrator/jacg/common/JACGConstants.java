@@ -112,6 +112,7 @@ public class JACGConstants {
     public static final String SQL_KEY_MC_QUERY_ONE_CALLEE = "mc_query_one_callee";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLEE_CHECK_LINE_NUM = "mc_query_one_callee_cln";
     public static final String SQL_KEY_MC_QUERY_CALLEE_ALL_METHODS = "mc_query_callee_all_methods";
+    public static final String SQL_KEY_MC_QUERY_CALLER_ALL_METHODS = "mc_query_caller_all_methods";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLER1 = "mc_query_one_caller1";
     public static final String SQL_KEY_MC_QUERY_ONE_CALLER2 = "mc_query_one_caller2";
     public static final String SQL_KEY_MC_QUERY_NOTICE_INFO = "mc_query_notice_info";

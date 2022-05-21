@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.dto;
+package com.adrninistrator.jacg.dto.notice;
 
 /**
  * @author adrninistrator

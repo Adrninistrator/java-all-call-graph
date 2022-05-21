@@ -16,7 +16,7 @@ public class LongConstantExtractor implements ConstantExtractorInterface {
             return null;
         }
 
-        // String常量
+        // Long常量
         LDC2_W ldc2W = (LDC2_W) instruction;
         Object o = ldc2W.getValue(methodGen.getConstantPool());
         if (!(o instanceof Long)) {

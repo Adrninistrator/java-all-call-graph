@@ -5,7 +5,7 @@ import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
-import com.adrninistrator.jacg.dto.TmpNode4Callee;
+import com.adrninistrator.jacg.dto.node.TmpNode4Callee;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.task.CalleeTmpMethodInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodInfo;

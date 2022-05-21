@@ -15,7 +15,7 @@
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.3'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.4'
 ```
 
 - Maven
@@ -24,7 +24,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.3'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.7.3</version>
+  <version>0.7.4</version>
 </dependency>
 ```
 
@@ -288,10 +288,13 @@ TestRunnerGenAllGraph4Caller类读取配置文件`~jacg_config/o_g4caller_entry_
 格式如下所示：
 
 ```
+[类名]
 [类名]:[方法名] [起始代码行号]-[结束代码行号]
 [类名]:[方法名+参数] [起始代码行号]-[结束代码行号]
 [类名]:[代码行号] [起始代码行号]-[结束代码行号]
 ```
+
+`假如仅指定了[类名]，则会处理对应类的所有方法`
 
 [类名]可指定简单类名或完整类名；若存在同名类，则需要指定完整类名
 

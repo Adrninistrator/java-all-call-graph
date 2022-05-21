@@ -41,24 +41,24 @@ public class JACGUtil {
     /**
      * 从完整方法信息中获取方法名+参数（去掉类名）
      *
-     * @param method 完整方法信息
+     * @param fullMethod 完整方法信息
      * @return
      */
-    public static String getMethodNameWithArgs(String method) {
-        int indexColon = method.indexOf(JACGConstants.FLAG_COLON);
-        return method.substring(indexColon + 1);
+    public static String getMethodNameWithArgs(String fullMethod) {
+        int indexColon = fullMethod.indexOf(JACGConstants.FLAG_COLON);
+        return fullMethod.substring(indexColon + 1);
     }
 
     /**
      * 从完整方法信息中获取方法名
      *
-     * @param method 完整方法信息
+     * @param fullMethod 完整方法信息
      * @return
      */
-    public static String getOnlyMethodName(String method) {
-        int indexColon = method.indexOf(JACGConstants.FLAG_COLON);
-        int indexLeftBrackets = method.indexOf(JACGConstants.FLAG_LEFT_BRACKET);
-        return method.substring(indexColon + 1, indexLeftBrackets);
+    public static String getOnlyMethodName(String fullMethod) {
+        int indexColon = fullMethod.indexOf(JACGConstants.FLAG_COLON);
+        int indexLeftBrackets = fullMethod.indexOf(JACGConstants.FLAG_LEFT_BRACKET);
+        return fullMethod.substring(indexColon + 1, indexLeftBrackets);
     }
 
     /**

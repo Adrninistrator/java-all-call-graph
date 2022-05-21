@@ -8,8 +8,8 @@ import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.dto.MultiImplMethodInfo;
-import com.adrninistrator.jacg.dto.TmpNode4Caller;
+import com.adrninistrator.jacg.dto.multiple.MultiImplMethodInfo;
+import com.adrninistrator.jacg.dto.node.TmpNode4Caller;
 import com.adrninistrator.jacg.dto.task.CallerTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodInfo;
 import com.adrninistrator.jacg.extensions.dto.BaseExtendedData;
@@ -78,6 +78,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     // 所有查询到存在多个实现类的接口或父类方法信息
     private Map<String, Boolean> allFoundMultiImplMethodMap = new ConcurrentHashMap<>();
+
+    // 简单类名及对应的完整类名Map
+    protected Map<String, String> simpleAndFullClassNameMap = new ConcurrentHashMap<>();
 
     // 用于打印的向自定义数据表插入的SQL语句
     private static String insertManualTableSql = null;
@@ -452,8 +455,18 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     // 生成需要执行的任务信息
     private List<CallerTaskInfo> genCallerTaskInfo() {
+        Set<String> handledClassNameSet = new HashSet<>();
+
         List<CallerTaskInfo> callerTaskInfoList = new ArrayList<>(taskSet.size());
         for (String task : taskSet) {
+            if (!StringUtils.containsAny(task, JACGConstants.FLAG_SPACE, JACGConstants.FLAG_COLON)) {
+                // 当前任务不包含空格或冒号，说明需要将一个类的全部方法添加至任务中
+                if (!addAllMethodsInClass2Task(task, handledClassNameSet, callerTaskInfoList)) {
+                    return null;
+                }
+                continue;
+            }
+
             String left = task;
             int lineNumStart = JACGConstants.LINE_NUM_NONE;
             int lineNumEnd = JACGConstants.LINE_NUM_NONE;
@@ -514,6 +527,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 return null;
             }
 
+            if (handledClassNameSet.contains(simpleClassName)) {
+                logger.warn("当前类的全部方法已添加至任务，不需要再指定 {} {}", simpleClassName, task);
+                continue;
+            }
+
             CallerTaskInfo callerTaskInfo = new CallerTaskInfo();
             callerTaskInfo.setOrigText(task);
             callerTaskInfo.setCallerSimpleClassName(simpleClassName);
@@ -534,12 +552,49 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         return callerTaskInfoList;
     }
 
-    public boolean isSupportIgnore() {
-        return supportIgnore;
-    }
+    // 将一个类的全部方法添加至任务中
+    private boolean addAllMethodsInClass2Task(String className, Set<String> handledClassNameSet, List<CallerTaskInfo> callerTaskInfoList) {
+        String simpleClassName = getSimpleClassName(className);
+        if (simpleClassName == null) {
+            return false;
+        }
 
-    public void setSupportIgnore(boolean supportIgnore) {
-        this.supportIgnore = supportIgnore;
+        if (handledClassNameSet.contains(simpleClassName)) {
+            // 已处理过的类不再处理
+            logger.warn("当前类已处理过，不需要再指定 {} {}", simpleClassName, className);
+            return true;
+        }
+        handledClassNameSet.add(simpleClassName);
+
+        // 查询当前类的所有方法
+        String sqlKey = JACGConstants.SQL_KEY_MC_QUERY_CALLER_ALL_METHODS;
+        String sql = sqlCacheMap.get(sqlKey);
+        if (sql == null) {
+            sql = "select distinct(" + DC.MC_CALLER_FULL_METHOD + ") from " + JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
+                    " where " + DC.MC_CALLER_CLASS_NAME + " = ?";
+            cacheSql(sqlKey, sql);
+        }
+
+        List<Object> fullMethodList = dbOperator.queryListOneColumn(sql, new Object[]{simpleClassName});
+        if (fullMethodList == null) {
+            return false;
+        }
+
+        for (Object obj : fullMethodList) {
+            String fullMethod = (String) obj;
+            String methodNameWithArgs = JACGUtil.getMethodNameWithArgs(fullMethod);
+
+            CallerTaskInfo callerTaskInfo = new CallerTaskInfo();
+            callerTaskInfo.setOrigText(null);
+            callerTaskInfo.setCallerSimpleClassName(simpleClassName);
+            callerTaskInfo.setCallerMethodName(methodNameWithArgs);
+            callerTaskInfo.setLineNumStart(JACGConstants.LINE_NUM_NONE);
+            callerTaskInfo.setLineNumEnd(JACGConstants.LINE_NUM_NONE);
+
+            callerTaskInfoList.add(callerTaskInfo);
+        }
+
+        return true;
     }
 
     // 处理一个任务
@@ -1449,6 +1504,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
     // 获取调用者完整类名
     private String getCallerFullClassName(String callerClassName) {
+        String existedFullClassName = simpleAndFullClassNameMap.get(callerClassName);
+        if (existedFullClassName != null) {
+            return existedFullClassName;
+        }
+
         // 根据简单类名，查找对应的完整类名
         String sqlKey = JACGConstants.SQL_KEY_MC_QUERY_CALLER_FULL_CLASS;
         String sql = sqlCacheMap.get(sqlKey);
@@ -1464,7 +1524,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return null;
         }
 
-        return (String) fullClassNameList.get(0);
+        String fullClassName = (String) fullClassNameList.get(0);
+        simpleAndFullClassNameMap.put(callerClassName, fullClassName);
+        return fullClassName;
     }
 
     /**
@@ -1530,5 +1592,13 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             }
         }
         return false;
+    }
+
+    public boolean isSupportIgnore() {
+        return supportIgnore;
+    }
+
+    public void setSupportIgnore(boolean supportIgnore) {
+        this.supportIgnore = supportIgnore;
     }
 }
