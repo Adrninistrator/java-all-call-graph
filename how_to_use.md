@@ -15,7 +15,7 @@
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.4'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.5'
 ```
 
 - Maven
@@ -24,7 +24,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.4'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.7.4</version>
+  <version>0.7.5</version>
 </dependency>
 ```
 

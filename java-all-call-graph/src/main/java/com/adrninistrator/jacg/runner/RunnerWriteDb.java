@@ -754,26 +754,40 @@ public class RunnerWriteDb extends AbstractRunner {
                 // 列表中上一条记录与当前记录是同一个类的同一个注解信息
                 // 增加注解属性信息，不向列表中增加元素
                 getLastSameAnnotation.getAnnotationAttributeMap().put(annotationAttributeKey, annotationAttributeValue);
-            } else {
-                // 列表中上一条记录与当前记录不是同一个类的同一个注解信息
-                // 记录注解属性信息
-                annotationInfo4Write.getAnnotationAttributeMap().put(annotationAttributeKey, annotationAttributeValue);
-
-                // 向列表中增加元素
-                annotationInfo4WriteList.add(annotationInfo4Write);
+                return true;
             }
-        } else {
-            // 当前行的注解信息没有属性
-            // 向列表中增加元素
-            annotationInfo4WriteList.add(annotationInfo4Write);
+
+            // 列表中上一条记录与当前记录不是同一个类的同一个注解信息
+            // 记录注解属性信息
+            annotationInfo4Write.getAnnotationAttributeMap().put(annotationAttributeKey, annotationAttributeValue);
+
+            // 记录注解信息并尝试写入数据库
+            return addAnnotationInfoAndTryWriteDb(annotationInfo4Write, methodOrClass, annotationInfo4WriteList);
         }
 
+        // 当前行的注解信息没有属性
+        // 记录注解信息并尝试写入数据库
+        return addAnnotationInfoAndTryWriteDb(annotationInfo4Write, methodOrClass, annotationInfo4WriteList);
+    }
+
+    /**
+     * 记录注解信息并尝试写入数据库
+     *
+     * @param annotationInfo4Write
+     * @param methodOrClass
+     * @param annotationInfo4WriteList
+     * @return
+     */
+    private boolean addAnnotationInfoAndTryWriteDb(AnnotationInfo4Write annotationInfo4Write, boolean methodOrClass, List<AnnotationInfo4Write> annotationInfo4WriteList) {
+        // 当发现新的注解信息时，需要先判断注解信息列表是否达到最大数量，若是则写入数据库并清空注解信息列表
         if (annotationInfo4WriteList.size() >= JACGConstants.BATCH_SIZE) {
             if (!writeAnnotationInfo2Db(methodOrClass, annotationInfo4WriteList)) {
                 return false;
             }
         }
 
+        // 在注解信息列表之后，再在注解信息列表中记录新的值
+        annotationInfo4WriteList.add(annotationInfo4Write);
         return true;
     }
 
@@ -834,7 +848,7 @@ public class RunnerWriteDb extends AbstractRunner {
             return true;
         }
 
-        logger.info("写入数据库，保存方法注解信息表 {}", annotationInfo4WriteList.size());
+        logger.info("{}注解信息写入数据库 {}", (methodOrClass ? "方法" : "类"), annotationInfo4WriteList.size());
 
         String sql;
         List<Object[]> objectList;
