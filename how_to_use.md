@@ -28,7 +28,14 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.5'
 </dependency>
 ```
 
-`由于在Maven中间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定java-all-call-graph依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过以下文件查看java-all-call-graph使用的依赖组件版本`[https://hub.fastgit.xyz/Adrninistrator/java-all-call-graph/blob/main/java-all-call-graph/build.gradle](https://hub.fastgit.xyz/Adrninistrator/java-all-call-graph/blob/main/java-all-call-graph/build.gradle)
+`由于Maven间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定java-all-call-graph依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过java-all-call-graph与java-callgraph2的pom文件的dependencies元素查看依赖组件版本`
+
+```
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/0.7.5/java-all-call-graph-0.7.5.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/0.1.8/java-callgraph2-0.1.8.pom
+```
+
+以上版本号可能需要替换为最新版本
 
 java-all-call-graph最新版本号可查看[https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph](https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph)。
 
