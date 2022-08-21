@@ -1,6 +1,4 @@
-# 1. 使用说明
-
-## 1.1. 依赖环境
+# 1. 依赖环境
 
 本工具将Java方法调用关系写入文件之后，会将数据保存在数据库中，需要访问MySQL或H2数据库（理论上支持其他数据库，但可能需要对SQL语句进行调整）。
 
@@ -8,14 +6,14 @@
 
 所使用的数据库用户需要有DML读写权限，及DDL权限（需要执行CREATE TABLE、TRUNCATE TABLE操作）。
 
-## 1.2. 引入组件
+# 2. 引入组件
 
 在使用本工具前，首先需要在对应的项目引入本工具组件的依赖，将其引入到test模块或使用provided类型，可以避免发布到服务器中。
 
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.5'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.7'
 ```
 
 - Maven
@@ -24,15 +22,15 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.5'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.7.5</version>
+  <version>0.7.7</version>
 </dependency>
 ```
 
 `由于Maven间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定java-all-call-graph依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过java-all-call-graph与java-callgraph2的pom文件的dependencies元素查看依赖组件版本`
 
 ```
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/0.7.5/java-all-call-graph-0.7.5.pom
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/0.1.8/java-callgraph2-0.1.8.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/0.7.7/java-all-call-graph-0.7.7.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/0.1.9/java-callgraph2-0.1.9.pom
 ```
 
 以上版本号可能需要替换为最新版本
@@ -45,11 +43,11 @@ java-all-call-graph对应代码地址为[https://github.com/Adrninistrator/java-
 
 本工具仅引入了log4j-over-slf4j组件，在引入本工具组件的项目中，还需要引入log4j2、logback等日志组件，且保证配置正确，能够在本地正常运行。
 
-## 1.3. 执行步骤
+# 3. 执行步骤
 
 以下所述执行步骤，需要在IDE中执行。
 
-### 1.3.1. 总体步骤
+## 3.1. 总体步骤
 
 本工具的总体使用步骤如下：
 
@@ -62,11 +60,13 @@ java-all-call-graph对应代码地址为[https://github.com/Adrninistrator/java-
 
 ![](pic/step-all.png)
 
-### 1.3.2. 释放启动类及配置文件
+## 3.2. 释放启动类及配置文件
 
 当前步骤在每个Java项目只需要执行一次。
 
 `当组件升级后，若对配置文件有新增或修改，则需要再执行当前步骤，否则可能会因为缺少配置文件导致执行失败。`
+
+从`0.7.7`版本开始，java-all-call-graph会尝试读取jar包中的配置文件，相关的配置文件可以不释放到项目中，可以通过Java代码对配置参数进行设置（进行二次开发时可能需要使用）。
 
 执行当前步骤时，需要执行main()方法的类名如下：
 
@@ -84,7 +84,7 @@ com.adrninistrator.jacg.unzip.UnzipFile
 
 当目标文件不存在时，则会进行释放；若目标文件已存在，则不会覆盖。
 
-### 1.3.3. 生成Java方法调用关系并写入数据库
+## 3.3. 生成Java方法调用关系并写入数据库
 
 已支持使用本地文件形式的H2数据库，可不依赖外部的其他数据库，可在无法连接其他数据库（如MySQL）的环境中运行
 
@@ -110,11 +110,17 @@ test.jacg.TestRunnerWriteDb
 
 ![](pic/args-use-b.png)
 
-- b.1 调用增强后的java-callgraph2.jar中的类的方法
+### 3.3.1. b.1 调用增强后的java-callgraph2.jar中的类的方法
 
-TestRunnerWriteDb类读取配置文件`~jacg_config/config.properties`中的参数：
+以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
-`call.graph.jar.list`：等待解析的jar/war包，或保存class、jar文件的目录路径列表，各jar包路径之间使用空格分隔（若路径中包含空格，则需要使用""包含对应的路径），支持指定一个或多个jar/war包，或一个或多个目录，或jar/war包与目录混合进行处理
+- call.graph.jar.list
+
+等待解析的jar/war包，或保存class、jar文件的目录路径列表
+
+各jar包路径之间使用空格分隔（若路径中包含空格，则需要使用""包含对应的路径）
+
+支持指定一个或多个jar/war包，或一个或多个目录，或jar/war包与目录混合进行处理
 
 以上参数的处理依赖java-callgraph2中实现，可参考[https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)
 
@@ -122,19 +128,19 @@ TestRunnerWriteDb类读取配置文件`~jacg_config/config.properties`中的参�
 
 调用增强后的java-callgraph2.jar中的JCallGraph类的run方法，通过方法的参数传递上述jar包路径列表；
 
-- b.2 解析指定jar包
+### 3.3.2. b.2 解析指定jar包
 
 增强后的java-callgraph2.jar中的类的方法开始解析指定的jar包；
 
-- b.3 将Java方法调用关系写入文件
+### 3.3.3. b.3 将Java方法调用关系写入文件
 
 增强后的java-callgraph2.jar中的类的方法将解析出的Java方法调用关系写入指定的文件中；
 
-- b.4 读取Java方法调用关系文件
+### 3.3.4. b.4 读取Java方法调用关系文件
 
 TestRunnerWriteDb类读取保存Java方法调用关系的文件，文件路径即第1个jar包路径加“.txt”；
 
-- b.5 将Java方法调用关系写入数据库
+### 3.3.5. b.5 将Java方法调用关系写入数据库
 
 TestRunnerWriteDb类读取配置文件`~jacg_config/i_allowed_class_prefix.properties`，该文件中指定了需要处理的类名前缀，可指定包名，或包名+类名，示例如下：
 
@@ -143,33 +149,72 @@ com.test
 com.test.Test1
 ```
 
-读取配置文件`~jacg_config/config.properties`中的参数：
+以上类会读取配置文件`~jacg_config/config.properties`中的以下参数，需要按照说明进行配置：
 
-`app.name`：当前应用名称，对应数据库表名后缀，该参数值中的分隔符不能使用“-”，需要使用“_”
+- app.name
 
-`thread.num`：写入数据库时并发处理的线程数量，也是数据源连接池数量
+当前应用名称，对应数据库表名后缀
 
-`db.use.h2`：是否使用H2数据库，值为true/false；当开关为开时，还需要配置db.h2.file.path参数，当开关为关时，还需要配置db.driver.name、db.url、db.username、db.password参数
+该参数值中的分隔符不能使用“-”，需要使用“_”
 
-`db.h2.file.path`：H2数据库文件路径（仅当使用H2数据库时需要指定），示例：./build/jacg_h2db，不需要指定“.mv.db”
+- thread.num
 
-`db.driver.name`：数据库驱动类名（仅当使用非H2数据库时需要指定）
+写入数据库时并发处理的线程数量，也是数据源连接池数量
 
-`db.url`：数据库JDBC URL（仅当使用非H2数据库时需要指定），使用MySQL时，url需要指定rewriteBatchedStatements=true，开启批量插入，提高效率
+- db.use.h2
 
-`db.username`：数据库用户名（仅当使用非H2数据库时需要指定）
+是否使用H2数据库，值为true/false
 
-`db.password`：数据库密码（仅当使用非H2数据库时需要指定）
+当开关为开时，还需要配置db.h2.file.path参数
 
-`input.ignore.other.package`：忽略其他包的开关，值为true/false；当开关为开时，仅将`~jacg_config/i_allowed_class_prefix.properties`中指定的类名前缀相符的类调用关系写入数据库；当开关为关时，所有的类调用关系都写入数据库
+当开关为关时，还需要配置db.driver.name、db.url、db.username、db.password参数
 
-向数据库写入数据库前，会判断对应数据库表是否存在，若不存在则创建，之后会执行“TRUNCATE TABLE”操作清空表中的数据；
+- db.h2.file.path
+
+H2数据库文件路径（仅当使用H2数据库时需要指定）
+
+示例：./build/jacg_h2db，不需要指定“.mv.db”
+
+- db.driver.name
+
+数据库驱动类名（仅当使用非H2数据库时需要指定）
+
+- db.url
+
+数据库JDBC URL（仅当使用非H2数据库时需要指定）
+
+使用MySQL时，url需要指定rewriteBatchedStatements=true，开启批量插入，提高效率
+
+- db.username
+
+数据库用户名（仅当使用非H2数据库时需要指定）
+
+- db.password
+
+数据库密码（仅当使用非H2数据库时需要指定）
+
+- input.ignore.other.package
+
+忽略其他包的开关，值为true/false
+
+当开关为开时，仅将`~jacg_config/i_allowed_class_prefix.properties`中指定的类名前缀相符的类调用关系写入数据库
+
+当开关为关时，所有的类调用关系都写入数据库
+
+以上类向数据库写入数据库前，会判断对应数据库表是否存在，若不存在则创建，之后会执行“TRUNCATE TABLE”操作清空表中的数据；
 
 根据配置文件`~jacg_config/config.properties`中的`input.ignore.other.package`参数值及配置文件`~jacg_config/i_allowed_class_prefix.properties`，将Java方法调用关系逐条写入数据库中；
 
 增强后的java-callgraph2.jar除了会将Java方法调用关系写入文件外，还会将各个方法上的注解信息写入文件（文件名为保存方法调用关系的文件名加上“-annotation.txt”）；TestRunnerWriteDb类也会读取对应文件，将各方法上的注解信息写入数据库中。
 
-### 1.3.4. 生成调用指定类方法向上的完整调用链
+假如选择使用H2数据库，则当前步骤执行完毕后，会在日志中打印用于连接H2数据库的JDBC URL，日志内容如下所示：
+
+```
+可用于连接H2数据库的JDBC URL:
+jdbc:h2:file:D:\test\java-all-call-graph\build\jacg_h2db
+```
+
+## 3.4. 生成调用指定类方法向上的完整调用链
 
 执行当前步骤之前，需要确认Java方法调用关系已成功写入数据库中。
 
@@ -185,7 +230,7 @@ test.jacg.TestRunnerGenAllGraph4Callee
 
 ![](pic/args-use-c.1.png)
 
-- c.1.1 从数据库读取Java方法调用关系
+### 3.4.1. c.1.1 从数据库读取Java方法调用关系
 
 TestRunnerGenAllGraph4Callee类读取配置文件`~jacg_config/o_g4callee_class_name.properties`，该文件中指定了需要生成向上完整调用链的类名，或类名+方法名前缀/代码行号；
 
@@ -217,13 +262,17 @@ Test1:test(java.lang.String)
 Test1:234
 ```
 
-读取配置文件`~jacg_config/config.properties`中的参数：
+以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
-`thread.num`：从数据库并发读取数据的线程数量，也是数据源连接池数量；若`~jacg_config/o_g4callee_class_name.properties`配置文件中的记录数比该值小，则会使用记录数覆盖该参数值
+- thread.num
+
+从数据库并发读取数据的线程数量，也是数据源连接池数量
+
+若`~jacg_config/o_g4callee_class_name.properties`配置文件中的记录数比该值小，则会使用记录数覆盖该参数值
 
 以下参数说明略：app.name、db.use.h2、db.h2.file.path、db.driver.name、db.url、db.username、db.password
 
-- c.1.2 将方法完整调用链（向上）写入文件
+### 3.4.2. c.1.2 将方法完整调用链（向上）写入文件
 
 对于配置文件`~jacg_config/o_g4callee_class_name.properties`中指定的类，对每个类生成一个对应的文件，文件名为“[类名].txt”，在某个类对应的文件中，会为对应类的每个方法生成向上完整调用链；
 
@@ -231,11 +280,23 @@ Test1:234
 
 每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“~jacg_o_ee/[yyyyMMdd-HHmmss.SSS]
 
-生成向上的调用链时，会为~jacg_config/o_g4callee_class_name.properties中指定的每个类的每个方法单独生成一个文件，保存在“~jacg_o_ee/[yyyyMMdd-HHmmss.SSS]/methods”目录中，文件名格式为“[类名]@[方法名]@[完整方法名HASH+长度].txt”
+生成向上的调用链时，会为“\~jacg_config/o_g4callee_class_name.properties”中指定的每个类的每个方法单独生成一个文件，保存在“\~jacg_o_ee/[yyyyMMdd-HHmmss.SSS]/methods”目录中，文件名格式为“[类名]@[方法名]@[完整方法名HASH+长度].txt”
 
-读取配置文件`~jacg_config/config.properties`中的参数：
+每次执行生成的目录默认保存在当前目录中，若需要保存到其他目录中，可参考[JVM参数及Java代码开关](jvm_options_java_switch.md)，“指定生成结果文件根目录”部分；
 
-`call.graph.output.detail`：输出文件中调用关系的详细程度，1: 最详细，包含完整类名+方法名+方法参数，2: 中等，包含完整类名+方法名,3: 最简单,包含简单类名（对于同名类展示完整类名）+方法名，示例如下
+以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
+
+- call.graph.output.detail
+
+输出文件中调用关系的详细程度
+
+1: 最详细，包含完整类名+方法名+方法参数
+
+2: 中等，包含完整类名+方法名
+
+3: 最简单,包含简单类名（对于同名类展示完整类名）+方法名
+
+示例如下：
 
 |call.graph.output.detail参数值|显示示例|
 |---|---|
@@ -243,20 +304,32 @@ Test1:234
 |2|com.test.Test1.func1|
 |3|Test1.func1|
 
-`show.method.annotation`：调用链中是否显示方法上的注解开关，值为true/false；当开关为开时，会显示当前方法上的全部注解的完整类名，格式为“[方法信息]@注解1@注解2...”
+- show.method.annotation
 
-`gen.combined.output`：是否生成调用链的合并文件开关，值为true/false；当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“~all-4callee.txt”
+调用链中是否显示方法上的注解开关，值为true/false
 
-`show.caller.line.num`：生成调用链时，是否需要显示调用者源代码行号开关，值为true/false；当开关为开时，会在向上的调用链每行后部显示当前调用者类名，及调用者方法对应的源代码行号，如“(TestClass:39)”
+仅当开关为开时，会显示当前方法上的全部注解的完整类名，格式为“[方法信息]@注解1@注解2...”
 
-#### 1.3.4.1. 生成配置文件中的任务信息与结果文件的映射关系
+- gen.combined.output
+
+是否生成调用链的合并文件开关，值为true/false
+
+仅当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“~all-4callee.txt”
+
+- show.caller.line.num
+
+生成调用链时，是否需要显示调用者源代码行号开关，值为true/false
+
+仅当开关为开时，会在向上的调用链每行后部显示当前调用者类名，及调用者方法对应的源代码行号，如“(TestClass:39)”
+
+### 3.4.3. 生成配置文件中的任务信息与结果文件的映射关系
 
 每次生成方法调用链后，会在本次生成的目录中创建~mapping.txt文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
 
 该文件内容包含两列，以“\t”进行分隔，第1列为配置文件中指定的任务信息，第2列为生成结果文件路径，内容如下所示：
 
 ```
-# 配置文件中指定的任务信息	生成结果文件路径
+ 配置文件中指定的任务信息	生成结果文件路径
 DbOperator:batchInsert(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
 DbOperator:getInstance(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@getInstance@Fg85cQ0J0brkEXpMPCoHUA#037.txt
 DbOperator:268	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
@@ -270,11 +343,11 @@ RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 假如在生成向上方法调用链时，在配置文件中指定了生成某个类的全部方法的调用链，也不会出现在以上文件中
 
-### 1.3.5. 生成指定方法向下完整调用链
+## 3.5. 生成指定方法向下完整调用链
 
 执行当前步骤之前，需要确认Java方法调用关系已成功写入数据库中。
 
-#### 1.3.5.1. 生成所有的调用链
+### 3.5.1. 生成所有的调用链
 
 执行当前步骤时，需要执行main()方法的类名如下：
 
@@ -288,7 +361,7 @@ test.jacg.TestRunnerGenAllGraph4Caller
 
 ![](pic/args-use-c.2.png)
 
-- c.2.1 从数据库读取Java方法调用关系
+### 3.5.2. c.2.1 从数据库读取Java方法调用关系
 
 TestRunnerGenAllGraph4Caller类读取配置文件`~jacg_config/o_g4caller_entry_method.properties`，该文件中指定了需要生成向下完整调用链的类名+方法名前缀/代码行号，可指定起始代码行号、结束代码行号
 
@@ -336,13 +409,17 @@ func1(java.lang.String)
 
 例如指定生成Class1.test方法的向下完整调用链，存在方法Class1.test1，则可指定忽略test1方法；指定生成Class1.test方法的向下完整调用链，所关注的test方法为test(java.lang.String)，存在不关注的方法test(java.lang.Integer)，则可指定忽略test(java.lang.Integer)方法；
 
-读取配置文件`~jacg_config/config.properties`中的参数：
+以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
-`thread.num`：从数据库并发读取数据的线程数量，也是数据源连接池数量；若`~jacg_config/o_g4caller_entry_method.properties`配置文件中的记录数比该值小，则会使用记录数覆盖该参数值
+- thread.num
+
+从数据库并发读取数据的线程数量，也是数据源连接池数量
+
+若`~jacg_config/o_g4caller_entry_method.properties`配置文件中的记录数比该值小，则会使用记录数覆盖该参数值
 
 以下参数说明略：app.name、db.use.h2、db.h2.file.path、db.driver.name、db.url、db.username、db.password
 
-- c.2.2 将方法完整调用链（向下）写入文件
+### 3.5.3. c.2.2 将方法完整调用链（向下）写入文件
 
 对于配置文件`~jacg_config/o_g4caller_entry_method.properties`中指定的方法，对每个方法生成一个对应的文件，文件名为“[类名]@[方法名]@[完整方法名HASH+长度].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048.txt”；
 
@@ -350,17 +427,59 @@ func1(java.lang.String)
 
 每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“~jacg_o_er/[yyyyMMdd-HHmmss.SSS]”；
 
-读取配置文件`~jacg_config/config.properties`中的参数：
+每次执行生成的目录默认保存在当前目录中，若需要保存到其中目录中，可通过执行Java命令时的JVM参数`output.root.path`指定，例如“java -Doutput.root.path=D:/test”；
 
-`gen.combined.output`：是否生成调用链的合并文件开关，值为true/false；当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“~all-4caller.txt”
+以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
-`show.caller.line.num`：生成调用链时，是否需要显示调用者源代码行号开关，值为true/false；当开关为开时，会在向下的调用链每行前部显示当前调用者类名，及调用者方法对应的源代码行号，如“[TestClass:39]”
+- gen.combined.output
 
-以下参数说明略：call.graph.output.detail、show.method.annotation。
+是否生成调用链的合并文件开关，值为true/false
 
-假如某个接口或抽象类存在多个实现类，当调用了以上接口或抽象类方法时，会在当前结果目录中生成名称中包含了接口或抽象类的目录，其中的文件保存了相关实现类方法的调用链
+仅当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“~all-4caller.txt”
 
-#### 1.3.5.2. 忽略特定的调用关系
+- show.caller.line.num
+
+生成调用链时，是否需要显示调用者源代码行号开关，值为true/false
+
+仅当开关为开时，会在向下的调用链每行前部显示当前调用者类名，及调用者方法对应的源代码行号，如“[TestClass:39]”
+
+- ignore.dup.callee.in.one.caller
+
+生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略，值为true/false
+
+仅当开关为开时会忽略
+
+默认值为关
+
+- multi.impl.gen.in.current.file
+
+生成向下的调用链时，若接口或父类存在多个实现类或子类，对于接口或父类方法调用多个实现类或子类方法的调用关系，是否需要在当前文件中继续生成，值为true/false
+
+当开关为开时，以上调用关系会在当前文件中继续生成
+
+当开关为关时，以上调用关系会在单独的目录中生成，目录名格式为“[接口或父类名]@[方法名]@[完整方法名HASH+长度]”，文件名格式为“[实现类或子类名]@[方法名]@[完整方法名HASH+长度].txt”；原始方法调用链对应的文件中，会记录当前方法调用接口或父类方法的调用关系，使用特殊的标记，格式为“!ext_data!JUMP_MULTI_IMPL@[接口或父类名]@[方法名]@[完整方法名HASH+长度]”
+
+默认值为开
+
+例如TestMulti.test1()方法中调用了Interface1接口的f1()方法，Interface1接口存在实现类ImplClass1、ImplClass2；
+
+当以上开关为开时，Interface1.f1()方法调用ImplClass1.f1()、ImplClass2.f1()方法的调用关系会继续在TestMulti.test1()方法对应文件中生成；
+
+当以上开关为关时，生成文件情况如下
+
+TestMulti.test1()方法对应文件中调用Interface1.f1()方法的信息如下：
+
+```
+[1]#  [TestMulti:22]	test.call_graph.implement.Interface1:f1	!ext_data!JUMP_MULTI_IMPL@Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029
+```
+
+生成Interface1.f1()方法对应的目录，目录名为“Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029”
+
+在以上目录中，分别生成ImplClass1.f1()、ImplClass2.f1()方法对应的保存调用链的文件，文件名为“ImplClass1@f1@28XJlqE5etyRh1WH_e_DLQ#029.txt”、“ImplClass2@f1@FixDUSOINEA0qji9Np3baA#029.txt”
+
+以下参数说明略：call.graph.output.detail、show.method.annotation
+
+### 3.5.4. 忽略特定的调用关系
 
 以上生成指定方法向下的完整调用链中，包含了所有的方法调用链，可用于查找指定方法直接调用及间接调用的方法，例如通过调用的Mybatis的Mapper接口确认该方法相关的数据库表操作；
 
@@ -400,96 +519,6 @@ func1()
 func1(java.lang.String)
 ```
 
-#### 1.3.5.3. 生成配置文件中的任务信息与结果文件的映射关系
+### 3.5.5. 生成配置文件中的任务信息与结果文件的映射关系
 
 见前文
-
-## 1.4. 使用命令行方式执行
-
-以上所述执行方式，需要在IDE中执行，假如需要使用命令行方式执行，可参考以下方法。
-
-在项目根目录执行`gradlew gen_run_jar`命令，生成可以直接执行的jar包，并拷贝相关文件。
-
-在生成的`output_dir`目录中，包含了当前项目生成的jar包、依赖jar包，以及资源文件、启动脚本等，如下所示：
-
-```
-~jacg_config
-~jacg_extensions
-~jacg_find_keyword
-~jacg_sql
-jar
-lib
-run.bat
-run.sh
-```
-
-可选择run.bat或run.sh脚本，以命令行方式执行，脚本中执行的类可为test.jacg包中的类，可选择的类可参考前文内容。
-
-在执行脚本前，需要根据需要修改脚本中执行的类名。
-
-## 1.5. 通过Java代码对参数配置进行设置
-
-支持通过Java代码对参数配置进行设置，可覆盖配置文件中的参数（或仅使用Java代码中设置的参数，不使用配置文件中的参数）
-
-可通过以下类的方法对参数配置进行设置
-
-```java
-com.adrninistrator.jacg.conf.ConfigureWrapper
-```
-
-在执行释放到项目中的test.jacg包中的入口类（如TestRunnerWriteDb），或执行jar包中com.adrninistrator.jacg.runner包中的入口类（如RunnerWriteDb）之前，需要先调用ConfigureWrapper类的方法设置参数配置
-
-以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中调用了ConfigureWrapper类的方法
-
-### 1.5.1. 设置~jacg_config/config.properties配置文件参数
-
-```java
-ConfigureWrapper.addConfig(ConfigKeyEnum configKeyEnum, String value);
-```
-
-`对于app.name参数，在以上方法中会将参数值中的-替换为_`
-
-ConfigKeyEnum枚举类中定义了~jacg_config/config.properties配置文件中的参数key
-
-通过value参数指定需要设置的参数值
-
-示例如下：
-
-```java
-ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
-```
-
-### 1.5.2. 设置~jacg_config、~jacg_extensions目录配置文件参数
-
-```java
-ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
-```
-
-OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置文件的文件名，以及~jacg_extensions目录中的配置文件名
-
-通过configSet参数指定需要设置的Set类型的参数值
-
-示例如下：
-
-```java
-ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX, new HashSet(Arrays.asList(
-        "test.call_graph.method_call",
-        "test.call_graph.argument",
-        "java.")));
-```
-
-### 1.5.3. 设置~jacg_find_keyword目录配置文件参数
-
-```java
-ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList);
-```
-
-OtherConfigFileUseListEnum枚举类中定义了~jacg_find_keyword目录中配置文件的文件名
-
-通过configList参数指定需要设置的List类型的参数值
-
-示例如下：
-
-```java
-ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE, Arrays.asList("!entry!", "<init>"));
-```

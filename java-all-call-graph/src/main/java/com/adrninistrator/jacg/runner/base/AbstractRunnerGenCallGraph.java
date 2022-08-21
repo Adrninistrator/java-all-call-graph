@@ -193,7 +193,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 创建输出文件所在目录
     protected boolean createOutputDir(String prefix) {
-        String outputRootPath = System.getProperty(JACGConstants.PROPERTY_OUTPUT_ROOT_PATH);
+        String outputRootPath = JACGUtil.getDirPathInJvmOptions(JACGConstants.PROPERTY_OUTPUT_ROOT_PATH);
         if (StringUtils.isNotBlank(outputRootPath)) {
             // 使用指定的生成结果文件根目录，并指定当前应用名称
             outputDirPrefix = outputRootPath + prefix + File.separator + confInfo.getAppName() + JACGConstants.FLAG_MINUS + JACGUtil.currentTime();

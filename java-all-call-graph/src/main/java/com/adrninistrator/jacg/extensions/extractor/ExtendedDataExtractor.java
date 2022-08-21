@@ -38,7 +38,7 @@ public class ExtendedDataExtractor {
     private BaseFindKeywordFilter baseFindKeywordFilter;
 
     // 保存当前查找关键字对应的结果目录
-    String currentFindResultDirPath;
+    private String currentFindResultDirPath;
 
     /**
      * 生成向下的完整调用链，根据关键字进行查找，获取自定义数据并返回
@@ -50,7 +50,12 @@ public class ExtendedDataExtractor {
         GenSingleCallGraph.setOrder4er();
         // 判断生成调用链时的详细程度是否为最详细
         ConfInfo confInfo = ConfManager.getConfInfo();
-        if (confInfo != null && !OutputDetailEnum.ODE_1.getDetail().equals(confInfo.getCallGraphOutputDetail())) {
+        if (confInfo == null) {
+            logger.error("配置信息为空");
+            return null;
+        }
+
+        if (!OutputDetailEnum.ODE_1.getDetail().equals(confInfo.getCallGraphOutputDetail())) {
             logger.error("生成调用链时的详细程度需要设置为最详细 {} {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getKey(), OutputDetailEnum.ODE_1.getDetail());
             return null;
         }
@@ -58,8 +63,12 @@ public class ExtendedDataExtractor {
         FindKeywordCallGraph findKeywordCallGraph = new FindKeywordCallGraph();
         // 设置处理目录时，需要返回生成文件路径列表
         findKeywordCallGraph.setReturnResultFileList();
-        // 添加额外关键字
-        findKeywordCallGraph.addExtraKeyword(JACGConstants.CALL_FLAG_EXTENDED_DATA + JACGConstants.DATA_TYPE_JUMP_MULTI_IMPL + JACGConstants.FLAG_AT);
+
+        if (!confInfo.isMultiImplGenInCurrentFile()) {
+            // 生成向下的调用链时，若接口或父类存在多个实现类或子类，接口或父类方法调用多个实现类或子类方法的调用关系需要在单独的目录中生成
+            // 添加额外关键字
+            findKeywordCallGraph.addExtraKeyword(JACGConstants.CALL_FLAG_EXTENDED_DATA + JACGConstants.DATA_TYPE_JUMP_MULTI_IMPL + JACGConstants.FLAG_AT);
+        }
         // 添加关键字过滤处理类
         findKeywordCallGraph.setBaseFindKeywordFilter(baseFindKeywordFilter);
         // 设置生成目录名使用固定值，不指定时间

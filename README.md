@@ -1,7 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.adrninistrator/java-all-call-graph.svg)](https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph/)
 
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-green.svg)](https://github.com/Adrninistrator/java-all-call-graph/blob/master/LICENSE)
-
 # 1. 前言
 
 在很多场景下，如果能够生成Java代码中方法之间的调用链，是很有帮助的，例如分析代码执行流程、确认被修改代码的影响范围、代码审计/漏洞分析等。
@@ -20,6 +19,8 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 本项目用于获取Java方法调用关系的功能在[https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)中实现
 
+在github查看文档时，图片可能无法显示，影响使用说明文档的查看，可查看gitee中的当前项目[https://gitee.com/Adrninistrator/java-all-call-graph](https://gitee.com/Adrninistrator/java-all-call-graph)。
+
 # 2. 输出结果示例
 
 [输出结果示例](output_example.md)
@@ -36,19 +37,26 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 [使用说明](how_to_use.md)
 
-# 6. 其他功能
+# 6. JVM参数及Java代码开关
+
+[JVM参数及Java代码开关](jvm_options_java_switch.md)
+
+# 7. 二次开发
+
+[二次开发](custom_development.md)
+
+# 8. 其他功能
 
 [其他功能](other_functions.md)
 
-# 7. 扩展功能
+# 9. 扩展功能
 
 [扩展功能](extensions.md)
 
-# 8. 原理说明
+# 10. 原理说明
 
 [原理说明](how_to_implementation.md)
 
-# 9. 其他说明
+# 11. 其他说明
 
 [其他说明](other_instructions.md)
-

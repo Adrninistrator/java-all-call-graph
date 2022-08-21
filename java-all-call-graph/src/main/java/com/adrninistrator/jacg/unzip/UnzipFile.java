@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.unzip;
 
-import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.util.FileUtilNoLogger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -27,7 +27,6 @@ public class UnzipFile {
     public static final String DIR_DEFAULT_HEAD = "~jacg-";
     public static final String DIR_JAVA = "java";
     public static final String DIR_RESOURCES = "resources";
-    public static final String FLAG_FSP = "/";
     public static final String FILE_JAVA = ".java";
 
     public static Set<String> handledFilePathSet = new HashSet<>();
@@ -41,11 +40,11 @@ public class UnzipFile {
 
         String rootDirName = chooseRootDirName();
 
-        if (!FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + JACGConstants.DIR_CONFIG, true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + JACGConstants.DIR_SQL, true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + JACGConstants.DIR_KEYWORD_CONF, true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_RESOURCES + FLAG_FSP + JACGConstants.DIR_EXTENSIONS, true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + FLAG_FSP + DIR_JAVA + FLAG_FSP + DIR_TEST_JAVA_FILE, true)) {
+        if (!FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_CONFIG.getDirName(), true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_SQL.getDirName(), true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_KEYWORD_CONF.getDirName(), true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_EXTENSIONS.getDirName(), true) ||
+                !FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_JAVA + "/" + DIR_TEST_JAVA_FILE, true)) {
             return;
         }
 
@@ -54,10 +53,10 @@ public class UnzipFile {
             while (ze != null) {
                 if (!ze.isDirectory()) {
                     String fileName = ze.getName();
-                    if (fileName.startsWith(JACGConstants.DIR_CONFIG) ||
-                            fileName.startsWith(JACGConstants.DIR_SQL) ||
-                            fileName.startsWith(JACGConstants.DIR_KEYWORD_CONF) ||
-                            fileName.startsWith(JACGConstants.DIR_EXTENSIONS)) {
+                    if (fileName.startsWith(InputDirEnum.IDE_CONFIG.getDirName()) ||
+                            fileName.startsWith(InputDirEnum.IDE_SQL.getDirName()) ||
+                            fileName.startsWith(InputDirEnum.IDE_KEYWORD_CONF.getDirName()) ||
+                            fileName.startsWith(InputDirEnum.IDE_EXTENSIONS.getDirName())) {
                         writeFile(ze, zis, rootDirName, DIR_RESOURCES, fileName);
                     } else if (fileName.startsWith(DIR_TEST_JAVA_FILE) && fileName.endsWith(FILE_JAVA)) {
                         writeFile(ze, zis, rootDirName, DIR_JAVA, fileName);
@@ -89,7 +88,7 @@ public class UnzipFile {
     }
 
     private static void writeFile(ZipEntry ze, ZipInputStream zis, String rootDirName, String destDirName, String fileName) throws IOException {
-        String destFilePath = rootDirName + FLAG_FSP + destDirName + FLAG_FSP + fileName;
+        String destFilePath = rootDirName + "/" + destDirName + "/" + fileName;
 
         if (handledFilePathSet.contains(destFilePath)) {
             return;

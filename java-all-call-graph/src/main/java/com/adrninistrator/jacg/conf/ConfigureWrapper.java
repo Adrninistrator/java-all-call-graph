@@ -124,7 +124,7 @@ public class ConfigureWrapper {
         }
 
         // 获取其他配置文件中的参数
-        return FileUtil.readFile2Set(configFileName);
+        return FileUtil.readFile2Set(ConfManager.getInputRootPath() + configFileName);
     }
 
     /**
@@ -143,7 +143,7 @@ public class ConfigureWrapper {
         }
 
         // 获取其他配置文件中的参数
-        return FileUtil.readFile2List(configFileName);
+        return FileUtil.readFile2List(ConfManager.getInputRootPath() + configFileName);
     }
 
     private ConfigureWrapper() {

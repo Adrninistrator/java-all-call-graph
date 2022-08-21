@@ -75,14 +75,10 @@ public class JACGConstants {
             DC.MAED_DATA_VALUE
     };
 
-    public static final String DIR_CONFIG = "~jacg_config";
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLEE = "~jacg_o_ee";
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLER = "~jacg_o_er";
-    public static final String DIR_SQL = "~jacg_sql";
-    public static final String DIR_METHODS = "methods";
-    public static final String DIR_FIND_KEYWORD_ = "~find_kw";
-    public static final String DIR_KEYWORD_CONF = "~jacg_find_keyword";
-    public static final String DIR_EXTENSIONS = "~jacg_extensions";
+    public static final String DIR_OUTPUT_METHODS = "methods";
+    public static final String DIR_OUTPUT_FIND_KEYWORD = "~find_kw";
 
     public static final String FILE_CONFIG = "config.properties";
 
@@ -164,10 +160,6 @@ public class JACGConstants {
 
     public static final String NEW_LINE = "\n";
 
-    public static final int BATCH_SIZE = 1000;
-    public static final int MAX_THREAD_NUM = 100;
-    public static final int NOTICE_LINE_NUM = 500;
-
     public static final String TABLE_PREFIX_CLASS_NAME = "class_name_";
     public static final String TABLE_PREFIX_METHOD_ANNOTATION = "method_annotation_";
     public static final String TABLE_PREFIX_CLASS_ANNOTATION = "class_annotation_";
@@ -197,12 +189,21 @@ public class JACGConstants {
 
     public static final int NO_CYCLE_CALL_FLAG = -1;
 
+    // 保存配置文件的根目录
+    public static final String PROPERTY_INPUT_ROOT_PATH = "input.root.path";
     // 是否在结果文件中写入配置信息
     public static final String PROPERTY_WRITE_CONFIG_IN_RESULT = "write.config";
     // 生成结果文件根目录
     public static final String PROPERTY_OUTPUT_ROOT_PATH = "output.root.path";
     // 跳过检查Jar包文件是否有更新
     public static final String PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED = "skip.check.jar.file.updated";
+    // 指定批量写入数据库时每次插入的数量
+    public static final String PROPERTY_DB_INSERT_BATCH_SIZE = "db.insert.batch.size";
+
+    public static final int DB_INSERT_BATCH_SIZE = System.getProperty(PROPERTY_DB_INSERT_BATCH_SIZE) != null ? Integer.parseInt(System.getProperty(PROPERTY_DB_INSERT_BATCH_SIZE)) : 1000;
+    public static final int MAX_THREAD_NUM = 100;
+    public static final int NOTICE_LINE_NUM = 500;
+    public static final int DB_TEXT_MAX_CHARACTER_SIZE = 3000;
 
     public static final int ENABLED = 1;
     public static final int DISABLED = 0;

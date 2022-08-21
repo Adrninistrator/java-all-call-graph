@@ -53,7 +53,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return false;
         }
 
-        String dirPath = outputDirPrefix + File.separator + JACGConstants.DIR_METHODS;
+        String dirPath = outputDirPrefix + File.separator + JACGConstants.DIR_OUTPUT_METHODS;
         if (!FileUtil.isDirectoryExists(dirPath)) {
             return false;
         }
@@ -300,7 +300,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
     private boolean doHandleOneCalleeMethod(String calleeSimpleClassName, String calleeMethodHash, String calleeFullMethod, String origTaskText) {
         String methodName = JACGUtil.getOnlyMethodName(calleeFullMethod);
         // 生成文件名格式: [完整或简单类名]@[方法名]@[方法HASH]
-        String tmpOutputFilePath4Method = outputDirPrefix + File.separator + JACGConstants.DIR_METHODS + File.separator + calleeSimpleClassName +
+        String tmpOutputFilePath4Method = outputDirPrefix + File.separator + JACGConstants.DIR_OUTPUT_METHODS + File.separator + calleeSimpleClassName +
                 JACGConstants.FLAG_AT + methodName + JACGConstants.FLAG_AT + calleeMethodHash + JACGConstants.EXT_TXT;
         String outputFilePath4Method = JACGUtil.getSafeFileName(tmpOutputFilePath4Method);
         logger.info("当前方法输出文件名 {}", outputFilePath4Method);
@@ -350,7 +350,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         stringBuilder.append(JACGConstants.NEW_LINE);
 
         // 记录查找到的调用方法信息List
-        List<Pair<String, Boolean>> callerMethodList = new ArrayList<>(JACGConstants.BATCH_SIZE);
+        List<Pair<String, Boolean>> callerMethodList = new ArrayList<>(JACGConstants.DB_INSERT_BATCH_SIZE);
 
         // 根据指定的调用者方法HASH，查找所有被调用的方法信息
         if (!genAllGraph4Callee(calleeMethodHash, callerMethodList, calleeFullMethod)) {
@@ -422,7 +422,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     // 生成空文件
     private boolean genEmptyFile(String calleeSimpleClassName, String methodInfoInTask) {
-        String tmpOutputFilePath4EmptyFile = outputDirPrefix + File.separator + JACGConstants.DIR_METHODS + File.separator + calleeSimpleClassName +
+        String tmpOutputFilePath4EmptyFile = outputDirPrefix + File.separator + JACGConstants.DIR_OUTPUT_METHODS + File.separator + calleeSimpleClassName +
                 JACGConstants.FLAG_AT + methodInfoInTask + JACGConstants.EXT_EMPTY_TXT;
         String outputFilePath4EmptyFile = JACGUtil.getSafeFileName(tmpOutputFilePath4EmptyFile);
         logger.info("生成空文件 {} {} {}", calleeSimpleClassName, methodInfoInTask, outputFilePath4EmptyFile);
@@ -764,7 +764,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     // 将输出的方法文件合并为类对应的文件
     private void combineClassFile() {
-        List<File> methodOutputFileList = FileUtil.findFileInCurrentDir(outputDirPrefix + File.separator + JACGConstants.DIR_METHODS, JACGConstants.EXT_TXT);
+        List<File> methodOutputFileList = FileUtil.findFileInCurrentDir(outputDirPrefix + File.separator + JACGConstants.DIR_OUTPUT_METHODS, JACGConstants.EXT_TXT);
         if (JACGUtil.isCollectionEmpty(methodOutputFileList)) {
             return;
         }

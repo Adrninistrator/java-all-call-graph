@@ -4,12 +4,12 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
@@ -29,31 +29,67 @@ public class FileUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
-    private static final ClassLoader CLASS_LOADER = FileUtil.class.getClassLoader();
-
-    private static final String CLASS_PATH = FileUtil.class.getResource("/").getPath();
-
-    public static File findFile(String filePath) throws URISyntaxException {
+    public static File findFile(String filePath) {
+        // 尝试通过文件路径获取文件
         File file = new File(filePath);
         if (file.exists()) {
+            logger.info("通过文件路径获取文件 {}", filePath);
             return file;
         }
 
-        URL url = CLASS_LOADER.getResource(filePath);
-        if (url != null) {
-            return new File(url.toURI());
+        // 尝试从classpath中获取文件，路径以/开头
+        URL url = FileUtil.class.getResource("/" + filePath);
+        if (url != null && "file".equals(url.getProtocol())) {
+            /*
+                当URL中的protocol为"file"时，说明对应的资源为独立文件的形式
+                若为"jar"则说明对应的资源是jar包中的文件，不能通过以下方式处理
+             */
+            logger.info("从classpath中获取文件 {}", url);
+            try {
+                return new File(url.toURI());
+            } catch (Exception e) {
+                logger.error("error {} ", url, e);
+                return null;
+            }
         }
-        return new File(CLASS_PATH + filePath);
+
+        return null;
+    }
+
+    public static InputStream getFileInputStream(String filePath) throws FileNotFoundException {
+        File file = findFile(filePath);
+        if (file != null) {
+            return new FileInputStream(file);
+        }
+
+        /*
+            尝试从jar包中读取，路径需要以/开头，从根目录读取，路径中的分隔符需要为/
+            不能使用以下方式获取File对象
+                new File(xxx.class.getResource("path“).toURI())
+            否则会出现异常
+                java.lang.IllegalArgumentException: URI is not hierarchical
+         */
+        InputStream inputStream = FileUtil.class.getResourceAsStream("/" + filePath);
+        if (inputStream == null) {
+            logger.error("未找到文件 {}", filePath);
+            throw new RuntimeException("未找到文件 " + filePath);
+        }
+
+        logger.info("从jar包中获取文件 {}", FileUtil.class.getResource("/" + filePath));
+        return inputStream;
     }
 
     public static String readFile2String(String filePath) {
-        try {
-            File file = findFile(filePath);
-            return readFile2String(file);
+        try (InputStream inputStream = getFileInputStream(filePath)) {
+            return readInputStream2String(inputStream);
         } catch (Exception e) {
-            logger.error("error ", e);
+            logger.error("error {} ", filePath, e);
             return null;
         }
+    }
+
+    public static String readInputStream2String(InputStream inputStream) throws IOException {
+        return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
     }
 
     public static String readFile2String(File file) throws IOException {
@@ -78,9 +114,8 @@ public class FileUtil {
      * @return
      */
     public static Set<String> readFile2Set(String filePath, String ignorePrefix) {
-        try {
-            File file = findFile(filePath);
-            List<String> list = FileUtils.readLines(file, StandardCharsets.UTF_8);
+        try (InputStream inputStream = getFileInputStream(filePath)) {
+            List<String> list = IOUtils.readLines(inputStream, StandardCharsets.UTF_8);
 
             Set<String> set = new HashSet<>(list.size());
 
@@ -99,7 +134,7 @@ public class FileUtil {
 
             return set;
         } catch (Exception e) {
-            logger.error("error ", e);
+            logger.error("error {} ", filePath, e);
             return null;
         }
     }
@@ -111,11 +146,10 @@ public class FileUtil {
      * @return
      */
     public static List<String> readFile2List(String filePath) {
-        try {
-            File file = findFile(filePath);
-            return FileUtils.readLines(file, StandardCharsets.UTF_8);
+        try (InputStream inputStream = getFileInputStream(filePath)) {
+            return IOUtils.readLines(inputStream, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            logger.error("error ", e);
+            logger.error("error {} ", filePath, e);
             return null;
         }
     }
@@ -146,7 +180,7 @@ public class FileUtil {
             logger.warn("try to create directory but exists: {}", dirPath);
             return true;
         } catch (IOException e) {
-            logger.error("error ", e);
+            logger.error("error {} ", dirPath, e);
             return true;
         }
     }
@@ -226,7 +260,7 @@ public class FileUtil {
             }
             return true;
         } catch (Exception e) {
-            logger.error("error ", e);
+            logger.error("error {} ", destFilePath, e);
             return false;
         }
     }
@@ -240,7 +274,7 @@ public class FileUtil {
         try {
             return new File(filePath).getCanonicalPath();
         } catch (IOException e) {
-            logger.error("error ", e);
+            logger.error("error {} ", filePath, e);
             return null;
         }
     }
@@ -249,7 +283,7 @@ public class FileUtil {
         try {
             return file.getCanonicalPath();
         } catch (IOException e) {
-            logger.error("error ", e);
+            logger.error("error {} ", file.getAbsolutePath(), e);
             return null;
         }
     }
@@ -259,7 +293,7 @@ public class FileUtil {
             byte[] md5 = DigestUtils.md5(input);
             return Base64.encodeBase64String(md5);
         } catch (Exception e) {
-            logger.error("error ", e);
+            logger.error("error {} ", filePath, e);
             return null;
         }
     }

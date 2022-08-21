@@ -163,7 +163,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         // 查询存在多个实现类的接口或父类方法HASH
-        if (!queryMultiImplMethodHash()) {
+        if (!confInfo.isMultiImplGenInCurrentFile() && !queryMultiImplMethodHash()) {
             return false;
         }
 
@@ -888,10 +888,13 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
             // 判断被调用的方法是否为存在多个实现类的接口或父类方法
             CallTypeEnum multiImplMethodCallType = null;
-            if (multiImplMethodHashSet.contains(currentCalleeMethodHash)) {
-                multiImplMethodCallType = CallTypeEnum.CTE_ITF;
-            } else if (multiChildrenMethodHashSet.contains(currentCalleeMethodHash)) {
-                multiImplMethodCallType = CallTypeEnum.CTE_SCC;
+            if (!confInfo.isMultiImplGenInCurrentFile()) {
+                // 生成向下的调用链时，若接口或父类存在多个实现类或子类，接口或父类方法调用多个实现类或子类方法的调用关系需要在单独的目录中生成
+                if (multiImplMethodHashSet.contains(currentCalleeMethodHash)) {
+                    multiImplMethodCallType = CallTypeEnum.CTE_ITF;
+                } else if (multiChildrenMethodHashSet.contains(currentCalleeMethodHash)) {
+                    multiImplMethodCallType = CallTypeEnum.CTE_SCC;
+                }
             }
 
             // 获取被调用方法信息（包含方法注解信息、自定义数据）
@@ -933,8 +936,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             if (back2Level != JACGConstants.NO_CYCLE_CALL_FLAG) {
                 logger.info("找到循环调用 {} [{}]", currentCalleeMethodHash, back2Level);
 
-                // 将当前处理的层级指定到循环调用的节点
-                currentNodeLevel = back2Level;
+                // 更新当前处理节点的id
+                node4CallerList.get(currentNodeLevel).setCurrentCalleeMethodId(currentMethodCallId);
                 continue;
             }
 

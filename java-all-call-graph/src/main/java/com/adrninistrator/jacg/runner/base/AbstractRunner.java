@@ -33,6 +33,12 @@ public abstract class AbstractRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunner.class);
 
+    // 退出前是否关闭数据源，默认为是
+    protected static boolean CLOSE_DS_BEFORE_EXIT = true;
+
+    // 是否有检查过数据库文件是否可写
+    protected static boolean CHECK_H2_DB_FILE_WRITEABLE = false;
+
     protected static AbstractRunner runner;
 
     protected ConfInfo confInfo;
@@ -126,7 +132,12 @@ public abstract class AbstractRunner {
             threadPoolExecutor.shutdown();
         }
 
-        dbOperator.closeDs();
+        if (CLOSE_DS_BEFORE_EXIT) {
+            logger.info("操作结束时关闭数据源");
+            dbOperator.closeDs();
+        } else {
+            logger.info("操作结束时不关闭数据源");
+        }
     }
 
     protected void cacheSql(String key, String sql) {
@@ -149,7 +160,7 @@ public abstract class AbstractRunner {
 
         // 任务队列最大长度，设置为线程数2倍
         taskQueueMaxSize = confInfo.getThreadNum() * 2;
-        threadPoolExecutor = new ThreadPoolExecutor(confInfo.getThreadNum(), confInfo.getThreadNum(), 10, TimeUnit.SECONDS,
+        threadPoolExecutor = new ThreadPoolExecutor(confInfo.getThreadNum(), confInfo.getThreadNum(), 10L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(taskQueueMaxSize), new ThreadFactory4TPE("jacg_worker"));
     }
 
@@ -187,6 +198,11 @@ public abstract class AbstractRunner {
 
     // 检查H2数据库文件是否可写
     protected boolean checkH2DbFileWritable(File h2DbFile) {
+        // 以下操作在JVM中只能成功执行一次，需要避免执行多次
+        if (CHECK_H2_DB_FILE_WRITEABLE) {
+            return true;
+        }
+
         // 尝试以写方式打开，检查数据库文件是否被占用
         try (FileChannel channel = FileChannel.open(h2DbFile.toPath(), StandardOpenOption.WRITE)) {
             FileLock fileLock = channel.tryLock();
@@ -196,6 +212,8 @@ public abstract class AbstractRunner {
             }
 
             fileLock.release();
+
+            CHECK_H2_DB_FILE_WRITEABLE = true;
             return true;
         } catch (Exception e) {
             logger.error("检查H2数据库文件是否可以写入失败 {} ", FileUtil.getCanonicalPath(h2DbFile), e);
@@ -215,5 +233,9 @@ public abstract class AbstractRunner {
         synchronized (AbstractRunner.class) {
             failTaskList.add(taskInfo);
         }
+    }
+
+    public static void setCloseDsBeforeExit(boolean closeDsBeforeExit) {
+        CLOSE_DS_BEFORE_EXIT = closeDsBeforeExit;
     }
 }

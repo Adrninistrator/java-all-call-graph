@@ -3,7 +3,10 @@ package com.adrninistrator.jacg.runner;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.enums.DbInsertMode;
+import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Write;
 import com.adrninistrator.jacg.dto.entity.JarInfoEntity;
@@ -44,25 +47,25 @@ public class RunnerWriteDb extends AbstractRunner {
     private Set<String> allowedClassPrefixSet;
 
     // 已写入数据库的完整类名
-    private Map<String, Boolean> fullClassNameMap = new HashMap<>(JACGConstants.BATCH_SIZE);
+    private Map<String, Boolean> fullClassNameMap = new HashMap<>(JACGConstants.DB_INSERT_BATCH_SIZE);
 
     // 记录完整类名
-    private List<String> fullClassNameList = new ArrayList<>(JACGConstants.BATCH_SIZE);
+    private List<String> fullClassNameList = new ArrayList<>(JACGConstants.DB_INSERT_BATCH_SIZE);
 
     // 类名相同但包名不同的类名
     private Set<String> duplicateClassNameSet = new HashSet<>();
 
     // 记录方法注解信息列表
-    private List<AnnotationInfo4Write> methodAnnotationInfoList = new ArrayList<>(JACGConstants.BATCH_SIZE);
+    private List<AnnotationInfo4Write> methodAnnotationInfoList = new ArrayList<>(JACGConstants.DB_INSERT_BATCH_SIZE);
 
     // 记录类注解信息列表
-    private List<AnnotationInfo4Write> classAnnotationInfoList = new ArrayList<>(JACGConstants.BATCH_SIZE);
+    private List<AnnotationInfo4Write> classAnnotationInfoList = new ArrayList<>(JACGConstants.DB_INSERT_BATCH_SIZE);
 
     // 记录方法调用列表
-    private List<MethodCallEntity> methodCallList = new ArrayList<>(JACGConstants.BATCH_SIZE);
+    private List<MethodCallEntity> methodCallList = new ArrayList<>(JACGConstants.DB_INSERT_BATCH_SIZE);
 
     // 记录方法行号列表
-    private List<MethodLineNumberInfo> methodLineNumberList = new ArrayList<>(JACGConstants.BATCH_SIZE);
+    private List<MethodLineNumberInfo> methodLineNumberList = new ArrayList<>(JACGConstants.DB_INSERT_BATCH_SIZE);
 
     // 记录Jar包信息
     private Map<Integer, JarInfoEntity> jarInfoMap = new HashMap<>();
@@ -301,7 +304,7 @@ public class RunnerWriteDb extends AbstractRunner {
             return true;
         }
 
-        List<Object[]> objectList = new ArrayList<>(JACGConstants.BATCH_SIZE);
+        List<Object[]> objectList = new ArrayList<>(JACGConstants.DB_INSERT_BATCH_SIZE);
         for (CustomCodeParserInterface customCodeParserInterface : customCodeParserList) {
             List<ExtendedData> extendedDataList = customCodeParserInterface.getExtendedDataList();
             if (JACGUtil.isCollectionEmpty(extendedDataList)) {
@@ -324,18 +327,18 @@ public class RunnerWriteDb extends AbstractRunner {
         String sql = sqlCacheMap.get(sqlKey);
         if (sql == null) {
             sql = genAndCacheInsertSql(sqlKey,
-                    false,
+                    DbInsertMode.DIME_INSERT,
                     JACGConstants.TABLE_PREFIX_EXTENDED_DATA,
                     JACGConstants.TABLE_COLUMNS_EXTENDED_DATA);
         }
 
         // 分批插入数据
         int extendedDataListSize = extendedDataList.size();
-        int insertTimes = (extendedDataListSize + JACGConstants.BATCH_SIZE - 1) / JACGConstants.BATCH_SIZE;
+        int insertTimes = (extendedDataListSize + JACGConstants.DB_INSERT_BATCH_SIZE - 1) / JACGConstants.DB_INSERT_BATCH_SIZE;
 
         for (int i = 0; i < insertTimes; i++) {
-            for (int j = 0; j < JACGConstants.BATCH_SIZE; j++) {
-                int seq = i * JACGConstants.BATCH_SIZE + j;
+            for (int j = 0; j < JACGConstants.DB_INSERT_BATCH_SIZE; j++) {
+                int seq = i * JACGConstants.DB_INSERT_BATCH_SIZE + j;
                 if (seq >= extendedDataListSize) {
                     break;
                 }
@@ -358,14 +361,14 @@ public class RunnerWriteDb extends AbstractRunner {
 
     // 创建数据库表
     private boolean createTables() {
-        String classNameSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_CLASS_NAME);
-        String classAnnotationSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_CLASS_ANNOTATION);
-        String methodAnnotationSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_METHOD_ANNOTATION);
-        String methodCallSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_METHOD_CALL);
-        String methodLineNumberSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_METHOD_LINE_NUMBER);
-        String jarInfoSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_JAR_INFO);
-        String extendedDataSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_EXTENDED_DATA);
-        String manualAddExtendedDataSql = readCreateTableSql(JACGConstants.DIR_SQL + File.separator + JACGConstants.FILE_SQL_MANUAL_ADD_EXTENDED_DATA);
+        String classNameSql = readCreateTableSql(JACGConstants.FILE_SQL_CLASS_NAME);
+        String classAnnotationSql = readCreateTableSql(JACGConstants.FILE_SQL_CLASS_ANNOTATION);
+        String methodAnnotationSql = readCreateTableSql(JACGConstants.FILE_SQL_METHOD_ANNOTATION);
+        String methodCallSql = readCreateTableSql(JACGConstants.FILE_SQL_METHOD_CALL);
+        String methodLineNumberSql = readCreateTableSql(JACGConstants.FILE_SQL_METHOD_LINE_NUMBER);
+        String jarInfoSql = readCreateTableSql(JACGConstants.FILE_SQL_JAR_INFO);
+        String extendedDataSql = readCreateTableSql(JACGConstants.FILE_SQL_EXTENDED_DATA);
+        String manualAddExtendedDataSql = readCreateTableSql(JACGConstants.FILE_SQL_MANUAL_ADD_EXTENDED_DATA);
 
         if (StringUtils.isAnyBlank(
                 classNameSql,
@@ -376,6 +379,7 @@ public class RunnerWriteDb extends AbstractRunner {
                 jarInfoSql,
                 extendedDataSql,
                 manualAddExtendedDataSql)) {
+            logger.error("存在创建数据库表的sql语句为空");
             return false;
         }
 
@@ -393,7 +397,8 @@ public class RunnerWriteDb extends AbstractRunner {
         return true;
     }
 
-    private String readCreateTableSql(String sqlFilePath) {
+    private String readCreateTableSql(String sqlFileName) {
+        String sqlFilePath = ConfManager.getInputRootPath() + InputDirEnum.IDE_SQL.getDirName() + "/" + sqlFileName;
         String sql = FileUtil.readFile2String(sqlFilePath);
         if (StringUtils.isBlank(sql)) {
             logger.error("文件内容为空 {}", sqlFilePath);
@@ -406,7 +411,7 @@ public class RunnerWriteDb extends AbstractRunner {
             // 使用H2数据库时，对建表的SQL语句进行处理
             sql = sql.replace("ENGINE=InnoDB", "")
                     .replace("COLLATE=utf8_bin", "")
-                    .replace(" text ", " varchar(3000) ");
+                    .replace(" text ", " varchar(" + JACGConstants.DB_TEXT_MAX_CHARACTER_SIZE + ") ");
         }
 
         logger.info("建表sql: {}", sql);
@@ -545,7 +550,7 @@ public class RunnerWriteDb extends AbstractRunner {
         if (fullClassNameMap.putIfAbsent(fullClassName, Boolean.TRUE) == null) {
             fullClassNameList.add(fullClassName);
 
-            if (fullClassNameList.size() >= JACGConstants.BATCH_SIZE) {
+            if (fullClassNameList.size() >= JACGConstants.DB_INSERT_BATCH_SIZE) {
                 if (!writeClassName2Db()) {
                     return false;
                 }
@@ -570,7 +575,7 @@ public class RunnerWriteDb extends AbstractRunner {
         String sql = sqlCacheMap.get(sqlKey);
         if (sql == null) {
             sql = genAndCacheInsertSql(sqlKey,
-                    false,
+                    DbInsertMode.DIME_INSERT,
                     JACGConstants.TABLE_PREFIX_CLASS_NAME,
                     JACGConstants.TABLE_COLUMNS_CLASS_NAME);
         }
@@ -615,7 +620,7 @@ public class RunnerWriteDb extends AbstractRunner {
         String sql = sqlCacheMap.get(sqlKey);
         if (sql == null) {
             sql = genAndCacheInsertSql(sqlKey,
-                    false,
+                    DbInsertMode.DIME_INSERT,
                     JACGConstants.TABLE_PREFIX_JAR_INFO,
                     JACGConstants.TABLE_COLUMNS_JAR_INFO);
         }
@@ -780,7 +785,7 @@ public class RunnerWriteDb extends AbstractRunner {
      */
     private boolean addAnnotationInfoAndTryWriteDb(AnnotationInfo4Write annotationInfo4Write, boolean methodOrClass, List<AnnotationInfo4Write> annotationInfo4WriteList) {
         // 当发现新的注解信息时，需要先判断注解信息列表是否达到最大数量，若是则写入数据库并清空注解信息列表
-        if (annotationInfo4WriteList.size() >= JACGConstants.BATCH_SIZE) {
+        if (annotationInfo4WriteList.size() >= JACGConstants.DB_INSERT_BATCH_SIZE) {
             if (!writeAnnotationInfo2Db(methodOrClass, annotationInfo4WriteList)) {
                 return false;
             }
@@ -812,7 +817,7 @@ public class RunnerWriteDb extends AbstractRunner {
         methodLineNumberInfo.setMaxLineNumber(Integer.parseInt(array[2]));
         methodLineNumberList.add(methodLineNumberInfo);
 
-        if (methodLineNumberList.size() >= JACGConstants.BATCH_SIZE) {
+        if (methodLineNumberList.size() >= JACGConstants.DB_INSERT_BATCH_SIZE) {
             if (!writeMethodLineNumber2Db()) {
                 return false;
             }
@@ -859,7 +864,7 @@ public class RunnerWriteDb extends AbstractRunner {
             sql = sqlCacheMap.get(sqlKey);
             if (sql == null) {
                 sql = genAndCacheInsertSql(sqlKey,
-                        false,
+                        DbInsertMode.DIME_INSERT,
                         JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION,
                         JACGConstants.TABLE_COLUMNS_METHOD_ANNOTATION);
             }
@@ -869,7 +874,14 @@ public class RunnerWriteDb extends AbstractRunner {
                 String fullMethod = annotationInfo4Write.getClassOrMethodName();
                 String annotationName = annotationInfo4Write.getAnnotationName();
                 String methodHash = JACGUtil.genHashWithLen(fullMethod);
-                String annotationAttributes = JsonUtil.getJsonStr(annotationInfo4Write.getAnnotationAttributeMap());
+                String tmpAnnotationAttributes = JsonUtil.getJsonStr(annotationInfo4Write.getAnnotationAttributeMap());
+                String annotationAttributes;
+                if (StringUtils.length(tmpAnnotationAttributes) <= JACGConstants.DB_TEXT_MAX_CHARACTER_SIZE) {
+                    annotationAttributes = tmpAnnotationAttributes;
+                } else {
+                    logger.error("注解属性长度太长，进行截取 {} {}\n{}", fullMethod, annotationName, tmpAnnotationAttributes);
+                    annotationAttributes = StringUtils.truncate(tmpAnnotationAttributes, JACGConstants.DB_TEXT_MAX_CHARACTER_SIZE);
+                }
 
                 Object[] object = new Object[]{methodHash, annotationName, annotationAttributes, fullMethod};
                 objectList.add(object);
@@ -880,7 +892,7 @@ public class RunnerWriteDb extends AbstractRunner {
             sql = sqlCacheMap.get(sqlKey);
             if (sql == null) {
                 sql = genAndCacheInsertSql(sqlKey,
-                        false,
+                        DbInsertMode.DIME_INSERT,
                         JACGConstants.TABLE_PREFIX_CLASS_ANNOTATION,
                         JACGConstants.TABLE_COLUMNS_CLASS_ANNOTATION);
             }
@@ -897,6 +909,14 @@ public class RunnerWriteDb extends AbstractRunner {
         }
 
         boolean success = dbOperator.batchInsert(sql, objectList);
+        if (!success) {
+            if (JACGConstants.DB_INSERT_BATCH_SIZE == 1) {
+                logger.error("插入注解信息失败 {}", JsonUtil.getJsonStr(annotationInfo4WriteList.get(0)));
+            } else {
+                logger.error("插入注解信息失败，为了定位重复的注解信息，可在JVM参数中指定 -D{}=1", JACGConstants.PROPERTY_DB_INSERT_BATCH_SIZE);
+            }
+        }
+
         annotationInfo4WriteList.clear();
         return success;
     }
@@ -915,7 +935,7 @@ public class RunnerWriteDb extends AbstractRunner {
         sql = sqlCacheMap.get(sqlKey);
         if (sql == null) {
             sql = genAndCacheInsertSql(sqlKey,
-                    false,
+                    DbInsertMode.DIME_INSERT,
                     JACGConstants.TABLE_PREFIX_METHOD_LINE_NUMBER,
                     JACGConstants.TABLE_COLUMNS_METHOD_LINE_NUMBER);
         }
@@ -1019,7 +1039,7 @@ public class RunnerWriteDb extends AbstractRunner {
 
         if (callerMethodHash.equals(calleeMethodHash)) {
             // 对于递归调用，不写入数据库，防止查询时出现死循环
-            logger.info("递归调用不写入数据库 {}", callerFullMethod);
+            logger.info("递归调用不写入数据库 {}", line);
             return true;
         }
 
@@ -1051,7 +1071,7 @@ public class RunnerWriteDb extends AbstractRunner {
 
         methodCallList.add(methodCallEntity);
 
-        if (methodCallList.size() >= JACGConstants.BATCH_SIZE) {
+        if (methodCallList.size() >= JACGConstants.DB_INSERT_BATCH_SIZE) {
             writeMethodCall2Db();
         }
 
@@ -1076,7 +1096,7 @@ public class RunnerWriteDb extends AbstractRunner {
             String sql = sqlCacheMap.get(sqlKey);
             if (sql == null) {
                 sql = genAndCacheInsertSql(sqlKey,
-                        false,
+                        DbInsertMode.DIME_INSERT,
                         JACGConstants.TABLE_PREFIX_METHOD_CALL,
                         JACGConstants.TABLE_COLUMNS_METHOD_CALL);
             }
@@ -1119,10 +1139,10 @@ public class RunnerWriteDb extends AbstractRunner {
         return simpleClassName;
     }
 
-    private String genAndCacheInsertSql(String key, boolean replaceInto, String tableName, String[] columns) {
+    private String genAndCacheInsertSql(String key, DbInsertMode dbInsertMode, String tableName, String[] columns) {
         String sql = sqlCacheMap.get(key);
         if (sql == null) {
-            sql = replaceInto ? "replace into " : "insert into ";
+            sql = dbInsertMode.getMode();
             sql = sql + tableName + confInfo.getAppName() + SqlUtil.genColumnString(columns) +
                     " values " + SqlUtil.genQuestionString(columns.length);
             cacheSql(key, sql);

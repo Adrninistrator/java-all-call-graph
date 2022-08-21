@@ -47,15 +47,18 @@ public class TestRunnerGenAllGraphComposite {
                     for (boolean line : BOOLEAN_ARRAY) {
                         for (boolean ignore : BOOLEAN_ARRAY) {
                             for (boolean ignoreDup : BOOLEAN_ARRAY) {
-                                confInfo.setCallGraphOutputDetail(outputDetailEnum.getDetail());
-                                confInfo.setShowMethodAnnotation(annotation);
-                                confInfo.setGenCombinedOutput(combined);
-                                confInfo.setShowCallerLineNum(line);
-                                confInfo.setIgnoreDupCalleeInOneCaller(ignoreDup);
+                                for (boolean inCurrentFile : BOOLEAN_ARRAY) {
+                                    confInfo.setCallGraphOutputDetail(outputDetailEnum.getDetail());
+                                    confInfo.setShowMethodAnnotation(annotation);
+                                    confInfo.setGenCombinedOutput(combined);
+                                    confInfo.setShowCallerLineNum(line);
+                                    confInfo.setIgnoreDupCalleeInOneCaller(ignoreDup);
+                                    confInfo.setMultiImplGenInCurrentFile(inCurrentFile);
 
-                                RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller();
-                                runnerGenAllGraph4Caller.setSupportIgnore(ignore);
-                                runnerGenAllGraph4Caller.run();
+                                    RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller();
+                                    runnerGenAllGraph4Caller.setSupportIgnore(ignore);
+                                    runnerGenAllGraph4Caller.run();
+                                }
                             }
                         }
                     }

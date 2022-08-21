@@ -244,6 +244,27 @@ public class JACGUtil {
         return value.substring(JACGConstants.FLAG_LEFT_BIG_PARENTHESES.length(), value.length() - JACGConstants.FLAG_RIGHT_BIG_PARENTHESES.length());
     }
 
+    /**
+     * 获取JVM参数中指定的目录路径
+     *
+     * @param jvmOptionKey
+     * @return
+     */
+    public static String getDirPathInJvmOptions(String jvmOptionKey) {
+        String dirPath = System.getProperty(jvmOptionKey);
+        if (dirPath == null) {
+            return "";
+        }
+
+        if (StringUtils.endsWithAny(dirPath, "/", "\\")) {
+            // 保存指定的配置文件根目录以目录分隔符结尾，则直接使用
+            return dirPath;
+        }
+
+        // 保存指定的配置文件根目录没有以目录分隔符结尾，则在后面增加目录分隔符
+        return dirPath + "/";
+    }
+
     private JACGUtil() {
         throw new IllegalStateException("illegal");
     }

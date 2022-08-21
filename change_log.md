@@ -143,7 +143,7 @@ OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置�
 示例如下：
 
 ```java
-ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX, new HashSet(Arrays.asList(
+ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX, new HashSet<>(Arrays.asList(
         "test.call_graph.method_call",
         "test.call_graph.argument",
         "java.")));
@@ -252,3 +252,81 @@ RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGr
 ## 1.7. (0.7.5)
 
 修复处理类或方法上注解信息时的bug
+
+## 1.8. (0.7.7)
+
+- 支持指定生成向下的调用链时是否忽略出现多次的被调用方法
+
+该参数在以前的版本（0.6.0）已添加，但未进行说明
+
+在配置文件`~jacg_config/o_g4caller_entry_method.properties`中增加了参数`ignore.dup.callee.in.one.caller`
+
+生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略，值为true/false
+
+仅当开关为开时会忽略
+
+默认值为关
+
+- 支持不释放配置文件
+
+尝试读取jar包中的配置文件，相关的配置文件可以不释放到项目中，可以通过Java代码对配置参数进行设置（进行二次开发时可能需要使用）。
+
+- 支持指定存在多个实现类时是否当前文件中继续生成调用链
+
+在配置文件`~jacg_config/o_g4caller_entry_method.properties`中增加了参数`multi.impl.gen.in.current.file`
+
+生成向下的调用链时，若接口或父类存在多个实现类或子类，对于接口或父类方法调用多个实现类或子类方法的调用关系，是否需要在当前文件中继续生成，值为true/false
+
+当开关为开时，以上调用关系会在当前文件中继续生成
+
+当开关为关时，以上调用关系会在单独的目录中生成，目录名格式为“[接口或父类名]@[方法名]@[完整方法名HASH+长度]”，文件名格式为“[实现类或子类名]@[方法名]@[完整方法名HASH+长度].txt”；原始方法调用链对应的文件中，会记录当前方法调用接口或父类方法的调用关系，使用特殊的标记，格式为“!ext_data!JUMP_MULTI_IMPL@[接口或父类名]@[方法名]@[完整方法名HASH+长度]”
+
+默认值为开
+
+例如TestMulti.test1()方法中调用了Interface1接口的f1()方法，Interface1接口存在实现类ImplClass1、ImplClass2；
+
+当以上开关为开时，Interface1.f1()方法调用ImplClass1.f1()、ImplClass2.f1()方法的调用关系会继续在TestMulti.test1()方法对应文件中生成；
+
+当以上开关为关时，生成文件情况如下
+
+TestMulti.test1()方法对应文件中调用Interface1.f1()方法的信息如下：
+
+```
+[1]#  [TestMulti:22]	test.call_graph.implement.Interface1:f1	!ext_data!JUMP_MULTI_IMPL@Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029
+```
+
+生成Interface1.f1()方法对应的目录，目录名为“Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029”
+
+在以上目录中，分别生成ImplClass1.f1()、ImplClass2.f1()方法对应的保存调用链的文件，文件名为“ImplClass1@f1@28XJlqE5etyRh1WH_e_DLQ#029.txt”、“ImplClass2@f1@FixDUSOINEA0qji9Np3baA#029.txt”
+
+- 支持指定配置文件路径
+
+支持通过JVM参数"input.root.path"指定"~jacg_config"、"~jacg_extensions"、"~jacg_find_keyword"、"~jacg_sql"等配置文件目录所在的路径，参数结尾可不指定目录分隔符"/"或"\"
+
+例如以上配置文件目录均在"C:/test"目录中，则可在JVM参数中通过以下方式指定
+
+```
+-Dinput.root.path=C:/test
+```
+
+- 支持处理没有被其他类调用的类
+
+在以前的版本中，假如某个类的方法没有被其他类调用，则不支持为其生成向上或向下的方法完整调用链；在当前版本中进行了支持
+
+- 方法循环调用Bug处理
+
+在以前的版本中，生成向上或向下的方法完整调用链时，假如出现方法循环调用，在方法循环调用之后的方法调用可能不会生成出来；在当前版本进行了处理
+
+- 支持指定指定批量写入数据库时每次插入的数量
+
+支持通过JVM参数"db.insert.batch.size"指定批量向数据库写入数据时，每次执行插入操作时的记录数量；可用于查找出现重复的注解信息
+
+- 超长注解属性进行截取
+
+在向数据库注解信息表写入数据时，假如注解属性太长，会进行截止，最多保留3000字符，避免写入数据库失败
+
+- 支持在MySQL中保留多个版本的表
+
+在创建数据库表的sql语句中，将索引名称修改为增加了`app.name`参数（需要重新释放相关文件到项目中）
+
+假如需要在MySQL中保留多个版本的数据库表，可在每次执行时使用不同的`app.name`参数，使创建的数据库表名不同，能够保留多个版本的表（以前的版本索引名称使用固定值，在MySQL中不能重复创建）

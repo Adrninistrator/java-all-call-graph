@@ -113,11 +113,14 @@ public class FindKeywordCallGraph {
                 OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLER;
         String keywordConfigFilePath = otherConfigFileUseListEnum.getFileName();
 
-        List<String> keywordList = ConfigureWrapper.getOtherConfigList(otherConfigFileUseListEnum);
-        if (JACGUtil.isCollectionEmpty(keywordList)) {
+        List<String> configKeywordList = ConfigureWrapper.getOtherConfigList(otherConfigFileUseListEnum);
+        if (JACGUtil.isCollectionEmpty(configKeywordList)) {
             logger.error("请在配置文件中指定需要生成到起始方法之间调用链的关键字 {}", keywordConfigFilePath);
             return null;
         }
+
+        // 这里需要新创建可写的List，从配置中获取的List可能是不可写的
+        List<String> keywordList = new ArrayList<>(configKeywordList);
 
         // 添加额外关键字
         for (String extraKeyword : extraKeywordList) {
@@ -224,7 +227,7 @@ public class FindKeywordCallGraph {
 
         int dirPathLength = dirPath.length();
         // 记录当前处理的目录
-        currentDirPath = dirPath + JACGConstants.DIR_FIND_KEYWORD_;
+        currentDirPath = dirPath + JACGConstants.DIR_OUTPUT_FIND_KEYWORD;
         if (!outputDirUseFixedValue) {
             currentDirPath = currentDirPath + "_" + JACGUtil.currentTime();
         }

@@ -28,6 +28,8 @@ public class ConfInfo {
 
     private boolean ignoreDupCalleeInOneCaller;
 
+    private boolean multiImplGenInCurrentFile;
+
     private boolean dbUseH2;
 
     private String dbH2FilePath;
@@ -55,6 +57,7 @@ public class ConfInfo {
                 ", genCombinedOutput=" + genCombinedOutput +
                 ", showCallerLineNum=" + showCallerLineNum +
                 ", ignoreDupCalleeInOneCaller=" + ignoreDupCalleeInOneCaller +
+                ", multiImplGenInCurrentFile=" + multiImplGenInCurrentFile +
                 ", dbUseH2=" + dbUseH2 +
                 ", dbH2FilePath='" + dbH2FilePath + '\'' +
                 ", dbDriverName='" + dbDriverName + '\'' +
@@ -66,6 +69,7 @@ public class ConfInfo {
     }
 
     //
+
     public String getAppName() {
         return appName;
     }
@@ -144,6 +148,14 @@ public class ConfInfo {
 
     public void setIgnoreDupCalleeInOneCaller(boolean ignoreDupCalleeInOneCaller) {
         this.ignoreDupCalleeInOneCaller = ignoreDupCalleeInOneCaller;
+    }
+
+    public boolean isMultiImplGenInCurrentFile() {
+        return multiImplGenInCurrentFile;
+    }
+
+    public void setMultiImplGenInCurrentFile(boolean multiImplGenInCurrentFile) {
+        this.multiImplGenInCurrentFile = multiImplGenInCurrentFile;
     }
 
     public boolean isDbUseH2() {

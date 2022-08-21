@@ -2,14 +2,14 @@ package com.adrninistrator.jacg.conf;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -43,8 +43,13 @@ public class ConfManager {
 
         inited = true;
 
-        String configFilePath = JACGConstants.DIR_CONFIG + File.separator + JACGConstants.FILE_CONFIG;
-        try (Reader reader = new InputStreamReader(new FileInputStream(FileUtil.findFile(configFilePath)), StandardCharsets.UTF_8)) {
+        if (JACGConstants.DB_INSERT_BATCH_SIZE <= 0) {
+            logger.error("通过-D{}=参数指定的批量写入数据库时每次插入的数量参数非法 {}", JACGConstants.PROPERTY_DB_INSERT_BATCH_SIZE, JACGConstants.DB_INSERT_BATCH_SIZE);
+            return null;
+        }
+
+        String configFilePath = getInputRootPath() + InputDirEnum.IDE_CONFIG.getDirName() + "/" + JACGConstants.FILE_CONFIG;
+        try (Reader reader = new InputStreamReader(FileUtil.getFileInputStream(configFilePath), StandardCharsets.UTF_8)) {
             Properties properties = new Properties();
             properties.load(reader);
 
@@ -79,6 +84,13 @@ public class ConfManager {
             if (StringUtils.isBlank(ignoreDupCalleeInOneCaller)) {
                 // 允许对应配置为空
                 ignoreDupCalleeInOneCaller = String.valueOf(false);
+            }
+
+            // 生成向下的调用链时，若接口或父类存在多个实现类或子类，接口或父类方法调用多个实现类或子类方法的调用关系是否需要在当前文件中继续生成，否则会在单独的目录中生成
+            String multiImplGenInCurrentFile = ConfigureWrapper.getConfig(properties, ConfigKeyEnum.CKE_MULTI_IMPL_GEN_IN_CURRENT_FILE);
+            if (StringUtils.isBlank(multiImplGenInCurrentFile)) {
+                // 允许对应配置为空
+                multiImplGenInCurrentFile = String.valueOf(true);
             }
 
             // 生成调用链时的详细程度
@@ -138,13 +150,14 @@ public class ConfManager {
             CONF_INFO.setGenCombinedOutput(Boolean.parseBoolean(genCombinedOutput));
             CONF_INFO.setShowCallerLineNum(Boolean.parseBoolean(showCallerLineNum));
             CONF_INFO.setIgnoreDupCalleeInOneCaller(Boolean.parseBoolean(ignoreDupCalleeInOneCaller));
+            CONF_INFO.setMultiImplGenInCurrentFile(Boolean.parseBoolean(multiImplGenInCurrentFile));
             if (System.getProperty(JACGConstants.PROPERTY_WRITE_CONFIG_IN_RESULT) != null) {
                 CONF_INFO.setWriteConf(true);
             }
 
             return CONF_INFO;
         } catch (Exception e) {
-            logger.error("error: ", e);
+            logger.error("error {} ", configFilePath, e);
             return null;
         }
     }
@@ -234,6 +247,15 @@ public class ConfManager {
         CONF_INFO.setDbPassword(dbPassword);
 
         return true;
+    }
+
+    /**
+     * 获取配置文件根目录
+     *
+     * @return
+     */
+    public static String getInputRootPath() {
+        return JACGUtil.getDirPathInJvmOptions(JACGConstants.PROPERTY_INPUT_ROOT_PATH);
     }
 
     private ConfManager() {
