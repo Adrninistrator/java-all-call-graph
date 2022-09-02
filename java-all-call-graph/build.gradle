@@ -204,22 +204,22 @@ publishing {
         }
     }
     repositories {
-        maven {
-            name 'sonatypeRepository'
-            url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-            credentials {
-                username = "${NEXUS_USERNAME}"
-                password = "${NEXUS_PASSWORD}"
-            }
-        }
-        maven {
-            name = 'sonatypeSnapshotRepository'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-            credentials {
-                username = "${NEXUS_USERNAME}"
-                password = "${NEXUS_PASSWORD}"
-            }
-        }
+//        maven {
+//            name 'sonatypeRepository'
+//            url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+//            credentials {
+//                username = "${NEXUS_USERNAME}"
+//                password = "${NEXUS_PASSWORD}"
+//            }
+//        }
+//        maven {
+//            name = 'sonatypeSnapshotRepository'
+//            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+//            credentials {
+//                username = "${NEXUS_USERNAME}"
+//                password = "${NEXUS_PASSWORD}"
+//            }
+//        }
     }
 }
 
