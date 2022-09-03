@@ -6,12 +6,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 public class JsonUtil {
+    private static final Logger logger = LoggerFactory.getLogger(JsonUtil.class);
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     static {
         JsonInclude.Value dense = JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL);
@@ -26,7 +29,7 @@ public class JsonUtil {
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("error ", e);
             return null;
         }
     }
@@ -36,7 +39,7 @@ public class JsonUtil {
             return objectMapper.readValue(jsonStr, new TypeReference<Map<String, Object>>() {
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("error ", e);
             return null;
         }
     }
@@ -45,7 +48,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(jsonStr, clazz);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("error ", e);
             return null;
         }
     }
@@ -54,7 +57,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(jsonStr, clazz);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("error ", e);
             return null;
         }
     }

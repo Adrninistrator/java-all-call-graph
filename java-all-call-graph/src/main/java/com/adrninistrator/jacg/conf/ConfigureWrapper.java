@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.conf;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
-import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGFileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +124,7 @@ public class ConfigureWrapper {
         }
 
         // 获取其他配置文件中的参数
-        return FileUtil.readFile2Set(ConfManager.getInputRootPath() + configFileName);
+        return JACGFileUtil.readFile2Set(ConfManager.getInputRootPath() + configFileName);
     }
 
     /**
@@ -143,7 +143,7 @@ public class ConfigureWrapper {
         }
 
         // 获取其他配置文件中的参数
-        return FileUtil.readFile2List(ConfManager.getInputRootPath() + configFileName);
+        return JACGFileUtil.readFile2List(ConfManager.getInputRootPath() + configFileName);
     }
 
     private ConfigureWrapper() {

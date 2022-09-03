@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.unzip;
 
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
-import com.adrninistrator.jacg.util.FileUtilNoLogger;
+import com.adrninistrator.jacg.util.JACGFileUtilNoLogger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -24,7 +24,7 @@ public class UnzipFile {
     public static final String DIR_TEST_JAVA_FILE = "test/jacg";
     public static final String DIR_TEST = "src/test";
     public static final String DIR_UNIT_TEST = "src/unit.test";
-    public static final String DIR_DEFAULT_HEAD = "~jacg-";
+    public static final String DIR_DEFAULT_HEAD = "_jacg-";
     public static final String DIR_JAVA = "java";
     public static final String DIR_RESOURCES = "resources";
     public static final String FILE_JAVA = ".java";
@@ -40,11 +40,11 @@ public class UnzipFile {
 
         String rootDirName = chooseRootDirName();
 
-        if (!FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_CONFIG.getDirName(), true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_SQL.getDirName(), true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_KEYWORD_CONF.getDirName(), true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_EXTENSIONS.getDirName(), true) ||
-                !FileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_JAVA + "/" + DIR_TEST_JAVA_FILE, true)) {
+        if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_CONFIG.getDirName(), true) ||
+                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_SQL.getDirName(), true) ||
+                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_KEYWORD_CONF.getDirName(), true) ||
+                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_EXTENSIONS.getDirName(), true) ||
+                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_JAVA + "/" + DIR_TEST_JAVA_FILE, true)) {
             return;
         }
 
@@ -74,14 +74,14 @@ public class UnzipFile {
     }
 
     private static String chooseRootDirName() {
-        if (FileUtilNoLogger.isDirectoryExists(DIR_TEST, false)) {
+        if (JACGFileUtilNoLogger.isDirectoryExists(DIR_TEST, false)) {
             return DIR_TEST;
         }
-        if (FileUtilNoLogger.isDirectoryExists(DIR_UNIT_TEST, false)) {
+        if (JACGFileUtilNoLogger.isDirectoryExists(DIR_UNIT_TEST, false)) {
             return DIR_UNIT_TEST;
         }
         String rootDirName = DIR_DEFAULT_HEAD + System.currentTimeMillis();
-        if (FileUtilNoLogger.isDirectoryExists(rootDirName, true)) {
+        if (JACGFileUtilNoLogger.isDirectoryExists(rootDirName, true)) {
             return rootDirName;
         }
         return null;

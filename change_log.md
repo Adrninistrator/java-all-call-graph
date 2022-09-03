@@ -30,9 +30,9 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 |增加或修改文件|文件路径|文件作用|
 |---|---|---|
-|增加|resources/~jacg_extensions/method_annotation_handler.properties|定义用于对方法上的注解进行处理的类完整类名|
-|增加|resources/~jacg_sql/class_annotation.sql|用于保存类上的注解信息数据库表|
-|修改|resources/~jacg_sql/method_annotation.sql|增加了保存注解属性的字段|
+|增加|resources/_jacg_extensions/method_annotation_handler.properties|定义用于对方法上的注解进行处理的类完整类名|
+|增加|resources/_jacg_sql/class_annotation.sql|用于保存类上的注解信息数据库表|
+|修改|resources/_jacg_sql/method_annotation.sql|增加了保存注解属性的字段|
 
 ### 1.2.2. 提供处理方法上的注解信息的插件功能
 
@@ -112,7 +112,7 @@ com.adrninistrator.jacg.conf.ConfigureWrapper
 
 以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中调用了ConfigureWrapper类的方法
 
-### 1.3.1. 设置~jacg_config/config.properties配置文件参数
+### 1.3.1. 设置_jacg_config/config.properties配置文件参数
 
 ```java
 ConfigureWrapper.addConfig(ConfigKeyEnum configKeyEnum, String value);
@@ -120,7 +120,7 @@ ConfigureWrapper.addConfig(ConfigKeyEnum configKeyEnum, String value);
 
 `对于app.name参数，在以上方法中会将参数值中的-替换为_`
 
-ConfigKeyEnum枚举类中定义了~jacg_config/config.properties配置文件中的参数key
+ConfigKeyEnum枚举类中定义了_jacg_config/config.properties配置文件中的参数key
 
 通过value参数指定需要设置的参数值
 
@@ -130,13 +130,13 @@ ConfigKeyEnum枚举类中定义了~jacg_config/config.properties配置文件中�
 ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
 ```
 
-### 1.3.2. 设置~jacg_config、~jacg_extensions目录配置文件参数
+### 1.3.2. 设置_jacg_config、_jacg_extensions目录配置文件参数
 
 ```java
 ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
 ```
 
-OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置文件的文件名，以及~jacg_extensions目录中的配置文件名
+OtherConfigFileUseSetEnum枚举类中定义了_jacg_config目录中其他配置文件的文件名，以及_jacg_extensions目录中的配置文件名
 
 通过configSet参数指定需要设置的Set类型的参数值
 
@@ -149,13 +149,13 @@ ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_C
         "java.")));
 ```
 
-### 1.3.3. 设置~jacg_find_keyword目录配置文件参数
+### 1.3.3. 设置_jacg_find_keyword目录配置文件参数
 
 ```java
 ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList);
 ```
 
-OtherConfigFileUseListEnum枚举类中定义了~jacg_find_keyword目录中配置文件的文件名
+OtherConfigFileUseListEnum枚举类中定义了_jacg_find_keyword目录中配置文件的文件名
 
 通过configList参数指定需要设置的List类型的参数值
 
@@ -177,11 +177,11 @@ ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWO
 
 |文件路径|文件作用|
 |---|---|
-|resources/~jacg_sql/method_line_number.sql|方法代码行号信息表|
+|resources/_jacg_sql/method_line_number.sql|方法代码行号信息表|
 
 ### 1.5.2. 支持指定方法名称生成向上方法调用链
 
-在`~jacg_config/o_g4callee_class_name.properties`配置文件中，支持指定类名+方法名前缀，代表需要处理指定类的对应方法
+在`_jacg_config/o_g4callee_class_name.properties`配置文件中，支持指定类名+方法名前缀，代表需要处理指定类的对应方法
 
 格式如下：
 
@@ -198,11 +198,11 @@ Test1:test(
 Test1:test(java.lang.String)
 ```
 
-配置文件`~jacg_config/config.properties`中的参数`gen.upwards.methods.file`不再使用
+配置文件`_jacg_config/config.properties`中的参数`gen.upwards.methods.file`不再使用
 
 ### 1.5.3. 支持指定代码行号生成向上方法调用链
 
-在`~jacg_config/o_g4callee_class_name.properties`配置文件中，支持指定类名+代码行号，代表需要处理指定类的对应方法
+在`_jacg_config/o_g4callee_class_name.properties`配置文件中，支持指定类名+代码行号，代表需要处理指定类的对应方法
 
 格式如下：
 
@@ -220,25 +220,25 @@ Test1:234
 
 ### 1.5.4. 支持指定代码行号生成向下方法调用链
 
-在`~jacg_config/o_g4caller_entry_method.properties`配置文件中，支持指定类名+代码行号，代表需要处理指定类的对应方法
+在`_jacg_config/o_g4caller_entry_method.properties`配置文件中，支持指定类名+代码行号，代表需要处理指定类的对应方法
 
 说明同上
 
 ### 1.5.5. 生成配置文件中的任务信息与结果文件的映射关系
 
-每次生成方法调用链后，会在本次生成的目录中创建~mapping.txt文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
+每次生成方法调用链后，会在本次生成的目录中创建_mapping.txt文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
 
 该文件内容包含两列，以“\t”进行分隔，第1列为配置文件中指定的任务信息，第2列为生成结果文件路径，内容如下所示：
 
 ```
 # 配置文件中指定的任务信息	生成结果文件路径
-DbOperator:batchInsert(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
-DbOperator:getInstance(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@getInstance@Fg85cQ0J0brkEXpMPCoHUA#037.txt
-DbOperator:268	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
-DbOperator:close(java.sql.Connection,java.sql.PreparedStatement)	~jacg_o_ee\20220505-211209.427\methods\DbOperator@close@9e5dsbPVD8648nV8on9Efw#05f.txt
+DbOperator:batchInsert(	_jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
+DbOperator:getInstance(	_jacg_o_ee\20220505-211209.427\methods\DbOperator@getInstance@Fg85cQ0J0brkEXpMPCoHUA#037.txt
+DbOperator:268	_jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
+DbOperator:close(java.sql.Connection,java.sql.PreparedStatement)	_jacg_o_ee\20220505-211209.427\methods\DbOperator@close@9e5dsbPVD8648nV8on9Efw#05f.txt
 
-RunnerGenAllGraph4Callee:101 101-101	~jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043@101-101.txt
-RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043.txt
+RunnerGenAllGraph4Callee:101 101-101	_jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043@101-101.txt
+RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043.txt
 ```
 
 以上文件仅包含成功生成了调用链的任务及结果文件信息
@@ -247,7 +247,7 @@ RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 ## 1.6. (0.7.4)
 
-生成向下完整方法调用链的配置文件`~jacg_config/o_g4caller_entry_method.properties`中，支持指定类名，代表需要处理对应类的所有方法
+生成向下完整方法调用链的配置文件`_jacg_config/o_g4caller_entry_method.properties`中，支持指定类名，代表需要处理对应类的所有方法
 
 ## 1.7. (0.7.5)
 
@@ -259,7 +259,7 @@ RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 该参数在以前的版本（0.6.0）已添加，但未进行说明
 
-在配置文件`~jacg_config/o_g4caller_entry_method.properties`中增加了参数`ignore.dup.callee.in.one.caller`
+在配置文件`_jacg_config/o_g4caller_entry_method.properties`中增加了参数`ignore.dup.callee.in.one.caller`
 
 生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略，值为true/false
 
@@ -273,7 +273,7 @@ RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 - 支持指定存在多个实现类时是否当前文件中继续生成调用链
 
-在配置文件`~jacg_config/o_g4caller_entry_method.properties`中增加了参数`multi.impl.gen.in.current.file`
+在配置文件`_jacg_config/o_g4caller_entry_method.properties`中增加了参数`multi.impl.gen.in.current.file`
 
 生成向下的调用链时，若接口或父类存在多个实现类或子类，对于接口或父类方法调用多个实现类或子类方法的调用关系，是否需要在当前文件中继续生成，值为true/false
 
@@ -301,7 +301,7 @@ TestMulti.test1()方法对应文件中调用Interface1.f1()方法的信息如下
 
 - 支持指定配置文件路径
 
-支持通过JVM参数"input.root.path"指定"~jacg_config"、"~jacg_extensions"、"~jacg_find_keyword"、"~jacg_sql"等配置文件目录所在的路径，参数结尾可不指定目录分隔符"/"或"\"
+支持通过JVM参数"input.root.path"指定"_jacg_config"、"_jacg_extensions"、"_jacg_find_keyword"、"_jacg_sql"等配置文件目录所在的路径，参数结尾可不指定目录分隔符"/"或"\"
 
 例如以上配置文件目录均在"C:/test"目录中，则可在JVM参数中通过以下方式指定
 
@@ -330,3 +330,41 @@ TestMulti.test1()方法对应文件中调用Interface1.f1()方法的信息如下
 在创建数据库表的sql语句中，将索引名称修改为增加了`app.name`参数（需要重新释放相关文件到项目中）
 
 假如需要在MySQL中保留多个版本的数据库表，可在每次执行时使用不同的`app.name`参数，使创建的数据库表名不同，能够保留多个版本的表（以前的版本索引名称使用固定值，在MySQL中不能重复创建）
+
+## 1.9. (0.7.8)
+
+- 一些内部优化
+
+对二次开发时进行优化与功能增加
+
+- 支持人工向数据库方法调用表增加数据
+
+只支持增加已经存在的类之间的方法调用
+
+需要先禁止数据源自动关闭
+
+- 根据关键字生成到起始方法的调用链优化
+
+根据关键字生成到起始方法的调用链，减少生成文件耗时
+
+- 注解属性处理优化
+
+对类、方法上的注解属性进行处理时，支持全部类型的注解属性，包括数组、注解嵌套等使用方式
+
+- 删除一些类
+
+删除以下不需要使用的类
+
+TestGenSingleCallGraph4ee
+
+TestGenSingleCallGraph4er
+
+GenSingleCallGraph
+
+- 支持提取向上调用链的入口方法信息
+
+支持获取指定方法的向上的调用链，并获取每个调用的对应的入口方法信息
+
+- 修改目录开头的字符
+
+由于字符“~”在Excel中会被显示为-，因此将目录开头的字符从“~”修改为“_”

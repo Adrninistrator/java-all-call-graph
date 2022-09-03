@@ -14,7 +14,7 @@ input.root.path
 
 - 作用
 
-以上参数用于指定"~jacg_config"、"~jacg_extensions"、"~jacg_find_keyword"、"~jacg_sql"等配置文件目录所在的路径：
+以上参数用于指定"_jacg_config"、"_jacg_extensions"、"_jacg_find_keyword"、"_jacg_sql"等配置文件目录所在的路径：
 
 优先从以上指定的目录中获取以上配置文件；
 

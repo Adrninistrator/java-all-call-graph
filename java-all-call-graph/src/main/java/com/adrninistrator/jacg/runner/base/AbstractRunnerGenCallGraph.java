@@ -6,15 +6,17 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.annotation.MethodWithAnnotationInfo;
+import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.multiple.MultiCallInfo;
 import com.adrninistrator.jacg.dto.notice.NoticeCallInfo;
-import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Method;
-import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Read;
 import com.adrninistrator.jacg.dto.task.FindMethodInfo;
 import com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler;
 import com.adrninistrator.jacg.extensions.annotation_handler.DefaultAnnotationHandler;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
-import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGFileUtil;
+import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.enums.CallTypeEnum;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +28,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -56,34 +65,34 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         key: 接口方法
         value: 实现类方法
      */
-    private Map<String, MultiCallInfo> itfMethodCallMap = new HashMap<>();
+    private final Map<String, MultiCallInfo> itfMethodCallMap = new HashMap<>();
 
     /*
         抽象父类调用对应子类的方法调用
         key: 抽象父类方法
         value: 子类方法
      */
-    private Map<String, MultiCallInfo> sccMethodCallMap = new HashMap<>();
+    private final Map<String, MultiCallInfo> sccMethodCallMap = new HashMap<>();
 
     // 接口调用对应实现类的方法调用，存在一对多的接口
-    private Set<String> itfMultiCallerMethodSet = new TreeSet<>();
+    private final Set<String> itfMultiCallerFullMethodSet = new TreeSet<>();
 
     // 抽象父类调用对应子类的方法调用，存在一对多的抽象父类
-    private Set<String> sccMultiCallerMethodSet = new TreeSet<>();
+    private final Set<String> sccMultiCallerFullMethodSet = new TreeSet<>();
 
     /*
         被禁用的接口调用对应实现类的方法调用
         key: 接口方法
         value: 实现类方法
      */
-    private Map<String, MultiCallInfo> disabledItfMethodCallMap = new TreeMap<>();
+    private final Map<String, MultiCallInfo> disabledItfMethodCallMap = new TreeMap<>();
 
     /*
         被禁用的抽象父类调用对应子类的方法调用
         key: 抽象父类方法
         value: 子类方法
      */
-    private Map<String, MultiCallInfo> disabledSccMethodCallMap = new TreeMap<>();
+    private final Map<String, MultiCallInfo> disabledSccMethodCallMap = new TreeMap<>();
 
     // 保存用于对方法上的注解进行处理的类
     protected List<AbstractAnnotationHandler> annotationHandlerList;
@@ -144,11 +153,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         if (className.contains(JACGConstants.FLAG_DOT)) {
             // 当前指定的是完整类名，查找对应的简单类名
             String sqlKey = JACGConstants.SQL_KEY_CN_QUERY_SIMPLE_CLASS;
-            String sql = sqlCacheMap.get(sqlKey);
+            String sql = DbOperWrapper.getCachedSql(sqlKey);
             if (sql == null) {
                 sql = "select " + DC.CN_SIMPLE_NAME + " from " + JACGConstants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName() +
                         " where " + DC.CN_FULL_NAME + " = ?";
-                cacheSql(sqlKey, sql);
+                DbOperWrapper.cacheSql(sqlKey, sql);
             }
 
             List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
@@ -162,11 +171,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         // 当前指定的是简单类名
         String sqlKey = JACGConstants.SQL_KEY_CN_QUERY_FULL_CLASS;
-        String sql = sqlCacheMap.get(sqlKey);
+        String sql = DbOperWrapper.getCachedSql(sqlKey);
         if (sql == null) {
             sql = "select " + DC.CN_SIMPLE_NAME + " from " + JACGConstants.TABLE_PREFIX_CLASS_NAME + confInfo.getAppName() +
                     " where " + DC.CN_SIMPLE_NAME + " = ?";
-            cacheSql(sqlKey, sql);
+            DbOperWrapper.cacheSql(sqlKey, sql);
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
@@ -193,18 +202,21 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 创建输出文件所在目录
     protected boolean createOutputDir(String prefix) {
-        String outputRootPath = JACGUtil.getDirPathInJvmOptions(JACGConstants.PROPERTY_OUTPUT_ROOT_PATH);
-        if (StringUtils.isNotBlank(outputRootPath)) {
+        String tmpOutputDirPrefix;
+        String outputRootPathInJvmOptions = JACGUtil.getDirPathInJvmOptions(JACGConstants.PROPERTY_OUTPUT_ROOT_PATH);
+        if (StringUtils.isNotBlank(outputRootPathInJvmOptions)) {
             // 使用指定的生成结果文件根目录，并指定当前应用名称
-            outputDirPrefix = outputRootPath + prefix + File.separator + confInfo.getAppName() + JACGConstants.FLAG_MINUS + JACGUtil.currentTime();
+            tmpOutputDirPrefix = outputRootPathInJvmOptions + prefix + File.separator + confInfo.getAppName() + JACGConstants.FLAG_MINUS + JACGUtil.currentTime();
         } else {
             // 使用当前目录作为生成结果文件根目录
-            outputDirPrefix = prefix + File.separator + JACGUtil.currentTime();
+            tmpOutputDirPrefix = prefix + File.separator + JACGUtil.currentTime();
         }
+
+        outputDirPrefix = new File(tmpOutputDirPrefix).getAbsolutePath();
 
         logger.info("创建保存输出文件的目录 {}", outputDirPrefix);
         // 判断目录是否存在，不存在时尝试创建
-        return FileUtil.isDirectoryExists(outputDirPrefix);
+        return JACGFileUtil.isDirectoryExists(outputDirPrefix);
     }
 
     // 生成输出文件前缀，包含了当前方法的调用层级
@@ -219,10 +231,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 将输出文件合并
     protected void combineOutputFile(String fileName) {
         if (confInfo.isGenCombinedOutput()) {
-            List<File> outputFileList = FileUtil.findFileInCurrentDir(outputDirPrefix, JACGConstants.EXT_TXT);
+            List<File> outputFileList = JACGFileUtil.findFileInCurrentDir(outputDirPrefix, JACGConstants.EXT_TXT);
             if (!JACGUtil.isCollectionEmpty(outputFileList) && outputFileList.size() > 1) {
                 String combinedOutputFilePath = outputDirPrefix + File.separator + JACGConstants.COMBINE_FILE_NAME_PREFIX + fileName + JACGConstants.EXT_TXT;
-                FileUtil.combineTextFile(combinedOutputFilePath, outputFileList);
+                JACGFileUtil.combineTextFile(combinedOutputFilePath, outputFileList);
             }
         }
     }
@@ -230,16 +242,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 根据调用关系ID获取用于提示的信息
     private NoticeCallInfo queryNoticeCallInfo(int currentMethodCallId) {
         String sqlKey = JACGConstants.SQL_KEY_MC_QUERY_NOTICE_INFO;
-        String sql = sqlCacheMap.get(sqlKey);
+        String sql = DbOperWrapper.getCachedSql(sqlKey);
         if (sql == null) {
-            String columns = StringUtils.join(new String[]{
-                    DC.MC_CALLER_METHOD_HASH,
-                    DC.MC_CALLER_FULL_METHOD,
-                    DC.MC_CALLEE_FULL_METHOD
-            }, JACGConstants.FLAG_COMMA_WITH_SPACE);
-            sql = "select " + columns + " from " + JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
-                    " where " + DC.MC_ID + " = ?";
-            cacheSql(sqlKey, sql);
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_METHOD_HASH, DC.MC_CALLER_FULL_METHOD, DC.MC_CALLEE_FULL_METHOD) +
+                    " from " + JACGConstants.TABLE_PREFIX_METHOD_CALL + confInfo.getAppName() +
+                    " where " + DC.MC_CALL_ID + " = ?";
+            DbOperWrapper.cacheSql(sqlKey, sql);
         }
 
         Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{currentMethodCallId});
@@ -267,9 +275,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     protected boolean recordMethodCallMayBeMulti(int currentMethodCallId, String callType) {
         CallTypeEnum callTypeEnum = CallTypeEnum.getFromType(callType);
         if (callTypeEnum != CallTypeEnum.CTE_ITF && callTypeEnum != CallTypeEnum.CTE_SCC) {
+            // 对于接口调用实现类、父类调用子类之外的情况，不判断是否出现出现一对多的方法调用
             return true;
         }
 
+        // 对于接口调用实现类、父类调用子类，判断是否出现出现一对多的方法调用
         // 根据调用关系ID获取用于提示的信息
         NoticeCallInfo noticeCallInfo = queryNoticeCallInfo(currentMethodCallId);
         if (noticeCallInfo == null) {
@@ -277,14 +287,14 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         Map<String, MultiCallInfo> methodCallMap;
-        Set<String> multiCallerMethodSet;
+        Set<String> multiCallerFullMethodSet;
 
         if (callTypeEnum == CallTypeEnum.CTE_ITF) {
             methodCallMap = itfMethodCallMap;
-            multiCallerMethodSet = itfMultiCallerMethodSet;
+            multiCallerFullMethodSet = itfMultiCallerFullMethodSet;
         } else {
             methodCallMap = sccMethodCallMap;
-            multiCallerMethodSet = sccMultiCallerMethodSet;
+            multiCallerFullMethodSet = sccMultiCallerFullMethodSet;
         }
 
         String callerMethodHash = noticeCallInfo.getCallerMethodHash();
@@ -304,21 +314,21 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         Set<String> calleeMethodSet = multiCallInfo.getCalleeFullMethodSet();
         calleeMethodSet.add(calleeFullMethod);
         if (calleeMethodSet.size() > 1) {
-            multiCallerMethodSet.add(callerFullMethod);
+            multiCallerFullMethodSet.add(callerFullMethod);
         }
 
         return true;
     }
 
     // 记录被禁用的方法调用
-    protected boolean recordDisabledMethodCall(Integer id, String callType) {
+    protected boolean recordDisabledMethodCall(int callId, String callType) {
         CallTypeEnum callTypeEnum = CallTypeEnum.getFromType(callType);
         if (callTypeEnum != CallTypeEnum.CTE_ITF && callTypeEnum != CallTypeEnum.CTE_SCC) {
             return true;
         }
 
         // 根据调用关系ID获取用于提示的信息
-        NoticeCallInfo noticeCallInfo = queryNoticeCallInfo(id);
+        NoticeCallInfo noticeCallInfo = queryNoticeCallInfo(callId);
         if (noticeCallInfo == null) {
             return false;
         }
@@ -351,8 +361,20 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     // 打印存在一对多的方法调用
-    private void printMultiMethodCall(Map<String, MultiCallInfo> methodCallMap, Set<String> multiCallerMethodSet, CallTypeEnum callTypeEnum) {
-        if (multiCallerMethodSet.isEmpty()) {
+    private void printMultiMethodCall(Map<String, MultiCallInfo> methodCallMap, Set<String> multiCallerFullMethodSet, CallTypeEnum callTypeEnum) {
+        // 判断相关存在一对多的调用者方法是否有被其他方法调用，若未被调用则不显示
+        List<String> multiCallerFullMethodList = new ArrayList<>(multiCallerFullMethodSet.size());
+        for (String multiCallerFullMethod : multiCallerFullMethodSet) {
+            String multiCallerMethodHash = JACGUtil.genHashWithLen(multiCallerFullMethod);
+            if (Boolean.TRUE.equals(DbOperWrapper.checkExistsNormalMethodCallByCalleeMethodHash(multiCallerMethodHash))) {
+                // 当前存在一对多的调用者方法有被其他方法调用
+                multiCallerFullMethodList.add(multiCallerFullMethod);
+            } else {
+                logger.warn("当前存在一对多的调用者方法未被其他方法调用，不打印到文件中 {}", multiCallerFullMethod);
+            }
+        }
+
+        if (multiCallerFullMethodList.isEmpty()) {
             logger.info("{} 不存在一对多的方法调用，不打印相关信息", callTypeEnum);
             return;
         }
@@ -376,36 +398,42 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             } else {
                 stringBuilder.append("出现当前文件，说明抽象父类调用对应子类的方法调用存在一对多的方法调用");
             }
+
             stringBuilder.append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
                     .append("可以使用以下SQL语句查找对应的方法调用并禁用，仅保留需要的调用关系").append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
-                    .append("```sql").append(JACGConstants.NEW_LINE)
+                    .append(JACGConstants.FLAG_MD_CODE_SQL).append(JACGConstants.NEW_LINE)
                     // 生成提示信息中的查询SQL
                     .append(genNoticeSelectSql(callTypeEnum.getType())).append(JACGConstants.NEW_LINE)
                     // 生成提示信息中的更新为禁用SQL
                     .append(genNoticeUpdateDisableSql(callTypeEnum.getType())).append(JACGConstants.NEW_LINE);
+
             if (this instanceof RunnerGenAllGraph4Callee) {
                 // 生成向上的方法调用完整调用链时，增加一个显示的update语句
                 stringBuilder.append(JACGConstants.NEW_LINE).append(genNoticeSelectSql4Callee()).append(JACGConstants.NEW_LINE)
                         .append(genNoticeUpdateDisableSql4Callee()).append(JACGConstants.NEW_LINE);
             }
-            stringBuilder.append("```");
 
-            for (String multiCallerMethod : multiCallerMethodSet) {
-                MultiCallInfo multiCallInfo = methodCallMap.get(multiCallerMethod);
+            stringBuilder.append(JACGConstants.FLAG_MD_CODE);
+
+            for (String multiCallerFullMethod : multiCallerFullMethodList) {
+                MultiCallInfo multiCallInfo = methodCallMap.get(multiCallerFullMethod);
                 if (multiCallInfo == null || JACGUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
-                    logger.error("未查找到对应的一对多方法调用关系 {}", multiCallerMethod);
+                    logger.error("未查找到对应的一对多方法调用关系 {}", multiCallerFullMethod);
                     continue;
                 }
+
                 stringBuilder.append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
-                        .append("## ").append(multiCallerMethod).append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
+                        .append("## ").append(multiCallerFullMethod).append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
                         .append("- ").append(DC.MC_CALLER_METHOD_HASH).append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
                         .append(multiCallInfo.getCallerMethodHash()).append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
                         .append("- ").append(DC.MC_CALLEE_FULL_METHOD).append("（被调用的方法）").append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
-                        .append("```").append(JACGConstants.NEW_LINE);
+                        .append(JACGConstants.FLAG_MD_CODE).append(JACGConstants.NEW_LINE);
+
                 for (String calleeMethod : multiCallInfo.getCalleeFullMethodSet()) {
                     stringBuilder.append(calleeMethod).append(JACGConstants.NEW_LINE);
                 }
-                stringBuilder.append("```");
+
+                stringBuilder.append(JACGConstants.FLAG_MD_CODE);
 
                 // 打印存在一对多的方法调用，自定义处理
                 printMultiMethodCallCustom(multiCallInfo.getCallerMethodHash(), stringBuilder);
@@ -449,12 +477,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             }
             stringBuilder.append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
                     .append("可以使用以下SQL语句查找对应的方法调用并启用").append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
-                    .append("```sql").append(JACGConstants.NEW_LINE)
+                    .append(JACGConstants.FLAG_MD_CODE_SQL).append(JACGConstants.NEW_LINE)
                     // 生成提示信息中的查询SQL
                     .append(genNoticeSelectSql(callTypeEnum.getType())).append(JACGConstants.NEW_LINE)
                     // 生成提示信息中的更新为禁用SQL
                     .append(genNoticeUpdateEnableSql(callTypeEnum.getType())).append(JACGConstants.NEW_LINE)
-                    .append("```");
+                    .append(JACGConstants.FLAG_MD_CODE);
 
             for (Map.Entry<String, MultiCallInfo> entry : disabledMethodCallMap.entrySet()) {
                 String disabledCallerMethod = entry.getKey();
@@ -469,11 +497,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                         .append("- ").append(DC.MC_CALLER_METHOD_HASH).append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
                         .append(multiCallInfo.getCallerMethodHash()).append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
                         .append("- ").append(DC.MC_CALLEE_FULL_METHOD).append("（被调用的方法）").append(JACGConstants.NEW_LINE).append(JACGConstants.NEW_LINE)
-                        .append("```").append(JACGConstants.NEW_LINE);
+                        .append(JACGConstants.FLAG_MD_CODE).append(JACGConstants.NEW_LINE);
                 for (String calleeMethod : multiCallInfo.getCalleeFullMethodSet()) {
                     stringBuilder.append(calleeMethod).append(JACGConstants.NEW_LINE);
                 }
-                stringBuilder.append("```");
+                stringBuilder.append(JACGConstants.FLAG_MD_CODE);
             }
 
             out.write(stringBuilder.toString());
@@ -484,8 +512,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 打印提示信息
     protected void printNoticeInfo() {
-        printMultiMethodCall(itfMethodCallMap, itfMultiCallerMethodSet, CallTypeEnum.CTE_ITF);
-        printMultiMethodCall(sccMethodCallMap, sccMultiCallerMethodSet, CallTypeEnum.CTE_SCC);
+        printMultiMethodCall(itfMethodCallMap, itfMultiCallerFullMethodSet, CallTypeEnum.CTE_ITF);
+        printMultiMethodCall(sccMethodCallMap, sccMultiCallerFullMethodSet, CallTypeEnum.CTE_SCC);
         printDisabledMethodCall(disabledItfMethodCallMap, CallTypeEnum.CTE_ITF);
         printDisabledMethodCall(disabledSccMethodCallMap, CallTypeEnum.CTE_SCC);
     }
@@ -567,11 +595,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         String[] array = getJarArray();
         for (String jarName : array) {
-            if (!FileUtil.isFileExists(jarName)) {
+            if (!JACGFileUtil.isFileExists(jarName)) {
                 continue;
             }
 
-            String jarFilePath = FileUtil.getCanonicalPath(jarName);
+            String jarFilePath = JACGFileUtil.getCanonicalPath(jarName);
             if (jarFilePath == null) {
                 logger.error("获取文件路径失败: {}", jarName);
                 return true;
@@ -581,18 +609,18 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             Map<String, Object> jarInfo = jarInfoMap.get(jarPathHash);
             if (jarInfo == null) {
                 String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
-                logger.error("指定的Jar包未导入数据库中，请先执行 TestRunnerWriteDb 类导入数据库\n{} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
+                logger.error("指定的Jar包未导入数据库中，请先执行 TestRunnerWriteDb 或 TestRunnerWriteDbJavaCGRecordAll 类导入数据库\n{} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
                         jarName, jarFullPath, JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED);
                 return true;
             }
 
-            long lastModified = FileUtil.getFileLastModified(jarFilePath);
+            long lastModified = JACGFileUtil.getFileLastModified(jarFilePath);
             String lastModifiedStr = String.valueOf(lastModified);
             if (!lastModifiedStr.equals(jarInfo.get(DC.JI_LAST_MODIFIED))) {
-                String jarFileHash = FileUtil.getFileMd5(jarFilePath);
+                String jarFileHash = JACGFileUtil.getFileMd5(jarFilePath);
                 if (!StringUtils.equals(jarFileHash, (String) jarInfo.get(DC.JI_JAR_HASH))) {
                     String jarFullPath = jarName.equals(jarFilePath) ? "" : jarFilePath;
-                    logger.error("指定的Jar包文件内容有变化，请先执行 TestRunnerWriteDb 类导入数据库\n{} {} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
+                    logger.error("指定的Jar包文件内容有变化，请先执行 TestRunnerWriteDb 或 TestRunnerWriteDbJavaCGRecordAll 类导入数据库\n{} {} {}\n假如不需要检查Jar包文件是否有更新，可在启动参数中指定 -D{}=任意值",
                             new Date(lastModified), jarName, jarFullPath, JACGConstants.PROPERTY_SKIP_CHECK_JAR_FILE_UPDATED);
                     return true;
                 }
@@ -605,13 +633,13 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     protected boolean checkH2DbFile() {
         File h2DbFile = getH2DbFile();
         if (!h2DbFile.exists()) {
-            logger.error("H2数据库文件不存在，请先执行 TestRunnerWriteDb 类导入数据库 {}", FileUtil.getCanonicalPath(h2DbFile));
+            logger.error("H2数据库文件不存在，请先执行 TestRunnerWriteDb 或 TestRunnerWriteDbJavaCGRecordAll 类导入数据库 {}", JACGFileUtil.getCanonicalPath(h2DbFile));
             return false;
         }
 
         // 数据库文件存在
         if (!h2DbFile.isFile()) {
-            logger.error("H2数据库文件不是文件 {}", FileUtil.getCanonicalPath(h2DbFile));
+            logger.error("H2数据库文件不是文件 {}", JACGFileUtil.getCanonicalPath(h2DbFile));
             return false;
         }
 
@@ -621,10 +649,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     private Map<String, Map<String, Object>> queryJarFileInfo() {
         String sqlKey = JACGConstants.SQL_KEY_JI_QUERY_JAR_INFO;
-        String sql = sqlCacheMap.get(sqlKey);
+        String sql = DbOperWrapper.getCachedSql(sqlKey);
         if (sql == null) {
             sql = "select * from " + JACGConstants.TABLE_PREFIX_JAR_INFO + confInfo.getAppName();
-            cacheSql(sqlKey, sql);
+            DbOperWrapper.cacheSql(sqlKey, sql);
         }
 
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{});
@@ -713,8 +741,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      */
     protected String getMethodAnnotationInfo(String methodHash) {
         // 根据完整方法HASH+长度获取对应的注解信息
-        AnnotationInfo4Method annotationInfo4Method = AnnotationStorage.getAnnotationInfo4Method(methodHash);
-        if (annotationInfo4Method == null) {
+        Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = AnnotationStorage.getAnnotationMap4Method(methodHash);
+        if (methodAnnotationMap == null) {
             // 当前方法上没有注解
             return "";
         }
@@ -729,16 +757,31 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         // 当前方法对应的注解信息未查询过
         StringBuilder stringBuilder = new StringBuilder();
 
-        // 遍历当前方法上的所有注解进行处理
-        for (AnnotationInfo4Read annotationInfo4Read : annotationInfo4Method.getAnnotationInfo4ReadList()) {
-            // 遍历用于对方法上的注解进行处理的类
-            for (AbstractAnnotationHandler annotationHandler : annotationHandlerList) {
-                if (annotationHandler.checkHandleAnnotation(annotationInfo4Read.getAnnotationName())) {
-                    // 找到能够处理的类进行处理
-                    String annotationInfo = annotationHandler.handleAnnotation(annotationInfo4Method.getFullMethod(), annotationInfo4Method.getFullClassName(),
-                            annotationInfo4Read);
-                    stringBuilder.append(annotationInfo);
-                    break;
+        MethodWithAnnotationInfo methodWithAnnotationInfo = AnnotationStorage.getMethodWithAnnotationInfo(methodHash);
+        if (methodWithAnnotationInfo != null) {
+            // 遍历当前方法上的所有注解进行处理
+            for (Map.Entry<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMapEntry : methodAnnotationMap.entrySet()) {
+                String annotationName = methodAnnotationMapEntry.getKey();
+                // 遍历用于对方法上的注解进行处理的类
+                for (AbstractAnnotationHandler annotationHandler : annotationHandlerList) {
+                    if (annotationHandler.checkHandleAnnotation(annotationName)) {
+                        // 找到能够处理的类进行处理
+                        String annotationInfo = annotationHandler.handleAnnotation(methodWithAnnotationInfo.getFullMethod(), methodWithAnnotationInfo.getFullClassName(),
+                                annotationName, methodAnnotationMapEntry.getValue());
+                        // 假如注解信息中包含了特定字符，会导致调用链文件行分隔时出现问题，因此将TAB替换为空格，半角@替换为全角＠
+                        if (StringUtils.contains(annotationInfo, JACGConstants.FLAG_TAB)) {
+                            logger.warn("注解内容中包含了TAB，将其替换为空格，请确认是否有影响 {}", annotationInfo);
+                            annotationInfo = annotationInfo.replace(JACGConstants.FLAG_TAB, JACGConstants.FLAG_SPACE);
+                        }
+                        if (StringUtils.contains(annotationInfo, JACGConstants.FLAG_AT)) {
+                            logger.warn("注解内容中包含了半角{}，将其替换为全角＠，请确认是否有影响 {}", JACGConstants.FLAG_AT, annotationInfo);
+                            annotationInfo = annotationInfo.replace(JACGConstants.FLAG_AT, "＠");
+                        }
+
+                        // 注解信息以@开头，在以上方法中不需要返回以@开头
+                        stringBuilder.append(JACGConstants.FLAG_AT).append(annotationInfo);
+                        break;
+                    }
                 }
             }
         }
@@ -767,14 +810,14 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 执行通过代码行号获取调用者方法
     protected FindMethodInfo doFindCallerMethodByLineNumber(String className, int methodLineNum) {
         String sqlKey = JACGConstants.SQL_KEY_MLN_QUERY_METHOD;
-        String sql = sqlCacheMap.get(sqlKey);
+        String sql = DbOperWrapper.getCachedSql(sqlKey);
         if (sql == null) {
-            sql = "select " + StringUtils.joinWith(JACGConstants.FLAG_COMMA_WITH_SPACE, DC.MLN_METHOD_HASH, DC.MLN_FULL_METHOD) +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MLN_METHOD_HASH, DC.MLN_FULL_METHOD) +
                     " from " + JACGConstants.TABLE_PREFIX_METHOD_LINE_NUMBER + confInfo.getAppName() +
                     " where " + DC.MLN_SIMPLE_CLASS_NAME + " = ? and " +
                     DC.MLN_MIN_LINE_NUMBER + " <= ? and " +
                     DC.MLN_MAX_LINE_NUMBER + " >= ? limit 1";
-            cacheSql(sqlKey, sql);
+            DbOperWrapper.cacheSql(sqlKey, sql);
         }
 
         Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{className, methodLineNum, methodLineNum});

@@ -1,7 +1,6 @@
 package test.jacg;
 
-import com.adrninistrator.jacg.other.FindKeywordCallGraph;
-import com.adrninistrator.jacg.other.GenSingleCallGraph;
+import com.adrninistrator.jacg.find_keyword.FindKeywordCallGraph;
 
 /**
  * @author adrninistrator
@@ -12,7 +11,6 @@ import com.adrninistrator.jacg.other.GenSingleCallGraph;
 public class TestFindKeywordCallGraph4ee {
 
     public static void main(String[] args) {
-        GenSingleCallGraph.setOrder4ee();
-        new FindKeywordCallGraph().find(args);
+        new FindKeywordCallGraph().find(true);
     }
 }

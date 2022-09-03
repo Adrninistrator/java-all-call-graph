@@ -1,7 +1,8 @@
 package com.adrninistrator.jacg.extensions.annotation_handler;
 
-import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Read;
+import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -16,8 +17,8 @@ public class DefaultAnnotationHandler extends AbstractAnnotationHandler {
     }
 
     @Override
-    public String handleAnnotation(String fullMethod, String fullClassName, AnnotationInfo4Read annotationInfo4Read) {
-        // 对注解的默认处理，返回@注解类名
-        return JACGConstants.FLAG_AT + annotationInfo4Read.getAnnotationName();
+    public String handleAnnotation(String fullMethod, String fullClassName, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
+        // 对注解的默认处理，返回注解类名
+        return annotationName;
     }
 }

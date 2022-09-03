@@ -20,7 +20,7 @@ com.adrninistrator.jacg.conf.ConfigureWrapper
 
 以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中调用了ConfigureWrapper类的方法。
 
-### 2.1.1. 设置~jacg_config/config.properties配置文件参数
+### 2.1.1. 设置_jacg_config/config.properties配置文件参数
 
 ```java
 ConfigureWrapper.addConfig(ConfigKeyEnum configKeyEnum, String value);
@@ -28,7 +28,7 @@ ConfigureWrapper.addConfig(ConfigKeyEnum configKeyEnum, String value);
 
 `对于app.name参数，在以上方法中会将参数值中的-替换为_`
 
-ConfigKeyEnum枚举类中定义了~jacg_config/config.properties配置文件中的参数key
+ConfigKeyEnum枚举类中定义了_jacg_config/config.properties配置文件中的参数key
 
 通过value参数指定需要设置的参数值
 
@@ -38,13 +38,13 @@ ConfigKeyEnum枚举类中定义了~jacg_config/config.properties配置文件中�
 ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
 ```
 
-### 2.1.2. 设置~jacg_config、~jacg_extensions目录配置文件参数
+### 2.1.2. 设置_jacg_config、_jacg_extensions目录配置文件参数
 
 ```java
 ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
 ```
 
-OtherConfigFileUseSetEnum枚举类中定义了~jacg_config目录中其他配置文件的文件名，以及~jacg_extensions目录中的配置文件名
+OtherConfigFileUseSetEnum枚举类中定义了_jacg_config目录中其他配置文件的文件名，以及_jacg_extensions目录中的配置文件名
 
 通过configSet参数指定需要设置的Set类型的参数值
 
@@ -57,13 +57,13 @@ ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_C
         "java.")));
 ```
 
-### 2.1.3. 设置~jacg_find_keyword目录配置文件参数
+### 2.1.3. 设置_jacg_find_keyword目录配置文件参数
 
 ```java
 ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList);
 ```
 
-OtherConfigFileUseListEnum枚举类中定义了~jacg_find_keyword目录中配置文件的文件名
+OtherConfigFileUseListEnum枚举类中定义了_jacg_find_keyword目录中配置文件的文件名
 
 通过configList参数指定需要设置的List类型的参数值
 
@@ -83,10 +83,10 @@ ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWO
 在生成的`output_dir`目录中，包含了当前项目生成的jar包、依赖jar包，以及资源文件、启动脚本等，如下所示：
 
 ```
-~jacg_config
-~jacg_extensions
-~jacg_find_keyword
-~jacg_sql
+_jacg_config
+_jacg_extensions
+_jacg_find_keyword
+_jacg_sql
 jar
 lib
 run.bat

@@ -10,7 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyVetoException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +105,13 @@ public class DbOperator {
             try {
 //            return DriverManager.getConnection(confInfo.getDbUrl(), confInfo.getDbUsername(), confInfo.getDbPassword());
                 return cpds.getConnection();
+            } catch (SQLException e) {
+                if (StringUtils.contains(e.getMessage(), " has been closed() -- you can no longer use it.")) {
+                    // 以上错误信息见com.mchange.v2.c3p0.impl.AbstractPoolBackedDataSource类，assertCpds()方法
+                    logger.error("数据源已被关闭，若此时确实需要操作数据库，可在操作开始执行调用 AbstractRunner.setCloseDsBeforeExit(false); 方法，使操作完毕时不关闭数据源");
+                }
+                logger.error("getConnection SQLException error ", e);
+                return null;
             } catch (Exception e) {
                 logger.error("getConnection error ", e);
                 return null;
@@ -109,6 +121,7 @@ public class DbOperator {
 
     public void closeDs() {
         if (cpds != null) {
+            logger.info("关闭数据源");
             cpds.close();
         }
     }
@@ -242,8 +255,7 @@ public class DbOperator {
         try {
             stmt = connection.prepareStatement(sql);
             setArguments(stmt, arguments);
-            int row = stmt.executeUpdate();
-            return Integer.valueOf(row);
+            return stmt.executeUpdate();
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] ", sql, e);

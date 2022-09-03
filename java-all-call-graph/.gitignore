@@ -16,6 +16,6 @@ out/
 /.DS_Store
 *.iml
 .classpath
-~jacg_o_ee/
-~jacg_o_er/
+_jacg_o_ee/
+_jacg_o_er/
 output_dir/

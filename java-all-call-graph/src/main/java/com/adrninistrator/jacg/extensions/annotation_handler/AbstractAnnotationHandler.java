@@ -1,6 +1,8 @@
 package com.adrninistrator.jacg.extensions.annotation_handler;
 
-import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Read;
+import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -20,11 +22,13 @@ public abstract class AbstractAnnotationHandler {
 
     /**
      * 返回方法上的注解处理后的结果
+     * 当前方法不需要以@开头
      *
-     * @param fullMethod
-     * @param fullClassName
-     * @param annotationInfo4Read
+     * @param fullMethod     完整方法
+     * @param fullClassName  方法所在类完整类名
+     * @param annotationName 注解类名
+     * @param attributesMap  注解属性Map
      * @return
      */
-    public abstract String handleAnnotation(String fullMethod, String fullClassName, AnnotationInfo4Read annotationInfo4Read);
+    public abstract String handleAnnotation(String fullMethod, String fullClassName, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap);
 }

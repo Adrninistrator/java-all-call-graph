@@ -84,7 +84,7 @@ list.stream().map(TestDto1::getStr).collect(Collectors.toList());
 
 - 数据库表
 
-在获取了Java方法调用关系之后，将其保存在数据库中，可查看java-all-callgraph.jar释放的~jacg_sql目录中的.sql文件，相关数据库表如下所示：
+在获取了Java方法调用关系之后，将其保存在数据库中，可查看java-all-callgraph.jar释放的_jacg_sql目录中的.sql文件，相关数据库表如下所示：
 
 |表名前缀|注释|作用|
 |---|---|---|
@@ -97,6 +97,6 @@ list.stream().map(TestDto1::getStr).collect(Collectors.toList());
 |method_call_|方法调用关系表|保存各方法之间调用信息|
 |method_line_number_|方法代码行号信息表|保存各方法的起始代码行号|
 
-上述数据库表在创建时使用表名前缀加上配置文件`~jacg_config/config.properties`中的`app.name`参数值。
+上述数据库表在创建时使用表名前缀加上配置文件`_jacg_config/config.properties`中的`app.name`参数值。
 
 本工具会主要从方法调用关系表中逐级查询数据，生成完整的方法调用链。

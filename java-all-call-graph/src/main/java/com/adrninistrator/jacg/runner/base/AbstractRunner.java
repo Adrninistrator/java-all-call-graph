@@ -3,9 +3,10 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfManager;
+import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
-import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,8 +18,6 @@ import java.nio.channels.FileLock;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -46,9 +45,6 @@ public abstract class AbstractRunner {
     protected DbOperator dbOperator;
 
     protected ThreadPoolExecutor threadPoolExecutor;
-
-    // 预编译SQL语句缓存
-    protected Map<String, String> sqlCacheMap = new ConcurrentHashMap<>();
 
     // 任务执行失败标志
     protected boolean someTaskFail = false;
@@ -86,6 +82,8 @@ public abstract class AbstractRunner {
         if (!dbOperator.init(confInfo)) {
             return false;
         }
+
+        DbOperWrapper.init(dbOperator, confInfo.getAppName());
 
         if (!init()) {
             logger.error("{} 初始化失败", this.getClass().getSimpleName());
@@ -137,12 +135,6 @@ public abstract class AbstractRunner {
             dbOperator.closeDs();
         } else {
             logger.info("操作结束时不关闭数据源");
-        }
-    }
-
-    protected void cacheSql(String key, String sql) {
-        if (sqlCacheMap.putIfAbsent(key, sql) == null) {
-            logger.info("cache sql: [{}] [{}]", key, sql);
         }
     }
 
@@ -207,7 +199,7 @@ public abstract class AbstractRunner {
         try (FileChannel channel = FileChannel.open(h2DbFile.toPath(), StandardOpenOption.WRITE)) {
             FileLock fileLock = channel.tryLock();
             if (fileLock == null) {
-                logger.error("H2数据库文件无法写入，请先关闭H2数据库工具打开的H2数据库文件 {}", FileUtil.getCanonicalPath(h2DbFile));
+                logger.error("H2数据库文件无法写入，请先关闭H2数据库工具打开的H2数据库文件 {}", JACGFileUtil.getCanonicalPath(h2DbFile));
                 return false;
             }
 
@@ -216,7 +208,7 @@ public abstract class AbstractRunner {
             CHECK_H2_DB_FILE_WRITEABLE = true;
             return true;
         } catch (Exception e) {
-            logger.error("检查H2数据库文件是否可以写入失败 {} ", FileUtil.getCanonicalPath(h2DbFile), e);
+            logger.error("检查H2数据库文件是否可以写入失败 {} ", JACGFileUtil.getCanonicalPath(h2DbFile), e);
             return false;
         }
     }
@@ -235,6 +227,7 @@ public abstract class AbstractRunner {
         }
     }
 
+    // 设置处理完毕时是否需要关闭数据源
     public static void setCloseDsBeforeExit(boolean closeDsBeforeExit) {
         CLOSE_DS_BEFORE_EXIT = closeDsBeforeExit;
     }

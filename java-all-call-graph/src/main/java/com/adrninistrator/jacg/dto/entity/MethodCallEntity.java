@@ -16,13 +16,13 @@ public class MethodCallEntity {
     private String callerFullMethod;
     private String callerMethodName;
     private String callerFullClassName;
-    private String callerSimpleClassName;
+    private String callerClassName;
     private int callerLineNum;
     private String calleeMethodHash;
-    private String finalCalleeFullMethod;
+    private String calleeFullMethod;
     private String calleeMethodName;
     private String calleeFullClassName;
-    private String calleeSimpleClassName;
+    private String calleeClassName;
 
     public Integer getId() {
         return id;
@@ -88,12 +88,12 @@ public class MethodCallEntity {
         this.callerFullClassName = callerFullClassName;
     }
 
-    public String getCallerSimpleClassName() {
-        return callerSimpleClassName;
+    public String getCallerClassName() {
+        return callerClassName;
     }
 
-    public void setCallerSimpleClassName(String callerSimpleClassName) {
-        this.callerSimpleClassName = callerSimpleClassName;
+    public void setCallerClassName(String callerClassName) {
+        this.callerClassName = callerClassName;
     }
 
     public int getCallerLineNum() {
@@ -112,12 +112,12 @@ public class MethodCallEntity {
         this.calleeMethodHash = calleeMethodHash;
     }
 
-    public String getFinalCalleeFullMethod() {
-        return finalCalleeFullMethod;
+    public String getCalleeFullMethod() {
+        return calleeFullMethod;
     }
 
-    public void setFinalCalleeFullMethod(String finalCalleeFullMethod) {
-        this.finalCalleeFullMethod = finalCalleeFullMethod;
+    public void setCalleeFullMethod(String calleeFullMethod) {
+        this.calleeFullMethod = calleeFullMethod;
     }
 
     public String getCalleeMethodName() {
@@ -136,11 +136,11 @@ public class MethodCallEntity {
         this.calleeFullClassName = calleeFullClassName;
     }
 
-    public String getCalleeSimpleClassName() {
-        return calleeSimpleClassName;
+    public String getCalleeClassName() {
+        return calleeClassName;
     }
 
-    public void setCalleeSimpleClassName(String calleeSimpleClassName) {
-        this.calleeSimpleClassName = calleeSimpleClassName;
+    public void setCalleeClassName(String calleeClassName) {
+        this.calleeClassName = calleeClassName;
     }
 }

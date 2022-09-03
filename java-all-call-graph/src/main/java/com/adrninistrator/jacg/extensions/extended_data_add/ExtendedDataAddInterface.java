@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.extensions.extended_data_add;
 
-import com.adrninistrator.jacg.extensions.dto.BaseExtendedData;
+import com.adrninistrator.jacg.extensions.dto.extened_data.BaseExtendedData;
 
 /**
  * @author adrninistrator

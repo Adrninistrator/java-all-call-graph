@@ -7,20 +7,27 @@ package com.adrninistrator.jacg.common;
  */
 
 public class DC {
+    public static final String COMMON_ANNOTATION_ANNOTATION_NAME = "annotation_name";
+    public static final String COMMON_ANNOTATION_ATTRIBUTE_NAME = "attribute_name";
+    public static final String COMMON_ANNOTATION_ATTRIBUTE_VALUE = "attribute_value";
+
+    public static final String ALIAS_ANNOTATION_CLASS_OR_METHOD = "class_or_method";
 
     public static final String CN_FULL_NAME = "full_name";
     public static final String CN_SIMPLE_NAME = "simple_name";
 
     public static final String CA_FULL_CLASS_NAME = "full_class_name";
-    public static final String CA_ANNOTATION_NAME = "annotation_name";
-    public static final String CA_ANNOTATION_ATTRIBUTES = "annotation_attributes";
+    public static final String CA_ANNOTATION_NAME = COMMON_ANNOTATION_ANNOTATION_NAME;
+    public static final String CA_ATTRIBUTE_NAME = COMMON_ANNOTATION_ATTRIBUTE_NAME;
+    public static final String CA_ATTRIBUTE_VALUE = COMMON_ANNOTATION_ATTRIBUTE_VALUE;
 
     public static final String MA_METHOD_HASH = "method_hash";
-    public static final String MA_ANNOTATION_NAME = "annotation_name";
-    public static final String MA_ANNOTATION_ATTRIBUTES = "annotation_attributes";
+    public static final String MA_ANNOTATION_NAME = COMMON_ANNOTATION_ANNOTATION_NAME;
+    public static final String MA_ATTRIBUTE_NAME = COMMON_ANNOTATION_ATTRIBUTE_NAME;
+    public static final String MA_ATTRIBUTE_VALUE = COMMON_ANNOTATION_ATTRIBUTE_VALUE;
     public static final String MA_FULL_METHOD = "full_method";
 
-    public static final String MC_ID = "id";
+    public static final String MC_CALL_ID = "call_id";
     public static final String MC_CALL_TYPE = "call_type";
     public static final String MC_ENABLED = "enabled";
     public static final String MC_CALLER_JAR_NUM = "caller_jar_num";

@@ -1,7 +1,7 @@
 -- 查找重名类
-select full_name, simple_name from class_name_wfts_fcts_adm where simple_name in
+select full_name, simple_name from class_name_xxx where simple_name in
 (
-select simple_name from class_name_wfts_fcts_adm group by simple_name having count(simple_name) > 1
+select simple_name from class_name_xxx group by simple_name having count(simple_name) > 1
 )
 
 -- 查找重名类方法调用
@@ -47,13 +47,34 @@ select * from method_call_xxx where callee_method_name = ''
 -- 查找特定被调用方法名及对应的类
 select distinct(callee_full_class_name), callee_method_name from method_call_xxx where callee_method_name in ('toDenseJson','')
 
--- 查找对应多个实现类或子类的接口或父类
-SELECT COUNT(combine) AS cc , ercn FROM
+-- 查找对应多个实现类或子类的接口或父类，查找完整方法（接口或父类方法有被其他方法调用），H2数据库语法
+SELECT DISTINCT r2.cc,  r1."caller_full_method"
+FROM "jacg"."method_call_xxx" r1
+JOIN 
 (
-SELECT DISTINCT CONCAT("caller_class_name", ':', "callee_class_name") AS combine, "caller_class_name" AS ercn
-FROM "jacg"."method_call_xxx"
-WHERE "call_type" IN ('ITF','SCC')
+	SELECT COUNT(eemh) AS cc, ermh FROM
+	(
+		SELECT DISTINCT a."callee_method_hash" AS eemh, a."caller_method_hash" AS ermh
+		FROM "jacg"."method_call_xxx" a, "jacg"."method_call_xxx" b
+		WHERE a."call_type" IN ('ITF','SCC')
+		AND a."caller_method_hash" = b."callee_method_hash"
+		AND b."call_type" NOT IN ('ITF','SCC','CCS')
+	)
+	GROUP BY ermh
+	HAVING cc > 1
+) r2
+ON r1."caller_method_hash" = r2.ermh
+ORDER BY r2.cc DESC
+
+-- 查找对应多个实现类或子类的接口或父类，查找简单类名（接口或父类方法有被其他方法调用），H2数据库语法
+SELECT COUNT(eecn) AS cc, ercn FROM
+(
+	SELECT DISTINCT a."callee_class_name" AS eecn, a."caller_class_name" AS ercn
+	FROM "jacg"."method_call_xxx" a, "jacg"."method_call_xxx" b
+	WHERE a."call_type" IN ('ITF','SCC')
+	AND a."caller_class_name" = b."callee_class_name"
+	AND b."call_type" NOT IN ('ITF','SCC','CCS')
 )
 GROUP BY ercn
 HAVING cc > 1
-ORDER BY cc DESC;
+ORDER BY cc DESC

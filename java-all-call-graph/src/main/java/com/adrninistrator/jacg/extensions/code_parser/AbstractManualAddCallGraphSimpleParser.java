@@ -1,9 +1,9 @@
 package com.adrninistrator.jacg.extensions.code_parser;
 
-import com.adrninistrator.javacg.dto.CallIdCounter;
-import com.adrninistrator.javacg.dto.ClassInterfaceMethodInfo;
-import com.adrninistrator.javacg.dto.ExtendsClassMethodInfo;
-import com.adrninistrator.javacg.dto.MethodCallDto;
+import com.adrninistrator.javacg.dto.classes.ClassInterfaceMethodInfo;
+import com.adrninistrator.javacg.dto.classes.ExtendsClassMethodInfo;
+import com.adrninistrator.javacg.dto.counter.CallIdCounter;
+import com.adrninistrator.javacg.dto.method.MethodCallDto;
 import com.adrninistrator.javacg.enums.CallTypeEnum;
 import com.adrninistrator.javacg.extensions.code_parser.CustomCodeParserInterface;
 import com.adrninistrator.javacg.util.JavaCGUtil;

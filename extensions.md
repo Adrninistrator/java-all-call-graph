@@ -32,7 +32,7 @@ com.adrninistrator.jacg.extensions.code_parser.AbstractManualAddCallGraphSimpleP
 
 - 在配置文件中指定以上类
 
-在“resources/~jacg_extensions/code_parser.properties”配置文件中指定以上自定义处理类的完整类名，可指定多个类，如下所示：
+在“resources/_jacg_extensions/code_parser.properties”配置文件中指定以上自定义处理类的完整类名，可指定多个类，如下所示：
 
 ```
 test.extensions.code_parser.MACGActionListenerParser

@@ -76,11 +76,11 @@ com.adrninistrator.jacg.unzip.UnzipFile
 
 需要选择classpath对应模块为test。
 
-执行以上类后，会将java-all-callgraph.jar中保存配置文件的~jacg_config、~jacg_extensions、~jacg_find_keyword、~jacg_sql目录，保存启动类（下文涉及的Test...类）的“test/jacg”目录，分别释放到当前Java项目的test模块的resources、java目录中（仅在本地生效，避免发布到服务器中）。
+执行以上类后，会将java-all-callgraph.jar中保存配置文件的_jacg_config、_jacg_extensions、_jacg_find_keyword、_jacg_sql目录，保存启动类（下文涉及的Test...类）的“test/jacg”目录，分别释放到当前Java项目的test模块的resources、java目录中（仅在本地生效，避免发布到服务器中）。
 
 若当前Java项目存在“src/test”或“src/unit.test”目录，则将配置文件与Java文件分别释放在该目录的resources、java目录中；
 
-若当前Java项目不存在以上目录，则将上述文件释放在“~jacg-[当前时间戳]”目录中，之后需要手工将对应目录拷贝至test模块对应目录中。
+若当前Java项目不存在以上目录，则将上述文件释放在“_jacg-[当前时间戳]”目录中，之后需要手工将对应目录拷贝至test模块对应目录中。
 
 当目标文件不存在时，则会进行释放；若目标文件已存在，则不会覆盖。
 
@@ -112,7 +112,7 @@ test.jacg.TestRunnerWriteDb
 
 ### 3.3.1. b.1 调用增强后的java-callgraph2.jar中的类的方法
 
-以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
+以上类会读取配置文件`_jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
 - call.graph.jar.list
 
@@ -124,7 +124,7 @@ test.jacg.TestRunnerWriteDb
 
 以上参数的处理依赖java-callgraph2中实现，可参考[https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)
 
-设置JVM参数“merge.class.in.jar.package”值为`~jacg_config/i_allowed_class_prefix.properties`配置文件中指定的信息，并以“#”作为多行数据的分隔符；
+设置JVM参数“merge.class.in.jar.package”值为`_jacg_config/i_allowed_class_prefix.properties`配置文件中指定的信息，并以“#”作为多行数据的分隔符；
 
 调用增强后的java-callgraph2.jar中的JCallGraph类的run方法，通过方法的参数传递上述jar包路径列表；
 
@@ -142,14 +142,14 @@ TestRunnerWriteDb类读取保存Java方法调用关系的文件，文件路径�
 
 ### 3.3.5. b.5 将Java方法调用关系写入数据库
 
-TestRunnerWriteDb类读取配置文件`~jacg_config/i_allowed_class_prefix.properties`，该文件中指定了需要处理的类名前缀，可指定包名，或包名+类名，示例如下：
+TestRunnerWriteDb类读取配置文件`_jacg_config/i_allowed_class_prefix.properties`，该文件中指定了需要处理的类名前缀，可指定包名，或包名+类名，示例如下：
 
 ```
 com.test
 com.test.Test1
 ```
 
-以上类会读取配置文件`~jacg_config/config.properties`中的以下参数，需要按照说明进行配置：
+以上类会读取配置文件`_jacg_config/config.properties`中的以下参数，需要按照说明进行配置：
 
 - app.name
 
@@ -197,13 +197,13 @@ H2数据库文件路径（仅当使用H2数据库时需要指定）
 
 忽略其他包的开关，值为true/false
 
-当开关为开时，仅将`~jacg_config/i_allowed_class_prefix.properties`中指定的类名前缀相符的类调用关系写入数据库
+当开关为开时，仅将`_jacg_config/i_allowed_class_prefix.properties`中指定的类名前缀相符的类调用关系写入数据库
 
 当开关为关时，所有的类调用关系都写入数据库
 
 以上类向数据库写入数据库前，会判断对应数据库表是否存在，若不存在则创建，之后会执行“TRUNCATE TABLE”操作清空表中的数据；
 
-根据配置文件`~jacg_config/config.properties`中的`input.ignore.other.package`参数值及配置文件`~jacg_config/i_allowed_class_prefix.properties`，将Java方法调用关系逐条写入数据库中；
+根据配置文件`_jacg_config/config.properties`中的`input.ignore.other.package`参数值及配置文件`_jacg_config/i_allowed_class_prefix.properties`，将Java方法调用关系逐条写入数据库中；
 
 增强后的java-callgraph2.jar除了会将Java方法调用关系写入文件外，还会将各个方法上的注解信息写入文件（文件名为保存方法调用关系的文件名加上“-annotation.txt”）；TestRunnerWriteDb类也会读取对应文件，将各方法上的注解信息写入数据库中。
 
@@ -232,7 +232,7 @@ test.jacg.TestRunnerGenAllGraph4Callee
 
 ### 3.4.1. c.1.1 从数据库读取Java方法调用关系
 
-TestRunnerGenAllGraph4Callee类读取配置文件`~jacg_config/o_g4callee_class_name.properties`，该文件中指定了需要生成向上完整调用链的类名，或类名+方法名前缀/代码行号；
+TestRunnerGenAllGraph4Callee类读取配置文件`_jacg_config/o_g4callee_class_name.properties`，该文件中指定了需要生成向上完整调用链的类名，或类名+方法名前缀/代码行号；
 
 格式如下：
 
@@ -262,29 +262,29 @@ Test1:test(java.lang.String)
 Test1:234
 ```
 
-以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
+以上类会读取配置文件`_jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
 - thread.num
 
 从数据库并发读取数据的线程数量，也是数据源连接池数量
 
-若`~jacg_config/o_g4callee_class_name.properties`配置文件中的记录数比该值小，则会使用记录数覆盖该参数值
+若`_jacg_config/o_g4callee_class_name.properties`配置文件中的记录数比该值小，则会使用记录数覆盖该参数值
 
 以下参数说明略：app.name、db.use.h2、db.h2.file.path、db.driver.name、db.url、db.username、db.password
 
 ### 3.4.2. c.1.2 将方法完整调用链（向上）写入文件
 
-对于配置文件`~jacg_config/o_g4callee_class_name.properties`中指定的类，对每个类生成一个对应的文件，文件名为“[类名].txt”，在某个类对应的文件中，会为对应类的每个方法生成向上完整调用链；
+对于配置文件`_jacg_config/o_g4callee_class_name.properties`中指定的类，对每个类生成一个对应的文件，文件名为“[类名].txt”，在某个类对应的文件中，会为对应类的每个方法生成向上完整调用链；
 
 以上文件名示例为“TestClass1.txt”
 
-每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“~jacg_o_ee/[yyyyMMdd-HHmmss.SSS]
+每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“_jacg_o_ee/[yyyyMMdd-HHmmss.SSS]
 
-生成向上的调用链时，会为“\~jacg_config/o_g4callee_class_name.properties”中指定的每个类的每个方法单独生成一个文件，保存在“\~jacg_o_ee/[yyyyMMdd-HHmmss.SSS]/methods”目录中，文件名格式为“[类名]@[方法名]@[完整方法名HASH+长度].txt”
+生成向上的调用链时，会为“\_jacg_config/o_g4callee_class_name.properties”中指定的每个类的每个方法单独生成一个文件，保存在“\_jacg_o_ee/[yyyyMMdd-HHmmss.SSS]/methods”目录中，文件名格式为“[类名]@[方法名]@[完整方法名HASH+长度].txt”
 
 每次执行生成的目录默认保存在当前目录中，若需要保存到其他目录中，可参考[JVM参数及Java代码开关](jvm_options_java_switch.md)，“指定生成结果文件根目录”部分；
 
-以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
+以上类会读取配置文件`_jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
 - call.graph.output.detail
 
@@ -314,7 +314,7 @@ Test1:234
 
 是否生成调用链的合并文件开关，值为true/false
 
-仅当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“~all-4callee.txt”
+仅当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“_all-4callee.txt”
 
 - show.caller.line.num
 
@@ -324,19 +324,19 @@ Test1:234
 
 ### 3.4.3. 生成配置文件中的任务信息与结果文件的映射关系
 
-每次生成方法调用链后，会在本次生成的目录中创建~mapping.txt文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
+每次生成方法调用链后，会在本次生成的目录中创建_mapping.txt文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
 
 该文件内容包含两列，以“\t”进行分隔，第1列为配置文件中指定的任务信息，第2列为生成结果文件路径，内容如下所示：
 
 ```
  配置文件中指定的任务信息	生成结果文件路径
-DbOperator:batchInsert(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
-DbOperator:getInstance(	~jacg_o_ee\20220505-211209.427\methods\DbOperator@getInstance@Fg85cQ0J0brkEXpMPCoHUA#037.txt
-DbOperator:268	~jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
-DbOperator:close(java.sql.Connection,java.sql.PreparedStatement)	~jacg_o_ee\20220505-211209.427\methods\DbOperator@close@9e5dsbPVD8648nV8on9Efw#05f.txt
+DbOperator:batchInsert(	_jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
+DbOperator:getInstance(	_jacg_o_ee\20220505-211209.427\methods\DbOperator@getInstance@Fg85cQ0J0brkEXpMPCoHUA#037.txt
+DbOperator:268	_jacg_o_ee\20220505-211209.427\methods\DbOperator@batchInsert@PVuwu2XS1Fvxj_FQA1Ekog#056.txt
+DbOperator:close(java.sql.Connection,java.sql.PreparedStatement)	_jacg_o_ee\20220505-211209.427\methods\DbOperator@close@9e5dsbPVD8648nV8on9Efw#05f.txt
 
-RunnerGenAllGraph4Callee:101 101-101	~jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043@101-101.txt
-RunnerGenAllGraph4Callee:doOperate	~jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043.txt
+RunnerGenAllGraph4Callee:101 101-101	_jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043@101-101.txt
+RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGraph4Callee@doOperate@HommTjLUWABHR5l7RkDZkQ#043.txt
 ```
 
 以上文件仅包含成功生成了调用链的任务及结果文件信息
@@ -363,7 +363,7 @@ test.jacg.TestRunnerGenAllGraph4Caller
 
 ### 3.5.2. c.2.1 从数据库读取Java方法调用关系
 
-TestRunnerGenAllGraph4Caller类读取配置文件`~jacg_config/o_g4caller_entry_method.properties`，该文件中指定了需要生成向下完整调用链的类名+方法名前缀/代码行号，可指定起始代码行号、结束代码行号
+TestRunnerGenAllGraph4Caller类读取配置文件`_jacg_config/o_g4caller_entry_method.properties`，该文件中指定了需要生成向下完整调用链的类名+方法名前缀/代码行号，可指定起始代码行号、结束代码行号
 
 格式如下所示：
 
@@ -397,9 +397,9 @@ Test1:139
 Test1:139 139-492
 ```
 
-若`~jacg_config/o_g4caller_entry_method.properties`配置文件中指定的方法前缀对应多个方法，则可在`~jacg_config/o_g4caller_entry_method_ignore_prefix.properties`配置文件中指定需要忽略的方法前缀；
+若`_jacg_config/o_g4caller_entry_method.properties`配置文件中指定的方法前缀对应多个方法，则可在`_jacg_config/o_g4caller_entry_method_ignore_prefix.properties`配置文件中指定需要忽略的方法前缀；
 
-`~jacg_config/o_g4caller_entry_method_ignore_prefix.properties`配置文件的格式为方法名，或方法名+参数，示例如下：
+`_jacg_config/o_g4caller_entry_method_ignore_prefix.properties`配置文件的格式为方法名，或方法名+参数，示例如下：
 
 ```
 func1
@@ -409,33 +409,33 @@ func1(java.lang.String)
 
 例如指定生成Class1.test方法的向下完整调用链，存在方法Class1.test1，则可指定忽略test1方法；指定生成Class1.test方法的向下完整调用链，所关注的test方法为test(java.lang.String)，存在不关注的方法test(java.lang.Integer)，则可指定忽略test(java.lang.Integer)方法；
 
-以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
+以上类会读取配置文件`_jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
 - thread.num
 
 从数据库并发读取数据的线程数量，也是数据源连接池数量
 
-若`~jacg_config/o_g4caller_entry_method.properties`配置文件中的记录数比该值小，则会使用记录数覆盖该参数值
+若`_jacg_config/o_g4caller_entry_method.properties`配置文件中的记录数比该值小，则会使用记录数覆盖该参数值
 
 以下参数说明略：app.name、db.use.h2、db.h2.file.path、db.driver.name、db.url、db.username、db.password
 
 ### 3.5.3. c.2.2 将方法完整调用链（向下）写入文件
 
-对于配置文件`~jacg_config/o_g4caller_entry_method.properties`中指定的方法，对每个方法生成一个对应的文件，文件名为“[类名]@[方法名]@[完整方法名HASH+长度].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048.txt”；
+对于配置文件`_jacg_config/o_g4caller_entry_method.properties`中指定的方法，对每个方法生成一个对应的文件，文件名为“[类名]@[方法名]@[完整方法名HASH+长度].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048.txt”；
 
 若某个方法生成向下的完整调用链时指定了代码行号范围，则对应文件名为“[类名]@[方法名]@[完整方法名HASH+长度]@[起始代码行号]-[结束代码行号].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048@135-395.txt”；
 
-每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“~jacg_o_er/[yyyyMMdd-HHmmss.SSS]”；
+每次执行时会生成一个新的目录，用于保存输出文件，目录名格式为“_jacg_o_er/[yyyyMMdd-HHmmss.SSS]”；
 
 每次执行生成的目录默认保存在当前目录中，若需要保存到其中目录中，可通过执行Java命令时的JVM参数`output.root.path`指定，例如“java -Doutput.root.path=D:/test”；
 
-以上类会读取配置文件`~jacg_config/config.properties`中的参数，需要按照说明进行配置：
+以上类会读取配置文件`_jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
 - gen.combined.output
 
 是否生成调用链的合并文件开关，值为true/false
 
-仅当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“~all-4caller.txt”
+仅当开关为开时，在为各个类生成了对应的调用链文件后，会生成一个将全部文件合并的文件，文件名为“_all-4caller.txt”
 
 - show.caller.line.num
 
@@ -491,7 +491,7 @@ TestMulti.test1()方法对应文件中调用Interface1.f1()方法的信息如下
 test.jacg.TestRunnerGenAllGraph4CallerSupportIgnore
 ```
 
-在配置文件`~jacg_config/o_g4caller_ignore_class_keyword.properties`中可以指定需要忽略的类名关键字，可为包名中的关键字，或类名中的关键字，示例如下：
+在配置文件`_jacg_config/o_g4caller_ignore_class_keyword.properties`中可以指定需要忽略的类名关键字，可为包名中的关键字，或类名中的关键字，示例如下：
 
 ```
 .dto.
@@ -500,7 +500,7 @@ Enum
 Constant
 ```
 
-在配置文件`~jacg_config/o_g4caller_ignore_full_method_prefix.properties`中可以指定需要忽略的完整方法前缀，可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数，示例如下：
+在配置文件`_jacg_config/o_g4caller_ignore_full_method_prefix.properties`中可以指定需要忽略的完整方法前缀，可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数，示例如下：
 
 ```
 com.test
@@ -510,7 +510,7 @@ com.test.Test1:func1(
 com.test.Test1:func1(java.lang.String)
 ```
 
-在配置文件`~jacg_config/o_g4caller_ignore_method_prefix.properties`中可以指定需要忽略的方法名前缀，如Java对象中的默认方法“toString()、hashCode()、equals(java.lang.Object)、\<init\>(、\<clinit\>(”等，示例如下：
+在配置文件`_jacg_config/o_g4caller_ignore_method_prefix.properties`中可以指定需要忽略的方法名前缀，如Java对象中的默认方法“toString()、hashCode()、equals(java.lang.Object)、\<init\>(、\<clinit\>(”等，示例如下：
 
 ```
 func1

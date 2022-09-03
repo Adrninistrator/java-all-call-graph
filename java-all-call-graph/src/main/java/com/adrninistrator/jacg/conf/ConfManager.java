@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
-import com.adrninistrator.jacg.util.FileUtil;
+import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class ConfManager {
         }
 
         String configFilePath = getInputRootPath() + InputDirEnum.IDE_CONFIG.getDirName() + "/" + JACGConstants.FILE_CONFIG;
-        try (Reader reader = new InputStreamReader(FileUtil.getFileInputStream(configFilePath), StandardCharsets.UTF_8)) {
+        try (Reader reader = new InputStreamReader(JACGFileUtil.getFileInputStream(configFilePath), StandardCharsets.UTF_8)) {
             Properties properties = new Properties();
             properties.load(reader);
 

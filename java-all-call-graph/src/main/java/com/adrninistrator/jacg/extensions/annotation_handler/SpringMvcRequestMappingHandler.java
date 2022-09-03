@@ -1,12 +1,14 @@
 package com.adrninistrator.jacg.extensions.annotation_handler;
 
 import com.adrninistrator.jacg.annotation.AnnotationStorage;
+import com.adrninistrator.jacg.common.CommonAnnotationConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.dto.annotation.AnnotationInfo4Read;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation_attribute.ListStringAnnotationAttribute;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,13 +17,15 @@ import java.util.Map;
  * @description: 处理方法上的Spring MVC RequestMapping注解处理类，返回@注解类名("path")
  */
 public class SpringMvcRequestMappingHandler extends AbstractAnnotationHandler {
+    private static final Logger logger = LoggerFactory.getLogger(SpringMvcRequestMappingHandler.class);
+
     @Override
     public boolean checkHandleAnnotation(String annotationName) {
         return isRequestMappingAnnotation(annotationName);
     }
 
     @Override
-    public String handleAnnotation(String fullMethod, String fullClassName, AnnotationInfo4Read annotationInfo4Read) {
+    public String handleAnnotation(String fullMethod, String fullClassName, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
         StringBuilder path = new StringBuilder();
 
         // 获取Spring MVC对应类上的注解中的path
@@ -34,53 +38,95 @@ public class SpringMvcRequestMappingHandler extends AbstractAnnotationHandler {
         }
 
         // 获取Spring MVC对应方法上的注解中的path
-        String springMvcMethodPath = getPathInRequestMappingAnnotation(annotationInfo4Read.getAnnotationAttributeMap());
+        String springMvcMethodPath = getPathInRequestMappingAnnotation(attributesMap);
         if (!StringUtils.startsWith(springMvcMethodPath, "/")) {
             path.append("/");
         }
         path.append(springMvcMethodPath);
 
-        // 返回@注解类名("path")
-        return JACGConstants.FLAG_AT + annotationInfo4Read.getAnnotationName() + JACGConstants.FLAG_LEFT_BRACKET + "\"" + path + "\"" + JACGConstants.FLAG_RIGHT_BRACKET;
+        // 返回注解类名("path")
+        return annotationName + JACGConstants.FLAG_LEFT_BRACKET + path + JACGConstants.FLAG_RIGHT_BRACKET;
     }
 
     // 判断是否为Spring MVC的RequestMapping注解
     private boolean isRequestMappingAnnotation(String annotationName) {
-        return StringUtils.equalsAny(annotationName,
-                "org.springframework.web.bind.annotation.RequestMapping",
-                "org.springframework.web.bind.annotation.PatchMapping",
-                "org.springframework.web.bind.annotation.DeleteMapping",
-                "org.springframework.web.bind.annotation.PutMapping",
-                "org.springframework.web.bind.annotation.PostMapping",
-                "org.springframework.web.bind.annotation.GetMapping"
-        );
+        return StringUtils.equalsAny(annotationName, CommonAnnotationConstants.SPRING_MVC_MAPPING_ANNOTATIONS);
     }
 
     // 获取Spring MVC对应注解中的path
-    private String getPathInRequestMappingAnnotation(Map<String, String> annotationAttributeMap) {
-        String path = annotationAttributeMap.get("path");
-        if (path != null) {
-            return JACGUtil.getAnnotationArrayAttributeValue(path);
-        }
-        path = annotationAttributeMap.get("value");
-        if (path != null) {
-            return JACGUtil.getAnnotationArrayAttributeValue(path);
+    private String getPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap) {
+        for (String attributeName : CommonAnnotationConstants.SPRING_MVC_MAPPING_ATTRIBUTE_NAMES) {
+            String path = doGetPathInRequestMappingAnnotation(annotationAttributeMap, attributeName);
+            if (path != null) {
+                return path;
+            }
         }
         return "";
     }
 
-    // 获取Spring MVC对应类上的注解中的path
-    private String getSpringMvcClassPath(String fullClassName) {
-        List<AnnotationInfo4Read> annotationInfo4ReadList = AnnotationStorage.getAnnotationInfo4Class(fullClassName);
-        if (annotationInfo4ReadList == null) {
+    private String doGetPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap, String attributeName) {
+        BaseAnnotationAttribute annotationAttribute = annotationAttributeMap.get(attributeName);
+        if (annotationAttribute == null) {
+            // 尝试不同的属性名称，可能不存在，不需要打印日志
             return null;
         }
 
-        for (AnnotationInfo4Read annotationInfo4Read : annotationInfo4ReadList) {
-            if (isRequestMappingAnnotation(annotationInfo4Read.getAnnotationName())) {
-                return getPathInRequestMappingAnnotation(annotationInfo4Read.getAnnotationAttributeMap());
+        if (!(annotationAttribute instanceof ListStringAnnotationAttribute)) {
+            logger.error("注解属性类型非法 {}", annotationAttribute.getClass().getName());
+            return "";
+        }
+
+        ListStringAnnotationAttribute listStringAnnotationAttribute = (ListStringAnnotationAttribute) annotationAttribute;
+        return listStringAnnotationAttribute.getAttributeList().get(0);
+    }
+
+    // 获取Spring MVC对应类上的注解中的path
+    private String getSpringMvcClassPath(String fullClassName) {
+        Map<String, Map<String, BaseAnnotationAttribute>> classAnnotationMap = AnnotationStorage.getAnnotationMap4Class(fullClassName);
+        if (classAnnotationMap == null) {
+            logger.error("未找到指定类的注解信息 {}", fullClassName);
+            return null;
+        }
+
+        for (Map.Entry<String, Map<String, BaseAnnotationAttribute>> classAnnotationMapEntry : classAnnotationMap.entrySet()) {
+            String annotationName = classAnnotationMapEntry.getKey();
+            // 判断是否为Spring MVC的RequestMapping注解
+            if (isRequestMappingAnnotation(annotationName)) {
+                return getPathInRequestMappingAnnotation(classAnnotationMapEntry.getValue());
             }
         }
         return null;
+    }
+
+    /**
+     * 从注解信息中获取Spring Mvc的path
+     * 注解信息示例：  @org.springframework.web.bind.annotation.RequestMapping(/path1/path2.do)
+     *
+     * @param annotationInfo 注解信息
+     * @return
+     */
+    public static String getSpringMvcPathFromAnnotation(String annotationInfo) {
+        if (annotationInfo == null) {
+            return null;
+        }
+
+        int indexLeftBracket = annotationInfo.indexOf(JACGConstants.FLAG_LEFT_BRACKET);
+        if (indexLeftBracket == -1) {
+            logger.error("注解信息中未找到{}字符 {}", JACGConstants.FLAG_LEFT_BRACKET, annotationInfo);
+            return null;
+        }
+
+        int indexRightBracket = annotationInfo.lastIndexOf(JACGConstants.FLAG_RIGHT_BRACKET);
+        if (indexRightBracket == -1) {
+            logger.error("注解信息中未找到{}字符 {}", JACGConstants.FLAG_RIGHT_BRACKET, annotationInfo);
+            return null;
+        }
+
+        if (!(indexLeftBracket < indexRightBracket)) {
+            logger.error("注解信息中 {} {} 字符位置非法 {}", JACGConstants.FLAG_LEFT_BRACKET, JACGConstants.FLAG_RIGHT_BRACKET, annotationInfo);
+            return null;
+        }
+
+        return annotationInfo.substring(indexLeftBracket + JACGConstants.FLAG_LEFT_BRACKET.length(), indexRightBracket);
     }
 }

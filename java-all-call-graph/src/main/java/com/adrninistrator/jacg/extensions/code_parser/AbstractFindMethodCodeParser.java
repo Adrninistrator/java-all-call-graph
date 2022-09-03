@@ -1,10 +1,6 @@
 package com.adrninistrator.jacg.extensions.code_parser;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.javacg.dto.ClassInterfaceMethodInfo;
-import com.adrninistrator.javacg.dto.ExtendsClassMethodInfo;
-import com.adrninistrator.javacg.extensions.code_parser.CustomCodeParserInterface;
-import com.adrninistrator.javacg.extensions.dto.ExtendedData;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
@@ -19,19 +15,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author adrninistrator
  * @date 2021/11/5
  * @description: 查找指定父类的非抽象子类满足条件的非抽象方法，基类
  */
-public abstract class AbstractFindMethodCodeParser implements CustomCodeParserInterface {
-
+public abstract class AbstractFindMethodCodeParser extends AbstractHandleExtendsOrImplCodeParser {
     private static final Logger logger = LoggerFactory.getLogger(AbstractFindMethodCodeParser.class);
-
-    private Map<String, ExtendsClassMethodInfo> extendsClassMethodInfoMap;
-    private Map<String, ClassInterfaceMethodInfo> classInterfaceMethodInfoMap;
 
     private List<String> childClassMethodList;
 
@@ -60,25 +51,15 @@ public abstract class AbstractFindMethodCodeParser implements CustomCodeParserIn
     protected abstract boolean checkMethodInfo(JavaClass javaClass, Method method, Type[] args);
 
     /**
-     * 指定生成结果的文件名
+     * 指定生成结果的文件路径
      *
      * @return
      */
-    protected abstract String getResultFileName();
+    protected abstract String getResultFilePath();
 
     @Override
     public void init() {
         childClassMethodList = new ArrayList<>();
-    }
-
-    @Override
-    public void setExtendsClassMethodInfoMap(Map<String, ExtendsClassMethodInfo> extendsClassMethodInfoMap) {
-        this.extendsClassMethodInfoMap = extendsClassMethodInfoMap;
-    }
-
-    @Override
-    public void setClassInterfaceMethodInfoMap(Map<String, ClassInterfaceMethodInfo> classInterfaceMethodInfoMap) {
-        this.classInterfaceMethodInfoMap = classInterfaceMethodInfoMap;
     }
 
     @Override
@@ -103,23 +84,21 @@ public abstract class AbstractFindMethodCodeParser implements CustomCodeParserIn
             Type[] args = method.getArgumentTypes();
             // 判断当前方法是否需要记录
             if (!method.isAbstract() && checkMethodInfo(javaClass, method, args)) {
-                childClassMethodList.add(javaClass.getClassName() + ":" + method.getName() + JavaCGUtil.getArgListStr(args));
+                childClassMethodList.add(JavaCGUtil.formatFullMethod(javaClass.getClassName(), method.getName(), JavaCGUtil.getArgListStr(args)));
             }
         }
     }
 
     @Override
-    public List<ExtendedData> getExtendedDataList() {
+    public void beforeDone() {
         Collections.sort(childClassMethodList);
 
-        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(getResultFileName()), StandardCharsets.UTF_8))) {
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(getResultFilePath()), StandardCharsets.UTF_8))) {
             for (String childClassMethod : childClassMethodList) {
                 out.write(childClassMethod + JACGConstants.NEW_LINE);
             }
         } catch (Exception e) {
             logger.error("error ", e);
         }
-
-        return null;
     }
 }

@@ -23,9 +23,9 @@
 
 ## 3.2. 解决
 
-当存在以上情况时，本工具会在当前目录生成“~notice_multi_ITF.md”或“~notice_multi_SCC.md”文件，可按照文档中的提示，将前缀为“method\_call\_”的数据库表中不需要的方法调用设置为禁用。
+当存在以上情况时，本工具会在当前目录生成“_notice_multi_ITF.md”或“_notice_multi_SCC.md”文件，可按照文档中的提示，将前缀为“method\_call\_”的数据库表中不需要的方法调用设置为禁用。
 
-当需要将禁用的方法调用恢复为启用时，可按照当前目录生成的“~notice_disabled_ITF.md”或“~notice_disabled_SCC.md”文件的说明进行操作。
+当需要将禁用的方法调用恢复为启用时，可按照当前目录生成的“_notice_disabled_ITF.md”或“_notice_disabled_SCC.md”文件的说明进行操作。
 
 # 4. 适用场景
 
