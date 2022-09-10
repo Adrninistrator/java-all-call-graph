@@ -8,11 +8,13 @@ import com.adrninistrator.jacg.dto.wrapper.MethodAndHash;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.enums.CallTypeEnum;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -82,24 +84,68 @@ public class DbOperWrapper {
     /**
      * 从方法注解表，查询带有指定注解的完整方法及方法HASH
      *
-     * @param annotationClassName 注解类名
+     * @param annotationClassNames 注解类名
      * @return
      */
-    public static List<MethodAndHash> getMethodsAndHashWithAnnotation(String annotationClassName) {
-        if (annotationClassName == null) {
+    public static List<MethodAndHash> getMethodsAndHashWithAnnotations(String[] annotationClassNames) {
+        if (ArrayUtils.isEmpty(annotationClassNames)) {
             return null;
         }
 
-        String sqlKey = JACGConstants.SQL_KEY_MA_QUERY_FULL_METHOD_AND_HASH_WITH_ANNOTATION;
-        String sql = getCachedSql(sqlKey);
+        String sqlKey = JACGConstants.SQL_KEY_MA_QUERY_FMAH_WITH_ANNOTATIONS;
+        String sql = getCachedSql(sqlKey, annotationClassNames.length);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.MA_FULL_METHOD, DC.MA_METHOD_HASH) +
                     " from " + JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION + APP_NAME +
-                    " where " + DC.MA_ANNOTATION_NAME + " = ?";
-            cacheSql(sqlKey, sql);
+                    " where " + DC.MA_ANNOTATION_NAME + " in " + JACGSqlUtil.genQuestionString(annotationClassNames.length);
+            cacheSql(sqlKey, sql, annotationClassNames.length);
         }
 
-        List<Map<String, Object>> list = DB_OPERATOR.queryList(sql, new Object[]{annotationClassName});
+        List<Map<String, Object>> list = DB_OPERATOR.queryList(sql, annotationClassNames);
+        if (list == null) {
+            return null;
+        }
+
+        List<MethodAndHash> methodAndHashList = new ArrayList<>(list.size());
+        for (Map<String, Object> map : list) {
+            MethodAndHash methodAndHash = new MethodAndHash();
+            methodAndHash.setFullMethod((String) map.get(DC.MA_FULL_METHOD));
+            methodAndHash.setMethodHash((String) map.get(DC.MA_METHOD_HASH));
+
+            methodAndHashList.add(methodAndHash);
+        }
+        return methodAndHashList;
+    }
+
+    /**
+     * 从方法注解表，查询带有指定注解的，且在指定类中的完整方法及方法HASH
+     *
+     * @param fullClassName        完整类名
+     * @param annotationClassNames 注解类名
+     * @return
+     */
+    public static List<MethodAndHash> getMethodsAndHashWithAnnotationsOfClass(String fullClassName, String[] annotationClassNames) {
+        if (fullClassName == null || ArrayUtils.isEmpty(annotationClassNames)) {
+            return null;
+        }
+
+        String sqlKey = JACGConstants.SQL_KEY_MA_QUERY_FMAH_WITH_ANNOTATIONS_OF_CLASS;
+        String sql = getCachedSql(sqlKey, annotationClassNames.length);
+        if (sql == null) {
+            // 指定完整方法需要以[完整类名]:开关，只查询指定类中的方法
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MA_FULL_METHOD, DC.MA_METHOD_HASH) +
+                    " from " + JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION + APP_NAME +
+                    " where " + DC.MA_ANNOTATION_NAME + " in " + JACGSqlUtil.genQuestionString(annotationClassNames.length) +
+                    " and " + DC.MA_FULL_METHOD + " like concat(?, ?, '%')";
+            cacheSql(sqlKey, sql, annotationClassNames.length);
+        }
+
+        List<String> argList = new ArrayList<>(annotationClassNames.length + 2);
+        argList.addAll(Arrays.asList(annotationClassNames));
+        argList.add(fullClassName);
+        argList.add(JACGConstants.FLAG_COLON);
+
+        List<Map<String, Object>> list = DB_OPERATOR.queryList(sql, argList.toArray());
         if (list == null) {
             return null;
         }
@@ -122,16 +168,40 @@ public class DbOperWrapper {
      * @return
      */
     public static List<String> getMethodsWithAnnotations(String[] annotationClassNames) {
-        if (annotationClassNames == null || annotationClassNames.length == 0) {
+        if (ArrayUtils.isEmpty(annotationClassNames)) {
             return null;
         }
 
-        String sqlKey = JACGConstants.SQL_KEY_MA_QUERY_FULL_METHOD_WITH_ANNOTATION;
+        String sqlKey = JACGConstants.SQL_KEY_MA_QUERY_FULL_METHOD_WITH_ANNOTATIONS;
         String sql = getCachedSql(sqlKey, annotationClassNames.length);
         if (sql == null) {
             sql = "select " + DC.MA_FULL_METHOD +
                     " from " + JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION + APP_NAME +
                     " where " + DC.MA_ANNOTATION_NAME + " in " + JACGSqlUtil.genQuestionString(annotationClassNames.length);
+            cacheSql(sqlKey, sql, annotationClassNames.length);
+        }
+
+        List<Object> list = DB_OPERATOR.queryListOneColumn(sql, annotationClassNames);
+        return JACGSqlUtil.getListString(list);
+    }
+
+    /**
+     * 从类注解表，查询带有指定注解的完整类名
+     *
+     * @param annotationClassNames 注解类名数组
+     * @return
+     */
+    public static List<String> getClassesWithAnnotations(String[] annotationClassNames) {
+        if (ArrayUtils.isEmpty(annotationClassNames)) {
+            return null;
+        }
+
+        String sqlKey = JACGConstants.SQL_KEY_CA_QUERY_FULL_CLASS_NAME_WITH_ANNOTATION;
+        String sql = getCachedSql(sqlKey, annotationClassNames.length);
+        if (sql == null) {
+            sql = "select " + DC.CA_FULL_CLASS_NAME +
+                    " from " + JACGConstants.TABLE_PREFIX_CLASS_ANNOTATION + APP_NAME +
+                    " where " + DC.CA_ANNOTATION_NAME + " in " + JACGSqlUtil.genQuestionString(annotationClassNames.length);
             cacheSql(sqlKey, sql, annotationClassNames.length);
         }
 
@@ -234,7 +304,8 @@ public class DbOperWrapper {
         String sql = getCachedSql(sqlKey);
         if (sql == null) {
             sql = "update " + JACGConstants.TABLE_PREFIX_CLASS_NAME + APP_NAME +
-                    " set " + DC.CN_SIMPLE_NAME + " = " + DC.CN_FULL_NAME + " where " + DC.CN_SIMPLE_NAME + " = ?";
+                    " set " + DC.CN_SIMPLE_NAME + " = " + DC.CN_FULL_NAME +
+                    " where " + DC.CN_SIMPLE_NAME + " = ?";
             cacheSql(sqlKey, sql);
         }
 
@@ -376,7 +447,11 @@ public class DbOperWrapper {
                 String.valueOf(0));
 
         List<Object[]> tmpMethodCallList = genMethodCallList(Collections.singletonList(methodCallEntity));
-        return writeMethodCall2Db(tmpMethodCallList);
+        if (!writeMethodCall2Db(tmpMethodCallList)) {
+            logger.error("人工向数据库方法调用表加入数据失败 {} {}", callerFullMethod, calleeFullMethod);
+            return false;
+        }
+        return true;
     }
 
     /**

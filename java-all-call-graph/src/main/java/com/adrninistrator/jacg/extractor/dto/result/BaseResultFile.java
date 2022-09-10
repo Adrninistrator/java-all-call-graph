@@ -19,6 +19,9 @@ public abstract class BaseResultFile {
     // 当前处理的文件对应的类名（完整类名或简单类名 ）
     private String className;
 
+    // 当前处理的文件对应的完整类名
+    private String fullClassName;
+
     // 当前处理的文件对应的方法名
     private String methodName;
 
@@ -58,6 +61,14 @@ public abstract class BaseResultFile {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public String getFullClassName() {
+        return fullClassName;
+    }
+
+    public void setFullClassName(String fullClassName) {
+        this.fullClassName = fullClassName;
     }
 
     public String getMethodName() {

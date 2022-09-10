@@ -129,8 +129,11 @@ public class JACGConstants {
 
     public static final String SQL_KEY_JI_QUERY_JAR_INFO = "ji_query_jar_info";
 
-    public static final String SQL_KEY_MA_QUERY_FULL_METHOD_AND_HASH_WITH_ANNOTATION = "ma_query_full_method_and_hash_with_annotation";
-    public static final String SQL_KEY_MA_QUERY_FULL_METHOD_WITH_ANNOTATION = "ma_query_full_method_with_annotation";
+    public static final String SQL_KEY_MA_QUERY_FMAH_WITH_ANNOTATIONS = "ma_query_fmah_with_annotations";
+    public static final String SQL_KEY_MA_QUERY_FMAH_WITH_ANNOTATIONS_OF_CLASS = "ma_query_fmah_with_annotations_of_class";
+    public static final String SQL_KEY_MA_QUERY_FULL_METHOD_WITH_ANNOTATIONS = "ma_query_full_method_with_annotations";
+
+    public static final String SQL_KEY_CA_QUERY_FULL_CLASS_NAME_WITH_ANNOTATION = "ca_query_full_class_name_with_annotation";
 
     public static final String SQL_KEY_ED_QUERY_EXTENDED_DATA = "ed_query_extended_data";
 

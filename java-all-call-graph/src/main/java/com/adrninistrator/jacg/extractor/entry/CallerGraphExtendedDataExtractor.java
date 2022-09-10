@@ -149,7 +149,9 @@ public class CallerGraphExtendedDataExtractor extends BaseExtractor {
         // 根据调用者完整方法HASH+长度，从方法调用表获取对应的完整方法
         String callerFullMethod = DbOperWrapper.getCallerFullMethodFromHash(callerExtendedDataFile.getMethodHash());
         callerExtendedDataFile.setFullMethod(callerFullMethod);
-
+        if (callerFullMethod != null) {
+            callerExtendedDataFile.setFullClassName(JACGUtil.getFullClassNameFromMethod(callerFullMethod));
+        }
         return callerExtendedDataFile;
     }
 

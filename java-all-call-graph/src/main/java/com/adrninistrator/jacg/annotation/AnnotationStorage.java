@@ -293,6 +293,7 @@ public class AnnotationStorage {
     public static Map<String, BaseAnnotationAttribute> getAttributeMap4ClassAnnotation(String fullClassName, String annotationName) {
         Map<String, Map<String, BaseAnnotationAttribute>> map = getAnnotationMap4Class(fullClassName);
         if (map == null) {
+            logger.warn("未找到指定类的注解信息 {}", fullClassName);
             return null;
         }
 
@@ -309,6 +310,7 @@ public class AnnotationStorage {
     public static Map<String, BaseAnnotationAttribute> getAttributeMap4MethodAnnotation(String methodHash, String annotationName) {
         Map<String, Map<String, BaseAnnotationAttribute>> map = getAnnotationMap4Method(methodHash);
         if (map == null) {
+            logger.warn("未找到指定方法HASH的注解信息 {}", methodHash);
             return null;
         }
 
@@ -326,6 +328,7 @@ public class AnnotationStorage {
     public static BaseAnnotationAttribute getAttributeInfo4ClassAnnotation(String fullClassName, String annotationName, String attributeName) {
         Map<String, BaseAnnotationAttribute> map = getAttributeMap4ClassAnnotation(fullClassName, annotationName);
         if (map == null) {
+            logger.warn("类注解不存在 {}\n{}", fullClassName, annotationName);
             return null;
         }
 
@@ -343,6 +346,7 @@ public class AnnotationStorage {
     public static BaseAnnotationAttribute getAttributeInfo4MethodAnnotation(String methodHash, String annotationName, String attributeName) {
         Map<String, BaseAnnotationAttribute> map = getAttributeMap4MethodAnnotation(methodHash, annotationName);
         if (map == null) {
+            logger.warn("方法注解不存在 {}\n{}", methodHash, annotationName);
             return null;
         }
 
@@ -362,14 +366,9 @@ public class AnnotationStorage {
                                                                                      String annotationName,
                                                                                      String attributeName,
                                                                                      Class<T> attributeClassType) {
-        Map<String, BaseAnnotationAttribute> map = getAttributeMap4ClassAnnotation(fullClassName, annotationName);
-        if (map == null) {
-            return null;
-        }
-
-        BaseAnnotationAttribute attribute = map.get(attributeName);
+        BaseAnnotationAttribute attribute = getAttributeInfo4ClassAnnotation(fullClassName, annotationName, attributeName);
         if (attribute == null) {
-            logger.error("类注解属性为空 {}\n{}\n{}", fullClassName, annotationName, attributeName);
+            logger.warn("类注解属性为空 {}\n{}\n{}", fullClassName, annotationName, attributeName);
             return null;
         }
 
@@ -395,20 +394,45 @@ public class AnnotationStorage {
                                                                                       String annotationName,
                                                                                       String attributeName,
                                                                                       Class<T> attributeClassType) {
-        Map<String, BaseAnnotationAttribute> map = getAttributeMap4MethodAnnotation(methodHash, annotationName);
-        if (map == null) {
-            return null;
-        }
-
-        BaseAnnotationAttribute attribute = map.get(attributeName);
+        BaseAnnotationAttribute attribute = getAttributeInfo4MethodAnnotation(methodHash, annotationName, attributeName);
         if (attribute == null) {
-            logger.error("方法注解属性为空 {}\n{}\n{}", methodHash, annotationName, attributeName);
+            logger.warn("方法注解属性为空 {}\n{}\n{}", methodHash, annotationName, attributeName);
             return null;
         }
 
         if (!attributeClassType.isAssignableFrom(attribute.getClass())) {
             logger.error("方法注解属性的实现类型与预期不一致 {}\n{}\n{}\n{}\n{}", methodHash, annotationName, attributeName,
                     attribute.getClass().getName(), attributeClassType.getName());
+            return null;
+        }
+
+        return (T) attribute;
+    }
+
+
+    /**
+     * 从注解属性Map中，根据注解属性名，获取预期类型的注解属性值
+     *
+     * @param annotationAttributeMap 注解属性Map
+     * @param attributeName          注解属性名
+     * @return attributeClassType 预期的注解属性类型
+     * @return
+     */
+    public static <T extends BaseAnnotationAttribute> T getAttributeFromMap(Map<String, BaseAnnotationAttribute> annotationAttributeMap,
+                                                                         String attributeName,
+                                                                         Class<T> attributeClassType) {
+        if (annotationAttributeMap == null || attributeName == null || attributeClassType == null) {
+            return null;
+        }
+
+        BaseAnnotationAttribute attribute = annotationAttributeMap.get(attributeName);
+        if (attribute == null) {
+            logger.warn("注解属性为空 {}", attributeName);
+            return null;
+        }
+
+        if (!attributeClassType.isAssignableFrom(attribute.getClass())) {
+            logger.error("类注解属性的实现类型与预期不一致 {}\n{}\n{}", attributeName, attribute.getClass().getName(), attributeClassType.getName());
             return null;
         }
 

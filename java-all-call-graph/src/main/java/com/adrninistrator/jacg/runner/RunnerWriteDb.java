@@ -325,14 +325,10 @@ public class RunnerWriteDb extends AbstractRunner {
 
     // 插入自定义数据
     private boolean insertExtendedData(List<ExtendedData> extendedDataList, List<Object[]> objectList) {
-        String sqlKey = JACGConstants.SQL_KEY_INSERT_EXTENDED_DATA;
-        String sql = DbOperWrapper.getCachedSql(sqlKey);
-        if (sql == null) {
-            sql = DbOperWrapper.genAndCacheInsertSql(sqlKey,
-                    DbInsertMode.DIME_INSERT,
-                    JACGConstants.TABLE_PREFIX_EXTENDED_DATA,
-                    JACGConstants.TABLE_COLUMNS_EXTENDED_DATA);
-        }
+        String sql = DbOperWrapper.genAndCacheInsertSql(JACGConstants.SQL_KEY_INSERT_EXTENDED_DATA,
+                DbInsertMode.DIME_INSERT,
+                JACGConstants.TABLE_PREFIX_EXTENDED_DATA,
+                JACGConstants.TABLE_COLUMNS_EXTENDED_DATA);
 
         // 分批插入数据
         int extendedDataListSize = extendedDataList.size();
@@ -542,14 +538,10 @@ public class RunnerWriteDb extends AbstractRunner {
             writeDbFlag = true;
         }
 
-        String sqlKey = JACGConstants.SQL_KEY_INSERT_CLASS_NAME;
-        String sql = DbOperWrapper.getCachedSql(sqlKey);
-        if (sql == null) {
-            sql = DbOperWrapper.genAndCacheInsertSql(sqlKey,
-                    DbInsertMode.DIME_INSERT,
-                    JACGConstants.TABLE_PREFIX_CLASS_NAME,
-                    JACGConstants.TABLE_COLUMNS_CLASS_NAME);
-        }
+        String sql = DbOperWrapper.genAndCacheInsertSql(JACGConstants.SQL_KEY_INSERT_CLASS_NAME,
+                DbInsertMode.DIME_INSERT,
+                JACGConstants.TABLE_PREFIX_CLASS_NAME,
+                JACGConstants.TABLE_COLUMNS_CLASS_NAME);
 
         List<Object[]> objectList = new ArrayList<>(fullClassNameList.size());
         for (String fullClassName : fullClassNameList) {
@@ -587,14 +579,10 @@ public class RunnerWriteDb extends AbstractRunner {
 
         logger.info("写入数据库，保存Jar包信息 {}", jarInfoMap.size());
 
-        String sqlKey = JACGConstants.SQL_KEY_INSERT_JAR_INFO;
-        String sql = DbOperWrapper.getCachedSql(sqlKey);
-        if (sql == null) {
-            sql = DbOperWrapper.genAndCacheInsertSql(sqlKey,
-                    DbInsertMode.DIME_INSERT,
-                    JACGConstants.TABLE_PREFIX_JAR_INFO,
-                    JACGConstants.TABLE_COLUMNS_JAR_INFO);
-        }
+        String sql = DbOperWrapper.genAndCacheInsertSql(JACGConstants.SQL_KEY_INSERT_JAR_INFO,
+                DbInsertMode.DIME_INSERT,
+                JACGConstants.TABLE_PREFIX_JAR_INFO,
+                JACGConstants.TABLE_COLUMNS_JAR_INFO);
 
         List<Object[]> objectList = new ArrayList<>(jarInfoMap.size());
         for (Map.Entry<Integer, JarInfoEntity> jarInfoEntry : jarInfoMap.entrySet()) {
@@ -803,14 +791,10 @@ public class RunnerWriteDb extends AbstractRunner {
 
         if (methodOrClass) {
             // 写入方法注解信息
-            String sqlKey = JACGConstants.SQL_KEY_INSERT_METHOD_ANNOTATION;
-            sql = DbOperWrapper.getCachedSql(sqlKey);
-            if (sql == null) {
-                sql = DbOperWrapper.genAndCacheInsertSql(sqlKey,
-                        DbInsertMode.DIME_INSERT,
-                        JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION,
-                        JACGConstants.TABLE_COLUMNS_METHOD_ANNOTATION);
-            }
+            sql = DbOperWrapper.genAndCacheInsertSql(JACGConstants.SQL_KEY_INSERT_METHOD_ANNOTATION,
+                    DbInsertMode.DIME_INSERT,
+                    JACGConstants.TABLE_PREFIX_METHOD_ANNOTATION,
+                    JACGConstants.TABLE_COLUMNS_METHOD_ANNOTATION);
 
             objectList = new ArrayList<>(annotationInfo4WriteDbList.size());
             for (AnnotationInfo4WriteDb annotationInfo4WriteDb : annotationInfo4WriteDbList) {
@@ -829,14 +813,10 @@ public class RunnerWriteDb extends AbstractRunner {
             }
         } else {
             // 写入类注解信息
-            String sqlKey = JACGConstants.SQL_KEY_INSERT_CLASS_ANNOTATION;
-            sql = DbOperWrapper.getCachedSql(sqlKey);
-            if (sql == null) {
-                sql = DbOperWrapper.genAndCacheInsertSql(sqlKey,
-                        DbInsertMode.DIME_INSERT,
-                        JACGConstants.TABLE_PREFIX_CLASS_ANNOTATION,
-                        JACGConstants.TABLE_COLUMNS_CLASS_ANNOTATION);
-            }
+            sql = DbOperWrapper.genAndCacheInsertSql(JACGConstants.SQL_KEY_INSERT_CLASS_ANNOTATION,
+                    DbInsertMode.DIME_INSERT,
+                    JACGConstants.TABLE_PREFIX_CLASS_ANNOTATION,
+                    JACGConstants.TABLE_COLUMNS_CLASS_ANNOTATION);
 
             objectList = new ArrayList<>(annotationInfo4WriteDbList.size());
             for (AnnotationInfo4WriteDb annotationInfo4WriteDb : annotationInfo4WriteDbList) {
@@ -870,17 +850,12 @@ public class RunnerWriteDb extends AbstractRunner {
 
         logger.info("写入数据库，方法代码行号信息表 {}", methodLineNumberList.size());
 
-        String sql;
         List<Object[]> objectList;
 
-        String sqlKey = JACGConstants.SQL_KEY_INSERT_METHOD_LINE_NUMBER;
-        sql = DbOperWrapper.getCachedSql(sqlKey);
-        if (sql == null) {
-            sql = DbOperWrapper.genAndCacheInsertSql(sqlKey,
-                    DbInsertMode.DIME_INSERT,
-                    JACGConstants.TABLE_PREFIX_METHOD_LINE_NUMBER,
-                    JACGConstants.TABLE_COLUMNS_METHOD_LINE_NUMBER);
-        }
+        String sql = DbOperWrapper.genAndCacheInsertSql(JACGConstants.SQL_KEY_INSERT_METHOD_LINE_NUMBER,
+                DbInsertMode.DIME_INSERT,
+                JACGConstants.TABLE_PREFIX_METHOD_LINE_NUMBER,
+                JACGConstants.TABLE_COLUMNS_METHOD_LINE_NUMBER);
 
         objectList = new ArrayList<>(methodLineNumberList.size());
         for (MethodLineNumberInfo methodLineNumberInfo : methodLineNumberList) {

@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.extractor.dto.result.CalleeEntryMethodFile;
 import com.adrninistrator.jacg.extractor.dto.result.CalleeEntryMethodInfo;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,7 +175,9 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
         // 根据被调用者完整方法HASH+长度，从方法调用表获取对应的完整方法
         String callerFullMethod = DbOperWrapper.getCalleeFullMethodFromHash(calleeEntryMethodFile.getMethodHash());
         calleeEntryMethodFile.setFullMethod(callerFullMethod);
-
+        if (callerFullMethod != null) {
+            calleeEntryMethodFile.setFullClassName(JACGUtil.getFullClassNameFromMethod(callerFullMethod));
+        }
         return calleeEntryMethodFile;
     }
 }

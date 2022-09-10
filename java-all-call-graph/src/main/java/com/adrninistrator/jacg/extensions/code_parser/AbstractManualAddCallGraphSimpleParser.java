@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.extensions.code_parser;
 
+import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.dto.classes.ClassInterfaceMethodInfo;
 import com.adrninistrator.javacg.dto.classes.ExtendsClassMethodInfo;
 import com.adrninistrator.javacg.dto.counter.CallIdCounter;
@@ -69,7 +70,7 @@ public abstract class AbstractManualAddCallGraphSimpleParser implements CustomCo
         String methodCall = JavaCGUtil.formatMethodCall(callIdCounter.addAndGet(), callerFullMethod, CallTypeEnum.CTE_MA.getType(), calleeClassName,
                 chooseAddCalleeMethodName(), chooseAddCalleeMethodNameArgs());
 
-        methodCalls.add(MethodCallDto.genInstance(methodCall, 0));
+        methodCalls.add(MethodCallDto.genInstance4Method(methodCall, JavaCGConstants.DEFAULT_LINE_NUMBER, callerFullMethod));
 
         handledClassNameSet.add(calleeClassName);
     }

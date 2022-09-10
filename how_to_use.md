@@ -13,7 +13,7 @@
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.8'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.9'
 ```
 
 - Maven
@@ -22,15 +22,15 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.8'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.7.8</version>
+  <version>0.7.9</version>
 </dependency>
 ```
 
 `由于Maven间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定java-all-call-graph依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过java-all-call-graph与java-callgraph2的pom文件的dependencies元素查看依赖组件版本`
 
 ```
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/0.7.8/java-all-call-graph-0.7.8.pom
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/0.2.1/java-callgraph2-0.2.1.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/0.7.9/java-all-call-graph-0.7.9.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/0.2.2/java-callgraph2-0.2.2.pom
 ```
 
 以上版本号可能需要替换为最新版本
