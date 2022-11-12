@@ -39,7 +39,7 @@ public class SpringMvcRequestMappingHandler extends AbstractAnnotationHandler {
      * @param attributesMap 方法上的注解属性Map
      * @return path路径
      */
-    public static String getPath(String fullClassName, Map<String, BaseAnnotationAttribute> attributesMap) {
+    public  String getPath(String fullClassName, Map<String, BaseAnnotationAttribute> attributesMap) {
         StringBuilder path = new StringBuilder();
 
         // 获取Spring MVC对应类上的注解中的path
@@ -61,12 +61,12 @@ public class SpringMvcRequestMappingHandler extends AbstractAnnotationHandler {
     }
 
     // 判断是否为Spring MVC的RequestMapping注解
-    private static boolean isRequestMappingAnnotation(String annotationName) {
+    private  boolean isRequestMappingAnnotation(String annotationName) {
         return StringUtils.equalsAny(annotationName, CommonAnnotationConstants.SPRING_MVC_MAPPING_ANNOTATIONS);
     }
 
     // 获取Spring MVC对应注解中的path
-    private static String getPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap) {
+    private  String getPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap) {
         for (String attributeName : CommonAnnotationConstants.SPRING_MVC_MAPPING_ATTRIBUTE_NAMES) {
             String path = doGetPathInRequestMappingAnnotation(annotationAttributeMap, attributeName);
             if (path != null) {
@@ -76,8 +76,8 @@ public class SpringMvcRequestMappingHandler extends AbstractAnnotationHandler {
         return "";
     }
 
-    private static String doGetPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap, String attributeName) {
-        ListStringAnnotationAttribute listStringAnnotationAttribute = AnnotationStorage.getAttributeFromMap(annotationAttributeMap, attributeName,
+    private  String doGetPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap, String attributeName) {
+        ListStringAnnotationAttribute listStringAnnotationAttribute = annotationStorage.getAttributeFromMap(annotationAttributeMap, attributeName,
                 ListStringAnnotationAttribute.class);
         if (listStringAnnotationAttribute == null) {
             // 尝试不同的属性名称，可能不存在，不需要打印日志
@@ -88,8 +88,8 @@ public class SpringMvcRequestMappingHandler extends AbstractAnnotationHandler {
     }
 
     // 获取Spring MVC对应类上的注解中的path
-    private static String getSpringMvcClassPath(String fullClassName) {
-        Map<String, Map<String, BaseAnnotationAttribute>> classAnnotationMap = AnnotationStorage.getAnnotationMap4Class(fullClassName);
+    private  String getSpringMvcClassPath(String fullClassName) {
+        Map<String, Map<String, BaseAnnotationAttribute>> classAnnotationMap = annotationStorage.getAnnotationMap4Class(fullClassName);
         if (classAnnotationMap == null) {
             logger.error("未找到指定类的注解信息 {}", fullClassName);
             return null;

@@ -9,23 +9,20 @@ import com.adrninistrator.javacg.enums.CallTypeEnum;
  */
 public class MultiImplMethodInfo {
 
-    private CallTypeEnum multiImplMethodCallType;
+    private final CallTypeEnum multiImplMethodCallType;
 
-    private String dirPath;
+    private final String dirPath;
+
+    public MultiImplMethodInfo(CallTypeEnum multiImplMethodCallType, String dirPath) {
+        this.multiImplMethodCallType = multiImplMethodCallType;
+        this.dirPath = dirPath;
+    }
 
     public CallTypeEnum getMultiImplMethodCallType() {
         return multiImplMethodCallType;
     }
 
-    public void setMultiImplMethodCallType(CallTypeEnum multiImplMethodCallType) {
-        this.multiImplMethodCallType = multiImplMethodCallType;
-    }
-
     public String getDirPath() {
         return dirPath;
-    }
-
-    public void setDirPath(String dirPath) {
-        this.dirPath = dirPath;
     }
 }

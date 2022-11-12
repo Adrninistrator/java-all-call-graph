@@ -59,4 +59,10 @@ public class MethodWithAnnotation {
     public void test3() {
         System.out.println("");
     }
+
+    @TestAnnotationOuter(value = "aaa", annotations = {})
+    @Override
+    public MethodWithAnnotation clone() {
+        return new MethodWithAnnotation();
+    }
 }

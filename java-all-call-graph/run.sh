@@ -1,1 +1,0 @@
-java -Dfile.encoding=UTF-8 -cp .:./jar/run_jacg.jar:./lib/* test.jacg.TestRunnerWriteDb

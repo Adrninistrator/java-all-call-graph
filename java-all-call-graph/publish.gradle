@@ -1,0 +1,63 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+apply from: 'build.gradle'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version "${version}"
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = "java-all-call-graph"
+                description = "Generate all call graph for Java Code."
+                url = "https://github.com/Adrninistrator/java-all-call-graph"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "Adrninistrator"
+                        name = "zhengyiee"
+                        email = "zhengyiee@qq.com"
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/Adrninistrator/java-all-call-graph.git"
+                    developerConnection = "scm:git:https://github.com/Adrninistrator/java-all-call-graph.git"
+                    url = "https://github.com/Adrninistrator/java-all-call-graph"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name 'sonatypeRepository'
+            url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = "${NEXUS_USERNAME}"
+                password = "${NEXUS_PASSWORD}"
+            }
+        }
+        maven {
+            name = 'sonatypeSnapshotRepository'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            credentials {
+                username = "${NEXUS_USERNAME}"
+                password = "${NEXUS_PASSWORD}"
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}

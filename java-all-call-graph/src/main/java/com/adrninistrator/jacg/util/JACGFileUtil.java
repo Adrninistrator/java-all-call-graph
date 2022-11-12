@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -9,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,12 +16,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -123,19 +125,16 @@ public class JACGFileUtil {
     public static Set<String> readFile2Set(String filePath, String ignorePrefix) {
         try (InputStream inputStream = getFileInputStream(filePath)) {
             List<String> list = IOUtils.readLines(inputStream, StandardCharsets.UTF_8);
-
             Set<String> set = new HashSet<>(list.size());
 
             boolean checkIgnore = StringUtils.isNotBlank(ignorePrefix);
-
             for (String line : list) {
-                String lineTrim = line.trim();
-                if (StringUtils.isNotBlank(lineTrim)) {
-                    if (checkIgnore && lineTrim.startsWith(ignorePrefix)) {
+                if (StringUtils.isNotBlank(line)) {
+                    if (checkIgnore && line.startsWith(ignorePrefix)) {
                         continue;
                     }
 
-                    set.add(lineTrim);
+                    set.add(line);
                 }
             }
 
@@ -180,24 +179,24 @@ public class JACGFileUtil {
     public static boolean isDirectoryExists(File dirFile) {
         if (dirFile.exists()) {
             if (dirFile.isDirectory()) {
-                logger.debug("directory exists: {}", dirFile.getAbsolutePath());
+                logger.debug("目录已存在: {}", dirFile.getAbsolutePath());
                 return true;
             }
 
-            logger.error("file exists: {}", dirFile.getAbsolutePath());
+            logger.error("已存在同名文件: {}", dirFile.getAbsolutePath());
             return false;
         }
 
         try {
             Files.createDirectories(dirFile.toPath());
-            logger.info("create directory: {}", dirFile.getAbsolutePath());
+            logger.info("创建目录: {}", dirFile.getAbsolutePath());
             return true;
         } catch (FileAlreadyExistsException e) {
-            logger.warn("try to create directory but exists: {}", dirFile.getAbsolutePath());
+            logger.warn("尝试创建目录但已存在: {}", dirFile.getAbsolutePath());
             return true;
         } catch (IOException e) {
             logger.error("error {} ", dirFile.getAbsolutePath(), e);
-            return true;
+            return false;
         }
     }
 
@@ -245,15 +244,29 @@ public class JACGFileUtil {
 
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFilePath), StandardCharsets.UTF_8))) {
             for (File file : srcFileList) {
-                String fileContent = readFile2String(file);
-                if (StringUtils.isNotBlank(fileContent)) {
-                    // 仅当文件内容非空时才进行合并
-                    out.write(fileContent + JACGConstants.NEW_LINE);
+                // 拷贝指定文件的内容
+                if (!copyFileContent(out, file)) {
+                    return false;
                 }
             }
             return true;
         } catch (Exception e) {
             logger.error("error {} ", destFilePath, e);
+            return false;
+        }
+    }
+
+    // 拷贝指定文件的内容
+    public static boolean copyFileContent(BufferedWriter out, File file) {
+        try (BufferedReader br = genBufferedReader(file)) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                out.write(line + JACGConstants.NEW_LINE);
+            }
+            out.write(JACGConstants.NEW_LINE);
+            return true;
+        } catch (Exception e) {
+            logger.error("error {} ", file.getAbsolutePath(), e);
             return false;
         }
     }
@@ -284,7 +297,7 @@ public class JACGFileUtil {
     public static String getFileMd5(String filePath) {
         try (InputStream input = new FileInputStream(filePath)) {
             byte[] md5 = DigestUtils.md5(input);
-            return Base64.encodeBase64String(md5);
+            return Base64.getEncoder().encodeToString(md5);
         } catch (Exception e) {
             logger.error("error {} ", filePath, e);
             return null;
@@ -384,6 +397,42 @@ public class JACGFileUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * todo 使用javacg中的
+     * 获取文件的BufferedReader
+     *
+     * @param filePath
+     * @return
+     * @throws FileNotFoundException
+     */
+    public static BufferedReader genBufferedReader(String filePath) throws FileNotFoundException {
+        return new BufferedReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8));
+    }
+
+    /**
+     * todo 使用javacg中的
+     * 获取文件的BufferedReader
+     *
+     * @param file
+     * @return
+     * @throws FileNotFoundException
+     */
+    public static BufferedReader genBufferedReader(File file) throws FileNotFoundException {
+        return new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+    }
+
+    /**
+     * todo 使用javacg中的
+     * 获取InputStream的BufferedReader
+     *
+     * @param input
+     * @return
+     * @throws FileNotFoundException
+     */
+    public static BufferedReader genBufferedReader(InputStream input) throws FileNotFoundException {
+        return new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
     }
 
     private JACGFileUtil() {

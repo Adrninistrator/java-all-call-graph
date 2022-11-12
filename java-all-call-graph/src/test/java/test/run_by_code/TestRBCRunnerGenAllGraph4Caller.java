@@ -1,7 +1,7 @@
 package test.run_by_code;
 
+import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import org.junit.Test;
-import test.jacg.TestRunnerGenAllGraph4Caller;
 
 /**
  * @author adrninistrator
@@ -11,6 +11,6 @@ import test.jacg.TestRunnerGenAllGraph4Caller;
 public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
     @Test
     public void test() {
-        TestRunnerGenAllGraph4Caller.main(null);
+        new RunnerGenAllGraph4Caller().run(configureWrapper);
     }
 }

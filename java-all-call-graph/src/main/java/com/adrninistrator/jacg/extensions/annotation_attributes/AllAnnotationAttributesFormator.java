@@ -12,7 +12,6 @@ import org.apache.bcel.classfile.ElementValuePair;
 import org.apache.bcel.classfile.EnumElementValue;
 import org.apache.bcel.classfile.SimpleElementValue;
 import org.apache.bcel.classfile.Utility;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +61,7 @@ public class AllAnnotationAttributesFormator implements AnnotationAttributesForm
     private String handleStringValue(String value) {
         if (StringUtils.containsAny(value, "\r", "\n")) {
             // 若字符串内容包含回车换行，则需要进行BASE64编码，避免写到文件后导致换行
-            return AnnotationAttributesTypeEnum.AATE_STRING_BASE64.getPrefix() + Base64.encodeBase64String(value.getBytes(StandardCharsets.UTF_8));
+            return AnnotationAttributesTypeEnum.AATE_STRING_BASE64.getPrefix() + Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
         }
 
         // 若字符串内容不包含回车换行，则使用原始值
@@ -140,9 +140,9 @@ public class AllAnnotationAttributesFormator implements AnnotationAttributesForm
             }
         }
 
-        AnnotationAttributesTypeEnum listTypeEnum = listElementTypeEnum == AnnotationAttributesTypeEnum.AATE_STRING ?
+        AnnotationAttributesTypeEnum listTypeEnum = (listElementTypeEnum == AnnotationAttributesTypeEnum.AATE_STRING ?
                 AnnotationAttributesTypeEnum.AATE_LIST_STRING :
-                AnnotationAttributesTypeEnum.AATE_LIST_MAP;
+                AnnotationAttributesTypeEnum.AATE_LIST_MAP);
 
         return new ImmutablePair<>(valueList, listTypeEnum);
     }

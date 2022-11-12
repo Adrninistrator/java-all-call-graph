@@ -1,5 +1,5 @@
 CREATE TABLE if not exists method_call_{appName} (
-  call_id integer(18) NOT NULL COMMENT '调用序号',
+  call_id integer NOT NULL COMMENT '调用序号',
   call_type varchar(10) NOT NULL COMMENT '调用类型',
   enabled int NOT NULL COMMENT '是否启用，1:启用',
   caller_jar_num int NOT NULL COMMENT '调用方，Jar包序号',

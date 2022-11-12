@@ -1,13 +1,14 @@
 package com.adrninistrator.jacg.extractor.entry;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extensions.dto.extened_data.BaseExtendedData;
 import com.adrninistrator.jacg.extensions.dto.multi_impl.MultiImplMethodData;
 import com.adrninistrator.jacg.extensions.util.JsonUtil;
 import com.adrninistrator.jacg.extractor.dto.result.CallerExtendedDataFile;
 import com.adrninistrator.jacg.extractor.dto.result.CallerExtendedDataInfo;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,9 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +33,17 @@ public class CallerGraphExtendedDataExtractor extends BaseExtractor {
      * @return
      */
     public List<CallerExtendedDataFile> extract() {
-        if (!init()) {
+        return extract(new ConfigureWrapper());
+    }
+
+    /**
+     * 生成向下的完整调用链，根据关键字进行查找，获取自定义数据并返回
+     *
+     * @param configureWrapper
+     * @return
+     */
+    public List<CallerExtendedDataFile> extract(ConfigureWrapper configureWrapper) {
+        if (!init(configureWrapper)) {
             return null;
         }
 
@@ -46,9 +54,14 @@ public class CallerGraphExtendedDataExtractor extends BaseExtractor {
         }
 
         // 处理向下的方法调用链
-        List<String> resultFilePathList = findKeywordCallGraph.find(false);
+        List<String> resultFilePathList = findKeywordCallGraph.find(chooseFindKeywordCallGraph(), configureWrapper);
         if (resultFilePathList == null) {
             logger.error("生成向下的方法调用链及查找关键字失败");
+            return null;
+        }
+
+        // 创建数据库相关对象
+        if (!genDbObject()) {
             return null;
         }
 
@@ -56,17 +69,17 @@ public class CallerGraphExtendedDataExtractor extends BaseExtractor {
         currentFindResultDirPath = findKeywordCallGraph.getCurrentDirPath();
 
         List<CallerExtendedDataFile> callerExtendedDataFileList = new ArrayList<>(resultFilePathList.size());
-
         for (String resultFilePath : resultFilePathList) {
             // 处理文件中的自定义数据
             CallerExtendedDataFile callerExtendedDataFile = handleExtendedDataInFile(resultFilePath);
             if (callerExtendedDataFile == null) {
                 return null;
             }
-
             callerExtendedDataFileList.add(callerExtendedDataFile);
         }
 
+        // 关闭数据源
+        closeDs();
         return callerExtendedDataFileList;
     }
 
@@ -88,7 +101,7 @@ public class CallerGraphExtendedDataExtractor extends BaseExtractor {
         boolean handleData = false;
 
         List<CallerExtendedDataInfo> callerExtendedDataInfoList = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = JACGFileUtil.genBufferedReader(filePath)) {
             String line;
             String lastLine = null;
             while ((line = br.readLine()) != null) {
@@ -147,7 +160,7 @@ public class CallerGraphExtendedDataExtractor extends BaseExtractor {
         }
 
         // 根据调用者完整方法HASH+长度，从方法调用表获取对应的完整方法
-        String callerFullMethod = DbOperWrapper.getCallerFullMethodFromHash(callerExtendedDataFile.getMethodHash());
+        String callerFullMethod = dbOperWrapper.getCallerFullMethodFromHash(callerExtendedDataFile.getMethodHash());
         callerExtendedDataFile.setFullMethod(callerFullMethod);
         if (callerFullMethod != null) {
             callerExtendedDataFile.setFullClassName(JACGUtil.getFullClassNameFromMethod(callerFullMethod));
@@ -209,31 +222,41 @@ public class CallerGraphExtendedDataExtractor extends BaseExtractor {
 
         int implSeq = 0;
         for (File file : files) {
-            if (file.isFile() && file.length() > 0) {
-                String fileName = file.getName();
-                if (fileName.endsWith(JACGConstants.EXT_MD)) {
-                    CallerExtendedDataInfo callerExtendedDataInfo = new CallerExtendedDataInfo();
-                    callerExtendedDataInfo.setDataType(currentCallerExtendedDataInfo.getDataType());
-
-                    String implMethodName = fileName.substring(0, fileName.length() - JACGConstants.EXT_MD.length());
-
-                    MultiImplMethodData multiImplMethodData = new MultiImplMethodData();
-                    // 转换方法名格式
-                    multiImplMethodData.setInterfaceOrSuperMethodName(JACGUtil.getMethodNameFromFileName(interfaceOrSuperMethodName));
-                    multiImplMethodData.setImplSeq(++implSeq);
-                    // 转换方法名格式
-                    multiImplMethodData.setImplMethodName(JACGUtil.getMethodNameFromFileName(implMethodName));
-                    multiImplMethodData.setImplMethodMdFilePath(file.getAbsolutePath());
-
-                    callerExtendedDataInfo.setDataValue(JsonUtil.getJsonStr(multiImplMethodData));
-                    callerExtendedDataInfo.setDataSeq(currentCallerExtendedDataInfo.getDataSeq());
-                    callerExtendedDataInfo.setLineNumber(currentCallerExtendedDataInfo.getLineNumber());
-                    callerExtendedDataInfo.setLastLineContent(currentCallerExtendedDataInfo.getLastLineContent());
-                    callerExtendedDataInfo.setLineContent(currentCallerExtendedDataInfo.getLineContent());
-
-                    callerExtendedDataInfoList.add(callerExtendedDataInfo);
-                }
+            if (!file.isFile() || file.length() <= 0) {
+                continue;
             }
+
+            String fileName = file.getName();
+            if (!fileName.endsWith(JACGConstants.EXT_MD)) {
+                continue;
+            }
+
+            CallerExtendedDataInfo callerExtendedDataInfo = new CallerExtendedDataInfo();
+            callerExtendedDataInfo.setDataType(currentCallerExtendedDataInfo.getDataType());
+
+            String implMethodName = fileName.substring(0, fileName.length() - JACGConstants.EXT_MD.length());
+
+            MultiImplMethodData multiImplMethodData = new MultiImplMethodData();
+            // 转换方法名格式
+            multiImplMethodData.setInterfaceOrSuperMethodName(JACGUtil.getMethodNameFromFileName(interfaceOrSuperMethodName));
+            multiImplMethodData.setImplSeq(++implSeq);
+            // 转换方法名格式
+            multiImplMethodData.setImplMethodName(JACGUtil.getMethodNameFromFileName(implMethodName));
+            multiImplMethodData.setImplMethodMdFilePath(file.getAbsolutePath());
+
+            callerExtendedDataInfo.setDataValue(JsonUtil.getJsonStr(multiImplMethodData));
+            callerExtendedDataInfo.setDataSeq(currentCallerExtendedDataInfo.getDataSeq());
+            callerExtendedDataInfo.setLineNumber(currentCallerExtendedDataInfo.getLineNumber());
+            callerExtendedDataInfo.setLastLineContent(currentCallerExtendedDataInfo.getLastLineContent());
+            callerExtendedDataInfo.setLineContent(currentCallerExtendedDataInfo.getLineContent());
+
+            callerExtendedDataInfoList.add(callerExtendedDataInfo);
         }
+    }
+
+    @Override
+    protected boolean chooseFindKeywordCallGraph() {
+        // 向下
+        return false;
     }
 }

@@ -26,10 +26,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -45,10 +48,10 @@ public abstract class AbstractGetMybatisSqlInfoCodeParser extends AbstractCustom
     public static final String DATA_TYPE = "MB_SQL";
 
     // 保存简单处理后的SQL语句
-    private Map<String, Map<String, String>> mapperSqlMap = new HashMap<>(200);
+    private final Map<String, Map<String, String>> mapperSqlMap = new HashMap<>(200);
 
     // 保存保存经过解析后的SQL语句对应的数据库操作，及对应的数据库表
-    private Map<String, Map<String, DbOperateData>> mapperDbOperateMap = new HashMap<>(200);
+    private final Map<String, Map<String, DbOperateData>> mapperDbOperateMap = new HashMap<>(200);
 
     @Override
     public void init() {
@@ -79,7 +82,12 @@ public abstract class AbstractGetMybatisSqlInfoCodeParser extends AbstractCustom
     protected abstract boolean checkClassNameAndMethod(String calleeClassName, String calleeMethodName);
 
     @Override
-    public void handleMethodCall(CallIdCounter callIdCounter, String calleeClassName, String calleeMethodName, Type[] arguments, InstructionHandle mcIh, MethodGen methodGen,
+    public void handleMethodCall(CallIdCounter callIdCounter,
+                                 String calleeClassName,
+                                 String calleeMethodName,
+                                 Type[] arguments,
+                                 InstructionHandle mcIh,
+                                 MethodGen methodGen,
                                  List<MethodCallDto> methodCalls) {
         if (!checkClassNameAndMethod(calleeClassName, calleeMethodName)) {
             return;
@@ -156,9 +164,9 @@ public abstract class AbstractGetMybatisSqlInfoCodeParser extends AbstractCustom
                 StringBuilder stringBuilder = new StringBuilder();
                 getElementSql(element, stringBuilder);
 
-                String sql = stringBuilder.toString();
-
-                sqlMap.put(sqlId, sql);
+                // 对sql语句进行格式化
+                String formattedSql = formatSql(stringBuilder.toString());
+                sqlMap.put(sqlId, formattedSql);
             }
         }
 
@@ -226,25 +234,33 @@ public abstract class AbstractGetMybatisSqlInfoCodeParser extends AbstractCustom
             return dbOperateData;
         }
 
-        List<String> tableList = null;
+        Set<String> tableSet = new HashSet<>();
 
         switch (dbStatementEnum) {
             case DSE_SELECT:
-                tableList = getTablesFromSql(sql, " from ", new String[]{" where ", " order by ", " group by ", " limit ", ";"});
+                getTablesFromSql(tableSet, sql, " from ", " from (", new String[]{" where ", " limit ", ";", " in ", ")", " order by ", " group by ", " having ", " join ", " " +
+                        "union "});
+                getTablesFromSql(tableSet, sql, " join ", " join (", new String[]{" on "});
                 break;
             case DSE_INSERT:
             case DSE_REPLACE:
-                tableList = getTablesFromSql(sql, " into ", new String[]{"(", " values", ";", "select"});
+                getTablesFromSql(tableSet, sql, " into ", null, new String[]{"(", " values", ";", "select "});
                 break;
             case DSE_UPDATE:
-                tableList = getTablesFromSql(sql, "update ", new String[]{" set "});
+                getTablesFromSql(tableSet, sql, "update ", null, new String[]{" set "});
                 break;
             case DSE_DELETE:
-                tableList = getTablesFromSql(sql, " from ", new String[]{" where ", " limit ", ";"});
+                getTablesFromSql(tableSet, sql, " from ", " from (", new String[]{" where ", " limit ", ";"});
+                break;
+            default:
+                logger.error("不支持的类型 {}", dbStatementEnum);
                 break;
         }
 
         dbOperateData.setStatement(dbStatementEnum.getStatement());
+
+        List<String> tableList = new ArrayList<>(tableSet);
+        Collections.sort(tableList);
         dbOperateData.setTableList(tableList);
         return dbOperateData;
     }
@@ -281,51 +297,65 @@ public abstract class AbstractGetMybatisSqlInfoCodeParser extends AbstractCustom
 
     // 对sql语句进行格式化
     private String formatSql(String sql) {
-        return sql.replaceAll("[\r\n\t]", " ")
+        String newSql = sql.replaceAll("[\r\n\t]", " ")
                 .replaceAll("[ ][ ]*", " ").trim();
+
+        if (newSql.endsWith(";")) {
+            return newSql;
+        }
+        return newSql + ";";
     }
 
     /**
      * 从数据库表名相关的sql语句中获得表名
      *
-     * @param sql 示例： "table1"    "table1, table2"    "table1 as t1, table2 as t2"
+     * @param tableSet
+     * @param sql      示例： "table1"    "table1, table2"    "table1 as t1, table2 as t2"
      * @return
      */
-    private List<String> getTablesFromPartSql(String sql) {
+    private void getTablesFromPartSql(Set<String> tableSet, String sql) {
         String[] array1 = sql.split(",");
-        List<String> tableList = new ArrayList<>(array1.length);
         for (String str1 : array1) {
             String[] array2 = str1.trim().split(" ");
-            if (!tableList.contains(array2[0])) {
-                tableList.add(array2[0]);
-            }
+            tableSet.add(array2[0]);
         }
-
-        return tableList;
     }
 
     /**
      * 从sql语句中获得对应的表名
      *
+     * @param tableSet
      * @param sql
      * @param startFlag
+     * @param ignoreStartFlag
      * @param endFlagArray
      * @return
      */
-    private List<String> getTablesFromSql(String sql, String startFlag, String[] endFlagArray) {
-        // 对sql语句进行格式化
-        String formattedSql = formatSql(sql);
+    private void getTablesFromSql(Set<String> tableSet, String sql, String startFlag, String ignoreStartFlag, String[] endFlagArray) {
+        int skipIndex = 0;
+        while (true) {
+            // 查找开始标志下标
+            int startIndex = StringUtils.indexOfIgnoreCase(sql, startFlag, skipIndex);
+            if (startIndex == -1) {
+                break;
+            }
 
-        // 查找开始标志下标
-        int fromIndex = StringUtils.indexOfIgnoreCase(formattedSql, startFlag);
-        if (fromIndex == -1) {
-            return new ArrayList<>(0);
+            // 跳过不处理的开始标志
+            if (ignoreStartFlag == null || startIndex != StringUtils.indexOfIgnoreCase(sql, ignoreStartFlag, skipIndex)) {
+                doGetTablesFromSql(startIndex, tableSet, sql, startFlag, endFlagArray);
+            }
+
+            skipIndex = startIndex + startFlag.length();
         }
+    }
+
+    private void doGetTablesFromSql(int startIndex, Set<String> tableSet, String sql, String startFlag, String[] endFlagArray) {
+        // 判断是否
 
         // 查找结束标志下标
         int minEndFlagIndex = -1;
         for (String endFlag : endFlagArray) {
-            int endFlagIndex = StringUtils.indexOfIgnoreCase(formattedSql, endFlag, fromIndex + startFlag.length());
+            int endFlagIndex = StringUtils.indexOfIgnoreCase(sql, endFlag, startIndex + startFlag.length());
             if (endFlagIndex == -1) {
                 continue;
             }
@@ -338,13 +368,12 @@ public abstract class AbstractGetMybatisSqlInfoCodeParser extends AbstractCustom
 
         String partSql;
         if (minEndFlagIndex == -1) {
-            partSql = formattedSql.substring(fromIndex + startFlag.length()).trim();
+            partSql = sql.substring(startIndex + startFlag.length()).trim();
         } else {
-            partSql = formattedSql.substring(fromIndex + startFlag.length(), minEndFlagIndex).trim();
+            partSql = sql.substring(startIndex + startFlag.length(), minEndFlagIndex).trim();
         }
 
         // 从数据库表名相关的sql语句中获得表名
-        return getTablesFromPartSql(partSql);
+        getTablesFromPartSql(tableSet, partSql);
     }
 }
-

@@ -351,13 +351,7 @@ public class JACGCallGraphFileUtil {
             return null;
         }
 
-        MethodInfoInFileName methodInfoInFileName = new MethodInfoInFileName();
-
-        methodInfoInFileName.setSimpleClassName(array[0]);
-        methodInfoInFileName.setMethodName(JACGUtil.recoveryMethodName(array[1]));
-        methodInfoInFileName.setMethodHash(array[2]);
-
-        return methodInfoInFileName;
+        return new MethodInfoInFileName(array[0], JACGUtil.recoveryMethodName(array[1]), array[2]);
     }
 
     /**

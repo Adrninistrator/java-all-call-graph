@@ -6,7 +6,6 @@ package com.adrninistrator.jacg.extensions.dto.multi_impl;
  * @description: 存在多个实现类的接口或父类方法自定义数据
  */
 public class MultiImplMethodData {
-
     // 接口或父类方法
     private String interfaceOrSuperMethodName;
 

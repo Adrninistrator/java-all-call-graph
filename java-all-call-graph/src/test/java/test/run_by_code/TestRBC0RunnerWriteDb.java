@@ -1,7 +1,7 @@
 package test.run_by_code;
 
+import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import org.junit.Test;
-import test.jacg.TestRunnerWriteDb;
 
 /**
  * @author adrninistrator
@@ -11,6 +11,6 @@ import test.jacg.TestRunnerWriteDb;
 public class TestRBC0RunnerWriteDb extends TestRunByCodeBase {
     @Test
     public void test() {
-        TestRunnerWriteDb.main(null);
+        new RunnerWriteDb().run(configureWrapper);
     }
 }

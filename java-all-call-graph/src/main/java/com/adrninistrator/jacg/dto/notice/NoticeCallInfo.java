@@ -7,34 +7,27 @@ package com.adrninistrator.jacg.dto.notice;
  */
 
 public class NoticeCallInfo {
+    private final String callerMethodHash;
 
-    private String callerMethodHash;
+    private final String callerFullMethod;
 
-    private String callerFullMethod;
+    private final String calleeFullMethod;
 
-    private String calleeFullMethod;
+    public NoticeCallInfo(String callerMethodHash, String callerFullMethod, String calleeFullMethod) {
+        this.callerMethodHash = callerMethodHash;
+        this.callerFullMethod = callerFullMethod;
+        this.calleeFullMethod = calleeFullMethod;
+    }
 
     public String getCallerMethodHash() {
         return callerMethodHash;
-    }
-
-    public void setCallerMethodHash(String callerMethodHash) {
-        this.callerMethodHash = callerMethodHash;
     }
 
     public String getCallerFullMethod() {
         return callerFullMethod;
     }
 
-    public void setCallerFullMethod(String callerFullMethod) {
-        this.callerFullMethod = callerFullMethod;
-    }
-
     public String getCalleeFullMethod() {
         return calleeFullMethod;
-    }
-
-    public void setCalleeFullMethod(String calleeFullMethod) {
-        this.calleeFullMethod = calleeFullMethod;
     }
 }

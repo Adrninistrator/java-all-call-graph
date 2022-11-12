@@ -30,8 +30,8 @@ public enum OtherConfigFileUseSetEnum {
             "定义用于对方法上的注解进行处理的类完整类名"),
     ;
 
-    private String fileName;
-    private String desc;
+    private final String fileName;
+    private final String desc;
 
     OtherConfigFileUseSetEnum(String fileName, String desc) {
         this.fileName = fileName;

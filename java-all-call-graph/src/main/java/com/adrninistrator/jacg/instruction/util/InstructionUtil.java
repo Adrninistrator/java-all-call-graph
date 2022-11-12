@@ -4,7 +4,21 @@ import com.adrninistrator.jacg.instruction.extractor.StringConstantExtractor;
 import org.apache.bcel.classfile.AnnotationEntry;
 import org.apache.bcel.classfile.ElementValuePair;
 import org.apache.bcel.classfile.LineNumberTable;
-import org.apache.bcel.generic.*;
+import org.apache.bcel.generic.ALOAD;
+import org.apache.bcel.generic.ASTORE;
+import org.apache.bcel.generic.AnnotationEntryGen;
+import org.apache.bcel.generic.BasicType;
+import org.apache.bcel.generic.CHECKCAST;
+import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.ElementValuePairGen;
+import org.apache.bcel.generic.GETFIELD;
+import org.apache.bcel.generic.GETSTATIC;
+import org.apache.bcel.generic.Instruction;
+import org.apache.bcel.generic.InstructionHandle;
+import org.apache.bcel.generic.InvokeInstruction;
+import org.apache.bcel.generic.MethodGen;
+import org.apache.bcel.generic.ObjectType;
+import org.apache.bcel.generic.Type;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +39,7 @@ public class InstructionUtil {
 
     private static final String LONG_CLASS_NAME = Long.class.getName();
 
-    private static StringConstantExtractor stringConstantExtractor = new StringConstantExtractor();
+    private static final StringConstantExtractor STRING_CONSTANT_EXTRACTOR = new StringConstantExtractor();
 
     /**
      * 获取指定指令向前，代码行号对应的偏移量第一条指令
@@ -320,7 +334,7 @@ public class InstructionUtil {
                 List<InstructionHandle> ihBeforeASTOREList = getAllIHBeforeASTORE(currIh, index);
                 for (InstructionHandle ihBeforeASTORE : ihBeforeASTOREList) {
                     // 尝试获取对应的常量字符串参数值
-                    Object o = stringConstantExtractor.extractConstantFromInstruction(ihBeforeASTORE.getInstruction(), methodGen);
+                    Object o = STRING_CONSTANT_EXTRACTOR.extractConstantFromInstruction(ihBeforeASTORE.getInstruction(), methodGen);
                     if (o != null) {
                         stringList.add((String) o);
                     }

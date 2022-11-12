@@ -8,7 +8,6 @@ import java.util.List;
  * @description:
  */
 public class CallerExtendedDataFile extends BaseResultFile {
-
     // 自定义数据列表
     private List<CallerExtendedDataInfo> callerExtendedDataInfoList;
 

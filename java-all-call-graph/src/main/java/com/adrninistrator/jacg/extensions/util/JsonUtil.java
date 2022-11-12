@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class JsonUtil {
     private static final Logger logger = LoggerFactory.getLogger(JsonUtil.class);
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectWriter objectWriterPretty;
 
     static {
         JsonInclude.Value dense = JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL);
@@ -23,11 +25,22 @@ public class JsonUtil {
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
+
+        objectWriterPretty = objectMapper.writerWithDefaultPrettyPrinter();
     }
 
     public static String getJsonStr(Object obj) {
         try {
             return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            logger.error("error ", e);
+            return null;
+        }
+    }
+
+    public static String getJsonStrPretty(Object obj) {
+        try {
+            return objectWriterPretty.writeValueAsString(obj);
         } catch (Exception e) {
             logger.error("error ", e);
             return null;

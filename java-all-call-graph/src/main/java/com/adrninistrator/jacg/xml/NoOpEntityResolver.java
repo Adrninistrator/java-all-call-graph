@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
  */
 public class NoOpEntityResolver implements EntityResolver {
     public InputSource resolveEntity(String publicId, String systemId) {
-        return new InputSource(new
-                ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8)));
+        return new InputSource(new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8)));
     }
 }

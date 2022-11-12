@@ -1,7 +1,7 @@
 package test.run_by_code;
 
+import com.adrninistrator.jacg.find_keyword.FindKeywordCallGraph;
 import org.junit.Test;
-import test.jacg.TestFindKeywordCallGraph4ee;
 
 /**
  * @author adrninistrator
@@ -11,6 +11,6 @@ import test.jacg.TestFindKeywordCallGraph4ee;
 public class TestRBCFindKeywordCallGraph4ee extends TestRunByCodeBase {
     @Test
     public void test() {
-        TestFindKeywordCallGraph4ee.main(new String[]{});
+        new FindKeywordCallGraph().find(true, configureWrapper);
     }
 }

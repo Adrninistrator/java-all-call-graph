@@ -8,7 +8,6 @@ import java.util.List;
  * @description:
  */
 public class DbOperateData {
-
     private String statement;
 
     private List<String> tableList;

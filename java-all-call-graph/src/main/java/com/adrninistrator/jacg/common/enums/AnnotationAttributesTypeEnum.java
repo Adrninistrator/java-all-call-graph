@@ -20,9 +20,9 @@ public enum AnnotationAttributesTypeEnum {
     AATE_LIST_MAP("list_map", "lm:"),
     ;
 
-    private String type;
+    private final String type;
 
-    private String prefix;
+    private final String prefix;
 
     AnnotationAttributesTypeEnum(String type, String prefix) {
         this.type = type;

@@ -1,7 +1,7 @@
 package test.manual_add_call_graph;
 
+import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import org.junit.Test;
-import test.jacg.TestRunnerGenAllGraph4Callee;
 
 /**
  * @author adrninistrator
@@ -10,7 +10,7 @@ import test.jacg.TestRunnerGenAllGraph4Callee;
  */
 public class TestMACGRunnerGenAllGraph4Callee extends TestMACGBase {
     @Test
-    public void test(){
-        TestRunnerGenAllGraph4Callee.main(null);
+    public void test() {
+        new RunnerGenAllGraph4Callee().run(configureWrapper);
     }
 }

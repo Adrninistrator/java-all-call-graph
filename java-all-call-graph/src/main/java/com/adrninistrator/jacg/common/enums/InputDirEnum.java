@@ -12,8 +12,8 @@ public enum InputDirEnum {
     IDE_EXTENSIONS("_jacg_extensions", "保存自定义处理类配置文件的目录"),
     ;
 
-    private String dirName;
-    private String desc;
+    private final String dirName;
+    private final String desc;
 
     InputDirEnum(String dirName, String desc) {
         this.dirName = dirName;

@@ -2,6 +2,8 @@ package test.extensions.code_parser;
 
 import com.adrninistrator.jacg.extensions.code_parser.AbstractManualAddCallGraphSimpleParser;
 
+import java.awt.event.ActionListener;
+
 /**
  * @author adrninistrator
  * @date 2022/4/21
@@ -11,7 +13,7 @@ public class MACGActionListenerParser extends AbstractManualAddCallGraphSimplePa
     @Override
     public String chooseTopSuperOrItfClassFullName() {
         // ActionListener接口的完整类名
-        return "java.awt.event.ActionListener";
+        return ActionListener.class.getName();
     }
 
     @Override

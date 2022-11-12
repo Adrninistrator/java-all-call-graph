@@ -6,6 +6,10 @@ package test.call_graph.extend_complex.only_class;
  * @description:
  */
 public class ChildClassA1 extends AbstractSuperClassA {
+    public ChildClassA1() {
+        System.out.println("ChildClassA1");
+    }
+
     public void test() {
         entryA();
     }

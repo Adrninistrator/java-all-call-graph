@@ -142,10 +142,12 @@ public class TestMCCaller {
     }
 
     public void test4h() {
-        argsWithArray(new String[]{"1", "2"});
+        handleStringArrayArgs(new String[]{"1", "2"});
         String[] ss = new String[]{"3", "4"};
         int a = 1;
-        argsWithArray(ss);
+        handleStringArrayArgs(ss);
+
+        handleIntArrayArgs(new int[]{11, 22});
     }
 
     public void test4i() {
@@ -172,8 +174,11 @@ public class TestMCCaller {
     private void run(int a, String b, BigDecimal c) {
     }
 
-    private void argsWithArray(String[] aa) {
+    private void handleStringArrayArgs(String[] aa) {
         System.out.println(aa == null);
+    }
+
+    private void handleIntArrayArgs(int[] aa) {
     }
 
     private void run2(I2_1_1 i) {

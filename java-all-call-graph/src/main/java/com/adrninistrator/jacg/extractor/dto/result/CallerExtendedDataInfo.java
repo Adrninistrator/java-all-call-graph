@@ -8,7 +8,6 @@ import com.adrninistrator.jacg.extensions.dto.extened_data.BaseExtendedData;
  * @description:
  */
 public class CallerExtendedDataInfo extends BaseExtendedData {
-
     // 数据序号
     private int dataSeq;
 

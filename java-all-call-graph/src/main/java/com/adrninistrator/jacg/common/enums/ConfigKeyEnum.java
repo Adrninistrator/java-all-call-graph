@@ -6,7 +6,7 @@ package com.adrninistrator.jacg.common.enums;
  * @description:
  */
 public enum ConfigKeyEnum {
-    CKE_APPNAME("app.name", "当前应用的调用关系写入数据库里的表名后缀"),
+    CKE_APP_NAME("app.name", "当前应用的调用关系写入数据库里的表名后缀"),
     CKE_CALL_GRAPH_JAR_LIST("call.graph.jar.list", "需要通过java-callgraph2生成调用关系文件的jar包，或保存class、jar文件的目录列表"),
     CKE_INPUT_IGNORE_OTHER_PACKAGE("input.ignore.other.package", "将调用关系及类名写入数据库中时，是否忽略非指定包中的类"),
     CKE_CALL_GRAPH_OUTPUT_DETAIL("call.graph.output.detail", "生成调用链时的详细程度"),
@@ -24,8 +24,8 @@ public enum ConfigKeyEnum {
     CKE_DB_PASSWORD("db.password", "数据库配置（仅当使用非H2数据库时需要指定），密码"),
     ;
 
-    private String key;
-    private String desc;
+    private final String key;
+    private final String desc;
 
     ConfigKeyEnum(String key, String desc) {
         this.key = key;

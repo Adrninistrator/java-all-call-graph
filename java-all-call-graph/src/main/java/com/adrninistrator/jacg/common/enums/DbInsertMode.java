@@ -12,7 +12,7 @@ public enum DbInsertMode {
     ;
 
     // 以上mode会用于sql语句拼接，需要以空格结尾
-    private String mode;
+    private final String mode;
 
     DbInsertMode(String mode) {
         this.mode = mode;

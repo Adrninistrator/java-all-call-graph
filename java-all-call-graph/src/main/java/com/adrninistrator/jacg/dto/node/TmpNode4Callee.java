@@ -12,11 +12,9 @@ public class TmpNode4Callee {
 
     private String currentCallerMethodHash;
 
-    public static TmpNode4Callee genNode(String currentCalleeMethodHash, String currentCallerMethodHash) {
-        TmpNode4Callee node = new TmpNode4Callee();
-        node.setCurrentCalleeMethodHash(currentCalleeMethodHash);
-        node.setCurrentCallerMethodHash(currentCallerMethodHash);
-        return node;
+    public TmpNode4Callee(String currentCalleeMethodHash, String currentCallerMethodHash) {
+        this.currentCalleeMethodHash = currentCalleeMethodHash;
+        this.currentCallerMethodHash = currentCallerMethodHash;
     }
 
     //

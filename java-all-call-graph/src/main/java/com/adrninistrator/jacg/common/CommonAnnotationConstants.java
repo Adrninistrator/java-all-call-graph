@@ -22,7 +22,6 @@ public class CommonAnnotationConstants {
     };
 
     public static final String[] SPRING_COMPONENT_ANNOTATIONS = new String[]{
-            "org.springframework.context.annotation.Configuration",
             "org.springframework.stereotype.Component",
             "org.springframework.stereotype.Controller",
             "org.springframework.stereotype.Repository",

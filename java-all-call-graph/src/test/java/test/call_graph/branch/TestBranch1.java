@@ -1,5 +1,7 @@
 package test.call_graph.branch;
 
+import java.math.BigDecimal;
+
 /**
  * @author adrninistrator
  * @date 2022/6/5
@@ -7,23 +9,27 @@ package test.call_graph.branch;
  */
 public class TestBranch1 {
 
-    private void test1() {
+    private void test1(String arg1, int arg2, Integer arg3) {
         int i = (int) System.currentTimeMillis() % 10;
         if (i == 1) {
-            System.out.println(i);
+            System.out.println(i + arg1 + arg2 + arg3);
         }
     }
 
-    private void test2() throws InterruptedException {
+    private void test2(BigDecimal arg1) throws InterruptedException {
         int i = (int) System.currentTimeMillis() % 10;
         if (i == 1) {
             System.out.println(i);
+        } else if (i == 2) {
+            System.getProperty(i + "");
         } else {
             Thread.sleep(i);
         }
+
+        System.setProperty("", i + "");
     }
 
-    private void test3() throws InterruptedException {
+    private void test3(int arg1) throws InterruptedException {
         int i1 = (int) System.currentTimeMillis() % 10;
         int i2 = (int) System.currentTimeMillis() % 10;
         if (i1 == 1) {
@@ -36,7 +42,7 @@ public class TestBranch1 {
         }
     }
 
-    private void test4() throws InterruptedException {
+    private void test4(Long arg1) throws InterruptedException {
         int i1 = (int) System.currentTimeMillis() % 10;
         int i2 = (int) System.currentTimeMillis() % 10;
         if (i1 == 1) {
@@ -49,13 +55,13 @@ public class TestBranch1 {
         }
     }
 
-    private void test5a() {
+    private void test5a(TestBranch1 arg1) {
         int i = (int) System.currentTimeMillis() % 10;
         String s1 = (i == 3 ? "a" : "b");
         System.out.println(s1);
     }
 
-    private void test5b() {
+    private void test5b(String arg1) {
         int i1 = (int) System.currentTimeMillis() % 10;
         int i2 = (int) System.currentTimeMillis() % 10;
         String s1 = (i1 == 3 ? i2 == 4 ? "a1" : "b1" : i2 == 5 ? "a2" : "b2");
@@ -113,6 +119,12 @@ public class TestBranch1 {
             System.out.println("a2");
         }
         System.out.println("1");
+    }
+
+    private void test9() {
+        long l1 = System.currentTimeMillis() % 10;
+        long l2 = l1 == 1 ? 2 : 3;
+        System.out.println(l2);
     }
 
     private String testString(String data) {

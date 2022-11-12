@@ -8,13 +8,13 @@ import java.util.Map;
  * @description: 注解属性值，Map格式，对应注解类型的注解属性
  */
 public class MapAnnotationAttribute extends BaseAnnotationAttribute {
-    private Map<String, Object> attributeMap;
+    private final Map<String, Object> attributeMap;
+
+    public MapAnnotationAttribute(Map<String, Object> attributeMap) {
+        this.attributeMap = attributeMap;
+    }
 
     public Map<String, Object> getAttributeMap() {
         return attributeMap;
-    }
-
-    public void setAttributeMap(Map<String, Object> attributeMap) {
-        this.attributeMap = attributeMap;
     }
 }

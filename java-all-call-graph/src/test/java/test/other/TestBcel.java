@@ -3,6 +3,7 @@ package test.other;
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -13,11 +14,8 @@ import java.io.IOException;
  */
 public class TestBcel {
 
-    public static void main(String[] args) throws IOException {
-        testEnum();
-    }
-
-    private static void testEnum() throws IOException {
+    @Test
+    public void test() throws IOException {
         ClassParser cp = new ClassParser("out/test/classes/TestA1$TestB.class");
         JavaClass javaClass = cp.parse();
         for (Method method : javaClass.getMethods()) {

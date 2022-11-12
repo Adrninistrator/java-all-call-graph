@@ -12,8 +12,8 @@ public enum OutputDetailEnum {
     ODE_ILLEGAL("ILLEGAL", "非法"),
     ;
 
-    private String detail;
-    private String desc;
+    private final String detail;
+    private final String desc;
 
     OutputDetailEnum(String detail, String desc) {
         this.detail = detail;

@@ -6,7 +6,6 @@ package com.adrninistrator.jacg.extractor.dto.result;
  * @description:
  */
 public class CalleeEntryMethodInfo {
-
     // 数据序号
     private int dataSeq;
 

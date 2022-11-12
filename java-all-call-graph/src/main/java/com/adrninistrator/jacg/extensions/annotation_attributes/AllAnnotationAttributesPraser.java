@@ -9,12 +9,12 @@ import com.adrninistrator.jacg.dto.annotation_attribute.MapAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation_attribute.StringAnnotationAttribute;
 import com.adrninistrator.jacg.extensions.util.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -54,50 +54,32 @@ public class AllAnnotationAttributesPraser {
 
     private static StringAnnotationAttribute handleString(String data, int prefixLength) {
         String dataWithOutPrefix = data.substring(prefixLength);
-
-        StringAnnotationAttribute stringAnnotationAttribute = new StringAnnotationAttribute();
-        stringAnnotationAttribute.setAttributeString(dataWithOutPrefix);
-        return stringAnnotationAttribute;
+        return new StringAnnotationAttribute(dataWithOutPrefix);
     }
 
     private static StringAnnotationAttribute handleStringBase64(String data, int prefixLength) {
         String dataWithOutPrefix = data.substring(prefixLength);
-
-        StringAnnotationAttribute stringAnnotationAttribute = new StringAnnotationAttribute();
-        stringAnnotationAttribute.setAttributeString(new String(Base64.decodeBase64(dataWithOutPrefix), StandardCharsets.UTF_8));
-        return stringAnnotationAttribute;
+        return new StringAnnotationAttribute(new String(Base64.getDecoder().decode(dataWithOutPrefix), StandardCharsets.UTF_8));
     }
 
     private static MapAnnotationAttribute handleMap(String data, int prefixLength) {
         String dataWithOutPrefix = data.substring(prefixLength);
-
         Map<String, Object> attributeMap = JsonUtil.getObjFromJsonStr(dataWithOutPrefix, new TypeReference<Map<String, Object>>() {
         });
-
-        MapAnnotationAttribute mapAnnotationAttribute = new MapAnnotationAttribute();
-        mapAnnotationAttribute.setAttributeMap(attributeMap);
-        return mapAnnotationAttribute;
+        return new MapAnnotationAttribute(attributeMap);
     }
 
     private static ListStringAnnotationAttribute handleListString(String data, int prefixLength) {
         String dataWithOutPrefix = data.substring(prefixLength);
-
         List<String> attributeList = JsonUtil.getObjFromJsonStr(dataWithOutPrefix, new TypeReference<List<String>>() {
         });
-
-        ListStringAnnotationAttribute listStringAnnotationAttribute = new ListStringAnnotationAttribute();
-        listStringAnnotationAttribute.setAttributeList(attributeList);
-        return listStringAnnotationAttribute;
+        return new ListStringAnnotationAttribute(attributeList);
     }
 
     private static ListMapAnnotationAttribute handleListMap(String data, int prefixLength) {
         String dataWithOutPrefix = data.substring(prefixLength);
-
         List<Map<String, Object>> attributeList = JsonUtil.getObjFromJsonStr(dataWithOutPrefix, new TypeReference<List<Map<String, Object>>>() {
         });
-
-        ListMapAnnotationAttribute listMapAnnotationAttribute = new ListMapAnnotationAttribute();
-        listMapAnnotationAttribute.setAttributeList(attributeList);
-        return listMapAnnotationAttribute;
+        return new ListMapAnnotationAttribute(attributeList);
     }
 }

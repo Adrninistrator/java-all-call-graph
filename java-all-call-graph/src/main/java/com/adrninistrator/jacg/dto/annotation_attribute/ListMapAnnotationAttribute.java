@@ -9,13 +9,13 @@ import java.util.Map;
  * @description: 注解属性值，List格式，对应数组类型的注解属性，内部属性类型为Map
  */
 public class ListMapAnnotationAttribute extends BaseAnnotationAttribute {
-    private List<Map<String, Object>> attributeList;
+    private final List<Map<String, Object>> attributeList;
+
+    public ListMapAnnotationAttribute(List<Map<String, Object>> attributeList) {
+        this.attributeList = attributeList;
+    }
 
     public List<Map<String, Object>> getAttributeList() {
         return attributeList;
-    }
-
-    public void setAttributeList(List<Map<String, Object>> attributeList) {
-        this.attributeList = attributeList;
     }
 }

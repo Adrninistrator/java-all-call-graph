@@ -46,7 +46,12 @@ public abstract class AbstractManualAddCallGraphSimpleParser implements CustomCo
     }
 
     @Override
-    public void handleMethodCall(CallIdCounter callIdCounter, String calleeClassName, String calleeMethodName, Type[] arguments, InstructionHandle mcIh, MethodGen methodGen,
+    public void handleMethodCall(CallIdCounter callIdCounter,
+                                 String calleeClassName,
+                                 String calleeMethodName,
+                                 Type[] arguments,
+                                 InstructionHandle mcIh,
+                                 MethodGen methodGen,
                                  List<MethodCallDto> methodCalls) {
         if (!StringUtils.equals(chooseCalleeMethodName(), calleeMethodName)) {
             // 判断被调用方法，不需要处理时跳过

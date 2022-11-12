@@ -7,35 +7,29 @@ package com.adrninistrator.jacg.dto.task;
  */
 public class CalleeTmpMethodInfo {
     // 完整方法HASH+长度
-    private String methodHash;
+    private final String methodHash;
 
     // 完整方法信息
-    private String fullMethod;
+    private final String fullMethod;
 
     // 方法名+参数
-    private String methodNameAndArgs;
+    private final String methodNameAndArgs;
+
+    public CalleeTmpMethodInfo(String methodHash, String fullMethod, String methodNameAndArgs) {
+        this.methodHash = methodHash;
+        this.fullMethod = fullMethod;
+        this.methodNameAndArgs = methodNameAndArgs;
+    }
 
     public String getMethodHash() {
         return methodHash;
-    }
-
-    public void setMethodHash(String methodHash) {
-        this.methodHash = methodHash;
     }
 
     public String getFullMethod() {
         return fullMethod;
     }
 
-    public void setFullMethod(String fullMethod) {
-        this.fullMethod = fullMethod;
-    }
-
     public String getMethodNameAndArgs() {
         return methodNameAndArgs;
-    }
-
-    public void setMethodNameAndArgs(String methodNameAndArgs) {
-        this.methodNameAndArgs = methodNameAndArgs;
     }
 }

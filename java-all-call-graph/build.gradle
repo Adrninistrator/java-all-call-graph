@@ -1,10 +1,9 @@
 apply plugin: 'eclipse'
 apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
+apply plugin: 'idea'
 
 group 'com.github.adrninistrator'
-version = "0.7.9"
+version = "0.8.0"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -18,6 +17,11 @@ project.buildDir = 'build'
 
 repositories {
     mavenCentral()
+}
+
+clean {
+    delete 'build'
+    delete 'output_dir'
 }
 
 sourceSets {
@@ -43,40 +47,45 @@ sourceSets {
 }
 
 List apache_common = [
-        'org.apache.commons:commons-lang3:3.11',
-        'commons-io:commons-io:2.8.0',
-        'commons-codec:commons-codec:1.9'
+        'org.apache.commons:commons-lang3:3.12.0',
+        'commons-io:commons-io:2.11.0',
+        'commons-codec:commons-codec:1.15'
 ]
 
 List c3p0 = ['com.mchange:c3p0:0.9.5.5']
 
-List mysql = ['mysql:mysql-connector-java:8.0.29']
+List mysql = ['com.mysql:mysql-connector-j:8.0.31']
 
-List h2database = ["com.h2database:h2:2.1.210"]
+List h2database = ["com.h2database:h2:2.1.214"]
 
-List slf4j = ['org.slf4j:log4j-over-slf4j:1.7.30']
+List slf4j = ['org.slf4j:log4j-over-slf4j:1.7.36']
 
 List java_callgraph = ['com.github.adrninistrator:java-callgraph2:0.2.2']
 
-def jackson_ver = "2.12.4"
-List jackson = [
-        "com.fasterxml.jackson.core:jackson-databind:$jackson_ver",
-        "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:$jackson_ver"
-]
+List jackson = ["com.fasterxml.jackson.core:jackson-databind:2.14.0"]
 
 List dom4j = ['dom4j:dom4j:1.6.1']
 
 List log4j = [
-        'org.apache.logging.log4j:log4j-api:2.17.0',
-        'org.apache.logging.log4j:log4j-core:2.17.0',
-        'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
+        'org.apache.logging.log4j:log4j-api:2.19.0',
+        'org.apache.logging.log4j:log4j-core:2.19.0',
+        'org.apache.logging.log4j:log4j-slf4j-impl:2.19.0'
 ]
 
 List junit = ['junit:junit:4.13.2']
 
+List spring = [
+        'org.springframework:spring-beans:5.3.22',
+        'org.springframework:spring-context:5.3.22'
+]
+
+List spring_test = [
+        'org.springframework:spring-test:5.3.22'
+]
+
 dependencies {
     compile apache_common, c3p0, mysql, h2database, slf4j, java_callgraph, jackson, dom4j
-    testImplementation log4j, junit
+    testImplementation log4j, junit, spring, spring_test
 }
 
 compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -118,7 +127,7 @@ task gen_run_jar(type: Jar) {
         into '/'
     }
 
-    doLast{
+    doLast {
         copy {
             from 'build/libs/run_jacg.jar'
             into 'output_dir/jar/'
@@ -140,15 +149,19 @@ task gen_run_jar(type: Jar) {
             into 'output_dir/_jacg_sql/'
         }
         copy {
-            from 'run.bat'
+            from new File('bat').listFiles().findAll { File f -> (f.name.endsWith('.bat')) }
             into 'output_dir/'
         }
         copy {
-            from 'run.sh'
+            from new File('shell').listFiles().findAll { File f -> (f.name.endsWith('.sh')) }
             into 'output_dir/'
         }
         copy {
-            from configurations.testRuntimeClasspath
+            from new File('src/test/resources').listFiles().findAll { File f -> (f.name.startsWith('log4j2') && f.name.endsWith('.xml')) }
+            into 'output_dir/config/'
+        }
+        copy {
+            from configurations.testRuntimeClasspath.getFiles().findAll { File f -> (!f.name.startsWith('spring-') && !f.name.startsWith('junit-')) }
             into 'output_dir/lib'
         }
     }
@@ -168,61 +181,15 @@ task javadocJar(type: Jar) {
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.name
-            version "${version}"
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-
-            pom {
-                name = "java-all-call-graph"
-                description = "Generate all call graph for Java Code."
-                url = "https://github.com/Adrninistrator/java-all-call-graph"
-                licenses {
-                    license {
-                        name = "The Apache License, Version 2.0"
-                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "Adrninistrator"
-                        name = "zhengyiee"
-                        email = "zhengyiee@qq.com"
-                    }
-                }
-                scm {
-                    connection = "scm:git:https://github.com/Adrninistrator/java-all-call-graph.git"
-                    developerConnection = "scm:git:https://github.com/Adrninistrator/java-all-call-graph.git"
-                    url = "https://github.com/Adrninistrator/java-all-call-graph"
-                }
-            }
-        }
+idea {
+    module {
+        // and some extra dirs that should be excluded by IDEA
+        excludeDirs += file('.idea')
+        excludeDirs += file('_jacg_o_ee')
+        excludeDirs += file('_jacg_o_er')
+        excludeDirs += file('gradle')
+        excludeDirs += file('output_dir')
+        excludeDirs += file('bat')
+        excludeDirs += file('shell')
     }
-    repositories {
-        maven {
-            name 'sonatypeRepository'
-            url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-            credentials {
-                username = "${NEXUS_USERNAME}"
-                password = "${NEXUS_PASSWORD}"
-            }
-        }
-        maven {
-            name = 'sonatypeSnapshotRepository'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-            credentials {
-                username = "${NEXUS_USERNAME}"
-                password = "${NEXUS_PASSWORD}"
-            }
-        }
-    }
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }

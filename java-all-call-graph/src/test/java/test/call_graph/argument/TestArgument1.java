@@ -1,5 +1,8 @@
 package test.call_graph.argument;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 
 /**
@@ -9,46 +12,57 @@ import java.math.BigDecimal;
  */
 public class TestArgument1 {
 
+    private static final Logger logger = LoggerFactory.getLogger(TestArgument1.class);
+
     public static void test() {
-        TestBigDecimal(BigDecimal.ONE);
-        TestBoolean(Boolean.FALSE);
-        TestByte(Byte.MAX_VALUE);
-        TestDouble(1.1D);
-        TestFloat(1.2F);
-        TestInteger(2);
-        TestInteger(128);
-        TestLong(3L);
-        TestLong(129L);
-        TestLong(5000L);
-        TestShort(Short.MAX_VALUE);
-        TestString("abc");
+        logger.info("test");
+        testBigDecimal(BigDecimal.ONE);
+        testBoolean(Boolean.FALSE);
+        testByte(Byte.MAX_VALUE);
+        testDouble(1.1D);
+        testFloat(1.2F);
+        testInteger(2);
+        testInteger(128);
+        testLong(3L);
+        testLong(129L);
+        testLong(5000L);
+        testShort(Short.MAX_VALUE);
+        testString("abc");
     }
 
-    public static void TestBigDecimal(BigDecimal arg) {
+    public static void testBigDecimal(BigDecimal arg) {
+        System.out.println(arg);
     }
 
-    public static void TestBoolean(Boolean arg) {
+    public static void testBoolean(Boolean arg) {
+        arg = null;
+        System.out.println(arg);
     }
 
-    public static void TestByte(Byte arg) {
+    public static void testByte(Byte arg) {
+        Byte arg2 = null;
+        System.out.println(arg2);
     }
 
-    public static void TestDouble(Double arg) {
+    public static void testDouble(Double arg) {
     }
 
-    public static void TestFloat(Float arg) {
+    public static void testFloat(Float arg) {
     }
 
-    public static void TestInteger(Integer arg) {
+    public static void testInteger(Integer arg) {
     }
 
-    public static void TestLong(Long arg) {
+    public static void testLong(Long arg) {
     }
 
-    public static void TestShort(Short arg) {
+    public static void testShort(Short arg) {
     }
 
-    public static void TestString(String arg) {
+    public static void testString(String arg) {
     }
 
+    public static void testIntArray(int[] arg) {
+        System.out.println(arg.length);
+    }
 }

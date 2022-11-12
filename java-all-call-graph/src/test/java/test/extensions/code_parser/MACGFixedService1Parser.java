@@ -1,6 +1,7 @@
 package test.extensions.code_parser;
 
 import com.adrninistrator.jacg.extensions.code_parser.AbstractManualAddCallGraphSimpleParser;
+import test.call_graph.manual_add_callgraph.fixed.AbstractFixedService1;
 
 /**
  * @author adrninistrator
@@ -11,7 +12,7 @@ public class MACGFixedService1Parser extends AbstractManualAddCallGraphSimplePar
     @Override
     public String chooseTopSuperOrItfClassFullName() {
         // AbstractFixedService1类的完整类名
-        return "test.call_graph.manual_add_callgraph.fixed.AbstractFixedService1";
+        return AbstractFixedService1.class.getName();
     }
 
     @Override

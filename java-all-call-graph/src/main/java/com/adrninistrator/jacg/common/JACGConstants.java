@@ -69,6 +69,7 @@ public class JACGConstants {
             DC.ED_DATA_VALUE
     };
 
+    // todo
     public static final String[] TABLE_COLUMNS_MANUAL_ADD_EXTENDED_DATA = new String[]{
             DC.MAED_CALLER_FULL_METHOD,
             DC.MAED_CALLEE_FULL_METHOD,
@@ -193,6 +194,7 @@ public class JACGConstants {
     public static final String TABLE_PREFIX_METHOD_LINE_NUMBER = "method_line_number_";
     public static final String TABLE_PREFIX_JAR_INFO = "jar_info_";
     public static final String TABLE_PREFIX_EXTENDED_DATA = "extended_data_";
+    // todo
     public static final String TABLE_PREFIX_MANUAL_ADD_EXTENDED_DATA = "manual_add_extended_data_";
 
     // 调用链文件中，每个级别之间的缩进，两个空格
@@ -216,7 +218,7 @@ public class JACGConstants {
 
     public static final int NO_CYCLE_CALL_FLAG = -1;
 
-    // 保存配置文件的根目录
+    // todo 使用javacg中的 保存配置文件的根目录
     public static final String PROPERTY_INPUT_ROOT_PATH = "input.root.path";
     // 是否在结果文件中写入配置信息
     public static final String PROPERTY_WRITE_CONFIG_IN_RESULT = "write.config";

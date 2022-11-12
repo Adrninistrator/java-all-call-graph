@@ -7,10 +7,6 @@ package com.adrninistrator.jacg.runner;
  */
 public class RunnerWriteDbJavaCGRecordAll extends RunnerWriteDb {
 
-    static {
-        runner = new RunnerWriteDb();
-    }
-
     @Override
     public boolean isJavaCGRecordAll() {
         return true;

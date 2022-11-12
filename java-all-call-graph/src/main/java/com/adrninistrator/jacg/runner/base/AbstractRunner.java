@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfManager;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
@@ -32,17 +33,19 @@ public abstract class AbstractRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunner.class);
 
-    // 退出前是否关闭数据源，默认为是
-    protected static boolean CLOSE_DS_BEFORE_EXIT = true;
+    // 配置信息包装类
+    protected ConfigureWrapper configureWrapper;
 
     // 是否有检查过数据库文件是否可写
     protected static boolean CHECK_H2_DB_FILE_WRITEABLE = false;
 
-    protected static AbstractRunner runner;
+    protected boolean inited = false;
 
     protected ConfInfo confInfo;
 
     protected DbOperator dbOperator;
+
+    protected DbOperWrapper dbOperWrapper;
 
     protected ThreadPoolExecutor threadPoolExecutor;
 
@@ -55,21 +58,75 @@ public abstract class AbstractRunner {
     // 任务队列最大长度
     protected int taskQueueMaxSize;
 
-    public static void main(String[] args) {
-        runner.run();
-    }
-
     /**
      * 执行任务
      *
      * @return true: 成功；false: 失败
      */
     public boolean run() {
+        return run(new ConfigureWrapper());
+    }
+
+    /**
+     * 初始化
+     *
+     * @return true: 成功；false: 失败
+     */
+    protected abstract boolean preHandle();
+
+    /**
+     * 执行处理
+     */
+    protected abstract void handle();
+
+    /**
+     * 检查H2数据库文件
+     *
+     * @return
+     */
+    protected abstract boolean checkH2DbFile();
+
+    /**
+     * 初始化
+     *
+     * @param configureWrapper
+     * @return
+     */
+    public boolean init(ConfigureWrapper configureWrapper) {
+        synchronized (this) {
+            if (inited) {
+                return true;
+            }
+
+            this.configureWrapper = configureWrapper;
+            confInfo = ConfManager.getConfInfo(configureWrapper);
+            if (confInfo == null) {
+                return false;
+            }
+
+            dbOperator = DbOperator.genInstance(confInfo);
+            if (dbOperator == null) {
+                return false;
+            }
+
+            dbOperWrapper = new DbOperWrapper(dbOperator, confInfo.getAppName());
+            inited = true;
+            return true;
+        }
+    }
+
+    /**
+     * 执行任务，通过代码指定配置参数
+     *
+     * @param configureWrapper
+     * @return
+     */
+    public boolean run(ConfigureWrapper configureWrapper) {
         long startTime = System.currentTimeMillis();
         someTaskFail = false;
 
-        confInfo = ConfManager.getConfInfo();
-        if (confInfo == null) {
+        if (!init(configureWrapper)) {
+            logger.error("{} 初始化失败", this.getClass().getSimpleName());
             return false;
         }
 
@@ -78,24 +135,18 @@ public abstract class AbstractRunner {
             return false;
         }
 
-        dbOperator = DbOperator.getInstance();
-        if (!dbOperator.init(confInfo)) {
+        if (!preHandle()) {
+            logger.error("{} 预处理失败", this.getClass().getSimpleName());
             return false;
         }
 
-        DbOperWrapper.init(dbOperator, confInfo.getAppName());
-
-        if (!init()) {
-            logger.error("{} 初始化失败", this.getClass().getSimpleName());
-            return false;
-        }
-
-        operate();
+        // 执行处理
+        handle();
 
         beforeExit();
 
         long spendTime = System.currentTimeMillis() - startTime;
-        logger.info("{} 耗时: {} s", this.getClass().getSimpleName(), spendTime / 1000.0D);
+        logger.info("{} 执行完毕，耗时: {} S", this.getClass().getSimpleName(), spendTime / 1000.0D);
 
         return !someTaskFail;
     }
@@ -105,19 +156,14 @@ public abstract class AbstractRunner {
      *
      * @return true: 成功；false: 失败
      */
-    public abstract boolean preCheck();
+    protected boolean preCheck() {
+        // 使用H2数据库时，检查数据库文件
+        if (confInfo.isDbUseH2() && !checkH2DbFile()) {
+            return false;
+        }
 
-    /**
-     * 初始化
-     *
-     * @return true: 成功；false: 失败
-     */
-    public abstract boolean init();
-
-    /**
-     * 执行操作
-     */
-    public abstract void operate();
+        return true;
+    }
 
     protected void beforeExit() {
         if (someTaskFail) {
@@ -130,12 +176,8 @@ public abstract class AbstractRunner {
             threadPoolExecutor.shutdown();
         }
 
-        if (CLOSE_DS_BEFORE_EXIT) {
-            logger.info("操作结束时关闭数据源");
-            dbOperator.closeDs();
-        } else {
-            logger.info("操作结束时不关闭数据源");
-        }
+        logger.info("操作结束时关闭数据源");
+        dbOperator.closeDs();
     }
 
     /**
@@ -188,28 +230,37 @@ public abstract class AbstractRunner {
         return confInfo.getCallGraphJarList().split(JACGConstants.FLAG_SPACE);
     }
 
-    // 检查H2数据库文件是否可写
+    /**
+     * 检查H2数据库文件是否可写
+     * 需要进行同步控制，避免同时执行
+     *
+     * @param h2DbFile
+     * @return
+     */
     protected boolean checkH2DbFileWritable(File h2DbFile) {
-        // 以下操作在JVM中只能成功执行一次，需要避免执行多次
-        if (CHECK_H2_DB_FILE_WRITEABLE) {
-            return true;
-        }
-
-        // 尝试以写方式打开，检查数据库文件是否被占用
-        try (FileChannel channel = FileChannel.open(h2DbFile.toPath(), StandardOpenOption.WRITE)) {
-            FileLock fileLock = channel.tryLock();
-            if (fileLock == null) {
-                logger.error("H2数据库文件无法写入，请先关闭H2数据库工具打开的H2数据库文件 {}", JACGFileUtil.getCanonicalPath(h2DbFile));
-                return false;
+        synchronized (AbstractRunner.class) {
+            // 以下操作在JVM中只能成功执行一次，需要避免执行多次
+            if (CHECK_H2_DB_FILE_WRITEABLE) {
+                return true;
             }
 
-            fileLock.release();
+            logger.info("检查H2数据库文件是否可写");
+            // 尝试以写方式打开，检查数据库文件是否被占用
+            try (FileChannel channel = FileChannel.open(h2DbFile.toPath(), StandardOpenOption.WRITE)) {
+                FileLock fileLock = channel.tryLock();
+                if (fileLock == null) {
+                    logger.error("H2数据库文件无法写入，请先关闭H2数据库工具打开的H2数据库文件 {}", JACGFileUtil.getCanonicalPath(h2DbFile));
+                    return false;
+                }
 
-            CHECK_H2_DB_FILE_WRITEABLE = true;
-            return true;
-        } catch (Exception e) {
-            logger.error("检查H2数据库文件是否可以写入失败 {} ", JACGFileUtil.getCanonicalPath(h2DbFile), e);
-            return false;
+                fileLock.release();
+
+                CHECK_H2_DB_FILE_WRITEABLE = true;
+                return true;
+            } catch (Exception e) {
+                logger.error("检查H2数据库文件是否可以写入失败 {} ", JACGFileUtil.getCanonicalPath(h2DbFile), e);
+                return false;
+            }
         }
     }
 
@@ -227,8 +278,21 @@ public abstract class AbstractRunner {
         }
     }
 
-    // 设置处理完毕时是否需要关闭数据源
-    public static void setCloseDsBeforeExit(boolean closeDsBeforeExit) {
-        CLOSE_DS_BEFORE_EXIT = closeDsBeforeExit;
+    /**
+     * 获取配置信息
+     *
+     * @return
+     */
+    public ConfInfo getConfInfo() {
+        return confInfo;
+    }
+
+    /**
+     * 获取执行失败的任务信息
+     *
+     * @return
+     */
+    public List<String> getFailTaskList() {
+        return failTaskList;
     }
 }

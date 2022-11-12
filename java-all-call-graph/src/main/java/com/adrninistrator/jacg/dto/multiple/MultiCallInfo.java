@@ -9,24 +9,20 @@ import java.util.Set;
  */
 
 public class MultiCallInfo {
+    private final String callerMethodHash;
 
-    private String callerMethodHash;
+    private final Set<String> calleeFullMethodSet;
 
-    private Set<String> calleeFullMethodSet;
+    public MultiCallInfo(String callerMethodHash, Set<String> calleeFullMethodSet) {
+        this.callerMethodHash = callerMethodHash;
+        this.calleeFullMethodSet = calleeFullMethodSet;
+    }
 
     public String getCallerMethodHash() {
         return callerMethodHash;
     }
 
-    public void setCallerMethodHash(String callerMethodHash) {
-        this.callerMethodHash = callerMethodHash;
-    }
-
     public Set<String> getCalleeFullMethodSet() {
         return calleeFullMethodSet;
-    }
-
-    public void setCalleeFullMethodSet(Set<String> calleeFullMethodSet) {
-        this.calleeFullMethodSet = calleeFullMethodSet;
     }
 }

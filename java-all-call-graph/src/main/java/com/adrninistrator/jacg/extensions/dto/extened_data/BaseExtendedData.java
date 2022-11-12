@@ -6,7 +6,6 @@ package com.adrninistrator.jacg.extensions.dto.extened_data;
  * @description:
  */
 public class BaseExtendedData {
-
     // 自定义数据类型
     protected String dataType;
 

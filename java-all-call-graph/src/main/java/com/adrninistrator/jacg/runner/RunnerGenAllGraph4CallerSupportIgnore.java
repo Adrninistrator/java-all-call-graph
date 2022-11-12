@@ -8,10 +8,6 @@ package com.adrninistrator.jacg.runner;
 
 public class RunnerGenAllGraph4CallerSupportIgnore extends RunnerGenAllGraph4Caller {
 
-    static {
-        runner = new RunnerGenAllGraph4CallerSupportIgnore();
-    }
-
     @Override
     public boolean isSupportIgnore() {
         return true;

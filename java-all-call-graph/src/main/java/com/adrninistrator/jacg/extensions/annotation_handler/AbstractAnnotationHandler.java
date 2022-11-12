@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.extensions.annotation_handler;
 
+import com.adrninistrator.jacg.annotation.AnnotationStorage;
 import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
 
 import java.util.Map;
@@ -10,6 +11,9 @@ import java.util.Map;
  * @description: 方法注解处理类的基类
  */
 public abstract class AbstractAnnotationHandler {
+
+    // 保存类及方法上的注解信息
+    protected AnnotationStorage annotationStorage;
 
     /**
      * 判断当前类是否处理对应的注解
@@ -31,4 +35,8 @@ public abstract class AbstractAnnotationHandler {
      * @return
      */
     public abstract String handleAnnotation(String fullMethod, String fullClassName, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap);
+
+    public void setAnnotationStorage(AnnotationStorage annotationStorage) {
+        this.annotationStorage = annotationStorage;
+    }
 }

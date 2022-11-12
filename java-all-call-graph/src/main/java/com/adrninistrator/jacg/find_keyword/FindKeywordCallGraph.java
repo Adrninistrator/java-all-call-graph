@@ -2,7 +2,9 @@ package com.adrninistrator.jacg.find_keyword;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.keyword.FileContentNode;
 import com.adrninistrator.jacg.extensions.find_filter.BaseFindKeywordFilter;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
@@ -18,9 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -30,7 +29,7 @@ import java.util.Set;
 /**
  * @author adrninistrator
  * @date 2021/7/29
- * @description:
+ * @description: 生成包含关键字的所有方法到起始方法之间的调用链
  */
 
 public class FindKeywordCallGraph {
@@ -38,6 +37,8 @@ public class FindKeywordCallGraph {
     private static final Logger logger = LoggerFactory.getLogger(FindKeywordCallGraph.class);
 
     public static final String GEN_FOR_CALLER_SUPPORT_IGNORE_KEY = "gen_for_caller_support_ignore";
+
+    private boolean inited = false;
 
     // 记录当前处理的目录
     private String currentDirPath;
@@ -54,9 +55,51 @@ public class FindKeywordCallGraph {
     // 读取文件内容时，上一行的节点
     private FileContentNode lastNode;
 
+    // 用于生成方法完整调用链的对象
+    private AbstractRunnerGenCallGraph runnerGenCallGraph;
+
     // 设置生成向下的完整方法调用链时，支持忽略特定的包名、类、方法
     public static void setGenForCallerSupportIgnore() {
         System.setProperty(GEN_FOR_CALLER_SUPPORT_IGNORE_KEY, "1");
+    }
+
+    /**
+     * 初始化
+     *
+     * @param order4ee
+     * @param configureWrapper
+     * @return
+     */
+    public boolean init(boolean order4ee, ConfigureWrapper configureWrapper) {
+        synchronized (this) {
+            if (inited) {
+                return true;
+            }
+
+            if (order4ee) {
+                runnerGenCallGraph = new RunnerGenAllGraph4Callee();
+            } else {
+                runnerGenCallGraph = new RunnerGenAllGraph4Caller();
+
+                if (System.getProperty(GEN_FOR_CALLER_SUPPORT_IGNORE_KEY) != null) {
+                    ((RunnerGenAllGraph4Caller) runnerGenCallGraph).setSupportIgnore(true);
+                }
+            }
+
+            if (!runnerGenCallGraph.init(configureWrapper)) {
+                return false;
+            }
+
+            inited = true;
+            return true;
+        }
+    }
+
+    private void checkInited() {
+        if (!inited) {
+            logger.error("相关对象未完成初始化，请先调用init()方法");
+            throw new RuntimeException("相关对象未完成初始化，请先调用init()方法");
+        }
     }
 
     /**
@@ -66,14 +109,28 @@ public class FindKeywordCallGraph {
      * @return 生成的搜索结果文件的完整路径列表
      */
     public List<String> find(boolean order4ee) {
-        // 先生成对应的方法完整调用链，再对生成目录的文件根据关键字生成到起始方法的调用链
+        return find(order4ee, new ConfigureWrapper());
+    }
+
+    /**
+     * 在生成的方法调用链文件中搜索指定关键字，通过代码指定配置参数
+     *
+     * @param order4ee         true: 处理向上的方法调用链 false: 处理向下的方法调用链
+     * @param configureWrapper
+     * @return 生成的搜索结果文件的完整路径列表
+     */
+    public List<String> find(boolean order4ee, ConfigureWrapper configureWrapper) {
+        if (!init(order4ee, configureWrapper)) {
+            logger.error("初始化失败");
+            return null;
+        }
 
         // 读取指定的关键字
         OtherConfigFileUseListEnum otherConfigFileUseListEnum = order4ee ? OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE :
                 OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLER;
         String keywordConfigFilePath = otherConfigFileUseListEnum.getFileName();
 
-        List<String> configKeywordList = ConfigureWrapper.getOtherConfigList(otherConfigFileUseListEnum);
+        List<String> configKeywordList = configureWrapper.getOtherConfigList(otherConfigFileUseListEnum);
         if (JACGUtil.isCollectionEmpty(configKeywordList)) {
             logger.error("请在配置文件中指定需要生成到起始方法之间调用链的关键字 {}", keywordConfigFilePath);
             return null;
@@ -103,20 +160,7 @@ public class FindKeywordCallGraph {
             return null;
         }
 
-        // 生成方法完整调用链
-        AbstractRunnerGenCallGraph runnerGenCallGraph;
-
-        if (order4ee) {
-            runnerGenCallGraph = new RunnerGenAllGraph4Callee();
-        } else {
-            runnerGenCallGraph = new RunnerGenAllGraph4Caller();
-
-            if (System.getProperty(GEN_FOR_CALLER_SUPPORT_IGNORE_KEY) != null) {
-                ((RunnerGenAllGraph4Caller) runnerGenCallGraph).setSupportIgnore(true);
-            }
-        }
-
-        boolean success = runnerGenCallGraph.run();
+        boolean success = runnerGenCallGraph.run(configureWrapper);
         String outputPath = runnerGenCallGraph.getSuccessOutputDir();
 
         if (!success || outputPath == null) {
@@ -262,7 +306,7 @@ public class FindKeywordCallGraph {
 
         // 生成文件头
         String headerInfo = genHeaderInfo(txtFilePath, keywordList, order4ee);
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(txtFilePath), StandardCharsets.UTF_8));
+        try (BufferedReader br = JACGFileUtil.genBufferedReader(txtFilePath);
              WriterSupportHeaderAndSkip out = WriterSupportHeaderAndSkip.genWriterSupportHeaderAndSkip(mdFilePath, headerInfo)) {
             String line;
             lastNode = null;
@@ -274,7 +318,7 @@ public class FindKeywordCallGraph {
             // 记录每个方法级别最后处理的文件内容节点
             List<FileContentNode> fileContentNodeList = new ArrayList<>(20);
 
-            while ((line = in.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
                 lineNum++;
                 // 处理txt文件的一行
                 if (!handleTxtFileOneLine(line, keywordList, order4ee, foundCallGraph, fileContentNodeList)) {
@@ -333,7 +377,7 @@ public class FindKeywordCallGraph {
             }
 
             // 根文件内容节点
-            lastNode = FileContentNode.genInstance(null, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START, line);
+            lastNode = new FileContentNode(null, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START, line);
 
             // 记录每个方法级别最后处理的文件内容节点
             recordFileContentNodeInList(methodLevel, fileContentNodeList);
@@ -362,7 +406,7 @@ public class FindKeywordCallGraph {
         }
 
         // 记录当前的文件内容节点
-        lastNode = FileContentNode.genInstance(parentNode, methodLevel, line);
+        lastNode = new FileContentNode(parentNode, methodLevel, line);
 
         // 记录每个方法级别最后处理的文件内容节点
         recordFileContentNodeInList(methodLevel, fileContentNodeList);
@@ -429,5 +473,15 @@ public class FindKeywordCallGraph {
                 foundCallGraph.append(str).append(JACGConstants.NEW_LINE);
             }
         }
+    }
+
+    /**
+     * 获取配置信息
+     *
+     * @return
+     */
+    public ConfInfo getConfInfo() {
+        checkInited();
+        return runnerGenCallGraph.getConfInfo();
     }
 }

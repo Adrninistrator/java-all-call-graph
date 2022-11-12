@@ -7,12 +7,17 @@ package test.call_graph.variable_argument;
  */
 public class TestVAArray1 {
     private void test1() {
-        String[] array1 = new String[]{};
-        String[] array2 = new String[]{"1"};
+        int[] array1 = new int[]{};
+        int[] array2 = new int[]{1};
+        System.out.println(array1[0]);
     }
 
     private void test2() {
-        String[][] array1 = new String[][]{};
-        String[][] array2 = new String[][]{new String[]{"1", "2"}, new String[]{"a", "b", "c"}};
+        boolean[][] array1 = new boolean[][]{};
+        boolean[][] array2 = new boolean[][]{new boolean[]{false}, new boolean[]{true, false}};
+
+        boolean[] array1a = array1[0];
+        System.out.println(array1a.length);
+        System.out.println(array1a[0]);
     }
 }

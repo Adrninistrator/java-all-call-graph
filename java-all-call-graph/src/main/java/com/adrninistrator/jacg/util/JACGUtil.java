@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -9,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import java.util.Map;
 public class JACGUtil {
     private static final Logger logger = LoggerFactory.getLogger(JACGUtil.class);
 
-    private static Map<Integer, String> outputFlagMap = new HashMap<>();
+    private static final Map<Integer, String> OUTPUT_FLAG_MAP = new HashMap<>();
 
     /**
      * 从完整类名中获取简单类名（去掉包名）
@@ -113,7 +113,6 @@ public class JACGUtil {
         return method.substring(0, indexLastColon);
     }
 
-
     public static boolean isInnerAnonymousClass(String className) {
         if (!className.contains("$")) {
             return false;
@@ -142,15 +141,15 @@ public class JACGUtil {
 
     public static String genHashWithLen(String data) {
         byte[] md5 = DigestUtils.md5(data);
-        // 以下使用的BASE64方法输出结果范围为字母+“+”+“/”，不是原始的字母+“-”+“_”
-        return String.format("%s#%03x", Base64.encodeBase64URLSafeString(md5), data.length());
+        // 以下使用的BASE64方法输出结果范围为字母+“-”+“_”，不是原始的字母+“+”+“/”
+        return String.format("%s#%03x", Base64.getUrlEncoder().encodeToString(md5), data.length());
     }
 
-    public static boolean isCollectionEmpty(Collection collection) {
+    public static <T> boolean isCollectionEmpty(Collection<T> collection) {
         return collection == null || collection.isEmpty();
     }
 
-    public static boolean isMapEmpty(Map map) {
+    public static <K, V> boolean isMapEmpty(Map<K, V> map) {
         return map == null || map.isEmpty();
     }
 
@@ -159,14 +158,14 @@ public class JACGUtil {
             return "";
         }
 
-        String flag = outputFlagMap.get(level);
+        String flag = OUTPUT_FLAG_MAP.get(level);
         if (flag == null) {
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < level; i++) {
                 stringBuilder.append(JACGConstants.OUTPUT_SPLIT_FLAG);
             }
             flag = stringBuilder.toString();
-            outputFlagMap.put(level, flag);
+            OUTPUT_FLAG_MAP.put(level, flag);
         }
 
         return flag;
@@ -181,6 +180,7 @@ public class JACGUtil {
         }
     }
 
+    // todo 使用javacg中的
     public static String currentTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss.SSS");
         return sdf.format(new Date());
@@ -239,6 +239,7 @@ public class JACGUtil {
     }
 
     /**
+     * todo 使用javacg中的
      * 为文件路径增加分隔符
      *
      * @param filePath
@@ -255,6 +256,7 @@ public class JACGUtil {
     }
 
     /**
+     * todo 使用javacg中的
      * 获取JVM参数中指定的目录路径
      *
      * @param jvmOptionKey
@@ -318,7 +320,6 @@ public class JACGUtil {
     public static String getFileNameWithOutExt(String fileName) {
         return getFileNameWithOutExt(fileName, JACGConstants.FLAG_DOT);
     }
-
 
     /**
      * 获取不包含后缀的文件名

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author adrninistrator
@@ -28,49 +29,42 @@ import java.util.Map;
  */
 
 public class DbOperator {
-
     private static final Logger logger = LoggerFactory.getLogger(DbOperator.class);
 
-    private static volatile DbOperator instance;
+    private static final AtomicInteger ATOMIC_INTEGER = new AtomicInteger(0);
 
-    private ComboPooledDataSource cpds;
+    private final ComboPooledDataSource cpds;
 
     private boolean useH2Db = false;
 
-//    private ConfInfo confInfo = null;
+    private final String objSeq;
 
-    public static DbOperator getInstance() {
-        if (instance == null) {
-            synchronized (DbOperator.class) {
-                if (instance == null) {
-                    instance = new DbOperator();
-                }
-            }
-        }
-        return instance;
-    }
-
-    public boolean init(ConfInfo confInfo) {
+    public static DbOperator genInstance(ConfInfo confInfo) {
         try {
-//            this.confInfo = confInfo;
+            DbOperator instance = new DbOperator(confInfo);
 //            Class.forName(confInfo.getDbDriverName());
 
-            cpds = new ComboPooledDataSource();
-            cpds.setMaxPoolSize(confInfo.getThreadNum());
-            cpds.setTestConnectionOnCheckin(false);
-            cpds.setTestConnectionOnCheckout(false);
-
             if (confInfo.isDbUseH2()) {
-                initH2Db(confInfo);
+                instance.initH2Db(confInfo);
             } else {
-                initNonH2Db(confInfo);
+                instance.initNonH2Db(confInfo);
             }
 
-            return true;
+            return instance;
         } catch (Exception e) {
             logger.error("error ", e);
-            return false;
+            return null;
         }
+    }
+
+    private DbOperator(ConfInfo confInfo) {
+        cpds = new ComboPooledDataSource();
+        cpds.setMaxPoolSize(confInfo.getThreadNum());
+        cpds.setTestConnectionOnCheckin(false);
+        cpds.setTestConnectionOnCheckout(false);
+
+        objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
+        logger.info("objSeq [{}]", objSeq);
     }
 
     private void initH2Db(ConfInfo confInfo) throws PropertyVetoException {
@@ -80,7 +74,7 @@ public class DbOperator {
         String h2DbJdbcUrl = JACGConstants.H2_PROTOCOL + confInfo.getDbH2FilePath() +
                 ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS " +
                 JACGConstants.H2_SCHEMA + "\\;SET SCHEMA " + JACGConstants.H2_SCHEMA;
-        logger.info("H2数据库的JDBC URL: {}", h2DbJdbcUrl);
+        logger.info("[{}] 初始化H2数据源 URL: {}", objSeq, h2DbJdbcUrl);
 
         cpds.setJdbcUrl(h2DbJdbcUrl);
         cpds.setUser("");
@@ -94,6 +88,8 @@ public class DbOperator {
         cpds.setJdbcUrl(confInfo.getDbUrl());
         cpds.setUser(confInfo.getDbUsername());
         cpds.setPassword(confInfo.getDbPassword());
+
+        logger.info("[{}] 初始化数据源", objSeq);
     }
 
     public void setMaxPoolSize(int maxPoolSize) {
@@ -121,7 +117,7 @@ public class DbOperator {
 
     public void closeDs() {
         if (cpds != null) {
-            logger.info("关闭数据源");
+            logger.info("[{}] 关闭数据源", objSeq);
             cpds.close();
         }
     }
@@ -195,7 +191,7 @@ public class DbOperator {
             }
         }
 
-        logger.info("数据库表创建成功 [{}]", tableName);
+        logger.info("[{}] 数据库表创建成功 [{}]", objSeq, tableName);
         return true;
     }
 
@@ -220,7 +216,7 @@ public class DbOperator {
 
     public boolean truncateTable(String tableName) {
         String sql = "truncate table " + tableName;
-        logger.info("truncate table sql: [{}]", sql);
+        logger.info("[{}] truncate table sql: [{}]", objSeq, sql);
         return executeDDLSql(sql);
     }
 

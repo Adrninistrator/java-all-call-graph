@@ -1,19 +1,17 @@
 package com.adrninistrator.jacg.extractor.entry;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extractor.dto.result.CalleeEntryMethodFile;
 import com.adrninistrator.jacg.extractor.dto.result.CalleeEntryMethodInfo;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,7 +30,19 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
      * @return
      */
     public List<CalleeEntryMethodFile> extract() {
-        if (!init()) {
+        return extract(new ConfigureWrapper());
+    }
+
+    /**
+     * 生成向上的完整调用链，根据关键字进行查找，获取入口方法信息并返回
+     * 通过代码指定配置参数
+     *
+     * @param configureWrapper
+     * @return
+     */
+    public List<CalleeEntryMethodFile> extract(ConfigureWrapper configureWrapper) {
+        if (!init(configureWrapper)) {
+            logger.error("初始化失败");
             return null;
         }
 
@@ -40,9 +50,14 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
         findKeywordCallGraph.addExtraKeyword(JACGConstants.CALLEE_FLAG_ENTRY);
 
         // 处理向上的方法调用链
-        List<String> resultFilePathList = findKeywordCallGraph.find(true);
+        List<String> resultFilePathList = findKeywordCallGraph.find(chooseFindKeywordCallGraph(), configureWrapper);
         if (resultFilePathList == null) {
             logger.error("生成向上的方法调用链及查找关键字失败");
+            return null;
+        }
+
+        // 创建数据库相关对象
+        if(!genDbObject()){
             return null;
         }
 
@@ -50,17 +65,17 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
         currentFindResultDirPath = findKeywordCallGraph.getCurrentDirPath();
 
         List<CalleeEntryMethodFile> calleeEntryMethodFileList = new ArrayList<>(resultFilePathList.size());
-
         for (String resultFilePath : resultFilePathList) {
             // 处理文件中的入口方法信息
             CalleeEntryMethodFile calleeEntryMethodFile = handleCallGraphResultInFile(resultFilePath);
             if (calleeEntryMethodFile == null) {
                 return null;
             }
-
             calleeEntryMethodFileList.add(calleeEntryMethodFile);
         }
 
+        // 关闭数据源
+        closeDs();
         return calleeEntryMethodFileList;
     }
 
@@ -82,7 +97,7 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
         AtomicBoolean handleData = new AtomicBoolean(false);
 
         List<CalleeEntryMethodInfo> calleeEntryMethodInfoList = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = JACGFileUtil.genBufferedReader(filePath)) {
             String line;
             List<String> lineList = new ArrayList<>(2);
             while ((line = br.readLine()) != null) {
@@ -133,7 +148,6 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
         }
     }
 
-
     // 处理一个入口方法信息
     private void handleOneEntryMethodInfo(List<String> lineList,
                                           int dataSeq,
@@ -173,11 +187,17 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
         }
 
         // 根据被调用者完整方法HASH+长度，从方法调用表获取对应的完整方法
-        String callerFullMethod = DbOperWrapper.getCalleeFullMethodFromHash(calleeEntryMethodFile.getMethodHash());
+        String callerFullMethod = dbOperWrapper.getCalleeFullMethodFromHash(calleeEntryMethodFile.getMethodHash());
         calleeEntryMethodFile.setFullMethod(callerFullMethod);
         if (callerFullMethod != null) {
             calleeEntryMethodFile.setFullClassName(JACGUtil.getFullClassNameFromMethod(callerFullMethod));
         }
         return calleeEntryMethodFile;
+    }
+
+    @Override
+    protected boolean chooseFindKeywordCallGraph() {
+        // 向上
+        return true;
     }
 }

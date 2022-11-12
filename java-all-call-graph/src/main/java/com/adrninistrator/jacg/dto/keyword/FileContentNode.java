@@ -8,21 +8,18 @@ package com.adrninistrator.jacg.dto.keyword;
 public class FileContentNode {
 
     // 当前节点的父节点
-    private FileContentNode parentNode;
+    private final FileContentNode parentNode;
 
     // 方法级别
-    private int methodLevel;
+    private final int methodLevel;
 
     // 文件行内容
-    private String fileLineContent;
+    private final String fileLineContent;
 
-    public static FileContentNode genInstance(FileContentNode parentNode, int methodLevel, String fileLineContent) {
-        FileContentNode fileContentNode = new FileContentNode();
-        fileContentNode.setParentNode(parentNode);
-        fileContentNode.setMethodLevel(methodLevel);
-        fileContentNode.setFileLineContent(fileLineContent);
-
-        return fileContentNode;
+    public FileContentNode(FileContentNode parentNode, int methodLevel, String fileLineContent) {
+        this.parentNode = parentNode;
+        this.methodLevel = methodLevel;
+        this.fileLineContent = fileLineContent;
     }
 
     //
@@ -30,23 +27,11 @@ public class FileContentNode {
         return parentNode;
     }
 
-    public void setParentNode(FileContentNode parentNode) {
-        this.parentNode = parentNode;
-    }
-
     public int getMethodLevel() {
         return methodLevel;
     }
 
-    public void setMethodLevel(int methodLevel) {
-        this.methodLevel = methodLevel;
-    }
-
     public String getFileLineContent() {
         return fileLineContent;
-    }
-
-    public void setFileLineContent(String fileLineContent) {
-        this.fileLineContent = fileLineContent;
     }
 }
