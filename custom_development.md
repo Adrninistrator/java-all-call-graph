@@ -4,26 +4,37 @@
 
 从`0.7.7`版本开始，java-all-call-graph会尝试读取jar包中的配置文件，相关的配置文件可以不释放到项目中，可以通过Java代码对配置参数进行设置（进行二次开发时可能需要使用）。
 
+从`0.8.0`版本开始，java-all-call-graph支持通过Java代码调用时，每次执行任务使用独立的配置信息，可支持多个任务并行执行（适用于在Web项目中使用java-all-call-graph的场景）
+
 # 2. 二次开发
 
 ## 2.1. 通过Java代码对配置参数进行设置
 
 支持通过Java代码对配置参数进行设置，可覆盖配置文件中的参数（或仅使用Java代码中设置的参数，不使用配置文件中的参数）
 
-可通过以下类的方法对配置参数进行设置
+以下类用于对配置参数进行设置
 
 ```java
 com.adrninistrator.jacg.conf.ConfigureWrapper
 ```
 
-在执行释放到项目中的test.jacg包中的入口类（如TestRunnerWriteDb），或执行jar包中com.adrninistrator.jacg.runner包中的入口类（如RunnerWriteDb）之前，需要先调用ConfigureWrapper类的方法设置配置参数。
+以下方法在执行时支持传入ConfigureWrapper对象，支持每次执行任务使用独立的配置信息，可支持多个任务并行执行（适用于在Web项目中使用java-all-call-graph的场景）
 
-以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中调用了ConfigureWrapper类的方法。
+|类|方法|作用|
+|---|---|---|
+|RunnerWriteDb|run(ConfigureWrapper configureWrapper)|生成Java方法调用关系并写入数据库|
+|RunnerGenAllGraph4Callee|run(ConfigureWrapper configureWrapper)|生成调用指定类方法向上的完整调用链|
+|RunnerGenAllGraph4Caller|run(ConfigureWrapper configureWrapper)|生成指定方法向下完整调用链|
+|FindKeywordCallGraph|find(boolean order4ee, ConfigureWrapper configureWrapper)|生成包含关键字的所有方法到起始方法之间的调用链|
 
-### 2.1.1. 设置_jacg_config/config.properties配置文件参数
+## 2.2. 示例
+
+以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中创建了ConfigureWrapper对象，并在该类的子类中使用ConfigureWrapper对象调用相关的方法。
+
+### 2.2.1. 设置_jacg_config/config.properties配置文件参数
 
 ```java
-ConfigureWrapper.addConfig(ConfigKeyEnum configKeyEnum, String value);
+configureWrapper.addConfig(ConfigKeyEnum configKeyEnum, String value);
 ```
 
 `对于app.name参数，在以上方法中会将参数值中的-替换为_`
@@ -35,13 +46,13 @@ ConfigKeyEnum枚举类中定义了_jacg_config/config.properties配置文件中�
 示例如下：
 
 ```java
-ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
+configureWrapper.addConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
 ```
 
-### 2.1.2. 设置_jacg_config、_jacg_extensions目录配置文件参数
+### 2.2.2. 设置_jacg_config、_jacg_extensions目录配置文件参数
 
 ```java
-ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
+configureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
 ```
 
 OtherConfigFileUseSetEnum枚举类中定义了_jacg_config目录中其他配置文件的文件名，以及_jacg_extensions目录中的配置文件名
@@ -51,16 +62,16 @@ OtherConfigFileUseSetEnum枚举类中定义了_jacg_config目录中其他配置�
 示例如下：
 
 ```java
-ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX, new HashSet<>(Arrays.asList(
+configureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_CLASS_PREFIX, new HashSet<>(Arrays.asList(
         "test.call_graph.method_call",
         "test.call_graph.argument",
         "java.")));
 ```
 
-### 2.1.3. 设置_jacg_find_keyword目录配置文件参数
+### 2.2.3. 设置_jacg_find_keyword目录配置文件参数
 
 ```java
-ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList);
+configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList);
 ```
 
 OtherConfigFileUseListEnum枚举类中定义了_jacg_find_keyword目录中配置文件的文件名
@@ -70,29 +81,5 @@ OtherConfigFileUseListEnum枚举类中定义了_jacg_find_keyword目录中配置
 示例如下：
 
 ```java
-ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE, Arrays.asList("!entry!", "<init>"));
+configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE, Arrays.asList("!entry!", "<init>"));
 ```
-
-
-## 2.2. 使用命令行方式执行
-
-以上所述执行方式，需要在IDE中执行，假如需要使用命令行方式执行，可参考以下方法。
-
-在项目根目录执行`gradlew gen_run_jar`命令，生成可以直接执行的jar包，并拷贝相关文件。
-
-在生成的`output_dir`目录中，包含了当前项目生成的jar包、依赖jar包，以及资源文件、启动脚本等，如下所示：
-
-```
-_jacg_config
-_jacg_extensions
-_jacg_find_keyword
-_jacg_sql
-jar
-lib
-run.bat
-run.sh
-```
-
-可选择run.bat或run.sh脚本，以命令行方式执行，脚本中执行的类可为test.jacg包中的类，可选择的类可参考前文内容。
-
-在执行脚本前，需要根据需要修改脚本中执行的类名。

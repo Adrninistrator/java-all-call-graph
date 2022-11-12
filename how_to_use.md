@@ -13,7 +13,7 @@
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.9'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:0.8.0'
 ```
 
 - Maven
@@ -22,14 +22,16 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:0.7.9'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>0.7.9</version>
+  <version>0.8.0</version>
 </dependency>
 ```
+
+`本工具仅引入了log4j-over-slf4j组件，在引入本工具组件的项目中，还需要引入log4j2、logback等日志组件，且保证配置正确，能够在本地正常运行。`
 
 `由于Maven间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定java-all-call-graph依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过java-all-call-graph与java-callgraph2的pom文件的dependencies元素查看依赖组件版本`
 
 ```
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/0.7.9/java-all-call-graph-0.7.9.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/0.8.0/java-all-call-graph-0.8.0.pom
 https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/0.2.2/java-callgraph2-0.2.2.pom
 ```
 
@@ -39,13 +41,9 @@ java-all-call-graph最新版本号可查看[https://search.maven.org/artifact/co
 
 java-all-call-graph对应代码地址为[https://github.com/Adrninistrator/java-all-call-graph](https://github.com/Adrninistrator/java-all-call-graph)。
 
-建议在需要生成方法调用链的项目中分别引入依赖，可以使每个项目使用单独的配置，不会相互影响。
-
-本工具仅引入了log4j-over-slf4j组件，在引入本工具组件的项目中，还需要引入log4j2、logback等日志组件，且保证配置正确，能够在本地正常运行。
-
 # 3. 执行步骤
 
-以下所述执行步骤，需要在IDE中执行。
+以下所述执行步骤，需要在IDE中执行。假如需要使用命令行方式执行，可参考以下`使用命令行方式执行`部分内容。
 
 ## 3.1. 总体步骤
 
@@ -522,3 +520,33 @@ func1(java.lang.String)
 ### 3.5.5. 生成配置文件中的任务信息与结果文件的映射关系
 
 见前文
+
+# 4. 使用命令行方式执行
+
+以上所述执行方式，需要在IDE中执行，假如需要使用命令行方式执行，可参考以下方法。
+
+在项目根目录执行`gradlew gen_run_jar`命令，生成可以直接执行的jar包，并拷贝相关文件。
+
+在生成的`output_dir`目录中，包含了当前项目生成的jar包、依赖jar包，以及资源文件、启动脚本等，如下所示：
+
+```
+_jacg_config
+_jacg_extensions
+_jacg_find_keyword
+_jacg_sql
+config
+jar
+lib
+xxx.bat
+xxx.sh
+```
+
+可根据操作系统选择对应脚本，以命令行方式执行，脚本中执行的类可为test.jacg包中的类，各脚本及作用如下所示：
+
+|脚本名称|作用|
+|---|---|
+|write_db.xx|生成Java方法调用关系并写入数据库|
+|gen_all_graph4_callee.xx|生成调用指定类方法向上的完整调用链|
+|gen_all_graph4_caller.xx|生成指定方法向下完整调用链|
+|find_keyword_call_graph4_ee.xx|生成包含关键字的所有方法到起始方法之间的调用链（向上）|
+|find_keyword_call_graph4_er.xx|生成包含关键字的所有方法到起始方法之间的调用链（向下）|
