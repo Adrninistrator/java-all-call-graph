@@ -15,9 +15,4 @@ public class ExtendsClass2A extends AbstractImplClass2A {
     public void testSuper2() {
         System.out.print("");
     }
-
-    @Override
-    public void testChild2() {
-        System.err.println("");
-    }
 }

@@ -17,9 +17,4 @@ public class ImplChildClass2A implements InterfaceChild2 {
     public void testSuper2() {
         System.getProperty("", "");
     }
-
-    @Override
-    public void testChild2() {
-        System.currentTimeMillis();
-    }
 }

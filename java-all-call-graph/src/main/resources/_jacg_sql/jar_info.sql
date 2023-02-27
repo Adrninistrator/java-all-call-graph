@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jar_info_{appName} (
+CREATE TABLE if not exists jacg_jar_info_{appName} (
   jar_num int NOT NULL COMMENT 'Jar包序号',
   jar_type varchar(5) NOT NULL COMMENT 'Jar包类型，jar: jar包，dir: 目录',
   jar_path_hash varchar(30) NOT NULL COMMENT 'Jar包路径HASH+字节数',

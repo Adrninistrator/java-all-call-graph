@@ -11,11 +11,14 @@ import java.math.BigDecimal;
  * @description:
  */
 public class TestArgument1 {
-
     private static final Logger logger = LoggerFactory.getLogger(TestArgument1.class);
 
     public static void test() {
-        logger.info("test");
+        logger.info("test\ra");
+        System.out.println("test\ra");
+        System.out.println("test\nb");
+        System.out.println("test\r\nc");
+        System.out.println("test\tc");
         testBigDecimal(BigDecimal.ONE);
         testBoolean(Boolean.FALSE);
         testByte(Byte.MAX_VALUE);

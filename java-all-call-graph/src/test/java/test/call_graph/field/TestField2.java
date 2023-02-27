@@ -1,7 +1,7 @@
 package test.call_graph.field;
 
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.extensions.enums.DbStatementEnum;
+import test.call_graph.enums.DbStatementEnum;
 
 /**
  * @author adrninistrator
@@ -22,9 +22,9 @@ public class TestField2 {
             configKeyEnum = ConfigKeyEnum.CKE_THREAD_NUM;
             System.out.println(configKeyEnum);
         } else if (i == 2) {
-            configKeyEnum = ConfigKeyEnum.CKE_DB_H2_FILE_PATH;
+            configKeyEnum = ConfigKeyEnum.CKE_THREAD_NUM;
         } else {
-            configKeyEnum = ConfigKeyEnum.CKE_DB_USERNAME;
+            configKeyEnum = ConfigKeyEnum.CKE_MULTI_IMPL_GEN_IN_CURRENT_FILE;
         }
 
         System.out.println(configKeyEnum);

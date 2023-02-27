@@ -3,13 +3,13 @@ package com.adrninistrator.jacg.dboper;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author adrninistrator
  * @date 2021/6/17
- * @description:
+ * @description: 数据库操作对象
  */
 
 public class DbOperator {
@@ -33,15 +33,22 @@ public class DbOperator {
 
     private static final AtomicInteger ATOMIC_INTEGER = new AtomicInteger(0);
 
-    private final ComboPooledDataSource cpds;
-
-    private boolean useH2Db = false;
+    private DruidDataSource dataSource;
 
     private final String objSeq;
 
-    public static DbOperator genInstance(ConfInfo confInfo) {
+    private final String appName;
+
+    // 记录当前入口类的类名
+    private final String entryClassName;
+
+    private boolean useH2Db = false;
+
+    protected boolean closed = false;
+
+    public static DbOperator genInstance(ConfInfo confInfo, String entryClassName) {
         try {
-            DbOperator instance = new DbOperator(confInfo);
+            DbOperator instance = new DbOperator(confInfo, entryClassName);
 //            Class.forName(confInfo.getDbDriverName());
 
             if (confInfo.isDbUseH2()) {
@@ -57,68 +64,92 @@ public class DbOperator {
         }
     }
 
-    private DbOperator(ConfInfo confInfo) {
-        cpds = new ComboPooledDataSource();
-        cpds.setMaxPoolSize(confInfo.getThreadNum());
-        cpds.setTestConnectionOnCheckin(false);
-        cpds.setTestConnectionOnCheckout(false);
+    private DbOperator(ConfInfo confInfo, String entryClassName) {
+        dataSource = new DruidDataSource();
+        dataSource.setMaxActive(confInfo.getThreadNum());
+        dataSource.setTestOnBorrow(false);
+        dataSource.setTestOnReturn(false);
+        dataSource.setTestWhileIdle(false);
 
         objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
-        logger.info("objSeq [{}]", objSeq);
+        logger.info("[{}] 创建数据库操作对象 {}", objSeq, entryClassName);
+
+        appName = confInfo.getAppName();
+        this.entryClassName = entryClassName;
+
+        addShutdownHook();
     }
 
-    private void initH2Db(ConfInfo confInfo) throws PropertyVetoException {
+    private void addShutdownHook() {
+        // 在JVM关闭时检查当前数据库操作对象是否有关闭
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (dataSource != null) {
+                logger.error("[{}] 数据库操作对象未关闭 {}", objSeq, entryClassName);
+                closeDs();
+            }
+        }));
+    }
+
+    private void initH2Db(ConfInfo confInfo) {
         useH2Db = true;
 
-        cpds.setDriverClass("org.h2.Driver");
+        dataSource.setDriverClassName("org.h2.Driver");
         String h2DbJdbcUrl = JACGConstants.H2_PROTOCOL + confInfo.getDbH2FilePath() +
                 ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS " +
                 JACGConstants.H2_SCHEMA + "\\;SET SCHEMA " + JACGConstants.H2_SCHEMA;
         logger.info("[{}] 初始化H2数据源 URL: {}", objSeq, h2DbJdbcUrl);
 
-        cpds.setJdbcUrl(h2DbJdbcUrl);
-        cpds.setUser("");
-        cpds.setPassword("");
+        dataSource.setUrl(h2DbJdbcUrl);
+        dataSource.setUsername("");
+        dataSource.setPassword("");
     }
 
-    private void initNonH2Db(ConfInfo confInfo) throws PropertyVetoException {
+    private void initNonH2Db(ConfInfo confInfo) {
         useH2Db = false;
 
-        cpds.setDriverClass(confInfo.getDbDriverName());
-        cpds.setJdbcUrl(confInfo.getDbUrl());
-        cpds.setUser(confInfo.getDbUsername());
-        cpds.setPassword(confInfo.getDbPassword());
+        dataSource.setDriverClassName(confInfo.getDbDriverName());
+        dataSource.setUrl(confInfo.getDbUrl());
+        dataSource.setUsername(confInfo.getDbUsername());
+        dataSource.setPassword(confInfo.getDbPassword());
 
         logger.info("[{}] 初始化数据源", objSeq);
     }
 
     public void setMaxPoolSize(int maxPoolSize) {
-        cpds.setMaxPoolSize(maxPoolSize);
+        dataSource.setMaxActive(maxPoolSize);
     }
 
     public Connection getConnection() {
         synchronized (DbOperator.class) {
             try {
 //            return DriverManager.getConnection(confInfo.getDbUrl(), confInfo.getDbUsername(), confInfo.getDbPassword());
-                return cpds.getConnection();
-            } catch (SQLException e) {
-                if (StringUtils.contains(e.getMessage(), " has been closed() -- you can no longer use it.")) {
-                    // 以上错误信息见com.mchange.v2.c3p0.impl.AbstractPoolBackedDataSource类，assertCpds()方法
-                    logger.error("数据源已被关闭，若此时确实需要操作数据库，可在操作开始执行调用 AbstractRunner.setCloseDsBeforeExit(false); 方法，使操作完毕时不关闭数据源");
+                return dataSource.getConnection();
+            } /*
+                数据库连接不会在AbstractRunner子类与其他类中复用，以下异常应该不会再出现（使用C3P0数据源）
+                catch (SQLException e) {
+                    if (StringUtils.contains(e.getMessage(), " has been closed() -- you can no longer use it.")) {
+                        // 以上错误信息见com.mchange.v2.c3p0.impl.AbstractPoolBackedDataSource类，assertCpds()方法
+                        logger.error("数据源已被关闭");
+                    }
+                    logger.error("getConnection SQLException error ", e);
+                    return null;
                 }
-                logger.error("getConnection SQLException error ", e);
-                return null;
-            } catch (Exception e) {
+            */ catch (Exception e) {
                 logger.error("getConnection error ", e);
                 return null;
             }
         }
     }
 
+    /**
+     * 关闭数据源
+     */
     public void closeDs() {
-        if (cpds != null) {
+        if (dataSource != null) {
             logger.info("[{}] 关闭数据源", objSeq);
-            cpds.close();
+            dataSource.close();
+            dataSource = null;
+            closed = true;
         }
     }
 
@@ -140,6 +171,11 @@ public class DbOperator {
         close(connection, stmt, true);
     }
 
+    /**
+     * 关闭连接
+     *
+     * @param connection
+     */
     public void closeConnection(Connection connection) {
         try {
             if (connection != null) {
@@ -161,24 +197,23 @@ public class DbOperator {
         }
     }
 
+    /**
+     * 创建数据库表
+     *
+     * @param sql
+     * @return
+     */
     public boolean createTable(String sql) {
         if (!executeDDLSql(sql)) {
             return false;
         }
 
-        int indexStart = sql.indexOf(JACGConstants.SQL_CREATE_TABLE_HEAD);
-        if (indexStart == -1) {
-            logger.error("建表SQL语句中未找到指定内容 {} {}", sql, JACGConstants.SQL_CREATE_TABLE_HEAD);
+        String tableName = StringUtils.substringBetween(sql, JACGConstants.SQL_CREATE_TABLE_HEAD, JavaCGConstants.FLAG_LEFT_BRACKET);
+        if (StringUtils.isBlank(tableName)) {
+            logger.error("建表SQL语句中未找到表名 {}", sql);
             return false;
         }
-
-        int indexEnd = sql.indexOf('(');
-        if (indexEnd == -1) {
-            logger.error("建表SQL语句中未找到\")\" {}", sql);
-            return false;
-        }
-
-        String tableName = sql.substring(indexStart + JACGConstants.SQL_CREATE_TABLE_HEAD_LENGTH, indexEnd).trim();
+        tableName = tableName.trim();
 
         // 检查数据库表是否创建成功，可能出现上述建表语句执行失败但未抛出异常的情况
         if (useH2Db) {
@@ -195,6 +230,12 @@ public class DbOperator {
         return true;
     }
 
+    /**
+     * 判断数据库表是否存在，H2数据库
+     *
+     * @param tableName
+     * @return
+     */
     private boolean checkTableExistsH2(String tableName) {
         List<Object> list = queryListOneColumn("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?",
                 new Object[]{JACGConstants.H2_SCHEMA, tableName});
@@ -205,6 +246,12 @@ public class DbOperator {
         return true;
     }
 
+    /**
+     * 判断数据库表是否存在，非H2数据库
+     *
+     * @param tableName
+     * @return
+     */
     private boolean checkTableExistsNonH2(String tableName) {
         List<Object> list = queryListOneColumn("show tables like ?", new Object[]{tableName});
         if (JACGUtil.isCollectionEmpty(list)) {
@@ -214,12 +261,24 @@ public class DbOperator {
         return true;
     }
 
+    /**
+     * 清空数据库表
+     *
+     * @param tableName
+     * @return
+     */
     public boolean truncateTable(String tableName) {
         String sql = "truncate table " + tableName;
-        logger.info("[{}] truncate table sql: [{}]", objSeq, sql);
+        logger.debug("[{}] truncate table sql: [{}]", objSeq, sql);
         return executeDDLSql(sql);
     }
 
+    /**
+     * 执行DDL语句
+     *
+     * @param sql
+     * @return
+     */
     public boolean executeDDLSql(String sql) {
         Connection connection = null;
         PreparedStatement stmt = null;
@@ -241,6 +300,13 @@ public class DbOperator {
         }
     }
 
+    /**
+     * 更新数据库
+     *
+     * @param sql
+     * @param arguments
+     * @return
+     */
     public Integer update(Connection connection, boolean closeConnection, String sql, Object[] arguments) {
         if (connection == null) {
             return null;
@@ -262,6 +328,13 @@ public class DbOperator {
         }
     }
 
+    /**
+     * 更新数据库
+     *
+     * @param sql
+     * @param arguments
+     * @return
+     */
     public Integer update(String sql, Object[] arguments) {
         Connection connection = getConnection();
         if (connection == null) {
@@ -270,6 +343,13 @@ public class DbOperator {
         return update(connection, true, sql, arguments);
     }
 
+    /**
+     * 指量写入数据库
+     *
+     * @param sql
+     * @param argumentList
+     * @return
+     */
     public boolean batchInsert(String sql, List<Object[]> argumentList) {
         Connection connection = null;
         PreparedStatement stmt = null;
@@ -280,12 +360,11 @@ public class DbOperator {
                 return false;
             }
 
-            connection.setAutoCommit(false);
+//            connection.setAutoCommit(false);
 
             stmt = connection.prepareStatement(sql);
 
             int columnNum = argumentList.get(0).length;
-
             for (Object[] argument : argumentList) {
                 for (int i = 0; i < columnNum; i++) {
                     stmt.setObject(i + 1, argument[i]);
@@ -295,12 +374,58 @@ public class DbOperator {
 
             stmt.executeBatch();
             stmt.clearBatch();
-            connection.commit();
+//            connection.commit();
+//            connection.setAutoCommit(true);
             return true;
         } catch (Exception e) {
+//            if (connection != null) {
+//                try {
+//                    connection.rollback();
+//                    connection.setAutoCommit(true);
+//                } catch (Exception e2) {
+//                    logger.error("error ", e2);
+//                }
+//            }
+
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] ", sql, e);
             }
+            return false;
+        } finally {
+            close(connection, stmt);
+        }
+    }
+
+    /**
+     * 写入数据库
+     *
+     * @param sql
+     * @param arguments
+     * @return
+     */
+    public boolean insert(String sql, Object[] arguments) {
+        Connection connection = null;
+        PreparedStatement stmt = null;
+
+        try {
+            connection = getConnection();
+            if (connection == null) {
+                return false;
+            }
+
+            stmt = connection.prepareStatement(sql);
+
+            int columnNum = arguments.length;
+
+            for (int i = 0; i < columnNum; i++) {
+                stmt.setObject(i + 1, arguments[i]);
+            }
+
+            stmt.executeUpdate();
+            connection.commit();
+            return true;
+        } catch (Exception e) {
+            logger.error("error [{}] ", sql, e);
             return false;
         } finally {
             close(connection, stmt);
@@ -409,6 +534,13 @@ public class DbOperator {
         }
     }
 
+    /**
+     * 查询数据库，结果为列表，元素为Map
+     *
+     * @param sql
+     * @param arguments
+     * @return
+     */
     public List<Map<String, Object>> queryList(String sql, Object[] arguments) {
         Connection connection = getConnection();
         if (connection == null) {
@@ -488,10 +620,18 @@ public class DbOperator {
         if (ExceptionUtils.indexOfType(e, SQLSyntaxErrorException.class) != -1) {
             logger.error("\n请检查数据库表是否需要使用最新版本重新创建，可先drop对应的数据库表" +
                     "\n请重新执行 com.adrninistrator.jacg.unzip.UnzipFile 类释放最新的SQL语句（需要先删除现有的SQL语句）" +
-                    "\n若使用H2数据库，还需要删除对应的数据库文件 {}" +
-                    "\n[{}] ", cpds.getJdbcUrl(), sql, e);
+                    "\n若使用H2数据库，需要删除对应的数据库文件 {}" +
+                    "\n[{}] ", dataSource.getUrl(), sql, e);
             return true;
         }
         return false;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public boolean isClosed() {
+        return closed;
     }
 }

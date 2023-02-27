@@ -3,7 +3,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 group 'com.github.adrninistrator'
-version = "0.8.0"
+version = "1.0.0"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -52,21 +52,24 @@ List apache_common = [
         'commons-codec:commons-codec:1.15'
 ]
 
-List c3p0 = ['com.mchange:c3p0:0.9.5.5']
+List druid = ['com.alibaba:druid:1.2.15']
 
 List mysql = ['com.mysql:mysql-connector-j:8.0.31']
 
 List h2database = ["com.h2database:h2:2.1.214"]
 
-List slf4j = ['org.slf4j:log4j-over-slf4j:1.7.36']
+List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:0.2.2']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.0']
+
+List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.0.3']
 
 List jackson = ["com.fasterxml.jackson.core:jackson-databind:2.14.0"]
 
-List dom4j = ['dom4j:dom4j:1.6.1']
+List jdom = ['org.jdom:jdom2:2.0.6.1']
 
 List log4j = [
+        'org.slf4j:log4j-over-slf4j:1.7.36',
         'org.apache.logging.log4j:log4j-api:2.19.0',
         'org.apache.logging.log4j:log4j-core:2.19.0',
         'org.apache.logging.log4j:log4j-slf4j-impl:2.19.0'
@@ -76,7 +79,8 @@ List junit = ['junit:junit:4.13.2']
 
 List spring = [
         'org.springframework:spring-beans:5.3.22',
-        'org.springframework:spring-context:5.3.22'
+        'org.springframework:spring-context:5.3.22',
+        'org.springframework:spring-web:5.3.22'
 ]
 
 List spring_test = [
@@ -84,7 +88,7 @@ List spring_test = [
 ]
 
 dependencies {
-    compile apache_common, c3p0, mysql, h2database, slf4j, java_callgraph, jackson, dom4j
+    compile apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom
     testImplementation log4j, junit, spring, spring_test
 }
 
@@ -191,5 +195,6 @@ idea {
         excludeDirs += file('output_dir')
         excludeDirs += file('bat')
         excludeDirs += file('shell')
+        excludeDirs += file('log')
     }
 }

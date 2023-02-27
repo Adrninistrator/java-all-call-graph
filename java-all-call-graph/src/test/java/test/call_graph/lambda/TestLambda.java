@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * @author adrninistrator
@@ -23,5 +24,9 @@ public class TestLambda {
 
     private void testString(String data) {
         System.out.println(data);
+    }
+
+    public void test2() {
+        Function f = o -> o;
     }
 }

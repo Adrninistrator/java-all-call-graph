@@ -1,9 +1,13 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +17,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
@@ -74,14 +75,14 @@ public class JACGFileUtil {
         /*
             尝试从jar包中读取，路径需要以/开头，从根目录读取，路径中的分隔符需要为/
             不能使用以下方式获取File对象
-                new File(xxx.class.getResource("path“).toURI())
+                new File(xxx.class.getResource("path").toURI())
             否则会出现异常
                 java.lang.IllegalArgumentException: URI is not hierarchical
          */
         InputStream inputStream = JACGFileUtil.class.getResourceAsStream("/" + filePath);
         if (inputStream == null) {
             logger.error("未找到文件 {}", filePath);
-            throw new RuntimeException("未找到文件 " + filePath);
+            throw new JavaCGRuntimeException("未找到文件 " + filePath);
         }
 
         logger.info("从jar包中获取文件 {}", JACGFileUtil.class.getResource("/" + filePath));
@@ -112,7 +113,7 @@ public class JACGFileUtil {
      * @return
      */
     public static Set<String> readFile2Set(String filePath) {
-        return readFile2Set(filePath, JACGConstants.FLAG_HASHTAG);
+        return readFile2Set(filePath, JavaCGConstants.FLAG_HASHTAG);
     }
 
     /**
@@ -146,19 +147,43 @@ public class JACGFileUtil {
     }
 
     /**
-     * 读取文件内容到List中
+     * 读取文件内容到List中，忽略以#开关的行
      *
      * @param filePath 文件路径
      * @return
      */
     public static List<String> readFile2List(String filePath) {
-        try (InputStream inputStream = getFileInputStream(filePath)) {
-            return IOUtils.readLines(inputStream, StandardCharsets.UTF_8);
+        return readFile2List(filePath, JavaCGConstants.FLAG_HASHTAG);
+    }
+
+    /**
+     * 读取文件内容到List中
+     *
+     * @param filePath     文件路径
+     * @param ignorePrefix 每行需要忽略的前缀，可为null
+     * @return
+     */
+    public static List<String> readFile2List(String filePath, String ignorePrefix) {
+        try (BufferedReader br = JavaCGFileUtil.genBufferedReader(getFileInputStream(filePath))) {
+            List<String> list = new ArrayList<>();
+            String line;
+            boolean checkIgnore = StringUtils.isNotBlank(ignorePrefix);
+            while ((line = br.readLine()) != null) {
+                if (StringUtils.isNotBlank(line)) {
+                    if (checkIgnore && line.startsWith(ignorePrefix)) {
+                        continue;
+                    }
+
+                    list.add(line);
+                }
+            }
+            return list;
         } catch (Exception e) {
-            logger.error("error {} ", filePath, e);
+            logger.error("处理文件出现异常 {}", filePath);
             return null;
         }
     }
+
 
     /**
      * 判断目录是否存在，不存在时尝试创建
@@ -207,7 +232,7 @@ public class JACGFileUtil {
      * @param fileExt
      * @return
      */
-    public static List<File> findFileInCurrentDir(String dirPath, String fileExt) {
+    public static List<File> findFileInCurrentDir(String dirPath, String... fileExt) {
         File dir = new File(dirPath);
         if (!dir.exists() || !dir.isDirectory()) {
             logger.error("目录不存在，或不是目录 {}", dirPath);
@@ -215,13 +240,13 @@ public class JACGFileUtil {
         }
 
         File[] files = dir.listFiles();
-        if (files == null || files.length == 0) {
+        if (ArrayUtils.isEmpty(files)) {
             return new ArrayList<>(0);
         }
 
         List<File> fileList = new ArrayList<>(files.length);
         for (File file : files) {
-            if (file.getName().endsWith(fileExt)) {
+            if (StringUtils.endsWithAny(file.getName(), fileExt)) {
                 fileList.add(file);
             }
         }
@@ -242,10 +267,10 @@ public class JACGFileUtil {
             return false;
         }
 
-        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFilePath), StandardCharsets.UTF_8))) {
+        try (BufferedWriter writer = JavaCGFileUtil.genBufferedWriter(destFilePath)) {
             for (File file : srcFileList) {
                 // 拷贝指定文件的内容
-                if (!copyFileContent(out, file)) {
+                if (!copyFileContent(writer, file)) {
                     return false;
                 }
             }
@@ -257,13 +282,13 @@ public class JACGFileUtil {
     }
 
     // 拷贝指定文件的内容
-    public static boolean copyFileContent(BufferedWriter out, File file) {
-        try (BufferedReader br = genBufferedReader(file)) {
+    public static boolean copyFileContent(BufferedWriter writer, File file) {
+        try (BufferedReader br = JavaCGFileUtil.genBufferedReader(file)) {
             String line;
             while ((line = br.readLine()) != null) {
-                out.write(line + JACGConstants.NEW_LINE);
+                writer.write(line + JACGConstants.NEW_LINE);
             }
-            out.write(JACGConstants.NEW_LINE);
+            writer.write(JACGConstants.NEW_LINE);
             return true;
         } catch (Exception e) {
             logger.error("error {} ", file.getAbsolutePath(), e);
@@ -349,7 +374,7 @@ public class JACGFileUtil {
      * 从目录中查找需要处理的文件
      *
      * @param dirPath         需要查找的目录
-     * @param subDirPathSet   保存查找到的目录
+     * @param subDirPathSet   保存查找到的目录，可为空
      * @param subFilePathList 保存查找到的文件列表
      * @param fileExts        需要查找的文件后缀，可为空
      */
@@ -400,39 +425,120 @@ public class JACGFileUtil {
     }
 
     /**
-     * todo 使用javacg中的
-     * 获取文件的BufferedReader
+     * 根据文件路径获取文件名
      *
      * @param filePath
      * @return
-     * @throws FileNotFoundException
      */
-    public static BufferedReader genBufferedReader(String filePath) throws FileNotFoundException {
-        return new BufferedReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8));
+    public static String getFileNameFromPath(String filePath) {
+        if (filePath == null) {
+            return null;
+        }
+
+        String tmpFilePath = replaceFilePathSeparator(filePath);
+        int lastSeparatorIndex = tmpFilePath.lastIndexOf("/");
+
+        if (lastSeparatorIndex == -1) {
+            return filePath;
+        }
+
+        return tmpFilePath.substring(lastSeparatorIndex + 1);
     }
 
     /**
-     * todo 使用javacg中的
-     * 获取文件的BufferedReader
+     * 获取不包含后缀的文件名
      *
-     * @param file
+     * @param fileName 文件名
      * @return
-     * @throws FileNotFoundException
      */
-    public static BufferedReader genBufferedReader(File file) throws FileNotFoundException {
-        return new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+    public static String getFileNameWithOutExt(String fileName) {
+        return getFileNameWithOutExt(fileName, JavaCGConstants.FLAG_DOT);
     }
 
     /**
-     * todo 使用javacg中的
-     * 获取InputStream的BufferedReader
+     * 获取不包含后缀的文件名
      *
-     * @param input
+     * @param fileName    文件名
+     * @param fileExtFlag 文件后缀标记，默认使用.
      * @return
-     * @throws FileNotFoundException
      */
-    public static BufferedReader genBufferedReader(InputStream input) throws FileNotFoundException {
-        return new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+    public static String getFileNameWithOutExt(String fileName, String fileExtFlag) {
+        if (fileName == null || fileExtFlag == null) {
+            return null;
+        }
+
+        int lastDotIndex = fileName.lastIndexOf(fileExtFlag);
+        if (lastDotIndex == -1) {
+            return fileName;
+        }
+
+        return fileName.substring(0, lastDotIndex);
+    }
+
+    /**
+     * 将文件路径中的\替换为/
+     *
+     * @param filePath
+     * @return
+     */
+    public static String replaceFilePathSeparator(String filePath) {
+        return StringUtils.replace(filePath, "\\", "/");
+    }
+
+    /**
+     * 获取文件所在目录名
+     *
+     * @param filePath
+     * @return
+     */
+    public static String getFileParentDirName(String filePath) {
+        if (filePath == null) {
+            return null;
+        }
+
+        String tmpFilePath = replaceFilePathSeparator(filePath);
+        String[] array = StringUtils.splitPreserveAllTokens(tmpFilePath, "/");
+        if (array.length < 2) {
+            return null;
+        }
+
+        // 使用分隔符进行分隔后，返回倒数第二个数据
+        return array[array.length - 2];
+    }
+
+    /**
+     * 重命名文件
+     *
+     * @param oldFilePath
+     * @param newFilePath
+     * @return
+     */
+    public static boolean renameFile(String oldFilePath, String newFilePath) {
+        File oldFile = new File(oldFilePath);
+        if (!oldFile.exists() || !oldFile.isFile()) {
+            logger.error("旧文件不存在或不是文件 {}", oldFilePath);
+            return false;
+        }
+
+        File newFile = new File(newFilePath);
+        if (newFile.exists()) {
+            logger.error("新文件已存在 {}", newFilePath);
+            return false;
+        }
+
+        // 判断新文件所在目录是否存在，若不存在则创建
+        File newDir = newFile.getParentFile();
+        if (!isDirectoryExists(newDir)) {
+            return false;
+        }
+
+        if (!oldFile.renameTo(newFile)) {
+            logger.error("重命名文件失败 {} {}", oldFilePath, newFilePath);
+            return false;
+        }
+
+        logger.info("重命名文件 {} {}", oldFilePath, newFilePath);
+        return true;
     }
 
     private JACGFileUtil() {

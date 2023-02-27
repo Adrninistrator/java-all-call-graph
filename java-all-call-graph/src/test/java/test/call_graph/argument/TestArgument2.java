@@ -6,7 +6,6 @@ package test.call_graph.argument;
  * @description:
  */
 public class TestArgument2 {
-
     public static void test() {
         int i = (int) System.currentTimeMillis() % 10;
         String s1 = (i == 7 ? "a" : "b");
@@ -19,6 +18,8 @@ public class TestArgument2 {
 
         testString(s1);
         testString(s2);
+
+        TestArgument1.test();
     }
 
     private static void testString(String s) {

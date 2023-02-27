@@ -2,14 +2,12 @@ package com.adrninistrator.jacg.unzip;
 
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.util.JACGFileUtilNoLogger;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.stat.JCallGraph;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -21,90 +19,94 @@ import java.util.zip.ZipInputStream;
 
 public class UnzipFile {
 
-    public static final String DIR_TEST_JAVA_FILE = "test/jacg";
-    public static final String DIR_TEST = "src/test";
-    public static final String DIR_UNIT_TEST = "src/unit.test";
-    public static final String DIR_DEFAULT_HEAD = "_jacg-";
-    public static final String DIR_JAVA = "java";
-    public static final String DIR_RESOURCES = "resources";
-    public static final String FILE_JAVA = ".java";
-
-    public static Set<String> handledFilePathSet = new HashSet<>();
-
     public static void main(String[] args) {
+        UnzipFile unzipFile = new UnzipFile();
+        unzipFile.unzipJACG();
+        unzipFile.unzipJavaCG();
+    }
+
+    private void unzipJACG() {
         String jarFilePath = UnzipFile.class.getProtectionDomain().getCodeSource().getLocation().getFile();
-        System.out.println("当前jar包路径: " + jarFilePath);
+        System.out.println("java-all-call-graph jar包路径: " + jarFilePath);
         if (!new File(jarFilePath).exists()) {
             System.out.println("文件路径不正确: " + jarFilePath);
         }
 
         String rootDirName = chooseRootDirName();
-
-        if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_CONFIG.getDirName(), true) ||
-                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_SQL.getDirName(), true) ||
-                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_KEYWORD_CONF.getDirName(), true) ||
-                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_RESOURCES + "/" + InputDirEnum.IDE_EXTENSIONS.getDirName(), true) ||
-                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + DIR_JAVA + "/" + DIR_TEST_JAVA_FILE, true)) {
+        if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + InputDirEnum.IDE_CONFIG.getDirName(), true) ||
+                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + InputDirEnum.IDE_SQL.getDirName(), true) ||
+                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + InputDirEnum.IDE_KEYWORD_CONF.getDirName(), true) ||
+                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + InputDirEnum.IDE_EXTENSIONS.getDirName(), true) ||
+                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_JAVA + "/" + UnzipFileConstants.DIR_TEST_JAVA_FILE, true)) {
             return;
         }
 
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(jarFilePath))) {
+        handleZipFile(jarFilePath, rootDirName, new AbstractZipEntryHandler() {
+            @Override
+            public void handleZipEntry(ZipEntry ze, String fileName, ZipInputStream zis, String rootDirName) {
+                if (fileName.startsWith(InputDirEnum.IDE_CONFIG.getDirName()) ||
+                        fileName.startsWith(InputDirEnum.IDE_SQL.getDirName()) ||
+                        fileName.startsWith(InputDirEnum.IDE_KEYWORD_CONF.getDirName()) ||
+                        fileName.startsWith(InputDirEnum.IDE_EXTENSIONS.getDirName())) {
+                    writeFile(ze, zis, rootDirName, UnzipFileConstants.DIR_RESOURCES, fileName);
+                } else if (fileName.startsWith(UnzipFileConstants.DIR_TEST_JAVA_FILE) && fileName.endsWith(UnzipFileConstants.FILE_JAVA)) {
+                    writeFile(ze, zis, rootDirName, UnzipFileConstants.DIR_JAVA, fileName);
+                }
+            }
+        });
+    }
+
+    private void unzipJavaCG() {
+        String jarFilePath = JCallGraph.class.getProtectionDomain().getCodeSource().getLocation().getFile();
+        System.out.println("java-callgraph2 jar包路径: " + jarFilePath);
+        if (!new File(jarFilePath).exists()) {
+            System.out.println("文件路径不正确: " + jarFilePath);
+        }
+
+        String rootDirName = chooseRootDirName();
+        if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + JavaCGConstants.DIR_CONFIG, true)) {
+            return;
+        }
+
+        handleZipFile(jarFilePath, rootDirName, new AbstractZipEntryHandler() {
+            @Override
+            public void handleZipEntry(ZipEntry ze, String fileName, ZipInputStream zis, String rootDirName) {
+                if (fileName.startsWith(JavaCGConstants.DIR_CONFIG + "/" + JavaCGConstants.FILE_CONFIG)) {
+                    writeFile(ze, zis, rootDirName, UnzipFileConstants.DIR_RESOURCES, fileName);
+                }
+            }
+        });
+    }
+
+    private void handleZipFile(String zipFilePath, String rootDirName, AbstractZipEntryHandler zipEntryHandler) {
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath))) {
             ZipEntry ze = zis.getNextEntry();
             while (ze != null) {
                 if (!ze.isDirectory()) {
-                    String fileName = ze.getName();
-                    if (fileName.startsWith(InputDirEnum.IDE_CONFIG.getDirName()) ||
-                            fileName.startsWith(InputDirEnum.IDE_SQL.getDirName()) ||
-                            fileName.startsWith(InputDirEnum.IDE_KEYWORD_CONF.getDirName()) ||
-                            fileName.startsWith(InputDirEnum.IDE_EXTENSIONS.getDirName())) {
-                        writeFile(ze, zis, rootDirName, DIR_RESOURCES, fileName);
-                    } else if (fileName.startsWith(DIR_TEST_JAVA_FILE) && fileName.endsWith(FILE_JAVA)) {
-                        writeFile(ze, zis, rootDirName, DIR_JAVA, fileName);
-                    }
+                    zipEntryHandler.handleZipEntry(ze, ze.getName(), zis, rootDirName);
                 }
-                //close this ZipEntry
+                // close this ZipEntry
                 zis.closeEntry();
                 ze = zis.getNextEntry();
             }
-            //close last ZipEntry
+            // close last ZipEntry
             zis.closeEntry();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static String chooseRootDirName() {
-        if (JACGFileUtilNoLogger.isDirectoryExists(DIR_TEST, false)) {
-            return DIR_TEST;
+    private String chooseRootDirName() {
+        if (JACGFileUtilNoLogger.isDirectoryExists(UnzipFileConstants.DIR_TEST, false)) {
+            return UnzipFileConstants.DIR_TEST;
         }
-        if (JACGFileUtilNoLogger.isDirectoryExists(DIR_UNIT_TEST, false)) {
-            return DIR_UNIT_TEST;
+        if (JACGFileUtilNoLogger.isDirectoryExists(UnzipFileConstants.DIR_UNIT_TEST, false)) {
+            return UnzipFileConstants.DIR_UNIT_TEST;
         }
-        String rootDirName = DIR_DEFAULT_HEAD + System.currentTimeMillis();
+        String rootDirName = UnzipFileConstants.DIR_DEFAULT_HEAD + System.currentTimeMillis();
         if (JACGFileUtilNoLogger.isDirectoryExists(rootDirName, true)) {
             return rootDirName;
         }
         return null;
     }
-
-    private static void writeFile(ZipEntry ze, ZipInputStream zis, String rootDirName, String destDirName, String fileName) throws IOException {
-        String destFilePath = rootDirName + "/" + destDirName + "/" + fileName;
-
-        if (handledFilePathSet.contains(destFilePath)) {
-            return;
-        }
-        handledFilePathSet.add(destFilePath);
-
-        File destFile = new File(destFilePath);
-        if (destFile.exists()) {
-            System.out.println("文件已存在，不覆盖: " + destFilePath);
-            return;
-        }
-
-        System.out.println("文件不存在，写入: " + destFilePath);
-        byte[] fileContent = new byte[(int) ze.getSize()];
-        IOUtils.read(zis, fileContent);
-        FileUtils.writeByteArrayToFile(destFile, fileContent);
-    }
-
 }

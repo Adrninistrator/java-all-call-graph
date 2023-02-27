@@ -37,6 +37,20 @@ public enum OutputDetailEnum {
         return OutputDetailEnum.ODE_ILLEGAL;
     }
 
+    public static String getValidValues() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (OutputDetailEnum outputDetailEnum : OutputDetailEnum.values()) {
+            if (OutputDetailEnum.ODE_ILLEGAL == outputDetailEnum) {
+                continue;
+            }
+            if (stringBuilder.length() > 0) {
+                stringBuilder.append(" ");
+            }
+            stringBuilder.append(outputDetailEnum.getDetail());
+        }
+        return stringBuilder.toString();
+    }
+
     @Override
     public String toString() {
         return detail;

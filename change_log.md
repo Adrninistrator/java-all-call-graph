@@ -247,7 +247,7 @@ RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 ## 1.6. (0.7.4)
 
-生成向下完整方法调用链的配置文件`_jacg_config/o_g4caller_entry_method.properties`中，支持指定类名，代表需要处理对应类的所有方法
+生成向下方法完整调用链的配置文件`_jacg_config/o_g4caller_entry_method.properties`中，支持指定类名，代表需要处理对应类的所有方法
 
 ## 1.7. (0.7.5)
 
@@ -380,3 +380,181 @@ GenSingleCallGraph
 - 支持每次执行任务使用独立的配置信息
 
 支持通过Java代码调用时，每次执行任务使用独立的配置信息（ConfigureWrapper类变成非静态方式使用），可支持多个任务并行执行（适用于在Web项目中使用java-all-call-graph的场景）
+
+## 1.12. (1.0.0)临时说明
+
+### 1.12.1. 支持获取方法调用中使用的参数值、被调用对象类型等
+
+参数信息在数据库表`method_call_info`
+
+假如需要使方法完整调用链文件中显示方法调用的参数信息，可修改配置文件`_jacg_config/config.properties`，指定`caller.show.raw.method.call.info`参数值为true
+
+在方法完整调用链最后一列（使用"\t"分隔），为方法调用中使用的参数值、被调用对象类型等信息，以`!ext_data!method_call_info@`开头，为JSON字符串格式，各个key说明如下：
+
+|key|含义|
+|---|---|
+|obj|被调用对象的信息|
+|args|参数的信息|
+|t|可能的类型列表|
+|v|可能的值列表|
+|sf|可能的静态字段列表|
+|sfm|可能的静态字段的方法列表|
+
+#### 1.12.1.1. 示例——参数值、类型、静态字段
+
+- 代码
+
+```java
+public static void test() {
+    logger.info("test\ra");
+    System.out.println("test\ra");
+    System.out.println("test\nb");
+    System.out.println("test\r\nc");
+    System.out.println("test\tc");
+    testBigDecimal(BigDecimal.ONE);
+    ...
+}
+
+public static void testBigDecimal(BigDecimal arg) {
+    System.out.println(arg);
+}
+```
+
+- 解析结果
+
+```java
+[0]#test.call_graph.argument.TestArgument1:test()
+[1]#  [TestArgument1:18]	java.io.PrintStream:println(java.lang.String)	!ext_data!method_call_info@{"obj":{"sf":["java.lang.System:out"]},"args":{"0":{"v":["test\ra"]}}}
+[1]#  [TestArgument1:19]	java.io.PrintStream:println(java.lang.String)	!ext_data!method_call_info@{"obj":{"sf":["java.lang.System:out"]},"args":{"0":{"v":["test\nb"]}}}
+[1]#  [TestArgument1:20]	java.io.PrintStream:println(java.lang.String)	!ext_data!method_call_info@{"obj":{"sf":["java.lang.System:out"]},"args":{"0":{"v":["test\r\nc"]}}}
+[1]#  [TestArgument1:21]	java.io.PrintStream:println(java.lang.String)	!ext_data!method_call_info@{"obj":{"sf":["java.lang.System:out"]},"args":{"0":{"v":["test\tc"]}}}
+[1]#  [TestArgument1:22]	test.call_graph.argument.TestArgument1:testBigDecimal(java.math.BigDecimal)	!ext_data!method_call_info@{"args":{"0":{"sf":["java.math.BigDecimal:ONE"]}}}
+[2]#    [TestArgument1:37]	java.io.PrintStream:println(java.lang.Object)	!ext_data!method_call_info@{"obj":{"sf":["java.lang.System:out"]},"args":{"0":{"t":["java.math.BigDecimal"]}}}
+```
+
+#### 1.12.1.2. 示例——所有可能的多种参数值
+
+- 代码
+
+```java
+int i = (int) System.currentTimeMillis() % 10;
+String s1 = (i == 7 ? "a" : "b");
+
+String s2 = "aa";
+int ii = 1;
+if (i == 7) {
+    s2 = "bb";
+}
+
+testString(s1);
+testString(s2);
+```
+
+- 解析结果
+
+```java
+[0]#test.call_graph.argument.TestArgument2:test()
+[1]#  [TestArgument2:10]	java.lang.System:currentTimeMillis()
+[1]#  [TestArgument2:19]	test.call_graph.argument.TestArgument2:testString(java.lang.String)	!ext_data!method_call_info@{"args":{"0":{"v":["a","b"]}}}
+[1]#  [TestArgument2:20]	test.call_graph.argument.TestArgument2:testString(java.lang.String)	!ext_data!method_call_info@{"args":{"0":{"v":["bb","aa"]}}}
+```
+
+### 1.12.2. 依赖组件
+
+- 数据源修改
+
+使用的数据源由c3p0修改为druid
+
+- 新增依赖组件
+
+com.github.adrninistrator:mybatis-mysql-table-parser
+
+### 1.12.3. 配置参数
+
+删除配置文件`o_g4caller_entry_method_ignore_prefix.properties`，该文件的作用可以通过其他方式替代，且该文件的存在容易造成误导，因此删除
+
+删除配置文件`_jacg_config/config.properties`中的参数`input.ignore.other.package`
+默认支持忽略，相关配置文件为空时不忽略
+
+删除配置文件`_jacg_config/config.properties`中的参数`call.graph.jar.list`，使用新的配置文件`i_jar_dir.properties`
+
+删除RunnerGenAllGraph4CallerSupportIgnore相关类，固定支持忽略特定的调用关系
+
+数据库相关配置文件拆分，`config_db.properties`
+
+删除配置文件`_jacg_config/config.properties`中的参数`show.method.annotation`、`gen.combined.output`、`show.caller.line.num`
+
+在配置文件``中增加以下参数
+
+|参数名称|参数作用|
+|---|---|
+|output.root.path|生成文件的根目录|
+|db.insert.batch.size|批量写入数据库时每次插入的数量|
+|check.jar.file.updated|检查jar包文件是否有更新|
+|caller.show.raw.method.call.info|生成向下的方法完整调用链时，是否显示原始方法调用信息|
+
+删除参数PROPERTY_OUTPUT_ROOT_PATH，改到配置文件中
+以上参数的说明需要删除
+
+删除参数`write.config.in.result`
+
+为了使`_jacg_config`目录的配置文件名更容易理解，对相关配置文件进行改名：
+
+|修改前|修改后|
+|---|---|
+|i_allowed_class_prefix.properties|allowed_class_prefix.properties|
+|i_jar_dir.properties|jar_dir.properties|
+|o_g4callee_class_name.properties|method_class_4callee.properties|
+|o_g4caller_entry_method.properties|method_class_4caller.properties|
+|o_g4caller_ignore_class_keyword.properties|ignore_class_keyword.properties|
+|o_g4caller_ignore_full_method_prefix.properties|ignore_full_method_prefix.properties|
+|o_g4caller_ignore_method_prefix.properties|ignore_method_prefix.properties|
+
+`ignore_class_keyword.properties`、`ignore_full_method_prefix.properties`、`ignore_method_prefix.properties`，这三个配置文件，支持在生成向上/向下的方法完整调用链时忽略指定的类或方法（以前的配置文件只支持生成向下的方法完整调用链时忽略）
+
+假如以依赖jar包形式使用java-all-call-graph，可不再执行UnzipFile类释放配置文件到项目中，会使用jar包中配置文件的默认参数值，可通过Java代码对配置参数进行修改
+
+释放java-callgraph2配置文件`_javacg_config/config.properties`
+
+#### 1.12.3.1. 生成当前使用的配置信息到单独的文件
+
+#### 1.12.3.2. 不再对生成的结果文件进行合并
+
+#### 1.12.3.3. 对配置参数进行设置的方法名称修改
+
+为了使方法名称更能体现实际作用，将`ConfigureWrapper`类的以下方法名称进行修改：
+
+|修改前的方法名称|修改后的方法名称|
+|---|---|
+|addConfig|setConfig|
+|addOtherConfigSet|setOtherConfigSet|
+|addOtherConfigList|setOtherConfigList|
+
+### 1.12.4. 生成文件修改
+
+不再生成_mapping.txt文件（删除说明）
+
+### 1.12.5. 数据库表
+
+增加数据库表
+
+长度修改
+
+数据库表加前缀"jacg_"
+
+### 1.12.6. 支持更准确地获取方法调用关系（支持Spring Bean）
+
+#### 1.12.6.1. 支持处理方法调用被调用对象及参数信息
+
+#### 1.12.6.2. 支持增加方法调用关系
+
+#### 1.12.6.3. 父类与子类方法调用优化
+
+### 1.12.7. 生成向上的方法完整调用链支持忽略条件
+
+### 1.12.8. 输出信息优化
+
+#### 1.12.8.1. 方法循环调用
+
+#### 1.12.8.2. 生成方法调用链文件耗时太长的辅助信息
+

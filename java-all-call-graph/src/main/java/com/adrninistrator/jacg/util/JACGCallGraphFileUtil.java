@@ -1,11 +1,19 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.dto.call_graph_result.CallGraphResultLineParsed;
+import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
 import com.adrninistrator.jacg.extensions.dto.extened_data.BaseExtendedData;
+import com.adrninistrator.jacg.markdown.JACGMarkdownConstants;
+import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author adrninistrator
@@ -15,6 +23,11 @@ import org.slf4j.LoggerFactory;
 public class JACGCallGraphFileUtil {
     private static final Logger logger = LoggerFactory.getLogger(JACGCallGraphFileUtil.class);
 
+    // 方法完整调用链文件中，代表方法调用第0层级的标志
+    private static final String CALL_FLAG_LEVEL_0 = JACGConstants.FLAG_LEFT_PARENTHESES + "0" + JACGConstants.FLAG_RIGHT_PARENTHESES;
+
+    private static final Map<Integer, String> OUTPUT_FLAG_MAP = new ConcurrentHashMap<>();
+
     /**
      * 判断调用链搜索结果文件中指定行是否为序号对应的行，以#开头
      *
@@ -22,30 +35,25 @@ public class JACGCallGraphFileUtil {
      * @return
      */
     public static boolean isDataSeqLine(String line) {
-        return StringUtils.startsWith(line, JACGConstants.FLAG_HASHTAG) && StringUtils.contains(line, JACGConstants.FLAG_MD_LINE_NUMBER);
+        return StringUtils.startsWith(line, JACGMarkdownConstants.FLAG_TITLE) && StringUtils.contains(line, JACGConstants.FLAG_MD_LINE_NUMBER);
     }
 
     /**
      * 调用链搜索结果文件中序号对应行的序号值
      *
-     * @param line       文件行内容
-     * @param lineNumber 当前行号
+     * @param line 文件行内容
      * @return
      */
-    public static int getDataSeqFromLine(String line, int lineNumber) {
-        int spaceIndex = line.indexOf(JACGConstants.FLAG_SPACE);
-        int dotIndex = line.indexOf(JACGConstants.FLAG_DOT);
-        if (spaceIndex == -1 || dotIndex == -1 || spaceIndex > dotIndex) {
-            logger.error("第 {} 行内容非法 {}", lineNumber, line);
-            return JACGConstants.DATA_SEQ_NONE;
+    public static int getDataSeqFromLine(String line) {
+        String dataSeq = StringUtils.substringBetween(line, JACGMarkdownConstants.FLAG_SPACE, JACGMarkdownConstants.FLAG_DOT);
+        if (!JACGUtil.isValidNum(dataSeq)) {
+            throw new JavaCGRuntimeException("方法调用行内容非法 " + line);
         }
-
-        String strDataSeq = line.substring(spaceIndex + JACGConstants.FLAG_SPACE.length(), dotIndex);
-        return Integer.parseInt(strDataSeq);
+        return Integer.parseInt(dataSeq);
     }
 
     /**
-     * 判断是否为方法完整调用链的行
+     * 判断方法完整调用链文件中指定行是否为调用链对应的行
      *
      * @param line
      * @return
@@ -55,252 +63,13 @@ public class JACGCallGraphFileUtil {
     }
 
     /**
-     * 判断调用链搜索结果文件行内容是否包含自定义数据
-     *
-     * @param line 文件行内容
-     * @return
-     */
-    public static boolean checkLineContainsExtendedData(String line) {
-        return isCallGraphLine(line) &&
-                (StringUtils.contains(line, JACGConstants.CALL_FLAG_EXTENDED_DATA) || StringUtils.contains(line, JACGConstants.CALL_FLAG_EXTENDED_DATA_MANUAL_ADD));
-    }
-
-    /**
-     * 从调用链搜索结果文件行内容获取自定义数据字符串
-     *
-     * @param line 文件行内容
-     * @return
-     */
-    public static String getExtendedDataStringFromLine(String line) {
-        String[] array = line.split(JACGConstants.FLAG_TAB);
-        for (String str : array) {
-            String extendedData = null;
-
-            if (str.startsWith(JACGConstants.CALL_FLAG_EXTENDED_DATA_NO_TAB)) {
-                extendedData = str.substring(JACGConstants.CALL_FLAG_EXTENDED_DATA_NO_TAB.length());
-            } else if (str.startsWith(JACGConstants.CALL_FLAG_EXTENDED_DATA_MANUAL_ADD_NO_TAB)) {
-                extendedData = str.substring(JACGConstants.CALL_FLAG_EXTENDED_DATA_MANUAL_ADD_NO_TAB.length());
-            }
-
-            if (extendedData != null) {
-                return extendedData;
-            }
-        }
-
-        logger.error("未找到自定义数据 {}", line);
-        return null;
-    }
-
-    /**
-     * 根据自定义数据字符串获取自定义数据
-     *
-     * @param extendedDataString 自定义数据字符串
-     * @return
-     */
-    public static BaseExtendedData getExtendedDataFromString(String extendedDataString) {
-        int atIndex = extendedDataString.indexOf(JACGConstants.FLAG_AT);
-        if (atIndex == -1) {
-            logger.error("自定义数据中未找到{}字符 {}", JACGConstants.FLAG_AT, extendedDataString);
-            return null;
-        }
-
-        String dataType = extendedDataString.substring(0, atIndex);
-        String dataValue = extendedDataString.substring(atIndex + JACGConstants.FLAG_AT.length());
-
-        BaseExtendedData extendedData = new BaseExtendedData();
-        extendedData.setDataType(dataType);
-        extendedData.setDataValue(dataValue);
-        return extendedData;
-    }
-
-    /**
-     * 根据调用链搜索结果文件行内容获取自定义数据
-     *
-     * @param line 文件行内容
-     * @return
-     */
-    public static BaseExtendedData getExtendedDataFromLine(String line) {
-        String extendedDataString = getExtendedDataStringFromLine(line);
-        if (extendedDataString == null) {
-            return null;
-        }
-
-        return getExtendedDataFromString(extendedDataString);
-    }
-
-    /**
-     * 根据向下的调用链文件行内容获取被调用方法
-     *
-     * @param line 文件行内容
-     * @return
-     */
-    public static String getCalleeMethodFromCallerGraph(String line) {
-        /*
-            文件行内容示例：
-            [0]#test.example.service.impl.Service1Impl:test1()@test.example.annotation.TestAnnotation1
-            [1]#  [Service1Impl:56]	test.example.rpc.wrapper.RpcSenderWrapperManualAdd:sendWrapperByArguments1(java.lang.String,java.lang.String,java.lang.String,long)
-            [2]#    [RpcSenderWrapperManualAdd:14]	test.example.rpc.sender.RpcSenderByArguments:send1(java.lang.String,java.lang.String,java.lang.String,long)
-            !ext_data!RPC_ARG@{"serviceNameList":[],"versionList":[],"timeout":"#未获取到#"}
-         */
-        if (line == null) {
-            return null;
-        }
-
-        // 获取第1个#之后的内容
-        int indexHashTag = line.indexOf(JACGConstants.FLAG_HASHTAG);
-        if (indexHashTag == -1) {
-            logger.error("文件行内容使用未找到{}字符 {}", JACGConstants.FLAG_HASHTAG, line);
-            return null;
-        }
-        String line2 = line.substring(indexHashTag + JACGConstants.FLAG_HASHTAG.length());
-
-        // 有的方法上有注解信息，获取剩余内容第1个@之前的内容
-        String line3 = JACGUtil.getFirstSubString(line2, JACGConstants.FLAG_AT);
-
-        // 对剩余内容使用\t进行分隔
-        String[] array3 = line3.split(JACGConstants.FLAG_TAB);
-        if (array3.length == 1) {
-            // 剩余内容使用\t分隔后只有一列，说明为第1行，直接使用
-            return line3;
-        }
-
-        // 剩余内容使用\t分隔后多于一列，使用第2列
-        return array3[1];
-    }
-
-    /**
-     * 根据向上的调用链文件行内容获取调用方法及注解信息
-     *
-     * @param line 文件行内容
-     * @return
-     */
-    public static String getCallerMethodWithAnnotationsFromCalleeGraph(String line) {
-         /*
-            文件行内容示例：
-            [2]#    test.call_graph.future.TestFuture:test1()	(TestFuture:16)	!entry!
-            [1]#  test.call_graph.future.FutureImpl:get()	(FutureImpl:32)
-            [0]#java.lang.System:currentTimeMillis()
-
-            [7]#              a.b.CController:method(Request,Response)@org.springframework.web.bind.annotation.RequestMapping(/path1/path2.do)	(CController:55)	!entry!
-            [6]#            a.b.CController$1:<init>(a.b.CController)	(CController$1:0)
-            [5]#      a.b.CService:query(a.b.CDTO)	(CService:0)
-         */
-        if (line == null) {
-            return null;
-        }
-
-        // 获取第1个#之后的内容
-        int indexHashTag = line.indexOf(JACGConstants.FLAG_HASHTAG);
-        if (indexHashTag == -1) {
-            logger.error("文件行内容使用未找到{}字符 {}", JACGConstants.FLAG_HASHTAG, line);
-            return null;
-        }
-        String line2 = line.substring(indexHashTag + JACGConstants.FLAG_HASHTAG.length());
-
-        // 找到第1个非空格开始的子字符串
-        String line3 = JACGUtil.getFirstExcludeSubString(line2, JACGConstants.FLAG_CHAR_SPACE);
-        if (line3 == null) {
-            logger.error("文件行内容未找到非{}的字符 {}", JACGConstants.FLAG_CHAR_SPACE, line);
-            return null;
-        }
-
-        // 获取第一个\t之前的数据（后续可能存在注解信息，在将注解信息写向调用链文件时，会将TAB替换为空格，半角@替换为全角＠，可以避免产生影响）
-        int indexTab = line3.indexOf(JACGConstants.FLAG_TAB);
-        if (indexTab == -1) {
-            // 对于级别为0的行，后面没有TAB，直接返回
-            return line3;
-        }
-
-        return line3.substring(0, indexTab);
-    }
-
-    /**
-     * 根据向上的调用链文件行内容获取调用方法
-     *
-     * @param line 文件行内容
-     * @return
-     */
-    public static String getCallerMethodFromCalleeGraph(String line) {
-        String line1 = getCallerMethodWithAnnotationsFromCalleeGraph(line);
-        if (line1 == null) {
-            return null;
-        }
-
-        // 使用@进行分隔，取第1列，去掉注解
-        return JACGUtil.getFirstSubString(line1, JACGConstants.FLAG_AT);
-    }
-
-    /**
-     * 根据向上的调用链文件行内容获取注解信息
-     * 假如一个方法上有多个注解，则返回信息里也包含多个注解信息，如@xxx@yyy
-     *
-     * @param line 文件行内容
-     * @return
-     */
-    public static String getCallerAnnotationsFromCalleeGraph(String line) {
-        String line1 = getCallerMethodWithAnnotationsFromCalleeGraph(line);
-        if (line1 == null) {
-            return null;
-        }
-
-        int indexAt = line1.indexOf(JACGConstants.FLAG_AT);
-        if (indexAt == -1) {
-            // 调用者方法行中不包含@，即没有注解信息
-            return null;
-        }
-        // 获取第1个@及之后的内容
-        return line1.substring(indexAt);
-    }
-
-    /**
-     * 从包含一个或多个注解的信息中，获取指定的注解信息
-     * 传入的注解信息示例如下： @xxx @xxx@yyy
-     *
-     * @param annotationsInfo 一个或多个注解信息
-     * @param annotationName  需要获取的类名
-     * @return
-     */
-    public static String getAnnotationFromAnnotations(String annotationsInfo, String annotationName) {
-        if (annotationsInfo == null || annotationName == null) {
-            return null;
-        }
-
-        String[] array = annotationsInfo.split(JACGConstants.FLAG_AT);
-        for (String annotationInfo : array) {
-            if (annotationInfo.startsWith(annotationName)) {
-                return JACGConstants.FLAG_AT + annotationInfo;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 从方法完整调用链文件行中，获取当前方法的级别
-     * 文件行示例 [0]#java.lang.System:setProperty
+     * 判断是否为markdown的代码行
      *
      * @param line
      * @return
      */
-    public static int getCallGraphMethodLevel(String line) {
-        if (line == null) {
-            return JACGConstants.CALL_GRAPH_METHOD_LEVEL_ILLEGAL;
-        }
-
-        int indexLeft = line.indexOf(JACGConstants.FLAG_LEFT_PARENTHESES);
-        int indexRight = line.indexOf(JACGConstants.FLAG_RIGHT_PARENTHESES);
-        if (indexLeft == -1 || indexRight == -1 || indexLeft >= indexRight) {
-            logger.error("文件行内容非法 {}", line);
-            return JACGConstants.CALL_GRAPH_METHOD_LEVEL_ILLEGAL;
-        }
-
-        String methodLevelStr = line.substring(indexLeft + JACGConstants.FLAG_LEFT_PARENTHESES_LENGTH, indexRight);
-        if (!JACGUtil.isValidNum(methodLevelStr)) {
-            logger.error("文件行内容方法级别非法 {} {}", methodLevelStr, line);
-            return JACGConstants.CALL_GRAPH_METHOD_LEVEL_ILLEGAL;
-        }
-
-        return Integer.parseInt(methodLevelStr);
+    public static boolean isMarkdownCodeLine(String line) {
+        return StringUtils.startsWith(line, JACGMarkdownConstants.FLAG_CODE);
     }
 
     /**
@@ -314,7 +83,7 @@ public class JACGCallGraphFileUtil {
      */
     public static String getCallGraphMethodFileName(String simpleClassName, String methodName, String methodHash) {
         return simpleClassName + JACGConstants.FLAG_AT +
-                JACGUtil.getSafeMethodName(methodName) + JACGConstants.FLAG_AT +
+                JACGClassMethodUtil.getSafeMethodName(methodName) + JACGConstants.FLAG_AT +
                 methodHash;
     }
 
@@ -327,7 +96,17 @@ public class JACGCallGraphFileUtil {
      * @return
      */
     public static String getEmptyCallGraphFileName(String simpleClassName, String methodName) {
-        return simpleClassName + JACGConstants.FLAG_AT + JACGUtil.getSafeMethodName(methodName) + JACGConstants.EXT_EMPTY_TXT;
+        return simpleClassName + JACGConstants.FLAG_AT + JACGClassMethodUtil.getSafeMethodName(methodName) + JACGConstants.EXT_EMPTY_TXT;
+    }
+
+    /**
+     * 判断文件中是否代表空的调用链文件
+     *
+     * @param fileName 文件名
+     * @return
+     */
+    public static boolean isEmptyCallGraphFileName(String fileName) {
+        return StringUtils.endsWith(fileName, JACGConstants.EXT_EMPTY_MD);
     }
 
     /**
@@ -342,16 +121,16 @@ public class JACGCallGraphFileUtil {
             return null;
         }
 
-        String fileNameWithOutExt = JACGUtil.getFileNameWithOutExt(fileName);
+        String fileNameWithOutExt = JACGFileUtil.getFileNameWithOutExt(fileName);
         // 以下文件名的格式，见RunnerGenAllGraph4Caller.handleOneTask()方法
-        String[] array = fileNameWithOutExt.split(JACGConstants.FLAG_AT);
+        String[] array = StringUtils.splitPreserveAllTokens(fileNameWithOutExt, JACGConstants.FLAG_AT);
         if (array.length < JACGConstants.CALLER_FILE_NAME_SPLIT_BY_AT_MIN_COLUMNS) {
             // 因为文件名中可能包括代码行号，会多一个使用@分隔的数据，因此分隔后的列长度可能会更多，但不能更少
             logger.error("文件名使用{}分隔后，列数小于 {} {}", JACGConstants.FLAG_AT, JACGConstants.CALLER_FILE_NAME_SPLIT_BY_AT_MIN_COLUMNS, fileName);
             return null;
         }
 
-        return new MethodInfoInFileName(array[0], JACGUtil.recoveryMethodName(array[1]), array[2]);
+        return new MethodInfoInFileName(array[0], JACGClassMethodUtil.recoveryMethodName(array[1]), array[2]);
     }
 
     /**
@@ -365,7 +144,288 @@ public class JACGCallGraphFileUtil {
             return null;
         }
         // 文件名使用@分隔后，类名在第1列
-        return JACGUtil.getFirstSubString(fileName, JACGConstants.FLAG_AT);
+        return StringUtils.substringBefore(fileName, JACGConstants.FLAG_AT);
+    }
+
+    /**
+     * 从[完整或简单类名]@[方法名]@[方法HASH+长度]格式的文件名转换为[完整或简单类名]:[方法名]()格式的方法名
+     *
+     * @param fileName
+     * @return
+     */
+    public static String getMethodNameFromFileName(String fileName) {
+        if (StringUtils.isBlank(fileName)) {
+            throw new JavaCGRuntimeException("传入参数不允许为空");
+        }
+
+        String[] array = StringUtils.splitPreserveAllTokens(fileName, JACGConstants.FLAG_AT);
+        if (array.length < 2) {
+            throw new JavaCGRuntimeException("传入文件名非法 " + fileName);
+        }
+        return array[0] + JavaCGConstants.FLAG_COLON + array[1] + JavaCGConstants.FLAG_LEFT_BRACKET + JavaCGConstants.FLAG_RIGHT_BRACKET;
+    }
+
+    /**
+     * 生成结果文件中的级别空格标志
+     * 按照级别数量增加空格
+     *
+     * @param level
+     * @return
+     */
+    public static String genOutputLevelSpaceFlag(int level) {
+        if (level < 0) {
+            throw new JavaCGRuntimeException("指定的方法级别非法 " + level);
+        }
+        if (level == 0) {
+            return "";
+        }
+        return OUTPUT_FLAG_MAP.computeIfAbsent(level, k -> StringUtils.repeat(JACGConstants.OUTPUT_SPLIT_FLAG, k));
+    }
+
+    /**
+     * 生成结果文件中的级别标志
+     *
+     * @param level
+     * @return
+     */
+    public static String genOutputLevelFlag(int level) {
+        return JACGConstants.FLAG_LEFT_PARENTHESES + level + JACGConstants.FLAG_RIGHT_PARENTHESES;
+    }
+
+    /**
+     * 生成输出文件前缀，包含了当前方法的调用层级
+     *
+     * @param level
+     * @return
+     */
+    public static String genOutputPrefix(int level) {
+        return genOutputLevelFlag(level) + JavaCGConstants.FLAG_HASHTAG + genOutputLevelSpaceFlag(level);
+    }
+
+    /**
+     * 生成循环调用标志
+     *
+     * @param back2Level
+     * @return
+     */
+    public static String genCycleCallFlag(int back2Level) {
+        return String.format(JACGConstants.CALL_FLAG_CYCLE, back2Level);
+    }
+
+    /**
+     * 替换TAB、回车、换行等字符
+     * 假如调用链文件数据中包含了以上字符，会导致调用链文件行分隔时出现问题，因此需要替换
+     *
+     * @param data
+     * @return
+     */
+    public static String replaceSplitChars(String data) {
+        if (data == null) {
+            return "";
+        }
+        return data.replace("\t", "")
+                .replace("\r", "")
+                .replace("\n", "");
+    }
+
+    /**
+     * 对方法完整调用链文件行进行分隔
+     *
+     * @param line
+     * @param calleeGraph true: 向上的方法完整调用链文件 false: 向下的方法完整调用链文件
+     * @return
+     */
+    public static String[] splitCallGraphLine(String line, boolean calleeGraph) {
+        if (StringUtils.isBlank(line)) {
+            throw new JavaCGRuntimeException("传入的行内容为空");
+        }
+
+        String[] array = StringUtils.splitPreserveAllTokens(line, JACGConstants.FLAG_TAB);
+        if (calleeGraph) {
+            if (array.length < JACGConstants.CALL_GRAPH_EE_LINE_MIN_COLUMN_NUM) {
+                throw new JavaCGRuntimeException("向上的方法完整调用链文件分隔后列数太小 " + array.length);
+            }
+        } else if (array.length < JACGConstants.CALL_GRAPH_ER_LINE_MIN_COLUMN_NUM) {
+            throw new JavaCGRuntimeException("向下的方法完整调用链文件分隔后列数太小 " + array.length);
+        }
+        return array;
+    }
+
+    /**
+     * 获取方法级别为0的完整方法及注解
+     *
+     * @param column1
+     * @return
+     */
+    private static String getFullMethodWithAnnotations4Level0(String column1) {
+        return StringUtils.substringAfter(column1, JavaCGConstants.FLAG_HASHTAG);
+    }
+
+    /**
+     * 为向上的方法完整调用链解析每行包含的内容
+     *
+     * @param line
+     * @return
+     */
+    public static CallGraphResultLineParsed parseCallGraphLine4ee(String line) {
+        if (line == null) {
+            return null;
+        }
+
+        // 对方法完整调用链文件行进行分隔
+        String[] array = splitCallGraphLine(line, true);
+        String column1 = array[0];
+        String fullMethodWithAnnotations;
+        int nextStartIndex;
+
+        // 获取方法级别
+        int methodLevel = getMethodLevel(line);
+        if (methodLevel == JACGConstants.CALL_GRAPH_METHOD_LEVEL_START) {
+            // 获取方法级别为0的完整方法及注解
+            fullMethodWithAnnotations = getFullMethodWithAnnotations4Level0(column1);
+            nextStartIndex = 1;
+        } else {
+            // 方法级别大于0
+            // 获取第1个#之后的内容
+            int indexHashTag = column1.indexOf(JavaCGConstants.FLAG_HASHTAG);
+            if (indexHashTag == -1) {
+                throw new JavaCGRuntimeException(line + " 未找到字符 " + JavaCGConstants.FLAG_HASHTAG);
+            }
+            String column1SubString = column1.substring(indexHashTag + JavaCGConstants.FLAG_HASHTAG.length());
+            // 获取第1个非空格开始的子字符串
+            fullMethodWithAnnotations = JACGUtil.getFirstExcludeSubString(column1SubString, JACGConstants.FLAG_CHAR_SPACE);
+            nextStartIndex = 2;
+        }
+        // 为方法完整调用链解析每行包含的内容
+        return parseCallGraphLine(line, methodLevel, fullMethodWithAnnotations, array, nextStartIndex);
+    }
+
+    /**
+     * 为向下的方法完整调用链解析每行包含的内容
+     *
+     * @param line
+     * @return
+     */
+    public static CallGraphResultLineParsed parseCallGraphLine4er(String line) {
+        // 对方法完整调用链文件行进行分隔
+        String[] array = splitCallGraphLine(line, false);
+        String fullMethodWithAnnotations;
+        int nextStartIndex;
+
+        // 获取方法级别
+        int methodLevel = getMethodLevel(line);
+        if (methodLevel == JACGConstants.CALL_GRAPH_METHOD_LEVEL_START) {
+            // 获取方法级别为0的完整方法及注解
+            fullMethodWithAnnotations = getFullMethodWithAnnotations4Level0(array[0]);
+            nextStartIndex = 1;
+        } else {
+            // 方法级别大于0
+            fullMethodWithAnnotations = array[1];
+            nextStartIndex = 2;
+        }
+        // 为方法完整调用链解析每行包含的内容
+        return parseCallGraphLine(line, methodLevel, fullMethodWithAnnotations, array, nextStartIndex);
+    }
+
+    /**
+     * 获取方法级别
+     *
+     * @param line
+     * @return
+     */
+    public static int getMethodLevel(String line) {
+        String level = StringUtils.substringBetween(line, JACGConstants.FLAG_LEFT_PARENTHESES, JACGConstants.FLAG_RIGHT_PARENTHESES);
+        if (!JACGUtil.isValidNum(level)) {
+            throw new JavaCGRuntimeException("方法调用行内容非法 " + line);
+        }
+        return Integer.parseInt(level);
+    }
+
+    /**
+     * 为方法完整调用链解析每行包含的内容
+     *
+     * @param line                      行内容
+     * @param methodLevel               方法级别
+     * @param fullMethodWithAnnotations 完整方法及注解
+     * @param lineColumns               行内容分隔后的列
+     * @param nextStartIndex            后续内容起始下标
+     * @return
+     */
+    private static CallGraphResultLineParsed parseCallGraphLine(String line,
+                                                                int methodLevel,
+                                                                String fullMethodWithAnnotations,
+                                                                String[] lineColumns,
+                                                                int nextStartIndex) {
+        if (fullMethodWithAnnotations == null) {
+            throw new JavaCGRuntimeException("获取方法与注解信息失败 " + line);
+        }
+
+        CallGraphResultLineParsed callGraphLineParsed = new CallGraphResultLineParsed();
+        callGraphLineParsed.setMethodLevel(methodLevel);
+
+        // 处理完整方法及注解
+        handleFullMethodWithAnnotations(callGraphLineParsed, fullMethodWithAnnotations);
+
+        if (lineColumns.length <= nextStartIndex) {
+            // 当前行不存在需要继续处理的列
+            return callGraphLineParsed;
+        }
+
+        // 当前行存在需要继续处理的列
+        for (int i = nextStartIndex; i < lineColumns.length; i++) {
+            String column = lineColumns[i];
+            if (column.startsWith(JACGConstants.CALL_FLAG_EXTENDED_DATA)) {
+                // 方法调用自定义数据
+                String extendedDataStr = StringUtils.substringAfter(column, JACGConstants.CALL_FLAG_EXTENDED_DATA);
+                // @之前为类型，@之后为值
+                String extendedDataType = StringUtils.substringBefore(extendedDataStr, JACGConstants.FLAG_AT);
+                String extendedDataValue = StringUtils.substringAfter(extendedDataStr, JACGConstants.FLAG_AT);
+                // 以下分别为方法调用自定义数据的类型与值
+                BaseExtendedData extendedData = new BaseExtendedData(extendedDataType, extendedDataValue);
+                callGraphLineParsed.setExtendedData(extendedData);
+            } else if (column.startsWith(JACGConstants.CALL_FLAG_CYCLE_START) && column.endsWith(JACGConstants.CALL_FLAG_CYCLE_END)) {
+                // 出现循环调用
+                callGraphLineParsed.setCycleCall(true);
+                String level = StringUtils.substringBetween(column, JACGConstants.FLAG_LEFT_PARENTHESES, JACGConstants.FLAG_RIGHT_PARENTHESES);
+                if (level == null) {
+                    throw new JavaCGRuntimeException("方法调用行内容非法 " + line);
+                }
+                callGraphLineParsed.setCycleCallLevel(Integer.parseInt(level));
+            } else if (JACGConstants.CALLEE_FLAG_ENTRY_NO_TAB.equals(column)) {
+                // 入口方法
+                callGraphLineParsed.setEntryMethod(true);
+            }
+        }
+
+        return callGraphLineParsed;
+    }
+
+    // 处理完整方法及注解
+    private static void handleFullMethodWithAnnotations(CallGraphResultLineParsed callGraphLineParsed, String fullMethodWithAnnotations) {
+        int index = fullMethodWithAnnotations.indexOf(JACGConstants.FLAG_AT);
+        String fullMethod;
+        if (index == -1) {
+            // 方法上不存在注解
+            fullMethod = fullMethodWithAnnotations;
+        } else {
+            // 方法上存在注解
+            fullMethod = fullMethodWithAnnotations.substring(0, index);
+            String annotations = fullMethodWithAnnotations.substring(index + JACGConstants.FLAG_AT.length());
+            String[] annotationArray = StringUtils.splitPreserveAllTokens(annotations, JACGConstants.FLAG_AT);
+            callGraphLineParsed.setAnnotations(annotationArray);
+        }
+        MethodDetail methodDetail = JACGClassMethodUtil.genMethodDetail(fullMethod);
+        callGraphLineParsed.setMethodDetail(methodDetail);
+    }
+
+    /**
+     * 判断指定的方法调用层级是否为第0级
+     *
+     * @param line
+     * @return
+     */
+    public static boolean isCallGraphLevel0(String line) {
+        return StringUtils.startsWith(line, CALL_FLAG_LEVEL_0);
     }
 
     private JACGCallGraphFileUtil() {

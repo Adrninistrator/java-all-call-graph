@@ -7,9 +7,9 @@ import java.util.LinkedList;
  * @date 2022/4/15
  * @description:
  */
-public class UnfixedService1a extends AbstractUnFixedService1<Long, LinkedList> {
+public class UnfixedService1a extends AbstractUnFixedService1<Long, LinkedList<String>> {
     @Override
-    protected LinkedList execute(Long l, LinkedList list) {
+    protected LinkedList<String> execute(Long l, LinkedList<String> list) {
         System.getProperty(null);
         return null;
     }

@@ -18,7 +18,7 @@ public abstract class AbstractTestSpringBeanB {
     @Qualifier("test.call_graph.spring.bean.define.SpringServiceImplB1")
     protected SpringInterfaceB springInterfaceB1;
 
-    @Resource(name = "test.call_graph.spring.bean.define.SpringServiceImplB2")
+    @Resource(name = "springServiceImplB2")
     protected SpringInterfaceB springInterfaceB2;
 
     @Resource(name = "test.call_graph.spring.bean.define.SpringServiceImplC2")

@@ -1,6 +1,7 @@
 package test.run_by_code;
 
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -11,6 +12,8 @@ import org.junit.Test;
 public class TestRBC0RunnerWriteDb extends TestRunByCodeBase {
     @Test
     public void test() {
-        new RunnerWriteDb().run(configureWrapper);
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb();
+        Assert.assertTrue(runnerWriteDb.run(configureWrapper, javaCGConfigureWrapper));
+        Assert.assertFalse(runnerWriteDb.run(configureWrapper, javaCGConfigureWrapper));
     }
 }

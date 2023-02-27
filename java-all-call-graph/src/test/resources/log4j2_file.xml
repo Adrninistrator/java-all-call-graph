@@ -6,7 +6,7 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %C{1}.%M(%L) - %m%n"/>
         </Console>
 
-        <RollingFile name="file" fileName="jacg.log" filePattern="jacg.log.%d{yyyy-MM-dd}.%i.log.gz">
+        <RollingFile name="file" fileName="log/jacg.log" filePattern="log/jacg.log.%d{yyyy-MM-dd}.%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}.%M(%F:%L) - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
@@ -25,5 +25,10 @@
             <AppenderRef ref="console"/>
             <AppenderRef ref="async"/>
         </Root>
+
+        <AsyncLogger name="com.adrninistrator" level="info" additivity="false" includeLocation="true">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="async" />
+        </AsyncLogger>
     </Loggers>
 </Configuration>

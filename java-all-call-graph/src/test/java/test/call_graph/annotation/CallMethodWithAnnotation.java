@@ -15,7 +15,7 @@ public class CallMethodWithAnnotation {
             intValue = 111,
             intArrayValue = {1, 2, 3, 4},
             clazz1 = DbOperator.class,
-            enum1 = ConfigKeyEnum.CKE_CALL_GRAPH_JAR_LIST,
+            enum1 = ConfigKeyEnum.CKE_APP_NAME,
             annotation1 = @TestAnnotationInner(valueA = "Cva1", valueB = "Cvb1"))
     private void test1() {
         MethodWithAnnotation methodWithAnnotation = new MethodWithAnnotation();

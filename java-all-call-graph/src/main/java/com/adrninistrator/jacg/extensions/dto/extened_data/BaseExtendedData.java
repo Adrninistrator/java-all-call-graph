@@ -6,11 +6,16 @@ package com.adrninistrator.jacg.extensions.dto.extened_data;
  * @description:
  */
 public class BaseExtendedData {
-    // 自定义数据类型
+    // 方法调用自定义数据类型
     protected String dataType;
 
-    // 自定义数据值
+    // 方法调用自定义数据值
     protected String dataValue;
+
+    public BaseExtendedData(String dataType, String dataValue) {
+        this.dataType = dataType;
+        this.dataValue = dataValue;
+    }
 
     public String getDataType() {
         return dataType;

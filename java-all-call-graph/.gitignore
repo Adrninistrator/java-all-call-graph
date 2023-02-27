@@ -12,4 +12,6 @@ _jacg_o_ee/
 _jacg_o_er/
 output_dir/
 src/test/resources/_jacg_config/
-src/test/java/test/run_local/
+src/test/resources/_jacg_find_keyword/
+log/*.log
+run_local/

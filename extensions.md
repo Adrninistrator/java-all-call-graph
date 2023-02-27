@@ -10,9 +10,9 @@ java-callgraph2提供的扩展功能在获取方法调用关系阶段执行，�
 
 ### 1.1.1. 使用方式
 
-- 自定义处理类开发
+- 扩展类开发
 
-开发自定义处理类，继承自以下类
+开发扩展类，继承自以下类
 
 ```
 com.adrninistrator.jacg.extensions.code_parser.AbstractManualAddCallGraphSimpleParser
@@ -32,7 +32,7 @@ com.adrninistrator.jacg.extensions.code_parser.AbstractManualAddCallGraphSimpleP
 
 - 在配置文件中指定以上类
 
-在“resources/_jacg_extensions/code_parser.properties”配置文件中指定以上自定义处理类的完整类名，可指定多个类，如下所示：
+在“resources/_jacg_extensions/code_parser.properties”配置文件中指定以上扩展类的完整类名，可指定多个类，如下所示：
 
 ```
 test.extensions.code_parser.MACGActionListenerParser
@@ -50,12 +50,12 @@ test.extensions.code_parser.MACGUnfixedService1Parser
 
 |类名|作用|
 |---|---|
-|TestMACG0RunnerWriteDbWithOutExtensions|生成方法调用关系并写入数据库，不添加自定义处理类|
-|TestMACG1RunnerWriteDbWithExtensions|生成方法调用关系并写入数据库，添加以下自定义处理类|
+|TestMACG0RunnerWriteDbWithOutExtensions|生成方法调用关系并写入数据库，不添加扩展类|
+|TestMACG1RunnerWriteDbWithExtensions|生成方法调用关系并写入数据库，添加以下扩展类|
 |TestMACGRunnerGenAllGraph4Callee|生成方法向上的完整调用链|
 |TestMACGRunnerGenAllGraph4Caller|生成方法向下的完整调用链|
 
-在以下示例中，假如在生成方法调用关系并写入数据库时，没有添加以下自定义处理类，则生成的方法调用链可能出现以下问题：
+在以下示例中，假如在生成方法调用关系并写入数据库时，没有添加以下扩展类，则生成的方法调用链可能出现以下问题：
 
 a. 部分方法调用关系缺失，例如不存在调用ActionListener实现类的actionPerformed()方法的调用关系
 b. 方法向上的完整调用链中，出现多余的方法调用关系，例如AbstractFixedService1a的子类的invoke()方法，均调用了AbstractFixedService1a的invoke()方法

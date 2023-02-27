@@ -6,7 +6,6 @@ package com.adrninistrator.jacg.dto.keyword;
  * @description: 搜索方法完整调用链文件时使用的节点
  */
 public class FileContentNode {
-
     // 当前节点的父节点
     private final FileContentNode parentNode;
 

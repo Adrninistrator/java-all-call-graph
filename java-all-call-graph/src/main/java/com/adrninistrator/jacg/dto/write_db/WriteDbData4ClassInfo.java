@@ -1,0 +1,39 @@
+package com.adrninistrator.jacg.dto.write_db;
+
+/**
+ * @author adrninistrator
+ * @date 2022/11/16
+ * @description: 用于写入数据库的数据，类的信息
+ */
+public class WriteDbData4ClassInfo extends AbstractWriteDbData {
+    private final int recordId;
+
+    private final String simpleClassName;
+
+    private final int accessFlags;
+
+    private final String className;
+
+    public WriteDbData4ClassInfo(int recordId, String simpleClassName, int accessFlags, String className) {
+        this.recordId = recordId;
+        this.simpleClassName = simpleClassName;
+        this.accessFlags = accessFlags;
+        this.className = className;
+    }
+
+    public int getRecordId() {
+        return recordId;
+    }
+
+    public String getSimpleClassName() {
+        return simpleClassName;
+    }
+
+    public int getAccessFlags() {
+        return accessFlags;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+}

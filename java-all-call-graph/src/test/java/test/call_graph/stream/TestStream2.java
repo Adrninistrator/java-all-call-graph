@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
  * @description:
  */
 public class TestStream2 {
-
     public void test2() {
         List<TestDto1> list = new ArrayList<>(0);
 
@@ -27,9 +26,5 @@ public class TestStream2 {
 
     public TestDto1 map2(TestDto1 testDto1) {
         return testDto1;
-    }
-
-    public String map3(TestDto1 testDto1) {
-        return testDto1.getStr();
     }
 }

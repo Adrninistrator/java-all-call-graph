@@ -15,7 +15,7 @@ import com.adrninistrator.jacg.dboper.DbOperator;
         intValue = 111,
         intArrayValue = {1, 2, 3, 4},
         clazz1 = DbOperator.class,
-        enum1 = ConfigKeyEnum.CKE_CALL_GRAPH_JAR_LIST,
+        enum1 = ConfigKeyEnum.CKE_APP_NAME,
         annotation1 = @TestAnnotationInner(valueA = "Cva1", valueB = "Cvb1"))
 public class MethodWithAnnotation {
 
@@ -24,10 +24,11 @@ public class MethodWithAnnotation {
             intValue = 222,
             intArrayValue = {11, 12, 13, 14},
             clazz1 = DbOperWrapper.class,
-            enum1 = ConfigKeyEnum.CKE_SHOW_METHOD_ANNOTATION,
+            enum1 = ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL,
             annotation1 = @TestAnnotationInner(valueA = "va1", valueB = "vb1"))
     public void test1() {
         System.out.println("");
+        clone();
     }
 
     @TestAnnotationOuter(value = "aaa",
@@ -38,6 +39,8 @@ public class MethodWithAnnotation {
     )
     public void test2() {
         System.out.println("");
+        test1();
+        clone();
     }
 
     @TestAnnotationOuter2(value = "333",
@@ -58,6 +61,8 @@ public class MethodWithAnnotation {
     )
     public void test3() {
         System.out.println("");
+        test2();
+        clone();
     }
 
     @TestAnnotationOuter(value = "aaa", annotations = {})

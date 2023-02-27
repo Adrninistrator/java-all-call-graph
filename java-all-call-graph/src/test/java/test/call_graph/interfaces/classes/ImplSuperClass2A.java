@@ -10,6 +10,6 @@ import test.call_graph.interfaces.interfaces.InterfaceSuper2;
 public class ImplSuperClass2A implements InterfaceSuper2 {
     @Override
     public void testSuper2() {
-        System.getProperty("");
+        System.getProperty("@@@");
     }
 }

@@ -6,5 +6,4 @@ package test.call_graph.interfaces.interfaces;
  * @description:
  */
 public interface InterfaceChild2 extends InterfaceSuper1, InterfaceSuper2 {
-    void testChild2();
 }

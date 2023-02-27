@@ -34,7 +34,7 @@ public class TestUnfixedManualAddCallGraph {
         return new AbstractUnFixedService1<BigDecimal, Set>() {
             @Override
             protected Set execute(BigDecimal bigDecimal, Set set) {
-                System.setIn(null);
+                System.getProperty(null);
                 return null;
             }
         }.invoke(null, null);
@@ -44,7 +44,7 @@ public class TestUnfixedManualAddCallGraph {
         return new AbstractUnFixedService1<String, List>() {
             @Override
             protected List execute(String str, List list) {
-                System.setOut(null);
+                System.identityHashCode(null);
                 return list;
             }
         }.invoke(null, null);

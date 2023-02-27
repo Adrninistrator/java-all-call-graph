@@ -6,5 +6,7 @@ package test.call_graph.interfaces.interfaces;
  * @description:
  */
 public interface InterfaceSuper1 {
-    void testSuper1();
+    default void testSuper1() {
+        System.currentTimeMillis();
+    }
 }

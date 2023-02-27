@@ -60,3 +60,7 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 # 11. 其他说明
 
 [其他说明](other_instructions.md)
+
+# 12. 常见问题
+
+[常见问题](question_answer.md)

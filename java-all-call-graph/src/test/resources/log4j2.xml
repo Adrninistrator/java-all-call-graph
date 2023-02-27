@@ -10,5 +10,9 @@
         <Root level="info">
             <AppenderRef ref="console"/>
         </Root>
+
+        <Logger name="com.adrninistrator" level="info" additivity="false">
+            <AppenderRef ref="console" />
+        </Logger>
     </Loggers>
 </Configuration>

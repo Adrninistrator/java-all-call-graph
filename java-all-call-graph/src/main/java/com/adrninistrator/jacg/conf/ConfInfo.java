@@ -3,16 +3,12 @@ package com.adrninistrator.jacg.conf;
 /**
  * @author adrninistrator
  * @date 2021/6/17
- * @description:
+ * @description: 配置信息
  */
 
 public class ConfInfo {
 
     private String appName;
-
-    private String callGraphJarList;
-
-    private boolean inputIgnoreOtherPackage;
 
     private String callGraphOutputDetail;
 
@@ -20,16 +16,19 @@ public class ConfInfo {
 
     private int originalThreadNum;
 
-    private boolean showMethodAnnotation;
-
-    private boolean genCombinedOutput;
-
-    private boolean showCallerLineNum;
-
     private boolean ignoreDupCalleeInOneCaller;
 
     private boolean multiImplGenInCurrentFile;
 
+    private String outputRootPath;
+
+    private int dbInsertBatchSize;
+
+    private boolean checkJarFileUpdated;
+
+    private boolean callerShowRawMethodCallInfo;
+
+    // 以下为数据库相关配置
     private boolean dbUseH2;
 
     private String dbH2FilePath;
@@ -42,56 +41,13 @@ public class ConfInfo {
 
     private String dbPassword;
 
-    private boolean writeConf;
-
-    @Override
-    public String toString() {
-        return "ConfInfo{" +
-                "appName='" + appName + '\'' +
-                ", callGraphJarList='" + callGraphJarList + '\'' +
-                ", inputIgnoreOtherPackage=" + inputIgnoreOtherPackage +
-                ", callGraphOutputDetail='" + callGraphOutputDetail + '\'' +
-                ", threadNum=" + threadNum +
-                ", originalThreadNum=" + originalThreadNum +
-                ", showMethodAnnotation=" + showMethodAnnotation +
-                ", genCombinedOutput=" + genCombinedOutput +
-                ", showCallerLineNum=" + showCallerLineNum +
-                ", ignoreDupCalleeInOneCaller=" + ignoreDupCalleeInOneCaller +
-                ", multiImplGenInCurrentFile=" + multiImplGenInCurrentFile +
-                ", dbUseH2=" + dbUseH2 +
-                ", dbH2FilePath='" + dbH2FilePath + '\'' +
-                ", dbDriverName='" + dbDriverName + '\'' +
-                ", dbUrl='" + dbUrl + '\'' +
-                ", dbUsername='" + dbUsername + '\'' +
-                ", dbPassword='" + dbPassword + '\'' +
-                ", writeConf=" + writeConf +
-                '}';
-    }
-
     //
-
     public String getAppName() {
         return appName;
     }
 
     public void setAppName(String appName) {
         this.appName = appName;
-    }
-
-    public String getCallGraphJarList() {
-        return callGraphJarList;
-    }
-
-    public void setCallGraphJarList(String callGraphJarList) {
-        this.callGraphJarList = callGraphJarList;
-    }
-
-    public boolean isInputIgnoreOtherPackage() {
-        return inputIgnoreOtherPackage;
-    }
-
-    public void setInputIgnoreOtherPackage(boolean inputIgnoreOtherPackage) {
-        this.inputIgnoreOtherPackage = inputIgnoreOtherPackage;
     }
 
     public String getCallGraphOutputDetail() {
@@ -118,30 +74,6 @@ public class ConfInfo {
         this.originalThreadNum = originalThreadNum;
     }
 
-    public boolean isShowMethodAnnotation() {
-        return showMethodAnnotation;
-    }
-
-    public void setShowMethodAnnotation(boolean showMethodAnnotation) {
-        this.showMethodAnnotation = showMethodAnnotation;
-    }
-
-    public boolean isGenCombinedOutput() {
-        return genCombinedOutput;
-    }
-
-    public void setGenCombinedOutput(boolean genCombinedOutput) {
-        this.genCombinedOutput = genCombinedOutput;
-    }
-
-    public boolean isShowCallerLineNum() {
-        return showCallerLineNum;
-    }
-
-    public void setShowCallerLineNum(boolean showCallerLineNum) {
-        this.showCallerLineNum = showCallerLineNum;
-    }
-
     public boolean isIgnoreDupCalleeInOneCaller() {
         return ignoreDupCalleeInOneCaller;
     }
@@ -156,6 +88,38 @@ public class ConfInfo {
 
     public void setMultiImplGenInCurrentFile(boolean multiImplGenInCurrentFile) {
         this.multiImplGenInCurrentFile = multiImplGenInCurrentFile;
+    }
+
+    public String getOutputRootPath() {
+        return outputRootPath;
+    }
+
+    public void setOutputRootPath(String outputRootPath) {
+        this.outputRootPath = outputRootPath;
+    }
+
+    public int getDbInsertBatchSize() {
+        return dbInsertBatchSize;
+    }
+
+    public void setDbInsertBatchSize(int dbInsertBatchSize) {
+        this.dbInsertBatchSize = dbInsertBatchSize;
+    }
+
+    public boolean isCheckJarFileUpdated() {
+        return checkJarFileUpdated;
+    }
+
+    public void setCheckJarFileUpdated(boolean checkJarFileUpdated) {
+        this.checkJarFileUpdated = checkJarFileUpdated;
+    }
+
+    public boolean isCallerShowRawMethodCallInfo() {
+        return callerShowRawMethodCallInfo;
+    }
+
+    public void setCallerShowRawMethodCallInfo(boolean callerShowRawMethodCallInfo) {
+        this.callerShowRawMethodCallInfo = callerShowRawMethodCallInfo;
     }
 
     public boolean isDbUseH2() {
@@ -204,13 +168,5 @@ public class ConfInfo {
 
     public void setDbPassword(String dbPassword) {
         this.dbPassword = dbPassword;
-    }
-
-    public boolean isWriteConf() {
-        return writeConf;
-    }
-
-    public void setWriteConf(boolean writeConf) {
-        this.writeConf = writeConf;
     }
 }

@@ -1,5 +1,7 @@
 package test.call_graph.branch;
 
+import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -89,6 +91,29 @@ public class TestExceptions {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public void test1g() {
+        try {
+            int a = 1;
+            int b = 1 / (a - 1);
+        } catch (ArithmeticException e) {
+            System.err.println("ArithmeticException e1");
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Exception e1");
+            e.printStackTrace();
+        }
+        System.out.println("done1");
+
+        try {
+            int a = 1;
+            int b = 1 / (a - 1);
+        } catch (Exception e) {
+            System.err.println("e2");
+            e.printStackTrace();
+        }
+        System.out.println("done2");
     }
 
     public void test2() {
@@ -210,7 +235,7 @@ public class TestExceptions {
 
     public void test6() {
         try {
-            throw new RuntimeException("111");
+            throw new JavaCGRuntimeException("111");
         } finally {
             System.getProperty("222");
         }

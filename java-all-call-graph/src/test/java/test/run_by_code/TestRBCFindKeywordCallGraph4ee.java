@@ -1,6 +1,7 @@
 package test.run_by_code;
 
 import com.adrninistrator.jacg.find_keyword.FindKeywordCallGraph;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**

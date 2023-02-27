@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class JACGSqlUtil {
      * @return
      */
     public static String genColumnAlias(String[] columns, String[] alias) {
-        if (columns == null || alias == null || columns.length == 0 || alias.length == 0 || columns.length != alias.length) {
+        if (ArrayUtils.isEmpty(columns) || ArrayUtils.isEmpty(alias) || columns.length != alias.length) {
             logger.error("指定的参数非法 {} {}", columns, alias);
             return null;
         }

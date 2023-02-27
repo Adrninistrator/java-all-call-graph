@@ -16,7 +16,7 @@ public class CallerTaskInfo {
     private String callerMethodName;
 
     // 调用者方法代码行号
-    private int methodLineNum;
+    private int methodLineNumber;
 
     // 调用者方法起始代码行号
     private int lineNumStart;
@@ -51,12 +51,12 @@ public class CallerTaskInfo {
         this.callerMethodName = callerMethodName;
     }
 
-    public int getMethodLineNum() {
-        return methodLineNum;
+    public int getMethodLineNumber() {
+        return methodLineNumber;
     }
 
-    public void setMethodLineNum(int methodLineNum) {
-        this.methodLineNum = methodLineNum;
+    public void setMethodLineNumber(int methodLineNumber) {
+        this.methodLineNumber = methodLineNumber;
     }
 
     public int getLineNumStart() {

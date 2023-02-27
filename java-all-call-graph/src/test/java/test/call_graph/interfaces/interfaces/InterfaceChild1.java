@@ -6,5 +6,7 @@ package test.call_graph.interfaces.interfaces;
  * @description:
  */
 public interface InterfaceChild1 extends InterfaceSuper1 {
-    void testChild1();
+    default void testChild1() {
+        System.out.println("abc");
+    }
 }
