@@ -288,7 +288,9 @@ public abstract class AbstractRunner {
 
     // 结束前的处理
     protected void beforeExit() {
-        dbOperator.closeDs();
+        if (dbOperator != null) {
+            dbOperator.closeDs();
+        }
 
         if (threadPoolExecutor != null) {
             threadPoolExecutor.shutdown();

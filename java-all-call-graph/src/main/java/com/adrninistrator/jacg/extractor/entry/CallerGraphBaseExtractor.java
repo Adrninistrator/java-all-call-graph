@@ -135,8 +135,8 @@ public class CallerGraphBaseExtractor extends BaseExtractor {
                 }
 
                 if (JACGCallGraphFileUtil.isMarkdownCodeLine(line) && lastLine != null) {
-                    // 当前行为markdown的代码行，上一行即为需要处理的行
-                    CallerGraphResultMethodInfo callerGraphResultMethodInfo = genCallerGraphResultMethodInfo(lastLine, lastLine2, dataSeq, lineNumber, null);
+                    // 当前行为markdown的代码行，上一行即为需要处理的行，上一行是实际处理的行，因此行号需要-1
+                    CallerGraphResultMethodInfo callerGraphResultMethodInfo = genCallerGraphResultMethodInfo(lastLine, lastLine2, dataSeq, lineNumber - 1, null);
                     callerGraphResultMethodInfoList.add(callerGraphResultMethodInfo);
                 }
             }

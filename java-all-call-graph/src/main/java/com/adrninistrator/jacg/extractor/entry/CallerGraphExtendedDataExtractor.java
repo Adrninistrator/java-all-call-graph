@@ -126,7 +126,6 @@ public class CallerGraphExtendedDataExtractor extends CallerGraphBaseExtractor {
                     continue;
                 }
 
-
                 // 处理方法完整调用链文件中的一行
                 CallerGraphResultMethodInfo callerExtendedDataInfo = handleExtendedDataInLine(line, lastLine, dataSeq, lineNumber, extendedDataTypes);
                 if (callerExtendedDataInfo != null) {

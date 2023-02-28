@@ -9,7 +9,6 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGConfigKeyEnum;
 import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
 import org.junit.Before;
 import org.slf4j.Logger;
@@ -28,7 +27,7 @@ public abstract class TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestRunByCodeBase.class);
 
     protected ConfigureWrapper configureWrapper = new ConfigureWrapper();
-    protected JavaCGConfigureWrapper javaCGConfigureWrapper = new JavaCGConfigureWrapper();
+    protected JavaCGConfigureWrapper javaCGConfigureWrapper = JACGUtil.genJavaCGConfigureWrapper();
 
     @Before
     public void initTestRunByCodeBase() {
@@ -111,13 +110,6 @@ public abstract class TestRunByCodeBase {
 
         // 添加所有预置的扩展类
         configureWrapper.addAllPreBuildExtensions();
-
-        // java-callgraph2的配置
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.TRUE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_FIRST_PARSE_INIT_METHOD_TYPE, Boolean.TRUE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_CONTINUE_WHEN_ERROR, Boolean.FALSE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_DEBUG_PRINT, Boolean.FALSE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_OUTPUT_FILE_EXT, ".md");
     }
 
     protected void printListContent(List<?> objectList) {
