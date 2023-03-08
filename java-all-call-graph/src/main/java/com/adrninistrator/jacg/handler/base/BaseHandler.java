@@ -37,7 +37,7 @@ public abstract class BaseHandler implements Closeable {
             throw new JavaCGRuntimeException("传入配置不允许为null");
         }
 
-        ConfInfo confInfo = ConfManager.getConfInfo(configureWrapper);
+        ConfInfo confInfo = ConfManager.getConfInfo(configureWrapper, true);
         if (confInfo == null) {
             throw new JavaCGRuntimeException("配置初始化失败");
         }

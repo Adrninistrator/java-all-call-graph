@@ -18,8 +18,6 @@ public class ConfInfo {
 
     private boolean ignoreDupCalleeInOneCaller;
 
-    private boolean multiImplGenInCurrentFile;
-
     private String outputRootPath;
 
     private int dbInsertBatchSize;
@@ -80,14 +78,6 @@ public class ConfInfo {
 
     public void setIgnoreDupCalleeInOneCaller(boolean ignoreDupCalleeInOneCaller) {
         this.ignoreDupCalleeInOneCaller = ignoreDupCalleeInOneCaller;
-    }
-
-    public boolean isMultiImplGenInCurrentFile() {
-        return multiImplGenInCurrentFile;
-    }
-
-    public void setMultiImplGenInCurrentFile(boolean multiImplGenInCurrentFile) {
-        this.multiImplGenInCurrentFile = multiImplGenInCurrentFile;
     }
 
     public String getOutputRootPath() {

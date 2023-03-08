@@ -16,6 +16,7 @@ import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -112,7 +114,7 @@ public abstract class AbstractRunner {
             }
 
             this.configureWrapper = configureWrapper;
-            confInfo = ConfManager.getConfInfo(configureWrapper);
+            confInfo = ConfManager.getConfInfo(configureWrapper, true);
             if (confInfo == null) {
                 return false;
             }
@@ -175,8 +177,8 @@ public abstract class AbstractRunner {
     private void printOtherListConfigInfo(MarkdownWriter markdownWriter, OtherConfigFileUseListEnum[] configs) throws IOException {        // 写入配置文件名
         markdownWriter.addTitle(1, "区分顺序的其他配置信息");
 
-        List<String> findKeywordFilterList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_FIND_KEYWORD_FILTER, false);
-        boolean useFindKeywordFilter = !JACGUtil.isCollectionEmpty(findKeywordFilterList);
+        List<String> findKeywordFilterList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_FIND_STACK_KEYWORD_FILTER, false);
+        boolean useFindKeywordFilter = !JavaCGUtil.isCollectionEmpty(findKeywordFilterList);
 
         for (OtherConfigFileUseListEnum currentConfig : configs) {
             // 写入配置文件名
@@ -188,9 +190,9 @@ public abstract class AbstractRunner {
             markdownWriter.addListWithNewLine("参数值");
             markdownWriter.addCodeBlock();
 
-            if (useFindKeywordFilter && (currentConfig == OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE ||
-                    currentConfig == OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLER)) {
-                markdownWriter.addList("对调用链文件查找关键字时使用过滤器扩展类");
+            if (useFindKeywordFilter && (currentConfig == OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE ||
+                    currentConfig == OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER)) {
+                markdownWriter.addList("对完整调用链文件根据关键字生成调用堆栈时使用过滤器扩展类");
             } else {
                 for (String configValue : configureWrapper.getOtherConfigList(currentConfig, false)) {
                     markdownWriter.addLine(configValue);
@@ -207,7 +209,7 @@ public abstract class AbstractRunner {
 
         for (OtherConfigFileUseSetEnum currentConfig : configs) {
             // 写入配置文件名
-            markdownWriter.addTitle(1, currentConfig.getKey());
+            markdownWriter.addTitle(2, currentConfig.getKey());
 
             markdownWriter.addListWithNewLine("参数说明");
             markdownWriter.addLineWithNewLine(currentConfig.getDesc());
@@ -215,6 +217,8 @@ public abstract class AbstractRunner {
             markdownWriter.addListWithNewLine("参数值");
             markdownWriter.addCodeBlock();
             List<String> configValueList = new ArrayList<>(configureWrapper.getOtherConfigSet(currentConfig, false));
+            // 排序后打印
+            Collections.sort(configValueList);
             for (String configValue : configValueList) {
                 markdownWriter.addLine(configValue);
             }

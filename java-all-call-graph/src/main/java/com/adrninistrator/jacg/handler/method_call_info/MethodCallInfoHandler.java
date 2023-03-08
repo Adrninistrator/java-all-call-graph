@@ -9,8 +9,8 @@ import com.adrninistrator.jacg.dto.method_call.MethodCallInfo;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class MethodCallInfoHandler extends BaseHandler {
             dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{callId});
-        if (JACGUtil.isCollectionEmpty(list)) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             return null;
         }
 

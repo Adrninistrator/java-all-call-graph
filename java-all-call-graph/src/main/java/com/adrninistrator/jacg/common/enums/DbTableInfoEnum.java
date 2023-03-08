@@ -37,6 +37,7 @@ public enum DbTableInfoEnum {
     DTIE_METHOD_CALL("method_call", new String[]{
             DC.MC_CALL_ID,
             DC.MC_CALL_TYPE,
+            DC.MC_CALLEE_OBJ_TYPE,
             DC.MC_ENABLED,
             DC.MC_CALLER_JAR_NUM,
             DC.MC_CALLER_METHOD_HASH,

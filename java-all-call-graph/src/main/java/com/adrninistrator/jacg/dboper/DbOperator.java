@@ -2,8 +2,8 @@ package com.adrninistrator.jacg.dboper;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfInfo;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -135,7 +135,7 @@ public class DbOperator {
                     return null;
                 }
             */ catch (Exception e) {
-                logger.error("getConnection error ", e);
+                logger.error("[{}] getConnection error ", objSeq, e);
                 return null;
             }
         }
@@ -239,7 +239,7 @@ public class DbOperator {
     private boolean checkTableExistsH2(String tableName) {
         List<Object> list = queryListOneColumn("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?",
                 new Object[]{JACGConstants.H2_SCHEMA, tableName});
-        if (JACGUtil.isCollectionEmpty(list)) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("数据库表创建失败 [{}]", tableName);
             return false;
         }
@@ -254,7 +254,7 @@ public class DbOperator {
      */
     private boolean checkTableExistsNonH2(String tableName) {
         List<Object> list = queryListOneColumn("show tables like ?", new Object[]{tableName});
-        if (JACGUtil.isCollectionEmpty(list)) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("数据库表创建失败 [{}]", tableName);
             return false;
         }

@@ -9,7 +9,7 @@ import com.adrninistrator.jacg.common.enums.interfaces.BaseConfigInterface;
  */
 public enum OtherConfigFileUseSetEnum implements BaseConfigInterface {
     OCFUSE_ALLOWED_CLASS_PREFIX(InputDirEnum.IDE_CONFIG.getDirName() + "/allowed_class_prefix.properties",
-            "将java-callgraph2生成的直接调用关系文件写入数据库时使用的配置，需要处理的类名前缀"),
+            "将java-callgraph2生成的方法调用关系文件写入数据库时使用的配置，需要处理的类名前缀"),
     OCFUSE_METHOD_CLASS_4CALLEE(InputDirEnum.IDE_CONFIG.getDirName() + "/method_class_4callee.properties",
             "生成调用指定类/方法的所有向上的方法完整调用链时的配置文件,指定需要生成的类名"),
     OCFUSE_METHOD_CLASS_4CALLER(InputDirEnum.IDE_CONFIG.getDirName() + "/method_class_4caller.properties",

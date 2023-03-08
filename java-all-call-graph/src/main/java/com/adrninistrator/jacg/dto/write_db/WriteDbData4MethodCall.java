@@ -14,6 +14,8 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
 
     private String callType;
 
+    private String calleeObjType;
+
     private int enabled;
 
     private String callerJarNum;
@@ -52,6 +54,7 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
      * @return
      */
     public static WriteDbData4MethodCall genInstance(String callType,
+                                                     String calleeObjType,
                                                      String callerSimpleClassName,
                                                      String callerFullMethod,
                                                      String calleeSimpleClassName,
@@ -65,6 +68,7 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
         WriteDbData4MethodCall writeDbData4MethodCall = new WriteDbData4MethodCall();
         writeDbData4MethodCall.setCallId(callId);
         writeDbData4MethodCall.setCallType(callType);
+        writeDbData4MethodCall.setCalleeObjType(calleeObjType);
         writeDbData4MethodCall.setEnabled(JACGConstants.YES_1);
         writeDbData4MethodCall.setCallerJarNum(callerJarNum);
         writeDbData4MethodCall.setCallerMethodHash(callerMethodHash);
@@ -98,6 +102,14 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
 
     public void setCallType(String callType) {
         this.callType = callType;
+    }
+
+    public String getCalleeObjType() {
+        return calleeObjType;
+    }
+
+    public void setCalleeObjType(String calleeObjType) {
+        this.calleeObjType = calleeObjType;
     }
 
     public int getEnabled() {

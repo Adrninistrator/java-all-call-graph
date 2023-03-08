@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.dto.call_graph_result.CallGraphResultLineParsed;
+import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
 import com.adrninistrator.jacg.extensions.dto.extened_data.BaseExtendedData;
@@ -54,6 +54,7 @@ public class JACGCallGraphFileUtil {
 
     /**
      * 判断方法完整调用链文件中指定行是否为调用链对应的行
+     * （或者是判断调用堆栈文件中指定行是否为调用堆栈对应的行）
      *
      * @param line
      * @return
@@ -267,7 +268,7 @@ public class JACGCallGraphFileUtil {
      * @param line
      * @return
      */
-    public static CallGraphResultLineParsed parseCallGraphLine4ee(String line) {
+    public static CallGraphLineParsed parseCallGraphLine4ee(String line) {
         if (line == null) {
             return null;
         }
@@ -306,7 +307,7 @@ public class JACGCallGraphFileUtil {
      * @param line
      * @return
      */
-    public static CallGraphResultLineParsed parseCallGraphLine4er(String line) {
+    public static CallGraphLineParsed parseCallGraphLine4er(String line) {
         // 对方法完整调用链文件行进行分隔
         String[] array = splitCallGraphLine(line, false);
         String fullMethodWithAnnotations;
@@ -351,16 +352,16 @@ public class JACGCallGraphFileUtil {
      * @param nextStartIndex            后续内容起始下标
      * @return
      */
-    private static CallGraphResultLineParsed parseCallGraphLine(String line,
-                                                                int methodLevel,
-                                                                String fullMethodWithAnnotations,
-                                                                String[] lineColumns,
-                                                                int nextStartIndex) {
+    private static CallGraphLineParsed parseCallGraphLine(String line,
+                                                          int methodLevel,
+                                                          String fullMethodWithAnnotations,
+                                                          String[] lineColumns,
+                                                          int nextStartIndex) {
         if (fullMethodWithAnnotations == null) {
             throw new JavaCGRuntimeException("获取方法与注解信息失败 " + line);
         }
 
-        CallGraphResultLineParsed callGraphLineParsed = new CallGraphResultLineParsed();
+        CallGraphLineParsed callGraphLineParsed = new CallGraphLineParsed();
         callGraphLineParsed.setMethodLevel(methodLevel);
 
         // 处理完整方法及注解
@@ -394,6 +395,9 @@ public class JACGCallGraphFileUtil {
             } else if (JACGConstants.CALLEE_FLAG_ENTRY_NO_TAB.equals(column)) {
                 // 入口方法
                 callGraphLineParsed.setEntryMethod(true);
+            } else if (JACGConstants.CALL_FLAG_RUN_IN_OTHER_THREAD.equals(column)) {
+                // 在其他线程中执行
+                callGraphLineParsed.setRunInOtherThread(true);
             }
         }
 
@@ -401,7 +405,7 @@ public class JACGCallGraphFileUtil {
     }
 
     // 处理完整方法及注解
-    private static void handleFullMethodWithAnnotations(CallGraphResultLineParsed callGraphLineParsed, String fullMethodWithAnnotations) {
+    private static void handleFullMethodWithAnnotations(CallGraphLineParsed callGraphLineParsed, String fullMethodWithAnnotations) {
         int index = fullMethodWithAnnotations.indexOf(JACGConstants.FLAG_AT);
         String fullMethod;
         if (index == -1) {

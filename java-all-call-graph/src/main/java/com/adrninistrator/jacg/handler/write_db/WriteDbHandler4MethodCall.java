@@ -15,7 +15,7 @@ import com.adrninistrator.jacg.handler.method_call_info.MethodCallInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.enums.CallTypeEnum;
+import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,13 +69,14 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
     @Override
     protected WriteDbData4MethodCall genData(String line) {
-        String[] array = splitEquals(line, 5);
+        String[] array = splitEquals(line, 6);
 
         int callId = Integer.parseInt(array[0]);
         String callerFullMethod = array[1];
         String tmpCalleeFullMethod = array[2];
         int callerLineNum = Integer.parseInt(array[3]);
-        String callerJarNum = array[4];
+        String calleeObjType = array[4];
+        String callerJarNum = array[5];
 
         int indexCalleeLeftBracket = tmpCalleeFullMethod.indexOf(JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG1);
         int indexCalleeRightBracket = tmpCalleeFullMethod.indexOf(JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG2);
@@ -91,6 +92,7 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
         WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(callType,
+                calleeObjType,
                 dbOperWrapper.getSimpleClassName(callerClassName),
                 callerFullMethod,
                 dbOperWrapper.getSimpleClassName(calleeClassName),
@@ -215,7 +217,8 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
             String calleeFullMethod = manualAddMethodCall.getCalleeFullMethod();
             String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
             String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
-            WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(CallTypeEnum.CTE_MANUAL_ADDED.getType(),
+            WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(JavaCGCallTypeEnum.CTE_MANUAL_ADDED.getType(),
+                    "",
                     dbOperWrapper.getSimpleClassName(callerClassName),
                     callerFullMethod,
                     dbOperWrapper.getSimpleClassName(calleeClassName),

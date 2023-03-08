@@ -39,7 +39,6 @@ public abstract class TestRunByCodeBase {
         configureWrapper.setConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_2.getDetail());
         configureWrapper.setConfig(ConfigKeyEnum.CKE_THREAD_NUM, "20");
         configureWrapper.setConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
-        configureWrapper.setConfig(ConfigKeyEnum.CKE_MULTI_IMPL_GEN_IN_CURRENT_FILE, Boolean.TRUE.toString());
         configureWrapper.setConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, "1000");
         configureWrapper.setConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, Boolean.TRUE.toString());
 //        configureWrapper.setConfig(ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO, Boolean.FALSE.toString());
@@ -98,12 +97,12 @@ public abstract class TestRunByCodeBase {
                 "TestSpringController1"
         ));
 
-        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE, Arrays.asList(
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, Arrays.asList(
                 "!entry!",
                 JavaCGConstants.METHOD_NAME_INIT
         ));
 
-        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLER, Arrays.asList(
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER, Arrays.asList(
                 "System",
                 "Deprecated"
         ));

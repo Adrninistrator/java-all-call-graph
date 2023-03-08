@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
+import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.method_call.MethodCallPair;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
@@ -12,8 +13,9 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.enums.CallTypeEnum;
+import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -273,7 +275,7 @@ public class DbOperWrapper {
      * @param methodHash 完整方法HASH+长度
      * @return
      */
-    public String getCallerFullMethodFromHash(String methodHash) {
+    public String getCallerFullMethodByHash(String methodHash) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLER_FULL_METHOD_BY_HASH;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -285,7 +287,7 @@ public class DbOperWrapper {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodHash});
-        if (JACGUtil.isCollectionEmpty(list)) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("根据调用者完整方法HASH+长度未找到完整方法 {}", methodHash);
             return null;
         }
@@ -299,7 +301,7 @@ public class DbOperWrapper {
      * @param methodHash 完整方法HASH+长度
      * @return
      */
-    public String getCalleeFullMethodFromHash(String methodHash) {
+    public String getCalleeFullMethodByHash(String methodHash) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLEE_FULL_METHOD_BY_HASH;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -311,12 +313,34 @@ public class DbOperWrapper {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodHash});
-        if (JACGUtil.isCollectionEmpty(list)) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("根据被调用者完整方法HASH+长度未找到完整方法 {}", methodHash);
             return null;
         }
 
         return (String) list.get(0);
+    }
+
+    /**
+     * 根据被调用完整方法HASH+长度，与被调用对象类型，查询对应的方法调用信息
+     *
+     * @param calleeMethodHash
+     * @param calleeObjType
+     * @return
+     */
+    public List<MethodCallPair> getMethodCallByCalleeHashObjType(String calleeMethodHash, String calleeObjType) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_METHOD_CALL_BY_CALLEE_HASH_OBJ_TYPE;
+        String sql = getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_FULL_METHOD, DC.MC_CALLER_LINE_NUMBER, DC.MC_CALLEE_FULL_METHOD) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(appName) +
+                    " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
+                    " and " + DC.MC_CALLEE_OBJ_TYPE + " = ?";
+            cacheSql(sqlKeyEnum, sql);
+        }
+
+        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{calleeMethodHash, calleeObjType});
+        return genMethodCallPairList(list);
     }
 
     /**
@@ -456,7 +480,7 @@ public class DbOperWrapper {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{});
-        if (JACGUtil.isCollectionEmpty(list) || list.get(0) == null) {
+        if (JavaCGUtil.isCollectionEmpty(list) || list.get(0) == null) {
             return JACGConstants.MAX_METHOD_CALL_ID_ILLEGAL;
         }
 
@@ -493,7 +517,8 @@ public class DbOperWrapper {
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
         logger.info("[{}] 人工向数据库方法调用表加入数据 {} {} {}", objSeq, maxCallId + 1, callerFullMethod, calleeFullMethod);
         // 人工向方法调用表写入数据，行号使用0，jar包序号使用0
-        WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(CallTypeEnum.CTE_MANUAL_ADDED.getType(),
+        WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(JavaCGCallTypeEnum.CTE_MANUAL_ADDED.getType(),
+                "",
                 getSimpleClassName(callerClassName),
                 callerFullMethod,
                 getSimpleClassName(calleeClassName),
@@ -619,9 +644,9 @@ public class DbOperWrapper {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{calleeMethodHash,
-                CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS.getType(),
-                CallTypeEnum.CTE_SUPER_CALL_CHILD.getType(),
-                CallTypeEnum.CTE_CHILD_CALL_SUPER.getType()
+                JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS.getType(),
+                JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD.getType(),
+                JavaCGCallTypeEnum.CTE_CHILD_CALL_SUPER.getType()
         });
         if (list == null) {
             return null;
@@ -669,10 +694,19 @@ public class DbOperWrapper {
         }
 
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{calleeSimpleClassName, calleeMethodName});
+        return genMethodCallPairList(list);
+    }
+
+    /**
+     * 生成方法调用列表
+     *
+     * @param list
+     * @return
+     */
+    private List<MethodCallPair> genMethodCallPairList(List<Map<String, Object>> list) {
         if (list == null) {
             return null;
         }
-
         List<MethodCallPair> methodCallPairList = new ArrayList<>(list.size());
         for (Map<String, Object> map : list) {
             String callerFullMethod = (String) map.get(DC.MC_CALLER_FULL_METHOD);
@@ -681,8 +715,57 @@ public class DbOperWrapper {
             MethodCallPair methodCallPair = new MethodCallPair(callerFullMethod, callerLineNumber, calleeFullMethod);
             methodCallPairList.add(methodCallPair);
         }
-
         return methodCallPairList;
+    }
+
+    /**
+     * 查询Lambda表达式中被调用方法信息
+     *
+     * @param methodCallId
+     * @return
+     */
+    public ClassAndMethodName getLambdaCalleeInfo(int methodCallId) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.LMI_QUERY_CALLEE_INFO;
+        String sql = getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.LMI_LAMBDA_CALLEE_CLASS_NAME, DC.LMI_LAMBDA_CALLEE_METHOD_NAME) +
+                    " from " + DbTableInfoEnum.DTIE_LAMBDA_METHOD_INFO.getTableName(appName)
+                    + " where " + DC.LMI_CALL_ID + " = ?";
+            cacheSql(sqlKeyEnum, sql);
+        }
+
+        Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{methodCallId});
+        if (map == null) {
+            return null;
+        }
+
+        String className = (String) map.get(DC.LMI_LAMBDA_CALLEE_CLASS_NAME);
+        String methodName = (String) map.get(DC.LMI_LAMBDA_CALLEE_METHOD_NAME);
+
+        return new ClassAndMethodName(className, methodName);
+    }
+
+    /**
+     * 根据完整方法HASH+长度，获取方法对应的标志
+     *
+     * @param methodHash
+     * @return
+     */
+    public Integer getMethodFlags(String methodHash) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_FLAGS;
+        String sql = getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.MI_ACCESS_FLAGS +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName(appName)
+                    + " where " + DC.MI_METHOD_HASH + " = ?";
+            cacheSql(sqlKeyEnum, sql);
+        }
+
+        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodHash});
+        if (list == null) {
+            return null;
+        }
+        return (Integer) list.get(0);
     }
 
     public String getAppName() {

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author adrninistrator
@@ -35,6 +36,8 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
     protected String cachedQuerySqlNotLast = null;
     protected String cachedQuerySqlLast = null;
 
+    protected AtomicBoolean runningFlag = new AtomicBoolean(false);
+
     /**
      * 分页查询
      *
@@ -51,34 +54,43 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
      * @return
      */
     public List<LambdaMethodCall> query(Object... args) {
-        List<LambdaMethodCall> lambdaMethodCallList = new ArrayList<>(100);
-
-        // 第一次分页查询时，从call_id最小值开始查询
-        int startCallId = JavaCGConstants.METHOD_CALL_ID_START;
-        while (true) {
-            // 分页查询本次从Lambda表达式方法信息表查询的最大的call_id
-            int endCallId = queryMaxCallIdByPage(startCallId);
-            if (endCallId == JACGConstants.PAGE_QUERY_FAIL) {
-                // 查询失败
-                return null;
-            }
-
-            // 通过类名前缀分页查询Lambda表达式方法调用信息
-            List<Map<String, Object>> list = queryByPage(startCallId, endCallId, args);
-            if (list == null) {
-                return null;
-            }
-
-            // 添加查询结果列表
-            addResultList(lambdaMethodCallList, list);
-
-            if (endCallId == JACGConstants.PAGE_QUERY_LAST) {
-                // 最后一次分页查询
-                break;
-            }
-            startCallId = endCallId + 1;
+        if (!runningFlag.compareAndSet(false, true)) {
+            logger.error("当前类不允许并发调用，请创建新的实例");
+            return null;
         }
-        return lambdaMethodCallList;
+
+        try {
+            List<LambdaMethodCall> lambdaMethodCallList = new ArrayList<>(100);
+
+            // 第一次分页查询时，从call_id最小值开始查询
+            int startCallId = JavaCGConstants.METHOD_CALL_ID_START;
+            while (true) {
+                // 分页查询本次从Lambda表达式方法信息表查询的最大的call_id
+                int endCallId = queryMaxCallIdByPage(startCallId);
+                if (endCallId == JACGConstants.PAGE_QUERY_FAIL) {
+                    // 查询失败
+                    return null;
+                }
+
+                // 通过类名前缀分页查询Lambda表达式方法调用信息
+                List<Map<String, Object>> list = queryByPage(startCallId, endCallId, args);
+                if (list == null) {
+                    return null;
+                }
+
+                // 添加查询结果列表
+                addLambdaMethodCall(lambdaMethodCallList, list);
+
+                if (endCallId == JACGConstants.PAGE_QUERY_LAST) {
+                    // 最后一次分页查询
+                    break;
+                }
+                startCallId = endCallId + 1;
+            }
+            return lambdaMethodCallList;
+        } finally {
+            runningFlag.set(false);
+        }
     }
 
     // 分页查询本次从Lambda表达式方法信息表查询的最大的call_id
@@ -139,7 +151,7 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
     }
 
     // 添加查询结果列表
-    private void addResultList(List<LambdaMethodCall> lambdaMethodCallList, List<Map<String, Object>> list) {
+    private void addLambdaMethodCall(List<LambdaMethodCall> lambdaMethodCallList, List<Map<String, Object>> list) {
         if (list.isEmpty()) {
             return;
         }

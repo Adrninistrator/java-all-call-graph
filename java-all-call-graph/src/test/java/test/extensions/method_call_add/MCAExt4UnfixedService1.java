@@ -1,7 +1,6 @@
 package test.extensions.method_call_add;
 
 import com.adrninistrator.jacg.extensions.method_call_add.AbstractMethodCallAdd4ExtendsImpl;
-import test.call_graph.manual_add_callgraph.fixed.AbstractFixedService1;
 import test.call_graph.manual_add_callgraph.unfixed.AbstractUnFixedService1;
 
 /**

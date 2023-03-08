@@ -2,9 +2,9 @@ package com.adrninistrator.jacg.extractor.entry;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.dto.call_graph_result.CallGraphResultLineParsed;
-import com.adrninistrator.jacg.extractor.dto.result.CallerGraphResultFileInfo;
-import com.adrninistrator.jacg.extractor.dto.result.CallerGraphResultMethodInfo;
+import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
+import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;
+import com.adrninistrator.jacg.extractor.dto.common.extract_file.CallerExtractedFile;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
@@ -31,7 +31,7 @@ public class CallerGraphExtendedDataExtractor extends CallerGraphBaseExtractor {
      * @param extendedDataTypes 需要处理的方法调用自定义数据类型
      * @return
      */
-    public List<CallerGraphResultFileInfo> extract(String... extendedDataTypes) {
+    public List<CallerExtractedFile> extract(String... extendedDataTypes) {
         return extract(new ConfigureWrapper(), extendedDataTypes);
     }
 
@@ -42,32 +42,32 @@ public class CallerGraphExtendedDataExtractor extends CallerGraphBaseExtractor {
      * @param extendedDataTypes 需要处理的方法调用自定义数据类型
      * @return
      */
-    public List<CallerGraphResultFileInfo> extract(ConfigureWrapper configureWrapper, String... extendedDataTypes) {
+    public List<CallerExtractedFile> extract(ConfigureWrapper configureWrapper, String... extendedDataTypes) {
         if (ArrayUtils.isEmpty(extendedDataTypes)) {
             throw new JavaCGRuntimeException("未指定需要处理的方法调用自定义数据类型");
         }
 
         try {
-            // 生成向下的方法调用链并查找关键字，生成相关文件
-            List<String> resultFilePathList = genCallGraphFiles(configureWrapper);
-            if (resultFilePathList == null) {
+            // 生成向下的方法完整调用链文件，并根据关键字生成调用堆栈文件
+            List<String> stackFilePathList = genStackFiles(configureWrapper);
+            if (stackFilePathList == null) {
                 return null;
             }
 
-            List<CallerGraphResultFileInfo> callerExtendedDataFileInfoList = new ArrayList<>(resultFilePathList.size());
-            for (String resultFilePath : resultFilePathList) {
+            List<CallerExtractedFile> callerExtractedFileList = new ArrayList<>(stackFilePathList.size());
+            for (String stackFilePath : stackFilePathList) {
                 // 处理文件中的方法调用自定义数据
-                CallerGraphResultFileInfo callerExtendedDataFileInfo = parseExtendedDataInFile(resultFilePath, extendedDataTypes);
-                if (callerExtendedDataFileInfo == null) {
+                CallerExtractedFile callerExtractedFile = handleStackFile(stackFilePath, extendedDataTypes);
+                if (callerExtractedFile == null) {
                     return null;
                 }
-                if (!callerExtendedDataFileInfo.getCallerGraphResultMethodInfoList().isEmpty()) {
+                if (!callerExtractedFile.getCallerExtractedLineList().isEmpty()) {
                     // 文件中存在指定类型的方法调用自定义数据时才添加
-                    callerExtendedDataFileInfoList.add(callerExtendedDataFileInfo);
+                    callerExtractedFileList.add(callerExtractedFile);
                 }
             }
             logger.info("处理完毕");
-            return callerExtendedDataFileInfoList;
+            return callerExtractedFileList;
         } finally {
             // 关闭数据源
             closeDs();
@@ -77,12 +77,12 @@ public class CallerGraphExtendedDataExtractor extends CallerGraphBaseExtractor {
     /**
      * 处理文件中的方法调用自定义数据
      *
-     * @param resultFilePath    文件路径
+     * @param stackFilePath     调用堆栈文件路径
      * @param extendedDataTypes 需要处理的方法调用自定义数据类型
      * @return
      */
-    private CallerGraphResultFileInfo parseExtendedDataInFile(String resultFilePath, String... extendedDataTypes) {
-        if (StringUtils.isBlank(resultFilePath)) {
+    private CallerExtractedFile handleStackFile(String stackFilePath, String... extendedDataTypes) {
+        if (StringUtils.isBlank(stackFilePath)) {
             throw new JavaCGRuntimeException("未指定文件路径");
         }
 
@@ -90,7 +90,7 @@ public class CallerGraphExtendedDataExtractor extends CallerGraphBaseExtractor {
             throw new JavaCGRuntimeException("未指定需要处理的方法调用自定义数据类型");
         }
 
-        logger.info("处理文件中的方法调用自定义数据 {}", resultFilePath);
+        logger.info("处理文件中的方法调用自定义数据 {}", stackFilePath);
 
         int lineNumber = 0;
         String line = null;
@@ -100,8 +100,8 @@ public class CallerGraphExtendedDataExtractor extends CallerGraphBaseExtractor {
         // 当前是否处理到一段数据
         boolean handleDataFlag = false;
 
-        List<CallerGraphResultMethodInfo> callerExtendedDataInfoList = new ArrayList<>();
-        try (BufferedReader br = JavaCGFileUtil.genBufferedReader(resultFilePath)) {
+        List<CallerExtractedLine> callerExtractedLineList = new ArrayList<>();
+        try (BufferedReader br = JavaCGFileUtil.genBufferedReader(stackFilePath)) {
             String lastLine = null;
             while ((line = br.readLine()) != null) {
                 lineNumber++;
@@ -126,42 +126,42 @@ public class CallerGraphExtendedDataExtractor extends CallerGraphBaseExtractor {
                     continue;
                 }
 
-                // 处理方法完整调用链文件中的一行
-                CallerGraphResultMethodInfo callerExtendedDataInfo = handleExtendedDataInLine(line, lastLine, dataSeq, lineNumber, extendedDataTypes);
-                if (callerExtendedDataInfo != null) {
+                // 处理调用堆栈文件中的一行
+                CallerExtractedLine callerExtractedLine = handleExtendedDataInLine(line, lastLine, dataSeq, lineNumber, extendedDataTypes);
+                if (callerExtractedLine != null) {
                     // 当前数据处理完毕，等待后续数据进行处理
                     handleDataFlag = false;
                     // 添加当前行的自定义数据信息
-                    callerExtendedDataInfoList.add(callerExtendedDataInfo);
+                    callerExtractedLineList.add(callerExtractedLine);
                 }
 
                 // 记录上一行内容
                 lastLine = line;
             }
 
-            CallerGraphResultFileInfo callerExtendedDataFileInfo = new CallerGraphResultFileInfo(callerExtendedDataInfoList);
-            // 处理关键字搜索结果文件信息
-            fillResultFileInfo4Caller(resultFilePath, callerExtendedDataFileInfo);
-            return callerExtendedDataFileInfo;
+            CallerExtractedFile callerExtractedFile = new CallerExtractedFile(callerExtractedLineList);
+            // 处理调用堆栈文件信息
+            fillExtractedFileInfo4Caller(stackFilePath, callerExtractedFile);
+            return callerExtractedFile;
         } catch (Exception e) {
             logger.error("error 行号 {}\n{} ", lineNumber, line, e);
             return null;
         }
     }
 
-    // 处理方法完整调用链文件中的一行
-    private CallerGraphResultMethodInfo handleExtendedDataInLine(String line,
-                                                                 String lastLine,
-                                                                 int dataSeq,
-                                                                 int lineNumber,
-                                                                 String... extendedDataTypes) {
+    // 处理调用堆栈文件中的一行
+    private CallerExtractedLine handleExtendedDataInLine(String line,
+                                                         String lastLine,
+                                                         int dataSeq,
+                                                         int lineNumber,
+                                                         String... extendedDataTypes) {
         if (!JACGCallGraphFileUtil.isCallGraphLine(line)) {
             // 当前行不是调用链对应的行
             return null;
         }
 
         // 当前行是调用链对应的行，解析当前行包含的内容
-        CallGraphResultLineParsed callGraphLineParsed = JACGCallGraphFileUtil.parseCallGraphLine4er(line);
+        CallGraphLineParsed callGraphLineParsed = JACGCallGraphFileUtil.parseCallGraphLine4er(line);
         if (callGraphLineParsed.getExtendedData() == null) {
             // 当前行不包含自定义数据
             return null;
@@ -173,6 +173,13 @@ public class CallerGraphExtendedDataExtractor extends CallerGraphBaseExtractor {
         }
 
         // 当前行包含方法调用自定义数据，且类型需要处理，进行处理
-        return genCallerGraphResultMethodInfo(line, lastLine, dataSeq, lineNumber, callGraphLineParsed);
+        // 生成向下的调用堆栈文件处理后对应行的信息
+        return genCallerExtractedLine(line, lastLine, dataSeq, lineNumber, callGraphLineParsed, false);
+    }
+
+    @Override
+    protected void handleCallStackData(int dataSeq, List<String> lineList, List<Integer> lineNumberList, boolean runInOtherThread) {
+        // todo
+        logger.error("实现方式待修改");
     }
 }

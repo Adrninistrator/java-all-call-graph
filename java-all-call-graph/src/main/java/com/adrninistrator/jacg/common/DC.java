@@ -43,6 +43,7 @@ public class DC {
 
     public static final String MC_CALL_ID = COMMON_CALL_ID;
     public static final String MC_CALL_TYPE = "call_type";
+    public static final String MC_CALLEE_OBJ_TYPE = "callee_obj_type";
     public static final String MC_ENABLED = "enabled";
     public static final String MC_CALLER_JAR_NUM = "caller_jar_num";
     public static final String MC_CALLER_METHOD_HASH = "caller_method_hash";

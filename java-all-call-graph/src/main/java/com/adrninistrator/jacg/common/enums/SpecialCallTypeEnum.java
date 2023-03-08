@@ -6,25 +6,18 @@ package com.adrninistrator.jacg.common.enums;
  * @description: 特殊的方法调用类型
  */
 public enum SpecialCallTypeEnum {
-    SCTE_LAMBDA("Lambda表达式", 1),
-    SCTE_ANONYMOUS_INNER_CLASS("匿名内部类", 2),
+    SCTE_LAMBDA("Lambda表达式"),
+    SCTE_ANONYMOUS_INNER_CLASS("匿名内部类"),
     ;
 
-    SpecialCallTypeEnum(String desc, int order) {
+    SpecialCallTypeEnum(String desc) {
         this.desc = desc;
-        this.order = order;
     }
 
     private final String desc;
 
-    private final int order;
-
     public String getDesc() {
         return desc;
-    }
-
-    public int getOrder() {
-        return order;
     }
 
     @Override

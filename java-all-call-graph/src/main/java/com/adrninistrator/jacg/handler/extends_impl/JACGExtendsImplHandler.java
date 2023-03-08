@@ -11,8 +11,8 @@ import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.dto.classes.ClassNameAndAccessFlags;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -331,7 +331,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleClassName});
-        if (JACGUtil.isCollectionEmpty(list)) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.debug("未查询到指定类的父类 {}", simpleClassName);
             return null;
         }

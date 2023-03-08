@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file;
 
+import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.extensions.code_parser.JarEntryOtherFileParser;
 import com.adrninistrator.mybatis_mysql_table_parser.dto.MyBatisSqlInfo;
 import com.adrninistrator.mybatis_mysql_table_parser.entry.Entry4ParseMyBatisMySqlTable;
@@ -14,7 +15,6 @@ import java.util.Map;
  * @description: 从MyBatis的XML文件获取对应的数据库操作语句及被操作的数据库表名（支持MySQL数据库）
  */
 public class MyBatisMySqlSqlInfoCodeParser implements JarEntryOtherFileParser {
-    private static final String[] FILE_EXT_ARRAY = new String[]{"xml"};
 
     /*
         使用静态变量记录当前类的最后一个实例，因为获取相关信息时找不到当前类的实例
@@ -29,7 +29,7 @@ public class MyBatisMySqlSqlInfoCodeParser implements JarEntryOtherFileParser {
         value
             从MyBatis的XML文件获取对应的数据库操作语句及被操作的数据库表名
      */
-    private  Map<String, MyBatisSqlInfo> myBatisSqlInfoMap;
+    private Map<String, MyBatisSqlInfo> myBatisSqlInfoMap;
 
     // 用于解析MyBatis XML中涉及的MySQL表名
     private Entry4ParseMyBatisMySqlTable entry4ParseMyBatisMySqlTable;
@@ -61,7 +61,7 @@ public class MyBatisMySqlSqlInfoCodeParser implements JarEntryOtherFileParser {
     // 指定需要处理xml文件
     @Override
     public String[] chooseJarEntryOtherFileExt() {
-        return FILE_EXT_ARRAY;
+        return JavaCGConstants.FILE_EXT_ARRAY_XML;
     }
 
     // 处理.xml文件

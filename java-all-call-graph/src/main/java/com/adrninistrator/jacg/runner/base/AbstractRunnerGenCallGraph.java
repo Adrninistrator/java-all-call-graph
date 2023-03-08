@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.annotation.storage.AnnotationStorage;
 import com.adrninistrator.jacg.common.DC;
+import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
@@ -10,6 +11,7 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.multiple.MultiCallInfo;
 import com.adrninistrator.jacg.dto.notice.NoticeCallInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
@@ -21,8 +23,9 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.enums.CallTypeEnum;
+import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -204,7 +207,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             }
 
             List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
-            if (JACGUtil.isCollectionEmpty(list)) {
+            if (JavaCGUtil.isCollectionEmpty(list)) {
                 logger.error("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定",
                         className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
                 return null;
@@ -223,7 +226,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
-        if (JACGUtil.isCollectionEmpty(list)) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("指定的简单类名 {} 不存在，请检查，可能因为以下原因\n" +
                             "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
                             "2. 指定的类存在同名类，需要使用完整类名形式",
@@ -236,7 +239,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 读取配置文件中指定的需要处理的任务
     protected boolean readTaskInfo(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum) {
         taskSet = configureWrapper.getOtherConfigSet(otherConfigFileUseSetEnum, true);
-        if (JACGUtil.isCollectionEmpty(taskSet)) {
+        if (JavaCGUtil.isCollectionEmpty(taskSet)) {
             logger.error("读取文件不存在或内容为空 {}", otherConfigFileUseSetEnum.getKey());
             return false;
         }
@@ -310,8 +313,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 记录可能出现一对多的方法调用
     protected boolean recordMethodCallMayBeMulti(int currentMethodCallId, String callType) {
-        CallTypeEnum callTypeEnum = CallTypeEnum.getFromType(callType);
-        if (callTypeEnum != CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS && callTypeEnum != CallTypeEnum.CTE_SUPER_CALL_CHILD) {
+        JavaCGCallTypeEnum callTypeEnum = JavaCGCallTypeEnum.getFromType(callType);
+        if (callTypeEnum != JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS && callTypeEnum != JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD) {
             // 对于接口调用实现类、父类调用子类之外的情况，不判断是否出现出现一对多的方法调用
             return true;
         }
@@ -326,7 +329,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         Map<String, MultiCallInfo> methodCallMap;
         Set<String> multiCallerFullMethodSet;
 
-        if (callTypeEnum == CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS) {
+        if (callTypeEnum == JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS) {
             methodCallMap = itfMethodCallMap;
             multiCallerFullMethodSet = itfMultiCallerFullMethodSet;
         } else {
@@ -353,8 +356,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 记录被禁用的方法调用
     protected boolean recordDisabledMethodCall(int callId, String callType) {
-        CallTypeEnum callTypeEnum = CallTypeEnum.getFromType(callType);
-        if (callTypeEnum != CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS && callTypeEnum != CallTypeEnum.CTE_SUPER_CALL_CHILD) {
+        JavaCGCallTypeEnum callTypeEnum = JavaCGCallTypeEnum.getFromType(callType);
+        if (callTypeEnum != JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS && callTypeEnum != JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD) {
             return true;
         }
 
@@ -366,7 +369,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         Map<String, MultiCallInfo> methodCallMap;
 
-        if (callTypeEnum == CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS) {
+        if (callTypeEnum == JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS) {
             methodCallMap = disabledItfMethodCallMap;
         } else {
             methodCallMap = disabledSccMethodCallMap;
@@ -382,7 +385,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     // 打印存在一对多的方法调用
-    private void printMultiMethodCall(Map<String, MultiCallInfo> methodCallMap, Set<String> multiCallerFullMethodSet, CallTypeEnum callTypeEnum) {
+    private void printMultiMethodCall(Map<String, MultiCallInfo> methodCallMap, Set<String> multiCallerFullMethodSet, JavaCGCallTypeEnum callTypeEnum) {
         // 判断相关存在一对多的调用者方法是否有被其他方法调用，若未被调用则不显示
         List<String> multiCallerFullMethodList = new ArrayList<>(multiCallerFullMethodSet.size());
         for (String multiCallerFullMethod : multiCallerFullMethodSet) {
@@ -401,7 +404,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         String filePath;
-        if (CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
+        if (JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
             filePath = outputDirPrefix + File.separator + JACGConstants.NOTICE_MULTI_ITF_MD;
         } else {
             filePath = outputDirPrefix + File.separator + JACGConstants.NOTICE_MULTI_SCC_MD;
@@ -411,7 +414,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         try (MarkdownWriter markdownWriter = new MarkdownWriter(filePath, true)) {
             markdownWriter.addTitle(1, "说明");
 
-            if (CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
+            if (JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
                 markdownWriter.addLineWithNewLine("出现当前文件，说明接口调用对应实现类的方法调用存在一对多的方法调用");
             } else {
                 markdownWriter.addLineWithNewLine("出现当前文件，说明抽象父类调用对应子类的方法调用存在一对多的方法调用");
@@ -435,7 +438,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             Collections.sort(multiCallerFullMethodList);
             for (String multiCallerFullMethod : multiCallerFullMethodList) {
                 MultiCallInfo multiCallInfo = methodCallMap.get(multiCallerFullMethod);
-                if (multiCallInfo == null || JACGUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
+                if (multiCallInfo == null || JavaCGUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
                     logger.error("未查找到对应的一对多方法调用关系 {}", multiCallerFullMethod);
                     continue;
                 }
@@ -465,14 +468,14 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     // 打印被禁用的方法调用
-    private void printDisabledMethodCall(Map<String, MultiCallInfo> disabledMethodCallMap, CallTypeEnum callTypeEnum) {
+    private void printDisabledMethodCall(Map<String, MultiCallInfo> disabledMethodCallMap, JavaCGCallTypeEnum callTypeEnum) {
         if (disabledMethodCallMap.isEmpty()) {
             logger.info("{} 不存在被禁用的方法调用，不打印相关信息", callTypeEnum);
             return;
         }
 
         String filePath;
-        if (CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
+        if (JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
             filePath = outputDirPrefix + File.separator + JACGConstants.NOTICE_DISABLED_ITF_MD;
         } else {
             filePath = outputDirPrefix + File.separator + JACGConstants.NOTICE_DISABLED_SCC_MD;
@@ -483,7 +486,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         try (MarkdownWriter markdownWriter = new MarkdownWriter(filePath, true)) {
             markdownWriter.addTitle(1, "说明");
 
-            if (CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
+            if (JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
                 markdownWriter.addLineWithNewLine("出现当前文件，说明接口调用对应实现类的方法调用存在被禁用的方法调用");
             } else {
                 markdownWriter.addLineWithNewLine("出现当前文件，说明抽象父类调用对应子类的方法调用存在被禁用的方法调用");
@@ -501,7 +504,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             Collections.sort(disabledCallerMethodList);
             for (String disabledCallerMethod : disabledCallerMethodList) {
                 MultiCallInfo multiCallInfo = disabledMethodCallMap.get(disabledCallerMethod);
-                if (multiCallInfo == null || JACGUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
+                if (multiCallInfo == null || JavaCGUtil.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
                     logger.error("未查找到对应的被禁用方法调用关系 {}", disabledCallerMethod);
                     continue;
                 }
@@ -523,10 +526,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 打印提示信息
     protected void printNoticeInfo() {
-        printMultiMethodCall(itfMethodCallMap, itfMultiCallerFullMethodSet, CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS);
-        printMultiMethodCall(sccMethodCallMap, sccMultiCallerFullMethodSet, CallTypeEnum.CTE_SUPER_CALL_CHILD);
-        printDisabledMethodCall(disabledItfMethodCallMap, CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS);
-        printDisabledMethodCall(disabledSccMethodCallMap, CallTypeEnum.CTE_SUPER_CALL_CHILD);
+        printMultiMethodCall(itfMethodCallMap, itfMultiCallerFullMethodSet, JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS);
+        printMultiMethodCall(sccMethodCallMap, sccMultiCallerFullMethodSet, JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD);
+        printDisabledMethodCall(disabledItfMethodCallMap, JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS);
+        printDisabledMethodCall(disabledSccMethodCallMap, JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD);
     }
 
     // 生成提示信息中的查询SQL
@@ -642,7 +645,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{});
-        if (JACGUtil.isCollectionEmpty(list)) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("查询到jar包信息为空");
             return null;
         }
@@ -693,8 +696,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 添加用于添加对方法上的注解进行处理的类
     protected boolean addMethodAnnotationHandlerExtensions() {
-        List<String> methodAnnotationHandlerClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_HANDLER, true);
-        if (JACGUtil.isCollectionEmpty(methodAnnotationHandlerClassList)) {
+        List<String> methodAnnotationHandlerClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER, true);
+        if (JavaCGUtil.isCollectionEmpty(methodAnnotationHandlerClassList)) {
             return true;
         }
 
@@ -718,22 +721,25 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     /**
      * 获取方法对应的注解信息
      *
-     * @param methodHash 完整方法HASH+长度
-     * @return
+     * @param fullMethod              完整方法
+     * @param methodHash              完整方法HASH+长度
+     * @param formattedAnnotationInfo 保存格式化后的注解信息
+     * @return 当前方法上的注解信息
      */
-    protected String getMethodAnnotationInfo(String fullMethod, String methodHash) {
+    protected Map<String, Map<String, BaseAnnotationAttribute>> getMethodAnnotationInfo(String fullMethod, String methodHash, StringBuilder formattedAnnotationInfo) {
         // 根据完整方法HASH+长度获取对应的注解信息
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = annotationStorage.getAnnotationMap4FullMethod(fullMethod);
         if (methodAnnotationMap == null) {
             // 当前方法上没有注解
-            return "";
+            return null;
         }
 
         // 当前方法上有注解
         String existedAnnotationInfo = methodAllAnnotationInfoMap.get(methodHash);
         if (existedAnnotationInfo != null) {
             // 当前方法对应的注解信息已查询过，直接使用
-            return existedAnnotationInfo;
+            formattedAnnotationInfo.append(existedAnnotationInfo);
+            return methodAnnotationMap;
         }
 
         // 当前方法对应的注解信息未查询过
@@ -765,7 +771,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         String allAnnotationInfo = stringBuilder.toString();
         methodAllAnnotationInfoMap.putIfAbsent(methodHash, allAnnotationInfo);
-        return allAnnotationInfo;
+        formattedAnnotationInfo.append(allAnnotationInfo);
+        return methodAnnotationMap;
     }
 
     /**
@@ -916,13 +923,58 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             若当前调用类型为Runnable/Callable实现类子类构造函数调用run()方法，或其他类似情况，则不判断方法名前缀是否需要忽略（<init> -> run()，可能会被指定为忽略）
          */
         if (!StringUtils.equalsAny(callType,
-                CallTypeEnum.CTE_RUNNABLE_INIT_RUN.getType(),
-                CallTypeEnum.CTE_CALLABLE_INIT_CALL.getType(),
-                CallTypeEnum.CTE_TX_CALLBACK_INIT_CALL.getType(),
-                CallTypeEnum.CTE_TX_CALLBACK_WR_INIT_CALL.getType()
+                JavaCGCallTypeEnum.CTE_RUNNABLE_INIT_RUN1.getType(),
+                JavaCGCallTypeEnum.CTE_RUNNABLE_INIT_RUN2.getType(),
+                JavaCGCallTypeEnum.CTE_CALLABLE_INIT_CALL1.getType(),
+                JavaCGCallTypeEnum.CTE_CALLABLE_INIT_CALL2.getType(),
+                JavaCGCallTypeEnum.CTE_TX_CALLBACK_INIT_CALL1.getType(),
+                JavaCGCallTypeEnum.CTE_TX_CALLBACK_INIT_CALL2.getType(),
+                JavaCGCallTypeEnum.CTE_TX_CALLBACK_WR_INIT_CALL1.getType(),
+                JavaCGCallTypeEnum.CTE_TX_CALLBACK_WR_INIT_CALL2.getType()
         ) && isIgnoredMethodWithPrefixByMethodName(methodNameWithArgs)) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 为方法调用信息增加是否在其他线程执行标志
+     *
+     * @param callInfo
+     * @param methodCallId
+     * @param callType
+     * @param methodAnnotationMap
+     */
+    protected void addRunInOtherThread(StringBuilder callInfo, int methodCallId, String callType, Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap) {
+        if (StringUtils.equalsAny(callType,
+                JavaCGCallTypeEnum.CTE_RUNNABLE_INIT_RUN2.getType(),
+                JavaCGCallTypeEnum.CTE_CALLABLE_INIT_CALL2.getType(),
+                JavaCGCallTypeEnum.CTE_THREAD_START_RUN.getType())) {
+            // 方法调用类型属于线程调用，在方法调用上增加在其他线程执行的标志
+            doAddRunInOtherThread(callInfo);
+            return;
+        }
+
+        if (methodAnnotationMap != null && methodAnnotationMap.get(JACGCommonNameConstants.SPRING_ASYNC_ANNOTATION) != null) {
+            // 方法上的注解包括@Async，在方法调用上增加在其他线程执行的标志
+            doAddRunInOtherThread(callInfo);
+            return;
+        }
+
+        if (JavaCGCallTypeEnum.CTE_LAMBDA.getType().equals(callType)) {
+            ClassAndMethodName lambdaCalleeInfo = dbOperWrapper.getLambdaCalleeInfo(methodCallId);
+            if (lambdaCalleeInfo != null && (
+                    (JavaCGCommonNameConstants.CLASS_NAME_RUNNABLE.equals(lambdaCalleeInfo.getClassName()) && JavaCGCommonNameConstants.METHOD_RUNNABLE_RUN.equals(lambdaCalleeInfo.getMethodName())) ||
+                            (JavaCGCommonNameConstants.CLASS_NAME_CALLABLE.equals(lambdaCalleeInfo.getClassName()) && JavaCGCommonNameConstants.METHOD_CALLABLE_CALL.equals(lambdaCalleeInfo.getMethodName()))
+            )) {
+                // 方法为Lambda表达式，且属于线程调用，在方法调用上增加在其他线程执行的标志
+                doAddRunInOtherThread(callInfo);
+            }
+        }
+    }
+
+    // 在方法调用上增加在其他线程执行的标志
+    private void doAddRunInOtherThread(StringBuilder callInfo) {
+        callInfo.append(JACGConstants.FLAG_TAB).append(JACGConstants.CALL_FLAG_RUN_IN_OTHER_THREAD);
     }
 }

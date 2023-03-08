@@ -29,7 +29,14 @@ public class ConfManager {
 
     private static final Pattern APP_NAME_PATTERN = Pattern.compile("[A-Za-z0-9_]*");
 
-    public static ConfInfo getConfInfo(ConfigureWrapper configureWrapper) {
+    /**
+     * 获取使用的配置信息，每次返回独立的对象，可重复执行
+     *
+     * @param configureWrapper
+     * @param printLog
+     * @return
+     */
+    public static ConfInfo getConfInfo(ConfigureWrapper configureWrapper, boolean printLog) {
         ConfInfo confInfo = new ConfInfo();
         String configFilePath = getInputRootPath() + InputDirEnum.IDE_CONFIG.getDirName() + "/" + JACGConstants.FILE_CONFIG;
         String configDbFilePath = getInputRootPath() + InputDirEnum.IDE_CONFIG.getDirName() + "/" + JACGConstants.FILE_CONFIG_DB;
@@ -41,13 +48,13 @@ public class ConfManager {
             properties4ConfigDb.load(br4ConfigDb);
 
             // 当前应用的调用关系写入数据库里的表名后缀
-            String appName = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_APP_NAME, true);
+            String appName = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_APP_NAME, printLog);
             if (checkBlank(appName, ConfigKeyEnum.CKE_APP_NAME, configFilePath) || !checkAppName(appName)) {
                 return null;
             }
 
             // 并发处理线程数量/数据源连接池数量
-            String strThreadNum = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_THREAD_NUM, true);
+            String strThreadNum = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_THREAD_NUM, printLog);
             if (checkBlank(strThreadNum, ConfigKeyEnum.CKE_THREAD_NUM, configFilePath)) {
                 return null;
             }
@@ -57,7 +64,7 @@ public class ConfManager {
             }
 
             // 生成调用链时的详细程度
-            String callGraphOutputDetail = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, true);
+            String callGraphOutputDetail = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, printLog);
             if (checkBlank(callGraphOutputDetail, ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, configFilePath)) {
                 return null;
             }
@@ -68,24 +75,17 @@ public class ConfManager {
             }
 
             // 在一个调用方法中出现多次的被调用方法（包含方法调用自定义数据），是否需要忽略
-            String ignoreDupCalleeInOneCaller = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, true);
+            String ignoreDupCalleeInOneCaller = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, printLog);
             if (StringUtils.isBlank(ignoreDupCalleeInOneCaller)) {
                 // 允许对应配置为空
-                ignoreDupCalleeInOneCaller = String.valueOf(false);
-            }
-
-            // 生成向下的调用链时，若接口或父类存在多个实现类或子类，接口或父类方法调用多个实现类或子类方法的调用关系是否需要在当前文件中继续生成，否则会在单独的目录中生成
-            String multiImplGenInCurrentFile = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_MULTI_IMPL_GEN_IN_CURRENT_FILE, true);
-            if (StringUtils.isBlank(multiImplGenInCurrentFile)) {
-                // 允许对应配置为空
-                multiImplGenInCurrentFile = String.valueOf(true);
+                ignoreDupCalleeInOneCaller = Boolean.FALSE.toString();
             }
 
             // 生成文件的根目录
-            String outputRootPath = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH, true);
+            String outputRootPath = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH, printLog);
 
             // 批量写入数据库时每次插入的数量
-            String dbInsertBatchSizeStr = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, true);
+            String dbInsertBatchSizeStr = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, printLog);
             if (checkBlank(dbInsertBatchSizeStr, ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, configFilePath)) {
                 return null;
             }
@@ -96,26 +96,24 @@ public class ConfManager {
             }
 
             // 检查jar包文件是否有更新
-            String checkJarFileUpdated = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, true);
+            String checkJarFileUpdated = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, printLog);
 
             // 生成向下的方法完整调用链时，是否显示原始方法调用信息
-            String callerShowRawMethodCallInfo = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO, true);
+            String callerShowRawMethodCallInfo = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO, printLog);
 
             // 数据库相关配置
-            String strDbUseH2 = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_USE_H2, true);
+            String strDbUseH2 = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_USE_H2, printLog);
             if (checkBlank(strDbUseH2, ConfigDbKeyEnum.CDKE_DB_USE_H2, configDbFilePath)) {
                 return null;
             }
 
             confInfo.setDbUseH2(Boolean.parseBoolean(strDbUseH2));
             if (confInfo.isDbUseH2()) {
-                logger.info("使用H2数据库");
-                if (!handleH2Db(configureWrapper, confInfo, properties4ConfigDb, configDbFilePath)) {
+                if (!handleH2Db(configureWrapper, confInfo, properties4ConfigDb, configDbFilePath, printLog)) {
                     return null;
                 }
             } else {
-                logger.info("使用非H2数据库");
-                if (!handleNonH2Db(configureWrapper, confInfo, properties4ConfigDb, configDbFilePath)) {
+                if (!handleNonH2Db(configureWrapper, confInfo, properties4ConfigDb, configDbFilePath, printLog)) {
                     return null;
                 }
             }
@@ -125,7 +123,6 @@ public class ConfManager {
             confInfo.setThreadNum(threadNum);
             confInfo.setOriginalThreadNum(threadNum);
             confInfo.setIgnoreDupCalleeInOneCaller(Boolean.parseBoolean(ignoreDupCalleeInOneCaller));
-            confInfo.setMultiImplGenInCurrentFile(Boolean.parseBoolean(multiImplGenInCurrentFile));
             confInfo.setOutputRootPath(outputRootPath);
             confInfo.setDbInsertBatchSize(dbInsertBatchSize);
             confInfo.setCheckJarFileUpdated(Boolean.parseBoolean(checkJarFileUpdated));
@@ -178,8 +175,9 @@ public class ConfManager {
         return false;
     }
 
-    private static boolean handleH2Db(ConfigureWrapper configureWrapper, ConfInfo confInfo, Properties properties4ConfigDb, String configFilePath) {
-        String dbH2FilePath = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH, true);
+    private static boolean handleH2Db(ConfigureWrapper configureWrapper, ConfInfo confInfo, Properties properties4ConfigDb, String configFilePath, boolean printLog) {
+        logger.info("使用H2数据库");
+        String dbH2FilePath = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH, printLog);
         if (checkBlank(dbH2FilePath, ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH, configFilePath)) {
             return false;
         }
@@ -194,23 +192,24 @@ public class ConfManager {
         return true;
     }
 
-    private static boolean handleNonH2Db(ConfigureWrapper configureWrapper, ConfInfo confInfo, Properties properties4ConfigDb, String configFilePath) {
-        String dbDriverName = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME, true);
+    private static boolean handleNonH2Db(ConfigureWrapper configureWrapper, ConfInfo confInfo, Properties properties4ConfigDb, String configFilePath, boolean printLog) {
+        logger.info("使用非H2数据库");
+        String dbDriverName = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME, printLog);
         if (checkBlank(dbDriverName, ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME, configFilePath)) {
             return false;
         }
 
-        String dbUrl = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_URL, true);
+        String dbUrl = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_URL, printLog);
         if (checkBlank(dbUrl, ConfigDbKeyEnum.CDKE_DB_URL, configFilePath)) {
             return false;
         }
 
-        String dbUsername = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_USERNAME, true);
+        String dbUsername = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_USERNAME, printLog);
         if (checkBlank(dbUsername, ConfigDbKeyEnum.CDKE_DB_USERNAME, configFilePath)) {
             return false;
         }
 
-        String dbPassword = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_PASSWORD, true);
+        String dbPassword = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_PASSWORD, printLog);
         if (checkBlank(dbPassword, ConfigDbKeyEnum.CDKE_DB_PASSWORD, configFilePath)) {
             return false;
         }

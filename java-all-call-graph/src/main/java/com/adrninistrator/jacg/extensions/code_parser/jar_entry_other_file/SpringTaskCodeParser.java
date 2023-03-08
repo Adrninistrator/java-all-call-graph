@@ -1,11 +1,10 @@
 package com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file;
 
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
+import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.extensions.code_parser.JarEntryOtherFileParser;
-import com.adrninistrator.mybatis_mysql_table_parser.xml.NoOpEntityResolver;
-import org.jdom2.Document;
+import com.adrninistrator.javacg.xml.JavaCGXmlParser;
 import org.jdom2.Element;
-import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +19,6 @@ import java.util.List;
  */
 public class SpringTaskCodeParser implements JarEntryOtherFileParser {
     private static final Logger logger = LoggerFactory.getLogger(SpringTaskCodeParser.class);
-
-    private static final String[] FILE_EXT_ARRAY = new String[]{"xml"};
 
     private static SpringTaskCodeParser LAST_INSTANCE;
 
@@ -47,29 +44,19 @@ public class SpringTaskCodeParser implements JarEntryOtherFileParser {
     // 指定需要处理xml文件
     @Override
     public String[] chooseJarEntryOtherFileExt() {
-        return FILE_EXT_ARRAY;
+        return JavaCGConstants.FILE_EXT_ARRAY_XML;
     }
 
     // 处理.xml文件
     @Override
     public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryName) {
         try {
-            SAXBuilder saxBuilder = new SAXBuilder();
-            saxBuilder.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
-            saxBuilder.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            saxBuilder.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            // 不读取DTD
-            saxBuilder.setEntityResolver(new NoOpEntityResolver());
-
-            Document document = saxBuilder.build(inputStream);
-
-            Element root = document.getRootElement();
+            Element root = JavaCGXmlParser.parseXmlRootElement(inputStream);
             if (!"beans".equals(root.getName())) {
-                logger.info("跳过非Spring XML 1: {}", jarEntryName);
+                logger.debug("跳过非Spring XML 1: {}", jarEntryName);
                 return;
             }
 
-            // 以上用于跳过非Spring的XML文件
             logger.info("开始处理Spring XML: {}", jarEntryName);
             for (Element element : root.getChildren()) {
                 if (!"task:scheduled-tasks".equals(element.getQualifiedName())) {

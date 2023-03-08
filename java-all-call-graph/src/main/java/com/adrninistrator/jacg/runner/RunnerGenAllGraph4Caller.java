@@ -8,25 +8,25 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
+import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.call_graph.CallGraphNode4Caller;
 import com.adrninistrator.jacg.dto.call_graph.ChildCallSuperInfo;
 import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
-import com.adrninistrator.jacg.dto.multiple.MultiImplMethodInfo;
 import com.adrninistrator.jacg.dto.task.CallerTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
 import com.adrninistrator.jacg.extensions.extended_data_supplement.ExtendedDataSupplementInterface;
-import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.handler.method_call_info.MethodCallInfoHandler;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
+import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.dto.stack.ListAsStack;
-import com.adrninistrator.javacg.enums.CallTypeEnum;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -61,15 +61,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 保存用于对方法调用自定义数据进行补充的处理类
     private Map<String, ExtendedDataSupplementInterface> extendedDataSupplementExtMap;
 
-    // 存在多个实现类的接口方法HASH
-    private Set<String> multiImplMethodHashSet;
-
-    // 存在多个子类的父类方法HASH
-    private Set<String> multiChildrenMethodHashSet;
-
-    // 本次执行时查询到存在多个实现类的接口或父类方法信息
-    private Map<String, MultiImplMethodInfo> currentFoundMultiImplMethodMap = new ConcurrentHashMap<>();
-
     // 简单类名及对应的完整类名Map
     protected Map<String, String> simpleAndClassNameMap = new ConcurrentHashMap<>();
 
@@ -98,11 +89,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return false;
         }
 
-        // 查询存在多个实现类的接口或父类方法HASH
-        if (!confInfo.isMultiImplGenInCurrentFile() && !queryMultiImplMethodHash()) {
-            return false;
-        }
-
         return true;
     }
 
@@ -119,7 +105,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     private boolean operate() {
         // 生成文件中指定的需要执行的任务信息
         List<CallerTaskInfo> callerTaskInfoList = genCallerTaskInfo();
-        if (JACGUtil.isCollectionEmpty(callerTaskInfoList)) {
+        if (JavaCGUtil.isCollectionEmpty(callerTaskInfoList)) {
             logger.error("执行失败，请检查配置文件 {} 的内容", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER);
             return false;
         }
@@ -129,21 +115,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 执行任务并等待
         runAndWait(callerTaskInfoList);
-
-        while (true) {
-            // 根据记录本次执行时查询到存在多个实现类的接口或父类方法信息，生成继续执行的任务信息
-            List<CallerTaskInfo> callerTaskInfoList2 = genTaskFromMultiImplMethod();
-            if (JACGUtil.isCollectionEmpty(callerTaskInfoList2)) {
-                logger.info("需要继续执行的任务已执行完毕");
-                break;
-            }
-
-            // 重新设置线程数，若当前线程数需要调大则修改
-            resetPoolSize(callerTaskInfoList2.size());
-
-            // 执行任务并等待
-            runAndWait(callerTaskInfoList2);
-        }
 
         return true;
     }
@@ -174,62 +145,10 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         wait4TPEDone();
     }
 
-    // 根据记录本次执行时查询到存在多个实现类的接口或父类方法信息，生成继续执行的任务信息
-    private List<CallerTaskInfo> genTaskFromMultiImplMethod() {
-        if (JACGUtil.isMapEmpty(currentFoundMultiImplMethodMap)) {
-            return null;
-        }
-
-        List<CallerTaskInfo> callerTaskInfoList = new ArrayList<>();
-
-        for (Map.Entry<String, MultiImplMethodInfo> currentFoundMultiImplMethod : currentFoundMultiImplMethodMap.entrySet()) {
-            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_IMPL_METHODS;
-            String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-            if (sql == null) {
-                sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLEE_SIMPLE_CLASS_NAME, DC.MC_CALLEE_FULL_METHOD) +
-                        " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
-                        " where " + DC.MC_CALLER_METHOD_HASH + " = ? and " + DC.MC_CALL_TYPE + " = ? and " + DC.MC_ENABLED + " = ?";
-                dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-            }
-
-            String methodHash = currentFoundMultiImplMethod.getKey();
-            MultiImplMethodInfo multiImplMethodInfo = currentFoundMultiImplMethod.getValue();
-            CallTypeEnum callType = multiImplMethodInfo.getMultiImplMethodCallType();
-            String dirPath = multiImplMethodInfo.getDirPath();
-
-            List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{methodHash, callType.getType(), JACGConstants.YES_1});
-            if (JACGUtil.isCollectionEmpty(list)) {
-                logger.error("未查找到接口或父类的实现类方法信息 {} {} {}", methodHash, callType.getType(), dirPath);
-                return null;
-            }
-
-            logger.info("查找到接口或父类的实现类方法数量 {} {} {} {}", methodHash, callType.getType(), dirPath, list.size());
-
-            for (Map<String, Object> map : list) {
-                CallerTaskInfo callerTaskInfo = new CallerTaskInfo();
-                callerTaskInfo.setCallerSimpleClassName((String) map.get(DC.MC_CALLEE_SIMPLE_CLASS_NAME));
-
-                String methodWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull((String) map.get(DC.MC_CALLEE_FULL_METHOD));
-                callerTaskInfo.setCallerMethodName(methodWithArgs);
-                callerTaskInfo.setLineNumStart(JACGConstants.LINE_NUM_NONE);
-                callerTaskInfo.setLineNumEnd(JACGConstants.LINE_NUM_NONE);
-                callerTaskInfo.setSaveDirPath(dirPath);
-
-                callerTaskInfoList.add(callerTaskInfo);
-            }
-        }
-
-        // 本次执行时查询到存在多个实现类的接口或父类方法信息，重置
-        currentFoundMultiImplMethodMap = new ConcurrentHashMap<>();
-
-        logger.info("需要继续执行的任务 {}", callerTaskInfoList);
-        return callerTaskInfoList;
-    }
-
     // 添加用于对方法调用自定义数据进行补充的处理类
     private boolean addExtendedDataSupplementExtensions() {
         List<String> extendedDataSupplementClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT, true);
-        if (JACGUtil.isCollectionEmpty(extendedDataSupplementClassList)) {
+        if (JavaCGUtil.isCollectionEmpty(extendedDataSupplementClassList)) {
             logger.info("未指定用于对方法调用自定义数据进行补充的类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_EXTENDED_DATA_SUPPLEMENT.getKey());
             return true;
         }
@@ -257,41 +176,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             logger.error("error ", e);
             return false;
         }
-    }
-
-    // 查询存在多个实现类的接口或父类方法HASH
-    private boolean queryMultiImplMethodHash() {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_MULTI_IMPL;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select " + DC.MC_CALLER_METHOD_HASH +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
-                    " where " + DC.MC_CALL_TYPE + " = ? and " + DC.MC_ENABLED + " = ?" +
-                    " group by " + DC.MC_CALLER_METHOD_HASH +
-                    " having count(" + DC.MC_CALLER_METHOD_HASH + ") > 1";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
-        List<Object> multiImplMethodHashList = dbOperator.queryListOneColumn(sql, new Object[]{CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS.getType(), JACGConstants.YES_1});
-        if (multiImplMethodHashList == null) {
-            return false;
-        }
-
-        multiImplMethodHashSet = new HashSet<>(multiImplMethodHashList.size());
-        for (Object multiImplMethodHash : multiImplMethodHashList) {
-            multiImplMethodHashSet.add((String) multiImplMethodHash);
-        }
-
-        List<Object> multiChildrenMethodHashList = dbOperator.queryListOneColumn(sql, new Object[]{CallTypeEnum.CTE_SUPER_CALL_CHILD.getType(), JACGConstants.YES_1});
-        if (multiChildrenMethodHashList == null) {
-            return false;
-        }
-
-        multiChildrenMethodHashSet = new HashSet<>(multiChildrenMethodHashList.size());
-        for (Object multiChildrenMethodHash : multiChildrenMethodHashList) {
-            multiChildrenMethodHashSet.add((String) multiChildrenMethodHash);
-        }
-
-        return true;
     }
 
     // 生成需要执行的任务信息
@@ -522,9 +406,10 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
             // 判断调用方法上是否有注解
             if (MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.checkFlag(findMethodTaskInfo.getCallFlags())) {
+                StringBuilder methodAnnotations = new StringBuilder();
                 // 添加方法注解信息
-                String methodAnnotations = getMethodAnnotationInfo(entryCallerFullMethod, entryCallerMethodHash);
-                if (methodAnnotations != null) {
+                Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = getMethodAnnotationInfo(entryCallerFullMethod, entryCallerMethodHash, methodAnnotations);
+                if (methodAnnotations.length() > 0) {
                     stringBuilder.append(methodAnnotations);
                 }
             }
@@ -557,7 +442,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         String callerSimpleClassName = callerTaskInfo.getCallerSimpleClassName();
         String fullMethodPrefix = callerClassName + JavaCGConstants.FLAG_COLON + callerMethodNameInTask;
         List<Map<String, Object>> callerMethodList = dbOperator.queryList(sql, new Object[]{callerSimpleClassName, fullMethodPrefix});
-        if (JACGUtil.isCollectionEmpty(callerMethodList)) {
+        if (JavaCGUtil.isCollectionEmpty(callerMethodList)) {
             logger.warn("从方法调用关系表未找到指定的调用方法 {} {}", callerSimpleClassName, fullMethodPrefix);
             // 生成空文件
             if (!genEmptyFile(callerTaskInfo, callerSimpleClassName, callerMethodNameInTask)) {
@@ -726,12 +611,10 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             }
 
             // 当前记录需要处理
-            // 判断被调用的方法是否为存在多个实现类的接口或父类方法
-            CallTypeEnum multiImplMethodCallType = checkMultiImplMethodCallType(calleeMethodHash);
 
             int callFlags = (int) calleeMethodMap.get(DC.MC_CALL_FLAGS);
             // 生成被调用方法信息（包含方法注解信息、方法调用自定义数据）
-            String calleeInfo = genCalleeInfo(calleeFullMethod, calleeMethodHash, methodCallId, callFlags, multiImplMethodCallType);
+            String calleeInfo = genCalleeInfo(calleeFullMethod, calleeMethodHash, methodCallId, callFlags, callType);
             if (calleeInfo == null) {
                 return false;
             }
@@ -755,11 +638,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
             // 更新当前处理节点的id
             callGraphNode4CallerStack.peek().setMethodCallId(methodCallId);
-
-            if (multiImplMethodCallType != null) {
-                // 被调用的方法为存在多个实现类的接口或父类方法，且需要生成在单独的目录中时，不再往下处理被调用的方法
-                continue;
-            }
 
             if (back2Level != JACGConstants.NO_CYCLE_CALL_FLAG) {
                 // 出现循环调用，不再往下处理被调用的方法
@@ -813,7 +691,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         // 使用原始的被调用方法
-        if (CallTypeEnum.CTE_CHILD_CALL_SUPER.getType().equals(callType)) {
+        if (JavaCGCallTypeEnum.CTE_CHILD_CALL_SUPER.getType().equals(callType)) {
             // 当前方法调用类型是子类调用父类方法，记录子类方法调用父类方法对应信息的栈入栈
             String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
             String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
@@ -1100,28 +978,12 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         return false;
     }
 
-    // 判断被调用的方法是否为存在多个实现类的接口或父类方法
-    private CallTypeEnum checkMultiImplMethodCallType(String calleeMethodHash) {
-        if (confInfo.isMultiImplGenInCurrentFile()) {
-            return null;
-        }
-
-        // 生成向下的调用链时，若接口或父类存在多个实现类或子类，接{口或父类方法调用多个实现类或子类方法的调用关系需要在单独的目录中生成
-        if (multiImplMethodHashSet.contains(calleeMethodHash)) {
-            return CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS;
-        }
-        if (multiChildrenMethodHashSet.contains(calleeMethodHash)) {
-            return CallTypeEnum.CTE_SUPER_CALL_CHILD;
-        }
-        return null;
-    }
-
     // 生成被调用方法信息（包含方法注解信息、方法调用自定义数据）
     protected String genCalleeInfo(String calleeFullMethod,
                                    String calleeMethodHash,
                                    int methodCallId,
                                    int callFlags,
-                                   CallTypeEnum multiImplMethodCallType) {
+                                   String callType) {
         StringBuilder calleeInfo = new StringBuilder();
 
         if (confInfo.getCallGraphOutputDetail().equals(OutputDetailEnum.ODE_1.getDetail())) {
@@ -1145,21 +1007,18 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         // 判断被调用方法上是否有注解
+        Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = null;
         if (MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) {
+            StringBuilder methodAnnotations = new StringBuilder();
             // 添加方法注解信息
-            String methodAnnotations = getMethodAnnotationInfo(calleeFullMethod, calleeMethodHash);
-            if (methodAnnotations != null) {
+            methodAnnotationMap = getMethodAnnotationInfo(calleeFullMethod, calleeMethodHash, methodAnnotations);
+            if (methodAnnotations.length() > 0) {
                 calleeInfo.append(methodAnnotations);
             }
         }
 
-        if (multiImplMethodCallType != null) {
-            // 对存在多个实现类的接口或父类方法进行处理
-            if (!handleMultiImplMethod(calleeInfo, methodCallId, calleeMethodHash, multiImplMethodCallType)) {
-                return null;
-            }
-            return calleeInfo.toString();
-        }
+        // 为方法调用信息增加是否在其他线程执行标志
+        addRunInOtherThread(calleeInfo, methodCallId, callType, methodAnnotationMap);
 
         // 添加方法调用自定义数据
         if (!addExtendedData(methodCallId, callFlags, calleeInfo)) {
@@ -1190,41 +1049,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return true;
         }
         return false;
-    }
-
-    // 对存在多个实现类的接口或父类方法进行处理
-    private boolean handleMultiImplMethod(StringBuilder calleeInfo, int methodCallId, String calleeMethodHash, CallTypeEnum multiImplMethodCallType) {
-        logger.info("对存在多个实现类的接口或父类方法进行处理 {} {} {}", methodCallId, calleeMethodHash, multiImplMethodCallType);
-
-        // 查询被调用方法类名与方法名
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLEE_BY_ID;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLEE_SIMPLE_CLASS_NAME, DC.MC_CALLEE_METHOD_NAME) +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
-                    " where " + DC.MC_CALL_ID + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
-
-        Map<String, Object> calleeWithMultiImplInfoMap = dbOperator.queryOneRow(sql, new Object[]{methodCallId});
-        if (JACGUtil.isMapEmpty(calleeWithMultiImplInfoMap)) {
-            logger.error("根据调用序号查找对应被调用方法信息失败 {}", methodCallId);
-            return false;
-        }
-
-        String methodName = (String) calleeWithMultiImplInfoMap.get(DC.MC_CALLEE_METHOD_NAME);
-        // 生成方法对应的调用链文件名
-        String calleeWithMultiImplName = JACGCallGraphFileUtil.getCallGraphMethodFileName((String) calleeWithMultiImplInfoMap.get(DC.MC_CALLEE_SIMPLE_CLASS_NAME),
-                methodName,
-                calleeMethodHash);
-
-        // 将被调用方法信息作为方法调用自定义数据加入被调用方法信息中
-        addExtendedData2CalleeInfo(true, JACGConstants.DATA_TYPE_JUMP_MULTI_IMPL, calleeWithMultiImplName, calleeInfo);
-
-        // 记录本次执行时查询到存在多个实现类的接口或父类方法信息
-        // 仅记录未被处理过的方法信息
-        currentFoundMultiImplMethodMap.putIfAbsent(calleeMethodHash, new MultiImplMethodInfo(multiImplMethodCallType, calleeWithMultiImplName));
-        return true;
     }
 
     // 记录被调用方法信息
@@ -1360,7 +1184,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         List<Object> list4CalleeSeq = dbOperator.queryListOneColumn(sql4CalleeSeq, new Object[]{calleeMethodHash, callerFullMethod, methodCallId});
-        if (JACGUtil.isCollectionEmpty(list4CalleeSeq)) {
+        if (JavaCGUtil.isCollectionEmpty(list4CalleeSeq)) {
             logger.error("查询当前调用者中，被调用者方法出现的序号失败 {} {} {}", calleeMethodHash, callerFullMethod, methodCallId);
             return 0;
         }
@@ -1435,7 +1259,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         List<Object> fullMethodList = dbOperator.queryListOneColumn(sql, new Object[]{callerSimpleClassName});
-        if (JACGUtil.isCollectionEmpty(fullMethodList)) {
+        if (JavaCGUtil.isCollectionEmpty(fullMethodList)) {
             logger.warn("从方法调用关系表未找到对应的完整类名 {}", callerSimpleClassName);
             return null;
         }

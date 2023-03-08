@@ -1,7 +1,7 @@
 package test.run_by_code.concurrent;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.find_keyword.FindKeywordCallGraph;
+import com.adrninistrator.jacg.find_stack.FindCallStackTrace;
 import org.junit.Test;
 import test.run_by_code.TestRunByCodeBase;
 
@@ -17,12 +17,12 @@ public class TestRBCConcurrentRead extends TestRunByCodeBase {
         ConfigureWrapper configureWrapper1 = configureWrapper.copy();
 
         Thread thread1 = new Thread(() -> {
-            new FindKeywordCallGraph().find(true, configureWrapper);
+            new FindCallStackTrace().find(true, configureWrapper);
         });
         thread1.start();
 
         Thread thread2 = new Thread(() -> {
-            new FindKeywordCallGraph().find(false, configureWrapper1);
+            new FindCallStackTrace().find(false, configureWrapper1);
         });
         thread2.start();
 

@@ -13,7 +13,7 @@ public abstract class AbstractSuperClassA {
         runC();
     }
 
-    protected void entryB(){
+    protected void entryB() {
         runD();
     }
 

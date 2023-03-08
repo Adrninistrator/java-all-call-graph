@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,10 +44,6 @@ public class JACGUtil {
         return String.format("%s#%03x", Base64.getUrlEncoder().encodeToString(md5), data.length());
     }
 
-    public static <T> boolean isCollectionEmpty(Collection<T> collection) {
-        return collection == null || collection.isEmpty();
-    }
-
     public static <K, V> boolean isMapEmpty(Map<K, V> map) {
         return map == null || map.isEmpty();
     }
@@ -70,6 +65,7 @@ public class JACGUtil {
      * @param <T>
      * @return
      */
+    @SuppressWarnings("unchecked")
     public static <T> T getClassObject(String className, Class<T> classType) {
         try {
             Class<?> clazz = Class.forName(className);
@@ -174,6 +170,7 @@ public class JACGUtil {
         return new Object[]{
                 data.getCallId(),
                 data.getCallType(),
+                data.getCalleeObjType(),
                 data.getEnabled(),
                 data.getCallerJarNum(),
                 data.getCallerMethodHash(),
@@ -268,7 +265,7 @@ public class JACGUtil {
         javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_FIRST_PARSE_INIT_METHOD_TYPE, Boolean.TRUE.toString());
         javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_CONTINUE_WHEN_ERROR, Boolean.FALSE.toString());
         javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_DEBUG_PRINT, Boolean.FALSE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_OUTPUT_FILE_EXT, ".md");
+        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_OUTPUT_FILE_EXT, JACGConstants.EXT_MD);
         return javaCGConfigureWrapper;
     }
 

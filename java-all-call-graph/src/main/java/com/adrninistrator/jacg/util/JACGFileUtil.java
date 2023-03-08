@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -23,6 +24,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
@@ -128,15 +130,15 @@ public class JACGFileUtil {
             List<String> list = IOUtils.readLines(inputStream, StandardCharsets.UTF_8);
             Set<String> set = new HashSet<>(list.size());
 
+            // 是否需要根据前缀忽略
             boolean checkIgnore = StringUtils.isNotBlank(ignorePrefix);
             for (String line : list) {
-                if (StringUtils.isNotBlank(line)) {
-                    if (checkIgnore && line.startsWith(ignorePrefix)) {
-                        continue;
-                    }
-
-                    set.add(line);
+                if (StringUtils.isBlank(line) ||
+                        (checkIgnore && line.startsWith(ignorePrefix))) {
+                    continue;
                 }
+
+                set.add(line);
             }
 
             return set;
@@ -262,7 +264,7 @@ public class JACGFileUtil {
      * @return
      */
     public static boolean combineTextFile(String destFilePath, List<File> srcFileList) {
-        if (JACGUtil.isCollectionEmpty(srcFileList)) {
+        if (JavaCGUtil.isCollectionEmpty(srcFileList)) {
             logger.error("指定的源文件列表为空");
             return false;
         }
@@ -539,6 +541,23 @@ public class JACGFileUtil {
 
         logger.info("重命名文件 {} {}", oldFilePath, newFilePath);
         return true;
+    }
+
+    /**
+     * 拷贝文件
+     *
+     * @param srcFile
+     * @param destFile
+     * @return
+     */
+    public static boolean copyFile(File srcFile, File destFile) {
+        try {
+            Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (Exception e) {
+            logger.error("error ", e);
+            return false;
+        }
     }
 
     private JACGFileUtil() {

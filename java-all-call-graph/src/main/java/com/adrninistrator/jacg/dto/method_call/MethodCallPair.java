@@ -7,13 +7,13 @@ package com.adrninistrator.jacg.dto.method_call;
  */
 public class MethodCallPair {
     // 调用方完整方法
-    private final String callerFullMethod;
+    protected final String callerFullMethod;
 
     // 调用方代码行号
-    private final int callerLineNumber;
+    protected final int callerLineNumber;
 
     // 被调用方完整方法
-    private final String calleeFullMethod;
+    protected final String calleeFullMethod;
 
     public MethodCallPair(String callerFullMethod, int callerLineNumber, String calleeFullMethod) {
         this.callerFullMethod = callerFullMethod;

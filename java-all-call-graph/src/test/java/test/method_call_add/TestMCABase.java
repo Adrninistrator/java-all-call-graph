@@ -9,9 +9,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.util.JACGUtil;
 import org.junit.Before;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 
 /**
  * @author adrninistrator
@@ -29,7 +27,6 @@ public abstract class TestMCABase {
         configureWrapper.setConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_2.getDetail());
         configureWrapper.setConfig(ConfigKeyEnum.CKE_THREAD_NUM, "20");
         configureWrapper.setConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
-        configureWrapper.setConfig(ConfigKeyEnum.CKE_MULTI_IMPL_GEN_IN_CURRENT_FILE, Boolean.TRUE.toString());
         configureWrapper.setConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, "1000");
         configureWrapper.setConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, Boolean.TRUE.toString());
         configureWrapper.setConfig(ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO, Boolean.FALSE.toString());

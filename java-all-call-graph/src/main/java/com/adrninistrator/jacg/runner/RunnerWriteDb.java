@@ -9,7 +9,6 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.dto.write_db.AbstractWriteDbData;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.SpringTaskCodeParser;
 import com.adrninistrator.jacg.extensions.extended_data_add.ExtendedDataAddInterface;
@@ -43,6 +42,7 @@ import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
 import com.adrninistrator.javacg.dto.output.HandleOutputInfo;
 import com.adrninistrator.javacg.extensions.code_parser.CodeParserInterface;
 import com.adrninistrator.javacg.stat.JCallGraph;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +80,7 @@ public class RunnerWriteDb extends AbstractRunner {
         value
             写入数据库的对象
      */
-    private final Map<String, AbstractWriteDbHandler<AbstractWriteDbData>> writeDbHandlerMap = new HashMap<>();
+    private final Map<String, AbstractWriteDbHandler<?>> writeDbHandlerMap = new HashMap<>();
 
     // 人工添加方法调用关系类列表
     private List<MethodCallAddInterface> methodCallAddExtList;
@@ -231,7 +231,7 @@ public class RunnerWriteDb extends AbstractRunner {
     // 判断是否需要调用java-callgraph2生成jar包的方法调用关系
     private boolean callJavaCallGraph2() {
         List<String> jarPathList = getJarPathList();
-        if (JACGUtil.isCollectionEmpty(jarPathList)) {
+        if (JavaCGUtil.isCollectionEmpty(jarPathList)) {
             logger.error("请在配置文件 {} 中指定需要处理的jar包，或保存class、jar文件的目录", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
             return false;
         }
@@ -286,7 +286,7 @@ public class RunnerWriteDb extends AbstractRunner {
     // 添加用于对代码进行解析的处理类
     private boolean addCodeParserExtensions() {
         List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, true);
-        if (JACGUtil.isCollectionEmpty(codeParserExtensionClassList)) {
+        if (JavaCGUtil.isCollectionEmpty(codeParserExtensionClassList)) {
             logger.info("未指定用于对代码进行解析的类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getKey());
             return true;
         }
@@ -312,7 +312,7 @@ public class RunnerWriteDb extends AbstractRunner {
     // 添加用于根据方法调用信息添加方法调用关系的处理类
     private boolean addMethodCallAddExtensions() {
         List<String> methodCallAddClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_CALL_ADD, true);
-        if (JACGUtil.isCollectionEmpty(methodCallAddClassList)) {
+        if (JavaCGUtil.isCollectionEmpty(methodCallAddClassList)) {
             logger.info("未指定用于人工添加方法调用关系的处理类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_CALL_ADD.getKey());
             methodCallAddExtList = Collections.emptyList();
             return true;
@@ -344,7 +344,7 @@ public class RunnerWriteDb extends AbstractRunner {
     // 用于根据方法调用信息添加方法调用自定义数据处理类
     private boolean addExtendedDataAddExtensions() {
         List<String> extendedDataAddClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_EXTENDED_DATA_ADD, true);
-        if (JACGUtil.isCollectionEmpty(extendedDataAddClassList)) {
+        if (JavaCGUtil.isCollectionEmpty(extendedDataAddClassList)) {
             logger.info("未指定用于根据方法调用信息添加方法调用自定义数据处理类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_EXTENDED_DATA_ADD.getKey());
             return true;
         }
@@ -396,7 +396,7 @@ public class RunnerWriteDb extends AbstractRunner {
     private String readCreateTableSql(String sqlFileName) {
         String sqlFilePath = ConfManager.getInputRootPath() + InputDirEnum.IDE_SQL.getDirName() + "/" + sqlFileName;
         List<String> sqlList = JACGFileUtil.readFile2List(sqlFilePath);
-        if (JACGUtil.isCollectionEmpty(sqlList)) {
+        if (JavaCGUtil.isCollectionEmpty(sqlList)) {
             logger.error("文件内容为空 {}", sqlFilePath);
             return null;
         }
@@ -419,7 +419,7 @@ public class RunnerWriteDb extends AbstractRunner {
     private String transformCreateTableSql(String sql, boolean useH2Db) {
         if (sql.startsWith(JACGConstants.SQL_CREATE_TABLE_HEAD)) {
             // CREATE TABLE if not exists开头
-            return sql.replace(JACGConstants.APPNAME_IN_SQL, confInfo.getAppName());
+            return sql.replace(JACGConstants.APP_NAME_IN_SQL, confInfo.getAppName());
         }
 
         if (sql.contains(JACGConstants.SQL_ENGINE_INNODB)) {
@@ -435,10 +435,10 @@ public class RunnerWriteDb extends AbstractRunner {
         if (StringUtils.startsWithAny(trimSql, "PRIMARY KEY", "INDEX", "UNIQUE INDEX")) {
             // PRIMARY KEY、INDEX、UNIQUE INDEX开头
             if (useH2Db) {
-                return sql.replace(JACGConstants.APPNAME_IN_SQL, confInfo.getAppName())
+                return sql.replace(JACGConstants.APP_NAME_IN_SQL, confInfo.getAppName())
                         .replaceAll("\\([0-9]+\\)", "");
             }
-            return sql.replace(JACGConstants.APPNAME_IN_SQL, confInfo.getAppName());
+            return sql.replace(JACGConstants.APP_NAME_IN_SQL, confInfo.getAppName());
         }
 
         // 其他情况
@@ -459,7 +459,7 @@ public class RunnerWriteDb extends AbstractRunner {
         return true;
     }
 
-    private void initWriteDbHandler(AbstractWriteDbHandler writeDbHandler) {
+    private void initWriteDbHandler(AbstractWriteDbHandler<?> writeDbHandler) {
         writeDbHandlerMap.put(writeDbHandler.getCurrentSimpleClassName(), writeDbHandler);
 
         writeDbHandler.setDbOperWrapper(dbOperWrapper);
@@ -565,8 +565,14 @@ public class RunnerWriteDb extends AbstractRunner {
         writeDbHandler4SpringBean.setSpringBeanMap(springBeanMap);
         writeDbHandler4SpringBean.handle(handleOutputInfo.getSpringBeanOutputFilePath());
 
-        List<WriteDbData4SpringTask> springTaskList = SpringTaskCodeParser.getLastInstance().getSpringTaskList();
-        if (JACGUtil.isCollectionEmpty(springTaskList)) {
+        SpringTaskCodeParser springTaskCodeParser = SpringTaskCodeParser.getLastInstance();
+        if (springTaskCodeParser == null) {
+            logger.error("未获取到 {} 类的实例", SpringTaskCodeParser.class.getSimpleName());
+            return;
+        }
+
+        List<WriteDbData4SpringTask> springTaskList = springTaskCodeParser.getSpringTaskList();
+        if (JavaCGUtil.isCollectionEmpty(springTaskList)) {
             return;
         }
 
@@ -636,7 +642,7 @@ public class RunnerWriteDb extends AbstractRunner {
         Collections.sort(writeDbHandlerNameList);
 
         for (String writeDbHandlerName : writeDbHandlerNameList) {
-            AbstractWriteDbHandler writeDbHandler = writeDbHandlerMap.get(writeDbHandlerName);
+            AbstractWriteDbHandler<?> writeDbHandler = writeDbHandlerMap.get(writeDbHandlerName);
             logger.info("{} 写入数据库记录数 {}", writeDbHandlerName, writeDbHandler.getWriteRecordNum());
 
             if (writeDbHandler instanceof WriteDbHandler4ClassName && writeDbHandler.getWriteRecordNum() == 0) {

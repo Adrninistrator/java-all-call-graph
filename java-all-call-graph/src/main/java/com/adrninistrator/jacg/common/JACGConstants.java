@@ -10,7 +10,7 @@ public class JACGConstants {
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLEE = "_jacg_o_ee";
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLER = "_jacg_o_er";
     public static final String DIR_OUTPUT_METHODS = "methods";
-    public static final String DIR_OUTPUT_FIND_KEYWORD = "_find_kw";
+    public static final String DIR_OUTPUT_STACK = "_stack";
     public static final String DIR_KEYWORDS_NOT_FOUND = "_keywords_not_found";
 
     public static final String FILE_CONFIG = "config.properties";
@@ -18,7 +18,7 @@ public class JACGConstants {
     // 保存当前使用的配置参数信息文件
     public static final String FILE_USED_CONFIG_MD = "_used_config.md";
 
-    public static final String APPNAME_IN_SQL = "{appName}";
+    public static final String APP_NAME_IN_SQL = "{appName}";
 
     public static final String SQL_CREATE_TABLE_HEAD = "CREATE TABLE if not exists";
     public static final String SQL_ENGINE_INNODB = "ENGINE=InnoDB";
@@ -37,7 +37,7 @@ public class JACGConstants {
 
     public static final char FLAG_CHAR_SPACE = FLAG_SPACE.charAt(0);
 
-    public static final String FLAG_MD_LINE_NUMBER = "行号: ";
+    public static final String FLAG_MD_LINE_NUMBER = "调用链文件行号: ";
 
     public static final String FLAG_EMPTY = "-empty";
 
@@ -58,6 +58,7 @@ public class JACGConstants {
     public static final String CALL_FLAG_CYCLE_END = JACGConstants.FLAG_RIGHT_PARENTHESES + "!";
     public static final String CALL_FLAG_CYCLE = CALL_FLAG_CYCLE_START + "%d" + CALL_FLAG_CYCLE_END;
     public static final String CALL_FLAG_EXTENDED_DATA = "!ext_data!";
+    public static final String CALL_FLAG_RUN_IN_OTHER_THREAD = "!run_in_other_thread!";
 
     // 方法调用自定义数据类型：方法调用信息
     public static final String EXTENDED_DATA_TYPE_METHOD_CALL_INFO = "method_call_info";

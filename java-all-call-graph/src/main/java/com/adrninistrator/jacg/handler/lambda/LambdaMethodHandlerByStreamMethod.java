@@ -61,7 +61,7 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodHandler {
     /**
      * 通过Stream条件查询Lambda表达式方法调用信息
      *
-     * @param lambdaNextIsStream                 下一个被调用方法是否为Stream，若为null则查询全部数据
+     * @param lambdaNextIsStream       下一个被调用方法是否为Stream，若为null则查询全部数据
      * @param lambdaNextIsIntermediate true: 下一个被调用方法为Stream的intermediate（中间）操作 false: 下一个被调用方法为Stream的terminal（终端）操作 仅当参数1非null时当前参数可为非null
      * @return
      */
@@ -78,7 +78,7 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodHandler {
     /**
      * 通过Stream条件查询Lambda表达式方法调用信息，包含各方法的详细信息
      *
-     * @param lambdaNextIsStream                 下一个被调用方法是否为Stream，若为null则查询全部数据
+     * @param lambdaNextIsStream       下一个被调用方法是否为Stream，若为null则查询全部数据
      * @param lambdaNextIsIntermediate true: 下一个被调用方法为Stream的intermediate（中间）操作 false: 下一个被调用方法为Stream的terminal（终端）操作 仅当参数1非null时当前参数可为非null
      * @return
      */

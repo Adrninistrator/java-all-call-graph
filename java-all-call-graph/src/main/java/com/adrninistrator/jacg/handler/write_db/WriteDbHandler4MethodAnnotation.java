@@ -32,7 +32,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     private WriteDbHandler4SpringController writeDbHandler4SpringController;
 
     // Spring Controller相关信息
-    private final List<WriteDbData4SpringController> writeDbData4SpringControllerList=new ArrayList<>(batchSize);
+    private final List<WriteDbData4SpringController> writeDbData4SpringControllerList = new ArrayList<>(batchSize);
 
     // 对应的方法HASH+长度
     private final Set<String> springControllerMethodHashSet = new HashSet<>();
@@ -175,7 +175,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     }
 
     @Override
-    protected void beforeDone(){
+    protected void beforeDone() {
         // 写入Spring Controller剩余信息
         writeDbHandler4SpringController.insertDb(writeDbData4SpringControllerList);
     }

@@ -1,9 +1,9 @@
 package com.adrninistrator.jacg.extensions.code_parser.method_annotation;
 
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.dto.call.MethodCall;
 import com.adrninistrator.javacg.dto.call.MethodCallList;
-import com.adrninistrator.javacg.enums.CallTypeEnum;
 import com.adrninistrator.javacg.extensions.code_parser.MethodAnnotationParser;
 import com.adrninistrator.javacg.util.JavaCGAnnotationUtil;
 import org.apache.bcel.classfile.AnnotationEntry;
@@ -50,8 +50,8 @@ public class MyBatisAnnotationCodeParser implements MethodAnnotationParser {
             return;
         }
 
-        MethodCall methodCall = new MethodCall(callerClassName, callerMethodName, callerMethodArgs, CallTypeEnum.CTE_METHOD_ANNOTATION_ADDED, type, method,
-                JavaCGConstants.EMPTY_METHOD_ARGS, JavaCGConstants.DEFAULT_LINE_NUMBER);
+        MethodCall methodCall = new MethodCall(callerClassName, callerMethodName, callerMethodArgs, JavaCGCallTypeEnum.CTE_METHOD_ANNOTATION_ADDED, type, method,
+                JavaCGConstants.EMPTY_METHOD_ARGS, JavaCGConstants.DEFAULT_LINE_NUMBER, null);
         methodCallList.addMethodCall(methodCall);
     }
 }

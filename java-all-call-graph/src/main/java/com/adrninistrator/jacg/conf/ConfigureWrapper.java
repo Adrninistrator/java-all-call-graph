@@ -307,7 +307,7 @@ public class ConfigureWrapper {
                 MyBatisAnnotationCodeParser.class.getName()
         ));
 
-        addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_HANDLER, Arrays.asList(
+        addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER, Arrays.asList(
                 SpringMvcRequestMappingFormatter.class.getName(),
                 SpringTransactionalFormatter.class.getName(),
                 DefaultAnnotationFormatter.class.getName()
@@ -316,6 +316,36 @@ public class ConfigureWrapper {
         addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_EXTENDED_DATA_ADD, Collections.singletonList(
                 MybatisMySqlSqlInfoAdd.class.getName()
         ));
+    }
+
+    /**
+     * 添加需要处理的类名前缀
+     *
+     * @param allowedClassNamePrefixes
+     */
+    public void addAllowedClassNamePrefixes(String... allowedClassNamePrefixes) {
+        Set<String> allowedClassSet = getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, false);
+        if (allowedClassSet.isEmpty()) {
+            // 未指定需要处理的类名前缀，不需要添加
+            return;
+        }
+
+        // 有指定需要处理的类名前缀，检查是否有包含指定的类
+        for (String allowedClassNamePrefix : allowedClassNamePrefixes) {
+            boolean findSpTransactionTemplate = false;
+            for (String allowedClass : allowedClassSet) {
+                if (StringUtils.startsWith(allowedClassNamePrefix, allowedClass)) {
+                    findSpTransactionTemplate = true;
+                    break;
+                }
+            }
+
+            if (!findSpTransactionTemplate) {
+                // 在需要处理的类名前缀中增加Spring事务模板类
+                logger.info("在需要处理的类名前缀中增加 {}", allowedClassNamePrefix);
+                allowedClassSet.add(allowedClassNamePrefix);
+            }
+        }
     }
 
     /**

@@ -3,20 +3,16 @@ package com.adrninistrator.jacg.extractor.entry;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.extractor.dto.result.CalleeGraphResultFileInfo;
-import com.adrninistrator.jacg.extractor.dto.result.CalleeGraphResultMethodInfo;
+import com.adrninistrator.jacg.extractor.dto.common.extract.CalleeExtractedLine;
+import com.adrninistrator.jacg.extractor.dto.common.extract_file.CalleeExtractedFile;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author adrninistrator
@@ -26,12 +22,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CalleeGraphEntryExtractor extends BaseExtractor {
     private static final Logger logger = LoggerFactory.getLogger(CalleeGraphEntryExtractor.class);
 
+    // 是否需要解析调用堆栈文件中下一行的内容
+    private boolean parseNextLine;
+
+    // 保存当前处理的调用堆栈文件行
+    private List<CalleeExtractedLine> calleeExtractedLineList;
+
     /**
      * 生成向上的完整调用链，根据关键字进行查找，获取入口方法信息并返回
      *
      * @return
      */
-    public List<CalleeGraphResultFileInfo> extract() {
+    public List<CalleeExtractedFile> extract() {
         return extract(new ConfigureWrapper());
     }
 
@@ -42,173 +44,101 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
      * @param configureWrapper
      * @return
      */
-    public List<CalleeGraphResultFileInfo> extract(ConfigureWrapper configureWrapper) {
+    public List<CalleeExtractedFile> extract(ConfigureWrapper configureWrapper) {
         try {
-            // 初始化
-            init(configureWrapper);
-
             // 添加关键字，代表入口方法
-            configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWORD_4CALLEE, Collections.singletonList(JACGConstants.CALLEE_FLAG_ENTRY));
+            configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, Collections.singletonList(JACGConstants.CALLEE_FLAG_ENTRY));
 
-            // 处理向上的方法调用链
-            List<String> resultFilePathList = findKeywordCallGraph.find(chooseFindKeywordCallGraph(), configureWrapper);
-            if (resultFilePathList == null) {
-                logger.error("生成向上的方法调用链及查找关键字失败");
+            // 根据关键字生成调用堆栈
+            List<String> stackFilePathList = findStack(configureWrapper);
+            if (stackFilePathList == null) {
+                logger.error("生成向上的方法完整调用链文件，并根据关键字生成调用堆栈失败");
                 return null;
             }
 
             // 创建数据库相关对象
-            if (!genDbObject()) {
+            if (!genDbObject(configureWrapper)) {
                 return null;
             }
 
-            // 记录当前查找关键字对应的结果目录
-            recordCurrentFindResultDirPath();
-
-            List<CalleeGraphResultFileInfo> calleeEntryMethodFileInfoList = new ArrayList<>(resultFilePathList.size());
-            for (String resultFilePath : resultFilePathList) {
+            List<CalleeExtractedFile> calleeExtractedFileList = new ArrayList<>(stackFilePathList.size());
+            for (String stackFilePath : stackFilePathList) {
                 // 处理文件中的入口方法信息
-                CalleeGraphResultFileInfo calleeEntryMethodFileInfo = handleCallGraphResultInFile(resultFilePath);
-                if (calleeEntryMethodFileInfo == null) {
+                CalleeExtractedFile calleeExtractedFile = handleStackFile(stackFilePath);
+                if (calleeExtractedFile == null) {
                     return null;
                 }
-                calleeEntryMethodFileInfoList.add(calleeEntryMethodFileInfo);
+                calleeExtractedFileList.add(calleeExtractedFile);
             }
             logger.info("处理完毕");
-            return calleeEntryMethodFileInfoList;
+            return calleeExtractedFileList;
         } finally {
             // 关闭数据源
             closeDs();
         }
     }
 
-    /**
-     * 是否需要解析方法完整调用链文件中下一行的内容
-     *
-     * @return true: 解析 false: 不解析
-     */
-    protected boolean parseNextLine() {
-        return false;
-    }
+    // 处理调用堆栈文件中的入口方法信息
+    private CalleeExtractedFile handleStackFile(String stackFilePath) {
+        calleeExtractedLineList = new ArrayList<>();
 
-    // 处理文件中的入口方法信息
-    private CalleeGraphResultFileInfo handleCallGraphResultInFile(String resultFilePath) {
-        if (StringUtils.isBlank(resultFilePath)) {
-            logger.error("未指定文件路径");
+        // 解析调用堆栈文件
+        if (!parseStackFilePath(stackFilePath)) {
             return null;
         }
 
-        logger.info("处理文件中的入口方法信息 {}", resultFilePath);
-
-        int lineNumber = 0;
-        String line = null;
-        // 当前处理的数据序号
-        int dataSeq = JACGConstants.DATA_SEQ_NONE;
-
-        // 当前是否处理到一段数据
-        AtomicBoolean handleDataFlag = new AtomicBoolean(false);
-        List<CalleeGraphResultMethodInfo> calleeEntryMethodInfoList = new ArrayList<>();
-        try (BufferedReader br = JavaCGFileUtil.genBufferedReader(resultFilePath)) {
-            List<String> lineList = new ArrayList<>(2);
-            while ((line = br.readLine()) != null) {
-                lineNumber++;
-
-                if (JACGCallGraphFileUtil.isDataSeqLine(line)) {
-                    // 读取到#时，说明开始处理一段数据
-                    dataSeq = JACGCallGraphFileUtil.getDataSeqFromLine(line);
-                    if (dataSeq == JACGConstants.DATA_SEQ_NONE) {
-                        return null;
-                    }
-
-                    if (!lineList.isEmpty()) {
-                        // 上一段数据只记录到一行，处理一个入口方法信息
-                        handleOneEntryMethodInfo(lineList, dataSeq, lineNumber, calleeEntryMethodInfoList, handleDataFlag);
-                    }
-
-                    // 标记开始处理数据
-                    handleDataFlag.set(true);
-                    continue;
-                }
-
-                if (!handleDataFlag.get()) {
-                    // 上一段数据处理完毕，还未开始处理下一段数据时，跳过
-                    continue;
-                }
-
-                if (JACGCallGraphFileUtil.isCallGraphLine(line)) {
-                    // 当前行为调用链数据，进行处理
-                    lineList.add(line);
-
-                    if (lineList.size() == 2) {
-                        // 处理一个入口方法信息
-                        handleOneEntryMethodInfo(lineList, dataSeq, lineNumber, calleeEntryMethodInfoList, handleDataFlag);
-                    }
-                }
-            }
-
-            if (!lineList.isEmpty()) {
-                // 最后一段数据只记录到一行，处理一个入口方法信息
-                handleOneEntryMethodInfo(lineList, dataSeq, lineNumber, calleeEntryMethodInfoList, handleDataFlag);
-            }
-
-            return genCallGraphFile(resultFilePath, calleeEntryMethodInfoList);
-        } catch (Exception e) {
-            logger.error("error 行号 {}\n{} ", lineNumber, line, e);
-            return null;
-        }
+        return genCalleeExtractedFile(stackFilePath, calleeExtractedLineList);
     }
 
-    // 处理一个入口方法信息
-    private void handleOneEntryMethodInfo(List<String> lineList,
-                                          int dataSeq,
-                                          int lineNumber,
-                                          List<CalleeGraphResultMethodInfo> calleeEntryMethodInfoList,
-                                          AtomicBoolean handleData) {
-        String line = lineList.get(0);
-        CalleeGraphResultMethodInfo calleeEntryMethodInfo = new CalleeGraphResultMethodInfo();
-        calleeEntryMethodInfo.setDataSeq(dataSeq);
-        calleeEntryMethodInfo.setLineNumber(lineNumber);
-        calleeEntryMethodInfo.setLineContent(line);
-        if (lineList.size() > 1) {
-            String nextLine = lineList.get(1);
-            calleeEntryMethodInfo.setNextLineContent(nextLine);
-            if (parseNextLine()) {
-                calleeEntryMethodInfo.setNextLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4ee(nextLine));
-            }
-        }
-        // 方法调用文件中每行解析后的内容
-        calleeEntryMethodInfo.setCallGraphLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4ee(line));
+    private CalleeExtractedFile genCalleeExtractedFile(String stackFilePath, List<CalleeExtractedLine> calleeExtractedLineList) {
+        CalleeExtractedFile calleeExtractedFile = new CalleeExtractedFile(calleeExtractedLineList);
 
-        calleeEntryMethodInfoList.add(calleeEntryMethodInfo);
-
-        // 清空记录行的列表
-        lineList.clear();
-
-        // 当前数据处理完毕，等待后续数据进行处理
-        handleData.set(false);
-    }
-
-    private CalleeGraphResultFileInfo genCallGraphFile(String resultFilePath, List<CalleeGraphResultMethodInfo> calleeEntryMethodInfoList) {
-        CalleeGraphResultFileInfo calleeEntryMethodFileInfo = new CalleeGraphResultFileInfo(calleeEntryMethodInfoList);
-
-        // 处理关键字搜索结果文件信息
-        fillResultFileInfo4Callee(resultFilePath, calleeEntryMethodFileInfo);
-        if (calleeEntryMethodFileInfo.isEmptyFile()) {
-            return calleeEntryMethodFileInfo;
+        // 处理调用堆栈结果文件信息
+        fillExtractedFileInfo4Callee(stackFilePath, calleeExtractedFile);
+        if (calleeExtractedFile.isEmptyStackFile()) {
+            return calleeExtractedFile;
         }
 
         // 根据被调用者完整方法HASH+长度，从方法调用表获取对应的完整方法
-        String callerFullMethod = dbOperWrapper.getCalleeFullMethodFromHash(calleeEntryMethodFileInfo.getMethodHash());
-        calleeEntryMethodFileInfo.setFullMethod(callerFullMethod);
+        String callerFullMethod = dbOperWrapper.getCalleeFullMethodByHash(calleeExtractedFile.getMethodHash());
+        calleeExtractedFile.setFullMethod(callerFullMethod);
         if (callerFullMethod != null) {
-            calleeEntryMethodFileInfo.setClassName(JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod));
+            calleeExtractedFile.setClassName(JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod));
         }
-        return calleeEntryMethodFileInfo;
+        return calleeExtractedFile;
     }
 
     @Override
-    protected boolean chooseFindKeywordCallGraph() {
-        // 向上
+    protected boolean chooseOrder4ee() {
         return true;
+    }
+
+    @Override
+    protected void handleCallStackData(int dataSeq, List<String> lineList, List<Integer> lineNumberList, boolean runInOtherThread) {
+        // 获取入口方法，在每一段调用堆栈的第一行
+        String line = lineList.get(0);
+        int lineNumber = lineNumberList.get(0);
+
+        CalleeExtractedLine calleeExtractedLine = new CalleeExtractedLine();
+        calleeExtractedLine.setDataSeq(dataSeq);
+        calleeExtractedLine.setLineNumber(lineNumber);
+        calleeExtractedLine.setLineContent(line);
+        if (lineList.size() > 1) {
+            // 假如当前调用堆栈中的行数超过1行，则处理下一行数据
+            String nextLine = lineList.get(1);
+            calleeExtractedLine.setNextLineContent(nextLine);
+            if (parseNextLine) {
+                calleeExtractedLine.setNextLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4ee(nextLine));
+            }
+        }
+        // 方法调用文件中每行解析后的内容
+        calleeExtractedLine.setCallGraphLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4ee(line));
+        calleeExtractedLine.setRunInOtherThread(runInOtherThread);
+
+        calleeExtractedLineList.add(calleeExtractedLine);
+    }
+
+    public void setParseNextLine(boolean parseNextLine) {
+        this.parseNextLine = parseNextLine;
     }
 }

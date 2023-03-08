@@ -1,6 +1,6 @@
 package test.jacg;
 
-import com.adrninistrator.jacg.find_keyword.FindKeywordCallGraph;
+import com.adrninistrator.jacg.find_stack.FindCallStackTrace;
 
 /**
  * @author adrninistrator
@@ -11,6 +11,6 @@ import com.adrninistrator.jacg.find_keyword.FindKeywordCallGraph;
 public class TestFindKeywordCallGraph4ee {
 
     public static void main(String[] args) {
-        new FindKeywordCallGraph().find(true);
+        new FindCallStackTrace().find(true);
     }
 }

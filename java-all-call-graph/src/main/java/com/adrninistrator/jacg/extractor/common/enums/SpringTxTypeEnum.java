@@ -6,25 +6,18 @@ package com.adrninistrator.jacg.extractor.common.enums;
  * @description: Spring事务类型枚举
  */
 public enum SpringTxTypeEnum {
-    STTE_ANNOTATION("事务注解", 1),
-    STTE_TEMPLATE("事务模板", 2),
+    STTE_ANNOTATION("事务注解"),
+    STTE_TEMPLATE("事务模板"),
     ;
 
-    SpringTxTypeEnum(String desc, int order) {
+    SpringTxTypeEnum(String desc) {
         this.desc = desc;
-        this.order = order;
     }
 
     private final String desc;
 
-    private final int order;
-
     public String getDesc() {
         return desc;
-    }
-
-    public int getOrder() {
-        return order;
     }
 
     @Override

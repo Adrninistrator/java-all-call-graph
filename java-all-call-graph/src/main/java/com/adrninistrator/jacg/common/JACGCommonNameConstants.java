@@ -77,13 +77,13 @@ public class JACGCommonNameConstants {
             "spliterator"
     };
 
-    public static final String SPRING_TRANSACTION_TEMPLATE = "org.springframework.transaction.support.TransactionTemplate";
+    public static final String SPRING_TRANSACTION_TEMPLATE_CLASS = "org.springframework.transaction.support.TransactionTemplate";
 
     public static final String SPRING_TX_ANNOTATION = "org.springframework.transaction.annotation.Transactional";
 
     public static final String SPRING_TX_ATTRIBUTE_PROPAGATION = "propagation";
 
-    public static final String SPRING_TX_ATTRIBUTE_PROPAGATION_DEFAULT = "DEFAULT_REQUIRED";
+    public static final String SPRING_ASYNC_ANNOTATION = "org.springframework.scheduling.annotation.Async";
 
     private JACGCommonNameConstants() {
         throw new IllegalStateException("illegal");

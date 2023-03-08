@@ -49,16 +49,13 @@ public class TestRunnerGenAllGraphComposite extends TestRunByCodeBase {
 
             for (boolean ignore : BOOLEAN_ARRAY) {
                 for (boolean ignoreDup : BOOLEAN_ARRAY) {
-                    for (boolean inCurrentFile : BOOLEAN_ARRAY) {
-                        configureWrapper.setConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, outputDetailEnum.getDetail());
-                        configureWrapper.setConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, String.valueOf(ignoreDup));
-                        configureWrapper.setConfig(ConfigKeyEnum.CKE_MULTI_IMPL_GEN_IN_CURRENT_FILE, String.valueOf(inCurrentFile));
+                    configureWrapper.setConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, outputDetailEnum.getDetail());
+                    configureWrapper.setConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, String.valueOf(ignoreDup));
 
-                        RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller();
-                        if (!runnerGenAllGraph4Caller.run(configureWrapper)) {
-                            logger.error("执行失败");
-                            return;
-                        }
+                    RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller();
+                    if (!runnerGenAllGraph4Caller.run(configureWrapper)) {
+                        logger.error("执行失败");
+                        return;
                     }
                 }
             }
