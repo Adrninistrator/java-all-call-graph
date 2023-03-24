@@ -6,8 +6,6 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，方法的注解
  */
 public class WriteDbData4MethodAnnotation extends AbstractWriteDbData {
-    private int recordId;
-
     private String methodHash;
 
     private String annotationName;
@@ -25,15 +23,6 @@ public class WriteDbData4MethodAnnotation extends AbstractWriteDbData {
     private int springMappingAnnotation;
 
     //
-
-    public int getRecordId() {
-        return recordId;
-    }
-
-    public void setRecordId(int recordId) {
-        this.recordId = recordId;
-    }
-
     public String getMethodHash() {
         return methodHash;
     }

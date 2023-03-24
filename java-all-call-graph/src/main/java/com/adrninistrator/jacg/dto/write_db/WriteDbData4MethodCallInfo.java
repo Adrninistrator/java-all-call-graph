@@ -10,17 +10,20 @@ public class WriteDbData4MethodCallInfo extends AbstractWriteDbData {
 
     private final int objArgsSeq;
 
+    private final int seq;
+
     private final String type;
 
-    private final int seq;
+    private final int arrayFlag;
 
     private final String theValue;
 
-    public WriteDbData4MethodCallInfo(int callId, int objArgsSeq, String type, int seq, String theValue) {
+    public WriteDbData4MethodCallInfo(int callId, int objArgsSeq, int seq, String type, int arrayFlag, String theValue) {
         this.callId = callId;
         this.objArgsSeq = objArgsSeq;
-        this.type = type;
         this.seq = seq;
+        this.type = type;
+        this.arrayFlag = arrayFlag;
         this.theValue = theValue;
     }
 
@@ -32,12 +35,16 @@ public class WriteDbData4MethodCallInfo extends AbstractWriteDbData {
         return objArgsSeq;
     }
 
+    public int getSeq() {
+        return seq;
+    }
+
     public String getType() {
         return type;
     }
 
-    public int getSeq() {
-        return seq;
+    public int getArrayFlag() {
+        return arrayFlag;
     }
 
     public String getTheValue() {

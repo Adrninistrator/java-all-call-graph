@@ -21,7 +21,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
         }
 
         String accessFlags = array[1];
-        return new WriteDbData4ClassInfo(genNextRecordId(), dbOperWrapper.getSimpleClassName(className), Integer.parseInt(accessFlags), className);
+        return new WriteDbData4ClassInfo(dbOperWrapper.getSimpleClassName(className), Integer.parseInt(accessFlags), className);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassInfo data) {
         return new Object[]{
-                data.getRecordId(),
+                genNextRecordId(),
                 data.getSimpleClassName(),
                 data.getAccessFlags(),
                 data.getClassName()

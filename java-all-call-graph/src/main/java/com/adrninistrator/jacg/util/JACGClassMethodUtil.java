@@ -145,6 +145,18 @@ public class JACGClassMethodUtil {
         return new MethodDetail(fullMethod, className, methodName, argStr, args);
     }
 
+    /**
+     * 拼接类名与方法名
+     * 格式：类名:方法名
+     *
+     * @param className
+     * @param methodName
+     * @return
+     */
+    public static String getClassAndMethodName(String className, String methodName) {
+        return className + JavaCGConstants.FLAG_COLON + methodName;
+    }
+
     private JACGClassMethodUtil() {
         throw new IllegalStateException("illegal");
     }

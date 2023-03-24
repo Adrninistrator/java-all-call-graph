@@ -23,9 +23,11 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
 
         String accessFlags = array[1];
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+        String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
         return new WriteDbData4MethodInfo(JACGUtil.genHashWithLen(fullMethod),
                 dbOperWrapper.getSimpleClassName(className),
                 Integer.parseInt(accessFlags),
+                methodName,
                 fullMethod);
     }
 
@@ -40,6 +42,7 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
                 data.getMethodHash(),
                 data.getSimpleClassName(),
                 data.getAccessFlags(),
+                data.getMethodName(),
                 data.getFullMethod()
         };
     }

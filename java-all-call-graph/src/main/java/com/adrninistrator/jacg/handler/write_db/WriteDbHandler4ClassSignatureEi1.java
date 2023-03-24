@@ -25,7 +25,6 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
         }
 
         WriteDbData4ClassSignatureEi1 writeDbData4ClassSignatureEi1 = new WriteDbData4ClassSignatureEi1();
-        writeDbData4ClassSignatureEi1.setRecordId(genNextRecordId());
         writeDbData4ClassSignatureEi1.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
         writeDbData4ClassSignatureEi1.setType(type);
         writeDbData4ClassSignatureEi1.setSuperItfClassName(superItfClassName);
@@ -44,7 +43,7 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassSignatureEi1 data) {
         return new Object[]{
-                data.getRecordId(),
+                genNextRecordId(),
                 data.getSimpleClassName(),
                 data.getType(),
                 data.getSuperItfClassName(),

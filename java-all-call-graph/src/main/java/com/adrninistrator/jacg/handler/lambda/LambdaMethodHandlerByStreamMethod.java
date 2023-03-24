@@ -6,6 +6,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCall;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,15 +46,15 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodHandler {
 
         if (lambdaNextIsStream != null) {
             sql = sql + " and lmi." + DC.LMI_LAMBDA_NEXT_IS_STREAM + " = ?";
-            argList.add(JACGUtil.boolean2Int(lambdaNextIsStream));
+            argList.add(JavaCGYesNoEnum.parseIntValue(lambdaNextIsStream));
         }
         if (Boolean.TRUE.equals(lambdaNextIsIntermediate)) {
             sql = sql + " and lmi." + DC.LMI_LAMBDA_NEXT_IS_INTERMEDIATE + " = ?";
-            argList.add(JACGConstants.YES_1);
+            argList.add(JavaCGYesNoEnum.YES.getStrValue());
         }
         if (Boolean.FALSE.equals(lambdaNextIsIntermediate)) {
             sql = sql + " and lmi." + DC.LMI_LAMBDA_NEXT_IS_TERMINAL + " = ?";
-            argList.add(JACGConstants.YES_1);
+            argList.add(JavaCGYesNoEnum.YES.getStrValue());
         }
         return dbOperator.queryList(sql, argList.toArray());
     }

@@ -16,7 +16,14 @@ public class JACGConstants {
     public static final String FILE_CONFIG = "config.properties";
     public static final String FILE_CONFIG_DB = "config_db.properties";
     // 保存当前使用的配置参数信息文件
-    public static final String FILE_USED_CONFIG_MD = "_used_config.md";
+    public static final String FILE_JACG_USED_CONFIG_MD = "_jacg_used_config.md";
+    public static final String FILE_JAVACG_USED_CONFIG_MD = "_javacg_used_config.md";
+
+    public static final String USED_CONFIG_FLAG_ARG_KEY = "参数名称";
+    public static final String USED_CONFIG_FLAG_ARG_DESC = "参数说明";
+    public static final String USED_CONFIG_FLAG_ARG_VALUE = "参数值";
+    public static final String USED_CONFIG_FLAG_ARG_LIST = "区分顺序的其他配置信息";
+    public static final String USED_CONFIG_FLAG_ARG_SET = "不区分顺序的其他配置信息";
 
     public static final String APP_NAME_IN_SQL = "{appName}";
 
@@ -57,11 +64,11 @@ public class JACGConstants {
     public static final String CALL_FLAG_CYCLE_START = "!cycle" + JACGConstants.FLAG_LEFT_PARENTHESES;
     public static final String CALL_FLAG_CYCLE_END = JACGConstants.FLAG_RIGHT_PARENTHESES + "!";
     public static final String CALL_FLAG_CYCLE = CALL_FLAG_CYCLE_START + "%d" + CALL_FLAG_CYCLE_END;
-    public static final String CALL_FLAG_EXTENDED_DATA = "!ext_data!";
-    public static final String CALL_FLAG_RUN_IN_OTHER_THREAD = "!run_in_other_thread!";
-
-    // 方法调用自定义数据类型：方法调用信息
-    public static final String EXTENDED_DATA_TYPE_METHOD_CALL_INFO = "method_call_info";
+    public static final String CALL_FLAG_BUSINESS_DATA = "!busi_data!";
+    public static final String CALL_FLAG_RUN_IN_OTHER_THREAD_NO_TAB = "!run_in_other_thread!";
+    public static final String CALL_FLAG_RUN_IN_OTHER_THREAD = FLAG_TAB + CALL_FLAG_RUN_IN_OTHER_THREAD_NO_TAB;
+    public static final String CALL_FLAG_RUN_IN_TRANSACTION_NO_TAB = "!run_in_transaction!";
+    public static final String CALL_FLAG_RUN_IN_TRANSACTION = FLAG_TAB + CALL_FLAG_RUN_IN_TRANSACTION_NO_TAB;
 
     public static final String MYSQL_FLAG = "mysql";
     public static final String MYSQL_REWRITEBATCHEDSTATEMENTS = "rewriteBatchedStatements=true";
@@ -77,11 +84,6 @@ public class JACGConstants {
     public static final int MAX_DB_INSERT_BATCH_SIZE = 5000;
     // 从数据库分页查询数据的数量
     public static final int DB_QUERY_PAGE_SIZE = 1000;
-
-    // 1代表是
-    public static final int YES_1 = 1;
-    // 0代表否
-    public static final int NO_0 = 0;
 
     // 代表分页查询失败
     public static final int PAGE_QUERY_FAIL = -2;
@@ -124,8 +126,6 @@ public class JACGConstants {
     public static final int ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE = 5;
     // 输出的注解信息文件，不包含属性时的列数
     public static final int ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE = 2;
-
-    public static final String DATA_TYPE_JUMP_MULTI_IMPL = "JUMP_MULTI_IMPL";
 
     public static final String H2_PROTOCOL = "jdbc:h2:file:";
     public static final String H2_SCHEMA = "jacg";

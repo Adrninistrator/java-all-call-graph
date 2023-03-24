@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.extensions.method_call_add;
 import com.adrninistrator.jacg.dto.method.MethodCallFullMethod;
 import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 
 import java.util.HashSet;
@@ -14,7 +13,9 @@ import java.util.Set;
  * @date 2022/11/19
  * @description: 人工添加方法调用关系，处理继承与实现相关的抽象父类，当前类仅判断了方法名称，未判断方法参数
  */
+// todo 不再使用
 public abstract class AbstractMethodCallAdd4ExtendsImpl implements MethodCallAddInterface {
+    // todo确认是否还需要
     private final Set<String> handledClassMethodNameSet = new HashSet<>();
 
     // 继承与实际相关的处理类
@@ -67,7 +68,7 @@ public abstract class AbstractMethodCallAdd4ExtendsImpl implements MethodCallAdd
             return null;
         }
 
-        String calleeClassMethodName = calleeClassName + JavaCGConstants.FLAG_COLON + calleeMethodName;
+        String calleeClassMethodName = JACGClassMethodUtil.getClassAndMethodName(calleeClassName, calleeMethodName);
         if (!handledClassMethodNameSet.add(calleeClassMethodName)) {
             // 已经处理过的方法，不再处理
             return null;

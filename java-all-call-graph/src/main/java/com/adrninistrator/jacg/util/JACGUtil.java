@@ -5,12 +5,14 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.javacg.common.enums.JavaCGConfigKeyEnum;
 import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashSet;
@@ -182,7 +184,9 @@ public class JACGUtil {
                 data.getCalleeSimpleClassName(),
                 data.getCalleeMethodName(),
                 data.getCalleeFullMethod(),
-                data.getCallFlags()
+                data.getCallFlags(),
+                data.getRawReturnType(),
+                data.getActualReturnType()
         };
     }
 
@@ -206,23 +210,22 @@ public class JACGUtil {
     }
 
     /**
-     * 将代表是/否的boolean转换为int
+     * 在字符串列表中查找字符串
      *
-     * @param value
-     * @return
+     * @param stringList 字符串列表
+     * @param strings    需要判断的字符串
+     * @return 在字符串列表中找到的字符串
      */
-    public static int boolean2Int(boolean value) {
-        return value ? JACGConstants.YES_1 : JACGConstants.NO_0;
-    }
-
-    /**
-     * 将代表是/否的int转换为boolean
-     *
-     * @param value
-     * @return
-     */
-    public static boolean int2Boolean(int value) {
-        return value == JACGConstants.YES_1;
+    public static String findStringInList(List<String> stringList, String... strings) {
+        if (JavaCGUtil.isCollectionEmpty(stringList) || ArrayUtils.isEmpty(strings)) {
+            return null;
+        }
+        for (String string : strings) {
+            if (stringList.contains(string)) {
+                return string;
+            }
+        }
+        return null;
     }
 
     /**
@@ -234,7 +237,25 @@ public class JACGUtil {
      */
     @SafeVarargs
     public static <T> Set<T> genSetFromArray(T... a) {
+        if (ArrayUtils.isEmpty(a)) {
+            return new HashSet<>();
+        }
         return new HashSet<>(Arrays.asList(a));
+    }
+
+    /**
+     * 根据不定长数组生成List
+     *
+     * @param a
+     * @param <T>
+     * @return
+     */
+    @SafeVarargs
+    public static <T> List<T> genListFromArray(T... a) {
+        if (ArrayUtils.isEmpty(a)) {
+            return new ArrayList<>();
+        }
+        return Arrays.asList(a);
     }
 
     /**

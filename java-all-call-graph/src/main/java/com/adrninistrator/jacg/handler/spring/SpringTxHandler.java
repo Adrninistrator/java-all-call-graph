@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.comparator.Comparator4MethodCallPairByCaller;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
+import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.method_call.MethodCallPair;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -57,13 +59,26 @@ public class SpringTxHandler extends BaseHandler {
                     continue;
                 }
                 // 当前@Transactional注解方法存在当前实例调用的情况
+                // 查询被调用方法Spring事务注解@Transactional对应的事务传播行为
+                String calleeTxPropagation = annotationHandler.querySpringTxAnnotationPropagation(springTransactionalMethod);
+
                 // 对调用信息列表排序
                 methodCallPairList.sort(Comparator4MethodCallPairByCaller.getInstance());
                 for (MethodCallPair methodCallPair : methodCallPairList) {
-                    // 查询Spring事务注解@Transactional对应的事务传播行为
-                    String txPropagation = annotationHandler.querySpringTxAnnotationPropagation(methodCallPair.getCalleeFullMethod());
-                    SpringInvalidTxAnnotationMethodCall springInvalidTxAnnotationMethodCall = new SpringInvalidTxAnnotationMethodCall(methodCallPair.getCallerFullMethod(),
-                            methodCallPair.getCallerLineNumber(), methodCallPair.getCalleeFullMethod(), txPropagation);
+                    String callerFullMethod = methodCallPair.getCallerFullMethod();
+                    boolean callerWithSpringTx = false;
+                    String callerTxPropagation = "";
+                    // 查询调用方法的Spring事务注解信息
+                    Map<String, BaseAnnotationAttribute> transactionalAnnotationAttributeMap = annotationHandler.queryMethodAnnotationAttributes(callerFullMethod,
+                            JACGCommonNameConstants.SPRING_TX_ANNOTATION);
+                    if (!JACGUtil.isMapEmpty(transactionalAnnotationAttributeMap)) {
+                        callerWithSpringTx = true;
+                        BaseAnnotationAttribute txPropagationAttribute = transactionalAnnotationAttributeMap.get(JACGCommonNameConstants.SPRING_TX_ANNOTATION);
+                        callerTxPropagation = annotationHandler.getSpringTxAnnotationPropagation(txPropagationAttribute);
+                    }
+
+                    SpringInvalidTxAnnotationMethodCall springInvalidTxAnnotationMethodCall = new SpringInvalidTxAnnotationMethodCall(callerFullMethod,
+                            methodCallPair.getCallerLineNumber(), methodCallPair.getCalleeFullMethod(), callerWithSpringTx, callerTxPropagation, calleeTxPropagation);
                     springInvalidTxAnnotationMethodCallList.add(springInvalidTxAnnotationMethodCall);
                 }
             }

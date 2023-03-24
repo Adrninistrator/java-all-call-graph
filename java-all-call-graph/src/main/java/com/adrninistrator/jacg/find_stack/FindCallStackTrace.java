@@ -275,7 +275,7 @@ public class FindCallStackTrace {
         for (String subFilePath : subFilePathList) {
             String subFileName = JACGFileUtil.getFileNameFromPath(subFilePath);
             if (StringUtils.equalsAny(subFileName,
-                    JACGConstants.FILE_USED_CONFIG_MD,
+                    JACGConstants.FILE_JACG_USED_CONFIG_MD,
                     JACGConstants.NOTICE_MULTI_ITF_MD,
                     JACGConstants.NOTICE_MULTI_SCC_MD,
                     JACGConstants.NOTICE_DISABLED_ITF_MD,
@@ -461,10 +461,21 @@ public class FindCallStackTrace {
 
         // 当前行存在关键字，生成到根节点的调用堆栈
         List<String> lineList = new ArrayList<>(20);
-
+        boolean runInOtherThread = false;
+        boolean runInTransaction = false;
         FileContentNode tmpNode = lastNode;
         while (true) {
-            lineList.add(tmpNode.getFileLineContent());
+            String lineContent = tmpNode.getFileLineContent();
+            lineList.add(lineContent);
+
+            // 判断是否在其他线程执行
+            if (JACGCallGraphFileUtil.checkRunInOtherThread(lineContent)) {
+                runInOtherThread = true;
+            }
+            // 判断是否在事务中执行
+            if (JACGCallGraphFileUtil.checkRunInTransaction(lineContent)) {
+                runInTransaction = true;
+            }
 
             if (tmpNode.getParentNode() == null) {
                 break;
@@ -473,7 +484,17 @@ public class FindCallStackTrace {
             tmpNode = tmpNode.getParentNode();
         }
 
-        markdownWriter.addTitle(1, title);
+        // 在标题中增加在其他线程执行、在事务中执行标记
+        String finalTitle = title;
+        if (runInOtherThread) {
+            finalTitle += JACGConstants.CALL_FLAG_RUN_IN_OTHER_THREAD;
+        }
+        if (runInTransaction) {
+            finalTitle += JACGConstants.CALL_FLAG_RUN_IN_TRANSACTION;
+        }
+        // 添加标题
+        markdownWriter.addTitle(1, finalTitle);
+
         markdownWriter.addCodeBlock();
         if (!order4ee) {
             // 向下的调用链，逆序

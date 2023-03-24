@@ -6,8 +6,6 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，继承与实现相关信息
  */
 public class WriteDbData4ExtendsImpl extends AbstractWriteDbData {
-    private int recordId;
-
     private String simpleClassName;
 
     private String className;
@@ -23,14 +21,6 @@ public class WriteDbData4ExtendsImpl extends AbstractWriteDbData {
     private String upwardSimpleClassName;
 
     private String upwardClassName;
-
-    public int getRecordId() {
-        return recordId;
-    }
-
-    public void setRecordId(int recordId) {
-        this.recordId = recordId;
-    }
 
     public String getSimpleClassName() {
         return simpleClassName;

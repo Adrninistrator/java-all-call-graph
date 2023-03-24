@@ -49,7 +49,9 @@ public enum DbTableInfoEnum {
             DC.MC_CALLEE_SIMPLE_CLASS_NAME,
             DC.MC_CALLEE_METHOD_NAME,
             DC.MC_CALLEE_FULL_METHOD,
-            DC.MC_CALL_FLAGS
+            DC.MC_CALL_FLAGS,
+            DC.MC_RAW_RETURN_TYPE,
+            DC.MC_ACTUAL_RETURN_TYPE
     }),
     DTIE_LAMBDA_METHOD_INFO("lambda_method_info", new String[]{
             DC.LMI_CALL_ID,
@@ -78,10 +80,10 @@ public enum DbTableInfoEnum {
             DC.JI_LAST_MODIFIED,
             DC.JI_JAR_HASH
     }),
-    DTIE_EXTENDED_DATA("extended_data", new String[]{
-            DC.ED_CALL_ID,
-            DC.ED_DATA_TYPE,
-            DC.ED_DATA_VALUE
+    DTIE_BUSINESS_DATA("business_data", new String[]{
+            DC.BD_CALL_ID,
+            DC.BD_DATA_TYPE,
+            DC.BD_DATA_VALUE
     }),
     DTIE_CLASS_INFO("class_info", new String[]{
             DC.CI_RECORD_ID,
@@ -93,6 +95,7 @@ public enum DbTableInfoEnum {
             DC.MI_METHOD_HASH,
             DC.MI_SIMPLE_CLASS_NAME,
             DC.MI_ACCESS_FLAGS,
+            DC.MI_METHOD_NAME,
             DC.MI_FULL_METHOD
     }),
     DTIE_EXTENDS_IMPL("extends_impl", new String[]{
@@ -109,8 +112,9 @@ public enum DbTableInfoEnum {
     DTIE_METHOD_CALL_INFO("method_call_info", new String[]{
             DC.MCI_CALL_ID,
             DC.MCI_OBJ_ARGS_SEQ,
-            DC.MCI_TYPE,
             DC.MCI_SEQ,
+            DC.MCI_TYPE,
+            DC.MCI_ARRAY_FLAG,
             DC.MCI_THE_VALUE
     }),
     DTIE_SPRING_BEAN("spring_bean", new String[]{
@@ -143,6 +147,37 @@ public enum DbTableInfoEnum {
             DC.CSEI1_SEQ,
             DC.CSEI1_SIGN_CLASS_NAME,
             DC.CSEI1_CLASS_NAME
+    }),
+    DTIE_MYBATIS_MS_TABLE("mybatis_ms_table", new String[]{
+            DC.MMT_RECORD_ID,
+            DC.MMT_MAPPER_SIMPLE_CLASS_NAME,
+            DC.MMT_MAPPER_METHOD_NAME,
+            DC.MMT_SQL_STATEMENT,
+            DC.MMT_TABLE_SEQ,
+            DC.MMT_TABLE_NAME,
+            DC.MMT_MAPPER_CLASS_NAME
+    }),
+    DTIE_MYBATIS_MS_WRITE_TABLE("mybatis_ms_write_table", new String[]{
+            DC.MMWT_RECORD_ID,
+            DC.MMWT_MAPPER_SIMPLE_CLASS_NAME,
+            DC.MMWT_MAPPER_METHOD_NAME,
+            DC.MMWT_SQL_STATEMENT,
+            DC.MMWT_TABLE_NAME,
+            DC.MMWT_MAPPER_CLASS_NAME
+    }),
+    DTIE_ALLOWED_CLASS_PREFIX("allowed_class_prefix", new String[]{
+            DC.ACP_RECORD_ID,
+            DC.ACP_CLASS_PREFIX,
+    }),
+    DTIE_METHOD_ARG_GENERICS_TYPE("method_arg_generics_type", new String[]{
+            DC.MAGT_RECORD_ID,
+            DC.MAGT_METHOD_HASH,
+            DC.MAGT_SIMPLE_CLASS_NAME,
+            DC.MAGT_ARG_SEQ,
+            DC.MAGT_TYPE,
+            DC.MAGT_TYPE_SEQ,
+            DC.MAGT_GENERICS_TYPE,
+            DC.MAGT_FULL_METHOD
     }),
     ;
 

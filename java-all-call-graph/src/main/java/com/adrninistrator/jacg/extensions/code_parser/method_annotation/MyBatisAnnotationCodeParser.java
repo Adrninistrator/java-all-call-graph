@@ -51,7 +51,7 @@ public class MyBatisAnnotationCodeParser implements MethodAnnotationParser {
         }
 
         MethodCall methodCall = new MethodCall(callerClassName, callerMethodName, callerMethodArgs, JavaCGCallTypeEnum.CTE_METHOD_ANNOTATION_ADDED, type, method,
-                JavaCGConstants.EMPTY_METHOD_ARGS, JavaCGConstants.DEFAULT_LINE_NUMBER, null);
+                JavaCGConstants.EMPTY_METHOD_ARGS, JavaCGConstants.DEFAULT_LINE_NUMBER, null, "", "");
         methodCallList.addMethodCall(methodCall);
     }
 }

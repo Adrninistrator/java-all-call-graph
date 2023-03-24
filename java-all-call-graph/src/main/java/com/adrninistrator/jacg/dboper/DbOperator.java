@@ -422,7 +422,6 @@ public class DbOperator {
             }
 
             stmt.executeUpdate();
-            connection.commit();
             return true;
         } catch (Exception e) {
             logger.error("error [{}] ", sql, e);

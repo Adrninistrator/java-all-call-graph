@@ -7,10 +7,6 @@ import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.interfaces.BaseConfigInterface;
-import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.MyBatisMySqlSqlInfoCodeParser;
-import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.SpringTaskCodeParser;
-import com.adrninistrator.jacg.extensions.code_parser.method_annotation.MyBatisAnnotationCodeParser;
-import com.adrninistrator.jacg.extensions.extended_data_add.MybatisMySqlSqlInfoAdd;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
@@ -19,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -81,6 +76,16 @@ public class ConfigureWrapper {
      * 设置其他配置文件中指定key的参数，Set格式，清空指定key已有的参数
      *
      * @param otherConfigFileUseSetEnum
+     * @param data
+     */
+    public void setOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, String... data) {
+        setOtherConfigSet(otherConfigFileUseSetEnum, JACGUtil.genSetFromArray(data));
+    }
+
+    /**
+     * 设置其他配置文件中指定key的参数，Set格式，清空指定key已有的参数
+     *
+     * @param otherConfigFileUseSetEnum
      * @param configSet
      */
     public void setOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet) {
@@ -88,6 +93,16 @@ public class ConfigureWrapper {
             throw new JavaCGRuntimeException("不允许传入null，只能传入内容为空的Set");
         }
         otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), configSet);
+    }
+
+    /**
+     * 添加其他配置文件中指定key的参数，Set格式，保留指定key已有的参数
+     *
+     * @param otherConfigFileUseSetEnum
+     * @param data
+     */
+    public void addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, String... data) {
+        addOtherConfigSet(otherConfigFileUseSetEnum, JACGUtil.genSetFromArray(data));
     }
 
     /**
@@ -128,6 +143,16 @@ public class ConfigureWrapper {
      * 设置其他配置文件中指定key的参数，List格式，清空指定key已有的参数
      *
      * @param otherConfigFileUseListEnum
+     * @param data
+     */
+    public void setOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, String... data) {
+        setOtherConfigList(otherConfigFileUseListEnum, JACGUtil.genListFromArray(data));
+    }
+
+    /**
+     * 设置其他配置文件中指定key的参数，List格式，清空指定key已有的参数
+     *
+     * @param otherConfigFileUseListEnum
      * @param configList
      */
     public void setOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList) {
@@ -135,6 +160,16 @@ public class ConfigureWrapper {
             throw new JavaCGRuntimeException("不允许传入null，只能传入内容为空的List");
         }
         otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), configList);
+    }
+
+    /**
+     * 添加其他配置文件中指定key的参数，List格式，保留指定key已有的参数
+     *
+     * @param otherConfigFileUseListEnum
+     * @param data
+     */
+    public void addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, String... data) {
+        addOtherConfigList(otherConfigFileUseListEnum, JACGUtil.genListFromArray(data));
     }
 
     /**
@@ -301,21 +336,11 @@ public class ConfigureWrapper {
      * 添加所有预置的扩展类
      */
     public void addAllPreBuildExtensions() {
-        addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, Arrays.asList(
-                MyBatisMySqlSqlInfoCodeParser.class.getName(),
-                SpringTaskCodeParser.class.getName(),
-                MyBatisAnnotationCodeParser.class.getName()
-        ));
-
-        addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER, Arrays.asList(
+        addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 SpringMvcRequestMappingFormatter.class.getName(),
                 SpringTransactionalFormatter.class.getName(),
                 DefaultAnnotationFormatter.class.getName()
-        ));
-
-        addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_EXTENDED_DATA_ADD, Collections.singletonList(
-                MybatisMySqlSqlInfoAdd.class.getName()
-        ));
+        );
     }
 
     /**

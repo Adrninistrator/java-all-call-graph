@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
-import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
 import com.adrninistrator.jacg.extractor.dto.common.extract_file.AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.find_stack.FindCallStackTrace;
@@ -53,8 +52,13 @@ public abstract class BaseExtractor {
      * @param lineList         调用堆栈文件中的调用堆栈数据列表
      * @param lineNumberList   调用堆栈文件中的调用堆栈数据对应的行号列表
      * @param runInOtherThread 是否在其他线程执行
+     * @param runInTransaction 是否在事务中执行
      */
-    protected abstract void handleCallStackData(int dataSeq, List<String> lineList, List<Integer> lineNumberList, boolean runInOtherThread);
+    protected abstract void handleCallStackData(int dataSeq,
+                                                List<String> lineList,
+                                                List<Integer> lineNumberList,
+                                                boolean runInOtherThread,
+                                                boolean runInTransaction);
 
     /**
      * 根据关键字生成调用堆栈，并返回结果文件路径
@@ -190,6 +194,8 @@ public abstract class BaseExtractor {
         boolean handleCallStack = false;
         // 是否在其他线程执行
         boolean runInOtherThread = false;
+        // 是否在事务中执行
+        boolean runInTransaction = false;
 
         try (BufferedReader br = JavaCGFileUtil.genBufferedReader(stackFilePath)) {
             while ((line = br.readLine()) != null) {
@@ -218,12 +224,13 @@ public abstract class BaseExtractor {
                     }
 
                     // 对当前的调用堆栈数据进行处理
-                    handleCallStackData(dataSeq, lineList, lineNumberList, runInOtherThread);
+                    handleCallStackData(dataSeq, lineList, lineNumberList, runInOtherThread, runInTransaction);
 
                     // 执行清理操作
                     lineList.clear();
                     lineNumberList.clear();
                     runInOtherThread = false;
+                    runInTransaction = false;
                     continue;
                 }
 
@@ -233,14 +240,12 @@ public abstract class BaseExtractor {
                     lineNumberList.add(lineNumber);
 
                     // 判断是否在其他线程执行
-                    CallGraphLineParsed callGraphLineParsed;
-                    if (chooseOrder4ee()) {
-                        callGraphLineParsed = JACGCallGraphFileUtil.parseCallGraphLine4ee(line);
-                    } else {
-                        callGraphLineParsed = JACGCallGraphFileUtil.parseCallGraphLine4er(line);
-                    }
-                    if (callGraphLineParsed.isRunInOtherThread()) {
+                    if (JACGCallGraphFileUtil.checkRunInOtherThread(line)) {
                         runInOtherThread = true;
+                    }
+                    // 判断是否在事务中执行
+                    if (JACGCallGraphFileUtil.checkRunInTransaction(line)) {
+                        runInTransaction = true;
                     }
                 }
             }

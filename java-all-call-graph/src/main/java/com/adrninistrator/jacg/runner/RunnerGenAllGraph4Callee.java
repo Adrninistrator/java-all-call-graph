@@ -14,6 +14,7 @@ import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.task.CalleeEntryMethodTaskInfo;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
+import com.adrninistrator.jacg.extensions.common.enums.BusinessDataTypeEnum;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
@@ -23,6 +24,7 @@ import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.dto.stack.ListAsStack;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
@@ -364,9 +366,16 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         if (MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) {
             StringBuilder methodAnnotations = new StringBuilder();
             // 添加方法注解信息
-            Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = getMethodAnnotationInfo(entryCalleeFullMethod, entryCalleeMethodHash, methodAnnotations);
+            getMethodAnnotationInfo(entryCalleeFullMethod, entryCalleeMethodHash, methodAnnotations);
             if (methodAnnotations.length() > 0) {
                 calleeInfo.append(methodAnnotations);
+            }
+        }
+
+        if (businessDataTypeSet.contains(BusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
+            // 显示方法参数泛型类型
+            if (!addMethodArgGenericsTypeInfo(true, callFlags, entryCalleeMethodHash, calleeInfo)) {
+                return false;
             }
         }
 
@@ -724,12 +733,12 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                                         int enabled,
                                         int methodCallId) {
         // 判断是否需要忽略
-        if (ignoreCurrentMethod(callType, callerFullMethod) || enabled != JACGConstants.YES_1) {
+        if (ignoreCurrentMethod(callType, callerFullMethod) || !JavaCGYesNoEnum.isYes(enabled)) {
             // 当前记录需要忽略
             // 更新当前处理节点的调用者方法HASH
             callGraphNode4CalleeStack.peek().setCallerMethodHash(callerMethodHash);
 
-            if (enabled != JACGConstants.YES_1) {
+            if (!JavaCGYesNoEnum.isYes(enabled)) {
                 // 记录被禁用的方法调用
                 recordDisabledMethodCall(methodCallId, callType);
             }
@@ -913,8 +922,16 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                 .append(callerLineNum)
                 .append(JavaCGConstants.FLAG_RIGHT_BRACKET);
 
+        // 添加方法调用业务功能数据
+        if (!addBusinessData(methodCallId, callFlags, callerMethodHash, callerInfo)) {
+            return null;
+        }
+
         // 为方法调用信息增加是否在其他线程执行标志
         addRunInOtherThread(callerInfo, methodCallId, callType, methodAnnotationMap);
+
+        // 为方法调用信息增加是否在事务中执行标志
+        addRunInTransaction(callerInfo, methodCallId, callType, methodAnnotationMap);
 
         // 添加循环调用标志
         if (back2Level != JACGConstants.NO_CYCLE_CALL_FLAG) {
@@ -933,11 +950,11 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             // # 2: 展示 完整类名+方法名
             String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
             String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
-            return calleeClassName + JavaCGConstants.FLAG_COLON + calleeMethodName;
+            return JACGClassMethodUtil.getClassAndMethodName(calleeClassName, calleeMethodName);
         }
         // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
         String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
-        return calleeSimpleClassName + JavaCGConstants.FLAG_COLON + calleeMethodName;
+        return JACGClassMethodUtil.getClassAndMethodName(calleeSimpleClassName, calleeMethodName);
     }
 
     // 确定查询被调用关系时所需字段

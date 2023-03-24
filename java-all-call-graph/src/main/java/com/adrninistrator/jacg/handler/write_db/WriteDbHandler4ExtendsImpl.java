@@ -1,9 +1,9 @@
 package com.adrninistrator.jacg.handler.write_db;
 
-import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ExtendsImpl;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,10 +38,9 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
         // 生成下一个序号，从0开始
         Integer seq = genNextSeq(className + JavaCGConstants.FLAG_COLON + type);
         // 判断当前类是否存在子类或子接口
-        int existsDownwardClasses = superClassOrInterfaceNameSet.contains(className) ? JACGConstants.YES_1 : JACGConstants.NO_0;
+        int existsDownwardClasses = JavaCGYesNoEnum.parseIntValue(superClassOrInterfaceNameSet.contains(className));
 
         WriteDbData4ExtendsImpl writeDbData4ExtendsImpl = new WriteDbData4ExtendsImpl();
-        writeDbData4ExtendsImpl.setRecordId(genNextRecordId());
         writeDbData4ExtendsImpl.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
         writeDbData4ExtendsImpl.setClassName(className);
         writeDbData4ExtendsImpl.setAccessFlags(accessFlags);
@@ -61,7 +60,7 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
     @Override
     protected Object[] genObjectArray(WriteDbData4ExtendsImpl data) {
         return new Object[]{
-                data.getRecordId(),
+                genNextRecordId(),
                 data.getSimpleClassName(),
                 data.getClassName(),
                 data.getAccessFlags(),

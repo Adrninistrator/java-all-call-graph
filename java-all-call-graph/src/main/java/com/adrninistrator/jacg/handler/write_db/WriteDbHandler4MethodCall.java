@@ -4,14 +4,8 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.dto.method.MethodCallFullMethod;
-import com.adrninistrator.jacg.dto.method.MethodDetail;
-import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4ExtendedData;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
-import com.adrninistrator.jacg.extensions.dto.extened_data.BaseExtendedData;
-import com.adrninistrator.jacg.extensions.extended_data_add.ExtendedDataAddInterface;
 import com.adrninistrator.jacg.extensions.method_call_add.MethodCallAddInterface;
-import com.adrninistrator.jacg.handler.method_call_info.MethodCallInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
@@ -20,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -32,51 +25,42 @@ import java.util.Set;
 public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbData4MethodCall> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4MethodCall.class);
 
-    // 写入数据库，方法调用自定义数据
-    private WriteDbHandler4ExtendedData writeDbHandler4ExtendedData;
-
-    // 方法调用信息处理类
-    private MethodCallInfoHandler methodCallInfoHandler;
-
     // Spring Controller对应的方法HASH+长度
-    private Set<String> springControllerMethodHashSet = new HashSet<>();
+    private Set<String> springControllerMethodHashSet;
 
     // 有注解的方法HASH+长度
-    private Set<String> withAnnotationMethodHashSet = new HashSet<>();
+    private Set<String> withAnnotationMethodHashSet;
 
     // 被调用对象及参数存在信息的call_id
-    private Set<Integer> withInfoCallIdSet = new HashSet<>();
+    private Set<Integer> withInfoCallIdSet;
 
-    // 存在方法调用自定义数据的call_id
-    private final Set<Integer> withExtendedDataCallIdSet = new HashSet<>();
+    // 方法参数存在泛型类型的方法HASH+长度
+    private Set<String> withGenericsTypeMethodHash;
 
     // 人工添加方法调用关系类列表
     private List<MethodCallAddInterface> methodCallAddExtList;
 
-    // 保存用于根据方法调用信息添加方法调用自定义数据的处理类
-    private List<ExtendedDataAddInterface> extendedDataAddExtList;
+    // 保存MyBatis Mapper类名
+    private Set<String> myBatisMapperSet;
+
+    // 保存MyBatis写数据库的Mapper方法
+    private Set<String> myBatisMapperMethodWriteSet;
 
     // 人工添加的方法调用关系
     private final List<MethodCallFullMethod> manualAddMethodCallList = new ArrayList<>(batchSize);
 
-    // 根据方法调用信息添加的方法调用自定义数据
-    private final List<WriteDbData4ExtendedData> extendedDataList = new ArrayList<>(batchSize);
-
-    @Override
-    public void init() {
-        methodCallInfoHandler = new MethodCallInfoHandler(dbOperator, dbOperWrapper);
-    }
-
     @Override
     protected WriteDbData4MethodCall genData(String line) {
-        String[] array = splitEquals(line, 6);
+        String[] array = splitEquals(line, 8);
 
         int callId = Integer.parseInt(array[0]);
         String callerFullMethod = array[1];
         String tmpCalleeFullMethod = array[2];
         int callerLineNum = Integer.parseInt(array[3]);
         String calleeObjType = array[4];
-        String callerJarNum = array[5];
+        String rawReturnType = array[5];
+        String actualReturnType = array[6];
+        String callerJarNum = array[7];
 
         int indexCalleeLeftBracket = tmpCalleeFullMethod.indexOf(JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG1);
         int indexCalleeRightBracket = tmpCalleeFullMethod.indexOf(JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG2);
@@ -99,7 +83,9 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
                 calleeFullMethod,
                 callId,
                 callerLineNum,
-                callerJarNum
+                callerJarNum,
+                rawReturnType,
+                actualReturnType
         );
 
         if (writeDbData4MethodCall.getCallerMethodHash().equals(writeDbData4MethodCall.getCalleeMethodHash())) {
@@ -108,6 +94,9 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
             return null;
         }
 
+        // 生成方法调用标记
+        genCallFlags(callId, writeDbData4MethodCall);
+
         // 人工添加方法调用关系
         for (MethodCallAddInterface methodCallAddExt : methodCallAddExtList) {
             MethodCallFullMethod methodCallFullMethod = methodCallAddExt.handleMethodCall(callerFullMethod, calleeFullMethod, calleeClassName);
@@ -115,41 +104,6 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
                 manualAddMethodCallList.add(methodCallFullMethod);
             }
         }
-
-        if (extendedDataAddExtList != null) {
-            /*
-                存在根据方法调用信息添加方法调用自定义数据的处理类
-                这里不判断withInfoCallIdSet.contains(callId)，因为MyBatis的Mapper被调用时，不存在方法调用信息
-             */
-            for (ExtendedDataAddInterface extendedDataAddExt : extendedDataAddExtList) {
-                MethodDetail calleeMethodDetail = JACGClassMethodUtil.genMethodDetail(calleeFullMethod);
-                if (!extendedDataAddExt.checkNeedHandle(callType, calleeMethodDetail)) {
-                    // 当前被调用方法不需要进行方法调用自定义数据处理
-                    continue;
-                }
-
-                // 当前被调用方法需要进行方法调用自定义数据处理
-                // 查询方法调用中被调用对象与参数使用的信息
-                ObjArgsInfoInMethodCall objArgsInfoInMethodCall = methodCallInfoHandler.queryObjArgsInfoInMethodCall(callId);
-                // 生成方法调用自定义数据，以下传入的objArgsInfoInMethodCall对象可能为null
-                BaseExtendedData extendedData = extendedDataAddExt.genBaseExtendedData(callType, calleeMethodDetail, objArgsInfoInMethodCall);
-                if (extendedData == null) {
-                    continue;
-                }
-
-                // 记录存在方法调用自定义数据的call_id
-                withExtendedDataCallIdSet.add(callId);
-
-                // 尝试将方法调用自定义数据写入数据库
-                WriteDbData4ExtendedData writeDbData4ExtendedData = new WriteDbData4ExtendedData(callId, extendedData.getDataType(), extendedData.getDataValue());
-                extendedDataList.add(writeDbData4ExtendedData);
-                writeDbHandler4ExtendedData.tryInsertDb(extendedDataList);
-            }
-        }
-
-        // 生成方法调用标记
-        int callFlags = genCallFlags(callId, writeDbData4MethodCall.getCallerMethodHash(), writeDbData4MethodCall.getCalleeMethodHash());
-        writeDbData4MethodCall.setCallFlags(callFlags);
 
         return writeDbData4MethodCall;
     }
@@ -164,21 +118,17 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         return JACGUtil.genMethodCallObjectArray(data);
     }
 
-    @Override
-    protected void beforeDone() {
-        // 将剩余方法调用自定义数据写入数据库
-        writeDbHandler4ExtendedData.insertDb(extendedDataList);
-    }
-
     /**
      * 生成方法调用标记
      *
      * @param callId
-     * @param callerMethodHash
-     * @param calleeMethodHash
+     * @param writeDbData4MethodCall
      * @return
      */
-    private int genCallFlags(int callId, String callerMethodHash, String calleeMethodHash) {
+    private void genCallFlags(int callId, WriteDbData4MethodCall writeDbData4MethodCall) {
+        String callerMethodHash = writeDbData4MethodCall.getCallerMethodHash();
+        String calleeMethodHash = writeDbData4MethodCall.getCalleeMethodHash();
+        String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(writeDbData4MethodCall.getCalleeFullMethod());
         int callFlags = 0;
         if (springControllerMethodHashSet.contains(callerMethodHash)) {
             callFlags = MethodCallFlagsEnum.MCFE_ER_SPRING_CONTROLLER.setFlag(callFlags);
@@ -192,10 +142,21 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         if (withInfoCallIdSet.contains(callId)) {
             callFlags = MethodCallFlagsEnum.MCFE_METHOD_CALL_INFO.setFlag(callFlags);
         }
-        if (withExtendedDataCallIdSet.contains(callId)) {
-            callFlags = MethodCallFlagsEnum.MCFE_EXTENDED_DATA.setFlag(callFlags);
+        if (withGenericsTypeMethodHash.contains(calleeMethodHash)) {
+            callFlags = MethodCallFlagsEnum.MCFE_EE_WITH_GENERICS_TYPE.setFlag(callFlags);
         }
-        return callFlags;
+        if (withGenericsTypeMethodHash.contains(callerMethodHash)) {
+            callFlags = MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.setFlag(callFlags);
+        }
+        if (myBatisMapperSet.contains(calleeClassName)) {
+            callFlags = MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER.setFlag(callFlags);
+            String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(writeDbData4MethodCall.getCalleeFullMethod());
+            String calleeClassAndMethodName = JACGClassMethodUtil.getClassAndMethodName(calleeClassName, calleeMethodName);
+            if (myBatisMapperMethodWriteSet.contains(calleeClassAndMethodName)) {
+                callFlags = MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER_WRITE.setFlag(callFlags);
+            }
+        }
+        writeDbData4MethodCall.setCallFlags(callFlags);
     }
 
     // 人工添加方法调用关系
@@ -225,7 +186,9 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
                     calleeFullMethod,
                     ++maxCallId,
                     JavaCGConstants.DEFAULT_LINE_NUMBER,
-                    String.valueOf(0)
+                    String.valueOf(0),
+                    "",
+                    ""
             );
             writeDbData4MethodCallList.add(writeDbData4MethodCall);
             // 尝试写入数据库
@@ -237,10 +200,6 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     }
 
     //
-    public void setWriteDbHandler4ExtendedData(WriteDbHandler4ExtendedData writeDbHandler4ExtendedData) {
-        this.writeDbHandler4ExtendedData = writeDbHandler4ExtendedData;
-    }
-
     public void setSpringControllerMethodHashSet(Set<String> springControllerMethodHashSet) {
         this.springControllerMethodHashSet = springControllerMethodHashSet;
     }
@@ -253,11 +212,19 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         this.withInfoCallIdSet = withInfoCallIdSet;
     }
 
+    public void setWithGenericsTypeMethodHash(Set<String> withGenericsTypeMethodHash) {
+        this.withGenericsTypeMethodHash = withGenericsTypeMethodHash;
+    }
+
     public void setMethodCallAddExtList(List<MethodCallAddInterface> methodCallAddExtList) {
         this.methodCallAddExtList = methodCallAddExtList;
     }
 
-    public void setExtendedDataAddExtList(List<ExtendedDataAddInterface> extendedDataAddExtList) {
-        this.extendedDataAddExtList = extendedDataAddExtList;
+    public void setMyBatisMapperSet(Set<String> myBatisMapperSet) {
+        this.myBatisMapperSet = myBatisMapperSet;
+    }
+
+    public void setMyBatisMapperMethodWriteSet(Set<String> myBatisMapperMethodWriteSet) {
+        this.myBatisMapperMethodWriteSet = myBatisMapperMethodWriteSet;
     }
 }

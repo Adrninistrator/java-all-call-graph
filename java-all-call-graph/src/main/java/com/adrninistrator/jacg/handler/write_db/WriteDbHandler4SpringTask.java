@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 
 import java.util.Map;
 
@@ -24,7 +23,28 @@ public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbDat
 
     @Override
     protected WriteDbData4SpringTask genData(String line) {
-        throw new JavaCGRuntimeException("不会调用当前方法");
+        String[] array = splitEquals(line, 2);
+
+        String springBeanName = array[0];
+        String springBeanClassName = springBeanMap.get(springBeanName);
+        if (springBeanClassName == null) {
+            // 假如根据Spring Bean名称未获取到对应的类名，则将首字段修改为小写后继续尝试获取
+            String springBeanNameLower = JACGUtil.getFirstLetterLowerClassName(springBeanName);
+            springBeanClassName = springBeanMap.get(springBeanNameLower);
+        }
+
+        // 根据类名前缀判断是否需要处理
+        if (!isAllowedClassPrefix(springBeanClassName)) {
+            return null;
+        }
+
+        String methodName = array[1];
+        WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
+        writeDbData4SpringTask.setSpringBeanName(springBeanName);
+        writeDbData4SpringTask.setClassName(springBeanClassName);
+        writeDbData4SpringTask.setMethodName(methodName);
+
+        return writeDbData4SpringTask;
     }
 
     @Override
@@ -34,23 +54,12 @@ public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbDat
 
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringTask data) {
-        String springBeanName = data.getSpringBeanName();
-        String springBeanClassName = springBeanMap.get(springBeanName);
-        if (springBeanClassName == null) {
-            // 假如根据Spring Bean名称未获取到对应的类名，则将首字段修改为小写后继续尝试获取
-            String springBeanNameLower = JACGUtil.getFirstLetterLowerClassName(springBeanName);
-            springBeanClassName = springBeanMap.get(springBeanNameLower);
-        }
         return new Object[]{
                 genNextRecordId(),
-                springBeanName,
-                springBeanClassName,
+                data.getSpringBeanName(),
+                data.getClassName(),
                 data.getMethodName()
         };
-    }
-
-    public Map<String, String> getSpringBeanMap() {
-        return springBeanMap;
     }
 
     public void setSpringBeanMap(Map<String, String> springBeanMap) {

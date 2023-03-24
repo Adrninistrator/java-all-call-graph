@@ -12,12 +12,15 @@ public class WriteDbData4MethodInfo extends AbstractWriteDbData {
 
     private final int accessFlags;
 
+    private final String methodName;
+
     private final String fullMethod;
 
-    public WriteDbData4MethodInfo(String methodHash, String simpleClassName, int accessFlags, String fullMethod) {
+    public WriteDbData4MethodInfo(String methodHash, String simpleClassName, int accessFlags, String methodName, String fullMethod) {
         this.methodHash = methodHash;
         this.simpleClassName = simpleClassName;
         this.accessFlags = accessFlags;
+        this.methodName = methodName;
         this.fullMethod = fullMethod;
     }
 
@@ -31,6 +34,10 @@ public class WriteDbData4MethodInfo extends AbstractWriteDbData {
 
     public int getAccessFlags() {
         return accessFlags;
+    }
+
+    public String getMethodName() {
+        return methodName;
     }
 
     public String getFullMethod() {

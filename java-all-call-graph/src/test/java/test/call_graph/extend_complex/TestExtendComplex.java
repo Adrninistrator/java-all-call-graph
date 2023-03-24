@@ -10,6 +10,7 @@ public class TestExtendComplex {
     private AbstractSuperClassA superClassA2;
     private AbstractSuperClassB superClassB1;
     private AbstractSuperClassB superClassB2;
+    private AbstractSuperClassB[] superClassB22Array;
 
     public TestExtendComplex() {
         int a = (int) System.currentTimeMillis() % 10;
@@ -21,6 +22,7 @@ public class TestExtendComplex {
         superClassA2 = new ChildClassA2();
         superClassB1 = new ChildClassB1();
         superClassB2 = new ChildClassB2();
+        superClassB22Array = new ChildClassB2[]{};
     }
 
     public TestExtendComplex(String test) {
@@ -41,6 +43,9 @@ public class TestExtendComplex {
         superClassA2.entryA();
         superClassB1.entryA();
         superClassB2.entryA();
+        for (AbstractSuperClassB superClassB22 : superClassB22Array) {
+            superClassB22.entryA();
+        }
     }
 
     public void test2() {
@@ -69,5 +74,13 @@ public class TestExtendComplex {
 
         ((ChildClassB1) gen()).entryA();
         ((ChildClassB1) gen()).runA();
+    }
+
+    private void test4() {
+        superClassB22Array = new AbstractSuperClassB[]{superClassB1, superClassB2};
+        test5(superClassB22Array);
+    }
+
+    private void test5(AbstractSuperClassB[] superClassBArray) {
     }
 }

@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,7 +46,7 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
     public List<CalleeExtractedFile> extract(ConfigureWrapper configureWrapper) {
         try {
             // 添加关键字，代表入口方法
-            configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, Collections.singletonList(JACGConstants.CALLEE_FLAG_ENTRY));
+            configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, JACGConstants.CALLEE_FLAG_ENTRY);
 
             // 根据关键字生成调用堆栈
             List<String> stackFilePathList = findStack(configureWrapper);
@@ -114,7 +113,7 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
     }
 
     @Override
-    protected void handleCallStackData(int dataSeq, List<String> lineList, List<Integer> lineNumberList, boolean runInOtherThread) {
+    protected void handleCallStackData(int dataSeq, List<String> lineList, List<Integer> lineNumberList, boolean runInOtherThread, boolean runInTransaction) {
         // 获取入口方法，在每一段调用堆栈的第一行
         String line = lineList.get(0);
         int lineNumber = lineNumberList.get(0);
@@ -134,6 +133,7 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
         // 方法调用文件中每行解析后的内容
         calleeExtractedLine.setCallGraphLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4ee(line));
         calleeExtractedLine.setRunInOtherThread(runInOtherThread);
+        calleeExtractedLine.setRunInTransaction(runInTransaction);
 
         calleeExtractedLineList.add(calleeExtractedLine);
     }

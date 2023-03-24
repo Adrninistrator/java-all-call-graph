@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.annotation.formatter;
 
-import com.adrninistrator.jacg.annotation.storage.AnnotationStorage;
 import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 
 import java.util.Map;
 
@@ -12,8 +12,8 @@ import java.util.Map;
  */
 public abstract class AbstractAnnotationFormatter {
 
-    // 保存类及方法上的注解信息
-    protected AnnotationStorage annotationStorage;
+    // 注解相关的查询处理类
+    protected AnnotationHandler annotationHandler;
 
     /**
      * 判断当前类是否处理对应的注解
@@ -36,7 +36,7 @@ public abstract class AbstractAnnotationFormatter {
      */
     public abstract String handleAnnotation(String fullMethod, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap);
 
-    public void setAnnotationStorage(AnnotationStorage annotationStorage) {
-        this.annotationStorage = annotationStorage;
+    public void setAnnotationHandler(AnnotationHandler annotationHandler) {
+        this.annotationHandler = annotationHandler;
     }
 }

@@ -89,6 +89,7 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
 
     /**
      * 根据需要写入的数据生成Object数组
+     * 在当前线程中执行，没有线程安全问题
      *
      * @param data
      * @return
@@ -149,7 +150,7 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
      * @param filePath
      * @return
      */
-    public void handle(String filePath) {
+    public boolean handle(String filePath) {
         List<T> dataList = new ArrayList<>(batchSize);
 
         try (BufferedReader br = JavaCGFileUtil.genBufferedReader(filePath)) {
@@ -178,8 +179,10 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
 
             // 执行完毕之前的操作
             beforeDone();
+            return true;
         } catch (Exception e) {
             logger.error("error ", e);
+            return false;
         }
     }
 
@@ -219,6 +222,7 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
         // 根据需要写入的数据生成Object数组
         List<Object[]> objectList = new ArrayList<>(dataList.size());
         for (T data : dataList) {
+            // genObjectArray()方法在当前线程中执行，没有线程安全问题
             objectList.add(genObjectArray(data));
         }
 

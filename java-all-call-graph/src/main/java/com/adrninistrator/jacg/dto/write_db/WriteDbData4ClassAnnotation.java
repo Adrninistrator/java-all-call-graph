@@ -6,8 +6,6 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，类的注解
  */
 public class WriteDbData4ClassAnnotation extends AbstractWriteDbData {
-    private final int recordId;
-
     private final String simpleClassName;
 
     private final String annotationName;
@@ -20,19 +18,13 @@ public class WriteDbData4ClassAnnotation extends AbstractWriteDbData {
 
     private final String className;
 
-    public WriteDbData4ClassAnnotation(int recordId, String simpleClassName, String annotationName, String attributeName, String annotationType, String attributeValue,
-                                       String className) {
-        this.recordId = recordId;
+    public WriteDbData4ClassAnnotation(String simpleClassName, String annotationName, String attributeName, String annotationType, String attributeValue, String className) {
         this.simpleClassName = simpleClassName;
         this.annotationName = annotationName;
         this.attributeName = attributeName;
         this.annotationType = annotationType;
         this.attributeValue = attributeValue;
         this.className = className;
-    }
-
-    public int getRecordId() {
-        return recordId;
     }
 
     public String getSimpleClassName() {

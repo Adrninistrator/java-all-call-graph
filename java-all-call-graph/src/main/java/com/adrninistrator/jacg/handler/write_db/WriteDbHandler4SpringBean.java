@@ -32,7 +32,7 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
             return null;
         }
         springBeanMap.put(springBeanName, className);
-        return new WriteDbData4SpringBean(genNextRecordId(), springBeanName, Integer.parseInt(seq), className);
+        return new WriteDbData4SpringBean(springBeanName, Integer.parseInt(seq), className);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringBean data) {
         return new Object[]{
-                data.getRecordId(),
+                genNextRecordId(),
                 data.getSpringBeanName(),
                 data.getSeq(),
                 data.getClassName()

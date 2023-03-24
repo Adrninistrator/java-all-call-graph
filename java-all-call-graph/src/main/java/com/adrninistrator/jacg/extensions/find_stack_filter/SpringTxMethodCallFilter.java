@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.extensions.find_stack_filter;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,8 +13,8 @@ import org.apache.commons.lang3.StringUtils;
  * @description: 搜索Spring事务调用过滤器扩展类
  */
 public class SpringTxMethodCallFilter implements FindStackKeywordFilterInterface {
-    private static final String TRANSACTION_TEMPLATE_EXECUTE_METHOD =
-            JACGCommonNameConstants.SPRING_TRANSACTION_TEMPLATE_CLASS + JavaCGConstants.FLAG_COLON + "execute" + JavaCGConstants.FLAG_LEFT_BRACKET;
+    private static final String TRANSACTION_TEMPLATE_EXECUTE_METHOD = JACGClassMethodUtil.getClassAndMethodName(JACGCommonNameConstants.SPRING_TRANSACTION_TEMPLATE_CLASS,
+            "execute" + JavaCGConstants.FLAG_LEFT_BRACKET);
     private static final String TRANSACTIONAL_ANNOTATION = JACGConstants.FLAG_AT + JACGCommonNameConstants.SPRING_TX_ANNOTATION;
 
 

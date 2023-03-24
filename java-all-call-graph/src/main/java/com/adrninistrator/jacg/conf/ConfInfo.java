@@ -24,8 +24,6 @@ public class ConfInfo {
 
     private boolean checkJarFileUpdated;
 
-    private boolean callerShowRawMethodCallInfo;
-
     // 以下为数据库相关配置
     private boolean dbUseH2;
 
@@ -102,14 +100,6 @@ public class ConfInfo {
 
     public void setCheckJarFileUpdated(boolean checkJarFileUpdated) {
         this.checkJarFileUpdated = checkJarFileUpdated;
-    }
-
-    public boolean isCallerShowRawMethodCallInfo() {
-        return callerShowRawMethodCallInfo;
-    }
-
-    public void setCallerShowRawMethodCallInfo(boolean callerShowRawMethodCallInfo) {
-        this.callerShowRawMethodCallInfo = callerShowRawMethodCallInfo;
     }
 
     public boolean isDbUseH2() {

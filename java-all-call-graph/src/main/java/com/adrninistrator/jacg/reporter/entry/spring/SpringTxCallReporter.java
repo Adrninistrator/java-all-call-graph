@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.reporter.entry.spring;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.YesNoEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extractor.dto.common.extract.BaseCalleeExtractedMethod;
 import com.adrninistrator.jacg.extractor.dto.spring_tx.entry_method.SpTxEntryMethodTxAnnotation;
@@ -17,6 +16,7 @@ import com.adrninistrator.jacg.reporter.dto.spring_tx.SpringTxCallTplReport;
 import com.adrninistrator.jacg.reporter.entry.base.AbstractReporter;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.io.IOUtils;
@@ -279,7 +279,7 @@ public class SpringTxCallReporter extends AbstractReporter {
     protected void addColumn(List<String> stringList, BaseCalleeExtractedMethod calleeExtractedMethod) {
         stringList.add(calleeExtractedMethod.getCalleeFullMethod());
         stringList.add(calleeExtractedMethod.getCalleeUpperFullMethod());
-        stringList.add(YesNoEnum.parse(calleeExtractedMethod.isRunInOtherThread()));
+        stringList.add(JavaCGYesNoEnum.parseDesc(calleeExtractedMethod.isRunInOtherThread()));
         stringList.add(String.valueOf(calleeExtractedMethod.getDataSeq()));
         stringList.add(String.valueOf(calleeExtractedMethod.getLineNumber()));
     }

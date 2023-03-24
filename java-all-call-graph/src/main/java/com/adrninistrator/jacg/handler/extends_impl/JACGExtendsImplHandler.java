@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.handler.extends_impl;
 
 import com.adrninistrator.jacg.common.DC;
-import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
@@ -11,6 +10,7 @@ import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.dto.classes.ClassNameAndAccessFlags;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
@@ -140,7 +140,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
             // 记录所有的子类/子接口/实现类名称及access_flags
             allClassNameAndAccessFlagsSet.add(classNameAndAccessFlags);
 
-            if (JACGConstants.YES_1 == existsDownwardClasses) {
+            if (JavaCGYesNoEnum.isYes(existsDownwardClasses)) {
                 // 当前类或接口还存在下一层的类或接口，记录需要返回的下一层子类/子接口/实现类名称
                 downwardSimpleClassNameList.add(downwardSimpleClassName);
             }

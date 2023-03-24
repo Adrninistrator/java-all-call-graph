@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.reporter.entry.spring;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.YesNoEnum;
 import com.adrninistrator.jacg.comparator.Comparator4AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extractor.common.enums.SpTxPropagationEnum;
@@ -20,6 +19,7 @@ import com.adrninistrator.jacg.reporter.dto.spring_tx.SpringTxNestedTplReport;
 import com.adrninistrator.jacg.reporter.entry.base.AbstractReporter;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.io.IOUtils;
@@ -297,7 +297,7 @@ public class SpringTxNestedReporter extends AbstractReporter {
         } else {
             stringList.add("");
         }
-        stringList.add(YesNoEnum.parse(spTxCalleeInfo.isRunInOtherThread()));
+        stringList.add(JavaCGYesNoEnum.parseDesc(spTxCalleeInfo.isRunInOtherThread()));
         stringList.add(String.valueOf(spTxCalleeInfo.getDataSeq()));
         stringList.add(String.valueOf(spTxCalleeInfo.getLineNumber()));
     }

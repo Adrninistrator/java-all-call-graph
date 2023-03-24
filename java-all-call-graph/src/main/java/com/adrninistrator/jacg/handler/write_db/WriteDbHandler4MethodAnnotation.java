@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringController;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,22 +32,20 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     // 将Spring Controller信息写入数据库的类
     private WriteDbHandler4SpringController writeDbHandler4SpringController;
 
-    // Spring Controller相关信息
-    private final List<WriteDbData4SpringController> writeDbData4SpringControllerList = new ArrayList<>(batchSize);
-
-    // 对应的方法HASH+长度
-    private final Set<String> springControllerMethodHashSet = new HashSet<>();
+    // Spring Controller对应的方法HASH+长度
+    private Set<String> springControllerMethodHashSet = new HashSet<>();
 
     // 有注解的方法HASH+长度
-    private final Set<String> withAnnotationMethodHashSet = new HashSet<>();
+    private Set<String> withAnnotationMethodHashSet = new HashSet<>();
+
+    // Spring Controller相关信息
+    private final List<WriteDbData4SpringController> writeDbData4SpringControllerList = new ArrayList<>(batchSize);
 
     @Override
     protected WriteDbData4MethodAnnotation genData(String line) {
         // 拆分时限制列数，最后一列注解属性中可能出现空格
         String[] array = splitBetween(line, JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE, JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE);
-
         String fullMethod = array[0];
-
         // 根据完整方法前缀判断是否需要处理
         if (!isAllowedClassPrefix(fullMethod)) {
             return null;
@@ -75,7 +74,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         boolean isSpringMappingAnnotation = handleSpringControllerAnnotation(methodHash, fullMethod, simpleClassName, annotationName, attributeName, attributeValue);
 
         WriteDbData4MethodAnnotation writeDbData4MethodAnnotation = new WriteDbData4MethodAnnotation();
-        writeDbData4MethodAnnotation.setRecordId(genNextRecordId());
         writeDbData4MethodAnnotation.setMethodHash(methodHash);
         writeDbData4MethodAnnotation.setAnnotationName(annotationName);
         writeDbData4MethodAnnotation.setAttributeName(attributeName);
@@ -83,7 +81,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         writeDbData4MethodAnnotation.setAttributeValue(attributeValue);
         writeDbData4MethodAnnotation.setFullMethod(fullMethod);
         writeDbData4MethodAnnotation.setSimpleClassName(simpleClassName);
-        writeDbData4MethodAnnotation.setSpringMappingAnnotation(isSpringMappingAnnotation ? JACGConstants.YES_1 : JACGConstants.NO_0);
+        writeDbData4MethodAnnotation.setSpringMappingAnnotation(JavaCGYesNoEnum.parseIntValue(isSpringMappingAnnotation));
         return writeDbData4MethodAnnotation;
     }
 
@@ -95,7 +93,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodAnnotation data) {
         return new Object[]{
-                data.getRecordId(),
+                genNextRecordId(),
                 data.getMethodHash(),
                 data.getAnnotationName(),
                 data.getAttributeName(),
@@ -189,11 +187,11 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         this.writeDbHandler4SpringController = writeDbHandler4SpringController;
     }
 
-    public Set<String> getSpringControllerMethodHashSet() {
-        return springControllerMethodHashSet;
+    public void setSpringControllerMethodHashSet(Set<String> springControllerMethodHashSet) {
+        this.springControllerMethodHashSet = springControllerMethodHashSet;
     }
 
-    public Set<String> getWithAnnotationMethodHashSet() {
-        return withAnnotationMethodHashSet;
+    public void setWithAnnotationMethodHashSet(Set<String> withAnnotationMethodHashSet) {
+        this.withAnnotationMethodHashSet = withAnnotationMethodHashSet;
     }
 }

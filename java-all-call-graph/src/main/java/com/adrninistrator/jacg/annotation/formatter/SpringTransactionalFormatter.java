@@ -20,7 +20,7 @@ public class SpringTransactionalFormatter extends AbstractAnnotationFormatter {
 
     @Override
     public String handleAnnotation(String fullMethod, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
-        StringAnnotationAttribute stringAnnotationAttribute = annotationStorage.getAttribute4MethodAnnotation(fullMethod,
+        StringAnnotationAttribute stringAnnotationAttribute = annotationHandler.queryAttribute4MethodAnnotation(fullMethod,
                 JACGCommonNameConstants.SPRING_TX_ANNOTATION,
                 JACGCommonNameConstants.SPRING_TX_ATTRIBUTE_PROPAGATION,
                 StringAnnotationAttribute.class);

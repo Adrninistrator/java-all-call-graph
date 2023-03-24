@@ -6,10 +6,7 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.util.JACGUtil;
 import org.junit.Before;
-
-import java.util.Collections;
 
 /**
  * @author adrninistrator
@@ -29,19 +26,17 @@ public abstract class TestMCABase {
         configureWrapper.setConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
         configureWrapper.setConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, "1000");
         configureWrapper.setConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, Boolean.TRUE.toString());
-        configureWrapper.setConfig(ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO, Boolean.FALSE.toString());
-//        configureWrapper.setConfig(ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO, Boolean.TRUE.toString());
 
         configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.TRUE.toString());
 
-        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, Collections.singletonList(
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
                 "build/libs/test.jar"
-        ));
+        );
 
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, JACGUtil.genSetFromArray(
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
                 "System"
-        ));
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, JACGUtil.genSetFromArray(
+        );
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 "TestActionListener:test1",
                 "TestActionListener:test2",
                 "TestActionListener:test3",
@@ -50,7 +45,7 @@ public abstract class TestMCABase {
                 "TestUnfixedManualAddCallGraph:test1a",
                 "TestUnfixedManualAddCallGraph:test1b",
                 "TestUnfixedManualAddCallGraph:test2"
-        ));
+        );
 
         // 添加所有预置的扩展类
         configureWrapper.addAllPreBuildExtensions();

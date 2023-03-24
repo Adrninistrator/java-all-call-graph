@@ -139,8 +139,8 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
         setCommonConfig(configureWrapper);
 
         // 指定对完整调用链文件生成调用堆栈时使用的过滤器扩展类
-        configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_FIND_STACK_KEYWORD_FILTER, Collections.singletonList(
+        configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_FIND_STACK_KEYWORD_FILTER,
                 SpringTxMethodCallFilter.class.getName()
-        ));
+        );
     }
 }

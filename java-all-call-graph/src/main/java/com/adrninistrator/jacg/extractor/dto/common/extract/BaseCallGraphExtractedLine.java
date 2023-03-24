@@ -23,6 +23,9 @@ public abstract class BaseCallGraphExtractedLine {
     // 是否在其他线程中执行
     protected boolean runInOtherThread;
 
+    // 是否在事务中执行
+    private boolean runInTransaction;
+
     public int getDataSeq() {
         return dataSeq;
     }
@@ -61,5 +64,13 @@ public abstract class BaseCallGraphExtractedLine {
 
     public void setRunInOtherThread(boolean runInOtherThread) {
         this.runInOtherThread = runInOtherThread;
+    }
+
+    public boolean isRunInTransaction() {
+        return runInTransaction;
+    }
+
+    public void setRunInTransaction(boolean runInTransaction) {
+        this.runInTransaction = runInTransaction;
     }
 }

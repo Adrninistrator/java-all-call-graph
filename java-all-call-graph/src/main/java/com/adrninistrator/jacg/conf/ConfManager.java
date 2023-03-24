@@ -74,7 +74,7 @@ public class ConfManager {
                 return null;
             }
 
-            // 在一个调用方法中出现多次的被调用方法（包含方法调用自定义数据），是否需要忽略
+            // 在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否需要忽略
             String ignoreDupCalleeInOneCaller = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, printLog);
             if (StringUtils.isBlank(ignoreDupCalleeInOneCaller)) {
                 // 允许对应配置为空
@@ -97,9 +97,6 @@ public class ConfManager {
 
             // 检查jar包文件是否有更新
             String checkJarFileUpdated = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, printLog);
-
-            // 生成向下的方法完整调用链时，是否显示原始方法调用信息
-            String callerShowRawMethodCallInfo = configureWrapper.getConfig(properties4Config, ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO, printLog);
 
             // 数据库相关配置
             String strDbUseH2 = configureWrapper.getConfig(properties4ConfigDb, ConfigDbKeyEnum.CDKE_DB_USE_H2, printLog);
@@ -126,7 +123,6 @@ public class ConfManager {
             confInfo.setOutputRootPath(outputRootPath);
             confInfo.setDbInsertBatchSize(dbInsertBatchSize);
             confInfo.setCheckJarFileUpdated(Boolean.parseBoolean(checkJarFileUpdated));
-            confInfo.setCallerShowRawMethodCallInfo(Boolean.parseBoolean(callerShowRawMethodCallInfo));
 
             return confInfo;
         } catch (Exception e) {

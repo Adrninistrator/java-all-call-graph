@@ -10,8 +10,8 @@ import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,9 +177,9 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
             }
 
             String lambdaNextCalleeFullMethod = (String) lambdaNextCalleeFullMethodObj;
-            boolean lambdaNextIsStream = JACGUtil.int2Boolean((int) map.get(DC.LMI_LAMBDA_NEXT_IS_STREAM));
-            boolean lambdaNextIsIntermediate = JACGUtil.int2Boolean((int) map.get(DC.LMI_LAMBDA_NEXT_IS_INTERMEDIATE));
-            boolean lambdaNextIsTerminal = JACGUtil.int2Boolean((int) map.get(DC.LMI_LAMBDA_NEXT_IS_TERMINAL));
+            boolean lambdaNextIsStream = JavaCGYesNoEnum.isYes((int) map.get(DC.LMI_LAMBDA_NEXT_IS_STREAM));
+            boolean lambdaNextIsIntermediate = JavaCGYesNoEnum.isYes((int) map.get(DC.LMI_LAMBDA_NEXT_IS_INTERMEDIATE));
+            boolean lambdaNextIsTerminal = JavaCGYesNoEnum.isYes((int) map.get(DC.LMI_LAMBDA_NEXT_IS_TERMINAL));
 
             lambdaMethodCall.setLambdaNextCalleeFullMethod(lambdaNextCalleeFullMethod);
             lambdaMethodCall.setLambdaNextIsStream(lambdaNextIsStream);

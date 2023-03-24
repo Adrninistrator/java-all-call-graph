@@ -15,11 +15,15 @@ public enum OtherConfigFileUseSetEnum implements BaseConfigInterface {
     OCFUSE_METHOD_CLASS_4CALLER(InputDirEnum.IDE_CONFIG.getDirName() + "/method_class_4caller.properties",
             "生成指定类/方法调用的所有向下的方法完整调用链时的配置文件，指定需要生成的类名，与方法前缀，以及起始代码行号、结束代码行号"),
     OCFUSE_IGNORE_CLASS_KEYWORD(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_class_keyword.properties",
-            "生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件，指定忽略的类名关键字"),
+            "生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件，指定忽略的类名关键字，可指定包名中的关键字，或类名中的关键字"),
     OCFUSE_IGNORE_FULL_METHOD_PREFIX(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_full_method_prefix.properties",
-            "生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件，指定忽略的完整方法前缀"),
+            "生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件，指定忽略的完整方法前缀，可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数"),
     OCFUSE_IGNORE_METHOD_PREFIX(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_method_prefix.properties",
             "生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件，指定忽略的方法名前缀"),
+    OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE(InputDirEnum.IDE_BUSINESS_DATA_TYPE.getDirName() + "/business_data_type_show_4ee.properties",
+            "生成向上的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据"),
+    OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER(InputDirEnum.IDE_BUSINESS_DATA_TYPE.getDirName() + "/business_data_type_show_4er.properties",
+            "生成向下的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据"),
     ;
 
     private final String fileName;

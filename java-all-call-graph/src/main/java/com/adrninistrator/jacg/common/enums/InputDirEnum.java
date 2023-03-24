@@ -10,6 +10,7 @@ public enum InputDirEnum {
     IDE_SQL("_jacg_sql", "保存sql脚本的目录"),
     IDE_KEYWORD_CONF("_jacg_find_stack_keyword", "保存需要查找的关键字的目录"),
     IDE_EXTENSIONS("_jacg_extensions", "保存扩展类配置文件的目录"),
+    IDE_BUSINESS_DATA_TYPE("_jacg_business_data_type", "保存业务功能数据类型配置文件的目录"),
     ;
 
     private final String dirName;

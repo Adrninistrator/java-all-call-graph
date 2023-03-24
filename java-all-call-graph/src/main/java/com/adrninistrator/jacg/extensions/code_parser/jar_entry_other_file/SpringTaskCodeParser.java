@@ -1,44 +1,28 @@
 package com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file;
 
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
+import com.adrninistrator.jacg.util.JACGXmlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.extensions.code_parser.JarEntryOtherFileParser;
-import com.adrninistrator.javacg.xml.JavaCGXmlParser;
+import com.adrninistrator.javacg.extensions.code_parser.SaveData2FileParser;
+import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author adrninistrator
  * @date 2023/1/2
  * @description: 获取Spring定时任务信息
  */
-public class SpringTaskCodeParser implements JarEntryOtherFileParser {
+public class SpringTaskCodeParser extends SaveData2FileParser {
     private static final Logger logger = LoggerFactory.getLogger(SpringTaskCodeParser.class);
 
-    private static SpringTaskCodeParser LAST_INSTANCE;
-
-    private List<WriteDbData4SpringTask> springTaskList;
-
-    public static SpringTaskCodeParser getLastInstance() {
-        return LAST_INSTANCE;
-    }
-
-    public SpringTaskCodeParser() {
-        LAST_INSTANCE = this;
-    }
-
-    public List<WriteDbData4SpringTask> getSpringTaskList() {
-        return springTaskList;
-    }
+    public static final String FILE_NAME = "spring_task";
 
     @Override
-    public void initCodeParser() {
-        springTaskList = new ArrayList<>();
+    public String chooseFileName() {
+        return FILE_NAME;
     }
 
     // 指定需要处理xml文件
@@ -51,7 +35,7 @@ public class SpringTaskCodeParser implements JarEntryOtherFileParser {
     @Override
     public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryName) {
         try {
-            Element root = JavaCGXmlParser.parseXmlRootElement(inputStream);
+            Element root = JACGXmlUtil.parseXmlRootElement(inputStream);
             if (!"beans".equals(root.getName())) {
                 logger.debug("跳过非Spring XML 1: {}", jarEntryName);
                 return;
@@ -70,12 +54,7 @@ public class SpringTaskCodeParser implements JarEntryOtherFileParser {
 
                     String beanName = element2.getAttributeValue("ref");
                     String methodName = element2.getAttributeValue("method");
-
-                    WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
-                    writeDbData4SpringTask.setSpringBeanName(beanName);
-                    writeDbData4SpringTask.setMethodName(methodName);
-
-                    springTaskList.add(writeDbData4SpringTask);
+                    JavaCGFileUtil.write2FileWithTab(writer, beanName, methodName);
                 }
             }
         } catch (Exception e) {

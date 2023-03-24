@@ -21,12 +21,16 @@ public class BaseCalleeExtractedMethod {
     // 在其他线程执行
     protected boolean runInOtherThread;
 
-    public BaseCalleeExtractedMethod(int dataSeq, int lineNumber, String calleeFullMethod, String calleeUpperFullMethod, boolean runInOtherThread) {
+    // 在事务中执行
+    protected boolean runInTransaction;
+
+    public BaseCalleeExtractedMethod(int dataSeq, int lineNumber, String calleeFullMethod, String calleeUpperFullMethod, boolean runInOtherThread, boolean runInTransaction) {
         this.dataSeq = dataSeq;
         this.lineNumber = lineNumber;
         this.calleeFullMethod = calleeFullMethod;
         this.calleeUpperFullMethod = calleeUpperFullMethod;
         this.runInOtherThread = runInOtherThread;
+        this.runInTransaction = runInTransaction;
     }
 
     public int getDataSeq() {
@@ -47,5 +51,9 @@ public class BaseCalleeExtractedMethod {
 
     public boolean isRunInOtherThread() {
         return runInOtherThread;
+    }
+
+    public boolean isRunInTransaction() {
+        return runInTransaction;
     }
 }

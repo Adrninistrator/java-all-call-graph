@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.interfaces.BaseConfigInterface;
@@ -143,7 +144,7 @@ public abstract class AbstractRunner {
         if (!configMdFilePath.endsWith(File.separator)) {
             configMdFilePath += File.separator;
         }
-        configMdFilePath += JACGConstants.FILE_USED_CONFIG_MD;
+        configMdFilePath += JACGConstants.FILE_JACG_USED_CONFIG_MD;
         logger.info("{} 当前使用的配置参数信息保存到以下文件 {}", currentSimpleClassName, configMdFilePath);
         try (MarkdownWriter markdownWriter = new MarkdownWriter(configMdFilePath, true)) {
             // 打印基本的配置信息
@@ -163,9 +164,8 @@ public abstract class AbstractRunner {
     // 打印基本的配置信息
     private void printConfigInfo(MarkdownWriter markdownWriter, BaseConfigInterface[] configs, String configFileName) throws IOException {
         // 写入配置文件名
-        markdownWriter.addTitle(1, configFileName);
-        markdownWriter.addTableHead("参数名称", "参数说明", "参数值");
-
+        markdownWriter.addTitle(1, InputDirEnum.IDE_CONFIG.getDirName() + "/" + configFileName);
+        markdownWriter.addTableHead(JACGConstants.USED_CONFIG_FLAG_ARG_KEY, JACGConstants.USED_CONFIG_FLAG_ARG_DESC, JACGConstants.USED_CONFIG_FLAG_ARG_VALUE);
         for (BaseConfigInterface currentConfigEnum : configs) {
             String value = configureWrapper.getConfig(null, currentConfigEnum, false);
             markdownWriter.addTableBody(currentConfigEnum.getKey(), currentConfigEnum.getDesc(), (value == null ? "" : value));
@@ -175,21 +175,16 @@ public abstract class AbstractRunner {
 
     // 打印List格式的其他配置信息
     private void printOtherListConfigInfo(MarkdownWriter markdownWriter, OtherConfigFileUseListEnum[] configs) throws IOException {        // 写入配置文件名
-        markdownWriter.addTitle(1, "区分顺序的其他配置信息");
-
+        markdownWriter.addTitle(1, JACGConstants.USED_CONFIG_FLAG_ARG_LIST);
         List<String> findKeywordFilterList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_FIND_STACK_KEYWORD_FILTER, false);
         boolean useFindKeywordFilter = !JavaCGUtil.isCollectionEmpty(findKeywordFilterList);
-
         for (OtherConfigFileUseListEnum currentConfig : configs) {
             // 写入配置文件名
             markdownWriter.addTitle(2, currentConfig.getKey());
-
-            markdownWriter.addListWithNewLine("参数说明");
+            markdownWriter.addListWithNewLine(JACGConstants.USED_CONFIG_FLAG_ARG_DESC);
             markdownWriter.addLineWithNewLine(currentConfig.getDesc());
-
-            markdownWriter.addListWithNewLine("参数值");
+            markdownWriter.addListWithNewLine(JACGConstants.USED_CONFIG_FLAG_ARG_VALUE);
             markdownWriter.addCodeBlock();
-
             if (useFindKeywordFilter && (currentConfig == OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE ||
                     currentConfig == OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER)) {
                 markdownWriter.addList("对完整调用链文件根据关键字生成调用堆栈时使用过滤器扩展类");
@@ -198,23 +193,19 @@ public abstract class AbstractRunner {
                     markdownWriter.addLine(configValue);
                 }
             }
-
             markdownWriter.addCodeBlock();
         }
     }
 
     // 打印Set格式的其他配置信息
     private void printOtherSetConfigInfo(MarkdownWriter markdownWriter, OtherConfigFileUseSetEnum[] configs) throws IOException {
-        markdownWriter.addTitle(1, "不区分顺序的其他配置信息");
-
+        markdownWriter.addTitle(1, JACGConstants.USED_CONFIG_FLAG_ARG_SET);
         for (OtherConfigFileUseSetEnum currentConfig : configs) {
             // 写入配置文件名
             markdownWriter.addTitle(2, currentConfig.getKey());
-
-            markdownWriter.addListWithNewLine("参数说明");
+            markdownWriter.addListWithNewLine(JACGConstants.USED_CONFIG_FLAG_ARG_DESC);
             markdownWriter.addLineWithNewLine(currentConfig.getDesc());
-
-            markdownWriter.addListWithNewLine("参数值");
+            markdownWriter.addListWithNewLine(JACGConstants.USED_CONFIG_FLAG_ARG_VALUE);
             markdownWriter.addCodeBlock();
             List<String> configValueList = new ArrayList<>(configureWrapper.getOtherConfigSet(currentConfig, false));
             // 排序后打印

@@ -1,5 +1,6 @@
 package test.run_by_code;
 
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
@@ -14,8 +15,6 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,8 +40,6 @@ public abstract class TestRunByCodeBase {
         configureWrapper.setConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
         configureWrapper.setConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, "1000");
         configureWrapper.setConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, Boolean.TRUE.toString());
-//        configureWrapper.setConfig(ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO, Boolean.FALSE.toString());
-        configureWrapper.setConfig(ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO, Boolean.TRUE.toString());
 
         // H2
         configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.TRUE.toString());
@@ -60,16 +57,16 @@ public abstract class TestRunByCodeBase {
             test.jar通过执行以下命令生成：
             gradlew test_jar
          */
-        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, Collections.singletonList(
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
                 "build/libs/test.jar"
-        ));
+        );
 
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, JACGUtil.genSetFromArray(
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,
                 "test.call_graph.",
                 "java."
-        ));
+        );
 
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, JACGUtil.genSetFromArray(
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
                 "TestMCCallee:20",
                 "TestMCCallee:run(",
                 "test.call_graph.method_call.TestMCCallee:run(",
@@ -77,8 +74,8 @@ public abstract class TestRunByCodeBase {
                 "MethodWithAnnotation",
                 "TestArgument1",
                 "TestCycleCall1"
-        ));
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, JACGUtil.genSetFromArray(
+        );
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 "MethodWithAnnotation",
                 "TestMCCaller:20",
                 "TestArgument1:test(",
@@ -95,17 +92,17 @@ public abstract class TestRunByCodeBase {
                 "TestExtendComplex",
                 "test.call_graph.future.CallableImpl:call(",
                 "TestSpringController1"
-        ));
+        );
 
-        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, Arrays.asList(
-                "!entry!",
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE,
+                JACGConstants.CALLEE_FLAG_ENTRY_NO_TAB,
                 JavaCGConstants.METHOD_NAME_INIT
-        ));
+        );
 
-        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER, Arrays.asList(
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 "System",
                 "Deprecated"
-        ));
+        );
 
         // 添加所有预置的扩展类
         configureWrapper.addAllPreBuildExtensions();

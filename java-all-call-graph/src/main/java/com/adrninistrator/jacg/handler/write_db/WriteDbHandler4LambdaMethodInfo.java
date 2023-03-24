@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4LambdaMethodInfo;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGStreamUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 
 /**
  * @author adrninistrator
@@ -75,9 +75,9 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
                 data.getLambdaNextCalleeClassName(),
                 data.getLambdaNextCalleeMethodName(),
                 data.getLambdaNextCalleeFullMethod(),
-                JACGUtil.boolean2Int(data.getLambdaNextIsStream()),
-                JACGUtil.boolean2Int(data.getLambdaNextIsIntermediate()),
-                JACGUtil.boolean2Int(data.getLambdaNextIsTerminal())
+                JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsStream()),
+                JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsIntermediate()),
+                JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsTerminal())
         };
     }
 }

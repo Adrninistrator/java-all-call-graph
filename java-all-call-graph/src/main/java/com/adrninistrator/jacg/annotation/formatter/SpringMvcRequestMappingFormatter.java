@@ -76,7 +76,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
     }
 
     private String doGetPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap, String attributeName) {
-        ListStringAnnotationAttribute listStringAnnotationAttribute = annotationStorage.getAttributeFromMap(annotationAttributeMap, attributeName,
+        ListStringAnnotationAttribute listStringAnnotationAttribute = annotationHandler.getAttributeFromMap(annotationAttributeMap, attributeName,
                 ListStringAnnotationAttribute.class);
         if (listStringAnnotationAttribute == null) {
             // 尝试不同的属性名称，可能不存在，不需要打印日志
@@ -88,7 +88,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
 
     // 获取Spring MVC对应类上的注解中的path
     private String getSpringMvcClassPath(String className) {
-        Map<String, Map<String, BaseAnnotationAttribute>> classAnnotationMap = annotationStorage.getAnnotationMap4Class(className);
+        Map<String, Map<String, BaseAnnotationAttribute>> classAnnotationMap = annotationHandler.queryAnnotationMap4Class(className);
         if (classAnnotationMap == null) {
             logger.error("未找到指定类的注解信息 {}", className);
             return null;

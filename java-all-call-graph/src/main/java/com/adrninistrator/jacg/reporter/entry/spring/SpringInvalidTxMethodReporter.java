@@ -6,10 +6,10 @@ import com.adrninistrator.jacg.handler.dto.spring.SpringInvalidTxAnnotationMetho
 import com.adrninistrator.jacg.handler.dto.spring.SpringInvalidTxAnnotationMethodCall;
 import com.adrninistrator.jacg.handler.spring.SpringTxHandler;
 import com.adrninistrator.jacg.reporter.common.JACGReportConstants;
-import com.adrninistrator.jacg.reporter.common.JACGSpReportConstants;
 import com.adrninistrator.jacg.reporter.entry.base.AbstractReporter;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.io.IOUtils;
@@ -30,8 +30,8 @@ import java.util.List;
 public class SpringInvalidTxMethodReporter extends AbstractReporter {
     private static final Logger logger = LoggerFactory.getLogger(SpringInvalidTxMethodReporter.class);
 
-    public static final String FILE_NAME_SP_INVALID_METHOD_CALL = "Spring事务注解方法非法调用的情况.md";
-    public static final String FILE_NAME_SP_INVALID_METHOD = "Spring非法事务注解方法的情况.md";
+    public static final String FILE_NAME_SP_INVALID_METHOD_CALL = "Spring事务注解方法调用非法——调用当前实例方法.md";
+    public static final String FILE_NAME_SP_INVALID_METHOD = "Spring事务注解方法非法.md";
 
     public static final String FILE_HEADER_SP_INVALID_METHOD_CALL;
     public static final String FILE_HEADER_SP_INVALID_METHOD;
@@ -40,8 +40,10 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
         FILE_HEADER_SP_INVALID_METHOD_CALL = StringUtils.joinWith(JACGConstants.FLAG_TAB,
                 JACGReportConstants.COLUMN_CALLER_FULL_METHOD,
                 JACGReportConstants.COLUMN_CALLER_LINE_NUMBER,
+                "调用方法是否存在事务注解",
+                "调用方法事务传播行为",
                 JACGReportConstants.COLUMN_CALLEE_FULL_METHOD,
-                JACGSpReportConstants.COLUMN_ANNOTATION_METHOD_PROPAGATION
+                "被调用方法事务传播行为"
         );
 
         FILE_HEADER_SP_INVALID_METHOD = StringUtils.joinWith(JACGConstants.FLAG_TAB,
@@ -74,23 +76,24 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
             return false;
         }
 
-        // 查询Spring事务注解方法非法调用（调用当前实例的@Transactional注解方法）
-        SpringTxHandler springTxHandler = new SpringTxHandler(configureWrapper);
-        List<SpringInvalidTxAnnotationMethodCall> springInvalidTxAnnotationMethodCallList = springTxHandler.querySpringInvalidTxAnnotationMethodCall();
-        if (JavaCGUtil.isCollectionEmpty(springInvalidTxAnnotationMethodCallList)) {
-            return true;
-        }
-
         WriterSupportHeader writerSupportHeader = null;
-        try {
+        // 查询Spring事务注解方法非法调用（调用当前实例的@Transactional注解方法）
+        try (SpringTxHandler springTxHandler = new SpringTxHandler(configureWrapper)) {
+            List<SpringInvalidTxAnnotationMethodCall> springInvalidTxAnnotationMethodCallList = springTxHandler.querySpringInvalidTxAnnotationMethodCall();
+            if (JavaCGUtil.isCollectionEmpty(springInvalidTxAnnotationMethodCallList)) {
+                return true;
+            }
+
             // 生成Writer
             writerSupportHeader = genWriter4InvalidMethodCall();
             for (SpringInvalidTxAnnotationMethodCall springInvalidTxAnnotationMethodCall : springInvalidTxAnnotationMethodCallList) {
                 List<String> stringList = new ArrayList<>();
                 stringList.add(springInvalidTxAnnotationMethodCall.getCallerFullMethod());
                 stringList.add(String.valueOf(springInvalidTxAnnotationMethodCall.getCallerLineNumber()));
+                stringList.add(JavaCGYesNoEnum.parseDesc(springInvalidTxAnnotationMethodCall.isCallerWithSpringTx()));
+                stringList.add(springInvalidTxAnnotationMethodCall.getCallerTxPropagation());
                 stringList.add(springInvalidTxAnnotationMethodCall.getCalleeFullMethod());
-                stringList.add(springInvalidTxAnnotationMethodCall.getTxPropagation());
+                stringList.add(springInvalidTxAnnotationMethodCall.getCalleeTxPropagation());
 
                 // 在报告文件写入一行
                 writeData4InvalidMethodCall(writerSupportHeader, stringList);
@@ -151,15 +154,14 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
             return false;
         }
 
-        // 查询Spring非法事务注解方法（@Transactional注解方法为private/protected、static、final方法）
-        SpringTxHandler springTxHandler = new SpringTxHandler(configureWrapper);
-        List<SpringInvalidTxAnnotationMethod> springInvalidTxAnnotationMethodList = springTxHandler.querySpringInvalidTxAnnotationMethod();
-        if (JavaCGUtil.isCollectionEmpty(springInvalidTxAnnotationMethodList)) {
-            return true;
-        }
-
         WriterSupportHeader writerSupportHeader = null;
-        try {
+        // 查询Spring非法事务注解方法（@Transactional注解方法为private/protected、static、final方法）
+        try (SpringTxHandler springTxHandler = new SpringTxHandler(configureWrapper)) {
+            List<SpringInvalidTxAnnotationMethod> springInvalidTxAnnotationMethodList = springTxHandler.querySpringInvalidTxAnnotationMethod();
+            if (JavaCGUtil.isCollectionEmpty(springInvalidTxAnnotationMethodList)) {
+                return true;
+            }
+
             // 生成Writer
             writerSupportHeader = genWriter4InvalidMethod();
             for (SpringInvalidTxAnnotationMethod springInvalidTxAnnotationMethod : springInvalidTxAnnotationMethodList) {

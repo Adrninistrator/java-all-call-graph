@@ -1,7 +1,9 @@
 package com.adrninistrator.jacg.dto.call_line;
 
 import com.adrninistrator.jacg.dto.method.MethodDetail;
-import com.adrninistrator.jacg.extensions.dto.extened_data.BaseExtendedData;
+import com.adrninistrator.jacg.extensions.dto.business_data.BaseBusinessData;
+
+import java.util.List;
 
 /**
  * @author adrninistrator
@@ -18,8 +20,8 @@ public class CallGraphLineParsed {
     // 方法上的注解信息（可能包含多个）
     private String[] annotations;
 
-    // 方法调用自定义数据列表
-    private BaseExtendedData extendedData;
+    // 方法调用业务功能数据列表
+    private List<BaseBusinessData> businessDataList;
 
     // 是否出现循环调用
     private boolean cycleCall;
@@ -32,6 +34,9 @@ public class CallGraphLineParsed {
 
     // 是否在其他线程执行
     private boolean runInOtherThread;
+
+    // 是否在事务中执行
+    private boolean runInTransaction;
 
     public int getMethodLevel() {
         return methodLevel;
@@ -57,12 +62,12 @@ public class CallGraphLineParsed {
         this.annotations = annotations;
     }
 
-    public BaseExtendedData getExtendedData() {
-        return extendedData;
+    public List<BaseBusinessData> getBusinessDataList() {
+        return businessDataList;
     }
 
-    public void setExtendedData(BaseExtendedData extendedData) {
-        this.extendedData = extendedData;
+    public void setBusinessDataList(List<BaseBusinessData> businessDataList) {
+        this.businessDataList = businessDataList;
     }
 
     public boolean isCycleCall() {
@@ -95,5 +100,13 @@ public class CallGraphLineParsed {
 
     public void setRunInOtherThread(boolean runInOtherThread) {
         this.runInOtherThread = runInOtherThread;
+    }
+
+    public boolean isRunInTransaction() {
+        return runInTransaction;
+    }
+
+    public void setRunInTransaction(boolean runInTransaction) {
+        this.runInTransaction = runInTransaction;
     }
 }

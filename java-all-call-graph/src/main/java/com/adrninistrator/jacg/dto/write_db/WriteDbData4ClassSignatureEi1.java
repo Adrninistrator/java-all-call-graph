@@ -6,8 +6,6 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，类的签名中涉及继承与实现的信息1
  */
 public class WriteDbData4ClassSignatureEi1 extends AbstractWriteDbData {
-    private int recordId;
-
     private String simpleClassName;
 
     private String type;
@@ -19,14 +17,6 @@ public class WriteDbData4ClassSignatureEi1 extends AbstractWriteDbData {
     private String signClassName;
 
     private String className;
-
-    public int getRecordId() {
-        return recordId;
-    }
-
-    public void setRecordId(int recordId) {
-        this.recordId = recordId;
-    }
 
     public String getSimpleClassName() {
         return simpleClassName;

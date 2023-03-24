@@ -62,7 +62,7 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
             }
         }
 
-        return new WriteDbData4ClassAnnotation(genNextRecordId(), simpleClassName, annotationName, attributeName, attributeType, attributeValue, className);
+        return new WriteDbData4ClassAnnotation(simpleClassName, annotationName, attributeName, attributeType, attributeValue, className);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassAnnotation data) {
         return new Object[]{
-                data.getRecordId(),
+                genNextRecordId(),
                 data.getSimpleClassName(),
                 data.getAnnotationName(),
                 data.getAttributeName(),

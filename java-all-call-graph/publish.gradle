@@ -3,6 +3,13 @@ apply plugin: 'signing'
 
 apply from: 'build.gradle'
 
+task sourcesJar(type: Jar) {
+    doFirst {
+        archiveClassifier.set('sources')
+        from sourceSets.main.allJava
+    }
+}
+
 publishing {
     publications {
         mavenJava1(MavenPublication) {
@@ -11,7 +18,6 @@ publishing {
             version "${version}"
             from components.java
             artifact sourcesJar
-            artifact javadocJar
 
             pom {
                 name = "java-all-call-graph"

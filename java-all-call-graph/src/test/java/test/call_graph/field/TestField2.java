@@ -24,7 +24,7 @@ public class TestField2 {
         } else if (i == 2) {
             configKeyEnum = ConfigKeyEnum.CKE_THREAD_NUM;
         } else {
-            configKeyEnum = ConfigKeyEnum.CKE_CALLER_SHOW_RAW_METHOD_CALL_INFO;
+            configKeyEnum = ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL;
         }
 
         System.out.println(configKeyEnum);

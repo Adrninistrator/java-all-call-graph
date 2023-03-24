@@ -23,7 +23,7 @@ public class SpTxCalleeInfo extends BaseCalleeExtractedMethod {
             boolean runInOtherThread,
             SpringTxTypeEnum springTxTypeEnum,
             String txPropagation) {
-        super(dataSeq, lineNumber, calleeFullMethod, calleeUpperFullMethod, runInOtherThread);
+        super(dataSeq, lineNumber, calleeFullMethod, calleeUpperFullMethod, runInOtherThread, false);
 
         this.springTxTypeEnum = springTxTypeEnum;
         this.txPropagation = txPropagation;

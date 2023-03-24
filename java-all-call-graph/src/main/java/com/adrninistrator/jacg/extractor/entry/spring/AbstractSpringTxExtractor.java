@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -60,7 +59,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         // 设置入口方法
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, new HashSet<>(springTransactionalMethodList));
 
-        // 调用父类的方法生成调用堆栈文件，参数2设为false，避免在父类中关闭数据源
+        // 调用父类的方法生成调用堆栈文件，参数2设为false，使父类不关闭数据源
         List<CallerExtractedFile> callerExtractedFileList = baseExtract(configureWrapper, false);
         if (JavaCGUtil.isCollectionEmpty(callerExtractedFileList)) {
             logger.info("未找到@Transactional注解对应的方法对应的调用堆栈文件");
@@ -92,7 +91,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         // 设置入口方法
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, new HashSet<>(txTplEntryMethodList));
 
-        // 调用父类的方法生成调用堆栈文件，参数2设为false，避免在父类中关闭数据源
+        // 调用父类的方法生成调用堆栈文件，参数2设为false，使父类不关闭数据源
         List<CallerExtractedFile> callerExtractedFileList = baseExtract(configureWrapper, false);
         if (JavaCGUtil.isCollectionEmpty(callerExtractedFileList)) {
             logger.info("未找到TransactionTemplate对应的方法对应的调用堆栈文件");
@@ -193,8 +192,9 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
                 // 被调用类为TransactionTemplate，类型为事务模板
                 springTxTypeEnum = SpringTxTypeEnum.STTE_TEMPLATE;
                 // 处理被调用上一层方法
-                if (callerExtractedLine.getLastLineParsed() != null) {
-                    calleeUpperFullMethod = callerExtractedLine.getLastLineParsed().getMethodDetail().getFullMethod();
+                CallGraphLineParsed lastLineParsed = callerExtractedLine.getLastLineParsed();
+                if (lastLineParsed != null) {
+                    calleeUpperFullMethod = lastLineParsed.getMethodDetail().getFullMethod();
                 }
             } else {
                 // 类型为事务注解
@@ -233,7 +233,8 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
                     callerExtractedLine.getLineNumber(),
                     callerExtractedLine.getCallGraphLineParsed().getMethodDetail().getFullMethod(),
                     calleeUpperFullMethod,
-                    callerExtractedLine.isRunInOtherThread());
+                    callerExtractedLine.isRunInOtherThread(),
+                    callerExtractedLine.isRunInTransaction());
             calleeExtractedMethodList.add(calleeExtractedMethod);
         }
         return calleeExtractedMethodList;
@@ -247,10 +248,10 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
     // 指定公共配置参数
     protected void setCommonConfig(ConfigureWrapper configureWrapper) {
         // 指定方法注解处理类
-        configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER, Arrays.asList(
+        configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 SpringTransactionalFormatter.class.getName(),
                 DefaultAnnotationFormatter.class.getName()
-        ));
+        );
 
         // 在需要处理的类名前缀中增加Spring事务模板类
         setAllowedClassNamePrefix(configureWrapper);

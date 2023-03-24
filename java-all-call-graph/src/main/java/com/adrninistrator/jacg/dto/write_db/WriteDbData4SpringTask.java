@@ -6,21 +6,11 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，Spring定时任务信息
  */
 public class WriteDbData4SpringTask extends AbstractWriteDbData {
-    private int recordId;
-
     private String springBeanName;
 
     private String className;
 
     private String methodName;
-
-    public int getRecordId() {
-        return recordId;
-    }
-
-    public void setRecordId(int recordId) {
-        this.recordId = recordId;
-    }
 
     public String getSpringBeanName() {
         return springBeanName;

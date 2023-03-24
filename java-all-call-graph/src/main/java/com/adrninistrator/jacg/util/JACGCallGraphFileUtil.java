@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
-import com.adrninistrator.jacg.extensions.dto.extened_data.BaseExtendedData;
+import com.adrninistrator.jacg.extensions.dto.business_data.BaseBusinessData;
 import com.adrninistrator.jacg.markdown.JACGMarkdownConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -146,24 +148,6 @@ public class JACGCallGraphFileUtil {
         }
         // 文件名使用@分隔后，类名在第1列
         return StringUtils.substringBefore(fileName, JACGConstants.FLAG_AT);
-    }
-
-    /**
-     * 从[完整或简单类名]@[方法名]@[方法HASH+长度]格式的文件名转换为[完整或简单类名]:[方法名]()格式的方法名
-     *
-     * @param fileName
-     * @return
-     */
-    public static String getMethodNameFromFileName(String fileName) {
-        if (StringUtils.isBlank(fileName)) {
-            throw new JavaCGRuntimeException("传入参数不允许为空");
-        }
-
-        String[] array = StringUtils.splitPreserveAllTokens(fileName, JACGConstants.FLAG_AT);
-        if (array.length < 2) {
-            throw new JavaCGRuntimeException("传入文件名非法 " + fileName);
-        }
-        return array[0] + JavaCGConstants.FLAG_COLON + array[1] + JavaCGConstants.FLAG_LEFT_BRACKET + JavaCGConstants.FLAG_RIGHT_BRACKET;
     }
 
     /**
@@ -308,6 +292,10 @@ public class JACGCallGraphFileUtil {
      * @return
      */
     public static CallGraphLineParsed parseCallGraphLine4er(String line) {
+        if (line == null) {
+            return null;
+        }
+
         // 对方法完整调用链文件行进行分隔
         String[] array = splitCallGraphLine(line, false);
         String fullMethodWithAnnotations;
@@ -373,17 +361,18 @@ public class JACGCallGraphFileUtil {
         }
 
         // 当前行存在需要继续处理的列
+        List<BaseBusinessData> businessDataList = new ArrayList<>();
         for (int i = nextStartIndex; i < lineColumns.length; i++) {
             String column = lineColumns[i];
-            if (column.startsWith(JACGConstants.CALL_FLAG_EXTENDED_DATA)) {
-                // 方法调用自定义数据
-                String extendedDataStr = StringUtils.substringAfter(column, JACGConstants.CALL_FLAG_EXTENDED_DATA);
+            if (column.startsWith(JACGConstants.CALL_FLAG_BUSINESS_DATA)) {
+                // 方法调用业务功能数据
+                String businessDataStr = StringUtils.substringAfter(column, JACGConstants.CALL_FLAG_BUSINESS_DATA);
                 // @之前为类型，@之后为值
-                String extendedDataType = StringUtils.substringBefore(extendedDataStr, JACGConstants.FLAG_AT);
-                String extendedDataValue = StringUtils.substringAfter(extendedDataStr, JACGConstants.FLAG_AT);
-                // 以下分别为方法调用自定义数据的类型与值
-                BaseExtendedData extendedData = new BaseExtendedData(extendedDataType, extendedDataValue);
-                callGraphLineParsed.setExtendedData(extendedData);
+                String businessDataType = StringUtils.substringBefore(businessDataStr, JACGConstants.FLAG_AT);
+                String businessDataValue = StringUtils.substringAfter(businessDataStr, JACGConstants.FLAG_AT);
+                // 以下分别为方法调用业务功能数据的类型与值
+                BaseBusinessData businessData = new BaseBusinessData(businessDataType, businessDataValue);
+                businessDataList.add(businessData);
             } else if (column.startsWith(JACGConstants.CALL_FLAG_CYCLE_START) && column.endsWith(JACGConstants.CALL_FLAG_CYCLE_END)) {
                 // 出现循环调用
                 callGraphLineParsed.setCycleCall(true);
@@ -395,13 +384,36 @@ public class JACGCallGraphFileUtil {
             } else if (JACGConstants.CALLEE_FLAG_ENTRY_NO_TAB.equals(column)) {
                 // 入口方法
                 callGraphLineParsed.setEntryMethod(true);
-            } else if (JACGConstants.CALL_FLAG_RUN_IN_OTHER_THREAD.equals(column)) {
+            } else if (JACGConstants.CALL_FLAG_RUN_IN_OTHER_THREAD_NO_TAB.equals(column)) {
                 // 在其他线程中执行
                 callGraphLineParsed.setRunInOtherThread(true);
+            } else if (JACGConstants.CALL_FLAG_RUN_IN_TRANSACTION_NO_TAB.equals(column)) {
+                // 在事务中执行
+                callGraphLineParsed.setRunInTransaction(true);
             }
         }
-
+        callGraphLineParsed.setBusinessDataList(businessDataList);
         return callGraphLineParsed;
+    }
+
+    /**
+     * 判断是否包含在其他线程中执行的标记（不对行数据进行完整解析）
+     *
+     * @param line
+     * @return
+     */
+    public static boolean checkRunInOtherThread(String line) {
+        return StringUtils.contains(line, JACGConstants.CALL_FLAG_RUN_IN_OTHER_THREAD);
+    }
+
+    /**
+     * 判断是否包含在事务中执行的标记（不对行数据进行完整解析）
+     *
+     * @param line
+     * @return
+     */
+    public static boolean checkRunInTransaction(String line) {
+        return StringUtils.contains(line, JACGConstants.CALL_FLAG_RUN_IN_TRANSACTION);
     }
 
     // 处理完整方法及注解

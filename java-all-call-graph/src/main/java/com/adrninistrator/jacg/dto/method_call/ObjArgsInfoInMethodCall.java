@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.dto.method_call;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Map;
 public class ObjArgsInfoInMethodCall {
     // 被调用对象的信息
     @JsonProperty("obj")
-    private MethodCallInfo objInfo;
+    private List<MethodCallInfo> objInfo;
 
     /*
         参数的信息
@@ -22,21 +23,21 @@ public class ObjArgsInfoInMethodCall {
             参数对应的方法调用中使用的相关信息
      */
     @JsonProperty("args")
-    private Map<Integer, MethodCallInfo> argInfoMap;
+    private Map<Integer, List<MethodCallInfo>> argInfoMap;
 
-    public MethodCallInfo getObjInfo() {
+    public List<MethodCallInfo> getObjInfo() {
         return objInfo;
     }
 
-    public void setObjInfo(MethodCallInfo objInfo) {
+    public void setObjInfo(List<MethodCallInfo> objInfo) {
         this.objInfo = objInfo;
     }
 
-    public Map<Integer, MethodCallInfo> getArgInfoMap() {
+    public Map<Integer, List<MethodCallInfo>> getArgInfoMap() {
         return argInfoMap;
     }
 
-    public void setArgInfoMap(Map<Integer, MethodCallInfo> argInfoMap) {
+    public void setArgInfoMap(Map<Integer, List<MethodCallInfo>> argInfoMap) {
         this.argInfoMap = argInfoMap;
     }
 }

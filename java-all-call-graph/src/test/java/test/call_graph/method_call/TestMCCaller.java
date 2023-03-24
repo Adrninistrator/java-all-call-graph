@@ -2,6 +2,8 @@ package test.call_graph.method_call;
 
 import test.call_graph.common.TestConstants;
 import test.call_graph.extend.I2_1_1;
+import test.call_graph.extend_complex.AbstractSuperClassA;
+import test.call_graph.extend_complex.ChildClassA1;
 
 import java.math.BigDecimal;
 
@@ -13,6 +15,8 @@ import java.math.BigDecimal;
 public class TestMCCaller {
 
     public static final String TEST_STRING = "r_test_string";
+
+    private static final AbstractSuperClassA[] SUPER_CLASSA_ARRAY = new ChildClassA1[]{};
 
     private TestMCCallee testMCCallee = new TestMCCallee();
 
@@ -172,6 +176,7 @@ public class TestMCCaller {
     }
 
     private void run(int a, String b, BigDecimal c) {
+        AbstractSuperClassA[] superClassAArray = returnArray1();
     }
 
     private void handleStringArrayArgs(String[] aa) {
@@ -182,5 +187,13 @@ public class TestMCCaller {
     }
 
     private void run2(I2_1_1 i) {
+    }
+
+    public AbstractSuperClassA[] returnArray1() {
+        return new ChildClassA1[]{};
+    }
+
+    public AbstractSuperClassA[] returnArray2() {
+        return SUPER_CLASSA_ARRAY;
     }
 }

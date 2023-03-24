@@ -1,8 +1,8 @@
 package com.adrninistrator.jacg.dto.write_db;
 
-import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 
 /**
  * @author adrninistrator
@@ -40,6 +40,10 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
 
     private int callFlags = 0;
 
+    private String rawReturnType;
+
+    private String actualReturnType;
+
     /**
      * 创建方法调用对象
      *
@@ -61,7 +65,10 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
                                                      String calleeFullMethod,
                                                      int callId,
                                                      int callerLineNum,
-                                                     String callerJarNum) {
+                                                     String callerJarNum,
+                                                     String rawReturnType,
+                                                     String actualReturnType
+    ) {
         String callerMethodHash = JACGUtil.genHashWithLen(callerFullMethod);
         String callerMethodName = JACGClassMethodUtil.getMethodNameFromFull(callerFullMethod);
 
@@ -69,7 +76,7 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
         writeDbData4MethodCall.setCallId(callId);
         writeDbData4MethodCall.setCallType(callType);
         writeDbData4MethodCall.setCalleeObjType(calleeObjType);
-        writeDbData4MethodCall.setEnabled(JACGConstants.YES_1);
+        writeDbData4MethodCall.setEnabled(JavaCGYesNoEnum.YES.getIntValue());
         writeDbData4MethodCall.setCallerJarNum(callerJarNum);
         writeDbData4MethodCall.setCallerMethodHash(callerMethodHash);
         writeDbData4MethodCall.setCallerSimpleClassName(callerSimpleClassName);
@@ -83,6 +90,9 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
         writeDbData4MethodCall.setCalleeSimpleClassName(calleeSimpleClassName);
         writeDbData4MethodCall.setCalleeMethodName(calleeMethodName);
         writeDbData4MethodCall.setCalleeFullMethod(calleeFullMethod);
+
+        writeDbData4MethodCall.setRawReturnType(rawReturnType);
+        writeDbData4MethodCall.setActualReturnType(actualReturnType);
 
         return writeDbData4MethodCall;
     }
@@ -206,5 +216,21 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
 
     public void setCallFlags(int callFlags) {
         this.callFlags = callFlags;
+    }
+
+    public String getRawReturnType() {
+        return rawReturnType;
+    }
+
+    public void setRawReturnType(String rawReturnType) {
+        this.rawReturnType = rawReturnType;
+    }
+
+    public String getActualReturnType() {
+        return actualReturnType;
+    }
+
+    public void setActualReturnType(String actualReturnType) {
+        this.actualReturnType = actualReturnType;
     }
 }
