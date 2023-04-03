@@ -3,7 +3,7 @@ package test.run_by_code.concurrent;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.find_stack.FindCallStackTrace;
 import org.junit.Test;
-import test.run_by_code.TestRunByCodeBase;
+import test.run_by_code.base.TestRunByCodeBase;
 
 /**
  * @author adrninistrator

@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.run_by_code.TestRunByCodeBase;
+import test.run_by_code.base.TestRunByCodeBase;
 
 /**
  * @author adrninistrator
@@ -34,7 +34,7 @@ public class TestRunnerGenAllGraphComposite extends TestRunByCodeBase {
                 continue;
             }
 
-            configureWrapper.setConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, outputDetailEnum.getDetail());
+            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, outputDetailEnum.getDetail());
 
             if (!new RunnerGenAllGraph4Callee().run(configureWrapper)) {
                 logger.error("执行失败");
@@ -49,8 +49,8 @@ public class TestRunnerGenAllGraphComposite extends TestRunByCodeBase {
 
             for (boolean ignore : BOOLEAN_ARRAY) {
                 for (boolean ignoreDup : BOOLEAN_ARRAY) {
-                    configureWrapper.setConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, outputDetailEnum.getDetail());
-                    configureWrapper.setConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, String.valueOf(ignoreDup));
+                    configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, outputDetailEnum.getDetail());
+                    configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, String.valueOf(ignoreDup));
 
                     RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller();
                     if (!runnerGenAllGraph4Caller.run(configureWrapper)) {

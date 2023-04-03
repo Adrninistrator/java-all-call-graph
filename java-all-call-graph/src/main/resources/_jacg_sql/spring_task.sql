@@ -4,6 +4,6 @@ CREATE TABLE if not exists jacg_spring_task_{appName} (
   class_name varchar(500) NOT NULL COMMENT '完整类名',
   method_name varchar(300) NOT NULL COMMENT '方法名',
   PRIMARY KEY (record_id),
-  INDEX inx_st_sbn_{appName}(spring_bean_name(255)),
-  INDEX inx_st_cn_{appName}(class_name(255))
+  INDEX inx_spt_sbn_{appName}(spring_bean_name(255)),
+  INDEX inx_spt_cn_{appName}(class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Spring定时任务信息表';

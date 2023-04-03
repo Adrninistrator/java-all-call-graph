@@ -2,8 +2,6 @@ package com.adrninistrator.jacg.extractor.entry;
 
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
-import com.adrninistrator.jacg.conf.ConfInfo;
-import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
@@ -13,7 +11,6 @@ import com.adrninistrator.jacg.find_stack.FindCallStackTrace;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -37,6 +34,8 @@ public abstract class BaseExtractor {
     protected DbOperWrapper dbOperWrapper;
 
     protected AtomicBoolean runningFlag = new AtomicBoolean(false);
+
+    protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
     /**
      * 选择方法调用链方向
@@ -67,15 +66,22 @@ public abstract class BaseExtractor {
      * @return
      */
     protected List<String> findStack(ConfigureWrapper configureWrapper) {
+        // 记录入口简单类名
+        configureWrapper.addEntryClass(currentSimpleClassName);
+
         // 判断生成调用链时的详细程度是否为最详细
-        if (!OutputDetailEnum.ODE_1.getDetail().equals(configureWrapper.getConfig(null, ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, false))) {
+        if (!OutputDetailEnum.ODE_1.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, true))) {
             logger.warn("生成调用链时的详细程度自动设置为最详细 {} {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getKey(), OutputDetailEnum.ODE_1.getDetail());
-            configureWrapper.setConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_1.getDetail());
+            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_1.getDetail());
         }
 
         FindCallStackTrace findCallStackTrace = new FindCallStackTrace();
         findCallStackTrace.init(chooseOrder4ee(), configureWrapper);
-        return findCallStackTrace.find(chooseOrder4ee(), configureWrapper);
+        List<String> mdFilePathList = findCallStackTrace.find(chooseOrder4ee(), configureWrapper);
+
+        // 执行完毕时尝试打印当前使用的配置信息
+        configureWrapper.tryPrintUsedConfigInfo(currentSimpleClassName, findCallStackTrace.getCallGraphOutputDirPath());
+        return mdFilePathList;
     }
 
     /**
@@ -89,16 +95,9 @@ public abstract class BaseExtractor {
             return true;
         }
 
-        ConfInfo confInfo = ConfManager.getConfInfo(configureWrapper, false);
-        if (confInfo == null) {
-            throw new JavaCGRuntimeException("配置初始化失败");
-        }
-        dbOperator = DbOperator.genInstance(confInfo, this.getClass().getSimpleName());
-        if (dbOperator == null) {
-            return false;
-        }
-
-        dbOperWrapper = new DbOperWrapper(dbOperator);
+        // 完成需要使用的基础配置的初始化
+        dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName);
+        dbOperator = dbOperWrapper.getDbOperator();
         return true;
     }
 

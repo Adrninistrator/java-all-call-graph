@@ -3,6 +3,7 @@ package test.run_by_code;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import org.junit.Assert;
 import org.junit.Test;
+import test.run_by_code.base.TestRunByCodeBase;
 
 /**
  * @author adrninistrator

@@ -28,17 +28,17 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor {
     private String[] handleBusinessDataTypes;
 
     /**
-     * 生成向下的完整调用链，根据关键字进行查找，获取方法调用业务功能数据并返回
+     * 生成向下的完整调用链，根据关键字进行查找，获取方法调用业务功能数据并返回，使用配置文件中的参数
      *
      * @param businessDataTypes 需要处理的方法调用业务功能数据类型
      * @return
      */
     public List<CallerExtractedFile> extract(String... businessDataTypes) {
-        return extract(new ConfigureWrapper(), businessDataTypes);
+        return extract(new ConfigureWrapper(false), businessDataTypes);
     }
 
     /**
-     * 生成向下的完整调用链，根据关键字进行查找，获取方法调用业务功能数据并返回
+     * 生成向下的完整调用链，根据关键字进行查找，获取方法调用业务功能数据并返回，使用代码指定的参数
      *
      * @param configureWrapper
      * @param businessDataTypes 需要处理的方法调用业务功能数据类型

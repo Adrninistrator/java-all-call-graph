@@ -11,37 +11,21 @@ import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
  */
 public class WriteDbData4MethodCall extends AbstractWriteDbData {
     private int callId;
-
     private String callType;
-
     private String calleeObjType;
-
     private int enabled;
-
     private String callerJarNum;
-
     private String callerMethodHash;
-
     private String callerSimpleClassName;
-
     private String callerMethodName;
-
     private String callerFullMethod;
-
     private int callerLineNumber;
-
     private String calleeMethodHash;
-
     private String calleeSimpleClassName;
-
     private String calleeMethodName;
-
     private String calleeFullMethod;
-
     private int callFlags = 0;
-
     private String rawReturnType;
-
     private String actualReturnType;
 
     /**

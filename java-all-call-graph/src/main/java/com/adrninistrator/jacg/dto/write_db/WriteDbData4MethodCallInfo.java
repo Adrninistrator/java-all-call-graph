@@ -7,15 +7,10 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4MethodCallInfo extends AbstractWriteDbData {
     private final int callId;
-
     private final int objArgsSeq;
-
     private final int seq;
-
     private final String type;
-
     private final int arrayFlag;
-
     private final String theValue;
 
     public WriteDbData4MethodCallInfo(int callId, int objArgsSeq, int seq, String type, int arrayFlag, String theValue) {

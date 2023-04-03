@@ -1,7 +1,10 @@
 package com.adrninistrator.jacg.dboper;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.conf.ConfInfo;
+import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -35,26 +38,28 @@ public class DbOperator {
 
     private DruidDataSource dataSource;
 
-    private final String objSeq;
+    private final ConfigureWrapper configureWrapper;
 
     private final String appName;
 
+    private final String objSeq;
+
     // 记录当前入口类的类名
-    private final String entryClassName;
+    private final String entrySimpleClassName;
 
     private boolean useH2Db = false;
 
     protected boolean closed = false;
 
-    public static DbOperator genInstance(ConfInfo confInfo, String entryClassName) {
+    public static DbOperator genInstance(ConfigureWrapper configureWrapper, String entrySimpleClassName) {
         try {
-            DbOperator instance = new DbOperator(confInfo, entryClassName);
+            DbOperator instance = new DbOperator(configureWrapper, entrySimpleClassName);
 //            Class.forName(confInfo.getDbDriverName());
 
-            if (confInfo.isDbUseH2()) {
-                instance.initH2Db(confInfo);
+            if (configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2)) {
+                instance.initH2Db();
             } else {
-                instance.initNonH2Db(confInfo);
+                instance.initNonH2Db();
             }
 
             return instance;
@@ -64,37 +69,39 @@ public class DbOperator {
         }
     }
 
-    private DbOperator(ConfInfo confInfo, String entryClassName) {
+    private DbOperator(ConfigureWrapper configureWrapper, String entrySimpleClassName) {
+        this.configureWrapper = configureWrapper;
+        this.entrySimpleClassName = entrySimpleClassName;
+
         dataSource = new DruidDataSource();
-        dataSource.setMaxActive(confInfo.getThreadNum());
+        dataSource.setMaxActive(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_THREAD_NUM));
         dataSource.setTestOnBorrow(false);
         dataSource.setTestOnReturn(false);
         dataSource.setTestWhileIdle(false);
 
+        appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
         objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
-        logger.info("[{}] 创建数据库操作对象 {}", objSeq, entryClassName);
+        logger.info("[{}] 创建数据库操作对象 {}", objSeq, entrySimpleClassName);
 
-        appName = confInfo.getAppName();
-        this.entryClassName = entryClassName;
-
+        // 在JVM关闭时检查当前数据库操作对象是否有关闭
         addShutdownHook();
     }
 
+    // 在JVM关闭时检查当前数据库操作对象是否有关闭
     private void addShutdownHook() {
-        // 在JVM关闭时检查当前数据库操作对象是否有关闭
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (dataSource != null) {
-                logger.error("[{}] 数据库操作对象未关闭 {}", objSeq, entryClassName);
+                logger.error("[{}] 数据库操作对象未关闭 {}", objSeq, entrySimpleClassName);
                 closeDs();
             }
         }));
     }
 
-    private void initH2Db(ConfInfo confInfo) {
+    private void initH2Db() {
         useH2Db = true;
 
         dataSource.setDriverClassName("org.h2.Driver");
-        String h2DbJdbcUrl = JACGConstants.H2_PROTOCOL + confInfo.getDbH2FilePath() +
+        String h2DbJdbcUrl = JACGConstants.H2_PROTOCOL + configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH) +
                 ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS " +
                 JACGConstants.H2_SCHEMA + "\\;SET SCHEMA " + JACGConstants.H2_SCHEMA;
         logger.info("[{}] 初始化H2数据源 URL: {}", objSeq, h2DbJdbcUrl);
@@ -104,13 +111,13 @@ public class DbOperator {
         dataSource.setPassword("");
     }
 
-    private void initNonH2Db(ConfInfo confInfo) {
+    private void initNonH2Db() {
         useH2Db = false;
 
-        dataSource.setDriverClassName(confInfo.getDbDriverName());
-        dataSource.setUrl(confInfo.getDbUrl());
-        dataSource.setUsername(confInfo.getDbUsername());
-        dataSource.setPassword(confInfo.getDbPassword());
+        dataSource.setDriverClassName(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME));
+        dataSource.setUrl(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_URL));
+        dataSource.setUsername(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME));
+        dataSource.setPassword(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD));
 
         logger.info("[{}] 初始化数据源", objSeq);
     }
@@ -269,6 +276,7 @@ public class DbOperator {
      */
     public boolean truncateTable(String tableName) {
         String sql = "truncate table " + tableName;
+        sql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
         logger.debug("[{}] truncate table sql: [{}]", objSeq, sql);
         return executeDDLSql(sql);
     }

@@ -7,13 +7,9 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4MethodInfo extends AbstractWriteDbData {
     private final String methodHash;
-
     private final String simpleClassName;
-
     private final int accessFlags;
-
     private final String methodName;
-
     private final String fullMethod;
 
     public WriteDbData4MethodInfo(String methodHash, String simpleClassName, int accessFlags, String methodName, String fullMethod) {

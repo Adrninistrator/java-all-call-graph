@@ -7,19 +7,12 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4MethodAnnotation extends AbstractWriteDbData {
     private String methodHash;
-
     private String annotationName;
-
     private String attributeName;
-
     private String annotationType;
-
     private String attributeValue;
-
     private String fullMethod;
-
     private String simpleClassName;
-
     private int springMappingAnnotation;
 
     //

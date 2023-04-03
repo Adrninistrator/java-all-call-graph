@@ -7,19 +7,12 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4SpringController extends AbstractWriteDbData {
     private String methodHash;
-
     private int seq;
-
     private String showUri;
-
     private String classPath;
-
     private String methodPath;
-
     private String annotationName;
-
     private String simpleClassName;
-
     private String fullMethod;
 
     public String getMethodHash() {

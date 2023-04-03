@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.annotation.util;
 
 import com.adrninistrator.jacg.common.enums.AnnotationAttributesTypeEnum;
 import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation_attribute.EmptyAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation_attribute.InvalidAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation_attribute.ListMapAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation_attribute.ListStringAnnotationAttribute;
@@ -10,6 +11,7 @@ import com.adrninistrator.jacg.dto.annotation_attribute.StringAnnotationAttribut
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +62,10 @@ public class AnnotationAttributesParseUtil {
             List<Map<String, Object>> attributeList = JACGJsonUtil.getObjFromJsonStr(attributeValue, new TypeReference<List<Map<String, Object>>>() {
             });
             return new ListMapAnnotationAttribute(attributeList);
+        }
+        if (StringUtils.isBlank(attributeType)) {
+            // 注解属性类型为空，返回空属性
+            return EmptyAnnotationAttribute.getInstance();
         }
 
         logger.error("格式非法的注解属性 {}", attributeValue);

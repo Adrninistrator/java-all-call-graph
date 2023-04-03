@@ -7,19 +7,12 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4ExtendsImpl extends AbstractWriteDbData {
     private String simpleClassName;
-
     private String className;
-
     private int accessFlags;
-
     private String type;
-
     private int seq;
-
     private int existsDownwardClasses;
-
     private String upwardSimpleClassName;
-
     private String upwardClassName;
 
     public String getSimpleClassName() {

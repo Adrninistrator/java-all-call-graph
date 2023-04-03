@@ -5,6 +5,8 @@ import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.extensions.code_parser.SpringXmlBeanParserInterface;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -16,6 +18,7 @@ import java.util.Map;
  * @description: 对Spring XML文件中的bean解析的类
  */
 public class SpringXmlBeanParser implements SpringXmlBeanParserInterface {
+    private static final Logger logger = LoggerFactory.getLogger(SpringXmlBeanParser.class);
 
     private Map<String, String> beanMap;
 
@@ -42,7 +45,7 @@ public class SpringXmlBeanParser implements SpringXmlBeanParserInterface {
                 return;
             }
 
-            System.out.println("处理Spring XML文件 " + jarEntryName);
+            logger.info("处理Spring XML文件 {}", jarEntryName);
             for (Element element : root.getChildren()) {
                 if (!"bean".equals(element.getQualifiedName())) {
                     continue;

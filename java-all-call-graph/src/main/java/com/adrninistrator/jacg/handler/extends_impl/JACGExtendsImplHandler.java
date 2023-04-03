@@ -5,7 +5,6 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.dto.classes.ClassNameAndAccessFlags;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
@@ -47,8 +46,8 @@ public class JACGExtendsImplHandler extends BaseHandler {
         super(configureWrapper);
     }
 
-    public JACGExtendsImplHandler(DbOperator dbOperator, DbOperWrapper dbOperWrapper) {
-        super(dbOperator, dbOperWrapper);
+    public JACGExtendsImplHandler(DbOperWrapper dbOperWrapper) {
+        super(dbOperWrapper);
     }
 
     /**
@@ -67,9 +66,9 @@ public class JACGExtendsImplHandler extends BaseHandler {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.EI_SIMPLE_CLASS_NAME, DC.EI_CLASS_NAME, DC.EI_ACCESS_FLAGS, DC.EI_EXISTS_DOWNWARD_CLASSES) +
-                    " from " + DbTableInfoEnum.DTIE_EXTENDS_IMPL.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_EXTENDS_IMPL.getTableName() +
                     " where " + DC.EI_UPWARD_SIMPLE_CLASS_NAME + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.computeIfAbsent(upwardSimpleClassName, k -> ConcurrentHashMap.newKeySet());
@@ -325,9 +324,9 @@ public class JACGExtendsImplHandler extends BaseHandler {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.EI_UPWARD_SIMPLE_CLASS_NAME +
-                    " from " + DbTableInfoEnum.DTIE_EXTENDS_IMPL.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_EXTENDS_IMPL.getTableName() +
                     " where " + DC.EI_SIMPLE_CLASS_NAME + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleClassName});

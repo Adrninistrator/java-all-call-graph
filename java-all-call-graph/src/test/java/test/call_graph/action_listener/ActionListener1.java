@@ -9,8 +9,18 @@ import java.awt.event.ActionListener;
  * @description:
  */
 public class ActionListener1 implements ActionListener {
+
+    private String data;
+
+    public ActionListener1() {
+    }
+
+    public ActionListener1(String data) {
+        this.data = data;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.getProperty("");
+        System.getProperty(data);
     }
 }

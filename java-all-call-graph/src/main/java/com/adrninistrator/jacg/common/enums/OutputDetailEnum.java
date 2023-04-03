@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.common.enums;
 /**
  * @author adrninistrator
  * @date 2022/4/20
- * @description:
+ * @description: 输出结果展示详细程度枚举
  */
 public enum OutputDetailEnum {
     ODE_1("1", "输出结果展示：完整类名+方法名+方法参数"),

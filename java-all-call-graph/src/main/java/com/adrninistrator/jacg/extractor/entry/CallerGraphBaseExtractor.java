@@ -23,16 +23,16 @@ public class CallerGraphBaseExtractor extends BaseExtractor {
     protected List<CallerExtractedLine> callerExtractedLineList;
 
     /**
-     * 生成向下的完整调用链，根据关键字进行查找，获取调用链结果文件信息并返回
+     * 生成向下的完整调用链，根据关键字进行查找，获取调用链结果文件信息并返回，使用配置文件中的参数
      *
      * @return
      */
     public List<CallerExtractedFile> baseExtract() {
-        return baseExtract(new ConfigureWrapper(), true);
+        return baseExtract(new ConfigureWrapper(false), true);
     }
 
     /**
-     * 生成向下的完整调用链，根据关键字进行查找，获取调用链结果文件信息并返回
+     * 生成向下的完整调用链，根据关键字进行查找，获取调用链结果文件信息并返回，使用代码指定的参数
      *
      * @param configureWrapper
      * @return

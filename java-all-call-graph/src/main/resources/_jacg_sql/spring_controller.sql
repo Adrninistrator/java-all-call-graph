@@ -8,6 +8,6 @@ CREATE TABLE if not exists jacg_spring_controller_{appName} (
   simple_class_name varchar(500) NOT NULL COMMENT '唯一类名',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
   PRIMARY KEY (method_hash, seq),
-  INDEX inx_sc_su_{appName}(show_uri(255)),
-  INDEX inx_sc_scn_{appName}(simple_class_name(255))
+  INDEX inx_spc_su_{appName}(show_uri(255)),
+  INDEX inx_spc_scn_{appName}(simple_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Spring Bean信息表';

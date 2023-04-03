@@ -7,13 +7,9 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4MethodLineNumber extends AbstractWriteDbData {
     private final String methodHash;
-
     private final String simpleClassName;
-
     private final int minLineNumber;
-
     private final int maxLineNumber;
-
     private final String fullMethod;
 
     public WriteDbData4MethodLineNumber(String methodHash, String simpleClassName, int minLineNumber, int maxLineNumber, String fullMethod) {

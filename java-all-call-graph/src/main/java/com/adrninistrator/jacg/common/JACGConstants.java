@@ -13,18 +13,21 @@ public class JACGConstants {
     public static final String DIR_OUTPUT_STACK = "_stack";
     public static final String DIR_KEYWORDS_NOT_FOUND = "_keywords_not_found";
 
-    public static final String FILE_CONFIG = "config.properties";
-    public static final String FILE_CONFIG_DB = "config_db.properties";
-    // 保存当前使用的配置参数信息文件
+    // 保存全部的配置参数信息文件
+    public static final String FILE_JACG_ALL_CONFIG_MD = "_jacg_all_config.md";
+    // 保存当前有使用的配置参数信息文件
     public static final String FILE_JACG_USED_CONFIG_MD = "_jacg_used_config.md";
     public static final String FILE_JAVACG_USED_CONFIG_MD = "_javacg_used_config.md";
 
-    public static final String USED_CONFIG_FLAG_ARG_KEY = "参数名称";
-    public static final String USED_CONFIG_FLAG_ARG_DESC = "参数说明";
-    public static final String USED_CONFIG_FLAG_ARG_VALUE = "参数值";
-    public static final String USED_CONFIG_FLAG_ARG_LIST = "区分顺序的其他配置信息";
-    public static final String USED_CONFIG_FLAG_ARG_SET = "不区分顺序的其他配置信息";
+    public static final String USED_CONFIG_FLAG_FILE_KEY = "配置文件名称";
+    public static final String USED_CONFIG_FLAG_FILE_DESC = "配置文件说明";
+    public static final String USED_CONFIG_FLAG_CONF_KEY = "参数名称";
+    public static final String USED_CONFIG_FLAG_CONF_DESC = "参数说明";
+    public static final String USED_CONFIG_FLAG_CONF_VALUE = "参数值";
+    public static final String USED_CONFIG_FLAG_CONF_LIST = "区分顺序的其他配置信息";
+    public static final String USED_CONFIG_FLAG_CONF_SET = "不区分顺序的其他配置信息";
 
+    // sql语句中用于替换的appName
     public static final String APP_NAME_IN_SQL = "{appName}";
 
     public static final String SQL_CREATE_TABLE_HEAD = "CREATE TABLE if not exists";
@@ -130,6 +133,8 @@ public class JACGConstants {
     public static final String H2_PROTOCOL = "jdbc:h2:file:";
     public static final String H2_SCHEMA = "jacg";
     public static final String H2_FILE_EXT = ".mv.db";
+
+    public static final String THREAD_NAME_PREFIX_WORKER = "jacg_worker";
 
     private JACGConstants() {
         throw new IllegalStateException("illegal");

@@ -22,7 +22,6 @@ import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByClassMethodName;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -111,11 +110,11 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
                 不查找调用doInTransaction方法的代码，否则找到上层调用方法是构造函数，下同
              */
             queryTxTplAnonymousInnerClassInfo(jacgExtendsImplHandler, JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK,
-                    JavaCGConstants.METHOD_NAME_INIT, spTxEntryMethodTxTplList, txTplEntryMethodList);
+                    JavaCGCommonNameConstants.METHOD_NAME_INIT, spTxEntryMethodTxTplList, txTplEntryMethodList);
 
             // 查询使用TransactionCallbackWithoutResult的情况
             queryTxTplAnonymousInnerClassInfo(jacgExtendsImplHandler, JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK_WITHOUT_RESULT,
-                    JavaCGConstants.METHOD_NAME_INIT, spTxEntryMethodTxTplList, txTplEntryMethodList);
+                    JavaCGCommonNameConstants.METHOD_NAME_INIT, spTxEntryMethodTxTplList, txTplEntryMethodList);
 
             if (!JavaCGUtil.isCollectionEmpty(txTplEntryMethodList)) {
                 logger.info("找到TransactionTemplate使用匿名内部类的方法\n{}", StringUtils.join(txTplEntryMethodList, "\n"));

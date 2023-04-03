@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
+import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGConfigKeyEnum;
 import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
@@ -29,16 +30,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public class JACGUtil {
     private static final Logger logger = LoggerFactory.getLogger(JACGUtil.class);
-
-    public static boolean isNumStr(String str) {
-        char[] charArray = str.toCharArray();
-        for (char ch : charArray) {
-            if (ch < '0' || ch > '9') {
-                return false;
-            }
-        }
-        return true;
-    }
 
     public static String genHashWithLen(String data) {
         byte[] md5 = DigestUtils.md5(data);
@@ -83,25 +74,6 @@ public class JACGUtil {
             logger.error("根据指定类名 {} 获得 {} 类的实例异常 ", className, classType.getName(), e);
             return null;
         }
-    }
-
-    /**
-     * 判断字符串是否为数字
-     *
-     * @param str
-     * @return
-     */
-    public static boolean isValidNum(String str) {
-        if (str == null || str.isEmpty()) {
-            return false;
-        }
-
-        for (char ch : str.toCharArray()) {
-            if (ch > '9' || ch < '0') {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -273,6 +245,15 @@ public class JACGUtil {
         }
 
         return (T) args[index];
+    }
+
+    /**
+     * 获取配置文件的根目录
+     *
+     * @return
+     */
+    public static String getInputRootPath() {
+        return JavaCGUtil.getDirPathInJvmOptions(JavaCGConstants.PROPERTY_INPUT_ROOT_PATH);
     }
 
     /**

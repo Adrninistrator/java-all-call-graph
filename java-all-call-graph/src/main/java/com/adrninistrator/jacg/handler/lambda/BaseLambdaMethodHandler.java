@@ -100,10 +100,10 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.LMI_CALL_ID +
-                    " from " + DbTableInfoEnum.DTIE_LAMBDA_METHOD_INFO.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_LAMBDA_METHOD_INFO.getTableName() +
                     " where " + DC.LMI_CALL_ID + " > ?" +
                     " limit ?, 1";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{startCallId, JACGConstants.DB_QUERY_PAGE_SIZE});
@@ -138,8 +138,8 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
                     "lmi." + DC.LMI_LAMBDA_NEXT_IS_STREAM,
                     "lmi." + DC.LMI_LAMBDA_NEXT_IS_INTERMEDIATE,
                     "lmi." + DC.LMI_LAMBDA_NEXT_IS_TERMINAL
-            ) + " from " + DbTableInfoEnum.DTIE_LAMBDA_METHOD_INFO.getTableName(dbOperWrapper.getAppName()) + " as lmi join " +
-                    DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) + " as mc" +
+            ) + " from " + DbTableInfoEnum.DTIE_LAMBDA_METHOD_INFO.getTableName() + " as lmi join " +
+                    DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() + " as mc" +
                     " on lmi." + DC.LMI_CALL_ID + " = mc." + DC.MC_CALL_ID +
                     " where lmi." + DC.LMI_CALL_ID + " > ?";
         }

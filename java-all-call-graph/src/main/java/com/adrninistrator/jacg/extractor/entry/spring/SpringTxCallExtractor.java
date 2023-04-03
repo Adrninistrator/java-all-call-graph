@@ -36,7 +36,7 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
      * @return
      */
     public SpTxCallCombined extract() {
-        return extract(new ConfigureWrapper());
+        return extract(new ConfigureWrapper(false));
     }
 
     /**
@@ -46,7 +46,7 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
      * @return
      */
     public SpTxCallCombined extract(ConfigureWrapper configureWrapper) {
-        List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER, false);
+        List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER, true);
         if (keywordList.isEmpty()) {
             logger.error("未在配置文件中指定搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER);
             return null;

@@ -122,6 +122,17 @@ public class JACGSqlUtil {
         return stringList;
     }
 
+    /**
+     * 替换sql语句中的appName
+     *
+     * @param sql
+     * @param appName
+     * @return
+     */
+    public static String replaceAppNameInSql(String sql, String appName) {
+        return sql.replace(JACGConstants.APP_NAME_IN_SQL, appName);
+    }
+
     private JACGSqlUtil() {
         throw new IllegalStateException("illegal");
     }

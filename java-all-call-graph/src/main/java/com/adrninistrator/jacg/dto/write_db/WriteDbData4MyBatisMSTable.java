@@ -6,17 +6,11 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，MyBatis数据库表信息（使用MySQL）
  */
 public class WriteDbData4MyBatisMSTable extends AbstractWriteDbData {
-
     private final String mapperSimpleClassName;
-
     private final String mapperMethodName;
-
     private final String sqlStatement;
-
     private final int tableSeq;
-
     private final String tableName;
-
     private final String mapperClassName;
 
     public WriteDbData4MyBatisMSTable(String mapperSimpleClassName, String mapperMethodName, String sqlStatement, int tableSeq, String tableName, String mapperClassName) {

@@ -2,7 +2,6 @@ package com.adrninistrator.jacg.find_stack;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.conf.ConfInfo;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.keyword.FileContentNode;
@@ -15,7 +14,6 @@ import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -39,10 +37,15 @@ import java.util.Set;
 public class FindCallStackTrace {
     private static final Logger logger = LoggerFactory.getLogger(FindCallStackTrace.class);
 
+    private final String currentSimpleClassName = this.getClass().getSimpleName();
+
     private boolean inited = false;
 
-    // 记录当前处理的目录
-    private String currentDirPath;
+    // 记录当前生成完整方法调用链的目录
+    private String callGraphOutputDirPath;
+
+    // 记录当前生成调用堆栈的目录
+    private String stackOutputDirPath;
 
     // 根据关键字生成调用堆栈过滤器扩展类列表
     private List<FindStackKeywordFilterInterface> findStackKeywordFilterList;
@@ -73,11 +76,6 @@ public class FindCallStackTrace {
                 runnerGenCallGraph = new RunnerGenAllGraph4Caller();
             }
 
-            // 提前对AbstractRunnerGenCallGraph的子类进行初始化，使用指定的配置参数
-            if (!runnerGenCallGraph.init(configureWrapper)) {
-                return false;
-            }
-
             // 初始化根据关键字生成调用堆栈过滤器扩展类
             if (!initFindKeywordFilters(configureWrapper)) {
                 return false;
@@ -85,13 +83,6 @@ public class FindCallStackTrace {
 
             inited = true;
             return true;
-        }
-    }
-
-    private void checkInited() {
-        if (!inited) {
-            logger.error("相关对象未完成初始化，请先调用init()方法");
-            throw new JavaCGRuntimeException("相关对象未完成初始化，请先调用init()方法");
         }
     }
 
@@ -125,7 +116,7 @@ public class FindCallStackTrace {
      * @return 生成的搜索结果文件的完整路径列表
      */
     public List<String> find(boolean order4ee) {
-        return find(order4ee, new ConfigureWrapper());
+        return find(order4ee, new ConfigureWrapper(false));
     }
 
     /**
@@ -136,6 +127,9 @@ public class FindCallStackTrace {
      * @return 生成的搜索结果文件的完整路径列表
      */
     public List<String> find(boolean order4ee, ConfigureWrapper configureWrapper) {
+        // 记录入口简单类名
+        configureWrapper.addEntryClass(currentSimpleClassName);
+
         if (!init(order4ee, configureWrapper)) {
             logger.error("初始化失败");
             return null;
@@ -145,37 +139,43 @@ public class FindCallStackTrace {
         OtherConfigFileUseListEnum otherConfigFileUseListEnum = order4ee ? OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE :
                 OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER;
 
-        List<String> configKeywordList = configureWrapper.getOtherConfigList(otherConfigFileUseListEnum, true);
-        // 保存关键字的列表，这里需要新创建可写的List，从配置中获取的List可能是不可写的
-        List<String> keywordList = new ArrayList<>(configKeywordList.size());
-        // 获取对调用链文件根据关键字生成调用堆栈时使用的过滤器扩展类
-        List<String> findKeywordFilterList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_FIND_STACK_KEYWORD_FILTER, true);
+        List<String> configKeywordList = null;
+        List<String> usedKeywordList = null;
+        if (JavaCGUtil.isCollectionEmpty(findStackKeywordFilterList)) {
+            // 未指定根据关键字生成调用堆栈过滤器扩展类时，使用指定的关键字
+            configKeywordList = configureWrapper.getOtherConfigList(otherConfigFileUseListEnum, true);
+            // 保存关键字的列表，这里需要新创建可写的List，从配置中获取的List可能是不可写的
+            usedKeywordList = new ArrayList<>(configKeywordList.size());
+        }
 
         // 处理关键字
-        if (!handleKeywords(otherConfigFileUseListEnum, configKeywordList, keywordList, findKeywordFilterList)) {
+        if (!handleKeywords(otherConfigFileUseListEnum, configKeywordList, usedKeywordList)) {
             return null;
         }
 
+        // 生成完整方法调用链文件
         boolean success = runnerGenCallGraph.run(configureWrapper);
-        String outputPath = runnerGenCallGraph.getSuccessOutputDir();
-
-        if (!success || outputPath == null) {
+        callGraphOutputDirPath = runnerGenCallGraph.getCurrentOutputDirPath();
+        if (!success || callGraphOutputDirPath == null) {
             logger.error("生成方法完整调用链失败，请检查");
             return null;
         }
 
         // 处理目录
-        return handleDir(outputPath, keywordList, findKeywordFilterList, order4ee);
+        List<String> mdFilePathList = handleDir(usedKeywordList, order4ee);
+
+        // 执行完毕时尝试打印当前使用的配置信息
+        configureWrapper.tryPrintUsedConfigInfo(currentSimpleClassName, callGraphOutputDirPath);
+        return mdFilePathList;
     }
 
     // 处理关键字
     private boolean handleKeywords(OtherConfigFileUseListEnum otherConfigFileUseListEnum,
                                    List<String> configKeywordList,
-                                   List<String> keywordList,
-                                   List<String> findKeywordFilterList) {
-        if (!JavaCGUtil.isCollectionEmpty(findKeywordFilterList)) {
+                                   List<String> usedKeywordList) {
+        if (!JavaCGUtil.isCollectionEmpty(findStackKeywordFilterList)) {
             // 使用关键字过滤器扩展类
-            logger.info("对方法完整调用链文件根据关键字生成调用堆栈文件的过滤器扩展类\n{}", StringUtils.join(keywordList, "\n"));
+            logger.info("对方法完整调用链文件根据关键字生成调用堆栈文件的过滤器扩展类\n{}", StringUtils.join(usedKeywordList, "\n"));
             return true;
         }
 
@@ -183,30 +183,25 @@ public class FindCallStackTrace {
         for (String configKeyword : configKeywordList) {
             if (StringUtils.isBlank(configKeyword) ||
                     StringUtils.startsWith(configKeyword, JavaCGConstants.FLAG_HASHTAG) ||
-                    keywordList.contains(configKeyword)) {
+                    usedKeywordList.contains(configKeyword)) {
                 // 配置文件中被注释的行不处理，避免重复添加
                 logger.warn("跳过以下关键字 {}", configKeyword);
                 continue;
             }
-            keywordList.add(configKeyword);
+            usedKeywordList.add(configKeyword);
         }
 
-        if (keywordList.isEmpty()) {
+        if (usedKeywordList.isEmpty()) {
             logger.error("请在配置文件中指定需要生成到起始方法之间调用链的合法关键字 {}", otherConfigFileUseListEnum.getKey());
             return false;
         }
 
-        logger.info("用于对方法完整调用链文件生成调用堆栈文件的关键字\n{}", StringUtils.join(keywordList, "\n"));
+        logger.info("用于对方法完整调用链文件生成调用堆栈文件的关键字\n{}", StringUtils.join(usedKeywordList, "\n"));
         return true;
     }
 
-    // 返回当前处理的目录
-    public String getCurrentDirPath() {
-        return currentDirPath;
-    }
-
     // 写入文件头信息
-    private void writeHeaderInfo(MarkdownWriter markdownWriter, String txtFilePath, List<String> keywordList, List<String> findKeywordFilterList, boolean order4ee) throws IOException {
+    private void writeHeaderInfo(MarkdownWriter markdownWriter, String txtFilePath, List<String> keywordList, boolean order4ee) throws IOException {
         markdownWriter.addList("处理调用链文件: " + txtFilePath);
 
         if (!order4ee) {
@@ -216,9 +211,12 @@ public class FindCallStackTrace {
         }
 
         List<String> usedKeywordList;
-        if (!JavaCGUtil.isCollectionEmpty(findKeywordFilterList)) {
+        if (!JavaCGUtil.isCollectionEmpty(findStackKeywordFilterList)) {
+            usedKeywordList = new ArrayList<>(findStackKeywordFilterList.size());
             markdownWriter.addListWithNewLine("使用关键字过滤器扩展类: ");
-            usedKeywordList = findKeywordFilterList;
+            for (FindStackKeywordFilterInterface findStackKeywordFilter : findStackKeywordFilterList) {
+                usedKeywordList.add(findStackKeywordFilter.getClass().getName());
+            }
         } else {
             markdownWriter.addListWithNewLine("查找的关键字: ");
             usedKeywordList = keywordList;
@@ -231,42 +229,42 @@ public class FindCallStackTrace {
     }
 
     // 处理目录
-    private List<String> handleDir(String srcDirPath, List<String> keywordList, List<String> findKeywordFilterList, boolean order4ee) {
+    private List<String> handleDir(List<String> keywordList, boolean order4ee) {
         // 目录路径后增加分隔符
-        String finalSrcDirPath = JavaCGUtil.addSeparator4FilePath(srcDirPath);
+        String finalCallGraphDirPath = JavaCGUtil.addSeparator4FilePath(callGraphOutputDirPath);
 
         Set<String> subDirPathSet = new HashSet<>();
         List<String> subFilePathList = new ArrayList<>();
 
         // 从目录中查找需要处理的文件
-        JACGFileUtil.searchDir(finalSrcDirPath, subDirPathSet, subFilePathList, JACGConstants.EXT_TXT);
+        JACGFileUtil.searchDir(finalCallGraphDirPath, subDirPathSet, subFilePathList, JACGConstants.EXT_TXT);
 
         if (subFilePathList.isEmpty()) {
-            logger.error("{} 目录中未找到后缀为[{}]的文件", finalSrcDirPath, JACGConstants.EXT_TXT);
+            logger.error("{} 目录中未找到后缀为[{}]的文件", finalCallGraphDirPath, JACGConstants.EXT_TXT);
             return null;
         }
 
         // 记录当前处理的目录
-        currentDirPath = finalSrcDirPath + JACGConstants.DIR_OUTPUT_STACK;
-        if (!JACGFileUtil.isDirectoryExists(currentDirPath)) {
+        stackOutputDirPath = finalCallGraphDirPath + JACGConstants.DIR_OUTPUT_STACK;
+        if (!JACGFileUtil.isDirectoryExists(stackOutputDirPath)) {
             return null;
         }
 
         // 未搜索到关键字的文件保存目录
-        String keyWordsNotFoundDirPath = currentDirPath + File.separator + JACGConstants.DIR_KEYWORDS_NOT_FOUND;
+        String keyWordsNotFoundDirPath = stackOutputDirPath + File.separator + JACGConstants.DIR_KEYWORDS_NOT_FOUND;
 
         // txt文件所在目录字符串长度，用于后续截取
-        int finalSrcDirPathLength = finalSrcDirPath.length();
+        int finalSrcDirPathLength = finalCallGraphDirPath.length();
 
         // 创建md文件需要保存的目录
         for (String subDirPath : subDirPathSet) {
-            if (subDirPath.equals(finalSrcDirPath)) {
+            if (subDirPath.equals(finalCallGraphDirPath)) {
                 // 当前结果目录不需要处理
                 continue;
             }
 
             String subDirName = subDirPath.substring(finalSrcDirPathLength);
-            String newDirPath = currentDirPath + File.separator + subDirName;
+            String newDirPath = stackOutputDirPath + File.separator + subDirName;
             if (!JACGFileUtil.isDirectoryExists(newDirPath)) {
                 return null;
             }
@@ -275,7 +273,7 @@ public class FindCallStackTrace {
         for (String subFilePath : subFilePathList) {
             String subFileName = JACGFileUtil.getFileNameFromPath(subFilePath);
             if (StringUtils.equalsAny(subFileName,
-                    JACGConstants.FILE_JACG_USED_CONFIG_MD,
+                    JACGConstants.FILE_JACG_ALL_CONFIG_MD,
                     JACGConstants.NOTICE_MULTI_ITF_MD,
                     JACGConstants.NOTICE_MULTI_SCC_MD,
                     JACGConstants.NOTICE_DISABLED_ITF_MD,
@@ -286,7 +284,7 @@ public class FindCallStackTrace {
             }
 
             logger.info("根据调用链文件生成调用堆栈文件: {}", subFilePath);
-            handleOneFile(finalSrcDirPathLength, keyWordsNotFoundDirPath, subFilePath, keywordList, findKeywordFilterList, order4ee);
+            handleOneFile(finalSrcDirPathLength, keyWordsNotFoundDirPath, subFilePath, keywordList, order4ee);
         }
 
         // 生成结果信息
@@ -299,7 +297,7 @@ public class FindCallStackTrace {
         List<String> mdFilePathList = new ArrayList<>();
 
         // 在生成.md文件的目录中搜索
-        JACGFileUtil.searchDir(currentDirPath, null, mdFilePathList, JACGConstants.EXT_MD);
+        JACGFileUtil.searchDir(stackOutputDirPath, null, mdFilePathList, JACGConstants.EXT_MD);
 
         List<String> finalMdFilePathList = new ArrayList<>(mdFilePathList.size());
         for (String mdFilePath : mdFilePathList) {
@@ -327,17 +325,16 @@ public class FindCallStackTrace {
                                   String keyWordsNotFoundDirPath,
                                   String txtFilePath,
                                   List<String> keywordList,
-                                  List<String> findKeywordFilterList,
                                   boolean order4ee) {
         // 获取txt文件去掉所在目录之后的文件名，可能包含中间的目录名
         String txtFileName = txtFilePath.substring(srcDirPathLength);
         String txtFileNameWithOutExt = JACGFileUtil.getFileNameWithOutExt(txtFileName);
-        String mdFilePath = currentDirPath + File.separator + txtFileNameWithOutExt + JACGConstants.EXT_MD;
+        String mdFilePath = stackOutputDirPath + File.separator + txtFileNameWithOutExt + JACGConstants.EXT_MD;
 
         try (BufferedReader br = JavaCGFileUtil.genBufferedReader(txtFilePath);
              MarkdownWriter markdownWriter = new MarkdownWriter(mdFilePath, true)) {
             // 写入文件头信息
-            writeHeaderInfo(markdownWriter, txtFilePath, keywordList, findKeywordFilterList, order4ee);
+            writeHeaderInfo(markdownWriter, txtFilePath, keywordList, order4ee);
 
             String line;
             lastNode = null;
@@ -547,13 +544,7 @@ public class FindCallStackTrace {
         return false;
     }
 
-    /**
-     * 获取配置信息
-     *
-     * @return
-     */
-    public ConfInfo getConfInfo() {
-        checkInited();
-        return runnerGenCallGraph.getConfInfo();
+    public String getCallGraphOutputDirPath() {
+        return callGraphOutputDirPath;
     }
 }

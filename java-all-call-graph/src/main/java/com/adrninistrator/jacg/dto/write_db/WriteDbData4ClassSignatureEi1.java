@@ -7,15 +7,10 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4ClassSignatureEi1 extends AbstractWriteDbData {
     private String simpleClassName;
-
     private String type;
-
     private String superItfClassName;
-
     private int seq;
-
     private String signClassName;
-
     private String className;
 
     public String getSimpleClassName() {

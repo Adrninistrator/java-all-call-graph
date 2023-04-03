@@ -7,9 +7,7 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4BusinessData extends AbstractWriteDbData {
     private final int callId;
-
     private final String dataType;
-
     private final String dataValue;
 
     public WriteDbData4BusinessData(int callId, String dataType, String dataValue) {

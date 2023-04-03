@@ -40,7 +40,7 @@ public class SpringTxHandler extends BaseHandler {
      * @return
      */
     public List<SpringInvalidTxAnnotationMethodCall> querySpringInvalidTxAnnotationMethodCall() {
-        try (AnnotationHandler annotationHandler = new AnnotationHandler(dbOperator, dbOperWrapper)) {
+        try (AnnotationHandler annotationHandler = new AnnotationHandler(dbOperWrapper)) {
             List<String> springTransactionalMethodList = annotationHandler.queryMethodsWithAnnotations(true, JACGCommonNameConstants.SPRING_TX_ANNOTATION);
             if (JavaCGUtil.isCollectionEmpty(springTransactionalMethodList)) {
                 logger.info("未查询到@Transactional注解所在方法");
@@ -92,7 +92,7 @@ public class SpringTxHandler extends BaseHandler {
      * @return
      */
     public List<SpringInvalidTxAnnotationMethod> querySpringInvalidTxAnnotationMethod() {
-        try (AnnotationHandler annotationHandler = new AnnotationHandler(dbOperator, dbOperWrapper)) {
+        try (AnnotationHandler annotationHandler = new AnnotationHandler(dbOperWrapper)) {
             List<String> springTransactionalMethodList = annotationHandler.queryMethodsWithAnnotations(true, JACGCommonNameConstants.SPRING_TX_ANNOTATION);
             if (JavaCGUtil.isCollectionEmpty(springTransactionalMethodList)) {
                 logger.info("未查询到@Transactional注解所在方法");

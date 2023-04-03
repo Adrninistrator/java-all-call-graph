@@ -7,15 +7,10 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4ClassAnnotation extends AbstractWriteDbData {
     private final String simpleClassName;
-
     private final String annotationName;
-
     private final String attributeName;
-
     private final String annotationType;
-
     private final String attributeValue;
-
     private final String className;
 
     public WriteDbData4ClassAnnotation(String simpleClassName, String annotationName, String attributeName, String annotationType, String attributeValue, String className) {

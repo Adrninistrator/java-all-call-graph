@@ -6,19 +6,12 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，方法参数泛型类型
  */
 public class WriteDbData4MethodArgGenericsType extends AbstractWriteDbData {
-
     private final String methodHash;
-
     private final String simpleClassName;
-
     private final int argSeq;
-
     private final String type;
-
     private final int typeSeq;
-
     private final String genericsType;
-
     private final String fullMethod;
 
     public WriteDbData4MethodArgGenericsType(String methodHash, String simpleClassName, int argSeq, String type, int typeSeq, String genericsType, String fullMethod) {

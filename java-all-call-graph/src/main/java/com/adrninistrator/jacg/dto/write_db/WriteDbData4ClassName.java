@@ -7,7 +7,6 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4ClassName extends AbstractWriteDbData {
     private final String className;
-
     private final String simpleClassName;
 
     public WriteDbData4ClassName(String className, String simpleClassName) {

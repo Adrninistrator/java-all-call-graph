@@ -11,6 +11,7 @@ import test.call_graph.custom_flow.method_call_args.handler.base.TestBaseCFMCAHa
  */
 @Service("test.call_graph.custom_flow.method_call_args.handler.TestCFMCAHandler1b")
 public class TestCFMCAHandler1b extends TestBaseCFMCAHandler<TestCFMCARequestDto1> {
+
     @Override
     protected void doHandle(TestCFMCARequestDto1 dto) {
         System.currentTimeMillis();

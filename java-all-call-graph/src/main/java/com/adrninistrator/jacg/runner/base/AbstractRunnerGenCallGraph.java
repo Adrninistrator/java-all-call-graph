@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
@@ -19,8 +20,8 @@ import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
 import com.adrninistrator.jacg.extensions.common.enums.BusinessDataTypeEnum;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
-import com.adrninistrator.jacg.handler.method_arg_generics_type.MethodArgGenericsTypeHandler;
-import com.adrninistrator.jacg.handler.method_call_info.MethodCallInfoHandler;
+import com.adrninistrator.jacg.handler.method.MethodArgGenericsTypeHandler;
+import com.adrninistrator.jacg.handler.method.MethodCallInfoHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMapperHandler;
 import com.adrninistrator.jacg.markdown.enums.MDCodeBlockTypeEnum;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
@@ -75,9 +76,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         value: 对应的简单类名或完整类名
      */
     protected Map<String, String> simpleClassNameMap = new HashMap<>();
-
-    // 保存当前生成输出文件时的目录前缀
-    protected String outputDirPrefix;
 
     // 完整方法（类名+方法名+参数）为以下前缀时，生成方法完整调用链时忽略
     protected Set<String> ignoreFullMethodPrefixSet;
@@ -149,8 +147,13 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 注解相关的查询处理类
     protected AnnotationHandler annotationHandler;
 
+    // 输出结果展示详细程度枚举
+    protected OutputDetailEnum outputDetailEnum;
+
     // 公共预处理
     protected boolean commonPreHandle() {
+        outputDetailEnum = OutputDetailEnum.getFromDetail(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL));
+
         // 从数据库查询数据需要在以上检查H2数据库文件之后
         if (!dbOperWrapper.findDuplicateClass()) {
             return false;
@@ -178,13 +181,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         if (!initDefaultBusinessDataHandler()) {
             return false;
         }
-
         return true;
     }
 
     // 初始化保存类及方法上的注解信息
     protected void initAnnotationStorage() {
-        annotationHandler = new AnnotationHandler(dbOperator, dbOperWrapper);
+        annotationHandler = new AnnotationHandler(dbOperWrapper);
     }
 
     // 获取生成方法完整调用链时需要忽略的信息
@@ -236,9 +238,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
             if (sql == null) {
                 sql = "select " + DC.CN_SIMPLE_CLASS_NAME +
-                        " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName(dbOperWrapper.getAppName()) +
+                        " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName() +
                         " where " + DC.CN_CLASS_NAME + " = ?";
-                dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
             }
 
             List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
@@ -255,9 +257,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.CN_SIMPLE_CLASS_NAME +
-                    " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName() +
                     " where " + DC.CN_SIMPLE_CLASS_NAME + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className});
@@ -292,30 +294,27 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     protected boolean createOutputDir(String prefix) {
         synchronized (AbstractRunnerGenCallGraph.class) {
             String tmpOutputDirPrefix;
-            String outputRootPathInProperties = confInfo.getOutputRootPath();
+            String outputRootPathInProperties = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH);
             if (StringUtils.isNotBlank(outputRootPathInProperties)) {
-                if (!StringUtils.endsWithAny(outputRootPathInProperties, "/", "\\")) {
-                    // 若指定的目录未以分隔符结尾，则增加
-                    outputRootPathInProperties += File.separator;
-                }
                 // 使用指定的生成结果文件根目录，并指定当前应用名称
-                tmpOutputDirPrefix = outputRootPathInProperties + prefix + File.separator + dbOperWrapper.getAppName() + JACGConstants.FLAG_MINUS + JavaCGUtil.currentTime();
+                tmpOutputDirPrefix = JavaCGUtil.addSeparator4FilePath(outputRootPathInProperties) + prefix +
+                        File.separator + appName + JACGConstants.FLAG_MINUS + JavaCGUtil.currentTime();
             } else {
                 // 使用当前目录作为生成结果文件根目录
                 tmpOutputDirPrefix = prefix + File.separator + JavaCGUtil.currentTime();
             }
 
-            outputDirPrefix = new File(tmpOutputDirPrefix).getAbsolutePath();
+            currentOutputDirPath = new File(tmpOutputDirPrefix).getAbsolutePath();
 
-            logger.info("创建保存输出文件的目录 {}", outputDirPrefix);
+            logger.info("创建保存输出文件的目录 {}", currentOutputDirPath);
             // 判断目录是否存在，不存在时尝试创建
-            if (!JACGFileUtil.isDirectoryExists(outputDirPrefix)) {
+            if (!JACGFileUtil.isDirectoryExists(currentOutputDirPath)) {
                 return false;
             }
         }
 
         // 打印当前使用的配置信息
-        printUsedConfigInfo(outputDirPrefix);
+        printAllConfigInfo();
         return true;
     }
 
@@ -325,9 +324,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_METHOD_HASH, DC.MC_CALLER_FULL_METHOD, DC.MC_CALLEE_FULL_METHOD) +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALL_ID + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{currentMethodCallId});
@@ -441,9 +440,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         String filePath;
         if (JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
-            filePath = outputDirPrefix + File.separator + JACGConstants.NOTICE_MULTI_ITF_MD;
+            filePath = currentOutputDirPath + File.separator + JACGConstants.NOTICE_MULTI_ITF_MD;
         } else {
-            filePath = outputDirPrefix + File.separator + JACGConstants.NOTICE_MULTI_SCC_MD;
+            filePath = currentOutputDirPath + File.separator + JACGConstants.NOTICE_MULTI_SCC_MD;
         }
 
         logger.info("{} 存在一对多的方法调用，打印相关信息 {}", callTypeEnum, filePath);
@@ -512,9 +511,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         String filePath;
         if (JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS == callTypeEnum) {
-            filePath = outputDirPrefix + File.separator + JACGConstants.NOTICE_DISABLED_ITF_MD;
+            filePath = currentOutputDirPath + File.separator + JACGConstants.NOTICE_DISABLED_ITF_MD;
         } else {
-            filePath = outputDirPrefix + File.separator + JACGConstants.NOTICE_DISABLED_SCC_MD;
+            filePath = currentOutputDirPath + File.separator + JACGConstants.NOTICE_DISABLED_SCC_MD;
         }
 
         logger.info("{} 存在被禁用的方法调用，打印相关信息 {}", callTypeEnum, filePath);
@@ -570,33 +569,33 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 生成提示信息中的查询SQL
     private String genNoticeSelectSql(String callType) {
-        return "select * from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
+        return "select * from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                 " where " + DC.MC_CALL_TYPE + " = '" + callType +
                 "' and " + DC.MC_CALLER_METHOD_HASH + " = '';";
     }
 
     private String genNoticeSelectSql4Callee() {
-        return "select * from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
+        return "select * from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                 " where " + DC.MC_CALLEE_METHOD_HASH + " = '';";
     }
 
     // 生成提示信息中的更新为禁用SQL
     private String genNoticeUpdateDisableSql(String callType) {
-        return "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
+        return "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                 " set " + DC.MC_ENABLED + " = " + JavaCGYesNoEnum.NO.getStrValue() +
                 " where " + DC.MC_CALL_TYPE + " = '" + callType +
                 "' and " + DC.MC_CALLER_METHOD_HASH + " = '' and " + DC.MC_CALLEE_FULL_METHOD + " <> '';";
     }
 
     private String genNoticeUpdateDisableSql4Callee() {
-        return "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
+        return "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                 " set " + DC.MC_ENABLED + " = " + JavaCGYesNoEnum.NO.getStrValue() +
                 " where " + DC.MC_CALLEE_METHOD_HASH + " = '' and " + DC.MC_CALLER_FULL_METHOD + " <> '';";
     }
 
     // 生成提示信息中的更新为启用SQL
     private String genNoticeUpdateEnableSql(String callType) {
-        return "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
+        return "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                 " set " + DC.MC_ENABLED + " = " + JavaCGYesNoEnum.YES.getStrValue() +
                 " where " + DC.MC_CALL_TYPE + " = '" + callType +
                 "' and " + DC.MC_CALLER_METHOD_HASH + " = '' and " + DC.MC_CALLEE_FULL_METHOD + " = '';";
@@ -608,7 +607,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      * @return true: 有更新，false: 没有更新
      */
     protected boolean checkJarFileUpdated() {
-        if (!confInfo.isCheckJarFileUpdated()) {
+        if (!Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED))) {
             logger.info("不检查jar包文件是否有更新");
             return false;
         }
@@ -663,14 +662,14 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.ACP_CLASS_PREFIX +
-                    " from " + DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX.getTableName() +
                     " order by " + DC.ACP_RECORD_ID;
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         // 查询数据库中的配置
         List<Object> list = dbOperator.queryListOneColumn(sql, null);
         // 获取当前指定的配置
-        Set<String> allowedClassPrefixSetInConfig = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, false);
+        Set<String> allowedClassPrefixSetInConfig = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true);
         if (JavaCGUtil.isCollectionEmpty(list) && allowedClassPrefixSetInConfig.isEmpty()) {
             return false;
         }
@@ -717,8 +716,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.JI_QUERY_JAR_INFO;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select * from " + DbTableInfoEnum.DTIE_JAR_INFO.getTableName(dbOperWrapper.getAppName());
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = "select * from " + DbTableInfoEnum.DTIE_JAR_INFO.getTableName();
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{});
@@ -742,33 +741,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      *
      * @return null: 执行失败，非null: 执行成功
      */
-    public String getSuccessOutputDir() {
+    public String getCurrentOutputDirPath() {
         if (someTaskFail) {
             return null;
         }
-        return outputDirPrefix;
-    }
-
-    /**
-     * 重新设置线程数，若当前线程数需要调大则修改
-     *
-     * @param taskNum 任务数量
-     */
-    protected void resetPoolSize(int taskNum) {
-        int currentPoolSize = confInfo.getThreadNum();
-        int newPoolSize = Math.min(confInfo.getOriginalThreadNum(), taskNum);
-
-        if (currentPoolSize >= newPoolSize) {
-            // 当前线程数比准备修改的线程数大，不处理
-            return;
-        }
-
-        confInfo.setThreadNum(newPoolSize);
-        // 先修改最大线程数，再修改核心线程数，避免内部处理报错
-        threadPoolExecutor.setMaximumPoolSize(newPoolSize);
-        threadPoolExecutor.setCorePoolSize(newPoolSize);
-
-        dbOperator.setMaxPoolSize(newPoolSize);
+        return currentOutputDirPath;
     }
 
     // 添加用于添加对方法上的注解进行处理的类
@@ -824,17 +801,17 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         if (businessDataTypeSet.contains(BusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType())) {
             // 初始化方法调用信息处理类
-            methodCallInfoHandler = new MethodCallInfoHandler(dbOperator, dbOperWrapper);
+            methodCallInfoHandler = new MethodCallInfoHandler(dbOperWrapper);
         }
 
         if (businessDataTypeSet.contains(BusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType()) || businessDataTypeSet.contains(BusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_WRITE_TABLE.getType())) {
             // 初始化对MyBatis Mapper的处理类
-            myBatisMapperHandler = new MyBatisMapperHandler(dbOperator, dbOperWrapper);
+            myBatisMapperHandler = new MyBatisMapperHandler(dbOperWrapper);
         }
 
         if (businessDataTypeSet.contains(BusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
             // 初始化方法参数泛型类型处理类
-            methodArgGenericsTypeHandler = new MethodArgGenericsTypeHandler(dbOperator, dbOperWrapper);
+            methodArgGenericsTypeHandler = new MethodArgGenericsTypeHandler(dbOperWrapper);
         }
 
         businessDataTypeList = new ArrayList<>(businessDataTypeSet);
@@ -908,16 +885,16 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      * @return
      */
     protected FindMethodTaskInfo findMethodByLineNumber(boolean isCallee, String simpleClassName, int methodLineNum) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MLN_QUERY_METHOD;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MLN_QUERY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.MLN_METHOD_HASH, DC.MLN_FULL_METHOD) +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_LINE_NUMBER.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_LINE_NUMBER.getTableName() +
                     " where " + DC.MLN_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MLN_MIN_LINE_NUMBER + " <= ?" +
                     " and " + DC.MLN_MAX_LINE_NUMBER + " >= ?" +
                     " limit 1";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{simpleClassName, methodLineNum, methodLineNum});
@@ -954,10 +931,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.MC_CALL_FLAGS +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + whereColumnName + " = ?" +
                     " limit 1";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{methodHash});
@@ -1170,9 +1147,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.BD_DATA_TYPE, DC.BD_DATA_VALUE) +
-                    " from " + DbTableInfoEnum.DTIE_BUSINESS_DATA.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_BUSINESS_DATA.getTableName() +
                     " where " + DC.BD_CALL_ID + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         Map<String, Object> businessDataMap = dbOperator.queryOneRow(sql, new Object[]{methodCallId});
@@ -1276,16 +1253,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      * 将方法调用业务功能数据加入被调用方法信息中
      *
      * @param dataType      方法调用业务功能数据类型
-     * @param jsonStr     方法调用业务功能数据值
+     * @param jsonStr       方法调用业务功能数据值
      * @param callGraphInfo 方法调用信息
      */
     protected void addBusinessData2CallGraphInfo(String dataType, String jsonStr, StringBuilder callGraphInfo) {
-        // todo 判断需要换位置
-//        if (dataType.contains(JACGConstants.FLAG_AT)) {
-//            logger.error("当前的方法调用业务功能数据类型不允许使用当前标志，请使用其他值 {} {}", JACGConstants.FLAG_AT, dataType);
-//            return false;
-//        }
-
         callGraphInfo.append(JACGConstants.FLAG_TAB)
                 .append(JACGConstants.CALL_FLAG_BUSINESS_DATA)
                 .append(dataType)

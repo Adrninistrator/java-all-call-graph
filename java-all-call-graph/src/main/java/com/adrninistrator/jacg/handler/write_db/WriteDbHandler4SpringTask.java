@@ -39,12 +39,7 @@ public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbDat
         }
 
         String methodName = array[1];
-        WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
-        writeDbData4SpringTask.setSpringBeanName(springBeanName);
-        writeDbData4SpringTask.setClassName(springBeanClassName);
-        writeDbData4SpringTask.setMethodName(methodName);
-
-        return writeDbData4SpringTask;
+        return new WriteDbData4SpringTask(springBeanName, springBeanClassName, methodName);
     }
 
     @Override

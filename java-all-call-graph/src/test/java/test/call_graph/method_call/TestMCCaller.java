@@ -22,7 +22,7 @@ public class TestMCCaller {
 
     public void test1a() {
         str();
-        TestMCCallee.test1("aa1");
+        TestMCCallee.test1("\uD83D\uDCE9");
     }
 
     public void test1b() {

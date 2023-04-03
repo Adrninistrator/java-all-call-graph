@@ -10,8 +10,14 @@ import java.awt.event.ActionListener;
  * @description:
  */
 public class TestActionListener {
-    public void test1() {
+    public void test1a() {
         ActionListener1 testActionListener = new ActionListener1();
+        new Button().addActionListener(testActionListener);
+        new Button().addActionListener(testActionListener);
+    }
+
+    public void test1b() {
+        ActionListener1 testActionListener = new ActionListener1("a");
         new Button().addActionListener(testActionListener);
         new Button().addActionListener(testActionListener);
     }
@@ -20,7 +26,7 @@ public class TestActionListener {
         new Button().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("");
+                System.getProperty("");
             }
         });
     }
@@ -29,12 +35,35 @@ public class TestActionListener {
         new Button().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        System.getProperty("");
+                    }
+                }.start();
+
                 System.setProperty("", "");
             }
         });
     }
 
     public void test4() {
+        new Thread() {
+            @Override
+            public void run() {
+                new Button().addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.setProperty("", "");
+                    }
+                });
+
+                System.getProperty("");
+            }
+        }.start();
+    }
+
+    public void test5() {
         new Button().addActionListener(e -> System.setProperty("", ""));
     }
 }

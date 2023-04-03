@@ -1,8 +1,7 @@
 package com.adrninistrator.jacg.reporter.entry.base;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.conf.ConfInfo;
-import com.adrninistrator.jacg.conf.ConfManager;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extractor.dto.common.extract_file.AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
@@ -36,13 +35,13 @@ public abstract class AbstractReporter {
     // 是否跳过写数据库的步骤
     protected final boolean skipWriteDb;
 
-    protected ConfInfo confInfo;
+    protected String appName;
 
     /**
      * 构造函数，生成结果文件在当前目录，使用配置文件中的参数
      */
     public AbstractReporter() {
-        configureWrapper = new ConfigureWrapper();
+        configureWrapper = new ConfigureWrapper(false);
         reportDirPath = "";
         copyStackFileInSeparateDir = false;
         skipWriteDb = false;
@@ -66,7 +65,7 @@ public abstract class AbstractReporter {
     }
 
     private void initConfig() {
-        confInfo = ConfManager.getConfInfo(configureWrapper, false);
+        appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
     }
 
     /**
@@ -80,7 +79,7 @@ public abstract class AbstractReporter {
         File srcStackFile = new File(callGraphExtractedFile.getStackFilePath());
         String newStackFilePath;
         if (copyStackFileInSeparateDir) {
-            String newDirPath = dirPath + File.separator + confInfo.getAppName();
+            String newDirPath = dirPath + File.separator + appName;
             JACGFileUtil.isDirectoryExists(newDirPath);
             newStackFilePath = newDirPath + File.separator + srcStackFile.getName();
         } else {

@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -121,7 +122,7 @@ public class JACGClassMethodUtil {
             return false;
         }
 
-        if (!JACGUtil.isNumStr(array[1])) {
+        if (!JavaCGUtil.isNumStr(array[1])) {
             return false;
         }
         return true;

@@ -15,6 +15,12 @@ public class MethodCallPair {
     // 被调用方完整方法
     protected final String calleeFullMethod;
 
+    public MethodCallPair(String callerFullMethod, String calleeFullMethod) {
+        this.callerFullMethod = callerFullMethod;
+        this.callerLineNumber = 0;
+        this.calleeFullMethod = calleeFullMethod;
+    }
+
     public MethodCallPair(String callerFullMethod, int callerLineNumber, String calleeFullMethod) {
         this.callerFullMethod = callerFullMethod;
         this.callerLineNumber = callerLineNumber;

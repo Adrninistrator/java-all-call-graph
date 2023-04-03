@@ -11,8 +11,9 @@ import test.call_graph.custom_flow.method_call_args.handler.base.TestBaseCFMCAHa
  */
 @Service
 public class TestCFMCAHandler1a extends TestBaseCFMCAHandler<TestCFMCARequestDto1> {
+
     @Override
     protected void doHandle(TestCFMCARequestDto1 dto) {
-        System.out.println("测试");
+        System.getProperty("a");
     }
 }

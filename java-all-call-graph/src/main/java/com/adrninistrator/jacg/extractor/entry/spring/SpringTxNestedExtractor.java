@@ -32,7 +32,7 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
      * @return
      */
     public SpTxNestedCombined extract() {
-        return extract(new ConfigureWrapper());
+        return extract(new ConfigureWrapper(false));
     }
 
     /**

@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.extensions.dto.business_data.BaseBusinessData;
 import com.adrninistrator.jacg.markdown.JACGMarkdownConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public class JACGCallGraphFileUtil {
      */
     public static int getDataSeqFromLine(String line) {
         String dataSeq = StringUtils.substringBetween(line, JACGMarkdownConstants.FLAG_SPACE, JACGMarkdownConstants.FLAG_DOT);
-        if (!JACGUtil.isValidNum(dataSeq)) {
+        if (!JavaCGUtil.isNumStr(dataSeq)) {
             throw new JavaCGRuntimeException("方法调用行内容非法 " + line);
         }
         return Integer.parseInt(dataSeq);
@@ -324,7 +325,7 @@ public class JACGCallGraphFileUtil {
      */
     public static int getMethodLevel(String line) {
         String level = StringUtils.substringBetween(line, JACGConstants.FLAG_LEFT_PARENTHESES, JACGConstants.FLAG_RIGHT_PARENTHESES);
-        if (!JACGUtil.isValidNum(level)) {
+        if (!JavaCGUtil.isNumStr(level)) {
             throw new JavaCGRuntimeException("方法调用行内容非法 " + line);
         }
         return Integer.parseInt(level);

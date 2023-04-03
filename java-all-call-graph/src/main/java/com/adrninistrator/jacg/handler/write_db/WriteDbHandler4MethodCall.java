@@ -1,20 +1,14 @@
 package com.adrninistrator.jacg.handler.write_db;
 
-import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
-import com.adrninistrator.jacg.dto.method.MethodCallFullMethod;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
-import com.adrninistrator.jacg.extensions.method_call_add.MethodCallAddInterface;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,17 +31,11 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     // 方法参数存在泛型类型的方法HASH+长度
     private Set<String> withGenericsTypeMethodHash;
 
-    // 人工添加方法调用关系类列表
-    private List<MethodCallAddInterface> methodCallAddExtList;
-
     // 保存MyBatis Mapper类名
     private Set<String> myBatisMapperSet;
 
     // 保存MyBatis写数据库的Mapper方法
     private Set<String> myBatisMapperMethodWriteSet;
-
-    // 人工添加的方法调用关系
-    private final List<MethodCallFullMethod> manualAddMethodCallList = new ArrayList<>(batchSize);
 
     @Override
     protected WriteDbData4MethodCall genData(String line) {
@@ -96,15 +84,6 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
         // 生成方法调用标记
         genCallFlags(callId, writeDbData4MethodCall);
-
-        // 人工添加方法调用关系
-        for (MethodCallAddInterface methodCallAddExt : methodCallAddExtList) {
-            MethodCallFullMethod methodCallFullMethod = methodCallAddExt.handleMethodCall(callerFullMethod, calleeFullMethod, calleeClassName);
-            if (methodCallFullMethod != null) {
-                manualAddMethodCallList.add(methodCallFullMethod);
-            }
-        }
-
         return writeDbData4MethodCall;
     }
 
@@ -159,46 +138,6 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         writeDbData4MethodCall.setCallFlags(callFlags);
     }
 
-    // 人工添加方法调用关系
-    public boolean manualAddMethodCall() {
-        if (manualAddMethodCallList.isEmpty()) {
-            logger.info("没有人工添加方法调用关系");
-        }
-        logger.info("人工添加方法调用关系数量 {}", manualAddMethodCallList.size());
-
-        // 查询当前方法调用的最大call_id
-        int maxCallId = dbOperWrapper.getMaxMethodCallId();
-        if (maxCallId == JACGConstants.MAX_METHOD_CALL_ID_ILLEGAL) {
-            return false;
-        }
-
-        List<WriteDbData4MethodCall> writeDbData4MethodCallList = new ArrayList<>(batchSize);
-        for (MethodCallFullMethod manualAddMethodCall : manualAddMethodCallList) {
-            String callerFullMethod = manualAddMethodCall.getCallerFullMethod();
-            String calleeFullMethod = manualAddMethodCall.getCalleeFullMethod();
-            String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
-            String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
-            WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(JavaCGCallTypeEnum.CTE_MANUAL_ADDED.getType(),
-                    "",
-                    dbOperWrapper.getSimpleClassName(callerClassName),
-                    callerFullMethod,
-                    dbOperWrapper.getSimpleClassName(calleeClassName),
-                    calleeFullMethod,
-                    ++maxCallId,
-                    JavaCGConstants.DEFAULT_LINE_NUMBER,
-                    String.valueOf(0),
-                    "",
-                    ""
-            );
-            writeDbData4MethodCallList.add(writeDbData4MethodCall);
-            // 尝试写入数据库
-            tryInsertDb(writeDbData4MethodCallList);
-        }
-        // 将剩余内容写入数据库
-        insertDb(writeDbData4MethodCallList);
-        return true;
-    }
-
     //
     public void setSpringControllerMethodHashSet(Set<String> springControllerMethodHashSet) {
         this.springControllerMethodHashSet = springControllerMethodHashSet;
@@ -214,10 +153,6 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
     public void setWithGenericsTypeMethodHash(Set<String> withGenericsTypeMethodHash) {
         this.withGenericsTypeMethodHash = withGenericsTypeMethodHash;
-    }
-
-    public void setMethodCallAddExtList(List<MethodCallAddInterface> methodCallAddExtList) {
-        this.methodCallAddExtList = methodCallAddExtList;
     }
 
     public void setMyBatisMapperSet(Set<String> myBatisMapperSet) {

@@ -115,24 +115,24 @@ public class DC {
     // H2中使用"value"作为字段名会报错
     public static final String MCI_THE_VALUE = "the_value";
 
-    public static final String SB_RECORD_ID = "record_id";
-    public static final String SB_SPRING_BEAN_NAME = "spring_bean_name";
-    public static final String SB_SEQ = "seq";
-    public static final String SB_CLASS_NAME = COMMON_CLASS_NAME;
+    public static final String SPB_RECORD_ID = "record_id";
+    public static final String SPB_SPRING_BEAN_NAME = "spring_bean_name";
+    public static final String SPB_SEQ = "seq";
+    public static final String SPB_CLASS_NAME = COMMON_CLASS_NAME;
 
-    public static final String SC_METHOD_HASH = COMMON_METHOD_HASH;
-    public static final String SC_SEQ = "seq";
-    public static final String SC_SHOW_URI = "show_uri";
-    public static final String SC_CLASS_PATH = "class_path";
-    public static final String SC_METHOD_PATH = "method_path";
-    public static final String SC_ANNOTATION_ANNOTATION_NAME = COMMON_ANNOTATION_ANNOTATION_NAME;
-    public static final String SC_SIMPLE_CLASS_NAME = COMMON_SIMPLE_CLASS_NAME;
-    public static final String SC_FULL_METHOD = COMMON_FULL_METHOD;
+    public static final String SPC_METHOD_HASH = COMMON_METHOD_HASH;
+    public static final String SPC_SEQ = "seq";
+    public static final String SPC_SHOW_URI = "show_uri";
+    public static final String SPC_CLASS_PATH = "class_path";
+    public static final String SPC_METHOD_PATH = "method_path";
+    public static final String SPC_ANNOTATION_ANNOTATION_NAME = COMMON_ANNOTATION_ANNOTATION_NAME;
+    public static final String SPC_SIMPLE_CLASS_NAME = COMMON_SIMPLE_CLASS_NAME;
+    public static final String SPC_FULL_METHOD = COMMON_FULL_METHOD;
 
-    public static final String ST_RECORD_ID = "record_id";
-    public static final String ST_SPRING_BEAN_NAME = "spring_bean_name";
-    public static final String ST_CLASS_NAME = COMMON_CLASS_NAME;
-    public static final String ST_METHOD_NAME = "method_name";
+    public static final String SPT_RECORD_ID = "record_id";
+    public static final String SPT_SPRING_BEAN_NAME = "spring_bean_name";
+    public static final String SPT_CLASS_NAME = COMMON_CLASS_NAME;
+    public static final String SPT_METHOD_NAME = "method_name";
 
     public static final String CSEI1_RECORD_ID = "record_id";
     public static final String CSEI1_SIMPLE_CLASS_NAME = "simple_class_name";
@@ -168,6 +168,12 @@ public class DC {
     public static final String MAGT_TYPE_SEQ = "type_seq";
     public static final String MAGT_GENERICS_TYPE = "generics_type";
     public static final String MAGT_FULL_METHOD = "full_method";
+
+    public static final String IC_SIMPLE_INNER_CLASS_NAME = "simple_inner_class_name";
+    public static final String IC_INNER_CLASS_NAME = "inner_class_name";
+    public static final String IC_SIMPLE_OUTER_CLASS_NAME = "simple_outer_class_name";
+    public static final String IC_OUTER_CLASS_NAME = "outer_class_name";
+    public static final String IC_ANONYMOUS_CLASS = "anonymous_class";
 
     private DC() {
         throw new IllegalStateException("illegal");

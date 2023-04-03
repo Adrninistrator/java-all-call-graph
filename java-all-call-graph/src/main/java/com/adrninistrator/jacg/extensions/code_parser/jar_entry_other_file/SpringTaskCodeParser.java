@@ -41,7 +41,7 @@ public class SpringTaskCodeParser extends SaveData2FileParser {
                 return;
             }
 
-            logger.info("开始处理Spring XML: {}", jarEntryName);
+            logger.info("处理Spring XML文件 {}", jarEntryName);
             for (Element element : root.getChildren()) {
                 if (!"task:scheduled-tasks".equals(element.getQualifiedName())) {
                     continue;

@@ -7,26 +7,17 @@ package com.adrninistrator.jacg.dto.write_db;
  */
 public class WriteDbData4LambdaMethodInfo extends AbstractWriteDbData {
     private int callId;
-
     private String lambdaCalleeClassName;
-
     private String lambdaCalleeMethodName;
-
     private String lambdaCalleeFullMethod;
-
     /*
         以下字段可能为null
      */
     private String lambdaNextCalleeClassName;
-
     private String lambdaNextCalleeMethodName;
-
     private String lambdaNextCalleeFullMethod;
-
     private Boolean lambdaNextIsStream;
-
     private Boolean lambdaNextIsIntermediate;
-
     private Boolean lambdaNextIsTerminal;
 
     public int getCallId() {

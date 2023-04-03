@@ -11,9 +11,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadFactory4TPE implements ThreadFactory {
 
-    private static AtomicInteger ai = new AtomicInteger(0);
+    private static final AtomicInteger ai = new AtomicInteger(0);
 
-    private String threadNamePrefix;
+    private final String threadNamePrefix;
 
     public ThreadFactory4TPE(String threadNamePrefix) {
         this.threadNamePrefix = threadNamePrefix;

@@ -1,7 +1,5 @@
 package com.adrninistrator.jacg.handler.base;
 
-import com.adrninistrator.jacg.conf.ConfInfo;
-import com.adrninistrator.jacg.conf.ConfManager;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
@@ -32,37 +30,30 @@ public abstract class BaseHandler implements Closeable {
      *
      * @param configureWrapper 配置包装类对象，不允许为null，可以为new出来的ConfigureWrapper对象
      */
-    protected BaseHandler(ConfigureWrapper configureWrapper) {
+    public BaseHandler(ConfigureWrapper configureWrapper) {
         if (configureWrapper == null) {
             throw new JavaCGRuntimeException("传入配置不允许为null");
         }
 
-        ConfInfo confInfo = ConfManager.getConfInfo(configureWrapper, true);
-        if (confInfo == null) {
-            throw new JavaCGRuntimeException("配置初始化失败");
-        }
+        // 完成需要使用的基础配置的初始化
+        dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, this.getClass().getSimpleName());
+        dbOperator = dbOperWrapper.getDbOperator();
 
-        dbOperator = DbOperator.genInstance(confInfo, this.getClass().getSimpleName());
-        if (dbOperator == null) {
-            throw new JavaCGRuntimeException("数据库初始化失败");
-        }
         logger.warn("调用该构造函数时，结束前[需要]关闭数据库操作对象");
         needCloseDb = true;
-        dbOperWrapper = new DbOperWrapper(dbOperator);
     }
 
     /**
      * 调用该构造函数时，结束前[不需要]关闭数据库操作对象
      *
-     * @param dbOperator
      * @param dbOperWrapper
      */
-    protected BaseHandler(DbOperator dbOperator, DbOperWrapper dbOperWrapper) {
-        if (dbOperator == null || dbOperWrapper == null) {
+    public BaseHandler(DbOperWrapper dbOperWrapper) {
+        if (dbOperWrapper == null || dbOperWrapper.getDbOperator() == null) {
             throw new JavaCGRuntimeException("传入参数不允许为空");
         }
 
-        this.dbOperator = dbOperator;
+        this.dbOperator = dbOperWrapper.getDbOperator();
         this.dbOperWrapper = dbOperWrapper;
     }
 

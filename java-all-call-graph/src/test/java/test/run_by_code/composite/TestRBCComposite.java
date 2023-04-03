@@ -8,7 +8,9 @@ import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import test.run_by_code.TestRunByCodeBase;
+import test.call_graph.argument.TestArgument1;
+import test.call_graph.argument.TestArgument2;
+import test.run_by_code.base.TestRunByCodeBase;
 
 /**
  * @author adrninistrator
@@ -36,9 +38,9 @@ public class TestRBCComposite extends TestRunByCodeBase {
     public void test2WithIgnore() {
         ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
         configureWrapperCopy.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IGNORE_CLASS_KEYWORD,
-                "TestArgument1");
+                TestArgument1.class.getSimpleName());
         configureWrapperCopy.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IGNORE_FULL_METHOD_PREFIX,
-                "test.call_graph.argument.TestArgument2");
+                TestArgument2.class.getName());
         configureWrapperCopy.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IGNORE_METHOD_PREFIX,
                 "test1(");
 

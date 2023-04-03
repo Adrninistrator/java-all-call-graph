@@ -28,17 +28,16 @@ public class CalleeGraphEntryExtractor extends BaseExtractor {
     private List<CalleeExtractedLine> calleeExtractedLineList;
 
     /**
-     * 生成向上的完整调用链，根据关键字进行查找，获取入口方法信息并返回
+     * 生成向上的完整调用链，根据关键字进行查找，获取入口方法信息并返回，使用配置文件中的参数
      *
      * @return
      */
     public List<CalleeExtractedFile> extract() {
-        return extract(new ConfigureWrapper());
+        return extract(new ConfigureWrapper(false));
     }
 
     /**
-     * 生成向上的完整调用链，根据关键字进行查找，获取入口方法信息并返回
-     * 通过代码指定配置参数
+     * 生成向上的完整调用链，根据关键字进行查找，获取入口方法信息并返回，通过代码指定配置参数
      *
      * @param configureWrapper
      * @return

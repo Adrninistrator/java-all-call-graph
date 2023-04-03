@@ -1,13 +1,13 @@
 package com.adrninistrator.jacg.common.enums;
 
-import com.adrninistrator.jacg.common.enums.interfaces.BaseConfigInterface;
+import com.adrninistrator.jacg.common.enums.interfaces.ConfigInterface;
 
 /**
  * @author adrninistrator
  * @date 2022/4/20
  * @description:
  */
-public enum OtherConfigFileUseSetEnum implements BaseConfigInterface {
+public enum OtherConfigFileUseSetEnum implements ConfigInterface {
     OCFUSE_ALLOWED_CLASS_PREFIX(InputDirEnum.IDE_CONFIG.getDirName() + "/allowed_class_prefix.properties",
             "将java-callgraph2生成的方法调用关系文件写入数据库时使用的配置，需要处理的类名前缀"),
     OCFUSE_METHOD_CLASS_4CALLEE(InputDirEnum.IDE_CONFIG.getDirName() + "/method_class_4callee.properties",
@@ -26,7 +26,9 @@ public enum OtherConfigFileUseSetEnum implements BaseConfigInterface {
             "生成向下的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据"),
     ;
 
+    // 参数配置文件名
     private final String fileName;
+    // 参数配置描述
     private final String desc;
 
     OtherConfigFileUseSetEnum(String fileName, String desc) {
@@ -47,5 +49,14 @@ public enum OtherConfigFileUseSetEnum implements BaseConfigInterface {
     @Override
     public String toString() {
         return fileName;
+    }
+
+    public static String getDescFromKey(String key) {
+        for (OtherConfigFileUseSetEnum otherConfigFileUseSetEnum : OtherConfigFileUseSetEnum.values()) {
+            if (otherConfigFileUseSetEnum.getKey().equals(key)) {
+                return otherConfigFileUseSetEnum.getDesc();
+            }
+        }
+        return "";
     }
 }

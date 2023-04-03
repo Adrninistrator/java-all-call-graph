@@ -216,7 +216,7 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
         String sql = dbOperWrapper.genAndCacheInsertSql(dbTableInfoEnum.getSqlKey(),
                 dbTableInfoEnum.getSqlKey4Print(),
                 DbInsertMode.DIME_INSERT,
-                dbTableInfoEnum.getTableName(dbOperWrapper.getAppName()),
+                dbTableInfoEnum.getTableName(),
                 dbTableInfoEnum.getColumns());
 
         // 根据需要写入的数据生成Object数组

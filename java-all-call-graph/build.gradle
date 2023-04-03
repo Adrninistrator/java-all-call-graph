@@ -3,7 +3,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 group 'com.github.adrninistrator'
-version = "1.0.3"
+version = "1.0.4"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -60,7 +60,7 @@ List h2database = ["com.h2database:h2:2.1.214"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.4']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.5']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.0.5']
 
@@ -116,7 +116,12 @@ task test_jar(type: Jar) {
     archiveName 'test.jar'
     from(sourceSets.test.output) {
         include 'test/call_graph/**'
+        exclude 'test/call_graph/other_jar/**'
         into '/'
+    }
+    from('src/test/resources/') {
+        include 'applicationContext.xml'
+        into 'resources/'
     }
 }
 

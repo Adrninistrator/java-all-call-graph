@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation_attribute.EmptyAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation_attribute.StringAnnotationAttribute;
@@ -39,8 +38,8 @@ public class AnnotationHandler extends BaseHandler {
         super(configureWrapper);
     }
 
-    public AnnotationHandler(DbOperator dbOperator, DbOperWrapper dbOperWrapper) {
-        super(dbOperator, dbOperWrapper);
+    public AnnotationHandler(DbOperWrapper dbOperWrapper) {
+        super(dbOperWrapper);
     }
 
     /**
@@ -105,11 +104,11 @@ public class AnnotationHandler extends BaseHandler {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE, DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName() +
                     " where " + DC.MA_METHOD_HASH + " = ?" +
                     " and " + DC.COMMON_ANNOTATION_ANNOTATION_NAME + " = ?" +
                     " and " + DC.COMMON_ANNOTATION_ATTRIBUTE_NAME + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{methodHash, annotationName, attributeName});
@@ -158,10 +157,10 @@ public class AnnotationHandler extends BaseHandler {
         sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ATTRIBUTE_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE, DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName() +
                     " where " + DC.MA_METHOD_HASH + " = ?" +
                     " and " + DC.COMMON_ANNOTATION_ANNOTATION_NAME + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{methodHash, annotationName});
@@ -242,9 +241,9 @@ public class AnnotationHandler extends BaseHandler {
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ANNOTATION_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE,
                     DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
-                    " from " + DbTableInfoEnum.DTIE_CLASS_ANNOTATION.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_ANNOTATION.getTableName() +
                     " where " + DC.CA_SIMPLE_CLASS_NAME + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<Map<String, Object>> annotationList = dbOperator.queryList(sql, new Object[]{simpleClassName});
@@ -290,9 +289,9 @@ public class AnnotationHandler extends BaseHandler {
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.MA_METHOD_HASH, DC.COMMON_ANNOTATION_ANNOTATION_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE,
                     DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName() +
                     " where " + DC.MA_METHOD_HASH + " = ?";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         List<Map<String, Object>> annotationList = dbOperator.queryList(sql, new Object[]{methodHash});
         // 根据从数据库的查询结果生成注解对应的Map信息
@@ -317,7 +316,7 @@ public class AnnotationHandler extends BaseHandler {
 
         BaseAnnotationAttribute attribute = annotationAttributeMap.get(attributeName);
         if (attribute == null) {
-            logger.warn("注解属性为空 {}", attributeName);
+            logger.debug("注解属性为空 {}", attributeName);
             return null;
         }
 

@@ -5,7 +5,6 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.mybatis.MyBatisMySqlTableInfo;
 import com.adrninistrator.jacg.handler.dto.mybatis.MyBatisMySqlWriteTableInfo;
@@ -33,8 +32,8 @@ public class MyBatisMapperHandler extends BaseHandler {
         super(configureWrapper);
     }
 
-    public MyBatisMapperHandler(DbOperator dbOperator, DbOperWrapper dbOperWrapper) {
-        super(dbOperator, dbOperWrapper);
+    public MyBatisMapperHandler(DbOperWrapper dbOperWrapper) {
+        super(dbOperWrapper);
     }
 
     /**
@@ -51,11 +50,11 @@ public class MyBatisMapperHandler extends BaseHandler {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.MMT_SQL_STATEMENT, DC.MMT_TABLE_NAME) +
-                    " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_TABLE.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_TABLE.getTableName() +
                     " where " + DC.MMT_MAPPER_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MMT_MAPPER_METHOD_NAME + " = ?" +
                     " order by " + JACGSqlUtil.joinColumns(DC.MMT_SQL_STATEMENT, DC.MMT_TABLE_SEQ);
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{mapperSimpleClassName, mapperMethodName});
@@ -120,11 +119,11 @@ public class MyBatisMapperHandler extends BaseHandler {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.MMWT_SQL_STATEMENT, DC.MMWT_TABLE_NAME) +
-                    " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_WRITE_TABLE.getTableName(dbOperWrapper.getAppName()) +
+                    " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_WRITE_TABLE.getTableName() +
                     " where " + DC.MMWT_MAPPER_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MMWT_MAPPER_METHOD_NAME + " = ?" +
                     " limit 1";
-            dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{mapperSimpleClassName, mapperMethodName});
