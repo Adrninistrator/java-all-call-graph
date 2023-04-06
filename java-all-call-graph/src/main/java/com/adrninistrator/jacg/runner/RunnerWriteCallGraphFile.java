@@ -43,9 +43,6 @@ import java.util.Set;
 public class RunnerWriteCallGraphFile extends AbstractRunner {
     private static final Logger logger = LoggerFactory.getLogger(RunnerWriteCallGraphFile.class);
 
-    // 需要处理的包名/类名前缀
-    protected Set<String> allowedClassPrefixSet;
-
     // java-callgraph2输出文件信息
     protected JavaCGOutputInfo javaCGOutputInfo;
 
@@ -62,13 +59,6 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
 
     @Override
     protected boolean preHandle() {
-        // 读取其他配置文件
-        allowedClassPrefixSet = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true);
-        if (allowedClassPrefixSet.isEmpty()) {
-            logger.info("所有包中的class文件都需要处理");
-        } else {
-            logger.info("仅处理以下包中的class文件\n{}", StringUtils.join(allowedClassPrefixSet, "\n"));
-        }
         return true;
     }
 
@@ -106,7 +96,9 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         }
 
         // 生成java-callgraph2使用的配置信息
-        genJavaCGConfigureWrapper(jarPathList);
+        if (javaCGConfigureWrapper == null) {
+            javaCGConfigureWrapper = configureWrapper.genJavaCGConfigureWrapper();
+        }
 
         jCallGraph = new JCallGraph();
         // 设置对注解属性进行格式化的类
@@ -135,17 +127,6 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         // 打印java-callgraph2当前使用的配置信息
         printJavaCGUsedConfigInfo();
         return true;
-    }
-
-    // 生成java-callgraph2使用的配置信息
-    private void genJavaCGConfigureWrapper(List<String> jarPathList) {
-        if (javaCGConfigureWrapper == null) {
-            javaCGConfigureWrapper = new JavaCGConfigureWrapper();
-        }
-        // 指定需要处理的jar包与目录
-        javaCGConfigureWrapper.setOtherConfigList(JavaCGOtherConfigFileUseListEnum.OCFULE_JAR_DIR, jarPathList);
-        // 指定需要处理的包名
-        javaCGConfigureWrapper.setOtherConfigSet(JavaCGOtherConfigFileUseSetEnum.OCFUSE_PACKAGES, allowedClassPrefixSet);
     }
 
     // 添加代码解析扩展类

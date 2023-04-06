@@ -43,7 +43,7 @@ public class TestManualAddMethodCall extends TestRunByCodeBase {
     @Test
     public void test0WithOutExtensions() {
         // 指定扩展类为空
-        configureWrapper.clearOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1);
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1);
 
         new RunnerWriteDb().run(configureWrapper);
         new RunnerGenAllGraph4Callee().run(configureWrapper);

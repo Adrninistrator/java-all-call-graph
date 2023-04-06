@@ -14,6 +14,10 @@ import com.adrninistrator.jacg.common.enums.interfaces.MainConfigInterface;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGConfigKeyEnum;
+import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseListEnum;
+import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseSetEnum;
+import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
 import com.adrninistrator.javacg.exceptions.JavaCGError;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
@@ -169,10 +173,10 @@ public class ConfigureWrapper {
      * 设置其他配置文件中指定key的参数，Set格式，清空指定key已有的参数
      *
      * @param otherConfigFileUseSetEnum
-     * @param data
+     * @param data                      若未指定则清空参数
      */
     public void setOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, String... data) {
-        setOtherConfigSet(otherConfigFileUseSetEnum, JACGUtil.genSetFromArray(data));
+        setOtherConfigSet(otherConfigFileUseSetEnum, JavaCGUtil.genSetFromArray(data));
     }
 
     /**
@@ -195,7 +199,7 @@ public class ConfigureWrapper {
      * @param data
      */
     public void addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, String... data) {
-        addOtherConfigSet(otherConfigFileUseSetEnum, JACGUtil.genSetFromArray(data));
+        addOtherConfigSet(otherConfigFileUseSetEnum, JavaCGUtil.genSetFromArray(data));
     }
 
     /**
@@ -219,27 +223,13 @@ public class ConfigureWrapper {
     }
 
     /**
-     * 清空其他配置文件中指定key的参数，Set格式，避免jar包或项目中的配置文件有值时对生成结果产生干扰
-     *
-     * @param otherConfigFileUseSetEnums
-     */
-    public void clearOtherConfigSet(OtherConfigFileUseSetEnum... otherConfigFileUseSetEnums) {
-        if (otherConfigFileUseSetEnums == null) {
-            throw new JavaCGError("传入的参数为空");
-        }
-        for (OtherConfigFileUseSetEnum otherConfigFileUseSetEnum : otherConfigFileUseSetEnums) {
-            otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), Collections.emptySet());
-        }
-    }
-
-    /**
      * 设置其他配置文件中指定key的参数，List格式，清空指定key已有的参数
      *
      * @param otherConfigFileUseListEnum
-     * @param data
+     * @param data                       若未指定则清空参数
      */
     public void setOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, String... data) {
-        setOtherConfigList(otherConfigFileUseListEnum, JACGUtil.genListFromArray(data));
+        setOtherConfigList(otherConfigFileUseListEnum, JavaCGUtil.genListFromArray(data));
     }
 
     /**
@@ -262,7 +252,7 @@ public class ConfigureWrapper {
      * @param data
      */
     public void addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, String... data) {
-        addOtherConfigList(otherConfigFileUseListEnum, JACGUtil.genListFromArray(data));
+        addOtherConfigList(otherConfigFileUseListEnum, JavaCGUtil.genListFromArray(data));
     }
 
     /**
@@ -283,20 +273,6 @@ public class ConfigureWrapper {
         }
         JACGUtil.addList2List(configList, newList);
         otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), newList);
-    }
-
-    /**
-     * 清空其他配置文件中指定key的参数，List格式，避免jar包或项目中的配置文件有值时对生成结果产生干扰
-     *
-     * @param otherConfigFileUseListEnums
-     */
-    public void clearOtherConfigList(OtherConfigFileUseListEnum... otherConfigFileUseListEnums) {
-        if (otherConfigFileUseListEnums == null) {
-            throw new JavaCGError("传入的参数为空");
-        }
-        for (OtherConfigFileUseListEnum otherConfigFileUseListEnum : otherConfigFileUseListEnums) {
-            otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), Collections.emptyList());
-        }
     }
 
     /**
@@ -550,10 +526,10 @@ public class ConfigureWrapper {
             clearMainConfig(configDbKeyEnum);
         }
         for (OtherConfigFileUseSetEnum otherConfigFileUseSetEnum : OtherConfigFileUseSetEnum.values()) {
-            clearOtherConfigSet(otherConfigFileUseSetEnum);
+            otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), Collections.emptySet());
         }
         for (OtherConfigFileUseListEnum otherConfigFileUseListEnum : OtherConfigFileUseListEnum.values()) {
-            clearOtherConfigList(otherConfigFileUseListEnum);
+            otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), Collections.emptyList());
         }
     }
 
@@ -849,5 +825,26 @@ public class ConfigureWrapper {
             markdownWriter.addLine(configValue);
         }
         markdownWriter.addCodeBlock();
+    }
+
+    /**
+     * 生成java-callgraph2的配置
+     *
+     * @return
+     */
+    public JavaCGConfigureWrapper genJavaCGConfigureWrapper() {
+        JavaCGConfigureWrapper javaCGConfigureWrapper = new JavaCGConfigureWrapper();
+        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.TRUE.toString());
+        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_FIRST_PARSE_INIT_METHOD_TYPE, Boolean.TRUE.toString());
+        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_CONTINUE_WHEN_ERROR, Boolean.FALSE.toString());
+        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_DEBUG_PRINT, Boolean.FALSE.toString());
+        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_OUTPUT_ROOT_PATH, getMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH));
+        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_OUTPUT_FILE_EXT, JACGConstants.EXT_MD);
+
+        // 指定需要处理的jar包与目录
+        javaCGConfigureWrapper.setOtherConfigList(JavaCGOtherConfigFileUseListEnum.OCFULE_JAR_DIR, getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, true));
+        // 指定需要处理的包名
+        javaCGConfigureWrapper.setOtherConfigSet(JavaCGOtherConfigFileUseSetEnum.OCFUSE_PACKAGES, getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true));
+        return javaCGConfigureWrapper;
     }
 }

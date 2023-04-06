@@ -60,6 +60,9 @@ import java.util.Set;
 public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private static final Logger logger = LoggerFactory.getLogger(RunnerWriteDb.class);
 
+    // 需要处理的包名/类名前缀
+    private Set<String> allowedClassPrefixSet;
+
     /*
         记录写入数据库的对象
         key
@@ -83,8 +86,12 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
     @Override
     public boolean preHandle() {
-        if (!super.preHandle()) {
-            return false;
+        // 读取其他配置文件
+        allowedClassPrefixSet = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true);
+        if (allowedClassPrefixSet.isEmpty()) {
+            logger.info("所有包中的class文件都需要处理");
+        } else {
+            logger.info("仅处理以下包中的class文件\n{}", StringUtils.join(allowedClassPrefixSet, "\n"));
         }
 
         // 是否使用H2数据库
@@ -382,7 +389,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         // 其他情况
         if (useH2Db) {
             return sql.replace(" text ", " varchar(65536) ")
-                    .replace("CHARSET utf8mb4_bin", "");
+                    .replace("COLLATE utf8mb4_bin", "");
         }
         return sql;
     }

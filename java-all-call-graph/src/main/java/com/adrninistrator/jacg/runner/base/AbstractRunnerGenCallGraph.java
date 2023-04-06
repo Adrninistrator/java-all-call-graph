@@ -54,8 +54,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER;
-
 /**
  * @author adrninistrator
  * @date 2021/6/18
@@ -774,7 +772,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 初始化默认的处理业务功能数据的类
     private boolean initDefaultBusinessDataHandler() {
-        businessDataTypeSet = configureWrapper.getOtherConfigSet(order4ee ? OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE : OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+        businessDataTypeSet = configureWrapper.getOtherConfigSet(order4ee ? OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE :
+                        OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 false);
         if (businessDataTypeSet.isEmpty()) {
             // 没有指定需要处理的业务功能数据类型

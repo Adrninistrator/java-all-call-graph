@@ -396,7 +396,13 @@ public class DbOperator {
 //            }
 
             if (!noticeDropTable(e, sql)) {
-                logger.error("error [{}] ", sql, e);
+                if (argumentList.size() == 1) {
+                    // 打印插入失败的数据
+                    logger.error("error\nsql: [{}]\n数据: [{}]", sql, StringUtils.join(argumentList.get(0), JACGConstants.FLAG_COMMA_WITH_SPACE), e);
+                } else {
+                    logger.error("error 为了打印插入失败的数据，可将{} {}参数值设置为1\nsql: [{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(),
+                            ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getKey(), sql, e);
+                }
             }
             return false;
         } finally {

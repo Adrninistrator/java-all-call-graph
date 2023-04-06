@@ -6,7 +6,6 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extractor.dto.common.extract_file.AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGFileUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -109,8 +108,7 @@ public abstract class AbstractReporter {
         }
 
         logger.info("执行写数据库步骤");
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb();
-        return runnerWriteDb.run(configureWrapper, JACGUtil.genJavaCGConfigureWrapper());
+        return new RunnerWriteDb().run(configureWrapper, configureWrapper.genJavaCGConfigureWrapper());
     }
 
     /**

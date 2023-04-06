@@ -33,21 +33,28 @@ public class UnzipFile {
         }
 
         String rootDirName = chooseRootDirName();
-        if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + InputDirEnum.IDE_CONFIG.getDirName(), true) ||
-                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + InputDirEnum.IDE_SQL.getDirName(), true) ||
-                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + InputDirEnum.IDE_KEYWORD_CONF.getDirName(), true) ||
-                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + InputDirEnum.IDE_EXTENSIONS.getDirName(), true) ||
-                !JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_JAVA + "/" + UnzipFileConstants.DIR_TEST_JAVA_FILE, true)) {
+
+        for (InputDirEnum inputDirEnum : InputDirEnum.values()) {
+            if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + inputDirEnum.getDirName(), true)) {
+                return;
+            }
+        }
+        if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_JAVA + "/" + UnzipFileConstants.DIR_TEST_JAVA_FILE, true)) {
             return;
         }
 
         handleZipFile(jarFilePath, rootDirName, new AbstractZipEntryHandler() {
             @Override
             public void handleZipEntry(ZipEntry ze, String fileName, ZipInputStream zis, String rootDirName) {
-                if (fileName.startsWith(InputDirEnum.IDE_CONFIG.getDirName()) ||
-                        fileName.startsWith(InputDirEnum.IDE_SQL.getDirName()) ||
-                        fileName.startsWith(InputDirEnum.IDE_KEYWORD_CONF.getDirName()) ||
-                        fileName.startsWith(InputDirEnum.IDE_EXTENSIONS.getDirName())) {
+                boolean configDir = false;
+                for (InputDirEnum inputDirEnum : InputDirEnum.values()) {
+                    if (fileName.startsWith(inputDirEnum.getDirName())) {
+                        configDir = true;
+                        break;
+                    }
+                }
+
+                if (configDir) {
                     writeFile(ze, zis, rootDirName, UnzipFileConstants.DIR_RESOURCES, fileName);
                 } else if (fileName.startsWith(UnzipFileConstants.DIR_TEST_JAVA_FILE) && fileName.endsWith(UnzipFileConstants.FILE_JAVA)) {
                     writeFile(ze, zis, rootDirName, UnzipFileConstants.DIR_JAVA, fileName);
@@ -71,7 +78,7 @@ public class UnzipFile {
         handleZipFile(jarFilePath, rootDirName, new AbstractZipEntryHandler() {
             @Override
             public void handleZipEntry(ZipEntry ze, String fileName, ZipInputStream zis, String rootDirName) {
-                if (fileName.startsWith(JavaCGConstants.DIR_CONFIG + "/" + JavaCGConstants.FILE_CONFIG)) {
+                if (fileName.startsWith(JavaCGConstants.DIR_CONFIG + "/")) {
                     writeFile(ze, zis, rootDirName, UnzipFileConstants.DIR_RESOURCES, fileName);
                 }
             }

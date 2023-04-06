@@ -8,7 +8,6 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
 import org.junit.Before;
@@ -35,17 +34,19 @@ import java.util.List;
 public abstract class TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestRunByCodeBase.class);
 
-    protected ConfigureWrapper configureWrapper = new ConfigureWrapper();
-    protected JavaCGConfigureWrapper javaCGConfigureWrapper = JACGUtil.genJavaCGConfigureWrapper();
+    protected ConfigureWrapper configureWrapper;
+    protected JavaCGConfigureWrapper javaCGConfigureWrapper;
 
     protected void initCommon() {
         // java-all-call-graph的配置
+        configureWrapper = new ConfigureWrapper();
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, "test_rbc");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_2.getDetail());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM, "20");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, "1000");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, Boolean.TRUE.toString());
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH, "");
 
         // H2
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.TRUE.toString());
@@ -85,6 +86,8 @@ public abstract class TestRunByCodeBase {
         } catch (Exception e) {
             logger.error("error ", e);
         }
+
+        javaCGConfigureWrapper = configureWrapper.genJavaCGConfigureWrapper();
     }
 
     @Before

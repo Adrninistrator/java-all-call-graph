@@ -10,7 +10,7 @@ out/
 .classpath
 _jacg_o_ee/
 _jacg_o_er/
-output_dir/
+jar_output_dir/
 src/test/resources/_jacg_config/
 src/test/resources/_jacg_find_stack_keyword/
 log/*.log

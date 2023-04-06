@@ -160,6 +160,7 @@ public abstract class AbstractRunner {
                 return false;
             }
 
+            // 预处理
             if (!preHandle()) {
                 logger.error("{} 预处理失败", currentSimpleClassName);
                 return false;

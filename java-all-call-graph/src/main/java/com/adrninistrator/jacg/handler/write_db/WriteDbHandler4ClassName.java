@@ -18,18 +18,17 @@ public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData
 
     @Override
     protected WriteDbData4ClassName genData(String line) {
-        // line为类名
         if (JavaCGConstants.FLAG_HASHTAG.equals(line)) {
             return null;
         }
 
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(line)) {
-            return null;
-        }
-
-        if (!handledClassNameSet.add(line)) {
-            // 已处理过则返回
+        // line为类名
+        if (!isAllowedClassPrefix(line) ||
+                !handledClassNameSet.add(line)) {
+              /*
+                根据类名前缀判断不需要处理时则不处理
+                或者已处理过则不处理
+             */
             return null;
         }
 

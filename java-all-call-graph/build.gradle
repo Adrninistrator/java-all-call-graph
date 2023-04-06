@@ -3,11 +3,12 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 group 'com.github.adrninistrator'
-version = "1.0.4"
+version = "1.0.5"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+def jar_output_dir = "jar_output_dir"
 
 def defaultEncoding = 'UTF-8'
 
@@ -21,7 +22,7 @@ repositories {
 
 clean {
     delete 'build'
-    delete 'output_dir'
+    delete "${jar_output_dir}"
 }
 
 sourceSets {
@@ -60,7 +61,7 @@ List h2database = ["com.h2database:h2:2.1.214"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.5']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.6']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.0.5']
 
@@ -78,9 +79,9 @@ List log4j = [
 List junit = ['junit:junit:4.13.2']
 
 List spring = [
-        'org.springframework:spring-beans:5.3.22',
-        'org.springframework:spring-context:5.3.22',
-        'org.springframework:spring-web:5.3.22'
+        'org.springframework:spring-beans:5.3.26',
+        'org.springframework:spring-context:5.3.26',
+        'org.springframework:spring-web:5.3.26'
 ]
 
 List spring_test = [
@@ -136,42 +137,39 @@ task gen_run_jar(type: Jar) {
         into '/'
     }
 
+    def jacgConfigDirs = new File('src/main/resources').listFiles().findAll { File f -> (f.isDirectory() && f.name.startsWith('_jacg_')) }
+
     doLast {
         copy {
             from 'build/libs/run_jacg.jar'
-            into 'output_dir/jar/'
+            into "${jar_output_dir}/jar/"
         }
-        copy {
-            from 'src/main/resources/_jacg_config/'
-            into 'output_dir/_jacg_config/'
-        }
-        copy {
-            from 'src/main/resources/_jacg_extensions/'
-            into 'output_dir/_jacg_extensions/'
-        }
-        copy {
-            from 'src/main/resources/_jacg_find_stack_keyword/'
-            into 'output_dir/_jacg_find_stack_keyword/'
-        }
-        copy {
-            from 'src/main/resources/_jacg_sql/'
-            into 'output_dir/_jacg_sql/'
+        // 拷贝配置文件目录
+        jacgConfigDirs.each { jacgConfigDir ->
+            def dirName = jacgConfigDir.getName()
+
+            copy {
+                from 'src/main/resources/' + dirName
+                into "${jar_output_dir}/" + dirName
+            }
         }
         copy {
             from new File('bat').listFiles().findAll { File f -> (f.name.endsWith('.bat')) }
-            into 'output_dir/'
+            into "${jar_output_dir}/"
         }
         copy {
             from new File('shell').listFiles().findAll { File f -> (f.name.endsWith('.sh')) }
-            into 'output_dir/'
+            into "${jar_output_dir}/"
         }
         copy {
             from new File('src/test/resources').listFiles().findAll { File f -> (f.name.startsWith('log4j2') && f.name.endsWith('.xml')) }
-            into 'output_dir/config/'
+            into "${jar_output_dir}/config/"
         }
         copy {
-            from configurations.testRuntimeClasspath.getFiles().findAll { File f -> (!f.name.startsWith('spring-') && !f.name.startsWith('junit-')) }
-            into 'output_dir/lib'
+            from configurations.testRuntimeClasspath.getFiles().findAll {
+                File f -> (!f.name.startsWith('spring-') && !f.name.startsWith('junit-'))
+            }
+            into "${jar_output_dir}/lib"
         }
     }
 }
@@ -183,7 +181,7 @@ idea {
         excludeDirs += file('_jacg_o_ee')
         excludeDirs += file('_jacg_o_er')
         excludeDirs += file('gradle')
-        excludeDirs += file('output_dir')
+        excludeDirs += file("${jar_output_dir}")
         excludeDirs += file('bat')
         excludeDirs += file('shell')
         excludeDirs += file('log')
