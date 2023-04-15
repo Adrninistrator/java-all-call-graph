@@ -1,7 +1,6 @@
 package test.run_by_code.handler.classes;
 
 import com.adrninistrator.jacg.handler.classes.ClassSignatureEi1Handler;
-import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -11,7 +10,7 @@ import test.call_graph.manual_add_method_call.unfixed.UnfixedService1a;
 import test.call_graph.signature.TestClassWithSignature1;
 import test.call_graph.signature.TestClassWithSignature2;
 import test.call_graph.signature.TestInterfaceWithSignature;
-import test.run_by_code.handler.base.TestHandlerBase;
+import test.run_by_code.base.TestRunByCodeBase;
 
 import java.util.List;
 
@@ -20,14 +19,11 @@ import java.util.List;
  * @date 2023/3/27
  * @description:
  */
-public class TestClassSignatureEi1Handler extends TestHandlerBase {
+public class TestClassSignatureEi1Handler extends TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestClassSignatureEi1Handler.class);
 
     @Test
     public void testClassSignatureEi1() {
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb();
-        runnerWriteDb.run(configureWrapper, javaCGConfigureWrapper);
-
         try (ClassSignatureEi1Handler classSignatureEi1Handler4Query = new ClassSignatureEi1Handler(configureWrapper)) {
             doTestClassSignatureEi1(classSignatureEi1Handler4Query, UnfixedService1a.class.getName(), AbstractUnFixedService1.class.getName());
             doTestClassSignatureEi1(classSignatureEi1Handler4Query, TestClassWithSignature1.class.getName(), TestInterfaceWithSignature.class.getName());

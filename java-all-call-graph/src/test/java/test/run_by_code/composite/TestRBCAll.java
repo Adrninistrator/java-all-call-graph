@@ -27,8 +27,8 @@ public class TestRBCAll extends TestRunByCodeBase {
         configureWrapperCopy = configureWrapper.copy();
         new RunnerGenAllGraph4Caller().run(configureWrapperCopy);
         configureWrapperCopy = configureWrapper.copy();
-        new RunnerWriteCallGraphFile().run(configureWrapperCopy, javaCGConfigureWrapper);
+        new RunnerWriteCallGraphFile().run(configureWrapperCopy);
         configureWrapperCopy = configureWrapper.copy();
-        new RunnerWriteDb().run(configureWrapperCopy, javaCGConfigureWrapper);
+        new RunnerWriteDb().run(configureWrapperCopy);
     }
 }

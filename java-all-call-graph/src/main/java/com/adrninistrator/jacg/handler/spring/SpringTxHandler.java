@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.comparator.Comparator4MethodCallPairByCaller;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
-import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.method_call.MethodCallPair;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.base.BaseHandler;

@@ -69,7 +69,7 @@ public abstract class AbstractRunner {
     protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
     /**
-     * 执行任务
+     * 入口方法
      *
      * @return true: 成功；false: 失败
      */
@@ -128,13 +128,13 @@ public abstract class AbstractRunner {
      */
     protected void printAllConfigInfo() {
         String configMdFilePath = JavaCGUtil.addSeparator4FilePath(currentOutputDirPath) + JACGConstants.FILE_JACG_ALL_CONFIG_MD;
-        logger.info("{} 全部的配置参数信息保存到以下文件 {}", currentSimpleClassName, configMdFilePath);
+        logger.info("{} 全部的配置参数信息保存到以下文件\n{}", currentSimpleClassName, configMdFilePath);
         // 打印所有的配置参数信息
         configureWrapper.printConfigInfo(currentSimpleClassName, configMdFilePath, true);
     }
 
     /**
-     * 执行任务，通过代码指定配置参数
+     * 入口方法，通过代码指定配置参数
      *
      * @param configureWrapper 当前使用的配置信息
      * @return

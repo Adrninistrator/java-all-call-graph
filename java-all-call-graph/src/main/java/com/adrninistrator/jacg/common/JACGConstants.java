@@ -85,8 +85,8 @@ public class JACGConstants {
     public static final int NOTICE_LINE_NUM = 5000;
     // 批量写入数据库时每次插入的数量允许的最大值
     public static final int MAX_DB_INSERT_BATCH_SIZE = 5000;
-    // 从数据库分页查询数据的数量
-    public static final int DB_QUERY_PAGE_SIZE = 1000;
+    // 数据库分页操作数量
+    public static final int DB_PAGE_HANDLE_SIZE = 1000;
 
     // 代表分页查询失败
     public static final int PAGE_QUERY_FAIL = -2;

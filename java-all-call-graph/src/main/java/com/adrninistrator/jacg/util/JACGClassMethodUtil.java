@@ -1,9 +1,14 @@
 package com.adrninistrator.jacg.util;
 
+import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author adrninistrator
@@ -147,6 +152,17 @@ public class JACGClassMethodUtil {
     }
 
     /**
+     * 根据完整方法生成方法参数类型列表
+     *
+     * @param fullMethod
+     * @return
+     */
+    public static List<String> genMethodArgTypeList(String fullMethod) {
+        MethodDetail methodDetail = genMethodDetail(fullMethod);
+        return Arrays.asList(methodDetail.getArgs());
+    }
+
+    /**
      * 拼接类名与方法名
      * 格式：类名:方法名
      *
@@ -156,6 +172,20 @@ public class JACGClassMethodUtil {
      */
     public static String getClassAndMethodName(String className, String methodName) {
         return className + JavaCGConstants.FLAG_COLON + methodName;
+    }
+
+    /**
+     * 根据[类名]:[方法名]格式的字符串获取对应的类名与方法名对象
+     *
+     * @param methodInfo
+     * @return
+     */
+    public static ClassAndMethodName parseClassAndMethodName(String methodInfo) {
+        String[] array = StringUtils.splitPreserveAllTokens(methodInfo, JavaCGConstants.FLAG_COLON);
+        if (array == null || array.length != 2) {
+            throw new JavaCGRuntimeException("指定的字符串不满足[类名]:[方法名]格式 " + methodInfo);
+        }
+        return new ClassAndMethodName(array[0], array[1]);
     }
 
     private JACGClassMethodUtil() {

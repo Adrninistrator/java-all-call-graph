@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -110,7 +112,7 @@ public class JACGSqlUtil {
      * @param list
      * @return
      */
-    public static List<String> getListString(List<Object> list) {
+    public static List<String> genStringList(List<Object> list) {
         if (list == null) {
             return null;
         }
@@ -120,6 +122,42 @@ public class JACGSqlUtil {
             stringList.add((String) obj);
         }
         return stringList;
+    }
+
+    /**
+     * 将数据库查询结果转换为字符串Set
+     *
+     * @param list
+     * @return
+     */
+    public static Set<String> genStringSet(List<Object> list) {
+        if (list == null) {
+            return null;
+        }
+
+        Set<String> stringSet = new HashSet<>(list.size());
+        for (Object obj : list) {
+            stringSet.add((String) obj);
+        }
+        return stringSet;
+    }
+
+    /**
+     * 将数据库查询结果转换为Integer List
+     *
+     * @param list
+     * @return
+     */
+    public static List<Integer> genIntegerList(List<Object> list) {
+        if (list == null) {
+            return null;
+        }
+
+        List<Integer> integerList = new ArrayList<>(list.size());
+        for (Object obj : list) {
+            integerList.add((Integer) obj);
+        }
+        return integerList;
     }
 
     /**

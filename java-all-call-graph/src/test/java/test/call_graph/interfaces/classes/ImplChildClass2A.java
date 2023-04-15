@@ -10,7 +10,7 @@ import test.call_graph.interfaces.interfaces.InterfaceChild2;
 public class ImplChildClass2A implements InterfaceChild2 {
     @Override
     public void testSuper1() {
-        System.setProperty("", "");
+        System.setProperty("c", "d");
     }
 
     @Override

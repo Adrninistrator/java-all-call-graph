@@ -12,10 +12,13 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,7 +59,7 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
     public List<LambdaMethodCall> query(Object... args) {
         if (!runningFlag.compareAndSet(false, true)) {
             logger.error("当前类不允许并发调用，请创建新的实例");
-            return null;
+            throw new JavaCGRuntimeException("当前类不允许并发调用，请创建新的实例");
         }
 
         try {
@@ -69,13 +72,13 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
                 int endCallId = queryMaxCallIdByPage(startCallId);
                 if (endCallId == JACGConstants.PAGE_QUERY_FAIL) {
                     // 查询失败
-                    return null;
+                    return Collections.emptyList();
                 }
 
                 // 通过类名前缀分页查询Lambda表达式方法调用信息
                 List<Map<String, Object>> list = queryByPage(startCallId, endCallId, args);
-                if (list == null) {
-                    return null;
+                if (JavaCGUtil.isCollectionEmpty(list)) {
+                    return Collections.emptyList();
                 }
 
                 // 添加查询结果列表
@@ -96,7 +99,7 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
     // 分页查询本次从Lambda表达式方法信息表查询的最大的call_id
     private int queryMaxCallIdByPage(int startCallId) {
         logger.debug("分页查询startCallId {}", startCallId);
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.LMI_QUERY_MAX_CALL_ID;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.LMI_QUERY_BY_PAGE_MAX_CALL_ID;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.LMI_CALL_ID +
@@ -106,10 +109,9 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{startCallId, JACGConstants.DB_QUERY_PAGE_SIZE});
+        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{startCallId, JACGConstants.DB_PAGE_HANDLE_SIZE - 1});
         if (list == null) {
             // 查询失败
-            logger.debug("查询失败 {}", startCallId);
             return JACGConstants.PAGE_QUERY_FAIL;
         }
 
@@ -195,8 +197,8 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
      * @return
      */
     protected List<LambdaMethodCallDetail> genDetailList(List<LambdaMethodCall> lambdaMethodCallList) {
-        if (lambdaMethodCallList == null) {
-            return null;
+        if (JavaCGUtil.isCollectionEmpty(lambdaMethodCallList)) {
+            return Collections.emptyList();
         }
 
         List<LambdaMethodCallDetail> lambdaMethodCallDetailList = new ArrayList<>(lambdaMethodCallList.size());

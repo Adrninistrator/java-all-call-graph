@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.dto.call_line;
 
 import com.adrninistrator.jacg.dto.method.MethodDetail;
-import com.adrninistrator.jacg.extensions.dto.business_data.BaseBusinessData;
+import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
 
 import java.util.List;
 

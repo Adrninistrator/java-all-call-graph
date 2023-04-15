@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.runner;
 import com.adrninistrator.jacg.annotation.attributes.AnnotationAttributesFormatter;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.interfaces.ConfigInterface;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.MyBatisMySqlSqlInfoCodeParser;
@@ -33,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -52,6 +50,14 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
     // java-callgraph2的入口类
     private JCallGraph jCallGraph;
 
+    /**
+     * 入口方法
+     * 可以调用run(ConfigureWrapper configureWrapper)方法，不需要指定JavaCGConfigureWrapper参数
+     *
+     * @param configureWrapper
+     * @param javaCGConfigureWrapper
+     * @return
+     */
     public boolean run(ConfigureWrapper configureWrapper, JavaCGConfigureWrapper javaCGConfigureWrapper) {
         this.javaCGConfigureWrapper = javaCGConfigureWrapper;
         return run(configureWrapper);

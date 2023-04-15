@@ -1,8 +1,8 @@
 package com.adrninistrator.jacg.annotation.formatter;
 
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
-import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.ListStringAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.ListStringAnnotationAttribute;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

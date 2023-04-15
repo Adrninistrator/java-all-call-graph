@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.dto.method;
 
+import java.util.Objects;
+
 /**
  * @author adrninistrator
  * @date 2023/3/3
@@ -24,5 +26,18 @@ public class ClassAndMethodName {
 
     public String getMethodName() {
         return methodName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ClassAndMethodName that = (ClassAndMethodName) o;
+        return Objects.equals(className, that.className) && Objects.equals(methodName, that.methodName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(className, methodName);
     }
 }

@@ -55,4 +55,14 @@ public class MethodCallInfo {
     public void setStaticFieldMethod(String staticFieldMethod) {
         this.staticFieldMethod = staticFieldMethod;
     }
+
+    @Override
+    public String toString() {
+        return "MethodCallInfo{" +
+                "type='" + type + '\'' +
+                ", value='" + value + '\'' +
+                ", staticField='" + staticField + '\'' +
+                ", staticFieldMethod='" + staticFieldMethod + '\'' +
+                '}';
+    }
 }

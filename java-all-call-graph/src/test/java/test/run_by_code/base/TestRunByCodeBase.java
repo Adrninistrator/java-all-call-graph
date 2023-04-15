@@ -9,7 +9,6 @@ import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,6 @@ public abstract class TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestRunByCodeBase.class);
 
     protected ConfigureWrapper configureWrapper;
-    protected JavaCGConfigureWrapper javaCGConfigureWrapper;
 
     protected void initCommon() {
         // java-all-call-graph的配置
@@ -86,8 +84,6 @@ public abstract class TestRunByCodeBase {
         } catch (Exception e) {
             logger.error("error ", e);
         }
-
-        javaCGConfigureWrapper = configureWrapper.genJavaCGConfigureWrapper();
     }
 
     @Before

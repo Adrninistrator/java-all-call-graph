@@ -34,7 +34,14 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
         String genericsType = array[4];
 
         withGenericsTypeMethodHash.add(methodHash);
-        return new WriteDbData4MethodArgGenericsType(methodHash, simpleClassName, argSeq, type, typeSeq, genericsType, fullMethod);
+        return new WriteDbData4MethodArgGenericsType(methodHash,
+                simpleClassName,
+                argSeq,
+                type,
+                typeSeq,
+                dbOperWrapper.getSimpleClassName(genericsType),
+                genericsType,
+                fullMethod);
     }
 
     @Override
@@ -51,6 +58,7 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
                 data.getArgSeq(),
                 data.getType(),
                 data.getTypeSeq(),
+                data.getSimpleGenericsType(),
                 data.getGenericsType(),
                 data.getFullMethod()
         };

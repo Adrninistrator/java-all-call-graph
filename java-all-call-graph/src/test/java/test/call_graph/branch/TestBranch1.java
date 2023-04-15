@@ -26,7 +26,7 @@ public class TestBranch1 {
             Thread.sleep(i);
         }
 
-        System.setProperty("", i + "");
+        System.setProperty("5", i + "6");
     }
 
     private void test3(int arg1) throws InterruptedException {

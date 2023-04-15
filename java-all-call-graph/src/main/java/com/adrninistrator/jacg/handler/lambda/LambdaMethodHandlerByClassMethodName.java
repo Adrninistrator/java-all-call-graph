@@ -4,11 +4,13 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,8 +34,8 @@ public class LambdaMethodHandlerByClassMethodName extends LambdaMethodHandlerByC
      */
     public List<String> queryCalleeFullMethodByLambdaCallee(String lambdaCalleeClassName, String lambdaCalleeMethodName) {
         List<LambdaMethodCallDetail> list = queryDetailByLambdaCallee(lambdaCalleeClassName, lambdaCalleeMethodName);
-        if (list == null) {
-            return null;
+        if (JavaCGUtil.isCollectionEmpty(list)) {
+            return Collections.emptyList();
         }
 
         List<String> calleeFullMethodList = new ArrayList<>(list.size());
@@ -58,8 +60,8 @@ public class LambdaMethodHandlerByClassMethodName extends LambdaMethodHandlerByC
         logger.info("通过Lambda表达式被调用方类名、方法名，查询Lambda表达式方法调用信息 {} {}", lambdaCalleeClassName, lambdaCalleeMethodName);
         // 执行查询操作
         List<LambdaMethodCallDetail> list = queryByClassNamePrefixDetail(lambdaCalleeClassName, null);
-        if (list == null) {
-            return null;
+        if (JavaCGUtil.isCollectionEmpty(list)) {
+            return Collections.emptyList();
         }
 
         List<LambdaMethodCallDetail> newList = new ArrayList<>(list.size());
@@ -89,8 +91,8 @@ public class LambdaMethodHandlerByClassMethodName extends LambdaMethodHandlerByC
         logger.info("通过Lambda表达式下一个被调用方类名、方法名，查询Lambda表达式方法调用信息 {} {}", lambdaNextCalleeClassName, lambdaNextCalleeMethodName);
         // 执行查询操作
         List<LambdaMethodCallDetail> list = queryByClassNamePrefixDetail(null, lambdaNextCalleeClassName);
-        if (list == null) {
-            return null;
+        if (JavaCGUtil.isCollectionEmpty(list)) {
+            return Collections.emptyList();
         }
 
         List<LambdaMethodCallDetail> newList = new ArrayList<>(list.size());

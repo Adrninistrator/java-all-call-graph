@@ -134,11 +134,7 @@ public class MethodCallHandler extends BaseHandler {
             );
             Object[] arguments = JACGUtil.genMethodCallObjectArray(writeDbData4MethodCall);
 
-            String sql = dbOperWrapper.genAndCacheInsertSql(DbTableInfoEnum.DTIE_METHOD_CALL.getSqlKey(),
-                    DbTableInfoEnum.DTIE_METHOD_CALL.getSqlKey4Print(),
-                    DbInsertMode.DIME_INSERT,
-                    DbTableInfoEnum.DTIE_METHOD_CALL.getTableName(),
-                    DbTableInfoEnum.DTIE_METHOD_CALL.getColumns());
+            String sql = dbOperWrapper.genAndCacheInsertSql(DbTableInfoEnum.DTIE_METHOD_CALL, DbInsertMode.DIME_INSERT);
             return dbOperator.insert(sql, arguments);
         } finally {
             runningFlag2.set(false);

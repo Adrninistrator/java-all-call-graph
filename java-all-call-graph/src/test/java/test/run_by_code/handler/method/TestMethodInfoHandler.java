@@ -5,14 +5,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.call_graph.method_call.TestMCCallee;
-import test.run_by_code.handler.base.TestHandlerBase;
+import test.run_by_code.base.TestRunByCodeBase;
 
 /**
  * @author adrninistrator
  * @date 2023/3/26
  * @description:
  */
-public class TestMethodInfoHandler extends TestHandlerBase {
+public class TestMethodInfoHandler extends TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestMethodInfoHandler.class);
 
     @Test

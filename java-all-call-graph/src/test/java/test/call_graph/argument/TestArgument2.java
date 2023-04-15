@@ -1,5 +1,7 @@
 package test.call_graph.argument;
 
+import java.math.BigDecimal;
+
 /**
  * @author adrninistrator
  * @date 2021/11/1
@@ -43,5 +45,21 @@ public class TestArgument2 {
         }
 
         System.setProperty(s1, s2);
+    }
+
+    private void test2() {
+        TestArgument3 testArgument3 = new TestArgument3();
+        testArgument3.test1(null, "a", 1);
+        testArgument3.test1(1, "b", 2);
+        testArgument3.test1(1.0, "c", 3);
+        testArgument3.test1(1L, "d", 4);
+        testArgument3.test1(BigDecimal.ONE, "e", 5);
+        testArgument3.test1("test", "f", 6);
+    }
+
+    private void test3() {
+        TestArgument3 testArgument3 = new TestArgument3();
+        testArgument3.test2(new TestClassWithAnnotation1A(), "a", 1);
+        testArgument3.test2(new TestClassWithAnnotation2A(), "b", 2);
     }
 }

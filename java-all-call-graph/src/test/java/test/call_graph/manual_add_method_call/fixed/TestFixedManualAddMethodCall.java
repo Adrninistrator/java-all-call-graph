@@ -23,7 +23,7 @@ public class TestFixedManualAddMethodCall {
         return new AbstractFixedService1() {
             @Override
             protected String execute() {
-                System.setProperty("", "");
+                System.setProperty("g", "h");
                 return "";
             }
         }.invoke();

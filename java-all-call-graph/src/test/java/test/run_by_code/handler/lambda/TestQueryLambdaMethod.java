@@ -7,7 +7,7 @@ import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByStreamMethod;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.run_by_code.handler.base.TestHandlerBase;
+import test.run_by_code.base.TestRunByCodeBase;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +18,7 @@ import java.util.function.Function;
  * @date 2023/1/11
  * @description:
  */
-public class TestQueryLambdaMethod extends TestHandlerBase {
+public class TestQueryLambdaMethod extends TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestQueryLambdaMethod.class);
 
     @Test

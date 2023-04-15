@@ -20,6 +20,7 @@ public class DC {
     public static final String CN_RECORD_ID = "record_id";
     public static final String CN_CLASS_NAME = COMMON_CLASS_NAME;
     public static final String CN_SIMPLE_CLASS_NAME = COMMON_SIMPLE_CLASS_NAME;
+    public static final String CN_DUPLICATE_CLASS = "duplicate_class";
 
     public static final String CA_RECORD_ID = "record_id";
     public static final String CA_SIMPLE_CLASS_NAME = COMMON_SIMPLE_CLASS_NAME;
@@ -95,6 +96,8 @@ public class DC {
     public static final String MI_ACCESS_FLAGS = "access_flags";
     public static final String MI_METHOD_NAME = "method_name";
     public static final String MI_FULL_METHOD = COMMON_FULL_METHOD;
+    public static final String MI_SIMPLE_RETURN_TYPE = "simple_return_type";
+    public static final String MI_RETURN_TYPE = "return_type";
 
     public static final String EI_RECORD_ID = "record_id";
     public static final String EI_SIMPLE_CLASS_NAME = COMMON_SIMPLE_CLASS_NAME;
@@ -166,8 +169,25 @@ public class DC {
     public static final String MAGT_ARG_SEQ = "arg_seq";
     public static final String MAGT_TYPE = "type";
     public static final String MAGT_TYPE_SEQ = "type_seq";
+    public static final String MAGT_SIMPLE_GENERICS_TYPE = "simple_generics_type";
     public static final String MAGT_GENERICS_TYPE = "generics_type";
     public static final String MAGT_FULL_METHOD = "full_method";
+
+    public static final String MAT_METHOD_HASH = "method_hash";
+    public static final String MAT_ARG_SEQ = "arg_seq";
+    public static final String MAT_SIMPLE_ARG_TYPE = "simple_arg_type";
+    public static final String MAT_ARG_TYPE = "arg_type";
+    public static final String MAT_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String MAT_FULL_METHOD = "full_method";
+
+    public static final String MRGT_RECORD_ID = "record_id";
+    public static final String MRGT_METHOD_HASH = "method_hash";
+    public static final String MRGT_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String MRGT_TYPE = "type";
+    public static final String MRGT_TYPE_SEQ = "type_seq";
+    public static final String MRGT_SIMPLE_GENERICS_TYPE = "simple_generics_type";
+    public static final String MRGT_GENERICS_TYPE = "generics_type";
+    public static final String MRGT_FULL_METHOD = "full_method";
 
     public static final String IC_SIMPLE_INNER_CLASS_NAME = "simple_inner_class_name";
     public static final String IC_INNER_CLASS_NAME = "inner_class_name";

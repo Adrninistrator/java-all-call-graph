@@ -1,11 +1,15 @@
 package test.run_by_code.handler.annotation;
 
+import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
-import com.adrninistrator.jacg.runner.RunnerWriteDb;
+import com.adrninistrator.jacg.util.JACGJsonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.call_graph.annotation.TestAnnotation1;
+import test.call_graph.argument.TestClassWithAnnotation2A;
+import test.call_graph.argument.TestClassWithAnnotation3A;
 import test.run_by_code.base.TestRunByCodeBase;
 
 import java.util.List;
@@ -19,18 +23,46 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestAnnotationHandler.class);
 
     @Test
-    public void test() {
-        new RunnerWriteDb().run(configureWrapper, javaCGConfigureWrapper);
-
+    public void testQueryClassesWithAnnotationsSimple() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<String> simpleClassList = annotationHandler.queryClassesWithAnnotations(true, "org.springframework.context.annotation.Configuration");
             logger.info("simpleClassList\n{}", StringUtils.join(simpleClassList, "\n"));
+        }
+    }
+
+    @Test
+    public void testQueryClassesWithAnnotationsFull() {
+        try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<String> classList = annotationHandler.queryClassesWithAnnotations(false, "org.springframework.web.bind.annotation.RequestMapping");
             logger.info("classList\n{}", StringUtils.join(classList, "\n"));
+        }
+    }
+
+    @Test
+    public void testQueryMethodsWithAnnotationsFullMethod() {
+        try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<String> methodList = annotationHandler.queryMethodsWithAnnotations(true, "org.springframework.web.bind.annotation.PostMapping");
             logger.info("methodList\n{}", StringUtils.join(methodList, "\n"));
+        }
+    }
+
+    @Test
+    public void testQueryMethodsWithAnnotationsMethodHash() {
+        try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<String> methodHashList = annotationHandler.queryMethodsWithAnnotations(false, "org.springframework.context.annotation.Bean");
             logger.info("methodHashList\n{}", StringUtils.join(methodHashList, "\n"));
+        }
+    }
+
+    @Test
+    public void testQuerySuperClassesInfo() {
+        try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
+            List<SuperClassWithAnnotation> superClassWithAnnotationList1 = annotationHandler.querySuperClassesInfo(TestClassWithAnnotation2A.class.getName(),
+                    TestAnnotation1.class.getName());
+            logger.info("superClassWithAnnotationList1\n{}", JACGJsonUtil.getJsonStr(superClassWithAnnotationList1));
+            List<SuperClassWithAnnotation> superClassWithAnnotationList2 = annotationHandler.querySuperClassesInfo(TestClassWithAnnotation3A.class.getName(),
+                    TestAnnotation1.class.getName());
+            logger.info("superClassWithAnnotationList2\n{}", JACGJsonUtil.getJsonStr(superClassWithAnnotationList2));
         }
     }
 }

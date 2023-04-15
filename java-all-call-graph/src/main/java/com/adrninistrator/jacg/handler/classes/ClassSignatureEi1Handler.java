@@ -75,7 +75,7 @@ public class ClassSignatureEi1Handler extends BaseHandler {
                     logger.error("指定类不存在对应父类/接口的签名信息 {} {}", simpleClassName, superOrItfClassName);
                     return Collections.emptyList();
                 }
-                return JACGSqlUtil.getListString(signatureClassList);
+                return JACGSqlUtil.genStringList(signatureClassList);
             }
         }
 

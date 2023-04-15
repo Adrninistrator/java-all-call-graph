@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.extensions.dto.business_data;
+package com.adrninistrator.jacg.handler.dto.business_data;
 
 /**
  * @author adrninistrator

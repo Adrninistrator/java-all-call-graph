@@ -8,10 +8,12 @@ package com.adrninistrator.jacg.dto.write_db;
 public class WriteDbData4ClassName extends AbstractWriteDbData {
     private final String className;
     private final String simpleClassName;
+    private final int duplicateClass;
 
-    public WriteDbData4ClassName(String className, String simpleClassName) {
+    public WriteDbData4ClassName(String className, String simpleClassName, int duplicateClass) {
         this.className = className;
         this.simpleClassName = simpleClassName;
+        this.duplicateClass = duplicateClass;
     }
 
     public String getClassName() {
@@ -20,5 +22,9 @@ public class WriteDbData4ClassName extends AbstractWriteDbData {
 
     public String getSimpleClassName() {
         return simpleClassName;
+    }
+
+    public int getDuplicateClass() {
+        return duplicateClass;
     }
 }

@@ -42,7 +42,7 @@ public class TestActionListener {
                     }
                 }.start();
 
-                System.setProperty("", "");
+                System.setProperty("1", "2");
             }
         });
     }
@@ -54,7 +54,7 @@ public class TestActionListener {
                 new Button().addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.setProperty("", "");
+                        System.setProperty("3", "4");
                     }
                 });
 

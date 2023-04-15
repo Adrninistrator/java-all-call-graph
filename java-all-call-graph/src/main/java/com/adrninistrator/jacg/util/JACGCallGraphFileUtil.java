@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
-import com.adrninistrator.jacg.extensions.dto.business_data.BaseBusinessData;
+import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
 import com.adrninistrator.jacg.markdown.JACGMarkdownConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;

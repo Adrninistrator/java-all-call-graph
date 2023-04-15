@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.annotation.formatter;
 
-import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 
 import java.util.Map;

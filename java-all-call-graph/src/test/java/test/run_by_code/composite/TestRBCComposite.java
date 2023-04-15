@@ -22,7 +22,7 @@ public class TestRBCComposite extends TestRunByCodeBase {
 
     @Test
     public void test0WriteDb() {
-        Assert.assertTrue(new RunnerWriteDb().run(configureWrapper, javaCGConfigureWrapper));
+        Assert.assertTrue(new RunnerWriteDb().run(configureWrapper));
     }
 
     @Test

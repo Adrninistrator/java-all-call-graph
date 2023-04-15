@@ -1,7 +1,10 @@
 package com.adrninistrator.jacg.dto.method_call;
 
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,13 +29,37 @@ public class ObjArgsInfoInMethodCall {
     private Map<Integer, List<MethodCallInfo>> argInfoMap;
 
     /**
+     * 判断参数的信息是否为空
+     *
+     * @return
+     */
+    public boolean isArgInfoMapEmpty() {
+        return JACGUtil.isMapEmpty(argInfoMap);
+    }
+
+    /**
+     * 获取参数的序号列表，已排序
+     * 序号从1开始
+     *
+     * @return
+     */
+    public List<Integer> getArgSeqList() {
+        if (isArgInfoMapEmpty()) {
+            return null;
+        }
+        List<Integer> argSeqList = new ArrayList<>(argInfoMap.keySet());
+        Collections.sort(argSeqList);
+        return argSeqList;
+    }
+
+    /**
      * 获取指定参数序号对应的参数信息
      *
      * @param argSeq
      * @return
      */
-    public List<MethodCallInfo> getArgMethodCallInfo(int argSeq) {
-        if (argInfoMap == null) {
+    public List<MethodCallInfo> getArgMethodCallInfo(Integer argSeq) {
+        if (isArgInfoMapEmpty()) {
             return null;
         }
         return argInfoMap.get(argSeq);

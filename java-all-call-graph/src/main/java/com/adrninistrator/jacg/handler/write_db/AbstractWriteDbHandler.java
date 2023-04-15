@@ -113,7 +113,7 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
     protected String[] splitEquals(String line, int rowNum) {
         String[] array = StringUtils.splitPreserveAllTokens(line, JavaCGConstants.FILE_COLUMN_SEPARATOR);
         if (array.length != rowNum) {
-            logger.error("{} 文件列数非法 {} [{}]", currentSimpleClassName, array.length, line);
+            logger.error("{} 文件列数非法 预期: {} 实际: {} [{}]", currentSimpleClassName, rowNum, array.length, line);
             throw new JavaCGRuntimeException(currentSimpleClassName + "文件列数非法");
         }
 
@@ -213,11 +213,7 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
         }
         DbTableInfoEnum dbTableInfoEnum = chooseDbTableInfo();
         // 生成用于插入数据的sql语句
-        String sql = dbOperWrapper.genAndCacheInsertSql(dbTableInfoEnum.getSqlKey(),
-                dbTableInfoEnum.getSqlKey4Print(),
-                DbInsertMode.DIME_INSERT,
-                dbTableInfoEnum.getTableName(),
-                dbTableInfoEnum.getColumns());
+        String sql = dbOperWrapper.genAndCacheInsertSql(dbTableInfoEnum, DbInsertMode.DIME_INSERT);
 
         // 根据需要写入的数据生成Object数组
         List<Object[]> objectList = new ArrayList<>(dataList.size());

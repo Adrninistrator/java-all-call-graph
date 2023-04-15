@@ -3,18 +3,18 @@ package com.adrninistrator.jacg.runner;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
-import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.call_graph.CallGraphNode4Callee;
 import com.adrninistrator.jacg.dto.call_graph.SuperCallChildInfo;
 import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.task.CalleeEntryMethodTaskInfo;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
-import com.adrninistrator.jacg.extensions.common.enums.BusinessDataTypeEnum;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
@@ -374,7 +374,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             }
         }
 
-        if (businessDataTypeSet.contains(BusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
+        if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
             // 显示方法参数泛型类型
             if (!addMethodArgGenericsTypeInfo(true, callFlags, entryCalleeMethodHash, calleeInfo)) {
                 return false;
@@ -778,13 +778,22 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         int cycleCallLevel = JACGConstants.NO_CYCLE_CALL_FLAG;
         for (int i = callGraphNode4CalleeStack.getHead(); i >= 0; i--) {
             CallGraphNode4Callee callGraphNode4Callee = callGraphNode4CalleeStack.getElement(i);
-            if (cycleCallLevel == JACGConstants.NO_CYCLE_CALL_FLAG && callerMethodHash.equals(callGraphNode4Callee.getCalleeMethodHash())) {
+            if (callerMethodHash.equals(callGraphNode4Callee.getCalleeMethodHash())) {
                 // 找到循环调用
                 cycleCallLevel = i;
+                break;
             }
+        }
 
-            if (cycleCallLevel != JACGConstants.NO_CYCLE_CALL_FLAG) {
-                // 记录循环调用信息
+        // 每个层级的调用方法遍历完之后的处理
+        if (cycleCallLevel != JACGConstants.NO_CYCLE_CALL_FLAG) {
+            // 显示被循环调用的信息
+            cycleCallLogInfo.append(JACGCallGraphFileUtil.genCycleCallFlag(cycleCallLevel))
+                    .append(" ")
+                    .append(callerFullMethod);
+            // 记录循环调用信息
+            for (int i = callGraphNode4CalleeStack.getHead(); i >= 0; i--) {
+                CallGraphNode4Callee callGraphNode4Callee = callGraphNode4CalleeStack.getElement(i);
                 if (cycleCallLogInfo.length() > 0) {
                     cycleCallLogInfo.append("\n");
                 }
@@ -792,15 +801,6 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                         .append(" ")
                         .append(callGraphNode4Callee.getCalleeFullMethod());
             }
-        }
-
-        // 每个层级的调用方法遍历完之后的处理
-        if (cycleCallLevel != JACGConstants.NO_CYCLE_CALL_FLAG) {
-            // 显示被循环调用的信息
-            cycleCallLogInfo.append("\n")
-                    .append(JACGCallGraphFileUtil.genCycleCallFlag(cycleCallLevel))
-                    .append(" ")
-                    .append(callerFullMethod);
             logger.info("找到循环调用的方法\n{}", cycleCallLogInfo);
         }
 

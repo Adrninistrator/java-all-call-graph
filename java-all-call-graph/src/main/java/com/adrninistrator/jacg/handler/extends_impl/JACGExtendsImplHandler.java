@@ -120,11 +120,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
     private List<String> doLoadChildrenOrImplClassInfo(String simpleClassName, String sql, Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet) {
         logger.debug("执行向下加载父类/接口对应的子类/子接口/实现类 {}", simpleClassName);
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{simpleClassName});
-        if (list == null) {
-            return null;
-        }
-
-        if (list.isEmpty()) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
 

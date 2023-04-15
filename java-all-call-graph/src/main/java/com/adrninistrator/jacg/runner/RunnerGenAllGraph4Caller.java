@@ -4,17 +4,17 @@ import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
-import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.call_graph.CallGraphNode4Caller;
 import com.adrninistrator.jacg.dto.call_graph.ChildCallSuperInfo;
 import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.task.CallerTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
-import com.adrninistrator.jacg.extensions.common.enums.BusinessDataTypeEnum;
 import com.adrninistrator.jacg.handler.dto.mybatis.MyBatisMySqlTableInfo;
 import com.adrninistrator.jacg.handler.dto.mybatis.MyBatisMySqlWriteTableInfo;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
@@ -375,7 +375,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 }
             }
 
-            if (businessDataTypeSet.contains(BusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
+            if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
                 // 显示方法参数泛型类型
                 if (!addMethodArgGenericsTypeInfo(true, callFlags, entryCallerMethodHash, stringBuilder)) {
                     return false;
@@ -1133,7 +1133,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                                               String calleeMethodName,
                                               StringBuilder callGraphInfo) {
         for (String businessDataType : businessDataTypeList) {
-            if (BusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType().equals(businessDataType)) {
+            if (DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType().equals(businessDataType)) {
                 // 显示MyBatis的XML文件中对应的数据库表名
                 if (!MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER.checkFlag(callFlags)) {
                     continue;
@@ -1144,7 +1144,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                     return false;
                 }
                 addBusinessData2CallGraphInfo(businessDataType, myBatisMySqlTableInfo, callGraphInfo);
-            } else if (BusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_WRITE_TABLE.getType().equals(businessDataType)) {
+            } else if (DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_WRITE_TABLE.getType().equals(businessDataType)) {
                 // 显示MyBatis的XML文件中对应的写数据库表名
                 if (!MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER_WRITE.checkFlag(callFlags)) {
                     continue;

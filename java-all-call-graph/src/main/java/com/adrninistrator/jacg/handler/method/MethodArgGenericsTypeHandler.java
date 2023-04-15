@@ -64,7 +64,7 @@ public class MethodArgGenericsTypeHandler extends BaseHandler {
             String type = (String) map.get(DC.MAGT_TYPE);
             String genericsType = (String) map.get(DC.MAGT_GENERICS_TYPE);
             MethodArgGenericsTypeValue methodArgGenericsTypeValue = genericsTypeMap.computeIfAbsent(argSeq, k -> new MethodArgGenericsTypeValue());
-            if (JavaCGConstants.FILE_KEY_METHOD_ARGS_TYPE.equals(type)) {
+            if (JavaCGConstants.FILE_KEY_METHOD_ARGS_RETURN_TYPE.equals(type)) {
                 methodArgGenericsTypeValue.setArgType(genericsType);
             } else {
                 methodArgGenericsTypeValue.addArgGenericsType(genericsType);

@@ -13,11 +13,11 @@ import com.adrninistrator.jacg.runner.RunnerWriteDb;
  */
 public class TestRunAll {
     public static void main(String[] args) {
+        new RunnerWriteCallGraphFile().run();
+        new RunnerWriteDb().run();
         new FindCallStackTrace().find(true);
         new FindCallStackTrace().find(false);
         new RunnerGenAllGraph4Callee().run();
         new RunnerGenAllGraph4Caller().run();
-        new RunnerWriteCallGraphFile().run();
-        new RunnerWriteDb().run();
     }
 }

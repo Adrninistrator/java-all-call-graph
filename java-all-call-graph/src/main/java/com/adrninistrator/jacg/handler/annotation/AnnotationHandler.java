@@ -7,15 +7,18 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.EmptyAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.StringAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.EmptyAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.StringAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
 import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.extractor.common.enums.SpTxPropagationEnum;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,23 +37,41 @@ import java.util.Map;
 public class AnnotationHandler extends BaseHandler {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationHandler.class);
 
+    private final JACGExtendsImplHandler jacgExtendsImplHandler;
+
     public AnnotationHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
+        jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
     }
 
     public AnnotationHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
+        jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
     }
 
     /**
      * 查询带有指定注解的类名列表
      *
      * @param querySimpleClassName true: 查询唯一类名 false: 查询完整类名
-     * @param annotationClassNames
+     * @param annotationClassNames 注解类名
      * @return
      */
     public List<String> queryClassesWithAnnotations(boolean querySimpleClassName, String... annotationClassNames) {
-        return dbOperWrapper.getClassesWithAnnotations(querySimpleClassName, annotationClassNames);
+        if (ArrayUtils.isEmpty(annotationClassNames)) {
+            return Collections.emptyList();
+        }
+
+        SqlKeyEnum sqlKeyEnum = querySimpleClassName ? SqlKeyEnum.CA_QUERY_SIMPLE_CLASS_NAME_WITH_ANNOTATION : SqlKeyEnum.CA_QUERY_CLASS_NAME_WITH_ANNOTATION;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum, annotationClassNames.length);
+        if (sql == null) {
+            sql = "select distinct " + (querySimpleClassName ? DC.CA_SIMPLE_CLASS_NAME : DC.CA_CLASS_NAME) +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_ANNOTATION.getTableName() +
+                    " where " + DC.CA_ANNOTATION_NAME + " in " + JACGSqlUtil.genQuestionString(annotationClassNames.length);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
+        }
+
+        List<Object> list = dbOperator.queryListOneColumn(sql, annotationClassNames);
+        return JACGSqlUtil.genStringList(list);
     }
 
     /**
@@ -72,7 +93,7 @@ public class AnnotationHandler extends BaseHandler {
      */
     public List<String> queryMethodsWithAnnotations(boolean queryFullMethod, String... annotationClassNames) {
         List<MethodAndHash> list = dbOperWrapper.getMethodsAndHashWithAnnotations(annotationClassNames);
-        if (list == null) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
 
@@ -132,7 +153,7 @@ public class AnnotationHandler extends BaseHandler {
      *
      * @param fullMethod
      * @param annotationName
-     * @return
+     * @return key：注解属性名称，value：注解属性
      */
     public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod,
                                                                                 String annotationName) {
@@ -146,7 +167,7 @@ public class AnnotationHandler extends BaseHandler {
      * @param fullMethod     仅用于打印日志
      * @param methodHash
      * @param annotationName
-     * @return
+     * @return key：注解属性名称，value：注解属性
      */
     public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod,
                                                                                 String methodHash,
@@ -220,23 +241,19 @@ public class AnnotationHandler extends BaseHandler {
     /**
      * 根据完整类名获取对应的注解信息，Map格式
      *
-     * @param className 完整类名或简单类名
+     * @param className 完整类名
      * @return
      */
     public Map<String, Map<String, BaseAnnotationAttribute>> queryAnnotationMap4Class(String className) {
         /*
             返回的Map格式
-                key     完整类名
-                value   注解属性
-                    key     注解类名
-                    value   注解属性Map
-                            key     属性名称
-                            value   属性值
+                key     注解类名
+                value   Map<String, BaseAnnotationAttribute> key：注解属性名称，value：注解属性
          */
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);
         logger.debug("从数据库查询类注解信息 {}", simpleClassName);
 
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CA_QUERY_ANNOTATION_BY_SIMPLE_CLASS_NAME;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CA_QUERY_ANNOTATIONS_BY_SIMPLE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ANNOTATION_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE,
@@ -252,11 +269,43 @@ public class AnnotationHandler extends BaseHandler {
     }
 
     /**
-     * 根据从数据库的查询结果生成注解对应的Map信息
+     * 获取指定类上指定注解对应的注解属性
      *
-     * @param list
-     * @return
+     * @param className      完整类名
+     * @param annotationName 注解类名
+     * @return key：注解属性名称，value：注解属性
      */
+    public Map<String, BaseAnnotationAttribute> queryAnnotationAttributes4Class(String className, String annotationName) {
+        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        logger.debug("从数据库查询类注解信息 {}", simpleClassName);
+
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CA_QUERY_ONE_ANNOTATION_BY_SIMPLE_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ATTRIBUTE_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE,
+                    DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_ANNOTATION.getTableName() +
+                    " where " + DC.CA_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.COMMON_ANNOTATION_ANNOTATION_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        List<Map<String, Object>> attributeMapList = dbOperator.queryList(sql, new Object[]{simpleClassName, annotationName});
+        if (JavaCGUtil.isCollectionEmpty(attributeMapList)) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, BaseAnnotationAttribute> returnMap = new HashMap<>(attributeMapList.size());
+        for (Map<String, Object> attributeMap : attributeMapList) {
+            String attributeName = (String) attributeMap.get(DC.COMMON_ANNOTATION_ATTRIBUTE_NAME);
+            // 根据查询的map获取对应的注解属性值
+            BaseAnnotationAttribute annotationAttribute = genAnnotationAttributeFromMap(attributeMap);
+            returnMap.put(attributeName, annotationAttribute);
+        }
+        return returnMap;
+    }
+
+    // 根据从数据库的查询结果生成注解对应的Map信息
     private Map<String, Map<String, BaseAnnotationAttribute>> genAnnotationMapFromQueryResult(List<Map<String, Object>> list) {
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptyMap();
@@ -281,6 +330,11 @@ public class AnnotationHandler extends BaseHandler {
      * @return
      */
     public Map<String, Map<String, BaseAnnotationAttribute>> queryAnnotationMap4FullMethod(String fullMethod) {
+        /*
+            返回的Map格式
+                key     注解类名
+                value   Map<String, BaseAnnotationAttribute> key：注解属性名称，value：注解属性
+         */
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         logger.debug("从数据库查询方法注解信息 {} {}", fullMethod, methodHash);
         // 查询有方法的注解信息
@@ -301,7 +355,7 @@ public class AnnotationHandler extends BaseHandler {
     /**
      * 从注解属性Map中，根据注解属性名，获取预期类型的注解属性值
      *
-     * @param annotationAttributeMap 注解属性Map
+     * @param annotationAttributeMap 注解属性Map，key：注解属性名称，value：注解属性
      * @param attributeName          注解属性名
      * @return attributeClassType 预期的注解属性类型
      * @return
@@ -324,7 +378,6 @@ public class AnnotationHandler extends BaseHandler {
             logger.error("类注解属性的实现类型与预期不一致 {}\n{}\n{}", attributeName, attribute.getClass().getName(), attributeClassType.getName());
             return null;
         }
-
         return (T) attribute;
     }
 
@@ -339,5 +392,30 @@ public class AnnotationHandler extends BaseHandler {
         String attributeType = (String) map.get(DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE);
         // 解析注解属性
         return AnnotationAttributesParseUtil.parseFromDb(attributeType, attributeValue);
+    }
+
+    /**
+     * 查询指定类的所有父类上指定的注解属性
+     *
+     * @param className      指定类名
+     * @param annotationName 指定的注解类名
+     * @return
+     */
+    public List<SuperClassWithAnnotation> querySuperClassesInfo(String className, String annotationName) {
+        List<SuperClassWithAnnotation> superClassWithAnnotationList = new ArrayList<>();
+        String currentClassName = className;
+        while (true) {
+            String superClassName = jacgExtendsImplHandler.querySuperClassNameByFull(currentClassName);
+            if (superClassName == null) {
+                break;
+            }
+            // 获取指定类上指定注解对应的注解属性
+            Map<String, BaseAnnotationAttribute> annotationAttributeMap = queryAnnotationAttributes4Class(superClassName, annotationName);
+            SuperClassWithAnnotation superClassWithAnnotation = new SuperClassWithAnnotation(superClassName, annotationAttributeMap);
+            superClassWithAnnotationList.add(superClassWithAnnotation);
+            // 继续查询当前父类的父类
+            currentClassName = superClassName;
+        }
+        return superClassWithAnnotationList;
     }
 }

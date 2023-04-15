@@ -14,6 +14,7 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.ArrayUtils;
@@ -155,18 +156,17 @@ public class DbOperWrapper {
     /**
      * 生成用于插入数据库的sql语句并缓存
      *
-     * @param key
-     * @param key4Print
+     * @param dbTableInfoEnum
      * @param dbInsertMode
-     * @param tableName
-     * @param columns
      * @return
      */
-    public String genAndCacheInsertSql(String key, String key4Print, DbInsertMode dbInsertMode, String tableName, String[] columns) {
+    public String genAndCacheInsertSql(DbTableInfoEnum dbTableInfoEnum, DbInsertMode dbInsertMode) {
+        String key = dbTableInfoEnum.getSqlKey();
+        String[] columns = dbTableInfoEnum.getColumns();
         String sql = getCachedSql(key);
         if (sql == null) {
-            sql = dbInsertMode.getMode() + tableName + JACGSqlUtil.genColumnString(columns) + " values " + JACGSqlUtil.genQuestionString(columns.length);
-            sql = cacheSql(key, sql, key4Print);
+            sql = dbInsertMode.getMode() + dbTableInfoEnum.getTableName() + JACGSqlUtil.genColumnString(columns) + " values " + JACGSqlUtil.genQuestionString(columns.length);
+            sql = cacheSql(key, sql, dbTableInfoEnum.getSqlKey4Print());
         }
         return sql;
     }
@@ -263,32 +263,7 @@ public class DbOperWrapper {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, annotationClassNames);
-        return JACGSqlUtil.getListString(list);
-    }
-
-    /**
-     * 从类注解表，查询带有指定注解的完整类名，结果会去重
-     *
-     * @param querySimpleClassName true: 查询唯一类名 false: 查询完整类名
-     * @param annotationClassNames 注解类名
-     * @return
-     */
-    public List<String> getClassesWithAnnotations(boolean querySimpleClassName, String... annotationClassNames) {
-        if (ArrayUtils.isEmpty(annotationClassNames)) {
-            return null;
-        }
-
-        SqlKeyEnum sqlKeyEnum = querySimpleClassName ? SqlKeyEnum.CA_QUERY_SIMPLE_CLASS_NAME_WITH_ANNOTATION : SqlKeyEnum.CA_QUERY_CLASS_NAME_WITH_ANNOTATION;
-        String sql = getCachedSql(sqlKeyEnum, annotationClassNames.length);
-        if (sql == null) {
-            sql = "select distinct " + (querySimpleClassName ? DC.CA_SIMPLE_CLASS_NAME : DC.CA_CLASS_NAME) +
-                    " from " + DbTableInfoEnum.DTIE_CLASS_ANNOTATION.getTableName() +
-                    " where " + DC.CA_ANNOTATION_NAME + " in " + JACGSqlUtil.genQuestionString(annotationClassNames.length);
-            sql = cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
-        }
-
-        List<Object> list = dbOperator.queryListOneColumn(sql, annotationClassNames);
-        return JACGSqlUtil.getListString(list);
+        return JACGSqlUtil.genStringList(list);
     }
 
     /**
@@ -339,7 +314,30 @@ public class DbOperWrapper {
             logger.error("根据被调用者完整方法HASH+长度未找到完整方法 {}", methodHash);
             return null;
         }
+        return (String) list.get(0);
+    }
 
+    /**
+     * 根据方法调用ID，从方法调用表获取对应的完整方法
+     *
+     * @param methodCallId 方法调用ID
+     * @return
+     */
+    public String getCalleeFullMethodById(int methodCallId) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLEE_FULL_METHOD_BY_ID;
+        String sql = getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.MC_CALLEE_FULL_METHOD +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALL_ID + " = ?";
+            sql = cacheSql(sqlKeyEnum, sql);
+        }
+
+        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodCallId});
+        if (JavaCGUtil.isCollectionEmpty(list)) {
+            logger.error("根据方法调用ID未找到完整方法 {}", methodCallId);
+            return null;
+        }
         return (String) list.get(0);
     }
 
@@ -380,12 +378,11 @@ public class DbOperWrapper {
         if (sql == null) {
             sql = "select " + DC.CN_SIMPLE_CLASS_NAME +
                     " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName() +
-                    " where " + DC.CN_CLASS_NAME + " = " + DC.CN_SIMPLE_CLASS_NAME
-                    + " and " + DC.CN_SIMPLE_CLASS_NAME + " like '%.%'";
+                    " where " + DC.CN_DUPLICATE_CLASS + " = ?";
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, null);
+        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{JavaCGYesNoEnum.YES.getIntValue()});
         if (list == null) {
             duplicateSimpleClassNameSet = null;
             return false;
@@ -453,13 +450,14 @@ public class DbOperWrapper {
         if (sql == null) {
             sql = "update " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName() +
                     " set " + DC.CN_SIMPLE_CLASS_NAME + " = " + DC.CN_CLASS_NAME +
+                    "," + DC.CN_DUPLICATE_CLASS + " = ?" +
                     " where " + DC.CN_SIMPLE_CLASS_NAME + " = ?";
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
         for (String duplicateClassName : foundDuplicateSimpleClassNameSet) {
             // 将class_name_表的simple_name更新为full_name
-            if (dbOperator.update(sql, new Object[]{duplicateClassName}) == null) {
+            if (dbOperator.update(sql, new Object[]{JavaCGYesNoEnum.YES.getIntValue(), duplicateClassName}) == null) {
                 return false;
             }
         }
@@ -541,7 +539,7 @@ public class DbOperWrapper {
         argList.addAll(dataKeywordList);
 
         List<Object> list = dbOperator.queryListOneColumn(sql, argList.toArray());
-        return JACGSqlUtil.getListString(list);
+        return JACGSqlUtil.genStringList(list);
     }
 
     /**
@@ -694,7 +692,7 @@ public class DbOperWrapper {
         }
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleClassName, methodName});
-        return JACGSqlUtil.getListString(list);
+        return JACGSqlUtil.genStringList(list);
     }
 
     /**

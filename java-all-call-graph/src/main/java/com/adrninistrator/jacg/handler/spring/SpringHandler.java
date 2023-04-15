@@ -49,7 +49,7 @@ public class SpringHandler extends BaseHandler {
 
         List<Map<String, Object>> list = dbOperator.queryList(sql, null);
         if (JavaCGUtil.isCollectionEmpty(list)) {
-            return null;
+            return Collections.emptyList();
         }
         List<SpringControllerInfo> springControllerInfoList = new ArrayList<>(list.size());
         for (Map<String, Object> map : list) {
@@ -78,7 +78,7 @@ public class SpringHandler extends BaseHandler {
 
         List<Map<String, Object>> list = dbOperator.queryList(sql, null);
         if (JavaCGUtil.isCollectionEmpty(list)) {
-            return null;
+            return Collections.emptyList();
         }
         List<String> springTaskMethodList = new ArrayList<>(list.size());
         for (Map<String, Object> map : list) {
@@ -95,7 +95,7 @@ public class SpringHandler extends BaseHandler {
      * 根据完整方法查询Spring Controller对应的URI列表
      *
      * @param fullMethod
-     * @return null: 指定的方法不是Spring Controller方法
+     * @return 空列表: 指定的方法不是Spring Controller方法
      */
     public List<String> getControllerUriList(String fullMethod) {
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
@@ -111,9 +111,9 @@ public class SpringHandler extends BaseHandler {
 
         List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodHash});
         if (JavaCGUtil.isCollectionEmpty(list)) {
-            return null;
+            return Collections.emptyList();
         }
-        return JACGSqlUtil.getListString(list);
+        return JACGSqlUtil.genStringList(list);
     }
 
     /**
@@ -124,7 +124,7 @@ public class SpringHandler extends BaseHandler {
      */
     public String getControllerUri(String fullMethod) {
         List<String> uriList = getControllerUriList(fullMethod);
-        if (uriList == null) {
+        if (JavaCGUtil.isCollectionEmpty(uriList)) {
             return null;
         }
         return uriList.get(0);

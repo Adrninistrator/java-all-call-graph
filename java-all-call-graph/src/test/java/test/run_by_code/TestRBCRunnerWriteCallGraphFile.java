@@ -13,7 +13,6 @@ public class TestRBCRunnerWriteCallGraphFile extends TestRunByCodeBase {
 
     @Test
     public void test() {
-        RunnerWriteCallGraphFile runnerWriteCallGraphFile = new RunnerWriteCallGraphFile();
-        runnerWriteCallGraphFile.run(configureWrapper, javaCGConfigureWrapper);
+        new RunnerWriteCallGraphFile().run(configureWrapper);
     }
 }

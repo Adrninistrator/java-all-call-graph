@@ -1,8 +1,8 @@
 package com.adrninistrator.jacg.annotation.formatter;
 
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
-import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.StringAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.StringAnnotationAttribute;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 
 import java.util.Map;

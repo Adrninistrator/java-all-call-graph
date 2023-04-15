@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import test.call_graph.spring.bean.define.SpringServiceImplA1;
 import test.call_graph.spring.mvc.TestSpringController1;
 import test.call_graph.spring.mvc.TestSpringController2;
-import test.run_by_code.handler.base.TestHandlerBase;
+import test.run_by_code.base.TestRunByCodeBase;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import java.util.List;
  * @date 2023/3/26
  * @description:
  */
-public class TestSpringHandler extends TestHandlerBase {
+public class TestSpringHandler extends TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestSpringHandler.class);
 
     @Test

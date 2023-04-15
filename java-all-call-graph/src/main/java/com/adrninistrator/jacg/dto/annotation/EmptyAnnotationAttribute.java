@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.dto.annotation_attribute;
+package com.adrninistrator.jacg.dto.annotation;
 
 /**
  * @author adrninistrator

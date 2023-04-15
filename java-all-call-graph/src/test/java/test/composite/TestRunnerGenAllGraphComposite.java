@@ -24,7 +24,7 @@ public class TestRunnerGenAllGraphComposite extends TestRunByCodeBase {
 
     @Before
     public void initTestRunnerGenAllGraphComposite() {
-        new RunnerWriteDb().run(configureWrapper, javaCGConfigureWrapper);
+        new RunnerWriteDb().run(configureWrapper);
     }
 
     @Test

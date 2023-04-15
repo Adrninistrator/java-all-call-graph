@@ -2,9 +2,9 @@ package com.adrninistrator.jacg.extractor.entry;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
-import com.adrninistrator.jacg.extensions.dto.business_data.BaseBusinessData;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extract_file.CallerExtractedFile;
+import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGUtil;

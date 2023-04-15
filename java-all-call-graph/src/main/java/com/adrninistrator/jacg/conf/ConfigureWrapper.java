@@ -632,7 +632,7 @@ public class ConfigureWrapper {
         }
 
         String configMdFilePath = JavaCGUtil.addSeparator4FilePath(outputDirPath) + JACGConstants.FILE_JACG_USED_CONFIG_MD;
-        logger.info("{} 使用的配置参数信息保存到以下文件 {}", simpleClassName, configMdFilePath);
+        logger.info("{} 使用的配置参数信息保存到以下文件\n{}", simpleClassName, configMdFilePath);
         // 打印使用的配置参数信息
         printConfigInfo(simpleClassName, configMdFilePath, false);
         // 清空入口简单类名，使一个ConfigureWrapper在多次使用时能够继续打印后续使用的配置参数（先写数据库，再执行其他类）
@@ -727,6 +727,7 @@ public class ConfigureWrapper {
             // 打印使用的配置参数信息，且主要的配置参数未使用，不打印
             return;
         }
+        boolean headWritten = false;
         for (int i = 0; i < configs.length; i++) {
             MainConfigInterface mainConfig = configs[i];
             if (!printAllConfigInfo) {
@@ -737,8 +738,15 @@ public class ConfigureWrapper {
                     continue;
                 }
             }
+            if (!headWritten) {
+                // 写入配置文件名
+                markdownWriter.addTitle(1, mainConfig.getFileName());
+                markdownWriter.addTableHead(JACGConstants.USED_CONFIG_FLAG_CONF_KEY, JACGConstants.USED_CONFIG_FLAG_CONF_DESC, JACGConstants.USED_CONFIG_FLAG_CONF_VALUE);
+                headWritten = true;
+            }
+
             // 执行打印主要的配置信息
-            doPrintMainConfigInfo(markdownWriter, i, mainConfig.getFileName(), mainConfig.getKey(), mainConfig.getDesc(), getMainConfig(mainConfig, false));
+            doPrintMainConfigInfo(markdownWriter, mainConfig.getKey(), mainConfig.getDesc(), getMainConfig(mainConfig, false));
         }
         // 最后写入空行
         markdownWriter.addEmptyLine();
@@ -771,12 +779,7 @@ public class ConfigureWrapper {
     }
 
     // 执行打印主要配置信息
-    public void doPrintMainConfigInfo(MarkdownWriter markdownWriter, int index, String configFileName, String key, String desc, Object value) throws IOException {
-        if (index == 0) {
-            // 写入配置文件名
-            markdownWriter.addTitle(1, configFileName);
-            markdownWriter.addTableHead(JACGConstants.USED_CONFIG_FLAG_CONF_KEY, JACGConstants.USED_CONFIG_FLAG_CONF_DESC, JACGConstants.USED_CONFIG_FLAG_CONF_VALUE);
-        }
+    public void doPrintMainConfigInfo(MarkdownWriter markdownWriter, String key, String desc, Object value) throws IOException {
         // 写入配置信息
         String strValue;
         if (value == null) {

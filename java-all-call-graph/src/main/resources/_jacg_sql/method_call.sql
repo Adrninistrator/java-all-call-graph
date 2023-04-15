@@ -20,6 +20,5 @@ CREATE TABLE if not exists jacg_method_call_{appName} (
   INDEX idx_mc_rmh_{appName}(caller_method_hash),
   INDEX idx_mc_hash_{appName}(callee_method_hash, caller_method_hash),
   INDEX idx_mc_rsn_{appName}(caller_simple_class_name(255)),
-  INDEX idx_mc_esn_{appName}(callee_simple_class_name(255)),
-  INDEX idx_mc_cf_{appName}(call_flags)
+  INDEX idx_mc_esn_{appName}(callee_simple_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用关系表';

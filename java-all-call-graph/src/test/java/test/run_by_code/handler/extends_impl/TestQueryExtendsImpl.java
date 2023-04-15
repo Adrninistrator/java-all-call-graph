@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.call_graph.interfaces.interfaces.InterfaceSuper1;
-import test.run_by_code.handler.base.TestHandlerBase;
+import test.run_by_code.base.TestRunByCodeBase;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2023/1/5
  * @description:
  */
-public class TestQueryExtendsImpl extends TestHandlerBase {
+public class TestQueryExtendsImpl extends TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestQueryExtendsImpl.class);
 
     @Test

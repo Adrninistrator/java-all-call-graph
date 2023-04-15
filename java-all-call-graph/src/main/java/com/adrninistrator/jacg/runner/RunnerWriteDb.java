@@ -25,10 +25,12 @@ import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4JarInfo;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4LambdaMethodInfo;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodAnnotation;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodArgGenericsType;
+import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodArgType;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodCall;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodCallInfo;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodInfo;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodLineNumber;
+import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodReturnGenericsType;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MyBatisMSTable;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MyBatisMSWriteTable;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4SpringBean;
@@ -37,6 +39,7 @@ import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4SpringTask;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -186,8 +189,10 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         // 处理注解信息
         handleAnnotations(springControllerMethodHashSet, withAnnotationMethodHashSet);
 
-        // 处理方法行号
-        if (!handleMethodLineNumber()) {
+        Set<String> withGenericsTypeMethodHash = new HashSet<>();
+        Set<Integer> withInfoCallIdSet = new HashSet<>();
+        // 处理方法
+        if (!handleMethod(withGenericsTypeMethodHash, withInfoCallIdSet)) {
             return false;
         }
 
@@ -198,11 +203,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
         // 处理继承与实现相关信息
         if (!handleExtendsImpl()) {
-            return false;
-        }
-
-        // 处理方法的信息
-        if (!handleMethodInfo()) {
             return false;
         }
 
@@ -228,18 +228,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
-        // 处理方法调用信息（需要在处理方法调用关系文件之前完成）
-        Set<Integer> withInfoCallIdSet = new HashSet<>();
-        if (!handleMethodCallInfo(withInfoCallIdSet)) {
-            return false;
-        }
-
-        // 处理方法参数泛型类型
-        Set<String> withGenericsTypeMethodHash = new HashSet<>();
-        if (!handleMethodArgGenericsType(withGenericsTypeMethodHash)) {
-            return false;
-        }
-
         // 处理方法调用关系文件（需要在后面处理）
         if (!handleMethodCall(springControllerMethodHashSet, withAnnotationMethodHashSet, withInfoCallIdSet, withGenericsTypeMethodHash, myBatisMapperSet,
                 myBatisMapperMethodWriteSet)) {
@@ -251,11 +239,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
-        if (useH2Db) {
-            // 显示H2数据库JDBC URL
-            printH2JdbcUrl();
-        }
-
         // 检查执行结果
         if (!checkResult()) {
             return false;
@@ -263,6 +246,11 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
         // 打印重复的类名
         printDuplicateClasses();
+
+        if (useH2Db) {
+            // 显示H2数据库JDBC URL
+            printH2JdbcUrl();
+        }
         return true;
     }
 
@@ -303,12 +291,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         }
 
         // 生成用于插入数据的sql语句
-        String sql = dbOperWrapper.genAndCacheInsertSql(DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX.getSqlKey(),
-                DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX.getSqlKey4Print(),
-                DbInsertMode.DIME_INSERT,
-                DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX.getTableName(),
-                DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX.getColumns());
-
+        String sql = dbOperWrapper.genAndCacheInsertSql(DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX, DbInsertMode.DIME_INSERT);
         List<String> allowedClassPrefixList = new ArrayList<>(allowedClassPrefixSet);
         Collections.sort(allowedClassPrefixList);
         for (int i = 0; i < allowedClassPrefixList.size(); i++) {
@@ -421,7 +404,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private boolean handleClassName() {
         WriteDbHandler4ClassName writeDbHandler4ClassName = new WriteDbHandler4ClassName();
         initWriteDbHandler(writeDbHandler4ClassName);
-        if (!writeDbHandler4ClassName.handle(javaCGOutputInfo.getClassNameOutputFilePath())) {
+        if (!writeDbHandler4ClassName.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_CLASS_NAME))) {
             return false;
         }
 
@@ -440,7 +423,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private boolean handleJarInfo() {
         WriteDbHandler4JarInfo writeDbHandler4JarInfo = new WriteDbHandler4JarInfo();
         initWriteDbHandler(writeDbHandler4JarInfo);
-        return writeDbHandler4JarInfo.handle(javaCGOutputInfo.getJarInfoOutputFilePath());
+        return writeDbHandler4JarInfo.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_JAR_INFO));
     }
 
     // 处理注解信息
@@ -449,7 +432,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         // 处理类注解信息
         WriteDbHandler4ClassAnnotation writeDbHandler4ClassAnnotation = new WriteDbHandler4ClassAnnotation();
         initWriteDbHandler(writeDbHandler4ClassAnnotation);
-        if (!writeDbHandler4ClassAnnotation.handle(javaCGOutputInfo.getClassAnnotationOutputFilePath())) {
+        if (!writeDbHandler4ClassAnnotation.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_CLASS_ANNOTATION))) {
             return false;
         }
 
@@ -465,55 +448,83 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         writeDbHandler4MethodAnnotation.setWriteDbHandler4SpringController(writeDbHandler4SpringController);
         writeDbHandler4MethodAnnotation.setSpringControllerMethodHashSet(springControllerMethodHashSet);
         writeDbHandler4MethodAnnotation.setWithAnnotationMethodHashSet(withAnnotationMethodHashSet);
-        return writeDbHandler4MethodAnnotation.handle(javaCGOutputInfo.getMethodAnnotationOutputFilePath());
+        return writeDbHandler4MethodAnnotation.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_ANNOTATION));
     }
 
-    // 处理方法行号
-    private boolean handleMethodLineNumber() {
+    // 处理方法
+    private boolean handleMethod(Set<String> withGenericsTypeMethodHash, Set<Integer> withInfoCallIdSet) {
+        // 处理方法行号
         WriteDbHandler4MethodLineNumber writeDbHandler4MethodLineNumber = new WriteDbHandler4MethodLineNumber();
         initWriteDbHandler(writeDbHandler4MethodLineNumber);
-        return writeDbHandler4MethodLineNumber.handle(javaCGOutputInfo.getMethodLineNumberOutputFilePath());
+        if (!writeDbHandler4MethodLineNumber.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_LINE_NUMBER))) {
+            return false;
+        }
+
+        // 方法的参数类型写入数据库的类
+        WriteDbHandler4MethodArgType writeDbHandler4MethodArgType = new WriteDbHandler4MethodArgType();
+        initWriteDbHandler(writeDbHandler4MethodArgType);
+
+        WriteDbHandler4MethodInfo writeDbHandler4MethodInfo = new WriteDbHandler4MethodInfo();
+        initWriteDbHandler(writeDbHandler4MethodInfo);
+        writeDbHandler4MethodInfo.setWriteDbHandler4MethodArgType(writeDbHandler4MethodArgType);
+        if (!writeDbHandler4MethodInfo.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_INFO))) {
+            return false;
+        }
+
+        // 处理方法参数泛型类型
+        WriteDbHandler4MethodArgGenericsType writeDbHandler4MethodArgGenericsType = new WriteDbHandler4MethodArgGenericsType();
+        writeDbHandler4MethodArgGenericsType.setWithGenericsTypeMethodHash(withGenericsTypeMethodHash);
+        initWriteDbHandler(writeDbHandler4MethodArgGenericsType);
+        if (!writeDbHandler4MethodArgGenericsType.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_ARG_GENERICS_TYPE))) {
+            return false;
+        }
+
+        // 处理方法返回泛型类型
+        WriteDbHandler4MethodReturnGenericsType writeDbHandler4MethodReturnGenericsType = new WriteDbHandler4MethodReturnGenericsType();
+        initWriteDbHandler(writeDbHandler4MethodReturnGenericsType);
+        if (!writeDbHandler4MethodReturnGenericsType.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_RETURN_GENERICS_TYPE))) {
+            return false;
+        }
+
+        // 处理方法调用信息（需要在处理方法调用关系文件之前完成）
+        WriteDbHandler4MethodCallInfo writeDbHandler4MethodCallInfo = new WriteDbHandler4MethodCallInfo();
+        writeDbHandler4MethodCallInfo.setWithInfoCallIdSet(withInfoCallIdSet);
+        initWriteDbHandler(writeDbHandler4MethodCallInfo);
+        return writeDbHandler4MethodCallInfo.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL_INFO));
     }
 
     // 处理类的信息
     private boolean handleClassInfo() {
         WriteDbHandler4ClassInfo writeDbHandler4ClassInfo = new WriteDbHandler4ClassInfo();
         initWriteDbHandler(writeDbHandler4ClassInfo);
-        if (!writeDbHandler4ClassInfo.handle(javaCGOutputInfo.getClassInfoOutputFilePath())) {
+        if (!writeDbHandler4ClassInfo.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_CLASS_INFO))) {
             return false;
         }
 
         WriteDbHandler4InnerClassInfo writeDbHandler4InnerClassInfo = new WriteDbHandler4InnerClassInfo();
         initWriteDbHandler(writeDbHandler4InnerClassInfo);
-        return writeDbHandler4InnerClassInfo.handle(javaCGOutputInfo.getInnerClassFilePath());
+        return writeDbHandler4InnerClassInfo.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_INNER_CLASS));
     }
 
     // 处理继承与实现相关信息
     private boolean handleExtendsImpl() {
         // 预处理
         WriteDbHandler4ExtendsImplPre writeDbHandler4ExtendsImplPre = new WriteDbHandler4ExtendsImplPre();
-        writeDbHandler4ExtendsImplPre.handle(javaCGOutputInfo.getExtendsImplOutputFilePath());
+        writeDbHandler4ExtendsImplPre.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_EXTENDS_IMPL));
         Set<String> superClassOrInterfaceNameSet = writeDbHandler4ExtendsImplPre.getSuperClassOrInterfaceNameSet();
 
         // 正式处理
         WriteDbHandler4ExtendsImpl writeDbHandler4ExtendsImpl = new WriteDbHandler4ExtendsImpl();
         initWriteDbHandler(writeDbHandler4ExtendsImpl);
         writeDbHandler4ExtendsImpl.setSuperClassOrInterfaceNameSet(superClassOrInterfaceNameSet);
-        return writeDbHandler4ExtendsImpl.handle(javaCGOutputInfo.getExtendsImplOutputFilePath());
-    }
-
-    // 处理方法的信息
-    private boolean handleMethodInfo() {
-        WriteDbHandler4MethodInfo writeDbHandler4MethodInfo = new WriteDbHandler4MethodInfo();
-        initWriteDbHandler(writeDbHandler4MethodInfo);
-        return writeDbHandler4MethodInfo.handle(javaCGOutputInfo.getMethodInfoOutputFilePath());
+        return writeDbHandler4ExtendsImpl.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_EXTENDS_IMPL));
     }
 
     // 处理Lambda表达式方法信息
     private boolean handleLambdaMethodInfo() {
         WriteDbHandler4LambdaMethodInfo writeDbHandler4LambdaMethodInfo = new WriteDbHandler4LambdaMethodInfo();
         initWriteDbHandler(writeDbHandler4LambdaMethodInfo);
-        return writeDbHandler4LambdaMethodInfo.handle(javaCGOutputInfo.getLambdaMethodInfoOutputFilePath());
+        return writeDbHandler4LambdaMethodInfo.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_LAMBDA_METHOD_INFO));
     }
 
     // 处理Spring相关信息
@@ -523,7 +534,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         WriteDbHandler4SpringBean writeDbHandler4SpringBean = new WriteDbHandler4SpringBean();
         initWriteDbHandler(writeDbHandler4SpringBean);
         writeDbHandler4SpringBean.setSpringBeanMap(springBeanMap);
-        if (!writeDbHandler4SpringBean.handle(javaCGOutputInfo.getSpringBeanOutputFilePath())) {
+        if (!writeDbHandler4SpringBean.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_SPRING_BEAN))) {
             return false;
         }
 
@@ -555,7 +566,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private boolean handleClassSignatureEi1() {
         WriteDbHandler4ClassSignatureEi1 writeDbHandler4ClassSignatureEi1 = new WriteDbHandler4ClassSignatureEi1();
         initWriteDbHandler(writeDbHandler4ClassSignatureEi1);
-        return writeDbHandler4ClassSignatureEi1.handle(javaCGOutputInfo.getClassSignatureEI1OutputFilePath());
+        return writeDbHandler4ClassSignatureEi1.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_CLASS_SIGNATURE_EI1));
     }
 
     // 处理方法调用关系文件
@@ -577,7 +588,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         writeDbHandler4MethodCall.setWithGenericsTypeMethodHash(withGenericsTypeMethodHash);
         writeDbHandler4MethodCall.setMyBatisMapperSet(myBatisMapperSet);
         writeDbHandler4MethodCall.setMyBatisMapperMethodWriteSet(myBatisMapperMethodWriteSet);
-        if (!writeDbHandler4MethodCall.handle(javaCGOutputInfo.getMethodCallOutputFilePath())) {
+        if (!writeDbHandler4MethodCall.handle(javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL))) {
             return false;
         }
 
@@ -595,23 +606,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         }
         return true;
     }
-
-    // 处理方法调用信息
-    private boolean handleMethodCallInfo(Set<Integer> withInfoCallIdSet) {
-        WriteDbHandler4MethodCallInfo writeDbHandler4MethodCallInfo = new WriteDbHandler4MethodCallInfo();
-        writeDbHandler4MethodCallInfo.setWithInfoCallIdSet(withInfoCallIdSet);
-        initWriteDbHandler(writeDbHandler4MethodCallInfo);
-        return writeDbHandler4MethodCallInfo.handle(javaCGOutputInfo.getMethodCallInfoOutputFilePath());
-    }
-
-    // 处理方法参数泛型类型
-    private boolean handleMethodArgGenericsType(Set<String> withGenericsTypeMethodHash) {
-        WriteDbHandler4MethodArgGenericsType writeDbHandler4MethodArgGenericsType = new WriteDbHandler4MethodArgGenericsType();
-        writeDbHandler4MethodArgGenericsType.setWithGenericsTypeMethodHash(withGenericsTypeMethodHash);
-        initWriteDbHandler(writeDbHandler4MethodArgGenericsType);
-        return writeDbHandler4MethodArgGenericsType.handle(javaCGOutputInfo.getMethodArgGenericsTypeFilePath());
-    }
-
 
     // 显示H2数据库JDBC URL
     private void printH2JdbcUrl() {
@@ -635,7 +629,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             logger.info("{} 写入数据库记录数 {}", writeDbHandlerName, writeDbHandler.getWriteRecordNum());
 
             if (writeDbHandler instanceof WriteDbHandler4ClassName && writeDbHandler.getWriteRecordNum() == 0) {
-                logger.warn("未向数据库写入数据，请检查文件 {} ，以及配置文件指定的包名 {}", javaCGOutputInfo.getMethodCallOutputFilePath(),
+                logger.warn("未向数据库写入数据，请检查文件\n{}\n以及写入数据库时需要处理的类名前缀配置 {}", javaCGOutputInfo.getFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL),
                         OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX.getKey());
             }
 

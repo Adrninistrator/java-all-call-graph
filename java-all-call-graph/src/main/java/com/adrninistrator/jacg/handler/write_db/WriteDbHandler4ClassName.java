@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ClassName;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData
         }
 
         String simpleClassName = JACGClassMethodUtil.getSimpleClassNameFromFull(line);
-        return new WriteDbData4ClassName(line, simpleClassName);
+        return new WriteDbData4ClassName(line, simpleClassName, JavaCGYesNoEnum.NO.getIntValue());
     }
 
     @Override
@@ -46,7 +47,8 @@ public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData
         return new Object[]{
                 genNextRecordId(),
                 data.getClassName(),
-                data.getSimpleClassName()
+                data.getSimpleClassName(),
+                data.getDuplicateClass()
         };
     }
 }

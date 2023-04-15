@@ -1,13 +1,13 @@
 package com.adrninistrator.jacg.annotation.util;
 
 import com.adrninistrator.jacg.common.enums.AnnotationAttributesTypeEnum;
-import com.adrninistrator.jacg.dto.annotation_attribute.BaseAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.EmptyAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.InvalidAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.ListMapAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.ListStringAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.MapAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation_attribute.StringAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.EmptyAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.InvalidAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.ListMapAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.ListStringAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.MapAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.StringAnnotationAttribute;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import com.fasterxml.jackson.core.type.TypeReference;

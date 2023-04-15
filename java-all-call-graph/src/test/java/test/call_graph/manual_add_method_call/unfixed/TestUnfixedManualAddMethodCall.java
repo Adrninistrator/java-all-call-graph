@@ -24,7 +24,7 @@ public class TestUnfixedManualAddMethodCall {
         return new AbstractUnFixedService1<Integer, ArrayList>() {
             @Override
             protected ArrayList execute(Integer integer, ArrayList list) {
-                System.setProperty("", "");
+                System.setProperty("a1", "b1");
                 return null;
             }
         }.invoke(null, null);

@@ -108,7 +108,7 @@ public abstract class AbstractReporter {
         }
 
         logger.info("执行写数据库步骤");
-        return new RunnerWriteDb().run(configureWrapper, configureWrapper.genJavaCGConfigureWrapper());
+        return new RunnerWriteDb().run(configureWrapper);
     }
 
     /**
