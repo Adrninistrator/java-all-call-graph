@@ -19,16 +19,21 @@ public class TestRBCAll extends TestRunByCodeBase {
     @Test
     public void test() {
         ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
-        new FindCallStackTrace().find(true, configureWrapperCopy);
-        configureWrapperCopy = configureWrapper.copy();
-        new FindCallStackTrace().find(false, configureWrapperCopy);
-        configureWrapperCopy = configureWrapper.copy();
-        new RunnerGenAllGraph4Callee().run(configureWrapperCopy);
-        configureWrapperCopy = configureWrapper.copy();
-        new RunnerGenAllGraph4Caller().run(configureWrapperCopy);
-        configureWrapperCopy = configureWrapper.copy();
         new RunnerWriteCallGraphFile().run(configureWrapperCopy);
+
         configureWrapperCopy = configureWrapper.copy();
         new RunnerWriteDb().run(configureWrapperCopy);
+
+        configureWrapperCopy = configureWrapper.copy();
+        new FindCallStackTrace().find(true, configureWrapperCopy);
+
+        configureWrapperCopy = configureWrapper.copy();
+        new FindCallStackTrace().find(false, configureWrapperCopy);
+
+        configureWrapperCopy = configureWrapper.copy();
+        new RunnerGenAllGraph4Callee().run(configureWrapperCopy);
+
+        configureWrapperCopy = configureWrapper.copy();
+        new RunnerGenAllGraph4Caller().run(configureWrapperCopy);
     }
 }

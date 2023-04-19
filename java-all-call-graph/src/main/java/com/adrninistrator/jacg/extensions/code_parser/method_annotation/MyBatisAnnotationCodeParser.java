@@ -49,9 +49,19 @@ public class MyBatisAnnotationCodeParser implements MethodAnnotationParser {
             logger.error("获取MyBatis注解属性为空 {} {} {} {} {}", callerClassName, callerMethodName, annotationClassName, type, method);
             return;
         }
-
-        MethodCall methodCall = new MethodCall(callerClassName, callerMethodName, callerMethodArgs, JavaCGCallTypeEnum.CTE_METHOD_ANNOTATION_ADDED, type, method,
-                JavaCGConstants.EMPTY_METHOD_ARGS, JavaCGConstants.DEFAULT_LINE_NUMBER, null, "", "");
+        MethodCall methodCall = new MethodCall(
+                callerClassName,
+                callerMethodName,
+                callerMethodArgs,
+                JavaCGCallTypeEnum.CTE_METHOD_ANNOTATION_ADDED,
+                type,
+                method,
+                JavaCGConstants.EMPTY_METHOD_ARGS,
+                JavaCGConstants.DEFAULT_LINE_NUMBER,
+                null,
+                "",
+                ""
+        );
         methodCallList.addMethodCall(methodCall);
     }
 }

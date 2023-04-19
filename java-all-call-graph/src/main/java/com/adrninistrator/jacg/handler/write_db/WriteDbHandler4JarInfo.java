@@ -24,7 +24,7 @@ public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4J
         String jarType = array[0];
         String jarNumStr = array[1];
         String jarFilePath = array[2];
-
+        String jarFileName = JACGFileUtil.getFileNameFromPath(jarFilePath);
         String lastModified = "";
         String jarFileHash = "";
 
@@ -38,7 +38,13 @@ public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4J
             lastModified = String.valueOf(JACGFileUtil.getFileLastModified(jarFilePath));
             jarFileHash = JACGFileUtil.getFileMd5(jarFilePath);
         }
-        return new WriteDbData4JarInfo(Integer.parseInt(jarNumStr), jarType, JACGUtil.genHashWithLen(jarFilePath), jarFilePath, lastModified, jarFileHash);
+        return new WriteDbData4JarInfo(Integer.parseInt(jarNumStr),
+                jarType,
+                JACGUtil.genHashWithLen(jarFilePath),
+                jarFilePath,
+                jarFileName,
+                lastModified,
+                jarFileHash);
     }
 
     @Override
@@ -53,6 +59,7 @@ public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4J
                 data.getJarType(),
                 data.getJarPathHash(),
                 data.getJarFullPath(),
+                data.getJarFileName(),
                 data.getLastModified(),
                 data.getJarHash()
         };

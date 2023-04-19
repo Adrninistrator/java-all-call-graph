@@ -3,6 +3,7 @@ CREATE TABLE if not exists jacg_jar_info_{appName} (
   jar_type varchar(5) NOT NULL COMMENT 'Jar包类型，jar: jar包，dir: 目录',
   jar_path_hash varchar(30) NOT NULL COMMENT 'Jar包路径HASH+字节数',
   jar_full_path text NOT NULL COMMENT 'Jar包完整路径',
+  jar_file_name varchar(255) NOT NULL COMMENT 'Jar包文件名',
   last_modified varchar(15) NOT NULL COMMENT 'Jar包完整路径',
   jar_hash varchar(30) NOT NULL COMMENT 'Jar包文件HASH',
   PRIMARY KEY (jar_num),

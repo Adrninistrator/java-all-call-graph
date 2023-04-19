@@ -14,7 +14,6 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
     private String callType;
     private String calleeObjType;
     private int enabled;
-    private String callerJarNum;
     private String callerMethodHash;
     private String callerSimpleClassName;
     private String callerMethodName;
@@ -27,18 +26,23 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
     private int callFlags = 0;
     private String rawReturnType;
     private String actualReturnType;
+    private Integer callerJarNum;
+    private Integer calleeJarNum;
 
     /**
      * 创建方法调用对象
-     *
      * @param callType
-     * @param callerFullMethod
+     * @param calleeObjType
      * @param callerSimpleClassName
-     * @param calleeFullMethod
+     * @param callerFullMethod
      * @param calleeSimpleClassName
+     * @param calleeFullMethod
      * @param callId
      * @param callerLineNum
+     * @param rawReturnType
+     * @param actualReturnType
      * @param callerJarNum
+     * @param calleeJarNum
      * @return
      */
     public static WriteDbData4MethodCall genInstance(String callType,
@@ -49,9 +53,10 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
                                                      String calleeFullMethod,
                                                      int callId,
                                                      int callerLineNum,
-                                                     String callerJarNum,
                                                      String rawReturnType,
-                                                     String actualReturnType
+                                                     String actualReturnType,
+                                                     Integer callerJarNum,
+                                                     Integer calleeJarNum
     ) {
         String callerMethodHash = JACGUtil.genHashWithLen(callerFullMethod);
         String callerMethodName = JACGClassMethodUtil.getMethodNameFromFull(callerFullMethod);
@@ -61,7 +66,6 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
         writeDbData4MethodCall.setCallType(callType);
         writeDbData4MethodCall.setCalleeObjType(calleeObjType);
         writeDbData4MethodCall.setEnabled(JavaCGYesNoEnum.YES.getIntValue());
-        writeDbData4MethodCall.setCallerJarNum(callerJarNum);
         writeDbData4MethodCall.setCallerMethodHash(callerMethodHash);
         writeDbData4MethodCall.setCallerSimpleClassName(callerSimpleClassName);
         writeDbData4MethodCall.setCallerMethodName(callerMethodName);
@@ -74,9 +78,10 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
         writeDbData4MethodCall.setCalleeSimpleClassName(calleeSimpleClassName);
         writeDbData4MethodCall.setCalleeMethodName(calleeMethodName);
         writeDbData4MethodCall.setCalleeFullMethod(calleeFullMethod);
-
         writeDbData4MethodCall.setRawReturnType(rawReturnType);
         writeDbData4MethodCall.setActualReturnType(actualReturnType);
+        writeDbData4MethodCall.setCallerJarNum(callerJarNum);
+        writeDbData4MethodCall.setCalleeJarNum(calleeJarNum);
 
         return writeDbData4MethodCall;
     }
@@ -112,14 +117,6 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
 
     public void setEnabled(int enabled) {
         this.enabled = enabled;
-    }
-
-    public String getCallerJarNum() {
-        return callerJarNum;
-    }
-
-    public void setCallerJarNum(String callerJarNum) {
-        this.callerJarNum = callerJarNum;
     }
 
     public String getCallerMethodHash() {
@@ -216,5 +213,21 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
 
     public void setActualReturnType(String actualReturnType) {
         this.actualReturnType = actualReturnType;
+    }
+
+    public Integer getCallerJarNum() {
+        return callerJarNum;
+    }
+
+    public void setCallerJarNum(Integer callerJarNum) {
+        this.callerJarNum = callerJarNum;
+    }
+
+    public Integer getCalleeJarNum() {
+        return calleeJarNum;
+    }
+
+    public void setCalleeJarNum(Integer calleeJarNum) {
+        this.calleeJarNum = calleeJarNum;
     }
 }

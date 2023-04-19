@@ -71,6 +71,7 @@ public enum DbTableInfoEnum {
             DC.JI_JAR_TYPE,
             DC.JI_JAR_PATH_HASH,
             DC.JI_JAR_FULL_PATH,
+            DC.JI_JAR_FILE_NAME,
             DC.JI_LAST_MODIFIED,
             DC.JI_JAR_HASH
     }),
@@ -121,7 +122,6 @@ public enum DbTableInfoEnum {
             DC.MC_CALL_TYPE,
             DC.MC_CALLEE_OBJ_TYPE,
             DC.MC_ENABLED,
-            DC.MC_CALLER_JAR_NUM,
             DC.MC_CALLER_METHOD_HASH,
             DC.MC_CALLER_SIMPLE_CLASS_NAME,
             DC.MC_CALLER_METHOD_NAME,
@@ -133,7 +133,9 @@ public enum DbTableInfoEnum {
             DC.MC_CALLEE_FULL_METHOD,
             DC.MC_CALL_FLAGS,
             DC.MC_RAW_RETURN_TYPE,
-            DC.MC_ACTUAL_RETURN_TYPE
+            DC.MC_ACTUAL_RETURN_TYPE,
+            DC.MC_CALLER_JAR_NUM,
+            DC.MC_CALLEE_JAR_NUM
     }),
     DTIE_METHOD_CALL_INFO("method_call_info", new String[]{
             DC.MCI_CALL_ID,

@@ -39,21 +39,14 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
     @Override
     protected WriteDbData4MethodCall genData(String line) {
-        String[] array = splitEquals(line, 8);
+        String[] array = splitEquals(line, 9);
 
         int callId = Integer.parseInt(array[0]);
         String callerFullMethod = array[1];
         String tmpCalleeFullMethod = array[2];
-        int callerLineNum = Integer.parseInt(array[3]);
-        String calleeObjType = array[4];
-        String rawReturnType = array[5];
-        String actualReturnType = array[6];
-        String callerJarNum = array[7];
 
         int indexCalleeLeftBracket = tmpCalleeFullMethod.indexOf(JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG1);
         int indexCalleeRightBracket = tmpCalleeFullMethod.indexOf(JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG2);
-
-        String callType = tmpCalleeFullMethod.substring(indexCalleeLeftBracket + JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG1.length(), indexCalleeRightBracket);
         String calleeFullMethod = tmpCalleeFullMethod.substring(indexCalleeRightBracket + JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG2.length()).trim();
 
         // 根据完整方法前缀判断是否需要处理
@@ -61,9 +54,21 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
             return null;
         }
 
+        int callerLineNum = Integer.parseInt(array[3]);
+        String calleeObjType = array[4];
+        String rawReturnType = array[5];
+        String actualReturnType = array[6];
+        String callerJarNumStr = array[7];
+        String calleeJarNumStr = array[8];
+
+        String callType = tmpCalleeFullMethod.substring(indexCalleeLeftBracket + JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG1.length(), indexCalleeRightBracket);
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
-        WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(callType,
+        Integer callerJarNum = (JavaCGConstants.EMPTY_JAR_NUM.equals(callerJarNumStr) ? null : Integer.parseInt(callerJarNumStr));
+        Integer calleeJarNum = (JavaCGConstants.EMPTY_JAR_NUM.equals(calleeJarNumStr) ? null : Integer.parseInt(calleeJarNumStr));
+
+        WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(
+                callType,
                 calleeObjType,
                 dbOperWrapper.getSimpleClassName(callerClassName),
                 callerFullMethod,
@@ -71,9 +76,10 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
                 calleeFullMethod,
                 callId,
                 callerLineNum,
-                callerJarNum,
                 rawReturnType,
-                actualReturnType
+                actualReturnType,
+                callerJarNum,
+                calleeJarNum
         );
 
         if (writeDbData4MethodCall.getCallerMethodHash().equals(writeDbData4MethodCall.getCalleeMethodHash())) {

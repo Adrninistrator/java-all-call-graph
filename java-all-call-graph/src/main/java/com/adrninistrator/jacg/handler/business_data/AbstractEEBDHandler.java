@@ -27,8 +27,8 @@ import java.util.List;
  * @date 2023/4/7
  * @description: 根据被调用方法处理业务功能数据的抽象父类
  */
-public abstract class AbstractCalleeMethodBDHandler extends BaseHandler {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractCalleeMethodBDHandler.class);
+public abstract class AbstractEEBDHandler extends BaseHandler {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractEEBDHandler.class);
 
     // 记录需要处理的被调用方法列表
     private final List<ClassAndMethodName> calleeMethodList = new ArrayList<>();
@@ -38,13 +38,13 @@ public abstract class AbstractCalleeMethodBDHandler extends BaseHandler {
     // 保存当前处理的被调用方法参数类型列表
     private List<String> currentCalleeMethodArgTypeList;
 
-    public AbstractCalleeMethodBDHandler(ConfigureWrapper configureWrapper) {
+    public AbstractEEBDHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
         // 初始化
         init();
     }
 
-    public AbstractCalleeMethodBDHandler(DbOperWrapper dbOperWrapper) {
+    public AbstractEEBDHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
         // 初始化
         init();

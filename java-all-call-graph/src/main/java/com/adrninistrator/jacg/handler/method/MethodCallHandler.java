@@ -120,7 +120,8 @@ public class MethodCallHandler extends BaseHandler {
             String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
             logger.info("人工向数据库方法调用表加入数据 {} {} {}", maxCallId + 1, callerFullMethod, calleeFullMethod);
             // 人工向方法调用表写入数据，行号使用0，jar包序号使用0
-            WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(JavaCGCallTypeEnum.CTE_MANUAL_ADDED.getType(),
+            WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(
+                    JavaCGCallTypeEnum.CTE_MANUAL_ADDED.getType(),
                     "",
                     dbOperWrapper.getSimpleClassName(callerClassName),
                     callerFullMethod,
@@ -128,9 +129,10 @@ public class MethodCallHandler extends BaseHandler {
                     calleeFullMethod,
                     ++maxCallId,
                     JavaCGConstants.DEFAULT_LINE_NUMBER,
-                    String.valueOf(0),
                     "",
-                    ""
+                    "",
+                    null,
+                    null
             );
             Object[] arguments = JACGUtil.genMethodCallObjectArray(writeDbData4MethodCall);
 

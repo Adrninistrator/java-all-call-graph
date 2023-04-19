@@ -54,7 +54,7 @@ public abstract class TestRunByCodeBase {
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.FALSE.toString());
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME, com.mysql.cj.jdbc.Driver.class.getName());
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_URL,
-//                "jdbc:mysql://1.1.1.1:3306/test_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true");
+//                "jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true");
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME, "username");
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD, "password");
 

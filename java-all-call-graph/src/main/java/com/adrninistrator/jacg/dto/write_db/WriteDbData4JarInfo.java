@@ -10,14 +10,16 @@ public class WriteDbData4JarInfo extends AbstractWriteDbData {
     private final String jarType;
     private final String jarPathHash;
     private final String jarFullPath;
+    private final String jarFileName;
     private final String lastModified;
     private final String jarHash;
 
-    public WriteDbData4JarInfo(int jarNum, String jarType, String jarPathHash, String jarFullPath, String lastModified, String jarHash) {
+    public WriteDbData4JarInfo(int jarNum, String jarType, String jarPathHash, String jarFullPath, String jarFileName, String lastModified, String jarHash) {
         this.jarNum = jarNum;
         this.jarType = jarType;
         this.jarPathHash = jarPathHash;
         this.jarFullPath = jarFullPath;
+        this.jarFileName = jarFileName;
         this.lastModified = lastModified;
         this.jarHash = jarHash;
     }
@@ -36,6 +38,10 @@ public class WriteDbData4JarInfo extends AbstractWriteDbData {
 
     public String getJarFullPath() {
         return jarFullPath;
+    }
+
+    public String getJarFileName() {
+        return jarFileName;
     }
 
     public String getLastModified() {

@@ -44,7 +44,6 @@ public class DC {
     public static final String MC_CALL_TYPE = "call_type";
     public static final String MC_CALLEE_OBJ_TYPE = "callee_obj_type";
     public static final String MC_ENABLED = "enabled";
-    public static final String MC_CALLER_JAR_NUM = "caller_jar_num";
     public static final String MC_CALLER_METHOD_HASH = "caller_method_hash";
     public static final String MC_CALLER_FULL_METHOD = "caller_full_method";
     public static final String MC_CALLER_METHOD_NAME = "caller_method_name";
@@ -57,6 +56,8 @@ public class DC {
     public static final String MC_CALL_FLAGS = "call_flags";
     public static final String MC_RAW_RETURN_TYPE = "raw_return_type";
     public static final String MC_ACTUAL_RETURN_TYPE = "actual_return_type";
+    public static final String MC_CALLER_JAR_NUM = "caller_jar_num";
+    public static final String MC_CALLEE_JAR_NUM = "callee_jar_num";
 
     public static final String LMI_CALL_ID = COMMON_CALL_ID;
     public static final String LMI_LAMBDA_CALLEE_CLASS_NAME = "lambda_callee_class_name";
@@ -79,6 +80,7 @@ public class DC {
     public static final String JI_JAR_TYPE = "jar_type";
     public static final String JI_JAR_PATH_HASH = "jar_path_hash";
     public static final String JI_JAR_FULL_PATH = "jar_full_path";
+    public static final String JI_JAR_FILE_NAME = "jar_file_name";
     public static final String JI_LAST_MODIFIED = "last_modified";
     public static final String JI_JAR_HASH = "jar_hash";
 

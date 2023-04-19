@@ -139,7 +139,6 @@ public class JACGUtil {
                 data.getCallType(),
                 data.getCalleeObjType(),
                 data.getEnabled(),
-                data.getCallerJarNum(),
                 data.getCallerMethodHash(),
                 data.getCallerSimpleClassName(),
                 data.getCallerMethodName(),
@@ -151,7 +150,9 @@ public class JACGUtil {
                 data.getCalleeFullMethod(),
                 data.getCallFlags(),
                 data.getRawReturnType(),
-                data.getActualReturnType()
+                data.getActualReturnType(),
+                data.getCallerJarNum(),
+                data.getCalleeJarNum()
         };
     }
 
