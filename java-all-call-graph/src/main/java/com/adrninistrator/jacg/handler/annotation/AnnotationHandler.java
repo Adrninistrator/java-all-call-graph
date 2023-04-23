@@ -273,7 +273,7 @@ public class AnnotationHandler extends BaseHandler {
      *
      * @param className      完整类名
      * @param annotationName 注解类名
-     * @return key：注解属性名称，value：注解属性
+     * @return 若返回map isEmpty()为true，代表类上没有对应的注解。若返回map isEmpty()为false，代表代表类上有对应的注解，key：注解属性名称，value：注解属性
      */
     public Map<String, BaseAnnotationAttribute> queryAnnotationAttributes4Class(String className, String annotationName) {
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);

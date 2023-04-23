@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,9 +72,6 @@ public abstract class TestRunByCodeBase {
                 "java."
         );
 
-        // 添加所有预置的扩展类
-        configureWrapper.addAllPreBuildExtensions();
-
         try {
             Class<?> testRunLocalConfigClass = Class.forName("test.run_local.TestRunLocalConfig");
             Method testRunLocalConfigSetMethod = testRunLocalConfigClass.getMethod("setConfig", ConfigureWrapper.class);
@@ -130,7 +128,8 @@ public abstract class TestRunByCodeBase {
     }
 
     protected void printListContent(List<?> objectList) {
-        if (objectList == null) {
+        if (JavaCGUtil.isCollectionEmpty(objectList)) {
+            logger.info("list为空");
             return;
         }
         for (Object object : objectList) {

@@ -23,4 +23,8 @@ public class CallMethodWithAnnotation {
         methodWithAnnotation.test2();
         methodWithAnnotation.test3();
     }
+
+    public void test2() {
+        test1();
+    }
 }

@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.handler.dto.mybatis;
 
+import com.adrninistrator.mybatis_mysql_table_parser.common.enums.MySqlStatementEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -57,6 +59,45 @@ public class MyBatisMySqlTableInfo {
     // drop table语句的表名列表
     @JsonProperty("drop")
     private List<String> dropTableList;
+
+    // 获取当前主要处理的SQL语句类型，及相关的数据库表
+    @JsonIgnore
+    public MyBatisMySqlStatementAndTable getMyBatisMySqlStatementAndTable() {
+        if (select4UpdateTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_SELECT_4_UPDATE, select4UpdateTableList);
+        }
+        if (insertTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_INSERT, insertTableList);
+        }
+        if (insertIgnoreTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_INSERT_IGNORE, insertIgnoreTableList);
+        }
+        if (insertOrUpdateTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_INSERT_OR_UPDATE, insertOrUpdateTableList);
+        }
+        if (replaceTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_REPLACE, replaceTableList);
+        }
+        if (updateTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_UPDATE, updateTableList);
+        }
+        if (deleteTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_DELETE, deleteTableList);
+        }
+        if (alterTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_ALTER, alterTableList);
+        }
+        if (truncateTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_TRUNCATE, truncateTableList);
+        }
+        if (createTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_CREATE, createTableList);
+        }
+        if (dropTableList != null) {
+            return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_DROP, dropTableList);
+        }
+        return new MyBatisMySqlStatementAndTable(MySqlStatementEnum.DSSE_SELECT, selectTableList);
+    }
 
     public List<String> getSelectTableList() {
         return selectTableList;

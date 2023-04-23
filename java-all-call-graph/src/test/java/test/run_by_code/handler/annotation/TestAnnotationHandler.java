@@ -1,5 +1,6 @@
 package test.run_by_code.handler.annotation;
 
+import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
@@ -7,12 +8,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import test.call_graph.annotation.TestAnnotation1;
 import test.call_graph.argument.TestClassWithAnnotation2A;
 import test.call_graph.argument.TestClassWithAnnotation3A;
+import test.call_graph.spring.bean.define.SpringServiceImplB2;
 import test.run_by_code.base.TestRunByCodeBase;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -35,6 +40,16 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<String> classList = annotationHandler.queryClassesWithAnnotations(false, "org.springframework.web.bind.annotation.RequestMapping");
             logger.info("classList\n{}", StringUtils.join(classList, "\n"));
+        }
+    }
+
+    @Test
+    public void testQueryAnnotationAttributes4Class() {
+        try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
+            Map<String, BaseAnnotationAttribute> map = annotationHandler.queryAnnotationAttributes4Class(SpringServiceImplB2.class.getName(), Service.class.getName());
+            logger.info("map\n{}", JACGJsonUtil.getJsonStr(map));
+            map = annotationHandler.queryAnnotationAttributes4Class(SpringServiceImplB2.class.getName(), Controller.class.getName());
+            logger.info("map.isEmpty(): {}", map.isEmpty());
         }
     }
 

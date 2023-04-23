@@ -1,6 +1,5 @@
 package com.adrninistrator.jacg.extractor.entry.spring;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.comparator.Comparator4AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.info_with_hash.AbstractInfoWithMethodHash;
@@ -14,8 +13,6 @@ import com.adrninistrator.jacg.extractor.dto.spring_tx.extract_file.SpTxCallByAn
 import com.adrninistrator.jacg.extractor.dto.spring_tx.extract_file.SpTxCallByTplFile;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.javacg.util.JavaCGUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +25,6 @@ import java.util.Map;
  * @description: 对调用链结果文件进行数据提取，查找Spring事务发起的指定操作（例如查找事务中发起RPC调用等耗时操作的情况）
  */
 public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
-    private static final Logger logger = LoggerFactory.getLogger(SpringTxCallExtractor.class);
 
     /**
      * 查找Spring事务嵌套的调用情况，使用配置文件中的参数
@@ -46,12 +42,6 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
      * @return
      */
     public SpTxCallCombined extract(ConfigureWrapper configureWrapper) {
-        List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER, true);
-        if (keywordList.isEmpty()) {
-            logger.error("未在配置文件中指定搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER);
-            return null;
-        }
-
         // 指定公共配置参数
         setCommonConfig(configureWrapper);
 

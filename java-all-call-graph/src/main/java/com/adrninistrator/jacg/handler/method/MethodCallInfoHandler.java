@@ -54,7 +54,7 @@ public class MethodCallInfoHandler extends BaseHandler {
         }
         List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{callId});
         if (JavaCGUtil.isCollectionEmpty(list)) {
-            logger.error("未查询到方法调用中被调用对象与参数使用的信息 {}", callId);
+            logger.warn("从{}表未查询到方法调用中被调用对象与参数使用的信息 callId: {}", DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName(), callId);
             return null;
         }
 

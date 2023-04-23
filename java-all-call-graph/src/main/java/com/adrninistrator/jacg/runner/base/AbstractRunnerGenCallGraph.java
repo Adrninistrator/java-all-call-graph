@@ -140,7 +140,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     protected List<AbstractAnnotationFormatter> annotationFormatterList;
 
     // 保存各个方法已处理过的所有注解信息
-    protected Map<String, String> methodAllAnnotationInfoMap = new HashMap<>();
+    protected Map<String, String> methodAllAnnotationInfoMap = new ConcurrentHashMap<>();
 
     // 保存已生成的过方法文件名
     protected Set<String> writtenFileNameSet = ConcurrentHashMap.newKeySet();
@@ -232,7 +232,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return null;
         }
 
-        simpleClassNameMap.putIfAbsent(className, simpleClassName);
+        simpleClassNameMap.put(className, simpleClassName);
         return simpleClassName;
     }
 
@@ -735,10 +735,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         Map<String, Map<String, Object>> rtnMap = new HashMap<>(list.size());
-
         for (Map<String, Object> map : list) {
             String jarPathHash = (String) map.get(DC.JI_JAR_PATH_HASH);
-            rtnMap.putIfAbsent(jarPathHash, map);
+            rtnMap.put(jarPathHash, map);
         }
 
         return rtnMap;
@@ -747,12 +746,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     /**
      * 获取本次执行时的输出目录
      *
-     * @return null: 执行失败，非null: 执行成功
+     * @return
      */
     public String getCurrentOutputDirPath() {
-        if (someTaskFail) {
-            return null;
-        }
         return currentOutputDirPath;
     }
 
@@ -760,6 +756,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     protected boolean addMethodAnnotationHandlerExtensions() {
         List<String> methodAnnotationHandlerClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER, true);
         if (JavaCGUtil.isCollectionEmpty(methodAnnotationHandlerClassList)) {
+            annotationFormatterList = Collections.emptyList();
             return true;
         }
 

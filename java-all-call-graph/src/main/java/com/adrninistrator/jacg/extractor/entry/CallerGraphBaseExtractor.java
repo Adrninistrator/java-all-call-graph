@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.extractor.entry;
 
+import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;
@@ -49,6 +50,12 @@ public class CallerGraphBaseExtractor extends BaseExtractor {
      * @return
      */
     protected List<CallerExtractedFile> baseExtract(ConfigureWrapper configureWrapper, boolean needCloseDs) {
+        List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER, true);
+        if (keywordList.isEmpty()) {
+            logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER);
+            return null;
+        }
+
         try {
             // 生成向下的方法完整调用链文件，并根据关键字生成调用堆栈文件
             List<String> stackFilePathList = genStackFiles(configureWrapper);

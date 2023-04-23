@@ -99,9 +99,6 @@ public abstract class AbstractReporter {
 
     // 公共预处理
     protected boolean commonPreHandle() {
-        // 添加所有预置的扩展类
-        configureWrapper.addAllPreBuildExtensions();
-
         if (skipWriteDb) {
             logger.info("通过参数指定跳过写数据库步骤");
             return true;

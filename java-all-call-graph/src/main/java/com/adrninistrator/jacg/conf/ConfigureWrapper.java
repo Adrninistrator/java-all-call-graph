@@ -531,6 +531,9 @@ public class ConfigureWrapper {
         for (OtherConfigFileUseListEnum otherConfigFileUseListEnum : OtherConfigFileUseListEnum.values()) {
             otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), Collections.emptyList());
         }
+
+        // 添加所有预置的扩展类
+        addAllPreBuildExtensions();
     }
 
     private void clearMainConfig(MainConfigInterface mainConfig) {
@@ -565,6 +568,7 @@ public class ConfigureWrapper {
      * 添加所有预置的扩展类
      */
     public void addAllPreBuildExtensions() {
+        logger.info("添加所有预置的扩展类");
         addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 SpringMvcRequestMappingFormatter.class.getName(),
                 SpringTransactionalFormatter.class.getName(),

@@ -47,6 +47,12 @@ public class FindCallStackTrace {
     // 记录当前生成调用堆栈的目录
     private String stackOutputDirPath;
 
+    // 记录当前生成调用堆栈时保存方法信息的目录，以分隔符结束，分隔符使用/（后续需要判断.md文件路径是否以该目录开头）
+    private String methodOutputDirPath;
+
+    // 未搜索到关键字的文件保存目录，以分隔符结束，分隔符使用/（后续需要判断.md文件路径是否以该目录开头）
+    private String keyWordsNotFoundDirPath;
+
     // 根据关键字生成调用堆栈过滤器扩展类列表
     private List<FindStackKeywordFilterInterface> findStackKeywordFilterList;
 
@@ -156,7 +162,7 @@ public class FindCallStackTrace {
         // 生成完整方法调用链文件
         boolean success = runnerGenCallGraph.run(configureWrapper);
         callGraphOutputDirPath = runnerGenCallGraph.getCurrentOutputDirPath();
-        if (!success || callGraphOutputDirPath == null) {
+        if (!success) {
             logger.error("生成方法完整调用链失败，请检查");
             return null;
         }
@@ -250,8 +256,11 @@ public class FindCallStackTrace {
             return null;
         }
 
+        // 记录当前生成调用堆栈时保存方法信息的目录
+        methodOutputDirPath = JACGFileUtil.replaceFilePathSeparator(stackOutputDirPath + File.separator + JACGConstants.DIR_OUTPUT_METHODS + File.separator);
+
         // 未搜索到关键字的文件保存目录
-        String keyWordsNotFoundDirPath = stackOutputDirPath + File.separator + JACGConstants.DIR_KEYWORDS_NOT_FOUND;
+        keyWordsNotFoundDirPath = JACGFileUtil.replaceFilePathSeparator(stackOutputDirPath + File.separator + JACGConstants.DIR_KEYWORDS_NOT_FOUND + File.separator);
 
         // txt文件所在目录字符串长度，用于后续截取
         int finalSrcDirPathLength = finalCallGraphDirPath.length();
@@ -284,7 +293,7 @@ public class FindCallStackTrace {
             }
 
             logger.info("根据调用链文件生成调用堆栈文件: {}", subFilePath);
-            handleOneFile(finalSrcDirPathLength, keyWordsNotFoundDirPath, subFilePath, keywordList, order4ee);
+            handleOneFile(finalSrcDirPathLength, subFilePath, keywordList, order4ee);
         }
 
         // 生成结果信息
@@ -301,15 +310,14 @@ public class FindCallStackTrace {
 
         List<String> finalMdFilePathList = new ArrayList<>(mdFilePathList.size());
         for (String mdFilePath : mdFilePathList) {
-            // 获取文件所在目录名
-            String mdFileDirName = JACGFileUtil.getFileParentDirName(mdFilePath);
-
-            if (JACGConstants.DIR_KEYWORDS_NOT_FOUND.equals(mdFileDirName)) {
-                // 跳过未找到关键字的文件
+            // 在比较文件路径之前，将.md文件路径中的\替换为/
+            String mdFilePathReplaceSeparator = JACGFileUtil.replaceFilePathSeparator(mdFilePath);
+            if (mdFilePathReplaceSeparator.startsWith(keyWordsNotFoundDirPath)) {
+                // 当前文件在未找到关键字的目录中，说明为未找到关键字的文件，跳过
                 continue;
             }
 
-            if (order4ee && !JACGConstants.DIR_OUTPUT_METHODS.equals(mdFileDirName)) {
+            if (order4ee && !mdFilePathReplaceSeparator.startsWith(methodOutputDirPath)) {
                 // 查找向上方法调用链文件时，对于不在方法目录中的文件跳过
                 continue;
             }
@@ -322,7 +330,6 @@ public class FindCallStackTrace {
     }
 
     private boolean handleOneFile(int srcDirPathLength,
-                                  String keyWordsNotFoundDirPath,
                                   String txtFilePath,
                                   List<String> keywordList,
                                   boolean order4ee) {
@@ -358,7 +365,7 @@ public class FindCallStackTrace {
                 markdownWriter.close();
 
                 // 未写入文件内容，将当前md文件移动到代表空文件的目录中
-                JACGFileUtil.renameFile(mdFilePath, keyWordsNotFoundDirPath + File.separator + txtFileNameWithOutExt + JACGConstants.EXT_MD);
+                JACGFileUtil.renameFile(mdFilePath, keyWordsNotFoundDirPath + txtFileNameWithOutExt + JACGConstants.EXT_MD);
             }
 
             return true;
