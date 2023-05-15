@@ -6,12 +6,15 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，类的注解
  */
 public class WriteDbData4ClassAnnotation extends AbstractWriteDbData {
-    private final String simpleClassName;
-    private final String annotationName;
-    private final String attributeName;
-    private final String annotationType;
-    private final String attributeValue;
-    private final String className;
+    private String simpleClassName;
+    private String annotationName;
+    private String attributeName;
+    private String annotationType;
+    private String attributeValue;
+    private String className;
+
+    public WriteDbData4ClassAnnotation() {
+    }
 
     public WriteDbData4ClassAnnotation(String simpleClassName, String annotationName, String attributeName, String annotationType, String attributeValue, String className) {
         this.simpleClassName = simpleClassName;
@@ -26,23 +29,47 @@ public class WriteDbData4ClassAnnotation extends AbstractWriteDbData {
         return simpleClassName;
     }
 
+    public void setSimpleClassName(String simpleClassName) {
+        this.simpleClassName = simpleClassName;
+    }
+
     public String getAnnotationName() {
         return annotationName;
+    }
+
+    public void setAnnotationName(String annotationName) {
+        this.annotationName = annotationName;
     }
 
     public String getAttributeName() {
         return attributeName;
     }
 
+    public void setAttributeName(String attributeName) {
+        this.attributeName = attributeName;
+    }
+
     public String getAnnotationType() {
         return annotationType;
+    }
+
+    public void setAnnotationType(String annotationType) {
+        this.annotationType = annotationType;
     }
 
     public String getAttributeValue() {
         return attributeValue;
     }
 
+    public void setAttributeValue(String attributeValue) {
+        this.attributeValue = attributeValue;
+    }
+
     public String getClassName() {
         return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 }

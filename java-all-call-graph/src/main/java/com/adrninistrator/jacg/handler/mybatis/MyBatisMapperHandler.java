@@ -5,11 +5,11 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MyBatisMSTable;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MyBatisMSWriteTable;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.mybatis.MyBatisMySqlTableInfo;
-import com.adrninistrator.jacg.handler.dto.mybatis.MyBatisMySqlWriteTableInfo;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import com.adrninistrator.mybatis_mysql_table_parser.common.enums.MySqlStatementEnum;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public class MyBatisMapperHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{mapperSimpleClassName, mapperMethodName});
+        List<WriteDbData4MyBatisMSTable> list = dbOperator.queryList(sql, WriteDbData4MyBatisMSTable.class, mapperSimpleClassName, mapperMethodName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("未查询到MyBatis Mapper对应的数据库表信息 {} {}", mapperClassName, mapperMethodName);
             return null;
@@ -65,11 +65,9 @@ public class MyBatisMapperHandler extends BaseHandler {
 
         MyBatisMySqlTableInfo myBatisMySqlTableInfo = new MyBatisMySqlTableInfo();
         Map<String, List<String>> tableNameMap = new HashMap<>();
-        for (Map<String, Object> map : list) {
-            String sqlStatement = (String) map.get(DC.MMT_SQL_STATEMENT);
-            String tableName = (String) map.get(DC.MMT_TABLE_NAME);
-            List<String> tableNameList = tableNameMap.computeIfAbsent(sqlStatement, k -> new ArrayList<>());
-            tableNameList.add(tableName);
+        for (WriteDbData4MyBatisMSTable writeDbData4MyBatisMSTable : list) {
+            List<String> tableNameList = tableNameMap.computeIfAbsent(writeDbData4MyBatisMSTable.getSqlStatement(), k -> new ArrayList<>());
+            tableNameList.add(writeDbData4MyBatisMSTable.getTableName());
         }
 
         for (Map.Entry<String, List<String>> entry : tableNameMap.entrySet()) {
@@ -112,7 +110,7 @@ public class MyBatisMapperHandler extends BaseHandler {
      * @param mapperMethodName
      * @return
      */
-    public MyBatisMySqlWriteTableInfo queryMyBatisMySqlWriteTableInfo(String mapperClassName, String mapperMethodName) {
+    public WriteDbData4MyBatisMSWriteTable queryMyBatisMySqlWriteTableInfo(String mapperClassName, String mapperMethodName) {
         String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MMWT_QUERY_TABLE;
@@ -125,15 +123,11 @@ public class MyBatisMapperHandler extends BaseHandler {
                     " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-
-        Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{mapperSimpleClassName, mapperMethodName});
-        if (JACGUtil.isMapEmpty(map)) {
+        WriteDbData4MyBatisMSWriteTable writeDbData4MyBatisMSWriteTable = dbOperator.queryObject(sql, WriteDbData4MyBatisMSWriteTable.class, mapperSimpleClassName,
+                mapperMethodName);
+        if (writeDbData4MyBatisMSWriteTable == null) {
             logger.error("未查询到MyBatis Mapper对应的写数据库表信息 {} {}", mapperClassName, mapperMethodName);
-            return null;
         }
-
-        String sqlStatement = (String) map.get(DC.MMT_SQL_STATEMENT);
-        String tableName = (String) map.get(DC.MMT_TABLE_NAME);
-        return new MyBatisMySqlWriteTableInfo(sqlStatement, tableName);
+        return writeDbData4MyBatisMSWriteTable;
     }
 }

@@ -1,13 +1,14 @@
-package test.call_graph.spring.bean.define;
+package test.call_graph.spring.bean.define.impl;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
+import test.call_graph.spring.bean.define.AbstractSpringServiceD;
 
 /**
  * @author adrninistrator
  * @date 2023/3/12
  * @description:
  */
-@Service
+@Repository
 public class SpringServiceImplD1 extends AbstractSpringServiceD {
     @Override
     public void test1() {

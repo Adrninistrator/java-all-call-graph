@@ -35,6 +35,9 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractRunner {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunner.class);
 
+    // 是否有检查过数据库文件是否可写
+    protected static boolean CHECK_H2_DB_FILE_WRITEABLE = false;
+
     // 配置信息包装类
     protected ConfigureWrapper configureWrapper;
 
@@ -42,9 +45,6 @@ public abstract class AbstractRunner {
     protected String currentOutputDirPath;
 
     protected String appName;
-
-    // 是否有检查过数据库文件是否可写
-    protected static boolean CHECK_H2_DB_FILE_WRITEABLE = false;
 
     protected boolean inited = false;
 
@@ -100,13 +100,12 @@ public abstract class AbstractRunner {
      * 初始化
      *
      * @param configureWrapper
-     * @return
      */
-    private boolean init(ConfigureWrapper configureWrapper) {
+    private void init(ConfigureWrapper configureWrapper) {
         synchronized (this) {
             if (inited) {
                 logger.warn("{} 已完成初始化，不会再初始化", currentSimpleClassName);
-                return true;
+                return;
             }
 
             this.configureWrapper = configureWrapper;
@@ -119,7 +118,6 @@ public abstract class AbstractRunner {
                 jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
             }
             inited = true;
-            return true;
         }
     }
 
@@ -149,10 +147,7 @@ public abstract class AbstractRunner {
             someTaskFail = false;
 
             // 初始化
-            if (!init(configureWrapper)) {
-                logger.error("{} 初始化失败", currentSimpleClassName);
-                return false;
-            }
+            init(configureWrapper);
 
             // 预检查
             if (!preCheck()) {

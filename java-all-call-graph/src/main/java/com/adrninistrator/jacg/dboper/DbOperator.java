@@ -12,17 +12,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -38,6 +34,10 @@ public class DbOperator {
 
     private DruidDataSource dataSource;
 
+    private final JdbcTemplateQuiet jdbcTemplate;
+
+    private final Map<String, BeanPropertyRowMapper<?>> beanPropertyRowMapperMap = new ConcurrentHashMap<>();
+
     private final ConfigureWrapper configureWrapper;
 
     private final String appName;
@@ -49,7 +49,7 @@ public class DbOperator {
 
     private boolean useH2Db = false;
 
-    protected boolean closed = false;
+    private boolean closed = false;
 
     public static DbOperator genInstance(ConfigureWrapper configureWrapper, String entrySimpleClassName) {
         try {
@@ -78,6 +78,8 @@ public class DbOperator {
         dataSource.setTestOnBorrow(false);
         dataSource.setTestOnReturn(false);
         dataSource.setTestWhileIdle(false);
+
+        jdbcTemplate = new JdbcTemplateQuiet(dataSource);
 
         appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
         objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
@@ -160,50 +162,6 @@ public class DbOperator {
         }
     }
 
-    private void close(Connection connection, PreparedStatement stmt, boolean closeConnection) {
-        try {
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (closeConnection && connection != null) {
-                // 使用数据源，只是将连接释放回连接池，不会断开与数据库的连接
-                connection.close();
-            }
-        } catch (Exception e) {
-            logger.error("error ", e);
-        }
-    }
-
-    private void close(Connection connection, PreparedStatement stmt) {
-        close(connection, stmt, true);
-    }
-
-    /**
-     * 关闭连接
-     *
-     * @param connection
-     */
-    public void closeConnection(Connection connection) {
-        try {
-            if (connection != null) {
-                // 使用数据源，只是将连接释放回连接池，不会断开与数据库的连接
-                connection.close();
-            }
-        } catch (Exception e) {
-            logger.error("error ", e);
-        }
-    }
-
-    private void closeResultSet(ResultSet rs) {
-        try {
-            if (rs != null) {
-                rs.close();
-            }
-        } catch (Exception e) {
-            logger.error("error ", e);
-        }
-    }
-
     /**
      * 创建数据库表
      *
@@ -244,8 +202,8 @@ public class DbOperator {
      * @return
      */
     private boolean checkTableExistsH2(String tableName) {
-        List<Object> list = queryListOneColumn("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?",
-                new Object[]{JACGConstants.H2_SCHEMA, tableName});
+        List<String> list = queryListOneColumn("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?",
+                String.class, JACGConstants.H2_SCHEMA, tableName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("数据库表创建失败 [{}]", tableName);
             return false;
@@ -260,7 +218,7 @@ public class DbOperator {
      * @return
      */
     private boolean checkTableExistsNonH2(String tableName) {
-        List<Object> list = queryListOneColumn("show tables like ?", new Object[]{tableName});
+        List<String> list = queryListOneColumn("show tables like ?", String.class, tableName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("数据库表创建失败 [{}]", tableName);
             return false;
@@ -288,23 +246,12 @@ public class DbOperator {
      * @return
      */
     public boolean executeDDLSql(String sql) {
-        Connection connection = null;
-        PreparedStatement stmt = null;
-
         try {
-            connection = getConnection();
-            if (connection == null) {
-                return false;
-            }
-
-            stmt = connection.prepareStatement(sql);
-            stmt.execute();
+            jdbcTemplate.execute(sql);
             return true;
         } catch (Exception e) {
             logger.error("error [{}] ", sql, e);
             return false;
-        } finally {
-            close(connection, stmt);
         }
     }
 
@@ -315,40 +262,15 @@ public class DbOperator {
      * @param arguments
      * @return
      */
-    public Integer update(Connection connection, boolean closeConnection, String sql, Object[] arguments) {
-        if (connection == null) {
-            return null;
-        }
-
-        PreparedStatement stmt = null;
-
+    public Integer update(String sql, Object... arguments) {
         try {
-            stmt = connection.prepareStatement(sql);
-            setArguments(stmt, arguments);
-            return stmt.executeUpdate();
+            return jdbcTemplate.update(sql, arguments);
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] ", sql, e);
             }
             return null;
-        } finally {
-            close(connection, stmt, closeConnection);
         }
-    }
-
-    /**
-     * 更新数据库
-     *
-     * @param sql
-     * @param arguments
-     * @return
-     */
-    public Integer update(String sql, Object[] arguments) {
-        Connection connection = getConnection();
-        if (connection == null) {
-            return null;
-        }
-        return update(connection, true, sql, arguments);
     }
 
     /**
@@ -359,42 +281,10 @@ public class DbOperator {
      * @return
      */
     public boolean batchInsert(String sql, List<Object[]> argumentList) {
-        Connection connection = null;
-        PreparedStatement stmt = null;
-
         try {
-            connection = getConnection();
-            if (connection == null) {
-                return false;
-            }
-
-//            connection.setAutoCommit(false);
-
-            stmt = connection.prepareStatement(sql);
-
-            int columnNum = argumentList.get(0).length;
-            for (Object[] argument : argumentList) {
-                for (int i = 0; i < columnNum; i++) {
-                    stmt.setObject(i + 1, argument[i]);
-                }
-                stmt.addBatch();
-            }
-
-            stmt.executeBatch();
-            stmt.clearBatch();
-//            connection.commit();
-//            connection.setAutoCommit(true);
+            jdbcTemplate.batchUpdate(sql, argumentList);
             return true;
         } catch (Exception e) {
-//            if (connection != null) {
-//                try {
-//                    connection.rollback();
-//                    connection.setAutoCommit(true);
-//                } catch (Exception e2) {
-//                    logger.error("error ", e2);
-//                }
-//            }
-
             if (!noticeDropTable(e, sql)) {
                 if (argumentList.size() == 1) {
                     // 打印插入失败的数据
@@ -405,8 +295,6 @@ public class DbOperator {
                 }
             }
             return false;
-        } finally {
-            close(connection, stmt);
         }
     }
 
@@ -417,204 +305,95 @@ public class DbOperator {
      * @param arguments
      * @return
      */
-    public boolean insert(String sql, Object[] arguments) {
-        Connection connection = null;
-        PreparedStatement stmt = null;
-
+    public boolean insert(String sql, Object... arguments) {
         try {
-            connection = getConnection();
-            if (connection == null) {
-                return false;
-            }
-
-            stmt = connection.prepareStatement(sql);
-
-            int columnNum = arguments.length;
-
-            for (int i = 0; i < columnNum; i++) {
-                stmt.setObject(i + 1, arguments[i]);
-            }
-
-            stmt.executeUpdate();
+            jdbcTemplate.update(sql, arguments);
             return true;
         } catch (Exception e) {
             logger.error("error [{}] ", sql, e);
             return false;
-        } finally {
-            close(connection, stmt);
         }
     }
 
     /**
-     * 查询列表，仅包含一个字段
+     * 查询列表，仅包含一列，返回类型为基本类型
      *
-     * @param connection
-     * @param closeConnection
      * @param sql
+     * @param type
      * @param arguments
      * @return
      */
-    public List<Object> queryListOneColumn(Connection connection, boolean closeConnection, String sql, Object[] arguments) {
-        if (connection == null) {
-            return null;
-        }
-
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
+    public <T> List<T> queryListOneColumn(String sql, Class<T> type, Object... arguments) {
         try {
-            stmt = connection.prepareStatement(sql);
-            setArguments(stmt, arguments);
-
-            rs = stmt.executeQuery();
-
-            List<Object> list = new ArrayList<>();
-            while (rs.next()) {
-                list.add(rs.getObject(1));
-            }
-            return list;
+            return jdbcTemplate.queryForList(sql, type, arguments);
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             }
             return null;
-        } finally {
-            close(connection, stmt, closeConnection);
-            closeResultSet(rs);
         }
     }
 
     /**
-     * 查询列表，仅包含一个字段
+     * 查询列表，包含多列，返回类型非基本类型
      *
      * @param sql
+     * @param type
      * @param arguments
      * @return
      */
-    public List<Object> queryListOneColumn(String sql, Object[] arguments) {
-        Connection connection = getConnection();
-        if (connection == null) {
-            return null;
-        }
-        return queryListOneColumn(connection, true, sql, arguments);
-    }
-
-    /**
-     * 查询列表，包含多个字段
-     *
-     * @param connection
-     * @param closeConnection
-     * @param sql
-     * @param arguments
-     * @return
-     */
-    public List<Map<String, Object>> queryList(Connection connection, boolean closeConnection, String sql, Object[] arguments) {
-        if (connection == null) {
-            return null;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
+    @SuppressWarnings("unchecked")
+    public <T> List<T> queryList(String sql, Class<T> type, Object... arguments) {
         try {
-            stmt = connection.prepareStatement(sql);
-            setArguments(stmt, arguments);
-            rs = stmt.executeQuery();
-
-            ResultSetMetaData meta = rs.getMetaData();
-            int columnCount = meta.getColumnCount();
-            List<Map<String, Object>> list = new ArrayList<>();
-
-            while (rs.next()) {
-                Map<String, Object> map = new HashMap<>(columnCount);
-                for (int i = 1; i <= columnCount; i++) {
-                    /*
-                        当查询SQL通过AS指定字段别名时，使用getColumnLabel可以获取到别名，未指定别名时，可获取到原始字段名
-                        使用getColumnName只能获取到原始字段名
-                     */
-                    map.put(meta.getColumnLabel(i), rs.getObject(i));
-                }
-                list.add(map);
-            }
-            return list;
+            BeanPropertyRowMapper<?> beanPropertyRowMapper = beanPropertyRowMapperMap.computeIfAbsent(type.getName(),
+                    k -> new BeanPropertyRowMapper<>(type));
+            return jdbcTemplate.query(sql, (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             }
             return null;
-        } finally {
-            close(connection, stmt, closeConnection);
-            closeResultSet(rs);
         }
     }
 
     /**
-     * 查询数据库，结果为列表，元素为Map
+     * 查询一行且只有一列的记录，返回类型为基本类型
      *
      * @param sql
+     * @param type
      * @param arguments
      * @return
      */
-    public List<Map<String, Object>> queryList(String sql, Object[] arguments) {
-        Connection connection = getConnection();
-        if (connection == null) {
-            return null;
-        }
-        return queryList(connection, true, sql, arguments);
-    }
-
-    /**
-     * 查询一行记录
-     *
-     * @param sql
-     * @param arguments
-     * @return
-     */
-    public Map<String, Object> queryOneRow(String sql, Object[] arguments) {
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
+    public <T> T queryObjectOneColumn(String sql, Class<T> type, Object... arguments) {
         try {
-            connection = getConnection();
-            if (connection == null) {
-                return null;
-            }
-
-            stmt = connection.prepareStatement(sql);
-            setArguments(stmt, arguments);
-            rs = stmt.executeQuery();
-
-            ResultSetMetaData meta = rs.getMetaData();
-            int columnCount = meta.getColumnCount();
-
-            Map<String, Object> map = new HashMap<>(columnCount);
-            if (rs.next()) {
-                for (int i = 1; i <= columnCount; i++) {
-                    /*
-                        当查询SQL通过AS指定字段别名时，使用getColumnLabel可以获取到别名，未指定别名时，可获取到原始字段名
-                        使用getColumnName只能获取到原始字段名
-                     */
-                    map.put(meta.getColumnLabel(i), rs.getObject(i));
-                }
-            }
-            return map;
+            return jdbcTemplate.queryForObject(sql, type, arguments);
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             }
             return null;
-        } finally {
-            close(connection, stmt);
-            closeResultSet(rs);
         }
     }
 
-    private void setArguments(PreparedStatement stmt, Object[] arguments) throws SQLException {
-        if (arguments != null) {
-            int argumentNum = arguments.length;
-            for (int i = 0; i < argumentNum; i++) {
-                stmt.setObject(i + 1, arguments[i]);
+    /**
+     * 查询一行记录，包含多列，返回类型非基本类型
+     *
+     * @param sql
+     * @param type
+     * @param arguments
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T queryObject(String sql, Class<T> type, Object... arguments) {
+        try {
+            BeanPropertyRowMapper<?> beanPropertyRowMapper = beanPropertyRowMapperMap.computeIfAbsent(type.getName(),
+                    k -> new BeanPropertyRowMapper<>(type));
+            return jdbcTemplate.queryForObject(sql, (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
+        } catch (Exception e) {
+            if (!noticeDropTable(e, sql)) {
+                logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             }
+            return null;
         }
     }
 

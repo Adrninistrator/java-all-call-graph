@@ -7,9 +7,6 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
-
-import java.util.List;
 
 /**
  * @author adrninistrator
@@ -55,11 +52,6 @@ public class ClassInfoHandler extends BaseHandler {
                     " where " + DC.CSEI1_SIMPLE_CLASS_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleClassName});
-        if (JavaCGUtil.isCollectionEmpty(list)) {
-            return null;
-        }
-        return (Integer) list.get(0);
+        return dbOperator.queryObjectOneColumn(sql, Integer.class, simpleClassName);
     }
 }

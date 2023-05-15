@@ -30,5 +30,6 @@ public class TestClassInfoHandler extends TestRunByCodeBase {
     private void doTest(ClassInfoHandler classInfoHandler, String className) {
         JACGAccessFlags jacgAccessFlags = classInfoHandler.queryClassJACGAccessFlags(className);
         logger.info("{} isInterface:{} isAnnotation:{} isAbstract:{}", className, jacgAccessFlags.isInterface(), jacgAccessFlags.isAnnotation(), jacgAccessFlags.isAbstract());
+        printObjectContent(jacgAccessFlags, className);
     }
 }

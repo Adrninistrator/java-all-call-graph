@@ -12,7 +12,6 @@ import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.method.MethodCallInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -101,7 +100,7 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
 
             String businessDataType = chooseBusinessDataType();
             while (true) {
-                Integer row = dbOperator.update(sql, new Object[]{businessDataType, JACGConstants.DB_PAGE_HANDLE_SIZE});
+                Integer row = dbOperator.update(sql, businessDataType, JACGConstants.DB_PAGE_HANDLE_SIZE);
                 if (row == null) {
                     return false;
                 }
@@ -158,22 +157,15 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{calleeSimpleClassName, startCallId, JACGConstants.DB_PAGE_HANDLE_SIZE - 1});
-        if (list == null) {
-            // 查询失败
-            logger.debug("查询失败 {}", startCallId);
-            return JACGConstants.PAGE_QUERY_FAIL;
-        }
-
-        if (list.isEmpty()) {
+        Integer endCallId = dbOperator.queryObjectOneColumn(sql, Integer.class, calleeSimpleClassName, startCallId, JACGConstants.DB_PAGE_HANDLE_SIZE - 1);
+        if (endCallId == null) {
             // 最后一次分页查询
             logger.debug("最后一次分页查询 {}", startCallId);
             return JACGConstants.PAGE_QUERY_LAST;
         }
 
         // 不是最后一次分页查询
-        int endCallId = (int) list.get(0);
-        logger.debug("查询到endCallId {}", endCallId);
+        logger.debug("查询到endCallId {} {}", startCallId, endCallId);
         return endCallId;
     }
 
@@ -199,8 +191,7 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
         if (!lastQuery) {
             argList.add(endCallId);
         }
-        List<Object> list = dbOperator.queryListOneColumn(sql, argList.toArray());
-        return JACGSqlUtil.genIntegerList(list);
+        return dbOperator.queryListOneColumn(sql, Integer.class, argList.toArray());
     }
 
     /**
@@ -251,7 +242,7 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
                     String businessData = handleMethodCall(methodCallId, calleeClassName, calleeMethodName, objArgsInfoInMethodCall, currentCalleeMethodArgTypeList);
                     // 向业务功能数据表写入数据
                     if (businessData != null &&
-                            !dbOperator.insert(insertSql, new Object[]{methodCallId, chooseBusinessDataType(), businessData})) {
+                            !dbOperator.insert(insertSql, methodCallId, chooseBusinessDataType(), businessData)) {
                         return false;
                     }
                     handleTime++;

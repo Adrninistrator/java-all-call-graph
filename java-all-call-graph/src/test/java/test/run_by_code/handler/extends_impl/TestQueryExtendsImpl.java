@@ -1,10 +1,7 @@
 package test.run_by_code.handler.extends_impl;
 
 import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import test.call_graph.interfaces.interfaces.InterfaceSuper1;
 import test.run_by_code.base.TestRunByCodeBase;
 
@@ -16,7 +13,6 @@ import java.util.List;
  * @description:
  */
 public class TestQueryExtendsImpl extends TestRunByCodeBase {
-    private static final Logger logger = LoggerFactory.getLogger(TestQueryExtendsImpl.class);
 
     @Test
     public void testGetChildClassList() {
@@ -27,18 +23,18 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
 
     private void doTestGetChildClassList(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
         List<String> list = jacgExtendsImplHandler.queryChildClassListByFull(className, true, true, true, true);
-        logger.info("子接口+子类 {}\n{}", className, StringUtils.join(list, "\n"));
+        printListContent(list, className, "子接口+子类");
 
         list = jacgExtendsImplHandler.queryChildClassListByFull(className, true, false, false, false);
-        logger.info("接口 {}\n{}", className, StringUtils.join(list, "\n"));
+        printListContent(list, className, "接口");
 
         list = jacgExtendsImplHandler.queryChildClassListByFull(className, false, true, true, true);
-        logger.info("类 {}\n{}", className, StringUtils.join(list, "\n"));
+        printListContent(list, className, "类");
 
         list = jacgExtendsImplHandler.queryChildClassListByFull(className, false, true, true, false);
-        logger.info("抽象类 {}\n{}", className, StringUtils.join(list, "\n"));
+        printListContent(list, className, "抽象类 {");
 
         list = jacgExtendsImplHandler.queryChildClassListByFull(className, false, true, false, true);
-        logger.info("非抽象类 {}\n{}", className, StringUtils.join(list, "\n"));
+        printListContent(list, className, "非抽象类");
     }
 }

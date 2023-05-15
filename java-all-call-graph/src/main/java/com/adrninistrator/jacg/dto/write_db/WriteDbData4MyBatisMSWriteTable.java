@@ -6,15 +6,16 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，MyBatis写数据库表信息（使用MySQL）
  */
 public class WriteDbData4MyBatisMSWriteTable extends AbstractWriteDbData {
-    private final int recordId;
-    private final String mapperSimpleClassName;
-    private final String mapperMethodName;
-    private final String sqlStatement;
-    private final String tableName;
-    private final String mapperClassName;
+    private String mapperSimpleClassName;
+    private String mapperMethodName;
+    private String sqlStatement;
+    private String tableName;
+    private String mapperClassName;
 
-    public WriteDbData4MyBatisMSWriteTable(int recordId, String mapperSimpleClassName, String mapperMethodName, String sqlStatement, String tableName, String mapperClassName) {
-        this.recordId = recordId;
+    public WriteDbData4MyBatisMSWriteTable() {
+    }
+
+    public WriteDbData4MyBatisMSWriteTable(String mapperSimpleClassName, String mapperMethodName, String sqlStatement, String tableName, String mapperClassName) {
         this.mapperSimpleClassName = mapperSimpleClassName;
         this.mapperMethodName = mapperMethodName;
         this.sqlStatement = sqlStatement;
@@ -22,27 +23,43 @@ public class WriteDbData4MyBatisMSWriteTable extends AbstractWriteDbData {
         this.mapperClassName = mapperClassName;
     }
 
-    public int getRecordId() {
-        return recordId;
-    }
-
     public String getMapperSimpleClassName() {
         return mapperSimpleClassName;
+    }
+
+    public void setMapperSimpleClassName(String mapperSimpleClassName) {
+        this.mapperSimpleClassName = mapperSimpleClassName;
     }
 
     public String getMapperMethodName() {
         return mapperMethodName;
     }
 
+    public void setMapperMethodName(String mapperMethodName) {
+        this.mapperMethodName = mapperMethodName;
+    }
+
     public String getSqlStatement() {
         return sqlStatement;
+    }
+
+    public void setSqlStatement(String sqlStatement) {
+        this.sqlStatement = sqlStatement;
     }
 
     public String getTableName() {
         return tableName;
     }
 
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     public String getMapperClassName() {
         return mapperClassName;
+    }
+
+    public void setMapperClassName(String mapperClassName) {
+        this.mapperClassName = mapperClassName;
     }
 }

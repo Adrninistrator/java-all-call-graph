@@ -1,5 +1,7 @@
 package test.run_by_code.composite;
 
+import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.find_stack.FindCallStackTrace;
@@ -30,7 +32,12 @@ public class TestRBCComposite extends TestRunByCodeBase {
 //        configureWrapper.setConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH,"D:/desktop");
         ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
 
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+                FindCallStackTrace.class.getSimpleName() + JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLEE);
         new FindCallStackTrace().find(true, configureWrapperCopy);
+
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+                FindCallStackTrace.class.getSimpleName() + JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER);
         new FindCallStackTrace().find(false, configureWrapperCopy);
     }
 
@@ -44,7 +51,12 @@ public class TestRBCComposite extends TestRunByCodeBase {
         configureWrapperCopy.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IGNORE_METHOD_PREFIX,
                 "test1(");
 
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+                FindCallStackTrace.class.getSimpleName() + JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLEE);
         new FindCallStackTrace().find(true, configureWrapperCopy);
+
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+                FindCallStackTrace.class.getSimpleName() + JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER);
         new FindCallStackTrace().find(false, configureWrapperCopy);
     }
 }

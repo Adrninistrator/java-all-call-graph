@@ -295,7 +295,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         List<String> allowedClassPrefixList = new ArrayList<>(allowedClassPrefixSet);
         Collections.sort(allowedClassPrefixList);
         for (int i = 0; i < allowedClassPrefixList.size(); i++) {
-            if (!dbOperator.insert(sql, new Object[]{i, allowedClassPrefixList.get(i)})) {
+            if (!dbOperator.insert(sql, i, allowedClassPrefixList.get(i))) {
                 return false;
             }
         }

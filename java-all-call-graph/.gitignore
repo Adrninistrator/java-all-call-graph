@@ -14,4 +14,5 @@ jar_output_dir/
 src/test/resources/_jacg_config/
 src/test/resources/_jacg_find_stack_keyword/
 log/*.log
+_unittest_output/
 run_local/

@@ -3,11 +3,10 @@ package test.run_by_code.handler.spring;
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfo;
 import com.adrninistrator.jacg.handler.spring.SpringHandler;
 import com.adrninistrator.javacg.util.JavaCGMethodUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.call_graph.spring.bean.define.SpringServiceImplA1;
+import test.call_graph.spring.bean.define.impl.SpringServiceImplA1;
 import test.call_graph.spring.mvc.TestSpringController1;
 import test.call_graph.spring.mvc.TestSpringController2;
 import test.run_by_code.base.TestRunByCodeBase;
@@ -20,18 +19,12 @@ import java.util.List;
  * @description:
  */
 public class TestSpringHandler extends TestRunByCodeBase {
-    private static final Logger logger = LoggerFactory.getLogger(TestSpringHandler.class);
 
     @Test
     public void testGetAllControllerMethod() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
             List<SpringControllerInfo> springControllerInfoList = springHandler.getAllControllerMethod();
-            if (springControllerInfoList == null) {
-                return;
-            }
-            for (SpringControllerInfo springControllerInfo : springControllerInfoList) {
-                logger.info("{} {}", springControllerInfo.getShowUri(), springControllerInfo.getFullMethod());
-            }
+            printListContent(springControllerInfoList);
         }
     }
 
@@ -39,10 +32,7 @@ public class TestSpringHandler extends TestRunByCodeBase {
     public void testGetAllTaskMethod() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
             List<String> springTaskMethodList = springHandler.getAllTaskMethod();
-            if (springTaskMethodList == null) {
-                return;
-            }
-            logger.info("{}", StringUtils.join(springTaskMethodList, "\n"));
+            printListContent(springTaskMethodList);
         }
     }
 
@@ -58,14 +48,10 @@ public class TestSpringHandler extends TestRunByCodeBase {
 
     private void doGetControllerUriList(SpringHandler springHandler, String fullMethod) {
         List<String> controllerUriList = springHandler.getControllerUriList(fullMethod);
-        if (controllerUriList == null) {
-            logger.info("不是Spring Controller方法 {}", fullMethod);
-            return;
-        }
-        logger.info("{}\n{}", fullMethod, StringUtils.join(controllerUriList, "\n"));
+        printListContent(controllerUriList, fullMethod);
 
         String controllerUri = springHandler.getControllerUri(fullMethod);
-        logger.info("controllerUri {}", controllerUri);
+        printObjectContent(controllerUri, fullMethod);
     }
 
     @Test
@@ -78,6 +64,6 @@ public class TestSpringHandler extends TestRunByCodeBase {
 
     private void doCheckSpringTask(SpringHandler springHandler, String fullMethod) {
         boolean isSpringTask = springHandler.checkSpringTask(fullMethod);
-        logger.info("{} {}", fullMethod, isSpringTask);
+        printObjectContent(isSpringTask, fullMethod);
     }
 }

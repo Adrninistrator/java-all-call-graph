@@ -12,6 +12,7 @@ public class JACGConstants {
     public static final String DIR_OUTPUT_METHODS = "methods";
     public static final String DIR_OUTPUT_STACK = "_stack";
     public static final String DIR_KEYWORDS_NOT_FOUND = "_keywords_not_found";
+    public static final String DIR_OUTPUT_UNITTEST = "_unittest_output";
 
     // 保存全部的配置参数信息文件
     public static final String FILE_JACG_ALL_CONFIG_MD = "_jacg_all_config.md";
@@ -135,6 +136,11 @@ public class JACGConstants {
     public static final String H2_FILE_EXT = ".mv.db";
 
     public static final String THREAD_NAME_PREFIX_WORKER = "jacg_worker";
+
+    // Spring事务类型，使用注解
+    public static final String SPRING_TX_TYPE_ANNOTATION = "annotation";
+    // Spring事务类型，使用事务模板
+    public static final String SPRING_TX_TYPE_TEMPLATE = "template";
 
     private JACGConstants() {
         throw new IllegalStateException("illegal");

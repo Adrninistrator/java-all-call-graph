@@ -6,6 +6,8 @@ import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.comparator.Comparator4SpringControllerInfo;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringController;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfo;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
@@ -17,7 +19,6 @@ import com.adrninistrator.javacg.util.JavaCGUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -47,15 +48,13 @@ public class SpringHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Map<String, Object>> list = dbOperator.queryList(sql, null);
+        List<WriteDbData4SpringController> list = dbOperator.queryList(sql, WriteDbData4SpringController.class);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
         List<SpringControllerInfo> springControllerInfoList = new ArrayList<>(list.size());
-        for (Map<String, Object> map : list) {
-            String showUri = (String) map.get(DC.SPC_SHOW_URI);
-            String fullMethod = (String) map.get(DC.SPC_FULL_METHOD);
-            SpringControllerInfo springControllerInfo = new SpringControllerInfo(showUri, fullMethod);
+        for (WriteDbData4SpringController springController : list) {
+            SpringControllerInfo springControllerInfo = new SpringControllerInfo(springController.getShowUri(), springController.getFullMethod());
             springControllerInfoList.add(springControllerInfo);
         }
         springControllerInfoList.sort(Comparator4SpringControllerInfo.getInstance());
@@ -76,15 +75,13 @@ public class SpringHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Map<String, Object>> list = dbOperator.queryList(sql, null);
+        List<WriteDbData4SpringTask> list = dbOperator.queryList(sql, WriteDbData4SpringTask.class);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
         List<String> springTaskMethodList = new ArrayList<>(list.size());
-        for (Map<String, Object> map : list) {
-            String className = (String) map.get(DC.SPT_CLASS_NAME);
-            String methodName = (String) map.get(DC.SPT_METHOD_NAME);
-            String fullMethod = JavaCGMethodUtil.formatFullMethodStr(className, methodName);
+        for (WriteDbData4SpringTask springTask : list) {
+            String fullMethod = JavaCGMethodUtil.formatFullMethodStr(springTask.getClassName(), springTask.getMethodName());
             springTaskMethodList.add(fullMethod);
         }
         Collections.sort(springTaskMethodList);
@@ -109,11 +106,7 @@ public class SpringHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodHash});
-        if (JavaCGUtil.isCollectionEmpty(list)) {
-            return Collections.emptyList();
-        }
-        return JACGSqlUtil.genStringList(list);
+        return dbOperator.queryListOneColumn(sql, String.class, methodHash);
     }
 
     /**
@@ -148,10 +141,7 @@ public class SpringHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{className, methodName});
-        if (JavaCGUtil.isCollectionEmpty(list)) {
-            return false;
-        }
-        return (Long) list.get(0) > 0;
+        Long count = dbOperator.queryObjectOneColumn(sql, Long.class, className, methodName);
+        return count != null && count > 0;
     }
 }

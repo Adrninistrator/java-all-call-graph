@@ -24,7 +24,7 @@ public class TestSpringController1 {
     private SpringInterfaceA springInterfaceA;
 
     @Autowired
-    @Qualifier("test.call_graph.spring.bean.define.SpringServiceImplC1")
+    @Qualifier("test.call_graph.spring.bean.define.impl.SpringServiceImplC1")
     protected AbstractSpringServiceC springServiceC1;
 
     @GetMapping("get1")
@@ -39,14 +39,18 @@ public class TestSpringController1 {
 
     @PostMapping("post")
     public String post(@RequestBody final String req) {
+        System.out.println("");
+        springServiceC1.test1();
         return req;
     }
 
     @RequestMapping(value = "test1", method = RequestMethod.GET)
     public void test1() {
+        System.out.println("");
     }
 
     @RequestMapping(value = {"/test2a", "test2b", "test2c"}, method = RequestMethod.POST)
     public void test2() {
+        System.out.println("");
     }
 }

@@ -1,10 +1,7 @@
 package test.run_by_code.handler.classes;
 
 import com.adrninistrator.jacg.handler.classes.ClassSignatureEi1Handler;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import test.call_graph.manual_add_method_call.unfixed.AbstractUnFixedService1;
 import test.call_graph.manual_add_method_call.unfixed.UnfixedService1a;
 import test.call_graph.signature.TestClassWithSignature1;
@@ -20,7 +17,6 @@ import java.util.List;
  * @description:
  */
 public class TestClassSignatureEi1Handler extends TestRunByCodeBase {
-    private static final Logger logger = LoggerFactory.getLogger(TestClassSignatureEi1Handler.class);
 
     @Test
     public void testClassSignatureEi1() {
@@ -33,6 +29,6 @@ public class TestClassSignatureEi1Handler extends TestRunByCodeBase {
 
     private void doTestClassSignatureEi1(ClassSignatureEi1Handler classSignatureEi1Handler4Query, String className, String upperClassName) {
         List<String> list = classSignatureEi1Handler4Query.queryClassSignatureEi1InfoFull(className, upperClassName);
-        logger.info("{}\n{}", className, StringUtils.join(list, "\n"));
+        printListContent(list, className);
     }
 }

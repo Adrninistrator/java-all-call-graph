@@ -1,5 +1,6 @@
 package test.run_by_code.manual_add_method_call;
 
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
@@ -46,7 +47,13 @@ public class TestManualAddMethodCall extends TestRunByCodeBase {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1);
 
         new RunnerWriteDb().run(configureWrapper);
+
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+                RunnerGenAllGraph4Callee.class.getSimpleName());
         new RunnerGenAllGraph4Callee().run(configureWrapper);
+
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+                RunnerGenAllGraph4Caller.class.getSimpleName());
         new RunnerGenAllGraph4Caller().run(configureWrapper);
     }
 
@@ -60,7 +67,13 @@ public class TestManualAddMethodCall extends TestRunByCodeBase {
         );
 
         new RunnerWriteDb().run(configureWrapper);
+
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+                RunnerGenAllGraph4Callee.class.getSimpleName());
         new RunnerGenAllGraph4Callee().run(configureWrapper);
+
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+                RunnerGenAllGraph4Caller.class.getSimpleName());
         new RunnerGenAllGraph4Caller().run(configureWrapper);
     }
 }

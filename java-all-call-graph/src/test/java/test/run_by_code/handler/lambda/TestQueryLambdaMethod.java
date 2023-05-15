@@ -5,8 +5,6 @@ import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByClassMethodNa
 import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByClassNamePrefix;
 import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByStreamMethod;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import test.run_by_code.base.TestRunByCodeBase;
 
 import java.util.List;
@@ -19,7 +17,6 @@ import java.util.function.Function;
  * @description:
  */
 public class TestQueryLambdaMethod extends TestRunByCodeBase {
-    private static final Logger logger = LoggerFactory.getLogger(TestQueryLambdaMethod.class);
 
     @Test
     public void testQueryByClassNamePrefix() {
@@ -52,14 +49,13 @@ public class TestQueryLambdaMethod extends TestRunByCodeBase {
 
     private void queryByClassNamePrefix(LambdaMethodHandlerByClassNamePrefix lambdaMethodHandlerByClassNamePrefix,
                                         String lambdaCalleeClassNamePrefix,
-                                        String lambdaNextCalleeClassNamePrefix) {
+                                        String lambdaNextClassNamePrefix) {
         List<LambdaMethodCallDetail> lambdaMethodCallDetailList = lambdaMethodHandlerByClassNamePrefix.queryByClassNamePrefixDetail(lambdaCalleeClassNamePrefix,
-                lambdaNextCalleeClassNamePrefix);
+                lambdaNextClassNamePrefix);
         if (lambdaMethodCallDetailList == null) {
             return;
         }
-        logger.info("{} {} {}", lambdaCalleeClassNamePrefix, lambdaNextCalleeClassNamePrefix, lambdaMethodCallDetailList.size());
-        printListContent(lambdaMethodCallDetailList);
+        printListContent(lambdaMethodCallDetailList, lambdaCalleeClassNamePrefix, lambdaNextClassNamePrefix, String.valueOf(lambdaMethodCallDetailList.size()));
     }
 
     private void queryByClassMethodName(LambdaMethodHandlerByClassMethodName lambdaMethodHandlerByClassMethodName,
@@ -70,13 +66,12 @@ public class TestQueryLambdaMethod extends TestRunByCodeBase {
         if (isLambdaCallee) {
             lambdaMethodCallDetailList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaCallee(className, methodName);
         } else {
-            lambdaMethodCallDetailList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaNextCallee(className, methodName);
+            lambdaMethodCallDetailList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaNext(className, methodName);
         }
         if (lambdaMethodCallDetailList == null) {
             return;
         }
-        logger.info("{} {} {}", className, methodName, lambdaMethodCallDetailList.size());
-        printListContent(lambdaMethodCallDetailList);
+        printListContent(lambdaMethodCallDetailList, className, methodName, String.valueOf(lambdaMethodCallDetailList.size()));
     }
 
     private void queryByStreamMethod(LambdaMethodHandlerByStreamMethod lambdaMethodHandlerByStreamMethod, Boolean lambdaNextIsStream, Boolean lambdaNextIsIntermediate) {
@@ -85,7 +80,7 @@ public class TestQueryLambdaMethod extends TestRunByCodeBase {
         if (lambdaMethodCallDetailList == null) {
             return;
         }
-        logger.info("{} {} {}", lambdaNextIsStream, lambdaNextIsIntermediate, lambdaMethodCallDetailList.size());
-        printListContent(lambdaMethodCallDetailList);
+        printListContent(lambdaMethodCallDetailList, String.valueOf(lambdaNextIsStream), String.valueOf(lambdaNextIsIntermediate),
+                String.valueOf(lambdaMethodCallDetailList.size()));
     }
 }

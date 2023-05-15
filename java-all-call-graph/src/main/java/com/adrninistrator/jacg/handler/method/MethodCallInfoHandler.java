@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method_call.MethodCallInfo;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
@@ -52,7 +53,7 @@ public class MethodCallInfoHandler extends BaseHandler {
                     " order by " + JACGSqlUtil.joinColumns(DC.MCI_OBJ_ARGS_SEQ, DC.MCI_SEQ);
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{callId});
+        List<WriteDbData4MethodCallInfo> list = dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, callId);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.warn("从{}表未查询到方法调用中被调用对象与参数使用的信息 callId: {}", DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName(), callId);
             return null;
@@ -61,15 +62,11 @@ public class MethodCallInfoHandler extends BaseHandler {
         ObjArgsInfoInMethodCall objArgsInfoInMethodCall = new ObjArgsInfoInMethodCall();
         Map<Integer, Map<Integer, MethodCallInfo>> methodCallMapOuter = new HashMap<>();
         // 查询数据库查询结果
-        for (Map<String, Object> map : list) {
-            int objArgsSeq = (int) map.get(DC.MCI_OBJ_ARGS_SEQ);
-            int seq = (int) map.get(DC.MCI_SEQ);
-            String type = (String) map.get(DC.MCI_TYPE);
-            String value = (String) map.get(DC.MCI_THE_VALUE);
+        for (WriteDbData4MethodCallInfo writeDbData4MethodCallInfo : list) {
             // 将查询到的数据设置到对应Map中
-            Map<Integer, MethodCallInfo> methodCallMapInner = methodCallMapOuter.computeIfAbsent(objArgsSeq, k -> new HashMap<>());
-            MethodCallInfo methodCallInfo = methodCallMapInner.computeIfAbsent(seq, k -> new MethodCallInfo());
-            addMethodCallInfo(methodCallInfo, type, value);
+            Map<Integer, MethodCallInfo> methodCallMapInner = methodCallMapOuter.computeIfAbsent(writeDbData4MethodCallInfo.getObjArgsSeq(), k -> new HashMap<>());
+            MethodCallInfo methodCallInfo = methodCallMapInner.computeIfAbsent(writeDbData4MethodCallInfo.getSeq(), k -> new MethodCallInfo());
+            addMethodCallInfo(methodCallInfo, writeDbData4MethodCallInfo.getType(), writeDbData4MethodCallInfo.getTheValue());
         }
 
         // 遍历处理后的方法调用信息，设置到对应的被调用对象和参数中
@@ -119,7 +116,6 @@ public class MethodCallInfoHandler extends BaseHandler {
                 break;
             default:
                 logger.error("未知类型 {}", type);
-                return;
         }
     }
 }

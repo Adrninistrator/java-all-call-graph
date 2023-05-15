@@ -10,7 +10,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
-import com.adrninistrator.jacg.dto.method_call.MethodCallPair;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.extractor.common.enums.SpringTxTypeEnum;
 import com.adrninistrator.jacg.extractor.dto.common.extract.BaseCalleeExtractedMethod;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;
@@ -67,8 +67,6 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         logger.info("找到@Transactional注解对应的方法对应的调用堆栈文件 {}", callerExtractedFileList.size());
         return callerExtractedFileList;
     }
-
-    // 查询事务模板对应的入口方法
 
     /**
      * 提取TransactionTemplate对应的方法相关信息
@@ -156,17 +154,17 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
 
         for (String childClassName : childClassNameList) {
             // 查询对指定类指定事务方法的调用
-            List<MethodCallPair> methodCallPairList = dbOperWrapper.getMethodCallByCalleeFullClassMethod(childClassName, method);
-            if (JavaCGUtil.isCollectionEmpty(methodCallPairList)) {
+            List<WriteDbData4MethodCall> methodCallList = dbOperWrapper.getMethodCallByCalleeFullClassMethod(childClassName, method);
+            if (JavaCGUtil.isCollectionEmpty(methodCallList)) {
                 continue;
             }
 
-            for (MethodCallPair methodCallPair : methodCallPairList) {
+            for (WriteDbData4MethodCall methodCall : methodCallList) {
                 // 记录Spring事务入口方法
-                SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = new SpTxEntryMethodTxTpl(SpecialCallTypeEnum.SCTE_ANONYMOUS_INNER_CLASS, methodCallPair.getCalleeFullMethod(),
-                        methodCallPair.getCallerFullMethod(), methodCallPair.getCallerLineNumber());
+                SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = new SpTxEntryMethodTxTpl(SpecialCallTypeEnum.SCTE_ANONYMOUS_INNER_CLASS, methodCall.getCalleeFullMethod(),
+                        methodCall.getCallerFullMethod(), methodCall.getCallerLineNumber());
                 spTxEntryMethodTxTplList.add(spTxEntryMethodTxTpl);
-                txTplEntryMethodList.add(methodCallPair.getCalleeFullMethod());
+                txTplEntryMethodList.add(methodCall.getCalleeFullMethod());
             }
         }
     }

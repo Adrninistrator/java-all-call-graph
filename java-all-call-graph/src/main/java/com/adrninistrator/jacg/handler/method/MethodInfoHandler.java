@@ -7,8 +7,6 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 
-import java.util.Map;
-
 /**
  * @author adrninistrator
  * @date 2023/3/26
@@ -43,11 +41,6 @@ public class MethodInfoHandler extends BaseHandler {
                     " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-
-        Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{simpleClassName, lineNumber, lineNumber});
-        if (map == null) {
-            return null;
-        }
-        return (String) map.get(DC.MLN_FULL_METHOD);
+        return dbOperator.queryObjectOneColumn(sql, String.class, simpleClassName, lineNumber, lineNumber);
     }
 }

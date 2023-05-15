@@ -23,4 +23,3 @@ public abstract class TestSpringBase {
         logger.info("### start {}", this.getClass().getName());
     }
 }
-

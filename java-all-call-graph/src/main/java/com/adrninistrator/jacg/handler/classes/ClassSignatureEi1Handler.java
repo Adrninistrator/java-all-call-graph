@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
-import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,29 +55,26 @@ public class ClassSignatureEi1Handler extends BaseHandler {
      */
     public List<String> queryClassSignatureEi1InfoSimple(String simpleClassName, String upperClassName) {
         // 查询指定类存在签名时对应的继承父类/实现接口
-        List<Object> superOrItfClassNameList = querySuperOrItfClassNameList(simpleClassName);
+        List<String> superOrItfClassNameList = querySuperOrItfClassNameList(simpleClassName);
         if (JavaCGUtil.isCollectionEmpty(superOrItfClassNameList)) {
             logger.error("指定类不存在对应的签名信息 {}", simpleClassName);
             return Collections.emptyList();
         }
 
-        for (Object obj : superOrItfClassNameList) {
-            String superOrItfClassName = (String) obj;
+        for (String superOrItfClassName : superOrItfClassNameList) {
             logger.debug("找到指定类对应的父类/接口 {} {}", simpleClassName, superOrItfClassName);
             if (superOrItfClassName.equals(upperClassName) || jacgExtendsImplHandler.checkExtendsOrImplFull(upperClassName, superOrItfClassName)) {
                 /*
                     当前的继承父类/实现接口与指定的相同，或指定的类是当前的继承父类/实现接口的父类/接口
                     查询指定类，及指定父类/接口对应的签名中的类名列表
                  */
-                List<Object> signatureClassList = queryClassSignatureList(simpleClassName, superOrItfClassName);
+                List<String> signatureClassList = queryClassSignatureList(simpleClassName, superOrItfClassName);
                 if (JavaCGUtil.isCollectionEmpty(superOrItfClassNameList)) {
                     logger.error("指定类不存在对应父类/接口的签名信息 {} {}", simpleClassName, superOrItfClassName);
-                    return Collections.emptyList();
                 }
-                return JACGSqlUtil.genStringList(signatureClassList);
+                return signatureClassList;
             }
         }
-
         return Collections.emptyList();
     }
 
@@ -88,7 +84,7 @@ public class ClassSignatureEi1Handler extends BaseHandler {
      * @param simpleClassName
      * @return
      */
-    private List<Object> querySuperOrItfClassNameList(String simpleClassName) {
+    private List<String> querySuperOrItfClassNameList(String simpleClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CSEI1_QUERY_SUPER_INTERFACE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -98,7 +94,7 @@ public class ClassSignatureEi1Handler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        return dbOperator.queryListOneColumn(sql, new Object[]{simpleClassName});
+        return dbOperator.queryListOneColumn(sql, String.class, simpleClassName);
     }
 
     /**
@@ -108,7 +104,7 @@ public class ClassSignatureEi1Handler extends BaseHandler {
      * @param superOrItfClassName
      * @return
      */
-    private List<Object> queryClassSignatureList(String simpleClassName, String superOrItfClassName) {
+    private List<String> queryClassSignatureList(String simpleClassName, String superOrItfClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CSEI1_QUERY_SIGNATURE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -120,6 +116,6 @@ public class ClassSignatureEi1Handler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        return dbOperator.queryListOneColumn(sql, new Object[]{simpleClassName, superOrItfClassName});
+        return dbOperator.queryListOneColumn(sql, String.class, simpleClassName, superOrItfClassName);
     }
 }

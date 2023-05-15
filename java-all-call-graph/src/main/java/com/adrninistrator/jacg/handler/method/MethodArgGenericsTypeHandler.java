@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodArgGenericsType;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
 import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeValue;
@@ -51,7 +52,7 @@ public class MethodArgGenericsTypeHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{methodHash});
+        List<WriteDbData4MethodArgGenericsType> list = dbOperator.queryList(sql, WriteDbData4MethodArgGenericsType.class, methodHash);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("根据方法HASH+长度查询查询对应的方法参数泛型类型不存在 {}", methodHash);
             return null;
@@ -59,15 +60,13 @@ public class MethodArgGenericsTypeHandler extends BaseHandler {
 
         MethodArgGenericsTypeInfo methodArgGenericsTypeInfo = new MethodArgGenericsTypeInfo();
         Map<Integer, MethodArgGenericsTypeValue> genericsTypeMap = new HashMap<>();
-        for (Map<String, Object> map : list) {
-            Integer argSeq = (Integer) map.get(DC.MAGT_ARG_SEQ);
-            String type = (String) map.get(DC.MAGT_TYPE);
-            String genericsType = (String) map.get(DC.MAGT_GENERICS_TYPE);
-            MethodArgGenericsTypeValue methodArgGenericsTypeValue = genericsTypeMap.computeIfAbsent(argSeq, k -> new MethodArgGenericsTypeValue());
-            if (JavaCGConstants.FILE_KEY_METHOD_ARGS_RETURN_TYPE.equals(type)) {
-                methodArgGenericsTypeValue.setArgType(genericsType);
+        for (WriteDbData4MethodArgGenericsType writeDbData4MethodArgGenericsType : list) {
+            MethodArgGenericsTypeValue methodArgGenericsTypeValue = genericsTypeMap.computeIfAbsent(writeDbData4MethodArgGenericsType.getArgSeq(),
+                    k -> new MethodArgGenericsTypeValue());
+            if (JavaCGConstants.FILE_KEY_METHOD_ARGS_RETURN_TYPE.equals(writeDbData4MethodArgGenericsType.getType())) {
+                methodArgGenericsTypeValue.setArgType(writeDbData4MethodArgGenericsType.getGenericsType());
             } else {
-                methodArgGenericsTypeValue.addArgGenericsType(genericsType);
+                methodArgGenericsTypeValue.addArgGenericsType(writeDbData4MethodArgGenericsType.getGenericsType());
             }
         }
 

@@ -21,7 +21,7 @@ public class LambdaMethodCallDetail extends LambdaMethodCall {
         以下字段可能为null
      */
     // Lambda表达式下一个被调用完整方法
-    private MethodDetail lambdaNextCalleeFullMethodDetail;
+    private MethodDetail lambdaNextFullMethodDetail;
 
     public static LambdaMethodCallDetail genLambdaMethodCallDetail(LambdaMethodCall lambdaMethodCall) {
         LambdaMethodCallDetail lambdaMethodCallDetail = new LambdaMethodCallDetail();
@@ -30,7 +30,7 @@ public class LambdaMethodCallDetail extends LambdaMethodCall {
         lambdaMethodCallDetail.setCallerLineNumber(lambdaMethodCall.getCallerLineNumber());
         lambdaMethodCallDetail.setCalleeFullMethod(lambdaMethodCall.getCalleeFullMethod());
         lambdaMethodCallDetail.setLambdaCalleeFullMethod(lambdaMethodCall.getLambdaCalleeFullMethod());
-        lambdaMethodCallDetail.setLambdaNextCalleeFullMethod(lambdaMethodCall.getLambdaNextCalleeFullMethod());
+        lambdaMethodCallDetail.setLambdaNextFullMethod(lambdaMethodCall.getLambdaNextFullMethod());
         lambdaMethodCallDetail.setLambdaNextIsStream(lambdaMethodCall.getLambdaNextIsStream());
         lambdaMethodCallDetail.setLambdaNextIsIntermediate(lambdaMethodCall.getLambdaNextIsIntermediate());
         lambdaMethodCallDetail.setLambdaNextIsTerminal(lambdaMethodCall.getLambdaNextIsTerminal());
@@ -61,11 +61,11 @@ public class LambdaMethodCallDetail extends LambdaMethodCall {
         this.lambdaCalleeFullMethodDetail = lambdaCalleeFullMethodDetail;
     }
 
-    public MethodDetail getLambdaNextCalleeFullMethodDetail() {
-        return lambdaNextCalleeFullMethodDetail;
+    public MethodDetail getLambdaNextFullMethodDetail() {
+        return lambdaNextFullMethodDetail;
     }
 
-    public void setLambdaNextCalleeFullMethodDetail(MethodDetail lambdaNextCalleeFullMethodDetail) {
-        this.lambdaNextCalleeFullMethodDetail = lambdaNextCalleeFullMethodDetail;
+    public void setLambdaNextFullMethodDetail(MethodDetail lambdaNextFullMethodDetail) {
+        this.lambdaNextFullMethodDetail = lambdaNextFullMethodDetail;
     }
 }

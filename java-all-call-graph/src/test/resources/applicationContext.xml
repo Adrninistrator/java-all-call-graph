@@ -20,7 +20,7 @@
 
     <task:scheduler id="TestTimer"/>
     <task:scheduled-tasks>
-        <task:scheduled ref="test.call_graph.spring.bean.define.SpringServiceImplA1" method="test1" cron="*/5 * * * * *"/>
+        <task:scheduled ref="test.call_graph.spring.bean.define.impl.SpringServiceImplA1" method="test1" cron="*/5 * * * * *"/>
         <task:scheduled ref="springServiceImplB2" method="test1" cron="*/5 * * * * *"/>
     </task:scheduled-tasks>
 </beans>

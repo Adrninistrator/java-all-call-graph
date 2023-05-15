@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -238,7 +239,7 @@ public class JACGFileUtil {
         File dir = new File(dirPath);
         if (!dir.exists() || !dir.isDirectory()) {
             logger.error("目录不存在，或不是目录 {}", dirPath);
-            return null;
+            return Collections.emptyList();
         }
 
         File[] files = dir.listFiles();
@@ -485,6 +486,16 @@ public class JACGFileUtil {
      */
     public static String replaceFilePathSeparator(String filePath) {
         return StringUtils.replace(filePath, "\\", "/");
+    }
+
+    /**
+     * 判断文件路径中是否包含目录分隔符\、/
+     *
+     * @param filePath
+     * @return
+     */
+    public static boolean checkFilePathContainsSeparator(String filePath) {
+        return StringUtils.containsAny(filePath, "\\", "/");
     }
 
     /**

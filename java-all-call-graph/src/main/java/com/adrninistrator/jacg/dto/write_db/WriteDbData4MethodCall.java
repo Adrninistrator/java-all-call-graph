@@ -31,6 +31,7 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
 
     /**
      * 创建方法调用对象
+     *
      * @param callType
      * @param calleeObjType
      * @param callerSimpleClassName

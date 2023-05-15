@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.dto.classes.ClassNameAndAccessFlags;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4ExtendsImpl;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
@@ -54,11 +55,10 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * 向下加载父类/接口对应的子类/子接口/实现类
      *
      * @param upwardSimpleClassName 父类/接口的唯一类名
-     * @return
      */
-    private boolean loadChildrenOrImplClassInfo(String upwardSimpleClassName) {
+    private void loadChildrenOrImplClassInfo(String upwardSimpleClassName) {
         if (loadedDownwardSimpleClassNameSet.contains(upwardSimpleClassName)) {
-            return true;
+            return;
         }
 
         logger.debug("向下加载父类/接口对应的子类/子接口/实现类 {}", upwardSimpleClassName);
@@ -73,40 +73,20 @@ public class JACGExtendsImplHandler extends BaseHandler {
 
         Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.computeIfAbsent(upwardSimpleClassName, k -> ConcurrentHashMap.newKeySet());
 
-        boolean success = true;
         // 查询当前类的子类/子接口/实现类
         List<String> downwardSimpleClassNameList = doLoadChildrenOrImplClassInfo(upwardSimpleClassName, sql, allClassNameAndAccessFlagsSet);
-        if (downwardSimpleClassNameList == null) {
-            return false;
-        }
-
-        while (true) {
-            if (downwardSimpleClassNameList.isEmpty()) {
-                break;
-            }
-
+        while (!downwardSimpleClassNameList.isEmpty()) {
             List<String> allDownwardSimpleClassNameList = new ArrayList<>();
             // 继续查询子类/子接口/实现类
             for (String downwardSimpleClassName : downwardSimpleClassNameList) {
                 List<String> tmpDownwardSimpleClassNameList = doLoadChildrenOrImplClassInfo(downwardSimpleClassName, sql, allClassNameAndAccessFlagsSet);
-                if (tmpDownwardSimpleClassNameList == null) {
-                    success = false;
-                    break;
-                }
                 allDownwardSimpleClassNameList.addAll(tmpDownwardSimpleClassNameList);
             }
 
-            if (!success) {
-                break;
-            }
             downwardSimpleClassNameList = allDownwardSimpleClassNameList;
         }
 
-        if (!success) {
-            return false;
-        }
         loadedDownwardSimpleClassNameSet.add(upwardSimpleClassName);
-        return true;
     }
 
     /**
@@ -119,28 +99,23 @@ public class JACGExtendsImplHandler extends BaseHandler {
      */
     private List<String> doLoadChildrenOrImplClassInfo(String simpleClassName, String sql, Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet) {
         logger.debug("执行向下加载父类/接口对应的子类/子接口/实现类 {}", simpleClassName);
-        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{simpleClassName});
+        List<WriteDbData4ExtendsImpl> list = dbOperator.queryList(sql, WriteDbData4ExtendsImpl.class, simpleClassName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
 
         List<String> downwardSimpleClassNameList = new ArrayList<>(list.size());
-        for (Map<String, Object> map : list) {
-            String downwardSimpleClassName = (String) map.get(DC.EI_SIMPLE_CLASS_NAME);
-            String downwardClassName = (String) map.get(DC.EI_CLASS_NAME);
-            int accessFlags = (int) map.get(DC.EI_ACCESS_FLAGS);
-            int existsDownwardClasses = (int) map.get(DC.EI_EXISTS_DOWNWARD_CLASSES);
-
-            ClassNameAndAccessFlags classNameAndAccessFlags = new ClassNameAndAccessFlags(downwardSimpleClassName, downwardClassName, accessFlags);
+        for (WriteDbData4ExtendsImpl writeDbData4ExtendsImpl : list) {
             // 记录所有的子类/子接口/实现类名称及access_flags
+            ClassNameAndAccessFlags classNameAndAccessFlags = new ClassNameAndAccessFlags(writeDbData4ExtendsImpl.getSimpleClassName(), writeDbData4ExtendsImpl.getClassName(),
+                    writeDbData4ExtendsImpl.getAccessFlags());
             allClassNameAndAccessFlagsSet.add(classNameAndAccessFlags);
 
-            if (JavaCGYesNoEnum.isYes(existsDownwardClasses)) {
+            if (JavaCGYesNoEnum.isYes(writeDbData4ExtendsImpl.getExistsDownwardClasses())) {
                 // 当前类或接口还存在下一层的类或接口，记录需要返回的下一层子类/子接口/实现类名称
-                downwardSimpleClassNameList.add(downwardSimpleClassName);
+                downwardSimpleClassNameList.add(writeDbData4ExtendsImpl.getSimpleClassName());
             }
         }
-
         return downwardSimpleClassNameList;
     }
 
@@ -166,9 +141,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
      */
     public boolean checkExtendsOrImplBySimple(String upwardSimpleClassName, String downwardSimpleClassName) {
         // 向下加载父类/接口对应的子类/子接口/实现类
-        if (!loadChildrenOrImplClassInfo(upwardSimpleClassName)) {
-            throw new JavaCGRuntimeException("加载对应的类失败");
-        }
+        loadChildrenOrImplClassInfo(upwardSimpleClassName);
 
         // 获取父类/接口对应的所有子类/子接口/实现类
         Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.get(upwardSimpleClassName);
@@ -238,9 +211,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
         }
 
         // 向下加载父类/接口对应的子类/子接口/实现类
-        if (!loadChildrenOrImplClassInfo(superSimpleClassName)) {
-            throw new JavaCGRuntimeException("加载对应的类失败");
-        }
+        loadChildrenOrImplClassInfo(superSimpleClassName);
 
         // 获取父类/接口对应的所有子类/子接口/实现类
         Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.get(superSimpleClassName);
@@ -325,12 +296,10 @@ public class JACGExtendsImplHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleClassName});
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        String upwardSimpleClassName = dbOperator.queryObjectOneColumn(sql, String.class, simpleClassName);
+        if (upwardSimpleClassName == null) {
             logger.debug("未查询到指定类的父类 {}", simpleClassName);
-            return null;
         }
-
-        return (String) list.get(0);
+        return upwardSimpleClassName;
     }
 }

@@ -45,7 +45,7 @@ public class ObjArgsInfoInMethodCall {
      */
     public List<Integer> getArgSeqList() {
         if (isArgInfoMapEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         List<Integer> argSeqList = new ArrayList<>(argInfoMap.keySet());
         Collections.sort(argSeqList);
@@ -60,7 +60,7 @@ public class ObjArgsInfoInMethodCall {
      */
     public List<MethodCallInfo> getArgMethodCallInfo(Integer argSeq) {
         if (isArgInfoMapEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         return argInfoMap.get(argSeq);
     }

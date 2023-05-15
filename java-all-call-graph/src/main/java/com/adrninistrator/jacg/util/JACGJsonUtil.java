@@ -39,6 +39,10 @@ public class JACGJsonUtil {
     }
 
     public static String getJsonStrPretty(Object obj) {
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+
         try {
             return objectWriterPretty.writeValueAsString(obj);
         } catch (Exception e) {

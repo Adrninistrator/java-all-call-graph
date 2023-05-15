@@ -2,8 +2,10 @@ apply plugin: 'eclipse'
 apply plugin: 'java'
 apply plugin: 'idea'
 
+apply from: 'unittest.gradle'
+
 group 'com.github.adrninistrator'
-version = "1.0.8"
+version = "1.0.9"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -61,13 +63,15 @@ List h2database = ["com.h2database:h2:2.1.214"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.8']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.10']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.0.5']
 
 List jackson = ["com.fasterxml.jackson.core:jackson-databind:2.14.0"]
 
 List jdom = ['org.jdom:jdom2:2.0.6.1']
+
+List spring_jdbc = ['org.springframework:spring-jdbc:5.3.26']
 
 List log4j = [
         'org.slf4j:log4j-over-slf4j:1.7.36',
@@ -76,21 +80,25 @@ List log4j = [
         'org.apache.logging.log4j:log4j-slf4j-impl:2.19.0'
 ]
 
-List junit = ['junit:junit:4.13.2']
+List junit = [
+        'org.junit.platform:junit-platform-launcher:1.9.3',
+        'org.junit.jupiter:junit-jupiter-engine:5.9.3',
+        'org.junit.vintage:junit-vintage-engine:5.9.3'
+]
 
-List spring = [
+List spring_for_test = [
         'org.springframework:spring-beans:5.3.26',
         'org.springframework:spring-context:5.3.26',
         'org.springframework:spring-web:5.3.26'
 ]
 
-List spring_test = [
-        'org.springframework:spring-test:5.3.22'
-]
+List javax_inject = ['javax.inject:javax.inject:1']
+
+List spring_test = ['org.springframework:spring-test:5.3.26']
 
 dependencies {
-    compile apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom
-    testImplementation log4j, junit, spring, spring_test
+    compile apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc
+    testImplementation log4j, junit, spring_for_test, javax_inject, spring_test
 }
 
 compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -167,7 +175,17 @@ task gen_run_jar(type: Jar) {
         }
         copy {
             from configurations.testRuntimeClasspath.getFiles().findAll {
-                File f -> (!f.name.startsWith('spring-') && !f.name.startsWith('junit-'))
+                    /*
+                        需要使用以下Spring相关的组件：
+                        spring-beans
+                        spring-core
+                        spring-jcl
+                        spring-jdbc
+                        spring-tx
+                     */
+                File f ->
+                    ((!f.name.startsWith('spring-') || f.name.startsWith("spring-beans-") || f.name.startsWith("spring-core-") || f.name.startsWith("spring-jcl-") ||
+                            f.name.startsWith("spring-jdbc-") || f.name.startsWith("spring-tx-")) && !f.name.startsWith('junit-'))
             }
             into "${jar_output_dir}/lib"
         }
@@ -185,5 +203,6 @@ idea {
         excludeDirs += file('bat')
         excludeDirs += file('shell')
         excludeDirs += file('log')
+        excludeDirs += file('_unittest_output')
     }
 }

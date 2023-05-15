@@ -6,12 +6,15 @@ package com.adrninistrator.jacg.dto.write_db;
  * @description: 用于写入数据库的数据，MyBatis数据库表信息（使用MySQL）
  */
 public class WriteDbData4MyBatisMSTable extends AbstractWriteDbData {
-    private final String mapperSimpleClassName;
-    private final String mapperMethodName;
-    private final String sqlStatement;
-    private final int tableSeq;
-    private final String tableName;
-    private final String mapperClassName;
+    private String mapperSimpleClassName;
+    private String mapperMethodName;
+    private String sqlStatement;
+    private int tableSeq;
+    private String tableName;
+    private String mapperClassName;
+
+    public WriteDbData4MyBatisMSTable() {
+    }
 
     public WriteDbData4MyBatisMSTable(String mapperSimpleClassName, String mapperMethodName, String sqlStatement, int tableSeq, String tableName, String mapperClassName) {
         this.mapperSimpleClassName = mapperSimpleClassName;
@@ -26,23 +29,47 @@ public class WriteDbData4MyBatisMSTable extends AbstractWriteDbData {
         return mapperSimpleClassName;
     }
 
+    public void setMapperSimpleClassName(String mapperSimpleClassName) {
+        this.mapperSimpleClassName = mapperSimpleClassName;
+    }
+
     public String getMapperMethodName() {
         return mapperMethodName;
+    }
+
+    public void setMapperMethodName(String mapperMethodName) {
+        this.mapperMethodName = mapperMethodName;
     }
 
     public String getSqlStatement() {
         return sqlStatement;
     }
 
+    public void setSqlStatement(String sqlStatement) {
+        this.sqlStatement = sqlStatement;
+    }
+
     public int getTableSeq() {
         return tableSeq;
+    }
+
+    public void setTableSeq(int tableSeq) {
+        this.tableSeq = tableSeq;
     }
 
     public String getTableName() {
         return tableName;
     }
 
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     public String getMapperClassName() {
         return mapperClassName;
+    }
+
+    public void setMapperClassName(String mapperClassName) {
+        this.mapperClassName = mapperClassName;
     }
 }

@@ -25,7 +25,7 @@ public class LambdaMethodCall {
         以下字段可能为null
      */
     // Lambda表达式下一个被调用完整方法
-    private String lambdaNextCalleeFullMethod;
+    private String lambdaNextFullMethod;
 
     // 下一个被调用方法是否为Stream
     private Boolean lambdaNextIsStream;
@@ -76,12 +76,12 @@ public class LambdaMethodCall {
         this.lambdaCalleeFullMethod = lambdaCalleeFullMethod;
     }
 
-    public String getLambdaNextCalleeFullMethod() {
-        return lambdaNextCalleeFullMethod;
+    public String getLambdaNextFullMethod() {
+        return lambdaNextFullMethod;
     }
 
-    public void setLambdaNextCalleeFullMethod(String lambdaNextCalleeFullMethod) {
-        this.lambdaNextCalleeFullMethod = lambdaNextCalleeFullMethod;
+    public void setLambdaNextFullMethod(String lambdaNextFullMethod) {
+        this.lambdaNextFullMethod = lambdaNextFullMethod;
     }
 
     public Boolean getLambdaNextIsStream() {

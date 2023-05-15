@@ -79,28 +79,28 @@ public class LambdaMethodHandlerByClassMethodName extends LambdaMethodHandlerByC
     /**
      * 通过Lambda表达式下一个被调用方类名、方法名查询Lambda表达式方法调用信息，包含各方法的详细信息
      *
-     * @param lambdaNextCalleeClassName  Lambda表达式下一个被调用方类名
-     * @param lambdaNextCalleeMethodName Lambda表达式下一个被调用方方法名
+     * @param lambdaNextClassName  Lambda表达式下一个被调用方类名
+     * @param lambdaNextMethodName Lambda表达式下一个被调用方方法名
      * @return
      */
-    public List<LambdaMethodCallDetail> queryDetailByLambdaNextCallee(String lambdaNextCalleeClassName, String lambdaNextCalleeMethodName) {
-        if (StringUtils.isAnyBlank(lambdaNextCalleeClassName, lambdaNextCalleeMethodName)) {
+    public List<LambdaMethodCallDetail> queryDetailByLambdaNext(String lambdaNextClassName, String lambdaNextMethodName) {
+        if (StringUtils.isAnyBlank(lambdaNextClassName, lambdaNextMethodName)) {
             throw new JavaCGRuntimeException("参数不允许为空");
         }
 
-        logger.info("通过Lambda表达式下一个被调用方类名、方法名，查询Lambda表达式方法调用信息 {} {}", lambdaNextCalleeClassName, lambdaNextCalleeMethodName);
+        logger.info("通过Lambda表达式下一个被调用方类名、方法名，查询Lambda表达式方法调用信息 {} {}", lambdaNextClassName, lambdaNextMethodName);
         // 执行查询操作
-        List<LambdaMethodCallDetail> list = queryByClassNamePrefixDetail(null, lambdaNextCalleeClassName);
+        List<LambdaMethodCallDetail> list = queryByClassNamePrefixDetail(null, lambdaNextClassName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
 
         List<LambdaMethodCallDetail> newList = new ArrayList<>(list.size());
         for (LambdaMethodCallDetail lambdaMethodCallDetail : list) {
-            MethodDetail lambdaNextCalleeFullMethodDetail = lambdaMethodCallDetail.getLambdaNextCalleeFullMethodDetail();
-            if (lambdaNextCalleeFullMethodDetail != null &&
-                    StringUtils.equals(lambdaNextCalleeFullMethodDetail.getClassName(), lambdaNextCalleeClassName) &&
-                    StringUtils.equals(lambdaNextCalleeFullMethodDetail.getMethodName(), lambdaNextCalleeMethodName)) {
+            MethodDetail lambdaNextFullMethodDetail = lambdaMethodCallDetail.getLambdaNextFullMethodDetail();
+            if (lambdaNextFullMethodDetail != null &&
+                    StringUtils.equals(lambdaNextFullMethodDetail.getClassName(), lambdaNextClassName) &&
+                    StringUtils.equals(lambdaNextFullMethodDetail.getMethodName(), lambdaNextMethodName)) {
                 newList.add(lambdaMethodCallDetail);
             }
         }

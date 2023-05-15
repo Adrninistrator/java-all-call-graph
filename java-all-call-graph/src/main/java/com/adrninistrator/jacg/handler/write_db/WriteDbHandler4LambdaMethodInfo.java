@@ -31,16 +31,16 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
             return writeDbData4LambdaMethodInfo;
         }
 
-        String lambdaNextCalleeFullMethod = array[2];
-        String lambdaNextCalleeClassName = JACGClassMethodUtil.getClassNameFromMethod(lambdaNextCalleeFullMethod);
-        String lambdaNextCalleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(lambdaNextCalleeFullMethod);
+        String lambdaNextFullMethod = array[2];
+        String lambdaNextClassName = JACGClassMethodUtil.getClassNameFromMethod(lambdaNextFullMethod);
+        String lambdaNextMethodName = JACGClassMethodUtil.getMethodNameFromFull(lambdaNextFullMethod);
 
-        writeDbData4LambdaMethodInfo.setLambdaNextCalleeClassName(lambdaNextCalleeClassName);
-        writeDbData4LambdaMethodInfo.setLambdaNextCalleeMethodName(lambdaNextCalleeMethodName);
-        writeDbData4LambdaMethodInfo.setLambdaNextCalleeFullMethod(lambdaNextCalleeFullMethod);
-        writeDbData4LambdaMethodInfo.setLambdaNextIsStream(JACGStreamUtil.isStreamClass(lambdaNextCalleeClassName));
-        writeDbData4LambdaMethodInfo.setLambdaNextIsIntermediate(JACGStreamUtil.isStreamIntermediateMethod(lambdaNextCalleeMethodName));
-        writeDbData4LambdaMethodInfo.setLambdaNextIsTerminal(JACGStreamUtil.isStreamTerminalMethod(lambdaNextCalleeMethodName));
+        writeDbData4LambdaMethodInfo.setLambdaNextClassName(lambdaNextClassName);
+        writeDbData4LambdaMethodInfo.setLambdaNextMethodName(lambdaNextMethodName);
+        writeDbData4LambdaMethodInfo.setLambdaNextFullMethod(lambdaNextFullMethod);
+        writeDbData4LambdaMethodInfo.setLambdaNextIsStream(JACGStreamUtil.isStreamClass(lambdaNextClassName));
+        writeDbData4LambdaMethodInfo.setLambdaNextIsIntermediate(JACGStreamUtil.isStreamIntermediateMethod(lambdaNextMethodName));
+        writeDbData4LambdaMethodInfo.setLambdaNextIsTerminal(JACGStreamUtil.isStreamTerminalMethod(lambdaNextMethodName));
 
         return writeDbData4LambdaMethodInfo;
     }
@@ -52,7 +52,7 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
 
     @Override
     protected Object[] genObjectArray(WriteDbData4LambdaMethodInfo data) {
-        if (data.getLambdaNextCalleeFullMethod() == null) {
+        if (data.getLambdaNextFullMethod() == null) {
             return new Object[]{
                     data.getCallId(),
                     data.getLambdaCalleeClassName(),
@@ -72,9 +72,9 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
                 data.getLambdaCalleeClassName(),
                 data.getLambdaCalleeMethodName(),
                 data.getLambdaCalleeFullMethod(),
-                data.getLambdaNextCalleeClassName(),
-                data.getLambdaNextCalleeMethodName(),
-                data.getLambdaNextCalleeFullMethod(),
+                data.getLambdaNextClassName(),
+                data.getLambdaNextMethodName(),
+                data.getLambdaNextFullMethod(),
                 JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsStream()),
                 JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsIntermediate()),
                 JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsTerminal())

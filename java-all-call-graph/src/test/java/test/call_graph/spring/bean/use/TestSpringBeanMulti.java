@@ -5,7 +5,7 @@ import test.call_graph.spring.bean.define.AbstractSpringServiceD;
 import test.call_graph.spring.bean.define.SpringInterfaceA;
 import test.call_graph.spring.bean.define.SpringInterfaceB;
 import test.call_graph.spring.bean.define.SpringInterfaceD;
-import test.call_graph.spring.bean.define.SpringServiceImplB1;
+import test.call_graph.spring.bean.define.impl.SpringServiceImplB1;
 
 /**
  * @author adrninistrator
@@ -30,8 +30,8 @@ public class TestSpringBeanMulti extends AbstractTestSpringBeanB {
         test2(springInterfaceB1);
 
         test3(springInterfaceB1);
-        test3(springInterfaceB1, springInterfaceB2);
-        test3(springInterfaceB1, springInterfaceB2, springServiceImplB1);
+        test3(springInterfaceB1, springInterfaceB2A);
+        test3(springInterfaceB1, springInterfaceB2A, springServiceImplB1);
 
         test4(springServiceD1);
     }

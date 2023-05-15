@@ -1,6 +1,7 @@
-package test.call_graph.spring.bean.define;
+package test.call_graph.spring.bean.define.impl;
 
 import org.springframework.stereotype.Service;
+import test.call_graph.spring.bean.define.SpringInterfaceB;
 
 /**
  * @author adrninistrator
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class SpringServiceImplB2 implements SpringInterfaceB {
     @Override
     public void test1() {
-        System.setProperty("", "");
+        System.setProperty(this.getClass().getName(), "");
     }
 
     @Override

@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -138,7 +139,7 @@ public class FindCallStackTrace {
 
         if (!init(order4ee, configureWrapper)) {
             logger.error("初始化失败");
-            return null;
+            return Collections.emptyList();
         }
 
         // 读取指定的关键字
@@ -156,7 +157,7 @@ public class FindCallStackTrace {
 
         // 处理关键字
         if (!handleKeywords(otherConfigFileUseListEnum, configKeywordList, usedKeywordList)) {
-            return null;
+            return Collections.emptyList();
         }
 
         // 生成完整方法调用链文件
@@ -164,7 +165,7 @@ public class FindCallStackTrace {
         callGraphOutputDirPath = runnerGenCallGraph.getCurrentOutputDirPath();
         if (!success) {
             logger.error("生成方法完整调用链失败，请检查");
-            return null;
+            return Collections.emptyList();
         }
 
         // 处理目录
@@ -247,13 +248,13 @@ public class FindCallStackTrace {
 
         if (subFilePathList.isEmpty()) {
             logger.error("{} 目录中未找到后缀为[{}]的文件", finalCallGraphDirPath, JACGConstants.EXT_TXT);
-            return null;
+            return Collections.emptyList();
         }
 
         // 记录当前处理的目录
         stackOutputDirPath = finalCallGraphDirPath + JACGConstants.DIR_OUTPUT_STACK;
         if (!JACGFileUtil.isDirectoryExists(stackOutputDirPath)) {
-            return null;
+            return Collections.emptyList();
         }
 
         // 记录当前生成调用堆栈时保存方法信息的目录
@@ -275,7 +276,7 @@ public class FindCallStackTrace {
             String subDirName = subDirPath.substring(finalSrcDirPathLength);
             String newDirPath = stackOutputDirPath + File.separator + subDirName;
             if (!JACGFileUtil.isDirectoryExists(newDirPath)) {
-                return null;
+                return Collections.emptyList();
             }
         }
 

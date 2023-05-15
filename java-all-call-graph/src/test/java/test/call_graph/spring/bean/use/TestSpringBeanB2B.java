@@ -10,6 +10,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class TestSpringBeanB2B extends AbstractTestSpringBeanB2 {
     public void test() {
-        springInterfaceB2.test2();
+        springInterfaceB2A.test2();
     }
 }

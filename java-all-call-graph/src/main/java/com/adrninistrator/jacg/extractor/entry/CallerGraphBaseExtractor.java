@@ -6,10 +6,12 @@ import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extract_file.CallerExtractedFile;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,14 +55,14 @@ public class CallerGraphBaseExtractor extends BaseExtractor {
         List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER, true);
         if (keywordList.isEmpty()) {
             logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER);
-            return null;
+            return Collections.emptyList();
         }
 
         try {
             // 生成向下的方法完整调用链文件，并根据关键字生成调用堆栈文件
             List<String> stackFilePathList = genStackFiles(configureWrapper);
-            if (stackFilePathList == null) {
-                return null;
+            if (JavaCGUtil.isCollectionEmpty(stackFilePathList)) {
+                return Collections.emptyList();
             }
 
             List<CallerExtractedFile> callerExtractedFileList = new ArrayList<>(stackFilePathList.size());
@@ -68,7 +70,7 @@ public class CallerGraphBaseExtractor extends BaseExtractor {
                 // 处理调用堆栈文件中的方法信息
                 CallerExtractedFile callerExtractedFile = handleStackFile(stackFilePath);
                 if (callerExtractedFile == null) {
-                    return null;
+                    return Collections.emptyList();
                 }
                 callerExtractedFileList.add(callerExtractedFile);
             }
@@ -86,15 +88,13 @@ public class CallerGraphBaseExtractor extends BaseExtractor {
     protected List<String> genStackFiles(ConfigureWrapper configureWrapper) {
         // 根据关键字生成调用堆栈
         List<String> stackFilePathList = findStack(configureWrapper);
-        if (stackFilePathList == null) {
-            logger.error("生成向下的方法完整调用链文件，并根据关键字生成调用堆栈失败");
-            return null;
+        if (JavaCGUtil.isCollectionEmpty(stackFilePathList)) {
+            logger.warn("生成向下的方法完整调用链文件，并根据关键字生成调用堆栈失败");
+            return Collections.emptyList();
         }
 
         // 创建数据库相关对象
-        if (!genDbObject(configureWrapper)) {
-            return null;
-        }
+        genDbObject(configureWrapper);
 
         return stackFilePathList;
     }

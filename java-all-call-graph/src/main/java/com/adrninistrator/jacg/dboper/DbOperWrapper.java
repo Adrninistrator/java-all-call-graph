@@ -6,17 +6,15 @@ import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.dto.call_graph.CallGraphCallerInfo;
-import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
-import com.adrninistrator.jacg.dto.method.MethodAndHash;
-import com.adrninistrator.jacg.dto.method_call.MethodCallPair;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4LambdaMethodInfo;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodAnnotation;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +90,7 @@ public class DbOperWrapper {
     }
 
     /**
-     * 生成用于缓存sql语句的key，参数数量可变
+     * 获取缓存的sql语句，参数数量可变
      *
      * @param sqlKeyEnum
      * @param num
@@ -106,7 +105,7 @@ public class DbOperWrapper {
     }
 
     /**
-     * 生成用于缓存sql语句的key，参数数量固定
+     * 获取缓存的sql语句，参数数量固定
      *
      * @param sqlKeyEnum
      * @return
@@ -129,7 +128,7 @@ public class DbOperWrapper {
     }
 
     /**
-     * 缓存sql，参数数量可变
+     * 缓存并格式化sql，参数数量可变
      *
      * @param sqlKeyEnum
      * @param sql
@@ -144,13 +143,26 @@ public class DbOperWrapper {
     }
 
     /**
-     * 缓存sql，参数数量固定
+     * 缓存并格式化sql，参数数量固定
      *
      * @param sqlKeyEnum
      * @param sql
      */
     public String cacheSql(SqlKeyEnum sqlKeyEnum, String sql) {
         return cacheSql(String.valueOf(sqlKeyEnum.ordinal()), sql, sqlKeyEnum.name());
+    }
+
+    /**
+     * 格式化sql语句，适用于不需要缓存的sql语句
+     *
+     * @param sql 格式化前的sql语句
+     * @return 格式化后的sql语句
+     */
+    public String formatSql(String sql) {
+        // 替换sql语句中的appName
+        String finalSql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
+        logger.info("[{}] format sql: [{}]", objSeq, finalSql);
+        return finalSql;
     }
 
     /**
@@ -177,9 +189,10 @@ public class DbOperWrapper {
      * @param annotationClassNames 注解类名
      * @return
      */
-    public List<MethodAndHash> getMethodsAndHashWithAnnotations(String... annotationClassNames) {
+    @SuppressWarnings("all")
+    public List<WriteDbData4MethodAnnotation> getMethodsAndHashWithAnnotations(String... annotationClassNames) {
         if (ArrayUtils.isEmpty(annotationClassNames)) {
-            return null;
+            return Collections.emptyList();
         }
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_FMAH_WITH_ANNOTATIONS;
@@ -190,17 +203,8 @@ public class DbOperWrapper {
                     " where " + DC.MA_ANNOTATION_NAME + " in " + JACGSqlUtil.genQuestionString(annotationClassNames.length);
             sql = cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
         }
-
-        List<Map<String, Object>> list = dbOperator.queryList(sql, annotationClassNames);
-        if (list == null) {
-            return null;
-        }
-
-        List<MethodAndHash> methodAndHashList = new ArrayList<>(list.size());
-        for (Map<String, Object> map : list) {
-            methodAndHashList.add(new MethodAndHash((String) map.get(DC.MA_FULL_METHOD), (String) map.get(DC.MA_METHOD_HASH)));
-        }
-        return methodAndHashList;
+        // IDEA的提示忽略 Confusing argument 'xxx', unclear if a varargs or non-varargs call is desired
+        return dbOperator.queryList(sql, WriteDbData4MethodAnnotation.class, annotationClassNames);
     }
 
     /**
@@ -210,7 +214,7 @@ public class DbOperWrapper {
      * @param annotationClassNames 注解类名
      * @return
      */
-    public List<MethodAndHash> getMethodsAndHashWithAnnotationsOfClass(String className, String... annotationClassNames) {
+    public List<WriteDbData4MethodAnnotation> getMethodsAndHashWithAnnotationsOfClass(String className, String... annotationClassNames) {
         if (className == null || ArrayUtils.isEmpty(annotationClassNames)) {
             throw new JavaCGRuntimeException("参数不允许为空");
         }
@@ -230,16 +234,7 @@ public class DbOperWrapper {
         argList.addAll(Arrays.asList(annotationClassNames));
         argList.add(className + JavaCGConstants.FLAG_COLON);
 
-        List<Map<String, Object>> list = dbOperator.queryList(sql, argList.toArray());
-        if (list == null) {
-            return null;
-        }
-
-        List<MethodAndHash> methodAndHashList = new ArrayList<>(list.size());
-        for (Map<String, Object> map : list) {
-            methodAndHashList.add(new MethodAndHash((String) map.get(DC.MA_FULL_METHOD), (String) map.get(DC.MA_METHOD_HASH)));
-        }
-        return methodAndHashList;
+        return dbOperator.queryList(sql, WriteDbData4MethodAnnotation.class, argList.toArray());
     }
 
     /**
@@ -248,9 +243,10 @@ public class DbOperWrapper {
      * @param annotationClassNames 注解类名数组
      * @return
      */
+    @SuppressWarnings("all")
     public List<String> getMethodsWithAnnotations(String... annotationClassNames) {
         if (ArrayUtils.isEmpty(annotationClassNames)) {
-            return null;
+            return Collections.emptyList();
         }
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_FULL_METHOD_WITH_ANNOTATIONS;
@@ -261,9 +257,8 @@ public class DbOperWrapper {
                     " where " + DC.MA_ANNOTATION_NAME + " in " + JACGSqlUtil.genQuestionString(annotationClassNames.length);
             sql = cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
         }
-
-        List<Object> list = dbOperator.queryListOneColumn(sql, annotationClassNames);
-        return JACGSqlUtil.genStringList(list);
+        // IDEA的提示忽略 Confusing argument 'xxx', unclear if a varargs or non-varargs call is desired
+        return dbOperator.queryListOneColumn(sql, String.class, annotationClassNames);
     }
 
     /**
@@ -282,14 +277,11 @@ public class DbOperWrapper {
                     " limit 1";
             sql = cacheSql(sqlKeyEnum, sql);
         }
-
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodHash});
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        String callerFullMethod = dbOperator.queryObjectOneColumn(sql, String.class, methodHash);
+        if (callerFullMethod == null) {
             logger.error("根据调用者完整方法HASH+长度未找到完整方法 {}", methodHash);
-            return null;
         }
-
-        return (String) list.get(0);
+        return callerFullMethod;
     }
 
     /**
@@ -308,13 +300,11 @@ public class DbOperWrapper {
                     " limit 1";
             sql = cacheSql(sqlKeyEnum, sql);
         }
-
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodHash});
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        String calleeFullMethod = dbOperator.queryObjectOneColumn(sql, String.class, methodHash);
+        if (calleeFullMethod == null) {
             logger.error("根据被调用者完整方法HASH+长度未找到完整方法 {}", methodHash);
-            return null;
         }
-        return (String) list.get(0);
+        return calleeFullMethod;
     }
 
     /**
@@ -333,12 +323,11 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodCallId});
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        String calleeFullMethod = dbOperator.queryObjectOneColumn(sql, String.class, methodCallId);
+        if (calleeFullMethod == null) {
             logger.error("根据方法调用ID未找到完整方法 {}", methodCallId);
-            return null;
         }
-        return (String) list.get(0);
+        return calleeFullMethod;
     }
 
     /**
@@ -348,7 +337,7 @@ public class DbOperWrapper {
      * @param calleeObjType
      * @return
      */
-    public List<MethodCallPair> getMethodCallByCalleeHashObjType(String calleeMethodHash, String calleeObjType) {
+    public List<WriteDbData4MethodCall> getMethodCallByCalleeHashObjType(String calleeMethodHash, String calleeObjType) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_METHOD_CALL_BY_CALLEE_HASH_OBJ_TYPE;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -359,8 +348,7 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{calleeMethodHash, calleeObjType});
-        return genMethodCallPairList(list);
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, calleeMethodHash, calleeObjType);
     }
 
     /**
@@ -382,7 +370,7 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{JavaCGYesNoEnum.YES.getIntValue()});
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, JavaCGYesNoEnum.YES.getIntValue());
         if (list == null) {
             duplicateSimpleClassNameSet = null;
             return false;
@@ -391,8 +379,8 @@ public class DbOperWrapper {
             return true;
         }
 
-        for (Object object : list) {
-            String duplicateSimpleClassName = JACGClassMethodUtil.getSimpleClassNameFromFull((String) object);
+        for (String simpleClassName : list) {
+            String duplicateSimpleClassName = JACGClassMethodUtil.getSimpleClassNameFromFull(simpleClassName);
             duplicateSimpleClassNameSet.add(duplicateSimpleClassName);
         }
         logger.info("找到类名相同但包名不同的类 {}", StringUtils.join(duplicateSimpleClassNameSet, " "));
@@ -405,8 +393,6 @@ public class DbOperWrapper {
      * @return
      */
     public Set<String> findDuplicateClassBeforeUpdate() {
-        Set<String> foundDuplicateSimpleClassNameSet = new HashSet<>();
-
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_DUPLICATE_CLASS_BEFORE_UPDATE;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -417,15 +403,11 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, null);
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class);
         if (list == null) {
-            return null;
+            return Collections.emptySet();
         }
-
-        for (Object object : list) {
-            foundDuplicateSimpleClassNameSet.add((String) object);
-        }
-        return foundDuplicateSimpleClassNameSet;
+        return new HashSet<>(list);
     }
 
     /**
@@ -435,10 +417,6 @@ public class DbOperWrapper {
      */
     public boolean updateAllSimpleName2Full() {
         Set<String> foundDuplicateSimpleClassNameSet = findDuplicateClassBeforeUpdate();
-        if (foundDuplicateSimpleClassNameSet == null) {
-            return false;
-        }
-
         if (foundDuplicateSimpleClassNameSet.isEmpty()) {
             logger.info("不存在类名相同但包名不同的类");
             return true;
@@ -449,15 +427,14 @@ public class DbOperWrapper {
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "update " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName() +
-                    " set " + DC.CN_SIMPLE_CLASS_NAME + " = " + DC.CN_CLASS_NAME +
-                    "," + DC.CN_DUPLICATE_CLASS + " = ?" +
+                    " set " + DC.CN_SIMPLE_CLASS_NAME + " = " + DC.CN_CLASS_NAME + "," + DC.CN_DUPLICATE_CLASS + " = ?" +
                     " where " + DC.CN_SIMPLE_CLASS_NAME + " = ?";
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
         for (String duplicateClassName : foundDuplicateSimpleClassNameSet) {
             // 将class_name_表的simple_name更新为full_name
-            if (dbOperator.update(sql, new Object[]{JavaCGYesNoEnum.YES.getIntValue(), duplicateClassName}) == null) {
+            if (dbOperator.update(sql, JavaCGYesNoEnum.YES.getIntValue(), duplicateClassName) == null) {
                 return false;
             }
         }
@@ -499,12 +476,8 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{});
-        if (JavaCGUtil.isCollectionEmpty(list) || list.get(0) == null) {
-            return JACGConstants.MAX_METHOD_CALL_ID_ILLEGAL;
-        }
-
-        return (int) list.get(0);
+        Integer maxCallId = dbOperator.queryObjectOneColumn(sql, Integer.class);
+        return maxCallId == null ? JACGConstants.MAX_METHOD_CALL_ID_ILLEGAL : maxCallId;
     }
 
     /**
@@ -538,17 +511,16 @@ public class DbOperWrapper {
         argList.addAll(dataTypeList);
         argList.addAll(dataKeywordList);
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, argList.toArray());
-        return JACGSqlUtil.genStringList(list);
+        return dbOperator.queryListOneColumn(sql, String.class, argList.toArray());
     }
 
     /**
      * 根据被调用方法HASH，判断方法调用表中是否存在常规的方法调用（排除ITF、SCC、CCS）
      *
      * @param calleeMethodHash 被调用方法HASH
-     * @return null: 出现异常 FALSE: 不存在 TRUE: 存在
+     * @return false: 不存在 true: 存在
      */
-    public Boolean checkExistsNormalMethodCallByCalleeMethodHash(String calleeMethodHash) {
+    public boolean checkExistsNormalMethodCallByCalleeMethodHash(String calleeMethodHash) {
         if (calleeMethodHash == null) {
             throw new JavaCGRuntimeException("参数不允许为空");
         }
@@ -556,23 +528,19 @@ public class DbOperWrapper {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CHECK_NORMAL_MC_BY_EE_HASH;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + DC.MC_CALLEE_METHOD_HASH +
+            sql = "select count(" + DC.MC_CALLEE_METHOD_HASH + ")" +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLEE_METHOD_HASH + " = ? and " +
                     DC.MC_CALL_TYPE + " not in (?, ?, ?)";
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{calleeMethodHash,
+        Long count = dbOperator.queryObjectOneColumn(sql, Long.class,
+                calleeMethodHash,
                 JavaCGCallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS.getType(),
                 JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD.getType(),
-                JavaCGCallTypeEnum.CTE_CHILD_CALL_SUPER.getType()
-        });
-        if (list == null) {
-            return null;
-        }
-
-        return !list.isEmpty();
+                JavaCGCallTypeEnum.CTE_CHILD_CALL_SUPER.getType());
+        return count != null && count > 0;
     }
 
     /**
@@ -582,7 +550,7 @@ public class DbOperWrapper {
      * @param calleeMethodName 被调用方方法
      * @return
      */
-    public List<MethodCallPair> getMethodCallByCalleeFullClassMethod(String calleeClassName, String calleeMethodName) {
+    public List<WriteDbData4MethodCall> getMethodCallByCalleeFullClassMethod(String calleeClassName, String calleeMethodName) {
         if (calleeClassName == null || calleeMethodName == null) {
             throw new JavaCGRuntimeException("参数不允许为空");
         }
@@ -598,29 +566,7 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{calleeSimpleClassName, calleeMethodName});
-        return genMethodCallPairList(list);
-    }
-
-    /**
-     * 生成方法调用列表
-     *
-     * @param list
-     * @return
-     */
-    private List<MethodCallPair> genMethodCallPairList(List<Map<String, Object>> list) {
-        if (list == null) {
-            return null;
-        }
-        List<MethodCallPair> methodCallPairList = new ArrayList<>(list.size());
-        for (Map<String, Object> map : list) {
-            String callerFullMethod = (String) map.get(DC.MC_CALLER_FULL_METHOD);
-            int callerLineNumber = (int) map.get(DC.MC_CALLER_LINE_NUMBER);
-            String calleeFullMethod = (String) map.get(DC.MC_CALLEE_FULL_METHOD);
-            MethodCallPair methodCallPair = new MethodCallPair(callerFullMethod, callerLineNumber, calleeFullMethod);
-            methodCallPairList.add(methodCallPair);
-        }
-        return methodCallPairList;
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, calleeSimpleClassName, calleeMethodName);
     }
 
     /**
@@ -629,7 +575,7 @@ public class DbOperWrapper {
      * @param methodCallId
      * @return
      */
-    public ClassAndMethodName getLambdaCalleeInfo(int methodCallId) {
+    public WriteDbData4LambdaMethodInfo getLambdaCalleeInfo(int methodCallId) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.LMI_QUERY_CALLEE_INFO;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -638,15 +584,7 @@ public class DbOperWrapper {
                     " where " + DC.LMI_CALL_ID + " = ?";
             sql = cacheSql(sqlKeyEnum, sql);
         }
-
-        Map<String, Object> map = dbOperator.queryOneRow(sql, new Object[]{methodCallId});
-        if (map == null) {
-            return null;
-        }
-
-        String className = (String) map.get(DC.LMI_LAMBDA_CALLEE_CLASS_NAME);
-        String methodName = (String) map.get(DC.LMI_LAMBDA_CALLEE_METHOD_NAME);
-        return new ClassAndMethodName(className, methodName);
+        return dbOperator.queryObject(sql, WriteDbData4LambdaMethodInfo.class, methodCallId);
     }
 
     /**
@@ -665,11 +603,7 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{methodHash});
-        if (list == null) {
-            return null;
-        }
-        return (Integer) list.get(0);
+        return dbOperator.queryObjectOneColumn(sql, Integer.class, methodHash);
     }
 
     /**
@@ -690,9 +624,7 @@ public class DbOperWrapper {
                     " and " + DC.MI_METHOD_NAME + " = ?";
             sql = cacheSql(sqlKeyEnum, sql);
         }
-
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleClassName, methodName});
-        return JACGSqlUtil.genStringList(list);
+        return dbOperator.queryListOneColumn(sql, String.class, simpleClassName, methodName);
     }
 
     /**
@@ -702,7 +634,7 @@ public class DbOperWrapper {
      * @param calleeMethodName
      * @return
      */
-    public List<CallGraphCallerInfo> getCallerInfoByCallee(String calleeClassName, String calleeMethodName) {
+    public List<WriteDbData4MethodCall> getCallerInfoByCallee(String calleeClassName, String calleeMethodName) {
         String calleeSimpleClassName = getSimpleClassName(calleeClassName);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_MC_PAIR_BY_CALLEE;
         String sql = getCachedSql(sqlKeyEnum);
@@ -714,19 +646,7 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Map<String, Object>> list = dbOperator.queryList(sql, new Object[]{calleeSimpleClassName, calleeMethodName});
-        if (JavaCGUtil.isCollectionEmpty(list)) {
-            return null;
-        }
-        List<CallGraphCallerInfo> callGraphCallerInfoList = new ArrayList<>(list.size());
-        for (Map<String, Object> map : list) {
-            Integer callId = (Integer) map.get(DC.MC_CALL_ID);
-            String callerFullMethod = (String) map.get(DC.MC_CALLER_FULL_METHOD);
-            Integer callFlags = (Integer) map.get(DC.MC_CALL_FLAGS);
-            CallGraphCallerInfo callGraphCallerInfo = new CallGraphCallerInfo(callId, callerFullMethod, callFlags);
-            callGraphCallerInfoList.add(callGraphCallerInfo);
-        }
-        return callGraphCallerInfoList;
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, calleeSimpleClassName, calleeMethodName);
     }
 
     public String getAppName() {

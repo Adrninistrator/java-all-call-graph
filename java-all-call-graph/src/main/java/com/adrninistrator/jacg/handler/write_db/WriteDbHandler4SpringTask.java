@@ -3,6 +3,8 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.util.JACGUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -12,6 +14,8 @@ import java.util.Map;
  * @description: 写入数据库，Spring定时任务信息
  */
 public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbData4SpringTask> {
+    private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4SpringTask.class);
+
     /*
         记录Spring Bean相关信息
         key
@@ -31,6 +35,11 @@ public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbDat
             // 假如根据Spring Bean名称未获取到对应的类名，则将首字段修改为小写后继续尝试获取
             String springBeanNameLower = JACGUtil.getFirstLetterLowerClassName(springBeanName);
             springBeanClassName = springBeanMap.get(springBeanNameLower);
+        }
+
+        if (springBeanClassName == null) {
+            logger.error("未获取到Spring Bean的名称 {}", springBeanName);
+            return null;
         }
 
         // 根据类名前缀判断是否需要处理

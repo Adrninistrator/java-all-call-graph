@@ -12,6 +12,9 @@ public class BaseBusinessData {
     // 方法调用业务功能数据值
     protected String dataValue;
 
+    public BaseBusinessData() {
+    }
+
     public BaseBusinessData(String dataType, String dataValue) {
         this.dataType = dataType;
         this.dataValue = dataValue;

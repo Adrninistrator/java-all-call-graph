@@ -2,8 +2,6 @@ package test.run_by_code.handler.method;
 
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import test.call_graph.method_call.TestMCCallee;
 import test.run_by_code.base.TestRunByCodeBase;
 
@@ -13,8 +11,6 @@ import test.run_by_code.base.TestRunByCodeBase;
  * @description:
  */
 public class TestMethodInfoHandler extends TestRunByCodeBase {
-    private static final Logger logger = LoggerFactory.getLogger(TestMethodInfoHandler.class);
-
     @Test
     public void testGetFullMethodByClassLine() {
         try (MethodInfoHandler methodInfoHandler = new MethodInfoHandler(configureWrapper)) {
@@ -26,6 +22,6 @@ public class TestMethodInfoHandler extends TestRunByCodeBase {
 
     private void getFullMethodByClassLine(MethodInfoHandler methodInfoHandler, String className, int lineNumber) {
         String method = methodInfoHandler.getFullMethodByClassLine(className, lineNumber);
-        logger.info("{} {} {}", className, lineNumber, method);
+        printObjectContent(method, className, String.valueOf(lineNumber), method);
     }
 }

@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.extractor.entry.spring;
 
+import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.comparator.Comparator4AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.info_with_hash.AbstractInfoWithMethodHash;
@@ -46,16 +48,30 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
         setCommonConfig(configureWrapper);
 
         // 创建数据库相关对象
-        if (!genDbObject(configureWrapper)) {
-            return null;
-        }
+        genDbObject(configureWrapper);
 
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
-            // 处理事务注解
-            List<SpTxCallByAnnotationFile> spTxCallByAnnotationFileList = handleTxAnnotation(configureWrapper, annotationHandler);
+            ConfigureWrapper usedConfigureWrapper;
+            String outputSubDirName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME);
+            if (!outputSubDirName.isEmpty()) {
+                // 有指定生成调用链文件的子目录名，需要生成新的配置对象，避免修改传入的配置对象
+                usedConfigureWrapper = configureWrapper.copy();
+            } else {
+                usedConfigureWrapper = configureWrapper;
+            }
 
+            if (!outputSubDirName.isEmpty()) {
+                // 有指定生成调用链文件的子目录名，以下会生成两次方法调用链文件，需要分别使用不同的输出子目录名，否则会输出到同一个目录中
+                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
+            }
+            // 处理事务注解
+            List<SpTxCallByAnnotationFile> spTxCallByAnnotationFileList = handleTxAnnotation(usedConfigureWrapper, annotationHandler);
+
+            if (!outputSubDirName.isEmpty()) {
+                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_TEMPLATE);
+            }
             // 处理事务模板
-            List<SpTxCallByTplFile> spTxCallByTplFileList = handleTxTpl(configureWrapper);
+            List<SpTxCallByTplFile> spTxCallByTplFileList = handleTxTpl(usedConfigureWrapper);
 
             return new SpTxCallCombined(spTxCallByAnnotationFileList, spTxCallByTplFileList);
         } finally {
@@ -122,7 +138,6 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
         // 处理根据事务模板找到的事务嵌套，找到对应的方法入口
         List<SpTxCallByTplFile> spTxCallByTplFileList = new ArrayList<>(callerExtractedFileList.size());
         for (CallerExtractedFile callerExtractedFile : callerExtractedFileList) {
-
             // 根据调用堆栈文件，生成Spring事务被调用信息列表
             List<BaseCalleeExtractedMethod> calleeExtractedMethodList = genBaseCalleeExtractedMethodList(callerExtractedFile.getCallerExtractedLineList());
             SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = spTxEntryMethodTxTplMap.get(callerExtractedFile.getMethodHash());

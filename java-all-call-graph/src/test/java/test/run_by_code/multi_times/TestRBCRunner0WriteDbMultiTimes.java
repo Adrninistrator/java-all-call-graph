@@ -12,8 +12,8 @@ import test.run_by_code.base.TestRunByCodeBase;
  * @date 2023/4/9
  * @description:
  */
-public class TestRBCRunnerWriteDbMultiTimes extends TestRunByCodeBase {
-    private static final Logger logger = LoggerFactory.getLogger(TestRBCRunnerWriteDbMultiTimes.class);
+public class TestRBCRunner0WriteDbMultiTimes extends TestRunByCodeBase {
+    private static final Logger logger = LoggerFactory.getLogger(TestRBCRunner0WriteDbMultiTimes.class);
 
     @Test
     public void test() {

@@ -1,11 +1,11 @@
 package com.adrninistrator.jacg.handler.spring;
 
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
-import com.adrninistrator.jacg.comparator.Comparator4MethodCallPairByCaller;
+import com.adrninistrator.jacg.comparator.Comparator4MethodCallByCaller1;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
-import com.adrninistrator.jacg.dto.method_call.MethodCallPair;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.spring.SpringInvalidTxAnnotationMethod;
@@ -53,8 +53,8 @@ public class SpringTxHandler extends BaseHandler {
             // 查找调用当前实例的@Transactional注解方法
             for (String springTransactionalMethod : springTransactionalMethodList) {
                 String methodHash = JACGUtil.genHashWithLen(springTransactionalMethod);
-                List<MethodCallPair> methodCallPairList = dbOperWrapper.getMethodCallByCalleeHashObjType(methodHash, JavaCGCalleeObjTypeEnum.COTE_THIS.getType());
-                if (JavaCGUtil.isCollectionEmpty(methodCallPairList)) {
+                List<WriteDbData4MethodCall> methodCallList = dbOperWrapper.getMethodCallByCalleeHashObjType(methodHash, JavaCGCalleeObjTypeEnum.COTE_THIS.getType());
+                if (JavaCGUtil.isCollectionEmpty(methodCallList)) {
                     // 当前@Transactional注解方法不存在当前实例调用的情况
                     continue;
                 }
@@ -63,9 +63,9 @@ public class SpringTxHandler extends BaseHandler {
                 String calleeTxPropagation = annotationHandler.querySpringTxAnnotationPropagation(springTransactionalMethod);
 
                 // 对调用信息列表排序
-                methodCallPairList.sort(Comparator4MethodCallPairByCaller.getInstance());
-                for (MethodCallPair methodCallPair : methodCallPairList) {
-                    String callerFullMethod = methodCallPair.getCallerFullMethod();
+                methodCallList.sort(Comparator4MethodCallByCaller1.getInstance());
+                for (WriteDbData4MethodCall methodCall : methodCallList) {
+                    String callerFullMethod = methodCall.getCallerFullMethod();
                     boolean callerWithSpringTx = false;
                     String callerTxPropagation = "";
                     // 查询调用方法的Spring事务注解信息
@@ -78,7 +78,7 @@ public class SpringTxHandler extends BaseHandler {
                     }
 
                     SpringInvalidTxAnnotationMethodCall springInvalidTxAnnotationMethodCall = new SpringInvalidTxAnnotationMethodCall(callerFullMethod,
-                            methodCallPair.getCallerLineNumber(), methodCallPair.getCalleeFullMethod(), callerWithSpringTx, callerTxPropagation, calleeTxPropagation);
+                            methodCall.getCallerLineNumber(), methodCall.getCalleeFullMethod(), callerWithSpringTx, callerTxPropagation, calleeTxPropagation);
                     springInvalidTxAnnotationMethodCallList.add(springInvalidTxAnnotationMethodCall);
                 }
             }

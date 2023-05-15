@@ -9,12 +9,12 @@ import java.util.List;
  * @date 2023/4/21
  * @description: MyBatis中操作的数据库语句及表信息（支持MySQL）
  */
-public class MyBatisMySqlStatementAndTable {
+public class MyBatisMySqlStatementAndTables {
     private final MySqlStatementEnum mySqlStatementEnum;
 
     private final List<String> tableList;
 
-    public MyBatisMySqlStatementAndTable(MySqlStatementEnum mySqlStatementEnum, List<String> tableList) {
+    public MyBatisMySqlStatementAndTables(MySqlStatementEnum mySqlStatementEnum, List<String> tableList) {
         this.mySqlStatementEnum = mySqlStatementEnum;
         this.tableList = tableList;
     }

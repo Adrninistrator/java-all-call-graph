@@ -6,7 +6,6 @@ import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
-import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 
 import java.util.Collections;
@@ -45,11 +44,11 @@ public class FindMethodByDtoHandler extends BaseHandler {
         }
 
         String simpleArgType = dbOperWrapper.getSimpleClassName(argType);
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleArgType});
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptySet();
         }
-        return JACGSqlUtil.genStringSet(list);
+        return new HashSet<>(list);
     }
 
     /**
@@ -69,11 +68,11 @@ public class FindMethodByDtoHandler extends BaseHandler {
         }
 
         String simpleArgType = dbOperWrapper.getSimpleClassName(argType);
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleArgType});
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptySet();
         }
-        return JACGSqlUtil.genStringSet(list);
+        return new HashSet<>(list);
     }
 
     /**
@@ -93,11 +92,11 @@ public class FindMethodByDtoHandler extends BaseHandler {
         }
 
         String simpleArgType = dbOperWrapper.getSimpleClassName(returnType);
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleArgType});
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptySet();
         }
-        return JACGSqlUtil.genStringSet(list);
+        return new HashSet<>(list);
     }
 
     /**
@@ -117,11 +116,11 @@ public class FindMethodByDtoHandler extends BaseHandler {
         }
 
         String simpleArgType = dbOperWrapper.getSimpleClassName(returnType);
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{simpleArgType});
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptySet();
         }
-        return JACGSqlUtil.genStringSet(list);
+        return new HashSet<>(list);
     }
 
     /**

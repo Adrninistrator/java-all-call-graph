@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,8 +54,8 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor {
         try {
             // 生成向下的方法完整调用链文件，并根据关键字生成调用堆栈文件
             List<String> stackFilePathList = genStackFiles(configureWrapper);
-            if (stackFilePathList == null) {
-                return null;
+            if (JavaCGUtil.isCollectionEmpty(stackFilePathList)) {
+                return Collections.emptyList();
             }
 
             List<CallerExtractedFile> callerExtractedFileList = new ArrayList<>(stackFilePathList.size());
@@ -62,7 +63,7 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor {
                 // 处理文件中的方法调用业务功能数据
                 CallerExtractedFile callerExtractedFile = handleStackFile(stackFilePath);
                 if (callerExtractedFile == null) {
-                    return null;
+                    return Collections.emptyList();
                 }
                 if (!JavaCGUtil.isCollectionEmpty(callerExtractedFile.getCallerExtractedLineList())) {
                     // 文件中存在指定类型的方法调用业务功能数据时才添加

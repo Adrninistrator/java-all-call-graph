@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -28,7 +27,7 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodHandler {
     }
 
     @Override
-    protected List<Map<String, Object>> queryByPage(int startCallId, int endCallId, Object... args) {
+    protected List<LambdaMethodCall> queryByPage(int startCallId, int endCallId, Object... args) {
         Boolean lambdaNextIsStream = JACGUtil.getArgAt(0, args);
         Boolean lambdaNextIsIntermediate = JACGUtil.getArgAt(1, args);
 
@@ -56,7 +55,7 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodHandler {
             sql = sql + " and lmi." + DC.LMI_LAMBDA_NEXT_IS_TERMINAL + " = ?";
             argList.add(JavaCGYesNoEnum.YES.getStrValue());
         }
-        return dbOperator.queryList(sql, argList.toArray());
+        return dbOperator.queryList(sql, LambdaMethodCall.class, argList.toArray());
     }
 
     /**

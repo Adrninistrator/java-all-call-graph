@@ -1,0 +1,35 @@
+apply plugin: 'jacoco'
+
+test {
+    doFirst {
+        exclude('test/other')
+        minHeapSize = "256m"
+        maxHeapSize = "1g"
+
+        maxParallelForks = 1
+
+        forkEvery = 5
+
+        def TEST_FLAG_RECORD_LOG_TO_FILE = "test.flag.record.log.to.file"
+        def testFlagRecordLogToFile = System.getProperty(TEST_FLAG_RECORD_LOG_TO_FILE)
+        jvmArgs "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=256m", "-D" + TEST_FLAG_RECORD_LOG_TO_FILE + "=" + testFlagRecordLogToFile
+
+        testLogging {
+            events "PASSED", "STARTED", "FAILED", "SKIPPED"
+        }
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = false
+        csv.enabled = false
+        html.enabled = true
+        html.destination = file("${buildDir}/jacocoReport")
+    }
+}
+
+/*
+    使用Gradle执行单元测试时，假如需要将日志中的输出记录到文件，使用以下命令：
+    gradlew test -Dtest.flag.record.log.to.file=1
+ */

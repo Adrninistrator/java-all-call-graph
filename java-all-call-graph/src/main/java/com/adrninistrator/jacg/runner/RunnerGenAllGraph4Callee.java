@@ -15,6 +15,7 @@ import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.task.CalleeEntryMethodTaskInfo;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
@@ -147,7 +148,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                                 "2. [类名]:[方法名] （代表生成指定类指定名称方法向上的调用链）\n" +
                                 "3. [类名]:[方法中的代码行号] （代表生成指定类指定代码行号对应方法向上的调用链）",
                         OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, task);
-                return null;
+                return Collections.emptyMap();
             }
 
             String className = taskArray[0];
@@ -155,7 +156,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             // 获取唯一类名（简单类名或完整类名）
             String simpleClassName = getSimpleClassName(className);
             if (simpleClassName == null) {
-                return null;
+                return Collections.emptyMap();
             }
 
             CalleeTaskInfo calleeTaskInfo = calleeTaskInfoMap.computeIfAbsent(simpleClassName, k -> new CalleeTaskInfo());
@@ -207,9 +208,6 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         if (calleeTaskInfo.isGenAllMethods() || calleeTaskInfo.isFindMethodByName()) {
             // 假如需要生成指定类的全部方法向上调用链，或需要根据方法名称查询方法时，需要查询被调用类的全部方法信息
             calleeEntryMethodTaskInfoList = queryMethodsOfCalleeClass(entryCalleeSimpleClassName);
-            if (calleeEntryMethodTaskInfoList == null) {
-                return false;
-            }
         }
 
         if (calleeTaskInfo.isGenAllMethods()) {
@@ -261,32 +259,26 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Map<String, Object>> calleeMethodList = dbOperator.queryList(sql, new Object[]{calleeSimpleClassName});
-        if (calleeMethodList == null) {
-            return null;
-        }
-
-        if (calleeMethodList.isEmpty()) {
+        List<WriteDbData4MethodCall> calleeMethodList = dbOperator.queryList(sql, WriteDbData4MethodCall.class, calleeSimpleClassName);
+        if (JavaCGUtil.isCollectionEmpty(calleeMethodList)) {
             logger.warn("从方法调用关系表未找到被调用类对应方法 [{}] [{}]", sql, calleeSimpleClassName);
-            return calleeEntryMethodTaskInfoList;
+            return Collections.emptyList();
         }
 
         // 记录已被处理过的方法HASH+长度，因为以上查询时返回字段增加了call_flags，因此相同的方法可能会出现多条
         Set<String> handledCalleeMethodHashSet = new HashSet<>();
-        for (Map<String, Object> map : calleeMethodList) {
-            String calleeMethodHash = (String) map.get(DC.MC_CALLEE_METHOD_HASH);
+        for (WriteDbData4MethodCall methodCall : calleeMethodList) {
+            String calleeMethodHash = methodCall.getCalleeMethodHash();
             if (!handledCalleeMethodHashSet.add(calleeMethodHash)) {
                 // 已处理过的方法跳过
                 continue;
             }
 
-            String calleeFullMethod = (String) map.get(DC.MC_CALLEE_FULL_METHOD);
-            int callFlags = (int) map.get(DC.MC_CALL_FLAGS);
-            CalleeEntryMethodTaskInfo calleeEntryMethodTaskInfo =
-                    new CalleeEntryMethodTaskInfo(calleeMethodHash, calleeFullMethod, JACGClassMethodUtil.getMethodNameWithArgsFromFull(calleeFullMethod), callFlags);
+            String methodNameAndArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(methodCall.getCalleeFullMethod());
+            CalleeEntryMethodTaskInfo calleeEntryMethodTaskInfo = new CalleeEntryMethodTaskInfo(calleeMethodHash, methodCall.getCalleeFullMethod(), methodNameAndArgs,
+                    methodCall.getCallFlags());
             calleeEntryMethodTaskInfoList.add(calleeEntryMethodTaskInfo);
         }
-
         return calleeEntryMethodTaskInfoList;
     }
 
@@ -426,7 +418,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         if (calleeFullMethodList.size() > 1) {
             // 查找到匹配的方法多于1个，返回处理失败
-            logger.error("根据配置文件 {}\n中的方法前缀 {} 找到多于一个方法，请指定更精确的方法信息\n{}", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
+            logger.error("通过配置文件 {}\n中的方法前缀 {} 找到多于一个方法，请指定更精确的方法信息\n{}", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
                     origTaskText, StringUtils.join(calleeFullMethodList, "\n"));
             return false;
         }
@@ -495,13 +487,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             CallGraphNode4Callee callGraphNode4Callee = callGraphNode4CalleeStack.peek();
 
             // 查询当前节点的一个上层调用方法
-            Map<String, Object> callerMethodMap = queryOneByCalleeMethod(callGraphNode4Callee);
-            if (callerMethodMap == null) {
-                // 查询失败
-                return false;
-            }
-
-            if (callerMethodMap.isEmpty()) {
+            WriteDbData4MethodCall callerMethod = queryOneCallerMethod(callGraphNode4Callee);
+            if (callerMethod == null) {
                 // 查询到调用方法为空时的处理
                 if (handleCallerEmptyResult(callGraphNode4CalleeStack, superCallChildInfoStack, entryCallerMethodList)) {
                     return true;
@@ -515,11 +502,11 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             }
 
             String calleeFullMethod = callGraphNode4Callee.getCalleeFullMethod();
-            String callerFullMethod = (String) callerMethodMap.get(DC.MC_CALLER_FULL_METHOD);
-            String origCallerMethodHash = (String) callerMethodMap.get(DC.MC_CALLER_METHOD_HASH);
-            int methodCallId = (int) callerMethodMap.get(DC.MC_CALL_ID);
-            int enabled = (int) callerMethodMap.get(DC.MC_ENABLED);
-            String callType = (String) callerMethodMap.get(DC.MC_CALL_TYPE);
+            String callerFullMethod = callerMethod.getCallerFullMethod();
+            String origCallerMethodHash = callerMethod.getCallerMethodHash();
+            int methodCallId = callerMethod.getCallId();
+            int enabled = callerMethod.getEnabled();
+            String callType = callerMethod.getCallType();
 
             // 处理父类方法调用子类方法的相关信息
             MethodAndHash callerMethodAndHash = handleSuperCallChildInfo(superCallChildInfoStack, callGraphNode4CalleeStack.getHead(), calleeFullMethod, callerFullMethod,
@@ -540,11 +527,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             // 检查是否出现循环调用
             int back2Level = checkCycleCall(callGraphNode4CalleeStack, callerMethodHash, callerFullMethod);
 
-            int callFlags = (int) callerMethodMap.get(DC.MC_CALL_FLAGS);
-            int callerLineNum = (int) callerMethodMap.get(DC.MC_CALLER_LINE_NUMBER);
             // 记录调用方法信息
-            Pair<String, Boolean> pair = recordCallerInfo(callerFullMethod, methodCallId, callFlags, callType, callerLineNum, callGraphNode4CalleeStack.getHead(),
-                    callerMethodHash, back2Level);
+            Pair<String, Boolean> pair = recordCallerInfo(callerFullMethod, methodCallId, callerMethod.getCallFlags(), callType, callerMethod.getCallerLineNumber(),
+                    callGraphNode4CalleeStack.getHead(), callerMethodHash, back2Level);
             entryCallerMethodList.add(pair);
 
             // 记录可能出现一对多的方法调用
@@ -610,11 +595,6 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                                                    String callerMethodHash) {
         // 获取子类的调用方法
         Pair<Boolean, MethodAndHash> pair = getSCCChildFullMethod(superCallChildInfoStack, callerFullMethod);
-        if (pair == null) {
-            // 处理失败
-            return null;
-        }
-
         if (Boolean.TRUE.equals(pair.getLeft())) {
             // 使用子类的调用方法
             return pair.getRight();
@@ -691,14 +671,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                         " limit 1";
                 sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
             }
-
-            List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{childCalleeSimpleClassName, tmpSccChildFullMethod});
-            if (list == null) {
-                // 查询失败
-                return null;
-            }
-
-            if (!list.isEmpty()) {
+            String simpleClassName = dbOperator.queryObjectOneColumn(sql, String.class, childCalleeSimpleClassName, tmpSccChildFullMethod);
+            if (simpleClassName != null) {
                 // 子类方法存在，需要继续使用栈中的数据进行处理
                 continue;
             }
@@ -816,28 +790,16 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
     }
 
     // 查询当前节点的一个上层调用方法
-    private Map<String, Object> queryOneByCalleeMethod(CallGraphNode4Callee callGraphNode4Callee) {
+    private WriteDbData4MethodCall queryOneCallerMethod(CallGraphNode4Callee callGraphNode4Callee) {
         // 确定通过调用方法进行查询使用的SQL语句
         String sql = chooseQueryByCalleeMethodSql(callGraphNode4Callee.getCallerMethodHash());
 
-        List<Map<String, Object>> list;
         if (callGraphNode4Callee.getCallerMethodHash() == null) {
-            list = dbOperator.queryList(sql, new Object[]{callGraphNode4Callee.getCalleeMethodHash()});
-        } else {
-            list = dbOperator.queryList(sql, new Object[]{callGraphNode4Callee.getCalleeMethodHash(), callGraphNode4Callee.getCallerMethodHash()});
+            // 第一次查询
+            return dbOperator.queryObject(sql, WriteDbData4MethodCall.class, callGraphNode4Callee.getCalleeMethodHash());
         }
-
-        if (list == null) {
-            // 查询失败
-            return null;
-        }
-
-        if (list.isEmpty()) {
-            // 查询不到结果时，返回空Map
-            return new HashMap<>(0);
-        }
-
-        return list.get(0);
+        // 不是第一次查询
+        return dbOperator.queryObject(sql, WriteDbData4MethodCall.class, callGraphNode4Callee.getCalleeMethodHash(), callGraphNode4Callee.getCallerMethodHash());
     }
 
     // 确定通过调用方法进行查询使用的SQL语句
@@ -986,7 +948,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{callerMethodHash});
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, callerMethodHash);
         if (list == null) {
             logger.error("查询所有的调用方法失败 {}", callerMethodHash);
             return;
@@ -1000,8 +962,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         markdownWriter.addLineWithNewLine(callerMethodHash);
         markdownWriter.addListWithNewLine(DC.MC_CALLER_FULL_METHOD + "（调用方法）");
         markdownWriter.addCodeBlock();
-        for (Object callerMethod : list) {
-            markdownWriter.addLine((String) callerMethod);
+        for (String callerMethod : list) {
+            markdownWriter.addLine(callerMethod);
         }
         markdownWriter.addCodeBlock();
     }

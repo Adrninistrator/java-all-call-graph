@@ -76,7 +76,7 @@ public class MethodCallHandler extends BaseHandler {
                 sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
             }
 
-            int row = dbOperator.update(sql, new Object[]{enabled, methodCallId});
+            int row = dbOperator.update(sql, enabled, methodCallId);
             logger.info("修改方法调用表 {} 启用标志: {} 行数: {}", methodCallId, enabled, row);
             return row > 0;
         } finally {

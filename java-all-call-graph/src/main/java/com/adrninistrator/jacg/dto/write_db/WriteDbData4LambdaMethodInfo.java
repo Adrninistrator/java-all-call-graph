@@ -13,9 +13,9 @@ public class WriteDbData4LambdaMethodInfo extends AbstractWriteDbData {
     /*
         以下字段可能为null
      */
-    private String lambdaNextCalleeClassName;
-    private String lambdaNextCalleeMethodName;
-    private String lambdaNextCalleeFullMethod;
+    private String lambdaNextClassName;
+    private String lambdaNextMethodName;
+    private String lambdaNextFullMethod;
     private Boolean lambdaNextIsStream;
     private Boolean lambdaNextIsIntermediate;
     private Boolean lambdaNextIsTerminal;
@@ -52,28 +52,28 @@ public class WriteDbData4LambdaMethodInfo extends AbstractWriteDbData {
         this.lambdaCalleeFullMethod = lambdaCalleeFullMethod;
     }
 
-    public String getLambdaNextCalleeClassName() {
-        return lambdaNextCalleeClassName;
+    public String getLambdaNextClassName() {
+        return lambdaNextClassName;
     }
 
-    public void setLambdaNextCalleeClassName(String lambdaNextCalleeClassName) {
-        this.lambdaNextCalleeClassName = lambdaNextCalleeClassName;
+    public void setLambdaNextClassName(String lambdaNextClassName) {
+        this.lambdaNextClassName = lambdaNextClassName;
     }
 
-    public String getLambdaNextCalleeMethodName() {
-        return lambdaNextCalleeMethodName;
+    public String getLambdaNextMethodName() {
+        return lambdaNextMethodName;
     }
 
-    public void setLambdaNextCalleeMethodName(String lambdaNextCalleeMethodName) {
-        this.lambdaNextCalleeMethodName = lambdaNextCalleeMethodName;
+    public void setLambdaNextMethodName(String lambdaNextMethodName) {
+        this.lambdaNextMethodName = lambdaNextMethodName;
     }
 
-    public String getLambdaNextCalleeFullMethod() {
-        return lambdaNextCalleeFullMethod;
+    public String getLambdaNextFullMethod() {
+        return lambdaNextFullMethod;
     }
 
-    public void setLambdaNextCalleeFullMethod(String lambdaNextCalleeFullMethod) {
-        this.lambdaNextCalleeFullMethod = lambdaNextCalleeFullMethod;
+    public void setLambdaNextFullMethod(String lambdaNextFullMethod) {
+        this.lambdaNextFullMethod = lambdaNextFullMethod;
     }
 
     public Boolean getLambdaNextIsStream() {

@@ -13,7 +13,7 @@ public class TestSpringBeanB1 extends AbstractTestSpringBeanB {
         springInterfaceB1.test1();
         springInterfaceB1.test2();
 
-        springInterfaceB2.test1();
+        springInterfaceB2A.test1();
 
         springServiceC2.test1();
     }

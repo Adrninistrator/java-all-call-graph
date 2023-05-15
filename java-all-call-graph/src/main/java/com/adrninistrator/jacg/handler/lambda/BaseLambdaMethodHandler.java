@@ -11,7 +11,6 @@ import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -49,7 +47,7 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
      * @param args        其他参数
      * @return
      */
-    protected abstract List<Map<String, Object>> queryByPage(int startCallId, int endCallId, Object... args);
+    protected abstract List<LambdaMethodCall> queryByPage(int startCallId, int endCallId, Object... args);
 
     /**
      * 执行查询操作
@@ -76,14 +74,10 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
                 }
 
                 // 通过类名前缀分页查询Lambda表达式方法调用信息
-                List<Map<String, Object>> list = queryByPage(startCallId, endCallId, args);
+                List<LambdaMethodCall> list = queryByPage(startCallId, endCallId, args);
                 if (JavaCGUtil.isCollectionEmpty(list)) {
                     return Collections.emptyList();
                 }
-
-                // 添加查询结果列表
-                addLambdaMethodCall(lambdaMethodCallList, list);
-
                 if (endCallId == JACGConstants.PAGE_QUERY_LAST) {
                     // 最后一次分页查询
                     break;
@@ -109,21 +103,15 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{startCallId, JACGConstants.DB_PAGE_HANDLE_SIZE - 1});
-        if (list == null) {
-            // 查询失败
-            return JACGConstants.PAGE_QUERY_FAIL;
-        }
-
-        if (list.isEmpty()) {
+        Integer endCallId = dbOperator.queryObjectOneColumn(sql, Integer.class, startCallId, JACGConstants.DB_PAGE_HANDLE_SIZE - 1);
+        if (endCallId == null) {
             // 最后一次分页查询
             logger.debug("最后一次分页查询 {}", startCallId);
             return JACGConstants.PAGE_QUERY_LAST;
         }
 
         // 不是最后一次分页查询
-        int endCallId = (int) list.get(0);
-        logger.debug("查询到endCallId {}", endCallId);
+        logger.debug("查询到endCallId {} {}", startCallId, endCallId);
         return endCallId;
     }
 
@@ -144,50 +132,13 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
                     DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() + " as mc" +
                     " on lmi." + DC.LMI_CALL_ID + " = mc." + DC.MC_CALL_ID +
                     " where lmi." + DC.LMI_CALL_ID + " > ?";
+            cachedQuerySqlLast = dbOperWrapper.formatSql(cachedQuerySqlLast);
         }
         if (cachedQuerySqlNotLast == null) {
             cachedQuerySqlNotLast = cachedQuerySqlLast + " and lmi." + DC.LMI_CALL_ID + " <= ?";
         }
 
         return lastQuery ? cachedQuerySqlLast : cachedQuerySqlNotLast;
-    }
-
-    // 添加查询结果列表
-    private void addLambdaMethodCall(List<LambdaMethodCall> lambdaMethodCallList, List<Map<String, Object>> list) {
-        if (list.isEmpty()) {
-            return;
-        }
-
-        for (Map<String, Object> map : list) {
-            int callId = (int) map.get(DC.MC_CALL_ID);
-            String callerFullMethod = (String) map.get(DC.MC_CALLER_FULL_METHOD);
-            int callerLineNum = (int) map.get(DC.MC_CALLER_LINE_NUMBER);
-            String calleeFullMethod = (String) map.get(DC.MC_CALLEE_FULL_METHOD);
-            String lambdaCalleeFullMethod = (String) map.get(DC.LMI_LAMBDA_CALLEE_FULL_METHOD);
-
-            LambdaMethodCall lambdaMethodCall = new LambdaMethodCall();
-            lambdaMethodCallList.add(lambdaMethodCall);
-            lambdaMethodCall.setCallId(callId);
-            lambdaMethodCall.setCallerFullMethod(callerFullMethod);
-            lambdaMethodCall.setCallerLineNumber(callerLineNum);
-            lambdaMethodCall.setCalleeFullMethod(calleeFullMethod);
-            lambdaMethodCall.setLambdaCalleeFullMethod(lambdaCalleeFullMethod);
-
-            Object lambdaNextCalleeFullMethodObj = map.get(DC.LMI_LAMBDA_NEXT_FULL_METHOD);
-            if (lambdaNextCalleeFullMethodObj == null) {
-                continue;
-            }
-
-            String lambdaNextCalleeFullMethod = (String) lambdaNextCalleeFullMethodObj;
-            boolean lambdaNextIsStream = JavaCGYesNoEnum.isYes((int) map.get(DC.LMI_LAMBDA_NEXT_IS_STREAM));
-            boolean lambdaNextIsIntermediate = JavaCGYesNoEnum.isYes((int) map.get(DC.LMI_LAMBDA_NEXT_IS_INTERMEDIATE));
-            boolean lambdaNextIsTerminal = JavaCGYesNoEnum.isYes((int) map.get(DC.LMI_LAMBDA_NEXT_IS_TERMINAL));
-
-            lambdaMethodCall.setLambdaNextCalleeFullMethod(lambdaNextCalleeFullMethod);
-            lambdaMethodCall.setLambdaNextIsStream(lambdaNextIsStream);
-            lambdaMethodCall.setLambdaNextIsIntermediate(lambdaNextIsIntermediate);
-            lambdaMethodCall.setLambdaNextIsTerminal(lambdaNextIsTerminal);
-        }
     }
 
     /**
@@ -215,8 +166,8 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
             if (lambdaMethodCall.getLambdaCalleeFullMethod() != null) {
                 lambdaMethodCallDetail.setLambdaCalleeFullMethodDetail(JACGClassMethodUtil.genMethodDetail(lambdaMethodCall.getLambdaCalleeFullMethod()));
             }
-            if (lambdaMethodCall.getLambdaNextCalleeFullMethod() != null) {
-                lambdaMethodCallDetail.setLambdaNextCalleeFullMethodDetail(JACGClassMethodUtil.genMethodDetail(lambdaMethodCall.getLambdaNextCalleeFullMethod()));
+            if (lambdaMethodCall.getLambdaNextFullMethod() != null) {
+                lambdaMethodCallDetail.setLambdaNextFullMethodDetail(JACGClassMethodUtil.genMethodDetail(lambdaMethodCall.getLambdaNextFullMethod()));
             }
         }
         return lambdaMethodCallDetailList;

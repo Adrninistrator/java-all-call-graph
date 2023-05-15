@@ -13,6 +13,18 @@ public class WriteDbData4ClassSignatureEi1 extends AbstractWriteDbData {
     private String signClassName;
     private String className;
 
+    public WriteDbData4ClassSignatureEi1() {
+    }
+
+    public WriteDbData4ClassSignatureEi1(String simpleClassName, String type, String superItfClassName, int seq, String signClassName, String className) {
+        this.simpleClassName = simpleClassName;
+        this.type = type;
+        this.superItfClassName = superItfClassName;
+        this.seq = seq;
+        this.signClassName = signClassName;
+        this.className = className;
+    }
+
     public String getSimpleClassName() {
         return simpleClassName;
     }
