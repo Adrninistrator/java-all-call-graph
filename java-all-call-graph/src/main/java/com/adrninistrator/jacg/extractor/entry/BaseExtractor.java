@@ -171,6 +171,7 @@ public abstract class BaseExtractor {
         }
 
         if (!runningFlag.compareAndSet(false, true)) {
+            // handleCallStackData()方法中会对类的字段进行修改，因此不能并发调用
             logger.error("当前类不允许并发调用，请创建新的实例");
             return false;
         }
@@ -206,7 +207,7 @@ public abstract class BaseExtractor {
                 }
 
                 if (!handleCallStack) {
-                    // 还未处理过数据，不执行后续处理
+                    // 不处理数据，不执行后续处理
                     continue;
                 }
 

@@ -611,6 +611,16 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                                                    String callerFullMethod,
                                                    String callType,
                                                    String calleeMethodHash) {
+        if (JavaCGCallTypeEnum.CTE_CHILD_CALL_SUPER.getType().equals(callType)
+                || JavaCGCallTypeEnum.CTE_CHILD_CALL_SUPER_SPECIAL.getType().equals(callType)) {
+            // 当前方法调用类型是子类调用父类方法，记录子类方法调用父类方法对应信息的栈入栈
+            String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
+            String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
+            ChildCallSuperInfo childCallSuperInfo = new ChildCallSuperInfo(nodeLevel, callerSimpleClassName, callerClassName, callerFullMethod);
+            childCallSuperInfoStack.push(childCallSuperInfo);
+            return new MethodAndHash(calleeFullMethod, calleeMethodHash);
+        }
+
         // 获取子类的被调用方法
         Pair<Boolean, MethodAndHash> pair = getCCSChildFullMethod(childCallSuperInfoStack, calleeFullMethod);
         if (Boolean.TRUE.equals(pair.getLeft())) {
@@ -618,14 +628,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return pair.getRight();
         }
 
-        // 使用原始的被调用方法
-        if (JavaCGCallTypeEnum.CTE_CHILD_CALL_SUPER.getType().equals(callType)) {
-            // 当前方法调用类型是子类调用父类方法，记录子类方法调用父类方法对应信息的栈入栈
-            String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
-            String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
-            ChildCallSuperInfo childCallSuperInfo = new ChildCallSuperInfo(nodeLevel, callerSimpleClassName, callerClassName, callerFullMethod);
-            childCallSuperInfoStack.push(childCallSuperInfo);
-        }
         return new MethodAndHash(calleeFullMethod, calleeMethodHash);
     }
 

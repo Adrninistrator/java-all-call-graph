@@ -22,6 +22,7 @@ import test.call_graph.interfaces.interfaces.InterfaceSuper1;
 import test.call_graph.interfaces.interfaces.InterfaceSuper2;
 import test.call_graph.method_call.TestMCCallee;
 import test.call_graph.method_call.TestMCCaller;
+import test.call_graph.spring.bean.use.complex.TestUseComplexService;
 import test.call_graph.spring.mvc.TestSpringController1;
 
 /**
@@ -68,8 +69,8 @@ public class TestConfigGenerator {
         );
 
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                TestMCCallee.class.getSimpleName() + ":20",
-                TestMCCallee.class.getSimpleName() + ":run(",
+                TestMCCallee.class.getName() + ":20",
+                TestMCCallee.class.getName() + ":run(",
                 TestMCCallee.class.getName() + ":run(",
                 System.class.getName(),
                 MethodWithAnnotation.class.getName(),
@@ -79,13 +80,13 @@ public class TestConfigGenerator {
 
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 MethodWithAnnotation.class.getName(),
-                TestMCCaller.class.getSimpleName() + ":20",
-                TestArgument1.class.getSimpleName() + ":test(",
-                TestArgument2.class.getSimpleName() + ":test(",
+                TestMCCaller.class.getName() + ":20",
+                TestArgument1.class.getName() + ":test(",
                 TestArgument2.class.getName() + ":test(",
-                CallMethodWithAnnotation.class.getSimpleName() + ":test1(",
-                InterfaceSuper1.class.getSimpleName() + ":testSuper1(",
-                InterfaceSuper2.class.getSimpleName() + ":testSuper2(",
+                TestArgument2.class.getName() + ":test(",
+                CallMethodWithAnnotation.class.getName() + ":test1(",
+                InterfaceSuper1.class.getName() + ":testSuper1(",
+                InterfaceSuper2.class.getName() + ":testSuper2(",
                 TestCycleCall1.class.getName(),
                 ChildClassA1.class.getName(),
                 ChildClassA2.class.getName(),
@@ -93,7 +94,8 @@ public class TestConfigGenerator {
                 ChildClassB2.class.getName(),
                 TestExtendComplex.class.getName(),
                 test.call_graph.future.CallableImpl.class.getName() + ":call(",
-                TestSpringController1.class.getName()
+                TestSpringController1.class.getName(),
+                TestUseComplexService.class.getName()
         );
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE,

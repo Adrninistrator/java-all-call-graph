@@ -5,12 +5,12 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.dto.classes.ClassNameAndAccessFlags;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ExtendsImpl;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg.dto.access_flag.JavaCGAccessFlags;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
@@ -232,37 +232,37 @@ public class JACGExtendsImplHandler extends BaseHandler {
 
     // 根据类的access_flags判断指定类的是否需要包含在结果中
     private boolean checkIncludeClass(int accessFlags, boolean includeInterface, boolean includeClass, boolean includeAbstractClass, boolean includeNonAbstractClass) {
-        JACGAccessFlags jacgAccessFlags = new JACGAccessFlags(accessFlags);
+        JavaCGAccessFlags javaCGAccessFlags = new JavaCGAccessFlags(accessFlags);
 
         // 先判断是否不满足
-        if (!includeInterface && jacgAccessFlags.isInterface()) {
+        if (!includeInterface && javaCGAccessFlags.isInterface()) {
             return false;
         }
-        if (!includeClass && !jacgAccessFlags.isInterface()) {
+        if (!includeClass && !javaCGAccessFlags.isInterface()) {
             return false;
         }
         if (includeClass) {
-            if (!includeAbstractClass && jacgAccessFlags.isAbstract()) {
+            if (!includeAbstractClass && javaCGAccessFlags.isAbstract()) {
                 return false;
             }
-            if (!includeNonAbstractClass && !jacgAccessFlags.isAbstract()) {
+            if (!includeNonAbstractClass && !javaCGAccessFlags.isAbstract()) {
                 return false;
             }
         }
 
         // 再判断是否满足
-        if (includeInterface && jacgAccessFlags.isInterface()) {
+        if (includeInterface && javaCGAccessFlags.isInterface()) {
             return true;
         }
         // 以下代码虽然会提示不需要，但为了保持逻辑清晰，还是保留
         if (includeClass) {
-            if (includeAbstractClass && jacgAccessFlags.isAbstract()) {
+            if (includeAbstractClass && javaCGAccessFlags.isAbstract()) {
                 return true;
             }
-            if (includeNonAbstractClass && !jacgAccessFlags.isAbstract()) {
+            if (includeNonAbstractClass && !javaCGAccessFlags.isAbstract()) {
                 return true;
             }
-            if (!jacgAccessFlags.isInterface()) {
+            if (!javaCGAccessFlags.isInterface()) {
                 return true;
             }
         }

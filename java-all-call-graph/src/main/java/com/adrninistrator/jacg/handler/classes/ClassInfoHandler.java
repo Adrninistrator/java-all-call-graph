@@ -5,8 +5,8 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.javacg.dto.access_flag.JavaCGAccessFlags;
 
 /**
  * @author adrninistrator
@@ -23,17 +23,17 @@ public class ClassInfoHandler extends BaseHandler {
     }
 
     /**
-     * 根据完整类名查询类的JACGAccessFlags对象，可调用方法判断类的属性
+     * 根据完整类名查询类的JavaCGAccessFlags对象，可调用方法判断类的属性
      *
      * @param className 完整类名
      * @return 可能为null
      */
-    public JACGAccessFlags queryClassJACGAccessFlags(String className) {
+    public JavaCGAccessFlags queryClassJavaCGAccessFlags(String className) {
         Integer accessFlags = queryClassAccessFlag(className);
         if (accessFlags == null) {
             return null;
         }
-        return new JACGAccessFlags(accessFlags);
+        return new JavaCGAccessFlags(accessFlags);
     }
 
     /**

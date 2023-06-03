@@ -55,7 +55,7 @@ public class MethodCallInfoHandler extends BaseHandler {
         }
         List<WriteDbData4MethodCallInfo> list = dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, callId);
         if (JavaCGUtil.isCollectionEmpty(list)) {
-            logger.warn("从{}表未查询到方法调用中被调用对象与参数使用的信息 callId: {}", DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName(), callId);
+            logger.warn("从{}表未查询到方法调用中被调用对象与参数使用的信息 callId: {}", DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getSqlKey4Print(), callId);
             return null;
         }
 

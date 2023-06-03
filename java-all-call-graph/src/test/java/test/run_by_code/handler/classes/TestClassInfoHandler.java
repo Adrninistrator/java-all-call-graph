@@ -1,7 +1,7 @@
 package test.run_by_code.handler.classes;
 
-import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
+import com.adrninistrator.javacg.dto.access_flag.JavaCGAccessFlags;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +28,8 @@ public class TestClassInfoHandler extends TestRunByCodeBase {
     }
 
     private void doTest(ClassInfoHandler classInfoHandler, String className) {
-        JACGAccessFlags jacgAccessFlags = classInfoHandler.queryClassJACGAccessFlags(className);
-        logger.info("{} isInterface:{} isAnnotation:{} isAbstract:{}", className, jacgAccessFlags.isInterface(), jacgAccessFlags.isAnnotation(), jacgAccessFlags.isAbstract());
-        printObjectContent(jacgAccessFlags, className);
+        JavaCGAccessFlags javaCGAccessFlags = classInfoHandler.queryClassJavaCGAccessFlags(className);
+        logger.info("{} isInterface:{} isAnnotation:{} isAbstract:{}", className, javaCGAccessFlags.isInterface(), javaCGAccessFlags.isAnnotation(), javaCGAccessFlags.isAbstract());
+        printObjectContent(javaCGAccessFlags, className);
     }
 }

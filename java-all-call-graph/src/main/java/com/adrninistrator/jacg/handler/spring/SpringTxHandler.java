@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.spring;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.comparator.Comparator4MethodCallByCaller1;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.dto.access_flag.JACGAccessFlags;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
@@ -12,6 +11,7 @@ import com.adrninistrator.jacg.handler.dto.spring.SpringInvalidTxAnnotationMetho
 import com.adrninistrator.jacg.handler.dto.spring.SpringInvalidTxAnnotationMethodCall;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGCalleeObjTypeEnum;
+import com.adrninistrator.javacg.dto.access_flag.JavaCGAccessFlags;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -111,16 +111,16 @@ public class SpringTxHandler extends BaseHandler {
                 }
 
                 List<String> methodFlagList = new ArrayList<>();
-                JACGAccessFlags jacgAccessFlags = new JACGAccessFlags(methodFlags);
-                if (jacgAccessFlags.isPrivate()) {
+                JavaCGAccessFlags javaCGAccessFlags = new JavaCGAccessFlags(methodFlags);
+                if (javaCGAccessFlags.isPrivate()) {
                     methodFlagList.add("private");
-                } else if (jacgAccessFlags.isProtected()) {
+                } else if (javaCGAccessFlags.isProtected()) {
                     methodFlagList.add("protected");
                 }
-                if (jacgAccessFlags.isStatic()) {
+                if (javaCGAccessFlags.isStatic()) {
                     methodFlagList.add("static");
                 }
-                if (jacgAccessFlags.isFinal()) {
+                if (javaCGAccessFlags.isFinal()) {
                     methodFlagList.add("final");
                 }
                 if (!methodFlagList.isEmpty()) {

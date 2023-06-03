@@ -235,7 +235,7 @@ public class DbOperator {
     public boolean truncateTable(String tableName) {
         String sql = "truncate table " + tableName;
         sql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
-        logger.debug("[{}] truncate table sql: [{}]", objSeq, sql);
+        logger.info("[{}] truncate table sql: [{}]", objSeq, sql);
         return executeDDLSql(sql);
     }
 

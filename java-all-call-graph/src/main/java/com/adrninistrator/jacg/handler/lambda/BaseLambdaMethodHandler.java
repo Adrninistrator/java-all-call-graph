@@ -56,6 +56,7 @@ public abstract class BaseLambdaMethodHandler extends BaseHandler {
      */
     public List<LambdaMethodCall> query(Object... args) {
         if (!runningFlag.compareAndSet(false, true)) {
+            // queryByPage()方法中会对类的字段进行修改，因此不能并发调用
             logger.error("当前类不允许并发调用，请创建新的实例");
             throw new JavaCGRuntimeException("当前类不允许并发调用，请创建新的实例");
         }

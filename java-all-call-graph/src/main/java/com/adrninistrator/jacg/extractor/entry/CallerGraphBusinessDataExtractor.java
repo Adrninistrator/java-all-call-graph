@@ -104,11 +104,13 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor {
                 continue;
             }
 
-            String lastLine = i > 0 ? lineList.get(i - 1) : null;
             // 当前行包含方法调用业务功能数据，且类型需要处理，进行处理
+            String lastLine = i > 0 ? lineList.get(i - 1) : null;
             // 生成向下的调用堆栈文件处理后对应行的信息
             CallerExtractedLine callerExtractedLine = genCallerExtractedLine(line, lastLine, dataSeq, lineNumberList.get(i), callGraphLineParsed, false, false);
             callerExtractedLineList.add(callerExtractedLine);
+            // 当前的调用堆栈处理了需要类型的业务功能数据后，不再处理后续行的数据
+            break;
         }
     }
 }

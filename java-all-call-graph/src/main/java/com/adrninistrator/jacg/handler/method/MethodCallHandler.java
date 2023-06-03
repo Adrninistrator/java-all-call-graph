@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
@@ -28,8 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MethodCallHandler extends BaseHandler {
     private static final Logger logger = LoggerFactory.getLogger(MethodCallHandler.class);
 
-    protected AtomicBoolean runningFlag1 = new AtomicBoolean(false);
-    protected AtomicBoolean runningFlag2 = new AtomicBoolean(false);
+    protected AtomicBoolean runningFlag = new AtomicBoolean(false);
 
     public MethodCallHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
@@ -61,27 +61,56 @@ public class MethodCallHandler extends BaseHandler {
 
     // 修改方法调用表启用标志
     private boolean updateMethodCallEnabled(int methodCallId, int enabled) {
-        if (!runningFlag1.compareAndSet(false, true)) {
-            logger.error("当前方法不允许并发调用调用");
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_UPDATE_ENABLED;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " set " + DC.MC_ENABLED + " = ?" +
+                    " where " + DC.MC_CALL_ID + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        int row = dbOperator.update(sql, enabled, methodCallId);
+        logger.info("修改方法调用表 {} 启用标志: {} 行数: {}", methodCallId, enabled, row);
+        return row > 0;
+    }
+
+    /**
+     * 更新方法调用表指定方法调用的标记，增加其他值
+     *
+     * @param methodCallId
+     * @param methodCallFlagsEnum
+     * @return
+     */
+    public boolean updateMethodCallAddFlags(int methodCallId, MethodCallFlagsEnum methodCallFlagsEnum) {
+        SqlKeyEnum sqlKeyEnumQuery = SqlKeyEnum.MC_QUERY_FLAG_BY_ID;
+        String sqlQuery = dbOperWrapper.getCachedSql(sqlKeyEnumQuery);
+        if (sqlQuery == null) {
+            sqlQuery = "select " + DC.MC_CALL_FLAGS +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALL_ID + " = ?";
+            sqlQuery = dbOperWrapper.cacheSql(sqlKeyEnumQuery, sqlQuery);
+        }
+
+        WriteDbData4MethodCall writeDbData4MethodCall = dbOperator.queryObject(sqlQuery, WriteDbData4MethodCall.class, methodCallId);
+        if (writeDbData4MethodCall == null) {
+            logger.error("未查询到指定方法调用的方法调用标记 {}", methodCallId);
             return false;
         }
 
-        try {
-            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_UPDATE_STATUS;
-            String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-            if (sql == null) {
-                sql = "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
-                        " set " + DC.MC_ENABLED + " = ?" +
-                        " where " + DC.MC_CALL_ID + " = ?";
-                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-            }
-
-            int row = dbOperator.update(sql, enabled, methodCallId);
-            logger.info("修改方法调用表 {} 启用标志: {} 行数: {}", methodCallId, enabled, row);
-            return row > 0;
-        } finally {
-            runningFlag1.set(false);
+        SqlKeyEnum sqlKeyEnumUpdate = SqlKeyEnum.MC_UPDATE_FLAGS;
+        String sqlUpdate = dbOperWrapper.getCachedSql(sqlKeyEnumUpdate);
+        if (sqlUpdate == null) {
+            sqlUpdate = "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " set " + DC.MC_CALL_FLAGS + " = ?" +
+                    " where " + DC.MC_CALL_ID + " = ?";
+            sqlUpdate = dbOperWrapper.cacheSql(sqlKeyEnumUpdate, sqlUpdate);
         }
+
+        int newCallFlags = methodCallFlagsEnum.setFlag(writeDbData4MethodCall.getCallFlags());
+        int row = dbOperator.update(sqlUpdate, newCallFlags, methodCallId);
+        logger.info("修改方法调用表 {} 方法调用标记: {} 行数: {}", methodCallId, newCallFlags, row);
+        return row > 0;
     }
 
     /**
@@ -104,8 +133,9 @@ public class MethodCallHandler extends BaseHandler {
             return false;
         }
 
-        if (!runningFlag2.compareAndSet(false, true)) {
-            logger.error("当前方法不允许并发调用调用");
+        if (!runningFlag.compareAndSet(false, true)) {
+            // 以下需要查询方法调用表最大序号，加1并使用，因此不能并发调用
+            logger.error("当前方法不允许并发调用");
             return false;
         }
 
@@ -139,7 +169,7 @@ public class MethodCallHandler extends BaseHandler {
             String sql = dbOperWrapper.genAndCacheInsertSql(DbTableInfoEnum.DTIE_METHOD_CALL, DbInsertMode.DIME_INSERT);
             return dbOperator.insert(sql, arguments);
         } finally {
-            runningFlag2.set(false);
+            runningFlag.set(false);
         }
     }
 }
