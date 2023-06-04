@@ -1,20 +1,33 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 /**
  * @author adrninistrator
  * @date 2022/11/15
  * @description: 写入数据库，方法行号
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_LINE_NUMBER,
+        minColumnNum = 3,
+        maxColumnNum = 3,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_LINE_NUMBER
+)
 public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<WriteDbData4MethodLineNumber> {
-    @Override
-    protected WriteDbData4MethodLineNumber genData(String line) {
-        String[] array = splitEquals(line, 3);
+    public WriteDbHandler4MethodLineNumber(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4MethodLineNumber genData(String[] array) {
         String fullMethod = array[0];
         // 根据完整方法前缀判断是否需要处理
         if (!isAllowedClassPrefix(fullMethod)) {
@@ -27,11 +40,6 @@ public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<Writ
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);
         return new WriteDbData4MethodLineNumber(methodHash, simpleClassName, Integer.parseInt(minLineNumber), Integer.parseInt(maxLineNumber), fullMethod);
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_METHOD_LINE_NUMBER;
     }
 
     @Override

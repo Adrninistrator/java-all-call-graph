@@ -1,7 +1,10 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringBean;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.Map;
 
@@ -10,6 +13,14 @@ import java.util.Map;
  * @date 2022/11/16
  * @description: 写入数据库，Spring Bean信息
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_SPRING_BEAN,
+        minColumnNum = 3,
+        maxColumnNum = 3,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_SPRING_BEAN
+)
 public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbData4SpringBean> {
     /*
         记录Spring Bean相关信息
@@ -20,10 +31,12 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
      */
     private Map<String, String> springBeanMap;
 
-    @Override
-    protected WriteDbData4SpringBean genData(String line) {
-        String[] array = splitEquals(line, 3);
+    public WriteDbHandler4SpringBean(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4SpringBean genData(String[] array) {
         String springBeanName = array[0];
         String seq = array[1];
         String className = array[2];
@@ -33,11 +46,6 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
         }
         springBeanMap.put(springBeanName, className);
         return new WriteDbData4SpringBean(springBeanName, Integer.parseInt(seq), className);
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_SPRING_BEAN;
     }
 
     @Override

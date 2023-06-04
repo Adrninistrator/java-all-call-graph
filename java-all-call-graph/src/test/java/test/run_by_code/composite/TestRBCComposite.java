@@ -29,7 +29,7 @@ public class TestRBCComposite extends TestRunByCodeBase {
 
     @Test
     public void test1NoIgnore() {
-//        configureWrapper.setConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH,"D:/desktop");
+//        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH,"D:/desktop");
         ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
 
         configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +

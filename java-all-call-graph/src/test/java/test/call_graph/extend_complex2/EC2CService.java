@@ -29,5 +29,8 @@ public class EC2CService extends EC2BService {
         EC2CService service = new EC2CService();
         service.exec();
         service.exec2();
+
+        EC2BService ec2BService = new EC2BService();
+        ec2BService.exec();
     }
 }

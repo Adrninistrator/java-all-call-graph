@@ -1,8 +1,11 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCallInfo;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 
 import java.util.Set;
@@ -12,14 +15,24 @@ import java.util.Set;
  * @date 2022/11/16
  * @description: 写入数据库，方法调用信息
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL_INFO,
+        minColumnNum = 6,
+        maxColumnNum = 6,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL_INFO
+)
 public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteDbData4MethodCallInfo> {
     // 被调用对象及参数存在信息的call_id
     private Set<Integer> withInfoCallIdSet;
 
-    @Override
-    protected WriteDbData4MethodCallInfo genData(String line) {
-        String[] array = splitEquals(line, 6);
+    public WriteDbHandler4MethodCallInfo(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4MethodCallInfo genData(String[] array) {
         int callId = Integer.parseInt(array[0]);
         String objArgsSeq = array[1];
         String seq = array[2];
@@ -41,11 +54,6 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
                 type,
                 arrayFlag,
                 value);
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_METHOD_CALL_INFO;
     }
 
     @Override

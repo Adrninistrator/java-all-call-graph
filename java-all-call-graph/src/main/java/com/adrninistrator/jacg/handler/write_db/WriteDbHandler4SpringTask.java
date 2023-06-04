@@ -1,8 +1,11 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
+import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.SpringTaskCodeParser;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +16,13 @@ import java.util.Map;
  * @date 2023/1/2
  * @description: 写入数据库，Spring定时任务信息
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        otherFileName = SpringTaskCodeParser.FILE_NAME,
+        minColumnNum = 2,
+        maxColumnNum = 2,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_SPRING_TASK
+)
 public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbData4SpringTask> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4SpringTask.class);
 
@@ -25,10 +35,12 @@ public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbDat
      */
     private Map<String, String> springBeanMap;
 
-    @Override
-    protected WriteDbData4SpringTask genData(String line) {
-        String[] array = splitEquals(line, 2);
+    public WriteDbHandler4SpringTask(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4SpringTask genData(String[] array) {
         String springBeanName = array[0];
         String springBeanClassName = springBeanMap.get(springBeanName);
         if (springBeanClassName == null) {
@@ -49,11 +61,6 @@ public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbDat
 
         String methodName = array[1];
         return new WriteDbData4SpringTask(springBeanName, springBeanClassName, methodName);
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_SPRING_TASK;
     }
 
     @Override

@@ -5,7 +5,7 @@ package test.call_graph.extend_complex2;
  * @date 2023/6/1
  * @description:
  */
-public abstract class EC2BService extends EC2AService {
+public class EC2BService extends EC2AService {
 
     protected void get() {
         getB();

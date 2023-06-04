@@ -48,12 +48,12 @@ public class TestConfigGenerator {
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH, "./build/jacg_h2db_rbc");
 
         // MySQL
-//        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.FALSE.toString());
-//        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME, com.mysql.cj.jdbc.Driver.class.getName());
-//        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_URL,
+//        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.FALSE.toString());
+//        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME, com.mysql.cj.jdbc.Driver.class.getName());
+//        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,
 //                "jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true");
-//        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME, "username");
-//        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD, "password");
+//        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME, "username");
+//        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD, "password");
 
         /*
             test.jar通过执行以下命令生成：

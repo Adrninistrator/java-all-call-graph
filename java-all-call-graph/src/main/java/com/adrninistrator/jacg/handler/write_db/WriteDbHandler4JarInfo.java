@@ -1,10 +1,13 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,13 +17,23 @@ import org.slf4j.LoggerFactory;
  * @date 2022/11/15
  * @description: 写入数据库，jar包信息
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_JAR_INFO,
+        minColumnNum = 3,
+        maxColumnNum = 3,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_JAR_INFO
+)
 public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4JarInfo> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4JarInfo.class);
 
-    @Override
-    protected WriteDbData4JarInfo genData(String line) {
-        String[] array = splitEquals(line, 3);
+    public WriteDbHandler4JarInfo(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4JarInfo genData(String[] array) {
         String jarType = array[0];
         String jarNumStr = array[1];
         String jarFilePath = array[2];
@@ -45,11 +58,6 @@ public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4J
                 jarFileName,
                 lastModified,
                 jarFileHash);
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_JAR_INFO;
     }
 
     @Override

@@ -1,11 +1,15 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +20,14 @@ import java.util.Set;
  * @date 2022/11/18
  * @description: 写入数据库，方法调用关系
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL,
+        minColumnNum = 9,
+        maxColumnNum = 9,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL
+)
 public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbData4MethodCall> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4MethodCall.class);
 
@@ -37,10 +49,12 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     // 保存MyBatis写数据库的Mapper方法
     private Set<String> myBatisMapperMethodWriteSet;
 
-    @Override
-    protected WriteDbData4MethodCall genData(String line) {
-        String[] array = splitEquals(line, 9);
+    public WriteDbHandler4MethodCall(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4MethodCall genData(String[] array) {
         int callId = Integer.parseInt(array[0]);
         String callerFullMethod = array[1];
         String tmpCalleeFullMethod = array[2];
@@ -84,18 +98,15 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
         if (writeDbData4MethodCall.getCallerMethodHash().equals(writeDbData4MethodCall.getCalleeMethodHash())) {
             // 对于递归调用，不写入数据库，防止查询时出现死循环
-            logger.debug("递归调用不写入数据库 {}", line);
+            if (logger.isDebugEnabled()) {
+                logger.debug("递归调用不写入数据库 {}", StringUtils.join(array, "\t"));
+            }
             return null;
         }
 
         // 生成方法调用标记
         genCallFlags(callId, writeDbData4MethodCall);
         return writeDbData4MethodCall;
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_METHOD_CALL;
     }
 
     @Override

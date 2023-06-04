@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file;
 
 import com.adrninistrator.jacg.util.JACGXmlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.extensions.code_parser.SaveData2FileParser;
+import com.adrninistrator.javacg.extensions.code_parser.AbstractSaveData2FileParser;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import org.jdom2.Element;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import java.io.InputStream;
  * @date 2023/1/2
  * @description: 获取Spring定时任务信息
  */
-public class SpringTaskCodeParser extends SaveData2FileParser {
+public class SpringTaskCodeParser extends AbstractSaveData2FileParser {
     private static final Logger logger = LoggerFactory.getLogger(SpringTaskCodeParser.class);
 
     public static final String FILE_NAME = "spring_task";

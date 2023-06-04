@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
@@ -7,6 +8,8 @@ import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.write_db.AbstractWriteDbData;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -30,47 +33,91 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractWriteDbHandler.class);
 
-    protected AtomicBoolean failFlag = new AtomicBoolean(false);
-
     protected DbOperWrapper dbOperWrapper;
-
-    protected DbOperator dbOperator;
 
     // 每次批量写入的数量
     protected int batchSize;
 
-    // 需要处理的包名/类名前缀
-    protected Set<String> allowedClassPrefixSet;
+    private final AtomicBoolean failFlag = new AtomicBoolean(false);
 
-    protected ThreadPoolExecutor threadPoolExecutor;
+    private DbOperator dbOperator;
+
+    // 需要处理的包名/类名前缀
+    private Set<String> allowedClassPrefixSet;
+
+    private ThreadPoolExecutor threadPoolExecutor;
 
     // 任务最大队列数
-    protected int taskQueueMaxSize;
+    private int taskQueueMaxSize;
 
     // 批量插入数据库记录数
-    protected int writeRecordNum;
+    private int writeRecordNum;
 
     // 用于统计序号的Map
-    protected Map<String, Integer> seqMap;
+    private Map<String, Integer> seqMap;
 
     // 用于生成数据库记录的唯一ID
-    protected int recordId = 0;
+    private int recordId = 0;
+
+    // 需要读取的文件最小列数
+    private final int minColumnNum;
+
+    // 需要读取的文件最大列数
+    private final int maxColumnNum;
+
+    // 需要写到的数据库表信息
+    private final DbTableInfoEnum dbTableInfoEnum;
+
+    // 当前需要读取的文件路径
+    private final String filePath;
 
     protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
-    /**
-     * 初始化操作
-     */
-    public void init() {
+    public AbstractWriteDbHandler(JavaCGOutputInfo javaCGOutputInfo) {
+        JACGWriteDbHandler jacgWriteDbHandler = this.getClass().getAnnotation(JACGWriteDbHandler.class);
+        if (jacgWriteDbHandler == null) {
+            logger.error("类缺少注解 {}", this.getClass().getName());
+            throw new JavaCGRuntimeException("类缺少注解");
+        }
+
+        // 是否需要读取文件
+        boolean readFile = jacgWriteDbHandler.readFile();
+        // 需要读取的文件是属于主要的文件还是其他的文件
+        boolean mainFile = jacgWriteDbHandler.mainFile();
+        // 需要读取的主要文件类型
+        JavaCGOutPutFileTypeEnum mainFileTypeEnum = jacgWriteDbHandler.mainFileTypeEnum();
+        // 需要读取的其他文件名称
+        String otherFileName = jacgWriteDbHandler.otherFileName();
+        minColumnNum = jacgWriteDbHandler.minColumnNum();
+        maxColumnNum = jacgWriteDbHandler.maxColumnNum();
+        dbTableInfoEnum = jacgWriteDbHandler.dbTableInfoEnum();
+
+        if (readFile && (minColumnNum == 0 || maxColumnNum == 0
+                || (mainFile && (mainFileTypeEnum == null || JavaCGOutPutFileTypeEnum.OPFTE_ILLEGAL == mainFileTypeEnum))
+                || (!mainFile && StringUtils.isBlank(otherFileName))
+        )) {
+            logger.error("类需要读取文件但配置错误 {}", this.getClass().getName());
+            throw new JavaCGRuntimeException();
+        }
+
+        if (dbTableInfoEnum == null) {
+            logger.error("类的注解未配置对应的数据库表信息 {}", this.getClass().getName());
+            throw new JavaCGRuntimeException();
+        }
+
+        filePath = mainFile ? javaCGOutputInfo.getMainFilePath(mainFileTypeEnum) : javaCGOutputInfo.getOtherFilePath(otherFileName);
     }
 
     /**
      * 根据读取的文件内容生成对应对象
+     * 假如子类需要读取文件，则需要重载当前方法
      *
-     * @param line
+     * @param lineArray 文件行内容，已处理为数组形式
      * @return 返回null代表当前行不需要处理；返回非null代表需要处理
      */
-    protected abstract T genData(String line);
+    protected T genData(String[] lineArray) {
+        throw new JavaCGRuntimeException("不会调用当前方法");
+    }
 
     /**
      * 对生成数据的自定义处理
@@ -79,13 +126,6 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
      */
     protected void handleData(T data) {
     }
-
-    /**
-     * 选择对应的数据库表信息
-     *
-     * @return
-     */
-    protected abstract DbTableInfoEnum chooseDbTableInfo();
 
     /**
      * 根据需要写入的数据生成Object数组
@@ -147,10 +187,9 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
     /**
      * 读取文件并写入数据库
      *
-     * @param filePath
      * @return
      */
-    public boolean handle(String filePath) {
+    public boolean handle() {
         List<T> dataList = new ArrayList<>(batchSize);
 
         try (BufferedReader br = JavaCGFileUtil.genBufferedReader(filePath)) {
@@ -160,8 +199,15 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
                     continue;
                 }
 
+                String[] lineArray;
+                if (minColumnNum == maxColumnNum) {
+                    lineArray = splitEquals(line, minColumnNum);
+                } else {
+                    lineArray = splitBetween(line, minColumnNum, maxColumnNum);
+                }
+
                 // 根据读取的文件内容生成对应对象
-                T data = genData(line);
+                T data = genData(lineArray);
                 if (data == null) {
                     continue;
                 }
@@ -211,7 +257,6 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
         if (logger.isDebugEnabled()) {
             logger.debug("写入数据库 {} {}", currentSimpleClassName, dataList.size());
         }
-        DbTableInfoEnum dbTableInfoEnum = chooseDbTableInfo();
         // 生成用于插入数据的sql语句
         String sql = dbOperWrapper.genAndCacheInsertSql(dbTableInfoEnum, DbInsertMode.DIME_INSERT);
 

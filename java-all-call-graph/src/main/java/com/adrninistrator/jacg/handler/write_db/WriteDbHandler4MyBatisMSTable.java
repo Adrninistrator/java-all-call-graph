@@ -1,7 +1,10 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MyBatisMSTable;
+import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.MyBatisMySqlSqlInfoCodeParser;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.Set;
 
@@ -10,15 +13,24 @@ import java.util.Set;
  * @date 2023/3/14
  * @description: 写入数据库，MyBatis数据库表信息（使用MySQL）
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        otherFileName = MyBatisMySqlSqlInfoCodeParser.FILE_NAME,
+        minColumnNum = 5,
+        maxColumnNum = 5,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_MYBATIS_MS_TABLE
+)
 public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteDbData4MyBatisMSTable> {
 
     // 保存MyBatis Mapper类名
     private Set<String> myBatisMapperSet;
 
-    @Override
-    protected WriteDbData4MyBatisMSTable genData(String line) {
-        String[] array = splitEquals(line, 5);
+    public WriteDbHandler4MyBatisMSTable(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4MyBatisMSTable genData(String[] array) {
         String mapperClassName = array[0];
         // 根据完整方法前缀判断是否需要处理
         if (!isAllowedClassPrefix(mapperClassName)) {
@@ -40,11 +52,6 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
                 tableName,
                 mapperClassName
         );
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_MYBATIS_MS_TABLE;
     }
 
     @Override

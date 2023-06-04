@@ -2,20 +2,32 @@ package com.adrninistrator.jacg.handler.write_db;
 
 import com.adrninistrator.jacg.annotation.util.AnnotationAttributesParseUtil;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ClassAnnotation;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * @author adrninistrator
  * @date 2022/11/15
  * @description: 写入数据库，类的注解
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_CLASS_ANNOTATION,
+        minColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE,
+        maxColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_ANNOTATION
+)
 public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<WriteDbData4ClassAnnotation> {
     /*
         保存Spring MVC相关类名及@RequestMapping注解属性值
@@ -26,11 +38,13 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
      */
     private final Map<String, List<String>> classRequestMappingMap = new HashMap<>();
 
-    @Override
-    protected WriteDbData4ClassAnnotation genData(String line) {
-        // 拆分时限制列数，最后一列注解属性中可能出现空格
-        String[] array = splitBetween(line, JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE, JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE);
+    public WriteDbHandler4ClassAnnotation(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4ClassAnnotation genData(String[] array) {
+        // 拆分时限制列数，最后一列注解属性中可能出现空格
         String className = array[0];
 
         // 根据类名前缀判断是否需要处理
@@ -63,11 +77,6 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
         }
 
         return new WriteDbData4ClassAnnotation(simpleClassName, annotationName, attributeName, attributeType, attributeValue, className);
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_CLASS_ANNOTATION;
     }
 
     @Override

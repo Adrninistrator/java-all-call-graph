@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file;
 
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.extensions.code_parser.SaveData2FileParser;
+import com.adrninistrator.javacg.extensions.code_parser.AbstractSaveData2FileParser;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.mybatis_mysql_table_parser.common.enums.MySqlStatementEnum;
 import com.adrninistrator.mybatis_mysql_table_parser.dto.MyBatisMySqlInfo;
@@ -21,7 +21,7 @@ import java.util.Map;
  * @date 2023/1/1
  * @description: 从MyBatis的XML文件获取数据库操作语句及数据库表名（支持MySQL数据库）
  */
-public class MyBatisMySqlSqlInfoCodeParser extends SaveData2FileParser {
+public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
     private static final Logger logger = LoggerFactory.getLogger(MyBatisMySqlSqlInfoCodeParser.class);
 
     public static final String FILE_NAME = "mybatis_ms_table";

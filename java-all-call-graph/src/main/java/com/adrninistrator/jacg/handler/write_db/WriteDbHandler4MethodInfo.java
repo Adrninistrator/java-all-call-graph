@@ -1,10 +1,13 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodArgType;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +17,14 @@ import java.util.List;
  * @date 2022/11/16
  * @description: 写入数据库，方法的信息
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_INFO,
+        minColumnNum = 3,
+        maxColumnNum = 3,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_INFO
+)
 public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbData4MethodInfo> {
 
     // 方法的参数类型写入数据库的类
@@ -22,10 +33,12 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
     // 方法的参数类型相关信息
     private final List<WriteDbData4MethodArgType> writeDbData4MethodArgTypeList = new ArrayList<>(batchSize);
 
-    @Override
-    protected WriteDbData4MethodInfo genData(String line) {
-        String[] array = splitEquals(line, 3);
+    public WriteDbHandler4MethodInfo(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4MethodInfo genData(String[] array) {
         String fullMethod = array[0];
         // 根据完整方法前缀判断是否需要处理
         if (!isAllowedClassPrefix(fullMethod)) {
@@ -50,11 +63,6 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
                 fullMethod,
                 simpleReturnType,
                 returnType);
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_METHOD_INFO;
     }
 
     @Override

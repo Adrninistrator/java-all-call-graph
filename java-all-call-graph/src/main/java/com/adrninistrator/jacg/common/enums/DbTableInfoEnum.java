@@ -210,6 +210,7 @@ public enum DbTableInfoEnum {
             DC.SPT_CLASS_NAME,
             DC.SPT_METHOD_NAME,
     }),
+    DTIE_ILLEGAL("illegal", null),
     ;
 
     private final String tableNameKeyword;

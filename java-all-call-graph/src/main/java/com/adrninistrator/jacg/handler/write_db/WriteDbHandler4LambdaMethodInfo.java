@@ -1,21 +1,34 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4LambdaMethodInfo;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGStreamUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 /**
  * @author adrninistrator
  * @date 2023/1/10
  * @description: 写入数据库，Lambda表达式方法信息
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_LAMBDA_METHOD_INFO,
+        minColumnNum = 2,
+        maxColumnNum = 3,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_LAMBDA_METHOD_INFO
+)
 public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<WriteDbData4LambdaMethodInfo> {
-    @Override
-    protected WriteDbData4LambdaMethodInfo genData(String line) {
-        String[] array = splitBetween(line, 2, 3);
+    public WriteDbHandler4LambdaMethodInfo(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
+    }
 
+    @Override
+    protected WriteDbData4LambdaMethodInfo genData(String[] array) {
         int callId = Integer.parseInt(array[0]);
         String lambdaCalleeFullMethod = array[1];
         String lambdaCalleeClassName = JACGClassMethodUtil.getClassNameFromMethod(lambdaCalleeFullMethod);
@@ -43,11 +56,6 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
         writeDbData4LambdaMethodInfo.setLambdaNextIsTerminal(JACGStreamUtil.isStreamTerminalMethod(lambdaNextMethodName));
 
         return writeDbData4LambdaMethodInfo;
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_LAMBDA_METHOD_INFO;
     }
 
     @Override

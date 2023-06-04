@@ -1,9 +1,12 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ExtendsImpl;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,18 +16,25 @@ import java.util.Set;
  * @date 2022/11/16
  * @description: 写入数据库，继承与实现相关信息
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_EXTENDS_IMPL,
+        minColumnNum = 4,
+        maxColumnNum = 4,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_EXTENDS_IMPL
+)
 public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbData4ExtendsImpl> {
     // 父类或接口类名
     private Set<String> superClassOrInterfaceNameSet = new HashSet<>();
 
-    public WriteDbHandler4ExtendsImpl() {
+    public WriteDbHandler4ExtendsImpl(JavaCGOutputInfo javaCGOutputInfo) {
+        super(javaCGOutputInfo);
         initSeqMap();
     }
 
     @Override
-    protected WriteDbData4ExtendsImpl genData(String line) {
-        String[] array = splitEquals(line, 4);
-
+    protected WriteDbData4ExtendsImpl genData(String[] array) {
         String className = array[0];
         int accessFlags = Integer.parseInt(array[1]);
         String type = array[2];
@@ -50,11 +60,6 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
         writeDbData4ExtendsImpl.setUpwardSimpleClassName(dbOperWrapper.getSimpleClassName(upwardClassName));
         writeDbData4ExtendsImpl.setUpwardClassName(upwardClassName);
         return writeDbData4ExtendsImpl;
-    }
-
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_EXTENDS_IMPL;
     }
 
     @Override
