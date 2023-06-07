@@ -12,6 +12,7 @@ import test.call_graph.annotation.CallMethodWithAnnotation;
 import test.call_graph.annotation.MethodWithAnnotation;
 import test.call_graph.argument.TestArgument1;
 import test.call_graph.argument.TestArgument2;
+import test.call_graph.argument.TestArgumentGenerics1;
 import test.call_graph.cycle_call.TestCycleCall1;
 import test.call_graph.extend_complex.ChildClassA1;
 import test.call_graph.extend_complex.ChildClassA2;
@@ -39,6 +40,7 @@ public class TestConfigGenerator {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, "test_rbc");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_2.getDetail());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM, "20");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, "1000");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, Boolean.TRUE.toString());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH, "");
@@ -84,6 +86,7 @@ public class TestConfigGenerator {
                 TestArgument1.class.getName() + ":test(",
                 TestArgument2.class.getName() + ":test(",
                 TestArgument2.class.getName() + ":test(",
+                TestArgumentGenerics1.class.getName(),
                 CallMethodWithAnnotation.class.getName() + ":test1(",
                 InterfaceSuper1.class.getName() + ":testSuper1(",
                 InterfaceSuper2.class.getName() + ":testSuper2(",

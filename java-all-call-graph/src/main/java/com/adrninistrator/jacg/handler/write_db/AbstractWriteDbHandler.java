@@ -12,6 +12,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractWriteDbHandler.class);
+
+    protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
     protected DbOperWrapper dbOperWrapper;
 
@@ -59,6 +62,15 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
     // 用于生成数据库记录的唯一ID
     private int recordId = 0;
 
+    // 需要读取的文件是属于主要的文件还是其他的文件
+    private final boolean mainFile;
+
+    // 需要读取的主要文件类型
+    private final JavaCGOutPutFileTypeEnum mainFileTypeEnum;
+
+    // 需要读取的其他文件名称
+    private final String otherFileName;
+
     // 需要读取的文件最小列数
     private final int minColumnNum;
 
@@ -68,12 +80,13 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
     // 需要写到的数据库表信息
     private final DbTableInfoEnum dbTableInfoEnum;
 
-    // 当前需要读取的文件路径
-    private final String filePath;
+    // 当前需要读取的文件名称
+    private String fileName;
 
-    protected final String currentSimpleClassName = this.getClass().getSimpleName();
+    // 当前需要读取的文件描述
+    private String fileDesc;
 
-    public AbstractWriteDbHandler(JavaCGOutputInfo javaCGOutputInfo) {
+    public AbstractWriteDbHandler() {
         JACGWriteDbHandler jacgWriteDbHandler = this.getClass().getAnnotation(JACGWriteDbHandler.class);
         if (jacgWriteDbHandler == null) {
             logger.error("类缺少注解 {}", this.getClass().getName());
@@ -82,17 +95,23 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
 
         // 是否需要读取文件
         boolean readFile = jacgWriteDbHandler.readFile();
-        // 需要读取的文件是属于主要的文件还是其他的文件
-        boolean mainFile = jacgWriteDbHandler.mainFile();
-        // 需要读取的主要文件类型
-        JavaCGOutPutFileTypeEnum mainFileTypeEnum = jacgWriteDbHandler.mainFileTypeEnum();
-        // 需要读取的其他文件名称
-        String otherFileName = jacgWriteDbHandler.otherFileName();
+        mainFile = jacgWriteDbHandler.mainFile();
+        mainFileTypeEnum = jacgWriteDbHandler.mainFileTypeEnum();
+        otherFileName = jacgWriteDbHandler.otherFileName();
         minColumnNum = jacgWriteDbHandler.minColumnNum();
         maxColumnNum = jacgWriteDbHandler.maxColumnNum();
         dbTableInfoEnum = jacgWriteDbHandler.dbTableInfoEnum();
 
-        if (readFile && (minColumnNum == 0 || maxColumnNum == 0
+        if (dbTableInfoEnum == null) {
+            logger.error("类的注解未配置对应的数据库表信息 {}", this.getClass().getName());
+            throw new JavaCGRuntimeException();
+        }
+
+        if (!readFile) {
+            return;
+        }
+
+        if ((minColumnNum == 0 || maxColumnNum == 0
                 || (mainFile && (mainFileTypeEnum == null || JavaCGOutPutFileTypeEnum.OPFTE_ILLEGAL == mainFileTypeEnum))
                 || (!mainFile && StringUtils.isBlank(otherFileName))
         )) {
@@ -100,12 +119,21 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
             throw new JavaCGRuntimeException();
         }
 
-        if (dbTableInfoEnum == null) {
-            logger.error("类的注解未配置对应的数据库表信息 {}", this.getClass().getName());
-            throw new JavaCGRuntimeException();
+        if (DbTableInfoEnum.DTIE_ILLEGAL != dbTableInfoEnum) {
+            String[] fileColumnDesc = chooseFileColumnDesc();
+            if (ArrayUtils.isEmpty(fileColumnDesc)) {
+                logger.error("当前处理的文件列的描述为空 {}", this.getClass().getName());
+                throw new JavaCGRuntimeException();
+            }
+
+            if (fileColumnDesc.length != maxColumnNum) {
+                logger.error("当前处理的文件列的描述数量与最大列数不同 {} {} {}", this.getClass().getName(), fileColumnDesc.length, maxColumnNum);
+                throw new JavaCGRuntimeException();
+            }
         }
 
-        filePath = mainFile ? javaCGOutputInfo.getMainFilePath(mainFileTypeEnum) : javaCGOutputInfo.getOtherFilePath(otherFileName);
+        fileName = mainFile ? mainFileTypeEnum.getFileName() : otherFileName;
+        fileDesc = mainFile ? mainFileTypeEnum.getDesc() : chooseOtherFileDesc();
     }
 
     /**
@@ -125,6 +153,34 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
      * @param data
      */
     protected void handleData(T data) {
+    }
+
+    /**
+     * 返回当前处理的文件列的描述
+     * 假如子类需要读取文件，则需要重载当前方法
+     *
+     * @return
+     */
+    public String[] chooseFileColumnDesc() {
+        throw new JavaCGRuntimeException("不会调用当前方法");
+    }
+
+    /**
+     * 返回需要读取的其他文件描述
+     *
+     * @return
+     */
+    public String chooseOtherFileDesc() {
+        return null;
+    }
+
+    /**
+     * 返回需要读取的其他文件的详细说明
+     *
+     * @return
+     */
+    public String[] chooseOtherFileDetailInfo() {
+        return null;
     }
 
     /**
@@ -187,11 +243,13 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
     /**
      * 读取文件并写入数据库
      *
+     * @param javaCGOutputInfo
      * @return
      */
-    public boolean handle() {
+    public boolean handle(JavaCGOutputInfo javaCGOutputInfo) {
         List<T> dataList = new ArrayList<>(batchSize);
 
+        String filePath = mainFile ? javaCGOutputInfo.getMainFilePath(mainFileTypeEnum) : javaCGOutputInfo.getOtherFilePath(otherFileName);
         try (BufferedReader br = JavaCGFileUtil.genBufferedReader(filePath)) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -336,6 +394,14 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
 
     public int getWriteRecordNum() {
         return writeRecordNum;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getFileDesc() {
+        return fileDesc;
     }
 
     //

@@ -6,7 +6,6 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodArgGenericsType;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.Set;
 
@@ -26,10 +25,6 @@ import java.util.Set;
 public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler<WriteDbData4MethodArgGenericsType> {
     // 方法参数存在泛型类型的方法HASH+长度
     private Set<String> withGenericsTypeMethodHash;
-
-    public WriteDbHandler4MethodArgGenericsType(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4MethodArgGenericsType genData(String[] array) {
@@ -70,6 +65,27 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
                 data.getSimpleGenericsType(),
                 data.getGenericsType(),
                 data.getFullMethod()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整方法（类名+方法名+参数）",
+                "参数序号，从0开始",
+                "类型，t:参数类型，gt:参数泛型类型",
+                "类型序号，参数类型固定为0，参数泛型类型从0开始",
+                "泛型类型或参数类型类名"
+        };
+    }
+
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法参数中使用的泛型类型信息",
+                "示例：”TestArgumentGenerics1.testAll(int i, List<TestArgument1> list)“",
+                "对于以上示例，会记录对应的方法，以及方法参数中涉及泛型的List、TestArgument1"
         };
     }
 

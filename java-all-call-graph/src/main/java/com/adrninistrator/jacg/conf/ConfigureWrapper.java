@@ -416,6 +416,11 @@ public class ConfigureWrapper {
             return handleDbH2FilePath(strValue);
         }
 
+        if (ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER == mainConfig && StringUtils.isBlank(strValue)) {
+            // 当前参数允许为空，默认为false
+            return Boolean.FALSE;
+        }
+
         if (ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED == mainConfig && StringUtils.isBlank(strValue)) {
             // 当前参数允许为空，默认为false
             return Boolean.FALSE;

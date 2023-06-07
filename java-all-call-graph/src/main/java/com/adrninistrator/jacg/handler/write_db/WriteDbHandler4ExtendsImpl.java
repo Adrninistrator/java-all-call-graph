@@ -6,7 +6,6 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4ExtendsImpl;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,8 +27,7 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
     // 父类或接口类名
     private Set<String> superClassOrInterfaceNameSet = new HashSet<>();
 
-    public WriteDbHandler4ExtendsImpl(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
+    public WriteDbHandler4ExtendsImpl() {
         initSeqMap();
     }
 
@@ -74,6 +72,23 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
                 data.getExistsDownwardClasses(),
                 data.getUpwardSimpleClassName(),
                 data.getUpwardClassName()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整类名",
+                "类的access_flags",
+                "类型，e:继承，i:实现",
+                "父类或接口的完整类名"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "类继承类，或类实现接口相关的信息"
         };
     }
 

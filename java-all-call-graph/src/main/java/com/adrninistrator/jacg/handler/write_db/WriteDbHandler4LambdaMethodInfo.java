@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGStreamUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 /**
  * @author adrninistrator
@@ -23,9 +22,6 @@ import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
         dbTableInfoEnum = DbTableInfoEnum.DTIE_LAMBDA_METHOD_INFO
 )
 public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<WriteDbData4LambdaMethodInfo> {
-    public WriteDbHandler4LambdaMethodInfo(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4LambdaMethodInfo genData(String[] array) {
@@ -86,6 +82,22 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
                 JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsStream()),
                 JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsIntermediate()),
                 JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsTerminal())
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "方法调用序号",
+                "Lambda表达式被调用方完整方法（类名+方法名+参数）",
+                "Lambda表达式下一个被调用完整方法（类名+方法名+参数）"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "Lambda表达式方法调用相关信息"
         };
     }
 }

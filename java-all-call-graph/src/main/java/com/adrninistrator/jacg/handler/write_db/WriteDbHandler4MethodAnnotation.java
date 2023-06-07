@@ -11,7 +11,6 @@ import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +50,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
 
     // Spring Controller相关信息
     private final List<WriteDbData4SpringController> writeDbData4SpringControllerList = new ArrayList<>(batchSize);
-
-    public WriteDbHandler4MethodAnnotation(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4MethodAnnotation genData(String[] array) {
@@ -111,6 +106,26 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 data.getFullMethod(),
                 data.getSimpleClassName(),
                 data.getSpringMappingAnnotation()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整方法（类名+方法名+参数）",
+                "注解类名",
+                "注解属性名称，空字符串代表无注解属性",
+                "注解属性类型，s:字符串；bs:包含回车换行的字符串；m:JSON字符串，Map；ls:JSON字符串，List+String；lm:JSON字符串，List+Map",
+                "注解属性值"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法上指定的注解信息",
+                "若注解没有属性值，则相关字段为空",
+                "若注解有属性值，则每个属性值占一行"
         };
     }
 

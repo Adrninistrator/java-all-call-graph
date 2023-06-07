@@ -3,8 +3,6 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringController;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 
 /**
  * @author adrninistrator
@@ -16,10 +14,6 @@ import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
         dbTableInfoEnum = DbTableInfoEnum.DTIE_SPRING_CONTROLLER
 )
 public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<WriteDbData4SpringController> {
-
-    public WriteDbHandler4SpringController(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringController data) {

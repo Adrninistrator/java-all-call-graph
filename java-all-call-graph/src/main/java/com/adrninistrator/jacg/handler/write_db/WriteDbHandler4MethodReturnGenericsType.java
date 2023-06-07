@@ -6,7 +6,6 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodReturnGenericsType
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 /**
  * @author adrninistrator
@@ -22,9 +21,6 @@ import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_RETURN_GENERICS_TYPE
 )
 public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHandler<WriteDbData4MethodReturnGenericsType> {
-    public WriteDbHandler4MethodReturnGenericsType(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4MethodReturnGenericsType genData(String[] array) {
@@ -61,6 +57,25 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
                 data.getSimpleGenericsType(),
                 data.getGenericsType(),
                 data.getFullMethod()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整方法（类名+方法名+参数）",
+                "类型，t:参数类型，gt:参数泛型类型",
+                "类型序号，参数类型固定为0，参数泛型类型从0开始",
+                "泛型类型或参数类型类名"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法返回类型使用的泛型类型信息",
+                "示例：”Map<Integer, String> test2()“",
+                "对于以上示例，会记录对应的方法，以及方法参数中涉及泛型的Map、Integer、String"
         };
     }
 }

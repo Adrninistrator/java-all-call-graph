@@ -4,7 +4,6 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringBean;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.Map;
 
@@ -31,10 +30,6 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
      */
     private Map<String, String> springBeanMap;
 
-    public WriteDbHandler4SpringBean(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
-
     @Override
     protected WriteDbData4SpringBean genData(String[] array) {
         String springBeanName = array[0];
@@ -55,6 +50,22 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
                 data.getSpringBeanName(),
                 data.getSeq(),
                 data.getClassName()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "Spring Bean的名称",
+                "序号，从0开始，大于0代表有多种可能",
+                "完整类名"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "Spring Bean信息，包括Bean的名称及完整类名"
         };
     }
 

@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +31,6 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
 
     // 方法的参数类型相关信息
     private final List<WriteDbData4MethodArgType> writeDbData4MethodArgTypeList = new ArrayList<>(batchSize);
-
-    public WriteDbHandler4MethodInfo(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4MethodInfo genData(String[] array) {
@@ -75,6 +70,23 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
                 data.getFullMethod(),
                 data.getSimpleReturnType(),
                 data.getReturnType()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整方法（类名+方法名+参数）",
+                "方法的access_flags",
+                "返回类型类名"
+        };
+    }
+
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法的信息，包括方法的access_flags、返回类型"
         };
     }
 

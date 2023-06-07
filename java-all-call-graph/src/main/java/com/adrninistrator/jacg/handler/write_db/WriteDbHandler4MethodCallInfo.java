@@ -5,7 +5,6 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCallInfo;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 
 import java.util.Set;
@@ -26,10 +25,6 @@ import java.util.Set;
 public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteDbData4MethodCallInfo> {
     // 被调用对象及参数存在信息的call_id
     private Set<Integer> withInfoCallIdSet;
-
-    public WriteDbHandler4MethodCallInfo(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4MethodCallInfo genData(String[] array) {
@@ -65,6 +60,25 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
                 data.getType(),
                 data.getArrayFlag(),
                 data.getTheValue()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "方法调用序号",
+                "被调用对象或参数序号，0代表被调用对象，1开始为参数",
+                "序号，从0开始，大于0代表有多种可能",
+                "类型，t:类型，v:值，bv:BASE64编码后的值，sf:静态字段，sfm:静态字段的方法",
+                "是否为数组格式，1:是，0:否",
+                "对应的值"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法调用信息，包括方法调用中被调用对象与参数可能的类型以及值"
         };
     }
 

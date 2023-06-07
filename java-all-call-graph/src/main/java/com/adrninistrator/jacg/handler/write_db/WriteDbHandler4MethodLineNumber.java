@@ -6,7 +6,6 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 /**
  * @author adrninistrator
@@ -22,9 +21,6 @@ import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_LINE_NUMBER
 )
 public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<WriteDbData4MethodLineNumber> {
-    public WriteDbHandler4MethodLineNumber(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4MethodLineNumber genData(String[] array) {
@@ -50,6 +46,22 @@ public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<Writ
                 data.getMinLineNumber(),
                 data.getMaxLineNumber(),
                 data.getFullMethod()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整方法（类名+方法名+参数）",
+                "起始代码行号",
+                "结束代码行号"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法代码行号信息，包括起始行号与结束行号"
         };
     }
 }

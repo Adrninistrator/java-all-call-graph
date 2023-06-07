@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ClassAnnotation;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,10 +36,6 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
             @RequestMapping注解属性值列表
      */
     private final Map<String, List<String>> classRequestMappingMap = new HashMap<>();
-
-    public WriteDbHandler4ClassAnnotation(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4ClassAnnotation genData(String[] array) {
@@ -89,6 +84,26 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
                 data.getAnnotationType(),
                 data.getAttributeValue(),
                 data.getClassName()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整类名",
+                "注解类名",
+                "注解属性名称，空字符串代表无注解属性",
+                "注解属性类型，s:字符串；bs:包含回车换行的字符串；m:JSON字符串，Map；ls:JSON字符串，List+String；lm:JSON字符串，List+Map",
+                "注解属性值"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "类上指定的注解信息",
+                "若注解没有属性值，则相关字段为空",
+                "若注解有属性值，则每个属性值占一行"
         };
     }
 

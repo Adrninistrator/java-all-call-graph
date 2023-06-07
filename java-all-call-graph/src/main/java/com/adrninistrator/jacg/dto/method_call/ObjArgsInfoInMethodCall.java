@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.dto.method_call;
 
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class ObjArgsInfoInMethodCall {
      *
      * @return
      */
+    @JsonIgnore
     public boolean isArgInfoMapEmpty() {
         return JACGUtil.isMapEmpty(argInfoMap);
     }
@@ -43,6 +45,7 @@ public class ObjArgsInfoInMethodCall {
      *
      * @return
      */
+    @JsonIgnore
     public List<Integer> getArgSeqList() {
         if (isArgInfoMapEmpty()) {
             return Collections.emptyList();
@@ -58,6 +61,7 @@ public class ObjArgsInfoInMethodCall {
      * @param argSeq
      * @return
      */
+    @JsonIgnore
     public List<MethodCallInfo> getArgMethodCallInfo(Integer argSeq) {
         if (isArgInfoMapEmpty()) {
             return Collections.emptyList();

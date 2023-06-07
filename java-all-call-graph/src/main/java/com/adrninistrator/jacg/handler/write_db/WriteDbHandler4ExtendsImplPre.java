@@ -4,7 +4,6 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ExtendsImpl;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 
 import java.util.HashSet;
@@ -26,10 +25,6 @@ import java.util.Set;
 public class WriteDbHandler4ExtendsImplPre extends AbstractWriteDbHandler<WriteDbData4ExtendsImpl> {
     // 父类或接口类名
     private final Set<String> superClassOrInterfaceNameSet = new HashSet<>();
-
-    public WriteDbHandler4ExtendsImplPre(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4ExtendsImpl genData(String[] array) {

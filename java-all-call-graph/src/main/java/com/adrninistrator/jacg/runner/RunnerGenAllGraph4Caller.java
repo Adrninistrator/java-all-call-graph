@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
@@ -61,6 +62,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 简单类名及对应的完整类名Map
     protected Map<String, String> simpleAndClassNameMap = new ConcurrentHashMap<>();
 
+    // 在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否需要忽略
+    private boolean ignoreDupCalleeInOneCaller;
+
     @Override
     public boolean preHandle() {
         // 公共预处理
@@ -77,6 +81,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         if (!createOutputDir(JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER)) {
             return false;
         }
+
+        ignoreDupCalleeInOneCaller = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER);
         return true;
     }
 
@@ -508,6 +514,14 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         // 是否需要显示方法调用被调用方法数
         boolean showCalleeMethodNum;
 
+        // 记录各个层级的调用方法中有被调用过的方法（包含方法注解、方法调用业务功能数据）
+        ListAsStack<Set<String>> recordedCalleeStack = null;
+        if (ignoreDupCalleeInOneCaller) {
+            recordedCalleeStack = new ListAsStack<>();
+            // 为第0层的调用者添加Set，不能在以下while循环的if (callGraphNode4CallerStack.atBottom())中添加，因为会执行多次
+            recordedCalleeStack.push(new HashSet<>());
+        }
+
         while (true) {
             int lineNumStart = JACGConstants.LINE_NUM_NONE;
             int lineNumEnd = JACGConstants.LINE_NUM_NONE;
@@ -522,7 +536,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             WriteDbData4MethodCall calleeMethod = queryOneCalleeMethod(callGraphNode4Caller, lineNumStart, lineNumEnd);
             if (calleeMethod == null) {
                 // 查询到被调用方法为空时的处理
-                if (handleCalleeEmptyResult(callGraphNode4CallerStack, childCallSuperInfoStack)) {
+                if (handleCalleeEmptyResult(callGraphNode4CallerStack, childCallSuperInfoStack, recordedCalleeStack)) {
                     return true;
                 }
                 continue;
@@ -562,6 +576,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 return false;
             }
 
+            // 若当前被调用方法在调用方法中已被调用过则忽略
+            if (ignoreDupCalleeInOneCaller && checkIgnoreDupCalleeInOneCaller(recordedCalleeStack, callGraphNode4CallerStack, calleeInfo, methodCallId)) {
+                continue;
+            }
+
             // 处理方法调用的节点信息
             int back2Level = handleCallerNodeInfo(callGraphNode4CallerStack, calleeMethodHash, calleeFullMethod, showCalleeMethodNum);
 
@@ -586,6 +605,10 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             callGraphNode4CallerStack.push(nextCallGraphNode4Caller);
 
             // 继续下一层处理
+            if (ignoreDupCalleeInOneCaller) {
+                // 开始处理下一层，设置对应的Set
+                recordedCalleeStack.push(new HashSet<>());
+            }
         }
     }
 
@@ -851,13 +874,21 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
      *
      * @param callGraphNode4CallerStack
      * @param childCallSuperInfoStack
+     * @param recordedCalleeStack
      * @return true: 需要结束循环 false: 不结束循环
      */
     private boolean handleCalleeEmptyResult(ListAsStack<CallGraphNode4Caller> callGraphNode4CallerStack,
-                                            ListAsStack<ChildCallSuperInfo> childCallSuperInfoStack) {
+                                            ListAsStack<ChildCallSuperInfo> childCallSuperInfoStack,
+                                            ListAsStack<Set<String>> recordedCalleeStack) {
         if (callGraphNode4CallerStack.atBottom()) {
             // 当前处理的节点为最上层节点，结束循环
             return true;
+        }
+
+        // 当前处理的节点不是最上层节点，返回上一层处理
+        if (ignoreDupCalleeInOneCaller) {
+            // 清空不再使用的下一层Set
+            recordedCalleeStack.removeTop();
         }
 
         if (!childCallSuperInfoStack.isEmpty()) {
@@ -938,6 +969,31 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         addRunInTransaction(calleeInfo, methodCallId, callType, methodAnnotationMap);
 
         return calleeInfo.toString();
+    }
+
+    /**
+     * 若当前被调用方法在调用方法中已被调用过则忽略
+     *
+     * @param recordedCalleeStack
+     * @param callGraphNode4CallerStack
+     * @param calleeInfo
+     * @param methodCallId
+     * @return true: 需要忽略 false:不忽略
+     */
+    private boolean checkIgnoreDupCalleeInOneCaller(ListAsStack<Set<String>> recordedCalleeStack,
+                                                    ListAsStack<CallGraphNode4Caller> callGraphNode4CallerStack,
+                                                    String calleeInfo,
+                                                    int methodCallId) {
+        Set<String> callerRecordedCalleeSet = recordedCalleeStack.peek();
+        if (!callerRecordedCalleeSet.add(calleeInfo)) {
+            // 当前被调用方法在调用方法中已被调用过，忽略
+            logger.debug("忽略一个方法中被调用多次的方法 {} {}", callGraphNode4CallerStack.getHead(), calleeInfo);
+
+            // 更新当前处理节点的id
+            callGraphNode4CallerStack.peek().setMethodCallId(methodCallId);
+            return true;
+        }
+        return false;
     }
 
     // 记录被调用方法信息

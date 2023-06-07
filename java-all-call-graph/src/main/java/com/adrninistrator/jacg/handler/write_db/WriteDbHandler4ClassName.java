@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,10 +26,6 @@ import java.util.Set;
 )
 public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData4ClassName> {
     private final Set<String> handledClassNameSet = new HashSet<>();
-
-    public WriteDbHandler4ClassName(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4ClassName genData(String[] array) {
@@ -60,6 +55,22 @@ public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData
                 data.getClassName(),
                 data.getSimpleClassName(),
                 data.getDuplicateClass()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整类名"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "项目中所有引用的类",
+                "文件中内容为#的行将各个类中引用的类分隔开；第一个类代表引用其他类的类，后面的类代表被引用的类",
+                "可能出现重复值"
         };
     }
 }

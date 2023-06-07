@@ -1,5 +1,5 @@
 CREATE TABLE if not exists jacg_lambda_method_info_{appName} (
-  call_id int NOT NULL COMMENT '调用序号',
+  call_id int NOT NULL COMMENT '方法调用序号',
   lambda_callee_class_name varchar(500) NOT NULL COMMENT 'Lambda表达式被调用方类名',
   lambda_callee_method_name varchar(300) NOT NULL COMMENT 'Lambda表达式被调用方方法名',
   lambda_callee_full_method text NOT NULL COMMENT 'Lambda表达式被调用方完整方法（类名+方法名+参数）',

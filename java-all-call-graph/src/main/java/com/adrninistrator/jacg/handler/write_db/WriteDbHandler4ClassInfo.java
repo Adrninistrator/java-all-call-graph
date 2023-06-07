@@ -5,7 +5,6 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ClassInfo;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 /**
  * @author adrninistrator
@@ -21,9 +20,6 @@ import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
         dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_INFO
 )
 public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData4ClassInfo> {
-    public WriteDbHandler4ClassInfo(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4ClassInfo genData(String[] array) {
@@ -44,6 +40,21 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
                 data.getSimpleClassName(),
                 data.getAccessFlags(),
                 data.getClassName()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整类名",
+                "类的access_flags"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "类的信息，主要是access_flags"
         };
     }
 }

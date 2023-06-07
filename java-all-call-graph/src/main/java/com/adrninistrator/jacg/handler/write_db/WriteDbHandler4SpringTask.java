@@ -5,7 +5,6 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.SpringTaskCodeParser;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +33,6 @@ public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbDat
             Spring Bean对应类名
      */
     private Map<String, String> springBeanMap;
-
-    public WriteDbHandler4SpringTask(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4SpringTask genData(String[] array) {
@@ -70,6 +65,26 @@ public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbDat
                 data.getSpringBeanName(),
                 data.getClassName(),
                 data.getMethodName()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "Spring Bean的名称",
+                "方法名"
+        };
+    }
+
+    @Override
+    public String chooseOtherFileDesc() {
+        return "Spring定时任务信息表";
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "Spring定时任务信息，包括Bean的名称及方法名称"
         };
     }
 

@@ -4,7 +4,6 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4InnerClass;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,10 +23,6 @@ import java.util.Set;
 )
 public class WriteDbHandler4InnerClassInfo extends AbstractWriteDbHandler<WriteDbData4InnerClass> {
     private final Set<String> handledClassNameSet = new HashSet<>();
-
-    public WriteDbHandler4InnerClassInfo(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4InnerClass genData(String[] array) {
@@ -59,6 +54,22 @@ public class WriteDbHandler4InnerClassInfo extends AbstractWriteDbHandler<WriteD
                 data.getSimpleOuterClassName(),
                 data.getOuterClassName(),
                 data.getAnonymousClass()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "内部类完整类名",
+                "外部类完整类名",
+                "是否为匿名内部类，1:是，0:否"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "内部类相关的信息，包括内部类与对应的外部类"
         };
     }
 }

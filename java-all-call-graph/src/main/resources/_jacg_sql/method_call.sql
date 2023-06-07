@@ -1,5 +1,5 @@
 CREATE TABLE if not exists jacg_method_call_{appName} (
-  call_id int NOT NULL COMMENT '调用序号',
+  call_id int NOT NULL COMMENT '方法调用序号',
   call_type varchar(10) NOT NULL COMMENT '调用类型',
   callee_obj_type varchar(10) NOT NULL COMMENT '被调用对象类型，t:调用当前实例的方法，sf:调用静态字段的方法，f:调用字段的方法，v:调用其他变量的方法',
   enabled tinyint NOT NULL COMMENT '是否启用，1:启用',

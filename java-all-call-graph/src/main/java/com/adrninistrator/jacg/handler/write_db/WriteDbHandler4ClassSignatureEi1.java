@@ -4,7 +4,6 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ClassSignatureEi1;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 /**
  * @author adrninistrator
@@ -15,15 +14,11 @@ import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_CLASS_SIGNATURE_EI1,
-        otherFileName = "",
         minColumnNum = 5,
         maxColumnNum = 5,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_SIGNATURE_EI1
 )
 public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<WriteDbData4ClassSignatureEi1> {
-    public WriteDbHandler4ClassSignatureEi1(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4ClassSignatureEi1 genData(String[] array) {
@@ -52,6 +47,26 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
                 data.getSeq(),
                 data.getSignClassName(),
                 data.getClassName()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整类名",
+                "类型，e:继承，i:实现",
+                "父类或接口的类名",
+                "序号，从0开始",
+                "签名中的完整类名"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "类在继承类或实现接口时，签名中涉及的其他类信息",
+                "例如：“TestClassWithSignature1 implements TestInterfaceWithSignature<String, Integer>”，涉及String、Integer",
+                "例如：“TestClassWithSignature2 extends TestAbstractClassWithSignature<TestArgument1, TestArgument2>”，涉及TestArgument1、TestArgument2"
         };
     }
 }

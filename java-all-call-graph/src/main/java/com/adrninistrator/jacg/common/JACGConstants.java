@@ -45,6 +45,8 @@ public class JACGConstants {
     public static final String FLAG_UNDER_LINE = "_";
     public static final String FLAG_TAB = "\t";
     public static final String FLAG_COMMA_WITH_SPACE = ", ";
+    public static final String FLAG_FILE_PROTOCOL = "file:/";
+    public static final String FLAG_EXCLAMATION = "!";
 
     public static final char FLAG_CHAR_SPACE = FLAG_SPACE.charAt(0);
 
@@ -57,6 +59,7 @@ public class JACGConstants {
     public static final String EXT_MD = ".md";
     public static final String EXT_EMPTY_MD = FLAG_EMPTY + EXT_MD;
     public static final String EXT_SQL = ".sql";
+    public static final String EXT_CLASS = ".class";
 
     public static final String NEW_LINE = "\n";
 

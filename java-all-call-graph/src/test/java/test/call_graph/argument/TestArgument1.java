@@ -16,6 +16,8 @@ public class TestArgument1 {
     public static void test() {
         logger.info("test\ra");
         System.out.println("test\ra");
+        System.out.println("test\ra");
+        System.out.println("test\ra");
         System.out.println("test\nb");
         System.out.println("test\r\nc");
         System.out.println("test\tc");
@@ -31,6 +33,14 @@ public class TestArgument1 {
         testLong(5000L);
         testShort(Short.MAX_VALUE);
         testString("abc");
+        testString("abc");
+        testString("abc");
+        testStringMulti("1", "2", "3");
+        testStringMulti("1", "2", "3");
+        testStringMulti("a", "b", "c");
+        testStringArray("1", "2", "3");
+        testStringArray("1", "2", "3");
+        testStringArray("a", "b", "c");
     }
 
     public static void testBigDecimal(BigDecimal arg) {
@@ -63,6 +73,18 @@ public class TestArgument1 {
     }
 
     public static void testString(String arg) {
+    }
+
+    public static void testStringMulti(String arg1, String arg2, String arg3) {
+        System.out.println(arg1);
+        System.out.println(arg2);
+        System.out.println(arg3);
+    }
+
+    public static void testStringArray(String... args) {
+        for (String arg : args) {
+            System.out.println(arg);
+        }
     }
 
     public static void testIntArray(int[] arg) {

@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +26,6 @@ import org.slf4j.LoggerFactory;
 )
 public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4JarInfo> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4JarInfo.class);
-
-    public WriteDbHandler4JarInfo(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4JarInfo genData(String[] array) {
@@ -70,6 +65,22 @@ public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4J
                 data.getJarFileName(),
                 data.getLastModified(),
                 data.getJarHash()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "Jar包类型，J: jar包，D: 目录",
+                "Jar包序号",
+                "Jar包完整路径"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "解析的Jar包或目录相关的信息"
         };
     }
 }

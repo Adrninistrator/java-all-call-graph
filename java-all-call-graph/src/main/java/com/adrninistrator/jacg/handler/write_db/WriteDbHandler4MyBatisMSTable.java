@@ -4,7 +4,6 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MyBatisMSTable;
 import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.MyBatisMySqlSqlInfoCodeParser;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 
 import java.util.Set;
 
@@ -24,10 +23,6 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
 
     // 保存MyBatis Mapper类名
     private Set<String> myBatisMapperSet;
-
-    public WriteDbHandler4MyBatisMSTable(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4MyBatisMSTable genData(String[] array) {
@@ -64,6 +59,29 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
                 data.getTableSeq(),
                 data.getTableName(),
                 data.getMapperClassName()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "MyBatis Mapper完整类名",
+                "MyBatis Mapper方法名",
+                "sql语句类型",
+                "数据库表序号",
+                "数据库表名"
+        };
+    }
+
+    @Override
+    public String chooseOtherFileDesc() {
+        return "MyBatis数据库表信息（使用MySQL）";
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "使用MySQL时，MyBatis的Mapper接口方法中涉及到的数据库表信息"
         };
     }
 

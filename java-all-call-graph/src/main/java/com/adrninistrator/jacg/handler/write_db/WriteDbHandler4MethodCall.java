@@ -8,7 +8,6 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +47,6 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
     // 保存MyBatis写数据库的Mapper方法
     private Set<String> myBatisMapperMethodWriteSet;
-
-    public WriteDbHandler4MethodCall(JavaCGOutputInfo javaCGOutputInfo) {
-        super(javaCGOutputInfo);
-    }
 
     @Override
     protected WriteDbData4MethodCall genData(String[] array) {
@@ -112,6 +107,29 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodCall data) {
         return JACGUtil.genMethodCallObjectArray(data);
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "方法调用序号",
+                "调用方，完整方法（类名+方法名+参数）",
+                "被调用方，完整方法（类名+方法名+参数）",
+                "调用方，源代码行号",
+                "被调用对象类型，t:调用当前实例的方法，sf:调用静态字段的方法，f:调用字段的方法，v:调用其他变量的方法",
+                "方法原始的返回类型",
+                "方法实际的返回类型",
+                "调用方，Jar包序号",
+                "被调用方，Jar包序号"
+        };
+    }
+
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法调用信息，每个方法调用占一行，包括调用者方法与被调用者方法"
+        };
     }
 
     /**
