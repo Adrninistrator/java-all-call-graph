@@ -6,7 +6,58 @@
 
 所使用的数据库用户需要有DML读写权限，及DDL权限（需要执行CREATE TABLE、TRUNCATE TABLE操作）。
 
-# 2. 引入组件
+需要使用JDK8及以上版本
+
+若需要通过源码启动，需要安装Gradle
+
+# 2. 通过源码启动
+
+通过源码启动时，可以使用测试代码进行功能验证
+
+以下使用Java代码中指定的参数配置，与通过配置文件配置的效果一样
+
+相关的参数定义可参考以下类
+
+```
+com.adrninistrator.jacg.common.enums.ConfigKeyEnum
+com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum
+com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum
+com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum
+```
+
+- 编译测试代码
+
+在项目根目录执行以下命令
+
+```
+gradlew test_jar
+```
+
+- 解析测试代码并将结果写入数据库
+
+执行以下类
+
+```
+test.run_by_code.TestRBC0RunnerWriteDb
+```
+
+- 生成向上的方法完整调用链
+
+执行以下类
+
+```
+test.run_by_code.TestRBCRunnerGenAllGraph4Callee
+```
+
+- 生成向下的方法完整调用链
+
+执行以下类
+
+```
+test.run_by_code.TestRBCRunnerGenAllGraph4Caller
+```
+
+# 3. 引入组件
 
 在使用本工具前，首先需要在对应的项目引入本工具组件的依赖，将其引入到test模块或使用provided类型，可以避免发布到服务器中。
 
@@ -41,11 +92,11 @@ java-all-call-graph最新版本号可查看[https://search.maven.org/artifact/co
 
 java-all-call-graph对应代码地址为[https://github.com/Adrninistrator/java-all-call-graph](https://github.com/Adrninistrator/java-all-call-graph)。
 
-# 3. 执行步骤
+# 4. 执行步骤
 
 以下所述执行步骤，需要在IDE中执行。假如需要使用命令行方式执行，可参考以下`使用命令行方式执行`部分内容。
 
-## 3.1. 总体步骤
+## 4.1. 总体步骤
 
 本工具的总体使用步骤如下：
 
@@ -58,7 +109,7 @@ java-all-call-graph对应代码地址为[https://github.com/Adrninistrator/java-
 
 ![](pic/step-all.png)
 
-## 3.2. 释放启动类及配置文件
+## 4.2. 释放启动类及配置文件
 
 当前步骤在每个Java项目只需要执行一次。
 
@@ -82,7 +133,7 @@ com.adrninistrator.jacg.unzip.UnzipFile
 
 当目标文件不存在时，则会进行释放；若目标文件已存在，则不会覆盖。
 
-## 3.3. 生成Java方法调用关系并写入数据库
+## 4.3. 生成Java方法调用关系并写入数据库
 
 已支持使用本地文件形式的H2数据库，可不依赖外部的其他数据库，可在无法连接其他数据库（如MySQL）的环境中运行
 
@@ -108,7 +159,7 @@ test.jacg.TestRunnerWriteDb
 
 ![](pic/args-use-b.png)
 
-### 3.3.1. b.1 调用增强后的java-callgraph2.jar中的类的方法
+### 4.3.1. b.1 调用增强后的java-callgraph2.jar中的类的方法
 
 以上类会读取配置文件`_jacg_config/config.properties`中的参数，需要按照说明进行配置：
 
@@ -126,19 +177,19 @@ test.jacg.TestRunnerWriteDb
 
 调用增强后的java-callgraph2.jar中的JCallGraph类的run方法，通过方法的参数传递上述jar包路径列表；
 
-### 3.3.2. b.2 解析指定jar包
+### 4.3.2. b.2 解析指定jar包
 
 增强后的java-callgraph2.jar中的类的方法开始解析指定的jar包；
 
-### 3.3.3. b.3 将Java方法调用关系写入文件
+### 4.3.3. b.3 将Java方法调用关系写入文件
 
 增强后的java-callgraph2.jar中的类的方法将解析出的Java方法调用关系写入指定的文件中；
 
-### 3.3.4. b.4 读取Java方法调用关系文件
+### 4.3.4. b.4 读取Java方法调用关系文件
 
 TestRunnerWriteDb类读取保存Java方法调用关系的文件，文件路径即第1个jar包路径加“.txt”；
 
-### 3.3.5. b.5 将Java方法调用关系写入数据库
+### 4.3.5. b.5 将Java方法调用关系写入数据库
 
 TestRunnerWriteDb类读取配置文件`_jacg_config/i_allowed_class_prefix.properties`，该文件中指定了需要处理的类名前缀，可指定包名，或包名+类名，示例如下：
 
@@ -212,7 +263,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定）
 jdbc:h2:file:D:\test\java-all-call-graph\build\jacg_h2db
 ```
 
-## 3.4. 生成调用指定类方法向上的完整调用链
+## 4.4. 生成调用指定类方法向上的完整调用链
 
 执行当前步骤之前，需要确认Java方法调用关系已成功写入数据库中。
 
@@ -228,7 +279,7 @@ test.jacg.TestRunnerGenAllGraph4Callee
 
 ![](pic/args-use-c.1.png)
 
-### 3.4.1. c.1.1 从数据库读取Java方法调用关系
+### 4.4.1. c.1.1 从数据库读取Java方法调用关系
 
 TestRunnerGenAllGraph4Callee类读取配置文件`_jacg_config/o_g4callee_class_name.properties`，该文件中指定了需要生成向上完整调用链的类名，或类名+方法名前缀/代码行号；
 
@@ -270,7 +321,7 @@ Test1:234
 
 以下参数说明略：app.name、db.use.h2、db.h2.file.path、db.driver.name、db.url、db.username、db.password
 
-### 3.4.2. c.1.2 将方法完整调用链（向上）写入文件
+### 4.4.2. c.1.2 将方法完整调用链（向上）写入文件
 
 对于配置文件`_jacg_config/o_g4callee_class_name.properties`中指定的类，对每个类生成一个对应的文件，文件名为“[类名].txt”，在某个类对应的文件中，会为对应类的每个方法生成向上完整调用链；
 
@@ -320,7 +371,7 @@ Test1:234
 
 仅当开关为开时，会在向上的调用链每行后部显示当前调用者类名，及调用者方法对应的源代码行号，如“(TestClass:39)”
 
-### 3.4.3. 生成配置文件中的任务信息与结果文件的映射关系
+### 4.4.3. 生成配置文件中的任务信息与结果文件的映射关系
 
 每次生成方法调用链后，会在本次生成的目录中创建_mapping.txt文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
 
@@ -341,11 +392,11 @@ RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 假如在生成向上方法调用链时，在配置文件中指定了生成某个类的全部方法的调用链，也不会出现在以上文件中
 
-## 3.5. 生成指定方法向下完整调用链
+## 4.5. 生成指定方法向下完整调用链
 
 执行当前步骤之前，需要确认Java方法调用关系已成功写入数据库中。
 
-### 3.5.1. 生成所有的调用链
+### 4.5.1. 生成所有的调用链
 
 执行当前步骤时，需要执行main()方法的类名如下：
 
@@ -359,7 +410,7 @@ test.jacg.TestRunnerGenAllGraph4Caller
 
 ![](pic/args-use-c.2.png)
 
-### 3.5.2. c.2.1 从数据库读取Java方法调用关系
+### 4.5.2. c.2.1 从数据库读取Java方法调用关系
 
 TestRunnerGenAllGraph4Caller类读取配置文件`_jacg_config/o_g4caller_entry_method.properties`，该文件中指定了需要生成向下完整调用链的类名+方法名前缀/代码行号，可指定起始代码行号、结束代码行号
 
@@ -417,7 +468,7 @@ func1(java.lang.String)
 
 以下参数说明略：app.name、db.use.h2、db.h2.file.path、db.driver.name、db.url、db.username、db.password
 
-### 3.5.3. c.2.2 将方法完整调用链（向下）写入文件
+### 4.5.3. c.2.2 将方法完整调用链（向下）写入文件
 
 对于配置文件`_jacg_config/o_g4caller_entry_method.properties`中指定的方法，对每个方法生成一个对应的文件，文件名为“[类名]@[方法名]@[完整方法名HASH+长度].txt”，示例为“TestClass1@func1@qDb0chxHzmPj1F26S7kzhw#048.txt”；
 
@@ -477,7 +528,7 @@ TestMulti.test1()方法对应文件中调用Interface1.f1()方法的信息如下
 
 以下参数说明略：call.graph.output.detail、show.method.annotation
 
-### 3.5.4. 忽略特定的调用关系
+### 4.5.4. 忽略特定的调用关系
 
 以上生成指定方法向下的完整调用链中，包含了所有的方法调用链，可用于查找指定方法直接调用及间接调用的方法，例如通过调用的Mybatis的Mapper接口确认该方法相关的数据库表操作；
 
@@ -517,11 +568,11 @@ func1()
 func1(java.lang.String)
 ```
 
-### 3.5.5. 生成配置文件中的任务信息与结果文件的映射关系
+### 4.5.5. 生成配置文件中的任务信息与结果文件的映射关系
 
 见前文
 
-# 4. 使用命令行方式执行
+# 5. 使用命令行方式执行
 
 以上所述执行方式，需要在IDE中执行，假如需要使用命令行方式执行，可参考以下方法。
 
