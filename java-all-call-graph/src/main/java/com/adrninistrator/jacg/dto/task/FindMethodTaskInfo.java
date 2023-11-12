@@ -1,5 +1,8 @@
 package com.adrninistrator.jacg.dto.task;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author adrninistrator
  * @date 2022/4/29
@@ -12,35 +15,30 @@ public class FindMethodTaskInfo {
     // 是否需要生成空文件（只要不是无法执行下去的错误，都生成空文件，避免终止处理）
     private boolean genEmptyFile;
 
-    // 完整方法HASH+长度
-    private String methodHash;
-
-    // 完整方法信息
-    private String fullMethod;
-
-    // 方法调用的标志
-    private int callFlags;
+    // 用于查找方法的任务元素
+    private final List<FindMethodTaskElement> taskElementList = new ArrayList<>();
 
     public static FindMethodTaskInfo genFindMethodInfoFail() {
-        return genFindMethodInfo(true, false, null, null, 0);
+        return genFindMethodInfo(true, false);
     }
 
     public static FindMethodTaskInfo genFindMethodInfoGenEmptyFile() {
-        return genFindMethodInfo(false, true, null, null, 0);
+        return genFindMethodInfo(false, true);
     }
 
-    public static FindMethodTaskInfo genFindMethodInfoSuccess(String methodHash, String fullMethod, int callFlags) {
-        return genFindMethodInfo(false, false, methodHash, fullMethod, callFlags);
+    public static FindMethodTaskInfo genFindMethodInfoSuccess() {
+        return genFindMethodInfo(false, false);
     }
 
-    private static FindMethodTaskInfo genFindMethodInfo(boolean error, boolean genEmptyFile, String methodHash, String fullMethod, int callFlags) {
+    private static FindMethodTaskInfo genFindMethodInfo(boolean error, boolean genEmptyFile) {
         FindMethodTaskInfo findMethodTaskInfo = new FindMethodTaskInfo();
         findMethodTaskInfo.setError(error);
         findMethodTaskInfo.setGenEmptyFile(genEmptyFile);
-        findMethodTaskInfo.setMethodHash(methodHash);
-        findMethodTaskInfo.setFullMethod(fullMethod);
-        findMethodTaskInfo.setCallFlags(callFlags);
         return findMethodTaskInfo;
+    }
+
+    public void addTaskElement(String methodHash, String fullMethod, int callFlags, String returnType) {
+        taskElementList.add(new FindMethodTaskElement(methodHash, fullMethod, callFlags, returnType));
     }
 
     //
@@ -60,27 +58,7 @@ public class FindMethodTaskInfo {
         this.genEmptyFile = genEmptyFile;
     }
 
-    public String getMethodHash() {
-        return methodHash;
-    }
-
-    public void setMethodHash(String methodHash) {
-        this.methodHash = methodHash;
-    }
-
-    public String getFullMethod() {
-        return fullMethod;
-    }
-
-    public void setFullMethod(String fullMethod) {
-        this.fullMethod = fullMethod;
-    }
-
-    public int getCallFlags() {
-        return callFlags;
-    }
-
-    public void setCallFlags(int callFlags) {
-        this.callFlags = callFlags;
+    public List<FindMethodTaskElement> getTaskElementList() {
+        return taskElementList;
     }
 }

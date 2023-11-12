@@ -7,6 +7,8 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 
+import java.util.Set;
+
 /**
  * @author adrninistrator
  * @date 2023/4/13
@@ -21,6 +23,8 @@ import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_RETURN_GENERICS_TYPE
 )
 public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHandler<WriteDbData4MethodReturnGenericsType> {
+    // 方法返回存在泛型类型的方法HASH+长度
+    private Set<String> withReturnGenericsTypeMethodHash;
 
     @Override
     protected WriteDbData4MethodReturnGenericsType genData(String[] array) {
@@ -37,6 +41,7 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
         int typeSeq = Integer.parseInt(array[2]);
         String genericsType = array[3];
 
+        withReturnGenericsTypeMethodHash.add(methodHash);
         return new WriteDbData4MethodReturnGenericsType(methodHash,
                 simpleClassName,
                 type,
@@ -77,5 +82,9 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
                 "示例：”Map<Integer, String> test2()“",
                 "对于以上示例，会记录对应的方法，以及方法参数中涉及泛型的Map、Integer、String"
         };
+    }
+
+    public void setWithReturnGenericsTypeMethodHash(Set<String> withReturnGenericsTypeMethodHash) {
+        this.withReturnGenericsTypeMethodHash = withReturnGenericsTypeMethodHash;
     }
 }

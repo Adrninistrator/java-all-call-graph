@@ -161,6 +161,7 @@ public class MethodCallHandler extends BaseHandler {
                     JavaCGConstants.DEFAULT_LINE_NUMBER,
                     "",
                     "",
+                    "",
                     null,
                     null
             );

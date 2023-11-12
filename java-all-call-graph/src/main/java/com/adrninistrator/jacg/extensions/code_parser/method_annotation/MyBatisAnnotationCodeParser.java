@@ -40,6 +40,7 @@ public class MyBatisAnnotationCodeParser implements MethodAnnotationParser {
     public void parseMethodAnnotation(String callerClassName,
                                       String callerMethodName,
                                       String callerMethodArgs,
+                                      String callerReturnType,
                                       String annotationClassName,
                                       AnnotationEntry annotationEntry,
                                       MethodCallList methodCallList) {
@@ -53,6 +54,7 @@ public class MyBatisAnnotationCodeParser implements MethodAnnotationParser {
                 callerClassName,
                 callerMethodName,
                 callerMethodArgs,
+                callerReturnType,
                 JavaCGCallTypeEnum.CTE_METHOD_ANNOTATION_ADDED,
                 type,
                 method,

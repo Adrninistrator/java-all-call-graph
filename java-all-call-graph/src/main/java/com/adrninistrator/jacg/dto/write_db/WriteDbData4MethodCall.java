@@ -19,6 +19,7 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
     private String callerMethodName;
     private String callerFullMethod;
     private int callerLineNumber;
+    private String callerReturnType;
     private String calleeMethodHash;
     private String calleeSimpleClassName;
     private String calleeMethodName;
@@ -54,6 +55,7 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
                                                      String calleeFullMethod,
                                                      int callId,
                                                      int callerLineNum,
+                                                     String callerReturnType,
                                                      String rawReturnType,
                                                      String actualReturnType,
                                                      Integer callerJarNum,
@@ -66,12 +68,13 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
         writeDbData4MethodCall.setCallId(callId);
         writeDbData4MethodCall.setCallType(callType);
         writeDbData4MethodCall.setCalleeObjType(calleeObjType);
-        writeDbData4MethodCall.setEnabled(JavaCGYesNoEnum.YES.getIntValue());
+        writeDbData4MethodCall.setEnabled(1);
         writeDbData4MethodCall.setCallerMethodHash(callerMethodHash);
         writeDbData4MethodCall.setCallerSimpleClassName(callerSimpleClassName);
         writeDbData4MethodCall.setCallerMethodName(callerMethodName);
         writeDbData4MethodCall.setCallerFullMethod(callerFullMethod);
         writeDbData4MethodCall.setCallerLineNumber(callerLineNum);
+        writeDbData4MethodCall.setCallerReturnType(callerReturnType);
 
         String calleeMethodHash = JACGUtil.genHashWithLen(calleeFullMethod);
         String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
@@ -158,6 +161,14 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
 
     public void setCallerLineNumber(int callerLineNumber) {
         this.callerLineNumber = callerLineNumber;
+    }
+
+    public String getCallerReturnType() {
+        return callerReturnType;
+    }
+
+    public void setCallerReturnType(String callerReturnType) {
+        this.callerReturnType = callerReturnType;
     }
 
     public String getCalleeMethodHash() {

@@ -23,8 +23,8 @@ import java.util.Set;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL,
-        minColumnNum = 9,
-        maxColumnNum = 9,
+        minColumnNum = 10,
+        maxColumnNum = 10,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL
 )
 public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbData4MethodCall> {
@@ -40,10 +40,13 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     private Set<Integer> withInfoCallIdSet;
 
     // 方法参数存在泛型类型的方法HASH+长度
-    private Set<String> withGenericsTypeMethodHash;
+    private Set<String> withArgsGenericsTypeMethodHashSet;
+
+    // 方法返回存在泛型类型的方法HASH+长度
+    private Set<String> withReturnGenericsTypeMethodHashSet;
 
     // 保存MyBatis Mapper类名
-    private Set<String> myBatisMapperSet;
+    private Set<String> myBatisMapperClassNameSet;
 
     // 保存MyBatis写数据库的Mapper方法
     private Set<String> myBatisMapperMethodWriteSet;
@@ -64,11 +67,12 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         }
 
         int callerLineNum = Integer.parseInt(array[3]);
-        String calleeObjType = array[4];
-        String rawReturnType = array[5];
-        String actualReturnType = array[6];
-        String callerJarNumStr = array[7];
-        String calleeJarNumStr = array[8];
+        String callerReturnType = array[4];
+        String calleeObjType = array[5];
+        String rawReturnType = array[6];
+        String actualReturnType = array[7];
+        String callerJarNumStr = array[8];
+        String calleeJarNumStr = array[9];
 
         String callType = tmpCalleeFullMethod.substring(indexCalleeLeftBracket + JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG1.length(), indexCalleeRightBracket);
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
@@ -85,6 +89,7 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
                 calleeFullMethod,
                 callId,
                 callerLineNum,
+                callerReturnType,
                 rawReturnType,
                 actualReturnType,
                 callerJarNum,
@@ -112,15 +117,16 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     @Override
     public String[] chooseFileColumnDesc() {
         return new String[]{
-                "方法调用序号",
+                "方法调用序号，从1开始",
                 "调用方，完整方法（类名+方法名+参数）",
-                "被调用方，完整方法（类名+方法名+参数）",
-                "调用方，源代码行号",
+                "(方法调用类型)被调用方，完整方法（类名+方法名+参数）",
+                "调用方法源代码行号",
+                "调用方法返回类型",
                 "被调用对象类型，t:调用当前实例的方法，sf:调用静态字段的方法，f:调用字段的方法，v:调用其他变量的方法",
-                "方法原始的返回类型",
-                "方法实际的返回类型",
-                "调用方，Jar包序号",
-                "被调用方，Jar包序号"
+                "被调用方法原始的返回类型",
+                "被调用方法实际的返回类型",
+                "调用方法Jar包序号",
+                "被调用方法Jar包序号"
         };
     }
 
@@ -156,13 +162,19 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         if (withInfoCallIdSet.contains(callId)) {
             callFlags = MethodCallFlagsEnum.MCFE_METHOD_CALL_INFO.setFlag(callFlags);
         }
-        if (withGenericsTypeMethodHash.contains(calleeMethodHash)) {
-            callFlags = MethodCallFlagsEnum.MCFE_EE_WITH_GENERICS_TYPE.setFlag(callFlags);
+        if (withArgsGenericsTypeMethodHashSet.contains(calleeMethodHash)) {
+            callFlags = MethodCallFlagsEnum.MCFE_EE_ARGS_WITH_GENERICS_TYPE.setFlag(callFlags);
         }
-        if (withGenericsTypeMethodHash.contains(callerMethodHash)) {
-            callFlags = MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.setFlag(callFlags);
+        if (withArgsGenericsTypeMethodHashSet.contains(callerMethodHash)) {
+            callFlags = MethodCallFlagsEnum.MCFE_ER_ARGS_WITH_GENERICS_TYPE.setFlag(callFlags);
         }
-        if (myBatisMapperSet.contains(calleeClassName)) {
+        if (withReturnGenericsTypeMethodHashSet.contains(calleeMethodHash)) {
+            callFlags = MethodCallFlagsEnum.MCFE_EE_RETURN_WITH_GENERICS_TYPE.setFlag(callFlags);
+        }
+        if (withReturnGenericsTypeMethodHashSet.contains(callerMethodHash)) {
+            callFlags = MethodCallFlagsEnum.MCFE_ER_RETURN_WITH_GENERICS_TYPE.setFlag(callFlags);
+        }
+        if (myBatisMapperClassNameSet.contains(calleeClassName)) {
             callFlags = MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER.setFlag(callFlags);
             String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(writeDbData4MethodCall.getCalleeFullMethod());
             String calleeClassAndMethodName = JACGClassMethodUtil.getClassAndMethodName(calleeClassName, calleeMethodName);
@@ -186,12 +198,16 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         this.withInfoCallIdSet = withInfoCallIdSet;
     }
 
-    public void setWithGenericsTypeMethodHash(Set<String> withGenericsTypeMethodHash) {
-        this.withGenericsTypeMethodHash = withGenericsTypeMethodHash;
+    public void setWithArgsGenericsTypeMethodHashSet(Set<String> withArgsGenericsTypeMethodHashSet) {
+        this.withArgsGenericsTypeMethodHashSet = withArgsGenericsTypeMethodHashSet;
     }
 
-    public void setMyBatisMapperSet(Set<String> myBatisMapperSet) {
-        this.myBatisMapperSet = myBatisMapperSet;
+    public void setWithReturnGenericsTypeMethodHashSet(Set<String> withReturnGenericsTypeMethodHashSet) {
+        this.withReturnGenericsTypeMethodHashSet = withReturnGenericsTypeMethodHashSet;
+    }
+
+    public void setMyBatisMapperClassNameSet(Set<String> myBatisMapperClassNameSet) {
+        this.myBatisMapperClassNameSet = myBatisMapperClassNameSet;
     }
 
     public void setMyBatisMapperMethodWriteSet(Set<String> myBatisMapperMethodWriteSet) {

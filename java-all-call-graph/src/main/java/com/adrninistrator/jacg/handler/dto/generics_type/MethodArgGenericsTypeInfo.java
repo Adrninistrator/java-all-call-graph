@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.handler.dto.method_arg_generics_type;
+package com.adrninistrator.jacg.handler.dto.generics_type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -12,7 +12,7 @@ import java.util.List;
  * @date 2023/3/21
  * @description: 方法参数泛型类型信息
  */
-public class MethodArgGenericsTypeInfo extends HashMap<Integer, MethodArgGenericsTypeValue> {
+public class MethodArgGenericsTypeInfo extends HashMap<Integer, GenericsTypeValue> {
     /*
         方法参数泛型类型Map
         key
@@ -39,7 +39,7 @@ public class MethodArgGenericsTypeInfo extends HashMap<Integer, MethodArgGeneric
      * @param argSeq
      * @return
      */
-    public MethodArgGenericsTypeValue getTypeValue(int argSeq) {
+    public GenericsTypeValue getTypeValue(int argSeq) {
         return get(argSeq);
     }
 
@@ -49,7 +49,7 @@ public class MethodArgGenericsTypeInfo extends HashMap<Integer, MethodArgGeneric
      * @param argSeq
      * @param genericsTypeList
      */
-    public void putTypeValue(int argSeq, MethodArgGenericsTypeValue genericsTypeList) {
+    public void putTypeValue(int argSeq, GenericsTypeValue genericsTypeList) {
         put(argSeq, genericsTypeList);
     }
 }

@@ -22,7 +22,8 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
-import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
+import com.adrninistrator.jacg.handler.dto.generics_type.GenericsTypeValue;
+import com.adrninistrator.jacg.handler.dto.generics_type.MethodArgGenericsTypeInfo;
 import com.adrninistrator.jacg.handler.method.MethodArgGenericsTypeHandler;
 import com.adrninistrator.jacg.handler.method.MethodCallInfoHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMapperHandler;
@@ -824,7 +825,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             myBatisMapperHandler = new MyBatisMapperHandler(dbOperWrapper);
         }
 
-        if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
+        if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()) ||
+                businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType())) {
             // 初始化方法参数泛型类型处理类
             methodArgGenericsTypeHandler = new MethodArgGenericsTypeHandler(dbOperWrapper);
         }
@@ -922,36 +924,42 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return FindMethodTaskInfo.genFindMethodInfoGenEmptyFile();
         }
 
-        // 查询方法的标记
-        int methodCallFlags = queryMethodCallFlags(isCallee, methodAndHash.getMethodHash());
+        // 查询方法的标志
+        WriteDbData4MethodCall methodCallExtraInfo = queryMethodCallExtraInfo(isCallee, methodAndHash.getMethodHash());
+        String methodReturnType = isCallee ? methodCallExtraInfo.getRawReturnType() : methodCallExtraInfo.getCallerReturnType();
         // 指定类的代码行号查找到对应方法
-        return FindMethodTaskInfo.genFindMethodInfoSuccess(methodAndHash.getMethodHash(), methodAndHash.getFullMethod(), methodCallFlags);
+        FindMethodTaskInfo findMethodTaskInfo = FindMethodTaskInfo.genFindMethodInfoSuccess();
+        findMethodTaskInfo.addTaskElement(methodAndHash.getMethodHash(), methodAndHash.getFullMethod(), methodCallExtraInfo.getCallFlags(), methodReturnType);
+        return findMethodTaskInfo;
     }
 
     /**
-     * 查询方法的标记
+     * 查询方法调用额外信息，包括调用方法返回类型、方法调用标志、被调用方法原始返回类型等
      *
      * @param isCallee   true: 生成向上的方法调用链 false: 生成向下的方法调用链
      * @param methodHash
      * @return
      */
-    protected int queryMethodCallFlags(boolean isCallee, String methodHash) {
+    protected WriteDbData4MethodCall queryMethodCallExtraInfo(boolean isCallee, String methodHash) {
         SqlKeyEnum sqlKeyEnum = isCallee ? SqlKeyEnum.MC_QUERY_FLAG_4EE : SqlKeyEnum.MC_QUERY_FLAG_4ER;
         String whereColumnName = isCallee ? DC.MC_CALLEE_METHOD_HASH : DC.MC_CALLER_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + DC.MC_CALL_FLAGS +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_RETURN_TYPE, DC.MC_CALL_FLAGS, DC.MC_RAW_RETURN_TYPE) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + whereColumnName + " = ?" +
                     " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        Integer callFlags = dbOperator.queryObjectOneColumn(sql, Integer.class, methodHash);
-        if (callFlags == null) {
-            return 0;
+        WriteDbData4MethodCall writeDbData4MethodCall = dbOperator.queryObject(sql, WriteDbData4MethodCall.class, methodHash);
+        if (writeDbData4MethodCall == null) {
+            writeDbData4MethodCall = new WriteDbData4MethodCall();
+            writeDbData4MethodCall.setCallerReturnType("");
+            writeDbData4MethodCall.setCallFlags(0);
+            writeDbData4MethodCall.setRawReturnType("");
         }
-        return callFlags;
+        return writeDbData4MethodCall;
     }
 
     /**
@@ -1211,6 +1219,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 if (!addMethodArgGenericsTypeInfo(false, callFlags, methodHash, callGraphInfo)) {
                     return false;
                 }
+            } else if (DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType().equals(businessDataType)) {
+                // 显示方法返回泛型类型
+                if (!addMethodReturnGenericsTypeInfo(false, callFlags, methodHash, callGraphInfo)) {
+                    return false;
+                }
             }
         }
 
@@ -1233,12 +1246,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 生成向上的完整方法调用链时，判断被调用方法（即入口方法）是否存在参数泛型类型
                 生成向下的完整方法调用链时，判断调用方法（即入口方法）是否存在参数泛型类型
              */
-            if ((order4ee && !MethodCallFlagsEnum.MCFE_EE_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
-                    (!order4ee && !MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
+            if ((order4ee && !MethodCallFlagsEnum.MCFE_EE_ARGS_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
+                    (!order4ee && !MethodCallFlagsEnum.MCFE_ER_ARGS_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
                 return true;
             }
-        } else if ((order4ee && !MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
-                (!order4ee && !MethodCallFlagsEnum.MCFE_EE_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
+        } else if ((order4ee && !MethodCallFlagsEnum.MCFE_ER_ARGS_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
+                (!order4ee && !MethodCallFlagsEnum.MCFE_EE_ARGS_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
              /*
                 处理非入口方法
                 生成向上的完整方法调用链时，判断调用方法是否存在参数泛型类型
@@ -1252,6 +1265,45 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return false;
         }
         addBusinessData2CallGraphInfo(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(), methodArgGenericsTypeInfo, callGraphInfo);
+        return true;
+    }
+
+    /**
+     * 显示方法返回泛型类型
+     *
+     * @param handleEntryMethod 是否处理入口方法
+     * @param callFlags
+     * @param methodHash
+     * @param callGraphInfo
+     * @return
+     */
+    protected boolean addMethodReturnGenericsTypeInfo(boolean handleEntryMethod, int callFlags, String methodHash, StringBuilder callGraphInfo) {
+        if (handleEntryMethod) {
+             /*
+                处理入口方法
+                生成向上的完整方法调用链时，判断被调用方法（即入口方法）是否存在返回泛型类型
+                生成向下的完整方法调用链时，判断调用方法（即入口方法）是否存在返回泛型类型
+             */
+            if ((order4ee && !MethodCallFlagsEnum.MCFE_EE_RETURN_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
+                    (!order4ee && !MethodCallFlagsEnum.MCFE_ER_RETURN_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
+                return true;
+            }
+        } else if ((order4ee && !MethodCallFlagsEnum.MCFE_ER_RETURN_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
+                (!order4ee && !MethodCallFlagsEnum.MCFE_EE_RETURN_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
+             /*
+                处理非入口方法
+                生成向上的完整方法调用链时，判断调用方法是否存在返回泛型类型
+                生成向下的完整方法调用链时，判断被调用方法是否存在返回泛型类型
+             */
+            return true;
+        }
+
+        GenericsTypeValue methodReturnGenericsTypeInfo = methodArgGenericsTypeHandler.queryReturnGenericsTypeInfo(methodHash);
+        if (methodReturnGenericsTypeInfo == null) {
+            logger.error("未查询到方法返回的集合泛型信息 {}", methodHash);
+            return false;
+        }
+        addBusinessData2CallGraphInfo(DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType(), methodReturnGenericsTypeInfo, callGraphInfo);
         return true;
     }
 

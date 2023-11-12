@@ -18,6 +18,17 @@ import java.util.List;
 public class JACGClassMethodUtil {
 
     /**
+     * 将完整方法与返回类型拼接
+     *
+     * @param fullMethod
+     * @param returnType
+     * @return
+     */
+    public static String genFullMethodWithReturnType(String fullMethod, String returnType) {
+        return fullMethod + JavaCGConstants.FLAG_COLON + returnType;
+    }
+
+    /**
      * 从完整方法信息中获取完整类名
      *
      * @param method 完整方法信息

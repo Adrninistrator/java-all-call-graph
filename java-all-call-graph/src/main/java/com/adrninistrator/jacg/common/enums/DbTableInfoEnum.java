@@ -127,6 +127,7 @@ public enum DbTableInfoEnum {
             DC.MC_CALLER_METHOD_NAME,
             DC.MC_CALLER_FULL_METHOD,
             DC.MC_CALLER_LINE_NUMBER,
+            DC.MC_CALLER_RETURN_TYPE,
             DC.MC_CALLEE_METHOD_HASH,
             DC.MC_CALLEE_SIMPLE_CLASS_NAME,
             DC.MC_CALLEE_METHOD_NAME,

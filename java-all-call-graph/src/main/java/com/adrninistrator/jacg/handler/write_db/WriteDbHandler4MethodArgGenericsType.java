@@ -24,7 +24,7 @@ import java.util.Set;
 )
 public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler<WriteDbData4MethodArgGenericsType> {
     // 方法参数存在泛型类型的方法HASH+长度
-    private Set<String> withGenericsTypeMethodHash;
+    private Set<String> withArgsGenericsTypeMethodHash;
 
     @Override
     protected WriteDbData4MethodArgGenericsType genData(String[] array) {
@@ -42,7 +42,7 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
         int typeSeq = Integer.parseInt(array[3]);
         String genericsType = array[4];
 
-        withGenericsTypeMethodHash.add(methodHash);
+        withArgsGenericsTypeMethodHash.add(methodHash);
         return new WriteDbData4MethodArgGenericsType(methodHash,
                 simpleClassName,
                 argSeq,
@@ -89,7 +89,7 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
         };
     }
 
-    public void setWithGenericsTypeMethodHash(Set<String> withGenericsTypeMethodHash) {
-        this.withGenericsTypeMethodHash = withGenericsTypeMethodHash;
+    public void setWithArgsGenericsTypeMethodHash(Set<String> withArgsGenericsTypeMethodHash) {
+        this.withArgsGenericsTypeMethodHash = withArgsGenericsTypeMethodHash;
     }
 }

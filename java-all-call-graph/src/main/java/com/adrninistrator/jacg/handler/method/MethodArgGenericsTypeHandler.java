@@ -6,9 +6,10 @@ import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodArgGenericsType;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodReturnGenericsType;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
-import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
-import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeValue;
+import com.adrninistrator.jacg.handler.dto.generics_type.MethodArgGenericsTypeInfo;
+import com.adrninistrator.jacg.handler.dto.generics_type.GenericsTypeValue;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.util.JavaCGUtil;
@@ -59,20 +60,53 @@ public class MethodArgGenericsTypeHandler extends BaseHandler {
         }
 
         MethodArgGenericsTypeInfo methodArgGenericsTypeInfo = new MethodArgGenericsTypeInfo();
-        Map<Integer, MethodArgGenericsTypeValue> genericsTypeMap = new HashMap<>();
+        Map<Integer, GenericsTypeValue> genericsTypeMap = new HashMap<>();
         for (WriteDbData4MethodArgGenericsType writeDbData4MethodArgGenericsType : list) {
-            MethodArgGenericsTypeValue methodArgGenericsTypeValue = genericsTypeMap.computeIfAbsent(writeDbData4MethodArgGenericsType.getArgSeq(),
-                    k -> new MethodArgGenericsTypeValue());
+            GenericsTypeValue methodArgGenericsTypeValue = genericsTypeMap.computeIfAbsent(writeDbData4MethodArgGenericsType.getArgSeq(),
+                    k -> new GenericsTypeValue());
             if (JavaCGConstants.FILE_KEY_METHOD_ARGS_RETURN_TYPE.equals(writeDbData4MethodArgGenericsType.getType())) {
-                methodArgGenericsTypeValue.setArgType(writeDbData4MethodArgGenericsType.getGenericsType());
+                methodArgGenericsTypeValue.setType(writeDbData4MethodArgGenericsType.getGenericsType());
             } else {
-                methodArgGenericsTypeValue.addArgGenericsType(writeDbData4MethodArgGenericsType.getGenericsType());
+                methodArgGenericsTypeValue.addGenericsType(writeDbData4MethodArgGenericsType.getGenericsType());
             }
         }
 
-        for (Map.Entry<Integer, MethodArgGenericsTypeValue> entry : genericsTypeMap.entrySet()) {
+        for (Map.Entry<Integer, GenericsTypeValue> entry : genericsTypeMap.entrySet()) {
             methodArgGenericsTypeInfo.putTypeValue(entry.getKey(), entry.getValue());
         }
         return methodArgGenericsTypeInfo;
+    }
+
+    /**
+     * 根据方法HASH+长度查询对应的方法返回泛型类型
+     *
+     * @param methodHash
+     * @return
+     */
+    public GenericsTypeValue queryReturnGenericsTypeInfo(String methodHash) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MRGT_QUERY;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MRGT_TYPE, DC.MRGT_GENERICS_TYPE) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_RETURN_GENERICS_TYPE.getTableName() +
+                    " where " + DC.MRGT_METHOD_HASH + " = ?" +
+                    " order by " + JACGSqlUtil.joinColumns(DC.MRGT_TYPE, DC.MRGT_TYPE_SEQ);
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        List<WriteDbData4MethodReturnGenericsType> list = dbOperator.queryList(sql, WriteDbData4MethodReturnGenericsType.class, methodHash);
+        if (JavaCGUtil.isCollectionEmpty(list)) {
+            return null;
+        }
+
+        GenericsTypeValue methodReturnGenericsTypeInfo = new GenericsTypeValue();
+        for (WriteDbData4MethodReturnGenericsType writeDbData4MethodReturnGenericsType : list) {
+            if (JavaCGConstants.FILE_KEY_METHOD_ARGS_RETURN_TYPE.equals(writeDbData4MethodReturnGenericsType.getType())) {
+                methodReturnGenericsTypeInfo.setType(writeDbData4MethodReturnGenericsType.getGenericsType());
+            } else {
+                methodReturnGenericsTypeInfo.addGenericsType(writeDbData4MethodReturnGenericsType.getGenericsType());
+            }
+        }
+        return methodReturnGenericsTypeInfo;
     }
 }

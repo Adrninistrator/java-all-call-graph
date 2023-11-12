@@ -186,10 +186,11 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         // 处理注解信息
         handleAnnotations(springControllerMethodHashSet, withAnnotationMethodHashSet);
 
-        Set<String> withGenericsTypeMethodHash = new HashSet<>();
+        Set<String> withArgsGenericsTypeMethodHash = new HashSet<>();
+        Set<String> withReturnGenericsTypeMethodHash = new HashSet<>();
         Set<Integer> withInfoCallIdSet = new HashSet<>();
         // 处理方法
-        if (!handleMethod(withGenericsTypeMethodHash, withInfoCallIdSet)) {
+        if (!handleMethod(withArgsGenericsTypeMethodHash, withReturnGenericsTypeMethodHash, withInfoCallIdSet)) {
             return false;
         }
 
@@ -213,10 +214,10 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
-        Set<String> myBatisMapperSet = new HashSet<>();
+        Set<String> myBatisMapperClassNameSet = new HashSet<>();
         Set<String> myBatisMapperMethodWriteSet = new HashSet<>();
         // 处理MyBatis信息
-        if (!handleMyBatisInfo(myBatisMapperSet, myBatisMapperMethodWriteSet)) {
+        if (!handleMyBatisInfo(myBatisMapperClassNameSet, myBatisMapperMethodWriteSet)) {
             return false;
         }
 
@@ -226,8 +227,8 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         }
 
         // 处理方法调用关系文件（需要在后面处理）
-        if (!handleMethodCall(springControllerMethodHashSet, withAnnotationMethodHashSet, withInfoCallIdSet, withGenericsTypeMethodHash, myBatisMapperSet,
-                myBatisMapperMethodWriteSet)) {
+        if (!handleMethodCall(springControllerMethodHashSet, withAnnotationMethodHashSet, withInfoCallIdSet, withArgsGenericsTypeMethodHash, withReturnGenericsTypeMethodHash,
+                myBatisMapperClassNameSet, myBatisMapperMethodWriteSet)) {
             return false;
         }
 
@@ -452,7 +453,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     }
 
     // 处理方法
-    private boolean handleMethod(Set<String> withGenericsTypeMethodHash, Set<Integer> withInfoCallIdSet) {
+    private boolean handleMethod(Set<String> withArgsGenericsTypeMethodHash, Set<String> withReturnGenericsTypeMethodHash, Set<Integer> withInfoCallIdSet) {
         // 处理方法行号
         WriteDbHandler4MethodLineNumber writeDbHandler4MethodLineNumber = new WriteDbHandler4MethodLineNumber();
         initWriteDbHandler(writeDbHandler4MethodLineNumber);
@@ -473,7 +474,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
         // 处理方法参数泛型类型
         WriteDbHandler4MethodArgGenericsType writeDbHandler4MethodArgGenericsType = new WriteDbHandler4MethodArgGenericsType();
-        writeDbHandler4MethodArgGenericsType.setWithGenericsTypeMethodHash(withGenericsTypeMethodHash);
+        writeDbHandler4MethodArgGenericsType.setWithArgsGenericsTypeMethodHash(withArgsGenericsTypeMethodHash);
         initWriteDbHandler(writeDbHandler4MethodArgGenericsType);
         if (!writeDbHandler4MethodArgGenericsType.handle(javaCGOutputInfo)) {
             return false;
@@ -482,6 +483,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         // 处理方法返回泛型类型
         WriteDbHandler4MethodReturnGenericsType writeDbHandler4MethodReturnGenericsType = new WriteDbHandler4MethodReturnGenericsType();
         initWriteDbHandler(writeDbHandler4MethodReturnGenericsType);
+        writeDbHandler4MethodReturnGenericsType.setWithReturnGenericsTypeMethodHash(withReturnGenericsTypeMethodHash);
         if (!writeDbHandler4MethodReturnGenericsType.handle(javaCGOutputInfo)) {
             return false;
         }
@@ -573,8 +575,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private boolean handleMethodCall(Set<String> springControllerMethodHashSet,
                                      Set<String> withAnnotationMethodHashSet,
                                      Set<Integer> withInfoCallIdSet,
-                                     Set<String> withGenericsTypeMethodHash,
-                                     Set<String> myBatisMapperSet,
+                                     Set<String> withArgsGenericsTypeMethodHashSet,
+                                     Set<String> withReturnGenericsTypeMethodHashSet,
+                                     Set<String> myBatisMapperClassNameSet,
                                      Set<String> myBatisMapperMethodWriteSet) {
         // 等待直到任务执行完毕，等待前面的其他文件写入数据库完毕
         wait4TPEDone();
@@ -585,8 +588,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         writeDbHandler4MethodCall.setSpringControllerMethodHashSet(springControllerMethodHashSet);
         writeDbHandler4MethodCall.setWithAnnotationMethodHashSet(withAnnotationMethodHashSet);
         writeDbHandler4MethodCall.setWithInfoCallIdSet(withInfoCallIdSet);
-        writeDbHandler4MethodCall.setWithGenericsTypeMethodHash(withGenericsTypeMethodHash);
-        writeDbHandler4MethodCall.setMyBatisMapperSet(myBatisMapperSet);
+        writeDbHandler4MethodCall.setWithArgsGenericsTypeMethodHashSet(withArgsGenericsTypeMethodHashSet);
+        writeDbHandler4MethodCall.setWithReturnGenericsTypeMethodHashSet(withReturnGenericsTypeMethodHashSet);
+        writeDbHandler4MethodCall.setMyBatisMapperClassNameSet(myBatisMapperClassNameSet);
         writeDbHandler4MethodCall.setMyBatisMapperMethodWriteSet(myBatisMapperMethodWriteSet);
         if (!writeDbHandler4MethodCall.handle(javaCGOutputInfo)) {
             return false;

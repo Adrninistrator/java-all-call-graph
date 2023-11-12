@@ -10,11 +10,13 @@ public enum MethodCallFlagsEnum {
     MCFE_ER_METHOD_ANNOTATION(1 << 1, "调用方法有注解"),
     MCFE_EE_METHOD_ANNOTATION(1 << 2, "被调用方法有注解"),
     MCFE_METHOD_CALL_INFO(1 << 3, "存在方法调用信息"),
-    MCFE_EE_WITH_GENERICS_TYPE(1 << 4, "被调用方法参数存在泛型类型"),
-    MCFE_ER_WITH_GENERICS_TYPE(1 << 5, "调用方法参数存在泛型类型"),
+    MCFE_EE_ARGS_WITH_GENERICS_TYPE(1 << 4, "被调用方法参数存在泛型类型"),
+    MCFE_ER_ARGS_WITH_GENERICS_TYPE(1 << 5, "调用方法参数存在泛型类型"),
     MCFE_EE_MYBATIS_MAPPER(1 << 6, "被调用方法为Mybatis Mapper"),
     MCFE_EE_MYBATIS_MAPPER_WRITE(1 << 7, "被调用方法为Mybatis写数据库的Mapper方法"),
     MCFE_EE_BUSINESS_DATA(1 << 8, "被调用方法存在自定义的业务功能数据"),
+    MCFE_EE_RETURN_WITH_GENERICS_TYPE(1 << 9, "被调用方法返回存在泛型类型"),
+    MCFE_ER_RETURN_WITH_GENERICS_TYPE(1 << 10, "调用方法返回存在泛型类型"),
     ;
 
     // 需要定义为1，以及2的幂

@@ -144,6 +144,7 @@ public class JACGUtil {
                 data.getCallerMethodName(),
                 data.getCallerFullMethod(),
                 data.getCallerLineNumber(),
+                data.getCallerReturnType(),
                 data.getCalleeMethodHash(),
                 data.getCalleeSimpleClassName(),
                 data.getCalleeMethodName(),
