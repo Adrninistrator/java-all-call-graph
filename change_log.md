@@ -558,3 +558,8 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 
 #### 1.12.8.2. 生成方法调用链文件耗时太长的辅助信息
 
+## 1.13. (1.0.14)临时说明
+
+配置文件`_jacg_config/config.properties`参数`call.graph.output.detail`增加`0: 最详细 完整类名+方法名+方法参数+返回类型`，可以在生成的方法完整调用链结果文件中显示方法的返回类型
+
+配置文件`_jacg_business_data_type/business_data_type_show_4ee.properties`、`_jacg_business_data_type/business_data_type_show_4er.properties`增加可以使用的参数`method_return_generics_type`，指定以上参数时，在生成向上/向下的方法完整调用链结果文件时，显示方法返回类型中涉及集合的泛型类型

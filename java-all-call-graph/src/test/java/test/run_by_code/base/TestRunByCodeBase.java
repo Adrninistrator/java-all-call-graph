@@ -2,6 +2,7 @@ package test.run_by_code.base;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -36,6 +37,7 @@ import java.util.Set;
  * @date 2022/4/20
  * @description:
  */
+
 public abstract class TestRunByCodeBase {
     private static final Logger logger = LoggerFactory.getLogger(TestRunByCodeBase.class);
 
@@ -96,23 +98,28 @@ public abstract class TestRunByCodeBase {
         }
     }
 
+    // 将jar包解析结果写入数据库
+    protected boolean commonInsertDb() {
+        return new RunnerWriteDb().run(configureWrapper);
+    }
+
     private void printInfo(String info) {
         logger.info("{}", info);
 
-        if (currentOutputWriter != null) {
-            // 将输出记录到文件
-            try {
-                currentOutputWriter.write(info + JavaCGConstants.NEW_LINE);
-            } catch (IOException e) {
-                throw new JavaCGRuntimeException(e);
-            }
+        if (!recordLogToFile || currentOutputWriter == null) {
+            return;
+        }
+        // 将输出记录到文件
+        try {
+            currentOutputWriter.write(info + JavaCGConstants.NEW_LINE);
+        } catch (IOException e) {
+            throw new JavaCGRuntimeException(e);
         }
     }
 
     private void commonPrintHandle(String... flags) {
         if (recordLogToFile) {
             // 需要将输出记录到文件
-
             // 获取当前执行的测试方法执行次数
             Integer currentMethodRunTimes = currentMethodRunTimesMap.computeIfAbsent(currentMethodName, k -> 0);
             currentMethodRunTimesMap.put(currentMethodName, ++currentMethodRunTimes);
@@ -131,12 +138,11 @@ public abstract class TestRunByCodeBase {
                 throw new JavaCGRuntimeException(e);
             }
         }
-
         if (ArrayUtils.isEmpty(flags)) {
             return;
         }
         for (String flag : flags) {
-            printInfo(flag);
+            printInfo("[" + flag + "]");
         }
     }
 
@@ -177,7 +183,8 @@ public abstract class TestRunByCodeBase {
         Collections.sort(keyList);
         for (String key : keyList) {
             T value = map.get(key);
-            printInfo(JACGJsonUtil.getJsonStrPretty(value));
+            printInfo("key: " + key);
+            printInfo("value: " + JACGJsonUtil.getJsonStrPretty(value));
         }
     }
 
@@ -187,6 +194,6 @@ public abstract class TestRunByCodeBase {
             printInfo("value为空");
             return;
         }
-        printInfo(JACGJsonUtil.getJsonStrPretty(value));
+        printInfo("value: " + JACGJsonUtil.getJsonStrPretty(value));
     }
 }

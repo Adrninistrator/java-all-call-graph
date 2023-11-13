@@ -12,7 +12,7 @@ task sourcesJar(type: Jar) {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        mavenJava1(MavenPublication) {
             groupId project.group
             artifactId project.name
             version "${version}"
@@ -65,5 +65,5 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.mavenJava
+    sign publishing.publications.mavenJava1
 }
