@@ -10,6 +10,16 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class SpringMvcRequestMappingUtil {
     /**
+     * 判断是否为Spring MVC的Controller注解
+     *
+     * @param annotationName
+     * @return
+     */
+    public static boolean isControllerAnnotation(String annotationName) {
+        return StringUtils.equalsAny(annotationName, JACGCommonNameConstants.SPRING_MVC_CONTROLLER_ANNOTATIONS);
+    }
+
+    /**
      * 判断是否为Spring MVC的RequestMapping注解
      *
      * @param annotationName

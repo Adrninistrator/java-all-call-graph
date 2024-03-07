@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.annotation.formatter;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.ListStringAnnotationAttribute;
+import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
 
     @Override
     public boolean checkHandleAnnotation(String annotationName) {
-        return isRequestMappingAnnotation(annotationName);
+        return SpringMvcRequestMappingUtil.isRequestMappingAnnotation(annotationName);
     }
 
     @Override
@@ -59,11 +60,6 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
         return path.toString();
     }
 
-    // 判断是否为Spring MVC的RequestMapping注解
-    private boolean isRequestMappingAnnotation(String annotationName) {
-        return StringUtils.equalsAny(annotationName, JACGCommonNameConstants.SPRING_MVC_MAPPING_ANNOTATIONS);
-    }
-
     // 获取Spring MVC对应注解中的path
     private String getPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap) {
         for (String attributeName : JACGCommonNameConstants.SPRING_MVC_MAPPING_ATTRIBUTE_NAMES) {
@@ -97,7 +93,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
         for (Map.Entry<String, Map<String, BaseAnnotationAttribute>> classAnnotationMapEntry : classAnnotationMap.entrySet()) {
             String annotationName = classAnnotationMapEntry.getKey();
             // 判断是否为Spring MVC的RequestMapping注解
-            if (isRequestMappingAnnotation(annotationName)) {
+            if (SpringMvcRequestMappingUtil.isRequestMappingAnnotation(annotationName)) {
                 return getPathInRequestMappingAnnotation(classAnnotationMapEntry.getValue());
             }
         }

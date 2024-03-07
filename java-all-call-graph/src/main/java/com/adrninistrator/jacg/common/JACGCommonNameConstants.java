@@ -11,6 +11,11 @@ import java.util.stream.Stream;
  * @description: 常用类常量
  */
 public class JACGCommonNameConstants {
+    public static final String[] SPRING_MVC_CONTROLLER_ANNOTATIONS = new String[]{
+            "org.springframework.stereotype.Controller",
+            "org.springframework.web.bind.annotation.RestController"
+    };
+
     public static final String[] SPRING_MVC_MAPPING_ANNOTATIONS = new String[]{
             "org.springframework.web.bind.annotation.RequestMapping",
             "org.springframework.web.bind.annotation.DeleteMapping",

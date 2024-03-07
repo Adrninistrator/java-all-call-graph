@@ -61,9 +61,12 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
             attributeValue = AnnotationAttributesParseUtil.parseFromFile(attributeType, array[4]);
         }
 
-        if (SpringMvcRequestMappingUtil.isRequestMappingAnnotation(annotationName)) {
+        if (SpringMvcRequestMappingUtil.isControllerAnnotation(annotationName)) {
+            // 假如某个类上有@Controller类注解，则尝试向Map中先加入空的数据，避免类上没有@RequestMapping类注解时不被认为属于Controller类
+            classRequestMappingMap.putIfAbsent(simpleClassName, Collections.emptyList());
+        } else if (SpringMvcRequestMappingUtil.isRequestMappingAnnotation(annotationName)) {
             if (attributeName.isEmpty()) {
-                // 类上的Spring MVC对应的@RequestMapping注解的path属性值为空
+                // 类上的Spring MVC对应的@RequestMapping类注解的path属性值为空
                 classRequestMappingMap.put(simpleClassName, Collections.emptyList());
             } else if (SpringMvcRequestMappingUtil.isRequestMappingPathAttribute(attributeName)) {
                 // 处理类上的Spring MVC对应的@RequestMapping注解的path属性值
