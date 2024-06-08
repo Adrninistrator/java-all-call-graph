@@ -10,17 +10,17 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.annotation.AnnotationAttributeInfo;
 import com.adrninistrator.jacg.dto.annotation.AnnotationWithAttributeInfo;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation.EmptyAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.StringAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodAnnotation;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassAnnotation;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldAnnotation;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodAnnotation;
 import com.adrninistrator.jacg.extractor.common.enums.SpTxPropagationEnum;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
-import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
+import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +39,9 @@ import java.util.Map;
 public class AnnotationHandler extends BaseHandler {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationHandler.class);
 
+    public static final String ANNOTATION_ATTRIBUTE_COLUMNS = JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ATTRIBUTE_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE,
+            DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE);
+
     private final JACGExtendsImplHandler jacgExtendsImplHandler;
 
     public AnnotationHandler(ConfigureWrapper configureWrapper) {
@@ -55,48 +58,32 @@ public class AnnotationHandler extends BaseHandler {
      * 查询带有指定注解的类名列表
      *
      * @param querySimpleClassName true: 查询唯一类名 false: 查询完整类名
-     * @param annotationClassNames 注解类名
+     * @param annotationClassName  注解类名
      * @return
      */
-    @SuppressWarnings("all")
-    public List<String> queryClassesWithAnnotations(boolean querySimpleClassName, String... annotationClassNames) {
-        if (ArrayUtils.isEmpty(annotationClassNames)) {
-            return Collections.emptyList();
-        }
-
+    public List<String> queryClassesWithAnnotation(boolean querySimpleClassName, String annotationClassName) {
         SqlKeyEnum sqlKeyEnum = querySimpleClassName ? SqlKeyEnum.CA_QUERY_SIMPLE_CLASS_NAME_WITH_ANNOTATION : SqlKeyEnum.CA_QUERY_CLASS_NAME_WITH_ANNOTATION;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum, annotationClassNames.length);
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select distinct " + (querySimpleClassName ? DC.CA_SIMPLE_CLASS_NAME : DC.CA_CLASS_NAME) +
                     " from " + DbTableInfoEnum.DTIE_CLASS_ANNOTATION.getTableName() +
-                    " where " + DC.CA_ANNOTATION_NAME + " in " + JACGSqlUtil.genQuestionString(annotationClassNames.length);
-            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
+                    " where " + DC.CA_ANNOTATION_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        // IDEA的提示忽略 Confusing argument 'xxx', unclear if a varargs or non-varargs call is desired
-        return dbOperator.queryListOneColumn(sql, String.class, annotationClassNames);
-    }
-
-    /**
-     * 查询带有指定注解的方法列表
-     *
-     * @param annotationClassNames 指定的注解类名
-     * @return
-     */
-    public List<WriteDbData4MethodAnnotation> queryMethodsWithAnnotations(String... annotationClassNames) {
-        return dbOperWrapper.getMethodsAndHashWithAnnotations(annotationClassNames);
+        return dbOperator.queryListOneColumn(sql, String.class, annotationClassName);
     }
 
     /**
      * 查询带有指定注解的完整方法列表
      *
-     * @param queryFullMethod      true: 查询完整方法 false: 方法HASH+长度
-     * @param annotationClassNames 指定的注解类名
+     * @param queryFullMethod     true: 查询完整方法 false: 方法HASH+长度
+     * @param annotationClassName 指定的注解类名
      * @return
      */
-    public List<String> queryMethodsWithAnnotations(boolean queryFullMethod, String... annotationClassNames) {
-        List<WriteDbData4MethodAnnotation> list = dbOperWrapper.getMethodsAndHashWithAnnotations(annotationClassNames);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
-            return Collections.emptyList();
+    public List<String> queryMethodsWithAnnotation(boolean queryFullMethod, String annotationClassName) {
+        List<WriteDbData4MethodAnnotation> list = queryMethodsAndHashWithAnnotation(annotationClassName);
+        if (list == null) {
+            return null;
         }
 
         List<String> stringList = new ArrayList<>(list.size());
@@ -104,6 +91,24 @@ public class AnnotationHandler extends BaseHandler {
             stringList.add(queryFullMethod ? methodAnnotation.getFullMethod() : methodAnnotation.getMethodHash());
         }
         return stringList;
+    }
+
+    /**
+     * 从方法注解表，查询带有指定注解的完整方法及方法HASH，结果会去重
+     *
+     * @param annotationClassName 注解类名
+     * @return
+     */
+    public List<WriteDbData4MethodAnnotation> queryMethodsAndHashWithAnnotation(String annotationClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_FMAH_WITH_ANNOTATIONS;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select distinct " + JACGSqlUtil.joinColumns(DC.MA_FULL_METHOD, DC.MA_METHOD_HASH) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName() +
+                    " where " + DC.MA_ANNOTATION_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodAnnotation.class, annotationClassName);
     }
 
     /**
@@ -126,11 +131,11 @@ public class AnnotationHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_SINGLE_ATTRIBUTE_BY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE, DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MA_ATTRIBUTE_TYPE, DC.MA_ATTRIBUTE_VALUE) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName() +
                     " where " + DC.MA_METHOD_HASH + " = ?" +
-                    " and " + DC.COMMON_ANNOTATION_ANNOTATION_NAME + " = ?" +
-                    " and " + DC.COMMON_ANNOTATION_ATTRIBUTE_NAME + " = ?";
+                    " and " + DC.MA_ANNOTATION_NAME + " = ?" +
+                    " and " + DC.MA_ATTRIBUTE_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
@@ -140,13 +145,11 @@ public class AnnotationHandler extends BaseHandler {
         }
 
         // 根据查询的结果获取对应的注解属性值
-        BaseAnnotationAttribute attribute = genAnnotationAttributeFromResult(annotationAttributeInfo);
+        BaseAnnotationAttribute attribute = AnnotationAttributesParseUtil.genAnnotationAttribute(annotationAttributeInfo);
         if (!attributeClassType.isAssignableFrom(attribute.getClass())) {
-            logger.error("方法注解属性的实现类型与预期不一致 {}\n{}\n{}\n{}\n{}", fullMethod, annotationName, attributeName,
-                    attribute.getClass().getName(), attributeClassType.getName());
+            logger.error("方法注解属性的实现类型与预期不一致 {} {} {} {} {}", fullMethod, annotationName, attributeName, attribute.getClass().getName(), attributeClassType.getName());
             return null;
         }
-
         return (T) attribute;
     }
 
@@ -157,8 +160,7 @@ public class AnnotationHandler extends BaseHandler {
      * @param annotationName
      * @return key：注解属性名称，value：注解属性
      */
-    public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod,
-                                                                                String annotationName) {
+    public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod, String annotationName) {
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         return queryMethodAnnotationAttributes(fullMethod, methodHash, annotationName);
     }
@@ -171,38 +173,22 @@ public class AnnotationHandler extends BaseHandler {
      * @param annotationName
      * @return key：注解属性名称，value：注解属性
      */
-    public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod,
-                                                                                String methodHash,
-                                                                                String annotationName) {
+    public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod, String methodHash, String annotationName) {
         logger.debug("查询方法上注解的属性 {} {}", fullMethod, annotationName);
         String sql;
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_ALL_ATTRIBUTES;
         sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ATTRIBUTE_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE, DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
+            sql = "select " + ANNOTATION_ATTRIBUTE_COLUMNS +
                     " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName() +
                     " where " + DC.MA_METHOD_HASH + " = ?" +
-                    " and " + DC.COMMON_ANNOTATION_ANNOTATION_NAME + " = ?";
+                    " and " + DC.MA_ANNOTATION_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<AnnotationAttributeInfo> list = dbOperator.queryList(sql, AnnotationAttributeInfo.class, methodHash, annotationName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, BaseAnnotationAttribute> annotationAttributeMap = new HashMap<>(list.size());
-        for (AnnotationAttributeInfo annotationAttributeInfo : list) {
-            String attributeName = annotationAttributeInfo.getAttributeName();
-            if (StringUtils.isBlank(attributeName)) {
-                // 对于未指定属性的注解，属性名称字段会是""，不需要处理属性值
-                annotationAttributeMap.put(attributeName, EmptyAnnotationAttribute.getInstance());
-                continue;
-            }
-            // 根据查询的结果获取对应的注解属性值，并记录
-            annotationAttributeMap.put(attributeName, genAnnotationAttributeFromResult(annotationAttributeInfo));
-        }
-        return annotationAttributeMap;
+        // 将查询到的注解属性列表转换为对应的Map
+        return genAnnotationAttributeMap(list);
     }
 
     /**
@@ -223,19 +209,6 @@ public class AnnotationHandler extends BaseHandler {
     }
 
     /**
-     * 获取Spring事务注解@Transactional对应的事务传播行为，仅当确认对应方法上有@Transactional注解时，才能使用当前方法查询
-     *
-     * @param txPropagationAttribute
-     * @return
-     */
-    public String getSpringTxAnnotationPropagation(BaseAnnotationAttribute txPropagationAttribute) {
-        if (txPropagationAttribute == null) {
-            return SpTxPropagationEnum.STPE_DEFAULT_REQUIRED.getPropagation();
-        }
-        return ((StringAnnotationAttribute) txPropagationAttribute).getAttributeString();
-    }
-
-    /**
      * 根据完整类名获取对应的注解信息，Map格式
      *
      * @param className 完整类名
@@ -248,13 +221,12 @@ public class AnnotationHandler extends BaseHandler {
                 value   Map<String, BaseAnnotationAttribute> key：注解属性名称，value：注解属性
          */
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);
-        logger.debug("从数据库查询类注解信息 {}", simpleClassName);
+        logger.debug("根据完整类名获取对应的注解信息 {}", simpleClassName);
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CA_QUERY_ANNOTATIONS_BY_SIMPLE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ANNOTATION_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE,
-                    DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.CA_ANNOTATION_NAME, DC.CA_ATTRIBUTE_NAME, DC.CA_ATTRIBUTE_TYPE, DC.CA_ATTRIBUTE_VALUE) +
                     " from " + DbTableInfoEnum.DTIE_CLASS_ANNOTATION.getTableName() +
                     " where " + DC.CA_SIMPLE_CLASS_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
@@ -274,31 +246,21 @@ public class AnnotationHandler extends BaseHandler {
      */
     public Map<String, BaseAnnotationAttribute> queryAnnotationAttributes4Class(String className, String annotationName) {
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);
-        logger.debug("从数据库查询类注解信息 {}", simpleClassName);
+        logger.debug("获取指定类上指定注解对应的注解属性 {}", simpleClassName);
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CA_QUERY_ONE_ANNOTATION_BY_SIMPLE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.COMMON_ANNOTATION_ATTRIBUTE_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE,
-                    DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
+            sql = "select " + ANNOTATION_ATTRIBUTE_COLUMNS +
                     " from " + DbTableInfoEnum.DTIE_CLASS_ANNOTATION.getTableName() +
                     " where " + DC.CA_SIMPLE_CLASS_NAME + " = ?" +
-                    " and " + DC.COMMON_ANNOTATION_ANNOTATION_NAME + " = ?";
+                    " and " + DC.CA_ANNOTATION_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<AnnotationAttributeInfo> attributeMapList = dbOperator.queryList(sql, AnnotationAttributeInfo.class, simpleClassName, annotationName);
-        if (JavaCGUtil.isCollectionEmpty(attributeMapList)) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, BaseAnnotationAttribute> returnMap = new HashMap<>(attributeMapList.size());
-        for (AnnotationAttributeInfo annotationAttributeInfo : attributeMapList) {
-            // 根据查询的结果获取对应的注解属性值
-            BaseAnnotationAttribute annotationAttribute = genAnnotationAttributeFromResult(annotationAttributeInfo);
-            returnMap.put(annotationAttributeInfo.getAttributeName(), annotationAttribute);
-        }
-        return returnMap;
+        List<AnnotationAttributeInfo> list = dbOperator.queryList(sql, AnnotationAttributeInfo.class, simpleClassName, annotationName);
+        // 将查询到的注解属性列表转换为对应的Map
+        return genAnnotationAttributeMap(list);
     }
 
     // 根据从数据库的查询结果生成注解对应的Map信息
@@ -309,7 +271,7 @@ public class AnnotationHandler extends BaseHandler {
         Map<String, Map<String, BaseAnnotationAttribute>> resultMap = new HashMap<>();
         for (AnnotationWithAttributeInfo annotationWithAttributeInfo : list) {
             // 根据查询的结果获取对应的注解属性值
-            BaseAnnotationAttribute annotationAttribute = genAnnotationAttributeFromResult(annotationWithAttributeInfo);
+            BaseAnnotationAttribute annotationAttribute = AnnotationAttributesParseUtil.genAnnotationAttribute(annotationWithAttributeInfo);
             Map<String, BaseAnnotationAttribute> attributeMap = resultMap.computeIfAbsent(annotationWithAttributeInfo.getAnnotationName(), k -> new HashMap<>());
             attributeMap.put(annotationWithAttributeInfo.getAttributeName(), annotationAttribute);
         }
@@ -334,8 +296,7 @@ public class AnnotationHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_ANNOTATION_BY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.MA_METHOD_HASH, DC.COMMON_ANNOTATION_ANNOTATION_NAME, DC.COMMON_ANNOTATION_ATTRIBUTE_NAME,
-                    DC.COMMON_ANNOTATION_ATTRIBUTE_TYPE, DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE) +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MA_METHOD_HASH, DC.MA_ANNOTATION_NAME, DC.MA_ATTRIBUTE_NAME, DC.MA_ATTRIBUTE_TYPE, DC.MA_ATTRIBUTE_VALUE) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName() +
                     " where " + DC.MA_METHOD_HASH + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
@@ -343,46 +304,6 @@ public class AnnotationHandler extends BaseHandler {
         List<AnnotationWithAttributeInfo> annotationList = dbOperator.queryList(sql, AnnotationWithAttributeInfo.class, methodHash);
         // 根据从数据库的查询结果生成注解对应的Map信息
         return genAnnotationMapFromQueryResult(annotationList);
-    }
-
-    /**
-     * 从注解属性Map中，根据注解属性名，获取预期类型的注解属性值
-     *
-     * @param annotationAttributeMap 注解属性Map，key：注解属性名称，value：注解属性
-     * @param attributeName          注解属性名
-     * @return attributeClassType 预期的注解属性类型
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends BaseAnnotationAttribute> T getAttributeFromMap(Map<String, BaseAnnotationAttribute> annotationAttributeMap,
-                                                                     String attributeName,
-                                                                     Class<T> attributeClassType) {
-        if (annotationAttributeMap == null || attributeName == null || attributeClassType == null) {
-            return null;
-        }
-
-        BaseAnnotationAttribute attribute = annotationAttributeMap.get(attributeName);
-        if (attribute == null) {
-            logger.debug("注解属性为空 {}", attributeName);
-            return null;
-        }
-
-        if (!attributeClassType.isAssignableFrom(attribute.getClass())) {
-            logger.error("类注解属性的实现类型与预期不一致 {}\n{}\n{}", attributeName, attribute.getClass().getName(), attributeClassType.getName());
-            return null;
-        }
-        return (T) attribute;
-    }
-
-    /**
-     * 根据从数据库查询的注解属性信息获取对应的注解属性值
-     *
-     * @param annotationAttributeInfo
-     * @return
-     */
-    private BaseAnnotationAttribute genAnnotationAttributeFromResult(AnnotationAttributeInfo annotationAttributeInfo) {
-        // 解析注解属性
-        return AnnotationAttributesParseUtil.parseFromDb(annotationAttributeInfo.getAttributeType(), annotationAttributeInfo.getAttributeValue());
     }
 
     /**
@@ -396,6 +317,7 @@ public class AnnotationHandler extends BaseHandler {
         List<SuperClassWithAnnotation> superClassWithAnnotationList = new ArrayList<>();
         String currentClassName = className;
         while (true) {
+            // 查询当前类的父类名称
             String superClassName = jacgExtendsImplHandler.querySuperClassNameByFull(currentClassName);
             if (superClassName == null) {
                 break;
@@ -408,5 +330,150 @@ public class AnnotationHandler extends BaseHandler {
             currentClassName = superClassName;
         }
         return superClassWithAnnotationList;
+    }
+
+    /**
+     * 查询在字段上有指定注解的字段及对应的类信息
+     *
+     * @param annotationClassName
+     * @return
+     */
+    public List<WriteDbData4FieldAnnotation> queryClassFieldsWithAnnotation(String annotationClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.FA_QUERY_CLASS_FIELD_WITH_ANNOTATIONS;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select distinct " + JACGSqlUtil.joinColumns(DC.FA_SIMPLE_CLASS_NAME, DC.FA_FIELD_NAME, DC.FA_CLASS_NAME) +
+                    " from " + DbTableInfoEnum.DTIE_FIELD_ANNOTATION.getTableName() +
+                    " where " + DC.FA_ANNOTATION_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4FieldAnnotation.class, annotationClassName);
+    }
+
+    /**
+     * 获取指定字段上指定注解对应的注解属性
+     *
+     * @param className      完整类名
+     * @param fieldName      字段名称
+     * @param annotationName 注解类名
+     * @return 若返回map isEmpty()为true，代表类上没有对应的注解。若返回map isEmpty()为false，代表代表类上有对应的注解，key：注解属性名称，value：注解属性
+     */
+    public Map<String, BaseAnnotationAttribute> queryAnnotationAttributes4Field(String className, String fieldName, String annotationName) {
+        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        logger.debug("获取指定字段上指定注解对应的注解属性 {} {}", simpleClassName, fieldName);
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.FA_QUERY_ONE_ANNOTATION_BY_CLASS_FIELD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + ANNOTATION_ATTRIBUTE_COLUMNS +
+                    " from " + DbTableInfoEnum.DTIE_FIELD_ANNOTATION.getTableName() +
+                    " where " + DC.FA_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.FA_FIELD_NAME + " = ?" +
+                    " and " + DC.FA_ANNOTATION_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        List<AnnotationAttributeInfo> list = dbOperator.queryList(sql, AnnotationAttributeInfo.class, simpleClassName, fieldName, annotationName);
+        // 将查询到的注解属性列表转换为对应的Map
+        return genAnnotationAttributeMap(list);
+    }
+
+    /**
+     * 根据指定的注解及属性，查询对应的类的注解信息
+     *
+     * @param annotationName 注解名称
+     * @param attributeName  注解属性名称
+     * @param attributeValue 注解属性值
+     * @return
+     */
+    public List<WriteDbData4ClassAnnotation> queryClassAnnotationByAnnotationAttribute(String annotationName, String attributeName, String attributeValue) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CA_QUERY_ONE_ANNOTATION_BY_ANNOTATION_ATTRIBUTE;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_CLASS_ANNOTATION) +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_ANNOTATION.getTableName() +
+                    " where " + DC.CA_ANNOTATION_NAME + " = ?" +
+                    " and " + DC.CA_ATTRIBUTE_NAME + " = ?" +
+                    " and " + DC.CA_ATTRIBUTE_VALUE + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4ClassAnnotation.class, annotationName, attributeName, attributeValue);
+    }
+
+    /**
+     * 将查询到的注解属性列表转换为对应的Map
+     *
+     * @param list
+     * @return
+     */
+    private Map<String, BaseAnnotationAttribute> genAnnotationAttributeMap(List<AnnotationAttributeInfo> list) {
+        if (JavaCGUtil.isCollectionEmpty(list)) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, BaseAnnotationAttribute> annotationAttributeMap = new HashMap<>(list.size());
+        for (AnnotationAttributeInfo annotationAttributeInfo : list) {
+            // 根据查询的结果获取对应的注解属性值
+            annotationAttributeMap.put(annotationAttributeInfo.getAttributeName(), AnnotationAttributesParseUtil.genAnnotationAttribute(annotationAttributeInfo));
+        }
+        return annotationAttributeMap;
+    }
+
+    /**
+     * 获取字段上的@JsonProperty注解的value属性值
+     *
+     * @param className 类名
+     * @param fieldName 字段名
+     * @return
+     */
+    public String queryFieldJsonPropertyValue(String className, String fieldName) {
+        Map<String, BaseAnnotationAttribute> fieldAnnotationAttributeMap = queryAnnotationAttributes4Field(className, fieldName,
+                JACGCommonNameConstants.JSON_PROPERTY_ANNOTATION_NAME_);
+        String jsonPropertyValue = AnnotationAttributesParseUtil.getAttributeStringValue(fieldAnnotationAttributeMap, JACGCommonNameConstants.ANNOTATION_ATTRIBUTE_NAME_VALUE);
+        // @JsonProperty注解属性值若为""，也当作null
+        return StringUtils.isBlank(jsonPropertyValue) ? null : jsonPropertyValue;
+    }
+
+    /**
+     * 根据完整方法，查询方法指定参数的注解的指定属性
+     *
+     * @param fullMethod     完整方法
+     * @param argSeq         参数序号，从0开始
+     * @param annotationName 注解类名
+     * @param attributeName  注解属性名
+     * @param attributeName  注解属性名
+     * @return attributeClassType 预期的注解属性类型
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends BaseAnnotationAttribute> T queryAttribute4MethodArgAnnotation(String fullMethod,
+                                                                                    int argSeq,
+                                                                                    String annotationName,
+                                                                                    String attributeName,
+                                                                                    Class<T> attributeClassType) {
+        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        logger.debug("查询方法指定参数的指定注解的指定属性 {} {} {} {} {}", fullMethod, argSeq, methodHash, annotationName, attributeName);
+
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MAA_QUERY_SINGLE_ATTRIBUTE_BY_METHOD_HASH;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MA_ATTRIBUTE_TYPE, DC.MA_ATTRIBUTE_VALUE) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_ARG_ANNOTATION.getTableName() +
+                    " where " + DC.MAA_METHOD_HASH + " = ?" +
+                    " and " + DC.MAA_ARG_SEQ + " = ?" +
+                    " and " + DC.MAA_ANNOTATION_NAME + " = ?" +
+                    " and " + DC.MAA_ATTRIBUTE_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        AnnotationAttributeInfo annotationAttributeInfo = dbOperator.queryObject(sql, AnnotationAttributeInfo.class, methodHash, argSeq, annotationName, attributeName);
+        if (annotationAttributeInfo == null) {
+            return null;
+        }
+
+        // 根据查询的结果获取对应的注解属性值
+        BaseAnnotationAttribute attribute = AnnotationAttributesParseUtil.genAnnotationAttribute(annotationAttributeInfo);
+        if (!attributeClassType.isAssignableFrom(attribute.getClass())) {
+            logger.error("方法注解属性的实现类型与预期不一致 {} {} {} {} {} {}", fullMethod, argSeq, annotationName, attributeName, attribute.getClass().getName(), attributeClassType.getName());
+            return null;
+        }
+        return (T) attribute;
     }
 }

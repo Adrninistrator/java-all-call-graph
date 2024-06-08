@@ -1,16 +1,24 @@
 package com.adrninistrator.jacg.runner.base;
 
+import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
-import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
+import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
+import com.adrninistrator.jacg.handler.jarinfo.JarInfoHandler;
 import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,7 +30,11 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -35,22 +47,19 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractRunner {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunner.class);
 
-    // 是否有检查过数据库文件是否可写
-    protected static boolean CHECK_H2_DB_FILE_WRITEABLE = false;
-
     // 配置信息包装类
     protected ConfigureWrapper configureWrapper;
 
     // 当前的输出目录
     protected String currentOutputDirPath;
 
-    protected String appName;
-
-    protected boolean inited = false;
-
     protected DbOperator dbOperator;
 
     protected DbOperWrapper dbOperWrapper;
+
+    protected String appName;
+
+    protected String tableSuffix;
 
     protected ThreadPoolExecutor threadPoolExecutor;
 
@@ -66,15 +75,27 @@ public abstract class AbstractRunner {
     // 继承与实际相关的处理类
     protected JACGExtendsImplHandler jacgExtendsImplHandler;
 
+    // 对解析的jar包及目录信息处理的类
+    protected JarInfoHandler jarInfoHandler;
+
     protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
-    /**
-     * 入口方法
-     *
-     * @return true: 成功；false: 失败
-     */
-    public boolean run() {
-        return run(new ConfigureWrapper(false));
+    public AbstractRunner() {
+        this(new ConfigureWrapper(false));
+    }
+
+    public AbstractRunner(ConfigureWrapper configureWrapper) {
+        this.configureWrapper = configureWrapper;
+        // 判断当前的子类是否需要操作数据库，RunnerWriteCallGraphFile 类不需要
+        if (handleDb()) {
+            // 完成需要使用的基础配置的初始化
+            dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, this);
+            dbOperator = dbOperWrapper.getDbOperator();
+            appName = dbOperator.getAppName();
+            tableSuffix = dbOperator.getTableSuffix();
+            jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
+            jarInfoHandler = new JarInfoHandler(dbOperWrapper);
+        }
     }
 
     /**
@@ -97,31 +118,6 @@ public abstract class AbstractRunner {
     protected abstract boolean checkH2DbFile();
 
     /**
-     * 初始化
-     *
-     * @param configureWrapper
-     */
-    private void init(ConfigureWrapper configureWrapper) {
-        synchronized (this) {
-            if (inited) {
-                logger.warn("{} 已完成初始化，不会再初始化", currentSimpleClassName);
-                return;
-            }
-
-            this.configureWrapper = configureWrapper;
-            if (handleDb()) {
-                // 需要操作数据库时执行的操作
-                appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
-                // 完成需要使用的基础配置的初始化
-                dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName);
-                dbOperator = dbOperWrapper.getDbOperator();
-                jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
-            }
-            inited = true;
-        }
-    }
-
-    /**
      * 打印当前使用的配置信息
      */
     protected void printAllConfigInfo() {
@@ -134,20 +130,13 @@ public abstract class AbstractRunner {
     /**
      * 入口方法，通过代码指定配置参数
      *
-     * @param configureWrapper 当前使用的配置信息
      * @return
      */
-    public boolean run(ConfigureWrapper configureWrapper) {
-        // 记录入口简单类名
-        configureWrapper.addEntryClass(currentSimpleClassName);
-
+    public boolean run() {
         try {
             logger.info("{} 开始执行", currentSimpleClassName);
             long startTime = System.currentTimeMillis();
             someTaskFail = false;
-
-            // 初始化
-            init(configureWrapper);
 
             // 预检查
             if (!preCheck()) {
@@ -169,9 +158,13 @@ public abstract class AbstractRunner {
                 return false;
             }
             // 执行完毕时尝试打印当前使用的配置信息
-            configureWrapper.tryPrintUsedConfigInfo(currentSimpleClassName, currentOutputDirPath);
+            if (currentOutputDirPath != null) {
+                configureWrapper.printUsedConfigInfo(currentSimpleClassName, currentOutputDirPath);
+            } else {
+                logger.info("没有执行生成文件的操作，不打印当前使用的配置信息");
+            }
             long spendTime = System.currentTimeMillis() - startTime;
-            logger.info("{} 执行完毕，耗时: {} S", currentSimpleClassName, spendTime / 1000.0D);
+            logger.info("{} 执行完毕，耗时: {} 秒", currentSimpleClassName, spendTime / 1000.0D);
             return true;
         } catch (Exception e) {
             logger.error("error {} ", currentSimpleClassName, e);
@@ -191,23 +184,22 @@ public abstract class AbstractRunner {
         if (handleDb()) {
             // 需要操作数据库时执行的操作
             if (dbOperator.isClosed()) {
-                logger.error("当前类上次执行方法完毕后已将数据库关闭，若需要再次执行，需要重新创建对象再执行");
+                logger.error("{} 当前类上次执行方法完毕后已将数据库关闭，若需要再次执行，需要重新创建对象再执行", currentSimpleClassName);
                 return false;
             }
 
             // 使用H2数据库时，检查数据库文件
-            if (Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2)) && !checkH2DbFile()) {
+            if (dbOperator.getDbConfInfo().isUseH2Db() && !checkH2DbFile()) {
                 return false;
             }
         }
-
         return true;
     }
 
     // 结束前的处理
     protected void beforeExit() {
-        if (dbOperator != null) {
-            dbOperator.closeDs();
+        if (handleDb()) {
+            dbOperator.closeDs(this);
         }
 
         if (threadPoolExecutor != null) {
@@ -230,12 +222,12 @@ public abstract class AbstractRunner {
         int threadNum = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_THREAD_NUM);
         if (taskNum != null && taskNum < threadNum) {
             // 任务数量比配置文件中指定的线程数少，则调小实际创建的线程数
-            logger.info("{} 将线程数修改为需要处理的任务数 {}", currentSimpleClassName, taskNum);
-            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM, String.valueOf(taskNum));
+            threadNum = taskNum;
         }
 
         // 任务队列最大长度，设置为线程数2倍
         taskQueueMaxSize = threadNum * 2;
+        logger.info("任务数量 {} 创建的线程池线程数 {}", (taskNum == null ? "-" : taskNum), threadNum);
         threadPoolExecutor = new ThreadPoolExecutor(threadNum, threadNum, 10L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(taskQueueMaxSize), new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER));
     }
@@ -253,10 +245,10 @@ public abstract class AbstractRunner {
 
     // 获取H2数据库文件对象
     protected File getH2DbFile() {
-        return new File(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH) + JACGConstants.H2_FILE_EXT);
+        return new File(dbOperator.getDbConfInfo().getDbH2FilePath() + JACGConstants.H2_FILE_EXT);
     }
 
-    // 获得需要处理的jar包数组
+    // 获得需要处理的jar包列表
     protected List<String> getJarPathList() {
         List<String> jarPathList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, true);
         logger.info("{} 需要处理的jar包或目录\n{}", currentSimpleClassName, StringUtils.join(jarPathList, "\n"));
@@ -272,31 +264,25 @@ public abstract class AbstractRunner {
      */
     protected boolean checkH2DbFileWritable(File h2DbFile) {
         synchronized (AbstractRunner.class) {
-            // 以下操作在JVM中只能成功执行一次，需要避免执行多次
-            if (CHECK_H2_DB_FILE_WRITEABLE) {
-                return true;
-            }
-
             logger.info("{} 检查H2数据库文件是否可写", currentSimpleClassName);
             // 尝试以写方式打开，检查数据库文件是否被占用
             try (FileChannel channel = FileChannel.open(h2DbFile.toPath(), StandardOpenOption.WRITE)) {
                 FileLock fileLock = channel.tryLock();
                 if (fileLock == null) {
-                    logger.error("{} H2数据库文件无法写入，请先关闭H2数据库工具打开的H2数据库文件 {}", currentSimpleClassName, JACGFileUtil.getCanonicalPath(h2DbFile));
+                    logger.error("{} H2数据库文件无法写入，请先关闭H2数据库工具打开的H2数据库文件 {}", currentSimpleClassName, JavaCGFileUtil.getCanonicalPath(h2DbFile));
                     return false;
                 }
 
                 fileLock.release();
                 logger.info("{} H2数据库文件可写", currentSimpleClassName);
-                CHECK_H2_DB_FILE_WRITEABLE = true;
                 return true;
             } catch (OverlappingFileLockException e) {
                 // 某些情况下会出现以上异常，当作正常处理
-                logger.warn("{} 检查H2数据库文件是否可以写入时，出现重复对文件加锁的异常，当作正常处理 {} {} {}", currentSimpleClassName, JACGFileUtil.getCanonicalPath(h2DbFile),
+                logger.warn("{} 检查H2数据库文件是否可以写入时，出现重复对文件加锁的异常，当作正常处理 {} {} {}", currentSimpleClassName, JavaCGFileUtil.getCanonicalPath(h2DbFile),
                         e.getClass().getName(), e.getMessage());
                 return true;
             } catch (Exception e) {
-                logger.error("{} 检查H2数据库文件是否可以写入失败，请重试 {} ", currentSimpleClassName, JACGFileUtil.getCanonicalPath(h2DbFile), e);
+                logger.error("{} 检查H2数据库文件是否可以写入失败，请重试 {} ", currentSimpleClassName, JavaCGFileUtil.getCanonicalPath(h2DbFile), e);
                 return false;
             }
         }
@@ -323,6 +309,136 @@ public abstract class AbstractRunner {
      */
     protected boolean handleDb() {
         return true;
+    }
+
+    // 查询jar包与目录信息
+    protected Map<String, WriteDbData4JarInfo> queryJarFileInfo() {
+        // 查询所有的jar包和目录信息
+        List<WriteDbData4JarInfo> list = jarInfoHandler.queryAllJarInfo();
+        if (JavaCGUtil.isCollectionEmpty(list)) {
+            logger.error("查询到jar包信息为空");
+            return null;
+        }
+
+        Map<String, WriteDbData4JarInfo> rtnMap = new HashMap<>(list.size());
+        for (WriteDbData4JarInfo writeDbData4JarInfo : list) {
+            if (!JavaCGConstants.FILE_KEY_RESULT_DIR_INFO_PREFIX.equals(writeDbData4JarInfo.getJarType())) {
+                // 跳过解析结果文件保存目录
+                rtnMap.put(writeDbData4JarInfo.getJarPathHash(), writeDbData4JarInfo);
+            }
+        }
+        return rtnMap;
+    }
+
+    /**
+     * 检查配置文件与jar_info表中的jar文件是否不一致或出现变化
+     *
+     * @param jarPathList
+     * @return true: 有变化 false: 没有变化
+     */
+    protected boolean checkSomeJarModified(List<String> jarPathList) {
+        // 查询jar包与目录信息
+        Map<String, WriteDbData4JarInfo> jarInfoMap = queryJarFileInfo();
+        if (JACGUtil.isMapEmpty(jarInfoMap)) {
+            logger.info("{} 表的内容为空", DbTableInfoEnum.DTIE_JAR_INFO.getTableNameKeyword());
+            return true;
+        }
+
+        // 不检查配置文件中指定的jar包与数据库表中的数量，因为配置文件中可能指定目录，数据库表中保存的是目录中的jar包
+
+        for (String jarPath : jarPathList) {
+            if (!JACGFileUtil.isFileExists(jarPath)) {
+                // 非文件则不检查，对于 RunnerWriteDb 类调用当前方法时，已经提前检查过传入的 jarPathList 都是文件，没有影响
+                logger.info("非文件，不检查HASH {}", jarPath);
+                continue;
+            }
+
+            String jarFilePath = JavaCGFileUtil.getCanonicalPath(jarPath);
+            if (jarFilePath == null) {
+                logger.error("获取文件路径失败 {}", jarPath);
+                return true;
+            }
+
+            String jarPathHash = JACGUtil.genHashWithLen(jarFilePath);
+            WriteDbData4JarInfo jarInfo = jarInfoMap.get(jarPathHash);
+            if (jarInfo == null) {
+                logger.info("指定的jar包未导入数据库中 {} {}", jarPath, jarFilePath);
+                return true;
+            }
+
+            if (checkJarFileModified(jarFilePath, jarInfo)) {
+                logger.info("指定的jar包文件内容有变化 {} {}", jarPath, jarFilePath);
+                return true;
+            }
+        }
+        logger.info("配置文件 {} 中指定的jar包都在jar_info表中且未发生变化", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
+        return false;
+    }
+
+    /**
+     * 检查jar_info表中的某个jar包是否有发生变化
+     *
+     * @param jarFilePath
+     * @param jarInfo
+     * @return true: 有变化 false: 没有变化
+     */
+    protected boolean checkJarFileModified(String jarFilePath, WriteDbData4JarInfo jarInfo) {
+        String lastModifiedTime = JACGFileUtil.getFileLastModifiedTime(jarFilePath);
+        if (lastModifiedTime.equals(jarInfo.getLastModifiedTime())) {
+            logger.info("文件修改时间没有变化 {} {}", jarFilePath, lastModifiedTime);
+            // 文件修改时间没有变化，返回没有变化
+            return false;
+        }
+        String jarFileHash = JACGFileUtil.getFileMd5(jarFilePath);
+        // 比较jar包文件HASH值，若与之前不同则返回有变化
+        if (StringUtils.equals(jarFileHash, jarInfo.getJarFileHash())) {
+            logger.info("文件HASH没有变化 {} {}", jarFilePath, jarFileHash);
+            return false;
+        }
+        logger.info("文件HASH发生变化 {} {}->{}", jarFilePath, jarInfo.getJarFileHash(), jarFileHash);
+        return true;
+    }
+
+    /**
+     * 检查允许处理的类名或包名前缀是否有变化
+     *
+     * @return true: 有变化，false: 没有变化
+     */
+    protected boolean checkAllowedClassPrefixModified() {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.ACP_QUERY;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.ACP_CLASS_PREFIX +
+                    " from " + DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX.getTableName() +
+                    " order by " + DC.ACP_RECORD_ID;
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        // 查询数据库中的配置
+        List<String> allowedClassPrefixListInDb = dbOperator.queryListOneColumn(sql, String.class);
+        // 获取当前指定的配置
+        Set<String> allowedClassPrefixSetInConfig = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true);
+        if (JavaCGUtil.isCollectionEmpty(allowedClassPrefixListInDb) && allowedClassPrefixSetInConfig.isEmpty()) {
+            return false;
+        }
+
+        List<String> allowedClassPrefixListInConfig = new ArrayList<>(allowedClassPrefixSetInConfig);
+        Collections.sort(allowedClassPrefixListInConfig);
+
+        if (allowedClassPrefixListInDb.size() != allowedClassPrefixListInConfig.size()) {
+            logger.error("解析jar包时指定的允许的类包或包名前缀与当前配置中指定的数量不相同\n解析jar包时指定的:\n[\n{}\n]\n当前配置中指定的:\n[\n{}\n]",
+                    StringUtils.join(allowedClassPrefixListInDb, "\n"), StringUtils.join(allowedClassPrefixListInConfig, "\n"));
+            return true;
+        }
+
+        for (int i = 0; i < allowedClassPrefixListInDb.size(); i++) {
+            if (!StringUtils.equals(allowedClassPrefixListInDb.get(i), allowedClassPrefixListInConfig.get(i))) {
+                logger.error("解析jar包时指定的允许的类包或包名前缀与当前配置中指定的内容不相同\n解析jar包时指定的:\n[\n{}\n]\n当前配置中指定的:\n[\n{}\n]",
+                        StringUtils.join(allowedClassPrefixListInDb, "\n"), StringUtils.join(allowedClassPrefixListInConfig, "\n"));
+                return true;
+            }
+        }
+        logger.info("解析jar包时指定的允许的类包或包名前缀与当前配置中指定的内容相同");
+        return false;
     }
 
     /**

@@ -2,7 +2,7 @@ package test.junit.spring;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import test.call_graph.spring.bean.use.extends_impl.TestSpringExtendsImpl;
+import test.callgraph.spring.bean.use.extendsimpl.TestSpringExtendsImpl;
 import test.junit.base.TestSpringBase;
 
 /**

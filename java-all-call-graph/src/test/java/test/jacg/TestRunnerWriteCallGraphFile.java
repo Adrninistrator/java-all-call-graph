@@ -1,6 +1,7 @@
 package test.jacg;
 
 import com.adrninistrator.jacg.runner.RunnerWriteCallGraphFile;
+import org.junit.Assert;
 
 /**
  * @author adrninistrator
@@ -10,6 +11,6 @@ import com.adrninistrator.jacg.runner.RunnerWriteCallGraphFile;
 public class TestRunnerWriteCallGraphFile {
 
     public static void main(String[] args) {
-        new RunnerWriteCallGraphFile().run();
+        Assert.assertTrue(new RunnerWriteCallGraphFile().run());
     }
 }

@@ -1,12 +1,16 @@
 package com.adrninistrator.jacg.extractor.entry;
 
+import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
+import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
+import com.adrninistrator.jacg.extractor.callback.CallerExtractedFileCallback;
+import com.adrninistrator.jacg.extractor.callback.StackFileParsedCallback;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;
-import com.adrninistrator.jacg.extractor.dto.common.extract_file.CallerExtractedFile;
-import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
+import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedFile;
+import com.adrninistrator.jacg.extractor.parser.StackFileParser;
+import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,72 +18,99 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * @author adrninistrator
  * @date 2021/10/16
- * @description: 对调用链结果文件进行数据提取，向下的方法调用链，获取方法调用业务功能数据
+ * @description: 对向下的方法调用链文件进行数据提取，获取方法调用业务功能数据
  */
-public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor {
+public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor implements StackFileParsedCallback {
     private static final Logger logger = LoggerFactory.getLogger(CallerGraphBusinessDataExtractor.class);
-
-    // 需要处理的业务功能数据类型
-    private String[] handleBusinessDataTypes;
 
     /**
      * 生成向下的完整调用链，根据关键字进行查找，获取方法调用业务功能数据并返回，使用配置文件中的参数
      *
-     * @param businessDataTypes 需要处理的方法调用业务功能数据类型
-     * @return
+     * @param callerExtractedFileCallback 对处理后的文件进行自定义处理的回调类
+     * @param businessDataTypes           需要处理的方法调用业务功能数据类型
+     * @return true: 处理成功 false: 处理失败
      */
-    public List<CallerExtractedFile> extract(String... businessDataTypes) {
-        return extract(new ConfigureWrapper(false), businessDataTypes);
+    public boolean extract(CallerExtractedFileCallback callerExtractedFileCallback, String... businessDataTypes) {
+        return extract(new ConfigureWrapper(false), callerExtractedFileCallback, businessDataTypes);
     }
 
     /**
      * 生成向下的完整调用链，根据关键字进行查找，获取方法调用业务功能数据并返回，使用代码指定的参数
      *
      * @param configureWrapper
-     * @param businessDataTypes 需要处理的方法调用业务功能数据类型
-     * @return
+     * @param callerExtractedFileCallback 对处理后的文件进行自定义处理的回调类
+     * @param businessDataTypes           需要处理的方法调用业务功能数据类型
+     * @return true: 处理成功 false: 处理失败
      */
-    public List<CallerExtractedFile> extract(ConfigureWrapper configureWrapper, String... businessDataTypes) {
-        if (ArrayUtils.isEmpty(businessDataTypes)) {
-            throw new JavaCGRuntimeException("未指定需要处理的方法调用业务功能数据类型");
+    public boolean extract(ConfigureWrapper configureWrapper, CallerExtractedFileCallback callerExtractedFileCallback, String... businessDataTypes) {
+        if (callerExtractedFileCallback == null) {
+            logger.error("未指定 {} 实现类", CallerExtractedFileCallback.class);
+            return false;
         }
 
-        handleBusinessDataTypes = businessDataTypes;
+        if (ArrayUtils.isEmpty(businessDataTypes)) {
+            logger.error("未指定需要处理的方法调用业务功能数据类型");
+            return false;
+        }
+
         try {
             // 生成向下的方法完整调用链文件，并根据关键字生成调用堆栈文件
-            List<String> stackFilePathList = genStackFiles(configureWrapper);
-            if (JavaCGUtil.isCollectionEmpty(stackFilePathList)) {
-                return Collections.emptyList();
+            ListWithResult<String> stackFilePathList = genStackFiles(configureWrapper);
+            if (!stackFilePathList.isSuccess()) {
+                return false;
             }
 
-            List<CallerExtractedFile> callerExtractedFileList = new ArrayList<>(stackFilePathList.size());
-            for (String stackFilePath : stackFilePathList) {
-                // 处理文件中的方法调用业务功能数据
-                CallerExtractedFile callerExtractedFile = handleStackFile(stackFilePath);
+            for (String stackFilePath : stackFilePathList.getList()) {
+                // 处理调用堆栈文件中的方法信息
+                CallerExtractedFile callerExtractedFile = handleStackFile(stackFilePath, businessDataTypes);
                 if (callerExtractedFile == null) {
-                    return Collections.emptyList();
+                    logger.info("处理调用堆栈文件失败 {}", stackFilePath);
+                    return false;
                 }
-                if (!JavaCGUtil.isCollectionEmpty(callerExtractedFile.getCallerExtractedLineList())) {
-                    // 文件中存在指定类型的方法调用业务功能数据时才添加
-                    callerExtractedFileList.add(callerExtractedFile);
+                if (JavaCGUtil.isCollectionEmpty(callerExtractedFile.getCallerExtractedLineList())) {
+                    logger.info("从调用堆栈文件获取信息为空 {}", stackFilePath);
+                    continue;
+                }
+                // 调用自定义类处理文件，文件中存在指定类型的方法调用业务功能数据时才处理
+                if (!callerExtractedFileCallback.handle(callerExtractedFile)) {
+                    logger.info("对调用堆栈文件进行自定义处理失败 {}", stackFilePath);
+                    return false;
                 }
             }
             logger.info("处理完毕");
-            return callerExtractedFileList;
+            return true;
         } finally {
             // 关闭数据源
             closeDs();
         }
     }
 
+    // 处理调用堆栈文件中的方法信息
+    // 生成向下的调用堆栈文件处理后对应行的信息
+    private CallerExtractedFile handleStackFile(String stackFilePath, String[] businessDataTypes) {
+        // 保存当前处理的调用堆栈文件行
+        List<CallerExtractedLine> callerExtractedLineList = new ArrayList<>();
+
+        // 解析调用堆栈文件
+        if (!StackFileParser.parseStackFile(this, stackFilePath, callerExtractedLineList, businessDataTypes)) {
+            return null;
+        }
+
+        CallerExtractedFile callerExtractedFile = new CallerExtractedFile(callerExtractedLineList);
+        // 处理调用堆栈文件信息
+        fillExtractedFileInfo4Caller(stackFilePath, callerExtractedFile);
+        return callerExtractedFile;
+    }
+
     @Override
-    protected void handleCallStackData(int dataSeq, List<String> lineList, List<Integer> lineNumberList, boolean runInOtherThread, boolean runInTransaction) {
+    public void handleCallStackData(int dataSeq, List<String> lineList, List<Integer> lineNumberList, boolean runInOtherThread, boolean runInTransaction, Object... args) {
+        List<CallerExtractedLine> callerExtractedLineList = JACGUtil.getArgAt(0, args);
+        String[] businessDataTypes = JACGUtil.getArgAt(1, args);
         for (int i = 0; i < lineList.size(); i++) {
             String line = lineList.get(i);
             // 当前行是调用链对应的行，解析当前行包含的内容
@@ -92,7 +123,7 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor {
 
             boolean existsBusinessData = false;
             for (BaseBusinessData businessData : businessDataList) {
-                if (StringUtils.equalsAny(businessData.getDataType(), handleBusinessDataTypes)) {
+                if (StringUtils.equalsAny(businessData.getDataType(), businessDataTypes)) {
                     // 当前行包含的业务功能数据需要处理
                     existsBusinessData = true;
                     break;

@@ -14,6 +14,7 @@ public class JACGMarkdownConstants {
     public static final String FLAG_DOT = ".";
     public static final String FLAG_VERTICAL_BAR = "|";
     public static final String FLAG_TABLE_LINE = "---";
+    public static final String FLAG_HTML_NEW_LINE = "<br>";
 
     private JACGMarkdownConstants() {
         throw new IllegalStateException("illegal");

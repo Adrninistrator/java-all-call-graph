@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.comparator;
 
-import com.adrninistrator.jacg.extractor.dto.common.extract_file.AbstractCallGraphExtractedFile;
+import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGraphExtractedFile;
 
 import java.util.Comparator;
 

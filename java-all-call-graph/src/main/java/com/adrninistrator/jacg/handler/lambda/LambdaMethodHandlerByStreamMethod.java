@@ -1,11 +1,12 @@
 package com.adrninistrator.jacg.handler.lambda;
 
 import com.adrninistrator.jacg.common.DC;
-import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCall;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
+import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ import java.util.List;
  * @date 2023/1/13
  * @description: Lambda表达式方法相关信息查询处理类，通过Stream条件查询
  */
-public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodHandler {
+public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodPageHandler {
     private static final Logger logger = LoggerFactory.getLogger(LambdaMethodHandlerByStreamMethod.class);
 
     public LambdaMethodHandlerByStreamMethod(ConfigureWrapper configureWrapper) {
@@ -27,20 +28,18 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodHandler {
     }
 
     @Override
-    protected List<LambdaMethodCall> queryByPage(int startCallId, int endCallId, Object... args) {
-        Boolean lambdaNextIsStream = JACGUtil.getArgAt(0, args);
-        Boolean lambdaNextIsIntermediate = JACGUtil.getArgAt(1, args);
-
-        boolean lastQuery = (endCallId == JACGConstants.PAGE_QUERY_LAST);
-        logger.info("通过Stream条件查询 {} {} {} {} {}", lastQuery ? "最后一次分页查询" : "非最后一次分页查询", startCallId, endCallId, lambdaNextIsStream, lambdaNextIsIntermediate);
+    public List<LambdaMethodCall> queryDataByPage(int currentStartId, int currentEndId, boolean lastQuery, Object... argsByPage) {
+        Boolean lambdaNextIsStream = JACGUtil.getArgAt(0, argsByPage);
+        Boolean lambdaNextIsIntermediate = JACGUtil.getArgAt(1, argsByPage);
+        logger.info("通过Stream条件查询 {} {} {} {} {}", lastQuery ? "最后一次分页查询" : "非最后一次分页查询", currentStartId, currentEndId, lambdaNextIsStream, lambdaNextIsIntermediate);
 
         // 生成查询使用的sql语句
         String sql = genQuerySql(lastQuery);
         List<Object> argList = new ArrayList<>();
-        argList.add(startCallId);
+        argList.add(currentStartId);
         if (!lastQuery) {
             // 非最后一次分页查询
-            argList.add(endCallId);
+            argList.add(currentEndId);
         }
 
         if (lambdaNextIsStream != null) {
@@ -71,8 +70,8 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodHandler {
         }
 
         logger.info("通过Stream条件查询Lambda表达式方法调用信息 {} {}", lambdaNextIsStream, lambdaNextIsIntermediate);
-        // 执行查询操作
-        return query(lambdaNextIsStream, lambdaNextIsIntermediate);
+        // 分页查询，结果合并到List中
+        return QueryByPageHandler.queryAll2List(this, JavaCGConstants.METHOD_CALL_ID_MIN_BEFORE, lambdaNextIsStream, lambdaNextIsIntermediate);
     }
 
     /**

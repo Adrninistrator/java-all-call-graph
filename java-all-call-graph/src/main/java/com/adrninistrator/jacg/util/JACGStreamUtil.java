@@ -16,7 +16,7 @@ public class JACGStreamUtil {
      * @return
      */
     public static boolean isStreamClass(String className) {
-        return StringUtils.equalsAny(className, JACGCommonNameConstants.CLASS_NAMES_STREAM);
+        return StringUtils.equalsAny(className, JACGCommonNameConstants.STREAM_CLASS_NAMES);
     }
 
     /**
@@ -26,7 +26,7 @@ public class JACGStreamUtil {
      * @return
      */
     public static boolean isStreamIntermediateMethod(String methodName) {
-        return StringUtils.equalsAny(methodName, JACGCommonNameConstants.METHOD_NAMES_STREAM_INTERMEDIATE);
+        return StringUtils.equalsAny(methodName, JACGCommonNameConstants.STREAM_INTERMEDIATE_METHOD_NAMES);
     }
 
     /**
@@ -36,7 +36,7 @@ public class JACGStreamUtil {
      * @return
      */
     public static boolean isStreamTerminalMethod(String methodName) {
-        return StringUtils.equalsAny(methodName, JACGCommonNameConstants.METHOD_NAMES_STREAM_TERMINAL);
+        return StringUtils.equalsAny(methodName, JACGCommonNameConstants.STREAM_TERMINAL_METHOD_NAMES);
     }
 
     private JACGStreamUtil() {

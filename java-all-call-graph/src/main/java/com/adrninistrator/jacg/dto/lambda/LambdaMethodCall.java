@@ -6,8 +6,8 @@ package com.adrninistrator.jacg.dto.lambda;
  * @description: Lambda表达式方法调用
  */
 public class LambdaMethodCall {
-    // 方法调用call_id
-    private int callId;
+    // 方法调用序号
+    private int methodCallId;
 
     // 调用方完整方法
     private String callerFullMethod;
@@ -36,12 +36,12 @@ public class LambdaMethodCall {
     // 下一个被调用方法是否为Stream的terminal（终端）操作
     private Boolean lambdaNextIsTerminal;
 
-    public int getCallId() {
-        return callId;
+    public int getMethodCallId() {
+        return methodCallId;
     }
 
-    public void setCallId(int callId) {
-        this.callId = callId;
+    public void setMethodCallId(int methodCallId) {
+        this.methodCallId = methodCallId;
     }
 
     public String getCallerFullMethod() {

@@ -16,7 +16,7 @@ public class TestBcel {
 
     @Test
     public void test() throws IOException {
-        ClassParser cp = new ClassParser("out\\test\\classes\\test\\call_graph\\argument\\TestArgumentGenerics1.class");
+        ClassParser cp = new ClassParser("out\\test\\classes\\test\\callgraph\\argument\\TestArgumentGenerics1.class");
         JavaClass javaClass = cp.parse();
         for (Method method : javaClass.getMethods()) {
             System.out.println(method.getName());

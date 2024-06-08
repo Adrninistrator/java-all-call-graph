@@ -2,22 +2,21 @@ package com.adrninistrator.jacg.extractor.entry.spring;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.comparator.Comparator4AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.dto.info_with_hash.AbstractInfoWithMethodHash;
+import com.adrninistrator.jacg.dto.infowithhash.AbstractInfoWithMethodHash;
 import com.adrninistrator.jacg.extractor.dto.common.extract.BaseCalleeExtractedMethod;
-import com.adrninistrator.jacg.extractor.dto.common.extract_file.AbstractCallGraphExtractedFile;
-import com.adrninistrator.jacg.extractor.dto.common.extract_file.CallerExtractedFile;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.entry_method.SpTxEntryMethodTxAnnotation;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.entry_method.SpTxEntryMethodTxTpl;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.extract_combined.SpTxCallCombined;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.extract_file.SpTxCallByAnnotationFile;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.extract_file.SpTxCallByTplFile;
+import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGraphExtractedFile;
+import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedFile;
+import com.adrninistrator.jacg.extractor.dto.springtx.entrymethod.SpTxEntryMethodTxAnnotation;
+import com.adrninistrator.jacg.extractor.dto.springtx.entrymethod.SpTxEntryMethodTxTpl;
+import com.adrninistrator.jacg.extractor.dto.springtx.extractcombined.SpTxCallCombined;
+import com.adrninistrator.jacg.extractor.dto.springtx.extractfile.SpTxCallByAnnotationFile;
+import com.adrninistrator.jacg.extractor.dto.springtx.extractfile.SpTxCallByTplFile;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -65,14 +64,13 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
                 usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
             }
             // 处理事务注解
-            List<SpTxCallByAnnotationFile> spTxCallByAnnotationFileList = handleTxAnnotation(usedConfigureWrapper, annotationHandler);
+            ListWithResult<SpTxCallByAnnotationFile> spTxCallByAnnotationFileList = handleTxAnnotation(usedConfigureWrapper, annotationHandler);
 
             if (!outputSubDirName.isEmpty()) {
                 usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_TEMPLATE);
             }
             // 处理事务模板
-            List<SpTxCallByTplFile> spTxCallByTplFileList = handleTxTpl(usedConfigureWrapper);
-
+            ListWithResult<SpTxCallByTplFile> spTxCallByTplFileList = handleTxTpl(usedConfigureWrapper);
             return new SpTxCallCombined(spTxCallByAnnotationFileList, spTxCallByTplFileList);
         } finally {
             closeDs();
@@ -86,15 +84,15 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
      * @param annotationHandler
      * @return
      */
-    private List<SpTxCallByAnnotationFile> handleTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
+    private ListWithResult<SpTxCallByAnnotationFile> handleTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
         // 提取使用@Transactional注解的方法相关信息
-        List<CallerExtractedFile> callerExtractedFileList = extractTxAnnotation(configureWrapper, annotationHandler);
-        if (JavaCGUtil.isCollectionEmpty(callerExtractedFileList)) {
-            return Collections.emptyList();
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxAnnotation(configureWrapper, annotationHandler);
+        if (!callerExtractedFileList.isSuccess()) {
+            return ListWithResult.genFail();
         }
 
-        List<SpTxCallByAnnotationFile> spTxCallByAnnotationFileList = new ArrayList<>(callerExtractedFileList.size());
-        for (CallerExtractedFile callerExtractedFile : callerExtractedFileList) {
+        List<SpTxCallByAnnotationFile> spTxCallByAnnotationFileList = new ArrayList<>(callerExtractedFileList.getList().size());
+        for (CallerExtractedFile callerExtractedFile : callerExtractedFileList.getList()) {
             String txEntryFullMethod = callerExtractedFile.getFullMethod();
             // 查询事务注解对应的事务传播行为
             String txPropagation = queryTxAnnotationPropagation(annotationHandler, txEntryFullMethod);
@@ -110,7 +108,7 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
         }
         // 文件信息列表排序
         spTxCallByAnnotationFileList.sort(Comparator4AbstractCallGraphExtractedFile.getInstance());
-        return spTxCallByAnnotationFileList;
+        return new ListWithResult<>(spTxCallByAnnotationFileList);
     }
 
     /**
@@ -119,11 +117,11 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
      * @param configureWrapper
      * @return
      */
-    private List<SpTxCallByTplFile> handleTxTpl(ConfigureWrapper configureWrapper) {
+    private ListWithResult<SpTxCallByTplFile> handleTxTpl(ConfigureWrapper configureWrapper) {
         List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList = new ArrayList<>();
-        List<CallerExtractedFile> callerExtractedFileList = extractTxTpl(configureWrapper, spTxEntryMethodTxTplList);
-        if (JavaCGUtil.isCollectionEmpty(callerExtractedFileList)) {
-            return Collections.emptyList();
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxTpl(configureWrapper, spTxEntryMethodTxTplList);
+        if (!callerExtractedFileList.isSuccess()) {
+            return ListWithResult.genFail();
         }
 
         /*
@@ -136,8 +134,8 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
         Map<String, SpTxEntryMethodTxTpl> spTxEntryMethodTxTplMap = AbstractInfoWithMethodHash.buildMap(spTxEntryMethodTxTplList);
 
         // 处理根据事务模板找到的事务嵌套，找到对应的方法入口
-        List<SpTxCallByTplFile> spTxCallByTplFileList = new ArrayList<>(callerExtractedFileList.size());
-        for (CallerExtractedFile callerExtractedFile : callerExtractedFileList) {
+        List<SpTxCallByTplFile> spTxCallByTplFileList = new ArrayList<>(callerExtractedFileList.getList().size());
+        for (CallerExtractedFile callerExtractedFile : callerExtractedFileList.getList()) {
             // 根据调用堆栈文件，生成Spring事务被调用信息列表
             List<BaseCalleeExtractedMethod> calleeExtractedMethodList = genBaseCalleeExtractedMethodList(callerExtractedFile.getCallerExtractedLineList());
             SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = spTxEntryMethodTxTplMap.get(callerExtractedFile.getMethodHash());
@@ -148,6 +146,6 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
         }
         // 文件信息列表排序
         spTxCallByTplFileList.sort(Comparator4AbstractCallGraphExtractedFile.getInstance());
-        return spTxCallByTplFileList;
+        return new ListWithResult<>(spTxCallByTplFileList);
     }
 }

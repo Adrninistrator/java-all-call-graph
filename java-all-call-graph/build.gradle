@@ -1,11 +1,12 @@
 apply plugin: 'eclipse'
 apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'idea'
 
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "1.0.15"
+version = "2.0.0"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -23,7 +24,7 @@ repositories {
 }
 
 clean {
-    delete 'build'
+    delete "${buildDir}"
     delete "${jar_output_dir}"
 }
 
@@ -49,23 +50,25 @@ sourceSets {
     }
 }
 
+List apache_ant = ["org.apache.ant:ant:1.10.9"]
+
 List apache_common = [
         'org.apache.commons:commons-lang3:3.12.0',
         'commons-io:commons-io:2.11.0',
-        'commons-codec:commons-codec:1.15'
+        'org.apache.commons:commons-compress:1.19'
 ]
 
 List druid = ['com.alibaba:druid:1.2.15']
 
 List mysql = ['com.mysql:mysql-connector-j:8.0.31']
 
-List h2database = ["com.h2database:h2:2.1.214"]
+List h2database = ["com.h2database:h2:2.2.220"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.16']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:2.0.1']
 
-List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.0.5']
+List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.0.7']
 
 List jackson = ["com.fasterxml.jackson.core:jackson-databind:2.14.0"]
 
@@ -78,6 +81,8 @@ List log4j = [
         'org.apache.logging.log4j:log4j-core:2.20.0',
         'org.apache.logging.log4j:log4j-slf4j-impl:2.20.0'
 ]
+
+List disruptor = ['com.lmax:disruptor:3.3.7']
 
 List junit = [
         'org.junit.platform:junit-platform-launcher:1.9.3',
@@ -95,9 +100,11 @@ List javax_inject = ['javax.inject:javax.inject:1']
 
 List spring_test = ['org.springframework:spring-test:5.3.26']
 
+List commons_bean_utils = ['commons-beanutils:commons-beanutils:1.9.4']
+
 dependencies {
-    compile apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc
-    testImplementation log4j, junit, spring_for_test, javax_inject, spring_test
+    api apache_ant, apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc
+    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, commons_bean_utils
 }
 
 compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -120,19 +127,6 @@ jar {
     }
 }
 
-task test_jar(type: Jar) {
-    archiveName 'test.jar'
-    from(sourceSets.test.output) {
-        include 'test/call_graph/**'
-        exclude 'test/call_graph/other_jar/**'
-        into '/'
-    }
-    from('src/test/resources/') {
-        include 'applicationContext.xml'
-        into 'resources/'
-    }
-}
-
 // 生成可以直接执行的jar包，并拷贝相关文件
 task gen_run_jar(type: Jar) {
     archiveName 'run_jacg.jar'
@@ -144,11 +138,10 @@ task gen_run_jar(type: Jar) {
         into '/'
     }
 
-    def jacgConfigDirs = new File('src/main/resources').listFiles().findAll { File f -> (f.isDirectory() && f.name.startsWith('_jacg_')) }
-
     doLast {
+        def jacgConfigDirs = new File('src/main/resources').listFiles().findAll { File f -> (f.isDirectory() && f.name.startsWith('_jacg_')) }
         copy {
-            from 'build/libs/run_jacg.jar'
+            from "${buildDir}/libs/run_jacg.jar"
             into "${jar_output_dir}/jar/"
         }
         // 拷贝配置文件目录
@@ -183,12 +176,26 @@ task gen_run_jar(type: Jar) {
                         spring-tx
                      */
                 File f ->
-                    ((!f.name.startsWith('spring-') || f.name.startsWith("spring-beans-") || f.name.startsWith("spring-core-") || f.name.startsWith("spring-jcl-") ||
-                            f.name.startsWith("spring-jdbc-") || f.name.startsWith("spring-tx-")) && !f.name.startsWith('junit-'))
+                    ((!f.name.startsWith('spring-')
+                            || f.name.startsWith("spring-beans-")
+                            || f.name.startsWith("spring-core-")
+                            || f.name.startsWith("spring-jcl-")
+                            || f.name.startsWith("spring-jdbc-")
+                            || f.name.startsWith("spring-tx-")) && !f.name.startsWith('junit-') && !f.name.startsWith('hamcrest-core-'))
             }
             into "${jar_output_dir}/lib"
         }
     }
+}
+
+// 将gen_run_jar目录的文件生成tar.gz包
+task gen_tar_gz(type: Tar) {
+    dependsOn gen_run_jar
+    compression = Compression.GZIP
+    // 若使用archiveBaseName，则生成的文件包中会包含“-当前版本号”
+    archiveFileName.set("java-all-call-graph-" + getArchiveVersion().get() + ".tar.gz")
+    destinationDirectory.set(file("${buildDir}/tar_gz"))
+    from("${jar_output_dir}")
 }
 
 idea {

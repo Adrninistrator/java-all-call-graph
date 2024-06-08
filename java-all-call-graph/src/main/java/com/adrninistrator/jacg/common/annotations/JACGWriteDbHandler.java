@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.common.annotations;
 
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.common.enums.WriteDbHandlerWriteFileEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 
 import java.lang.annotation.ElementType;
@@ -29,11 +30,17 @@ public @interface JACGWriteDbHandler {
     // 需要读取的其他文件名称
     String otherFileName() default "";
 
+    // 需要写入到文件的信息
+    WriteDbHandlerWriteFileEnum writeFileEnum() default WriteDbHandlerWriteFileEnum.WDHWFE_NONE;
+
     // 需要读取的文件最小列数
     int minColumnNum() default 0;
 
     // 需要读取的文件最大列数
     int maxColumnNum() default 0;
+
+    // 读取文件时是否允许最后一列出现TAB
+    boolean allowTabInLastColumn() default false;
 
     // 需要写到的数据库表信息
     DbTableInfoEnum dbTableInfoEnum();

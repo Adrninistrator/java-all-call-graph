@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.util;
 
-import com.adrninistrator.mybatis_mysql_table_parser.xml.NoOpEntityResolver;
+import com.adrninistrator.mybatismysqltableparser.xml.NoOpEntityResolver;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;

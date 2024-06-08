@@ -16,11 +16,22 @@
     <context:annotation-config/>
 
     <!-- Scans for application @Components to deploy -->
-    <context:component-scan base-package="test.call_graph"/>
+    <context:component-scan base-package="test.callgraph"/>
+
+    <bean id="threadPoolTaskExecutor1" class="test.callgraph.thread.threadpool.TestThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="1"/>
+        <property name="maxPoolSize" value="10"/>
+        <property name="queueCapacity" value="100"/>
+        <property name="keepAliveSeconds" value="30"/>
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$AbortPolicy"/>
+        </property>
+    </bean>
 
     <task:scheduler id="TestTimer"/>
     <task:scheduled-tasks>
-        <task:scheduled ref="test.call_graph.spring.bean.define.impl.SpringServiceImplA1" method="test1" cron="*/5 * * * * *"/>
+        <task:scheduled ref="test.callgraph.spring.bean.define.impl.SpringServiceImplA1" method="test1" cron="*/2 * * * * *"/>
+        <task:scheduled ref="test.callgraph.spring.bean.define.impl.SpringServiceImplA1" method="test1" cron="*/3 * * * * *"/>
         <task:scheduled ref="springServiceImplB2" method="test1" cron="*/5 * * * * *"/>
     </task:scheduled-tasks>
 </beans>

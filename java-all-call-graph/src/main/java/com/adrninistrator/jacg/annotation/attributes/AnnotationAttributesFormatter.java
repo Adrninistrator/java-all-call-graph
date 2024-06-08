@@ -2,8 +2,9 @@ package com.adrninistrator.jacg.annotation.attributes;
 
 import com.adrninistrator.jacg.common.enums.AnnotationAttributesTypeEnum;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.extensions.annotation_attributes.AnnotationAttributesFormatterInterface;
+import com.adrninistrator.javacg.extensions.annotationattributes.AnnotationAttributesFormatterInterface;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.bcel.classfile.AnnotationElementValue;
 import org.apache.bcel.classfile.AnnotationEntry;
@@ -15,7 +16,6 @@ import org.apache.bcel.classfile.EnumElementValue;
 import org.apache.bcel.classfile.SimpleElementValue;
 import org.apache.bcel.classfile.Utility;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -48,11 +48,11 @@ public class AnnotationAttributesFormatter implements AnnotationAttributesFormat
             valueString = handleStringValue((String) value);
         } else if (value instanceof Map) {
             // 注解属性为Map类型，进行JSON序列化
-            valueString = annotationAttributesTypeEnum.getPrefix() + JavaCGConstants.FILE_COLUMN_SEPARATOR +
+            valueString = annotationAttributesTypeEnum.getPrefix() + JavaCGConstants.FLAG_TAB +
                     JACGJsonUtil.getJsonStr(value);
         } else if (value instanceof List) {
             // 注解属性为List类型，进行JSON序列化
-            valueString = annotationAttributesTypeEnum.getPrefix() + JavaCGConstants.FILE_COLUMN_SEPARATOR +
+            valueString = annotationAttributesTypeEnum.getPrefix() + JavaCGConstants.FLAG_TAB +
                     JACGJsonUtil.getJsonStr(value);
         }
 
@@ -60,14 +60,14 @@ public class AnnotationAttributesFormatter implements AnnotationAttributesFormat
     }
 
     private String handleStringValue(String value) {
-        if (StringUtils.containsAny(value, "\r", "\n")) {
+        if (JACGUtil.containsCRLF(value)) {
             // 若字符串内容包含回车换行，则需要进行BASE64编码，避免写到文件后导致换行
-            return AnnotationAttributesTypeEnum.AATE_STRING_BASE64.getPrefix() + JavaCGConstants.FILE_COLUMN_SEPARATOR +
+            return AnnotationAttributesTypeEnum.AATE_STRING_BASE64.getPrefix() + JavaCGConstants.FLAG_TAB +
                     JavaCGUtil.base64Encode(value);
         }
 
         // 若字符串内容不包含回车换行，则使用原始值
-        return AnnotationAttributesTypeEnum.AATE_STRING.getPrefix() + JavaCGConstants.FILE_COLUMN_SEPARATOR +
+        return AnnotationAttributesTypeEnum.AATE_STRING.getPrefix() + JavaCGConstants.FLAG_TAB +
                 value;
     }
 

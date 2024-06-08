@@ -23,7 +23,7 @@ public class ThreadFactory4TPE implements ThreadFactory {
     public Thread newThread(Runnable r) {
         Thread thread = new Thread(r);
         thread.setName(threadNamePrefix + "-" + ai.addAndGet(1));
-
+        thread.setUncaughtExceptionHandler(LogUncaughtExceptionHandler.getInstance());
         // 设置线程为非守护线程
         thread.setDaemon(false);
 

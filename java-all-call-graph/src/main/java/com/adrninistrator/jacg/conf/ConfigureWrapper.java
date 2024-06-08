@@ -11,6 +11,7 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.enums.interfaces.ConfigInterface;
 import com.adrninistrator.jacg.common.enums.interfaces.MainConfigInterface;
+import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -19,6 +20,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseListEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseSetEnum;
 import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
 import com.adrninistrator.javacg.exceptions.JavaCGError;
+import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +48,9 @@ public class ConfigureWrapper {
     private static final Logger logger = LoggerFactory.getLogger(ConfigureWrapper.class);
 
     private static final Pattern APP_NAME_PATTERN = Pattern.compile("[A-Za-z0-9_]*");
+
+    // 记录使用过当前配置类的简单类名列表
+    private final List<String> useThisSimpleClassNameList = new ArrayList<>();
 
     /*
         从配置文件中读取的内容
@@ -94,23 +99,28 @@ public class ConfigureWrapper {
      */
     private Map<String, List<String>> otherConfigListMap = new HashMap<>();
 
-    // 记录入口简单类名列表
-    private List<String> entrySimpleClassNameList = new ArrayList<>();
+    // 数据库操作包装对象
+    private DbOperWrapper dbOperWrapper;
 
     /**
-     * 默认构造函数，忽略配置文件中的参数
+     * 默认构造函数，仅使用代码中指定的参数，忽略配置文件中的参数
      */
     public ConfigureWrapper() {
         this(true);
     }
 
     /**
-     * @param useDefaultEmptyConfigFlag true: 使用默认的空参数（忽略配置文件中的参数） false: 使用配置文件中的参数
+     * 构造函数，指定使用代码中指定的参数，还是使用配置文件中的参数
+     *
+     * @param onlyUseConfigInJavaCode true: 仅使用代码中指定的参数，忽略配置文件中的参数 false: 使用配置文件中的参数
      */
-    public ConfigureWrapper(boolean useDefaultEmptyConfigFlag) {
-        if (useDefaultEmptyConfigFlag) {
+    public ConfigureWrapper(boolean onlyUseConfigInJavaCode) {
+        if (onlyUseConfigInJavaCode) {
+            logger.info("仅使用代码中指定的参数，忽略配置文件中的参数");
             // 使用默认的空参数（忽略配置文件中的参数）
             useDefaultEmptyConfig();
+        } else {
+            logger.info("使用配置文件中的参数");
         }
     }
 
@@ -146,26 +156,42 @@ public class ConfigureWrapper {
 
     /**
      * 设置主要配置文件中指定key的参数，清空指定key已有的参数
+     * 需要缓存当前的参数值
      *
      * @param mainConfig
      * @param strValue
      */
     public Object setMainConfig(MainConfigInterface mainConfig, String strValue) {
+        return setMainConfig(mainConfig, strValue, true);
+    }
+
+    /**
+     * 设置主要配置文件中指定key的参数，清空指定key已有的参数
+     *
+     * @param mainConfig
+     * @param strValue
+     * @param cacheValue 是否需要缓存当前的参数值
+     */
+    public Object setMainConfig(MainConfigInterface mainConfig, String strValue, boolean cacheValue) {
         if (strValue == null) {
             throw new JavaCGError("配置参数不允许为null");
         }
         // 生成并检查主要配置参数值
         Object value = genMainConfigValue(mainConfig, strValue);
         if (value == null) {
+            logger.error("配置参数非法 {} {} {}", mainConfig.getFileName(), mainConfig.getKey(), mainConfig.getType().getName());
             throw new JavaCGError("配置参数非法");
         }
 
         if (!mainConfig.getType().isAssignableFrom(value.getClass())) {
-            logger.error("生成的参数值类型与预期的不一致\n{} {}\n{} {}", mainConfig.getFileName(), mainConfig.getKey(), value.getClass().getName(), mainConfig.getType().getName());
-            return null;
+            logger.error("生成的参数值类型与预期的不一致 {} {} {} {}", mainConfig.getFileName(), mainConfig.getKey(), value.getClass().getName(), mainConfig.getType().getName());
+            throw new JavaCGError("生成的参数值类型与预期的不一致");
         }
-
-        mainConfigMap.put(mainConfig.getKey(), value);
+        logger.info("通过代码设置主要配置的参数 {} {}", mainConfig.getFileName(), mainConfig.getKey());
+        if (cacheValue) {
+            // 缓存当前的参数值
+            mainConfigMap.put(mainConfig.getKey(), value);
+        }
         return value;
     }
 
@@ -187,8 +213,9 @@ public class ConfigureWrapper {
      */
     public void setOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet) {
         if (configSet == null) {
-            throw new JavaCGError("不允许传入null，只能传入内容为空的Set");
+            throw new JavaCGError("不允许传入null，只能传入内容为空的Set " + otherConfigFileUseSetEnum.getKey());
         }
+        logger.info("通过代码设置Set格式配置的参数 {}", otherConfigFileUseSetEnum.getKey());
         otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), configSet);
     }
 
@@ -210,16 +237,15 @@ public class ConfigureWrapper {
      */
     public void addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet) {
         if (configSet == null) {
-            throw new JavaCGError("不允许传入null，只能传入内容为空的Set");
+            throw new JavaCGError("不允许传入null，只能传入内容为空的Set " + otherConfigFileUseSetEnum.getKey());
         }
-        // 原始的Set可能不允许修改，因此新创建一个
+        logger.info("通过代码添加Set格式配置的参数 {}", otherConfigFileUseSetEnum.getKey());
         Set<String> existedSet = otherConfigSetMap.get(otherConfigFileUseSetEnum.getKey());
-        Set<String> newSet = new HashSet<>();
-        if (existedSet != null) {
-            newSet.addAll(existedSet);
+        if (existedSet == null) {
+            otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), configSet);
+            return;
         }
-        newSet.addAll(configSet);
-        otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), newSet);
+        existedSet.addAll(configSet);
     }
 
     /**
@@ -240,8 +266,9 @@ public class ConfigureWrapper {
      */
     public void setOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList) {
         if (configList == null) {
-            throw new JavaCGError("不允许传入null，只能传入内容为空的List");
+            throw new JavaCGError("不允许传入null，只能传入内容为空的List " + otherConfigFileUseListEnum.getKey());
         }
+        logger.info("通过代码设置List格式配置的参数 {}", otherConfigFileUseListEnum.getKey());
         otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), configList);
     }
 
@@ -263,16 +290,17 @@ public class ConfigureWrapper {
      */
     public void addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList) {
         if (configList == null) {
-            throw new JavaCGError("不允许传入null，只能传入内容为空的List");
+            throw new JavaCGError("不允许传入null，只能传入内容为空的List " + otherConfigFileUseListEnum.getKey());
         }
-        // 原始的List可能不允许修改，因此新创建一个
+        logger.info("通过代码添加List格式配置的参数 {}", otherConfigFileUseListEnum.getKey());
         List<String> existedList = otherConfigListMap.get(otherConfigFileUseListEnum.getKey());
-        List<String> newList = new ArrayList<>();
-        if (existedList != null) {
-            JACGUtil.addList2List(existedList, newList);
+        if (existedList == null) {
+            List<String> newList = new ArrayList<>();
+            JACGUtil.addList2List(configList, newList);
+            otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), newList);
+            return;
         }
-        JACGUtil.addList2List(configList, newList);
-        otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), newList);
+        JACGUtil.addList2List(configList, existedList);
     }
 
     /**
@@ -300,6 +328,12 @@ public class ConfigureWrapper {
         Object value = mainConfigMap.get(key);
         if (value != null) {
             if (useConfig) {
+                // 判断不允许为空的参数是否有指定值
+                if (mainConfig.notBlank() && value instanceof String && StringUtils.isBlank((String) value)) {
+                    logger.error("需要使用的配置参数未在代码中指定 {} {}", mainConfig.getFileName(), mainConfig.getKey());
+                    throw new JavaCGError("需要使用的配置参数未在代码中指定: " + mainConfig.getFileName() + " " + mainConfig.getKey());
+                }
+
                 // 记录有被使用的主要配置
                 recordUsedMainConfig(mainConfig);
             }
@@ -310,7 +344,7 @@ public class ConfigureWrapper {
         String configFileName = mainConfig.getFileName();
         Properties properties = propertiesMap.get(configFileName);
         if (properties == null) {
-            try (BufferedReader reader = JavaCGFileUtil.genBufferedReader(JACGFileUtil.getFileInputStream(JACGUtil.getInputRootPath() + configFileName))) {
+            try (BufferedReader reader = JavaCGFileUtil.genBufferedReader(JavaCGFileUtil.getFileInputStream(JACGUtil.getInputRootPath() + configFileName))) {
                 properties = new Properties();
                 properties.load(reader);
                 propertiesMap.put(configFileName, properties);
@@ -322,19 +356,21 @@ public class ConfigureWrapper {
 
         // 获取配置文件中的参数
         String strValue = properties.getProperty(key);
-        if (strValue == null) {
-            if (useConfig) {
-                logger.error("需要使用的配置参数未指定 {} {}", mainConfig.getFileName(), mainConfig.getKey());
-                throw new JavaCGError("需要使用的配置参数未指定: " + mainConfig.getFileName() + " " + mainConfig.getKey());
-            }
-            return null;
-        }
         if (useConfig) {
+            if (mainConfig.notBlank() && StringUtils.isBlank(strValue)) {
+                logger.error("需要使用的配置参数未在配置文件中指定 {} {}", mainConfig.getFileName(), mainConfig.getKey());
+                throw new JavaCGError("需要使用的配置参数未在配置文件中指定: " + mainConfig.getFileName() + " " + mainConfig.getKey());
+            }
             // 记录有被使用的主要配置
             recordUsedMainConfig(mainConfig);
         }
-        // 设置参数值
-        return (T) setMainConfig(mainConfig, strValue);
+
+        if (strValue == null) {
+            // 获取默认的参数值
+            strValue = getDefaultConfig(mainConfig);
+        }
+        // 设置参数值，仅当useConfig为true时，才需要缓存参数值
+        return (T) setMainConfig(mainConfig, strValue, useConfig);
     }
 
     /**
@@ -357,7 +393,7 @@ public class ConfigureWrapper {
         }
 
         // 获取其他配置文件中的参数
-        configSet = JACGFileUtil.readFile2Set(JACGUtil.getInputRootPath() + configFileName);
+        configSet = JavaCGFileUtil.readFile2Set(JACGUtil.getInputRootPath() + configFileName);
         // 将配置文件中的参数记录到内存中，用于后续使用
         otherConfigSetMap.put(configFileName, configSet);
         if (useConfig) {
@@ -387,7 +423,7 @@ public class ConfigureWrapper {
         }
 
         // 获取其他配置文件中的参数
-        configList = JACGFileUtil.readFile2List(JACGUtil.getInputRootPath() + configFileName);
+        configList = JavaCGFileUtil.readFile2List(JACGUtil.getInputRootPath() + configFileName);
         // 将配置文件中的参数记录到内存中，用于后续使用
         otherConfigListMap.put(configFileName, configList);
         if (useConfig) {
@@ -399,6 +435,20 @@ public class ConfigureWrapper {
 
     // 生成并检查主要配置参数值
     private Object genMainConfigValue(MainConfigInterface mainConfig, String strValue) {
+        if (StringUtils.isBlank(strValue)) {
+            if (ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH == mainConfig) {
+                // 当前参数允许为空，默认为""
+                return "";
+            }
+
+            if (ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER == mainConfig
+                    || ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED == mainConfig
+                    || ConfigKeyEnum.CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP == mainConfig) {
+                // 当前参数允许为空，默认为false
+                return Boolean.FALSE;
+            }
+        }
+
         if (ConfigKeyEnum.CKE_APP_NAME == mainConfig) {
             return handleAppName(strValue);
         }
@@ -407,23 +457,8 @@ public class ConfigureWrapper {
             return handleOutputDetail(strValue);
         }
 
-        if (ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH == mainConfig && StringUtils.isBlank(strValue)) {
-            // 当前参数允许为空，默认为""
-            return "";
-        }
-
         if (ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH == mainConfig) {
             return handleDbH2FilePath(strValue);
-        }
-
-        if (ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER == mainConfig && StringUtils.isBlank(strValue)) {
-            // 当前参数允许为空，默认为false
-            return Boolean.FALSE;
-        }
-
-        if (ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED == mainConfig && StringUtils.isBlank(strValue)) {
-            // 当前参数允许为空，默认为false
-            return Boolean.FALSE;
         }
 
         if (ConfigKeyEnum.CKE_THREAD_NUM == mainConfig) {
@@ -447,7 +482,8 @@ public class ConfigureWrapper {
         }
 
         // 不可能执行到这里
-        return null;
+        logger.error("未知情况 {} {}", mainConfig, strValue);
+        throw new JavaCGRuntimeException("未知情况 " + mainConfig + " " + strValue);
     }
 
     // 处理数据库里的表名后缀
@@ -487,7 +523,7 @@ public class ConfigureWrapper {
         }
 
         if (dbInsertBatchSize <= 0 || dbInsertBatchSize > JACGConstants.MAX_DB_INSERT_BATCH_SIZE) {
-            logger.error("参数配置非法\n{} {}\n应在以下范围: (0,{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(), ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getKey(),
+            logger.error("参数配置非法 {} {} 应在以下范围: (0,{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(), ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getKey(),
                     JACGConstants.MAX_DB_INSERT_BATCH_SIZE);
             return null;
         }
@@ -526,16 +562,29 @@ public class ConfigureWrapper {
             clearMainConfig(configDbKeyEnum);
         }
         for (OtherConfigFileUseSetEnum otherConfigFileUseSetEnum : OtherConfigFileUseSetEnum.values()) {
-            otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), Collections.emptySet());
+            if (!otherConfigFileUseSetEnum.isCanUseConfigInFile()) {
+                logger.info("List格式的配置仅使用代码中指定的参数，若代码中未指定则为空 {}", otherConfigFileUseSetEnum.getKey());
+                // 不使用Collections.emptySet()，否则后续无法修改
+                otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), new HashSet<>());
+            } else {
+                logger.info("List格式的配置优先使用代码中指定的参数，若代码中未指定则使用配置文件中的参数 {}", otherConfigFileUseSetEnum.getKey());
+            }
         }
         for (OtherConfigFileUseListEnum otherConfigFileUseListEnum : OtherConfigFileUseListEnum.values()) {
-            otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), Collections.emptyList());
+            if (!otherConfigFileUseListEnum.isCanUseConfigInFile()) {
+                logger.info("Set格式的配置仅使用代码中指定的参数，若代码中未指定则为空 {}", otherConfigFileUseListEnum.getKey());
+                // 不使用Collections.emptyList()，否则后续无法修改
+                otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), new ArrayList<>());
+            } else {
+                logger.info("Set格式的配置优先使用代码中指定的参数，若代码中未指定则使用配置文件中的参数 {}", otherConfigFileUseListEnum.getKey());
+            }
         }
 
         // 添加所有预置的扩展类
         addAllPreBuildExtensions();
     }
 
+    // 清空指定的参数
     private void clearMainConfig(MainConfigInterface mainConfig) {
         if (String.class == mainConfig.getType()) {
             mainConfigMap.put(mainConfig.getKey(), "");
@@ -546,22 +595,33 @@ public class ConfigureWrapper {
         }
     }
 
+    // 获取默认的参数值
+    private String getDefaultConfig(MainConfigInterface mainConfig) {
+        if (Boolean.class == mainConfig.getType()) {
+            return Boolean.FALSE.toString();
+        } else if (Integer.class == mainConfig.getType()) {
+            // int默认返回1，0认为是非法值
+            return "1";
+        }
+        return "";
+    }
+
     /**
      * 拷贝数据
      *
      * @return
      */
     public ConfigureWrapper copy() {
-        ConfigureWrapper clone = new ConfigureWrapper(false);
-        clone.propertiesMap = new HashMap<>(this.propertiesMap);
-        clone.usedMainConfigMap = new HashMap<>(this.usedMainConfigMap);
-        clone.usedOtherListConfigSet = new HashSet<>(this.usedOtherListConfigSet);
-        clone.usedOtherSetConfigSet = new HashSet<>(this.usedOtherSetConfigSet);
-        clone.mainConfigMap = new HashMap<>(this.mainConfigMap);
-        clone.otherConfigSetMap = new HashMap<>(this.otherConfigSetMap);
-        clone.otherConfigListMap = new HashMap<>(this.otherConfigListMap);
-        clone.entrySimpleClassNameList = new ArrayList<>(this.entrySimpleClassNameList);
-        return clone;
+        ConfigureWrapper copied = new ConfigureWrapper(false);
+        copied.propertiesMap = new HashMap<>(this.propertiesMap);
+        copied.usedMainConfigMap = new HashMap<>(this.usedMainConfigMap);
+        copied.usedOtherListConfigSet = new HashSet<>(this.usedOtherListConfigSet);
+        copied.usedOtherSetConfigSet = new HashSet<>(this.usedOtherSetConfigSet);
+        copied.mainConfigMap = new HashMap<>(this.mainConfigMap);
+        copied.otherConfigSetMap = new HashMap<>(this.otherConfigSetMap);
+        copied.otherConfigListMap = new HashMap<>(this.otherConfigListMap);
+        // 不拷贝DbOperWrapper dbOperWrapper字段
+        return copied;
     }
 
     /**
@@ -614,33 +674,31 @@ public class ConfigureWrapper {
     }
 
     /**
-     * 记录入口简单类名
+     * 执行完毕时打印当前使用的配置信息
      *
      * @param simpleClassName
      */
-    public void addEntryClass(String simpleClassName) {
-        if (!entrySimpleClassNameList.contains(simpleClassName)) {
-            entrySimpleClassNameList.add(simpleClassName);
-        }
+    public void printUsedConfigInfo(String simpleClassName, String outputDirPath) {
+        String configMdFilePath = JavaCGUtil.addSeparator4FilePath(outputDirPath) + JACGConstants.FILE_JACG_USED_CONFIG_MD;
+        logger.info("{} 使用的配置参数信息保存到以下文件 {}", simpleClassName, configMdFilePath);
+        // 打印使用的配置参数信息
+        printConfigInfo(simpleClassName, configMdFilePath, false);
     }
 
     /**
-     * 执行完毕时尝试打印当前使用的配置信息
+     * 执行完毕时打印所有的配置信息
      *
      * @param simpleClassName
      */
-    public void tryPrintUsedConfigInfo(String simpleClassName, String outputDirPath) {
-        if (!StringUtils.equals(simpleClassName, entrySimpleClassNameList.get(0))) {
-            logger.info("不是第1个入口类尝试打印当前使用的配置信息，忽略 {}", simpleClassName);
+    public void printAllConfigInfo(String simpleClassName, String outputDirPath) {
+        String configMdFilePath = JavaCGUtil.addSeparator4FilePath(outputDirPath) + JACGConstants.FILE_JACG_USED_CONFIG_MD;
+        if (JACGFileUtil.isFileExists(configMdFilePath)) {
+            logger.info("记录配置参数信息的文件已存在，不覆盖 {} {}", simpleClassName, configMdFilePath);
             return;
         }
-
-        String configMdFilePath = JavaCGUtil.addSeparator4FilePath(outputDirPath) + JACGConstants.FILE_JACG_USED_CONFIG_MD;
-        logger.info("{} 使用的配置参数信息保存到以下文件\n{}", simpleClassName, configMdFilePath);
+        logger.info("{} 使用的配置参数信息保存到以下文件 {}", simpleClassName, configMdFilePath);
         // 打印使用的配置参数信息
         printConfigInfo(simpleClassName, configMdFilePath, false);
-        // 清空入口简单类名，使一个ConfigureWrapper在多次使用时能够继续打印后续使用的配置参数（先写数据库，再执行其他类）
-        entrySimpleClassNameList.clear();
     }
 
     /**
@@ -651,10 +709,14 @@ public class ConfigureWrapper {
      * @param printAllConfigInfo true: 打印所有的配置参数信息 false: 打印使用的配置参数信息
      */
     public void printConfigInfo(String simpleClassName, String configMdFilePath, boolean printAllConfigInfo) {
+        // 当前文件可能会写多次，最后一次写的内容覆盖前面的内容，所有使用过当前配置类的类名都会被记录
+        if (!useThisSimpleClassNameList.contains(simpleClassName)) {
+            useThisSimpleClassNameList.add(simpleClassName);
+        }
         try (MarkdownWriter markdownWriter = new MarkdownWriter(configMdFilePath, true)) {
             if (!printAllConfigInfo) {
                 // 打印使用的配置参数信息，先打印当前有使用的配置参数
-                printUsedConfigKey(markdownWriter, simpleClassName);
+                printUsedConfigKey(markdownWriter, StringUtils.join(useThisSimpleClassNameList, " "));
             }
 
             // 打印主要的配置信息
@@ -672,9 +734,9 @@ public class ConfigureWrapper {
     }
 
     // 打印有使用的配置参数key及描述
-    private void printUsedConfigKey(MarkdownWriter markdownWriter, String simpleClassName) throws IOException {
-        markdownWriter.addTitle(1, "当前执行的类名");
-        markdownWriter.addLineWithNewLine(simpleClassName);
+    private void printUsedConfigKey(MarkdownWriter markdownWriter, String simpleClassNames) throws IOException {
+        markdownWriter.addTitle(1, "使用过当前配置类的简单类名列表");
+        markdownWriter.addLineWithNewLine(simpleClassNames);
 
         if (!usedMainConfigMap.isEmpty()) {
             // 当主要配置参数有使用时，打印有使用的主要的配置key及描述
@@ -843,15 +905,31 @@ public class ConfigureWrapper {
         JavaCGConfigureWrapper javaCGConfigureWrapper = new JavaCGConfigureWrapper();
         javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.TRUE.toString());
         javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_FIRST_PARSE_INIT_METHOD_TYPE, Boolean.TRUE.toString());
+        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_LOG_METHOD_SPEND_TIME, Boolean.TRUE.toString());
         javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_CONTINUE_WHEN_ERROR, Boolean.FALSE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_DEBUG_PRINT, Boolean.FALSE.toString());
         javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_OUTPUT_ROOT_PATH, getMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH));
         javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_OUTPUT_FILE_EXT, JACGConstants.EXT_MD);
 
+        // 处理通过get/set方法关联的字段关联关系
+        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_ANALYSE_FIELD_RELATIONSHIP, getMainConfig(ConfigKeyEnum.CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP).toString());
         // 指定需要处理的jar包与目录
         javaCGConfigureWrapper.setOtherConfigList(JavaCGOtherConfigFileUseListEnum.OCFULE_JAR_DIR, getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, true));
         // 指定需要处理的包名
         javaCGConfigureWrapper.setOtherConfigSet(JavaCGOtherConfigFileUseSetEnum.OCFUSE_PACKAGES, getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true));
+        // 指定需要合并jar包或目录时，除了class文件外，还需要合并的文件类型，添加xml、properties
+        javaCGConfigureWrapper.setOtherConfigSet(JavaCGOtherConfigFileUseSetEnum.OCFUSE_JAR_DIR_MERGE_FILE_TYPE, JACGConstants.EXT_XML, JACGConstants.EXT_PROPERTIES);
+        // 在处理通过get/set方法的字段关联关系时使用，指定方法返回值与被调用对象或参数认为是等值转换的方法
+        javaCGConfigureWrapper.setOtherConfigSet(JavaCGOtherConfigFileUseSetEnum.OCFUSE_FR_EQ_CONVERSION_METHOD,
+                getOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_FR_EQ_CONVERSION_METHOD, true));
         return javaCGConfigureWrapper;
+    }
+
+    // 记录数据库操作对象
+    public void setDbOperWrapper(DbOperWrapper dbOperWrapper) {
+        this.dbOperWrapper = dbOperWrapper;
+    }
+
+    public DbOperWrapper getDbOperWrapper() {
+        return dbOperWrapper;
     }
 }

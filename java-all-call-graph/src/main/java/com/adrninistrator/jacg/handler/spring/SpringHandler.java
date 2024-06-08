@@ -1,24 +1,30 @@
 package com.adrninistrator.jacg.handler.spring;
 
 import com.adrninistrator.jacg.common.DC;
+import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.comparator.Comparator4SpringControllerInfo;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringController;
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfo;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
+import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfoDetail;
+import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
+import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.util.JavaCGMethodUtil;
+import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -26,12 +32,21 @@ import java.util.List;
  * @description: Spring相关的查询处理类
  */
 public class SpringHandler extends BaseHandler {
+
+    private final MethodInfoHandler methodInfoHandler;
+
+    private final MethodArgReturnHandler methodArgReturnHandler;
+
     public SpringHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
+        methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
+        methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
     }
 
     public SpringHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
+        methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
+        methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
     }
 
     /**
@@ -81,7 +96,7 @@ public class SpringHandler extends BaseHandler {
         }
         List<String> springTaskMethodList = new ArrayList<>(list.size());
         for (WriteDbData4SpringTask springTask : list) {
-            String fullMethod = JavaCGMethodUtil.formatFullMethodStr(springTask.getClassName(), springTask.getMethodName());
+            String fullMethod = JavaCGClassMethodUtil.formatFullMethodStr(springTask.getClassName(), springTask.getMethodName());
             springTaskMethodList.add(fullMethod);
         }
         Collections.sort(springTaskMethodList);
@@ -124,24 +139,55 @@ public class SpringHandler extends BaseHandler {
     }
 
     /**
+     * 查询所有的用于上传文件的Spring Controller信息
+     *
+     * @return
+     */
+    public List<SpringControllerInfoDetail> queryUploadFileControllerInfo() {
+        Set<String> fullMethodSetAll = new HashSet<>();
+        // 查询方法参数包含Spring用于上传文件的完整方法
+        Set<String> fullMethodSet1 = methodArgReturnHandler.findMethodByArgType(JACGCommonNameConstants.SPRING_MULTI_PART_FILE_CLASS);
+        Set<String> fullMethodSet2 = methodArgReturnHandler.findMethodByArgType(JACGCommonNameConstants.SPRING_COMMONS_MULTI_PART_FILE_CLASS);
+        fullMethodSetAll.addAll(fullMethodSet1);
+        fullMethodSetAll.addAll(fullMethodSet2);
+        if (fullMethodSetAll.isEmpty()) {
+            return null;
+        }
+        List<SpringControllerInfoDetail> springControllerInfoDetailList = new ArrayList<>();
+        List<String> fullMethodList = new ArrayList<>(fullMethodSetAll);
+        Collections.sort(fullMethodList);
+        for (String fullMethod : fullMethodList) {
+            // 判断方法是否属于Spring Controller方法
+            String uri = getControllerUri(fullMethod);
+            if (uri == null) {
+                continue;
+            }
+            // 查询方法返回类型
+            WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(fullMethod);
+            SpringControllerInfoDetail springControllerInfoDetail = new SpringControllerInfoDetail(uri, fullMethod, methodInfo.getReturnType());
+            springControllerInfoDetailList.add(springControllerInfoDetail);
+        }
+        return springControllerInfoDetailList;
+    }
+
+    /**
      * 判断指定的方法是否为Spring Task方法
      *
      * @param fullMethod
      * @return
      */
     public boolean checkSpringTask(String fullMethod) {
-        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPT_QUERY_BY_CLASS_METHOD;
+        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPT_QUERY_BY_FULL_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select count(*) from " + DbTableInfoEnum.DTIE_SPRING_TASK.getTableName() +
-                    " where " + DC.SPT_CLASS_NAME + " = ?" +
-                    " and " + DC.SPT_METHOD_NAME + " = ?";
+            sql = "select " + DC.SPT_METHOD_HASH +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_TASK.getTableName() +
+                    " where " + DC.SPT_METHOD_HASH + " = ?" +
+                    " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-
-        Long count = dbOperator.queryObjectOneColumn(sql, Long.class, className, methodName);
-        return count != null && count > 0;
+        String result = dbOperator.queryObjectOneColumn(sql, String.class, methodHash);
+        return result != null;
     }
 }

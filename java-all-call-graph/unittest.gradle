@@ -2,7 +2,7 @@ apply plugin: 'jacoco'
 
 test {
     doFirst {
-        exclude('test/other')
+        exclude('test/other', 'test/runbycode/targz', 'test/runlocal')
         minHeapSize = "256m"
         maxHeapSize = "1g"
 
@@ -32,4 +32,68 @@ jacocoTestReport {
 /*
     使用Gradle执行单元测试时，假如需要将日志中的输出记录到文件，使用以下命令：
     gradlew test -Dtest.flag.record.log.to.file=1
+ */
+
+/*
+    执行单元测试及代码覆盖率统计
+    gradlew test jacocoTestReport
+ */
+
+
+// 将测试代码生成jar包
+task test_gen_jar(type: Jar) {
+    archiveName 'test.jar'
+    from(sourceSets.test.output) {
+        include 'test/callgraph/**'
+        exclude 'test/callgraph/otherjar/**'
+        into '/'
+    }
+    from('src/test/resources/') {
+        include 'applicationContext.xml'
+        into 'resources/'
+    }
+}
+
+// 拷贝对应的java代码
+task test_copy_example() {
+    doFirst {
+        def exampleFlag = project.properties.get("example_flag")
+        if (exampleFlag != null) {
+            println 'example_flag: ' + exampleFlag
+            delete 'src/test/java/test/callgraph/diffjar'
+            def exampleDir = 'src/test/resources/java_example/example_' + exampleFlag + '/diffjar'
+            def javaExampleDirs = new File("${exampleDir}").listFiles().findAll { File f -> (f.isDirectory()) }
+            javaExampleDirs.each { javaExampleDir ->
+                def dirName = javaExampleDir.getName()
+                println 'dir_name: ' + dirName
+                copy {
+                    from "${exampleDir}/" + dirName
+                    into 'src/test/java/test/callgraph/diffjar/' + dirName
+                }
+            }
+        }
+    }
+}
+
+compileTestJava.dependsOn(test_copy_example)
+
+// 将用于比较的测试代码生成jar包
+task test_gen_diff_jar(type: Jar) {
+    doFirst {
+        def exampleFlag = project.properties.get("example_flag")
+        def jarName = 'jar-diff-version-' + exampleFlag + '/jar-diff-' + exampleFlag + '.jar'
+        println 'example_flag: ' + exampleFlag + ' jarName: ' + jarName
+        delete 'build/libs' + jarName
+        archiveName "${jarName}"
+        from(sourceSets.test.output) {
+            include 'test/callgraph/diffjar/**'
+            into '/'
+        }
+    }
+}
+
+/*
+    生成用于比较的示例jar包
+    gradlew test_gen_diff_jar -Pexample_flag=1
+    gradlew test_gen_diff_jar -Pexample_flag=2
  */

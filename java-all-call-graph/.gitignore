@@ -10,9 +10,10 @@ out/
 .classpath
 _jacg_o_ee/
 _jacg_o_er/
+_unittest_output/
 jar_output_dir/
+log/*.log
 src/test/resources/_jacg_config/
 src/test/resources/_jacg_find_stack_keyword/
-log/*.log
-_unittest_output/
-run_local/
+src/test/resources/_jacg_jar_diff_callee_graph/
+runlocal/

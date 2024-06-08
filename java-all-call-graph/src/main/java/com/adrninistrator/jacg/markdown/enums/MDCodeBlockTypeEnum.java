@@ -6,7 +6,9 @@ package com.adrninistrator.jacg.markdown.enums;
  * @description: markdown代码块类型枚举
  */
 public enum MDCodeBlockTypeEnum {
-    MDCBTE_SQL("sql");
+    MDCBTE_SQL("sql"),
+    MDCBTE_JAVA("java"),
+    ;
 
     private final String type;
 

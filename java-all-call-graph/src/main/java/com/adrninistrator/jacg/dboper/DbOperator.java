@@ -1,12 +1,16 @@
 package com.adrninistrator.jacg.dboper;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.common.exceptions.JACGSQLException;
+import com.adrninistrator.jacg.conf.DbConfInfo;
+import com.adrninistrator.jacg.druidfilter.DruidMonitorFilter;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
 import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.alibaba.druid.pool.DataSourceClosedException;
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -16,6 +20,8 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 import java.sql.Connection;
 import java.sql.SQLSyntaxErrorException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,63 +33,50 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @description: 数据库操作对象
  */
 
-public class DbOperator {
+public class DbOperator implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(DbOperator.class);
 
     private static final AtomicInteger ATOMIC_INTEGER = new AtomicInteger(0);
 
-    private DruidDataSource dataSource;
+    private final Map<String, BeanPropertyRowMapper<?>> beanPropertyRowMapperMap = new ConcurrentHashMap<>();
+
+    private final DbConfInfo dbConfInfo;
 
     private final JdbcTemplateQuiet jdbcTemplate;
 
-    private final Map<String, BeanPropertyRowMapper<?>> beanPropertyRowMapperMap = new ConcurrentHashMap<>();
-
-    private final ConfigureWrapper configureWrapper;
-
-    private final String appName;
-
     private final String objSeq;
 
-    // 记录当前入口类的类名
-    private final String entrySimpleClassName;
+    private final DruidDataSource dataSource;
 
-    private boolean useH2Db = false;
+    // 记录当前对象被引用的次数
+    private final JavaCGCounter referenceCounter = new JavaCGCounter(0);
+
+    // 引用了当前类的对象类名及HASH列表
+    private final List<String> referenceCLassNameAndHashList = new ArrayList<>();
+
+    // 释放了当前类的对象类名及HASH列表
+    private final List<String> releaseCLassNameAndHashList = new ArrayList<>();
 
     private boolean closed = false;
 
-    public static DbOperator genInstance(ConfigureWrapper configureWrapper, String entrySimpleClassName) {
-        try {
-            DbOperator instance = new DbOperator(configureWrapper, entrySimpleClassName);
-//            Class.forName(confInfo.getDbDriverName());
+    DbOperator(DbConfInfo dbConfInfo, String initDbOperSimpleCLassNameAndHash) {
+        this.dbConfInfo = dbConfInfo;
+        // 处理引用当前对象的信息
+        referenceCounter.addAndGet();
+        referenceCLassNameAndHashList.add(initDbOperSimpleCLassNameAndHash);
 
-            if (configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2)) {
-                instance.initH2Db();
-            } else {
-                instance.initNonH2Db();
-            }
-
-            return instance;
-        } catch (Exception e) {
-            logger.error("error ", e);
-            return null;
-        }
-    }
-
-    private DbOperator(ConfigureWrapper configureWrapper, String entrySimpleClassName) {
-        this.configureWrapper = configureWrapper;
-        this.entrySimpleClassName = entrySimpleClassName;
+        objSeq = "dbo@" + ATOMIC_INTEGER.incrementAndGet();
+        logger.info("[{}] 创建数据库操作对象 {} {}", objSeq, initDbOperSimpleCLassNameAndHash, dbConfInfo);
 
         dataSource = new DruidDataSource();
-        dataSource.setMaxActive(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_THREAD_NUM));
+        dataSource.setMaxActive(dbConfInfo.getMaxActive());
         dataSource.setTestOnBorrow(false);
         dataSource.setTestOnReturn(false);
         dataSource.setTestWhileIdle(false);
+        dataSource.setProxyFilters(Collections.singletonList(new DruidMonitorFilter(dbConfInfo.isUseH2Db())));
+        initDataSource();
 
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
-
-        appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
-        objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
-        logger.info("[{}] 创建数据库操作对象 {}", objSeq, entrySimpleClassName);
 
         // 在JVM关闭时检查当前数据库操作对象是否有关闭
         addShutdownHook();
@@ -92,18 +85,25 @@ public class DbOperator {
     // 在JVM关闭时检查当前数据库操作对象是否有关闭
     private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (dataSource != null) {
-                logger.error("[{}] 数据库操作对象未关闭 {}", objSeq, entrySimpleClassName);
-                closeDs();
+            if (!closed) {
+                logger.error("[{}] 数据库操作对象未关闭\n当前类目前被引用的次数为 {}\n引用过当前类的对象类名及HASH为\n{}\n释放过当前类的对象类名及HASH为\n{}", objSeq, referenceCounter.getCount(),
+                        StringUtils.join(referenceCLassNameAndHashList, "\n"), StringUtils.join(releaseCLassNameAndHashList, "\n"));
+                closeDs(this);
             }
         }));
     }
 
-    private void initH2Db() {
-        useH2Db = true;
+    private void initDataSource() {
+        if (dbConfInfo.isUseH2Db()) {
+            initH2Db();
+            return;
+        }
+        initNonH2Db();
+    }
 
+    private void initH2Db() {
         dataSource.setDriverClassName("org.h2.Driver");
-        String h2DbJdbcUrl = JACGConstants.H2_PROTOCOL + configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH) +
+        String h2DbJdbcUrl = JACGConstants.H2_PROTOCOL + dbConfInfo.getDbH2FilePath() +
                 ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS " +
                 JACGConstants.H2_SCHEMA + "\\;SET SCHEMA " + JACGConstants.H2_SCHEMA;
         logger.info("[{}] 初始化H2数据源 URL: {}", objSeq, h2DbJdbcUrl);
@@ -114,18 +114,10 @@ public class DbOperator {
     }
 
     private void initNonH2Db() {
-        useH2Db = false;
-
-        dataSource.setDriverClassName(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME));
-        dataSource.setUrl(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_URL));
-        dataSource.setUsername(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME));
-        dataSource.setPassword(configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD));
-
-        logger.info("[{}] 初始化数据源", objSeq);
-    }
-
-    public void setMaxPoolSize(int maxPoolSize) {
-        dataSource.setMaxActive(maxPoolSize);
+        dataSource.setDriverClassName(dbConfInfo.getDriverClassName());
+        dataSource.setUrl(dbConfInfo.getDbUrl());
+        dataSource.setUsername(dbConfInfo.getUsername());
+        dataSource.setPassword(dbConfInfo.getPassword());
     }
 
     public Connection getConnection() {
@@ -152,14 +144,30 @@ public class DbOperator {
 
     /**
      * 关闭数据源
+     *
+     * @param callerObject 调用当前方法的对象
      */
-    public void closeDs() {
-        if (dataSource != null) {
-            logger.info("[{}] 关闭数据源", objSeq);
-            dataSource.close();
-            dataSource = null;
-            closed = true;
+    public void closeDs(Object callerObject) {
+        if (!closed) {
+            String closeDbOperSimpleCLassNameAndHash = JACGUtil.getObjSimpleClassNameAndHash(callerObject);
+            if (DbOperator.class == callerObject.getClass()) {
+                // 调用当前方法的类为当前类，说明使用了try-with-resource方式，获取调用当前方法的方法
+                String callerMethod = JACGUtil.getMethodInStackTrace(Thread.currentThread().getStackTrace(), 3);
+                closeDbOperSimpleCLassNameAndHash += (JACGConstants.FLAG_AT + callerMethod);
+            }
+            // 处理释放当前对象的信息
+            releaseCLassNameAndHashList.add(closeDbOperSimpleCLassNameAndHash);
+            if (referenceCounter.minusAndGet() == 0) {
+                logger.info("[{}] 关闭数据源\n引用过当前类的对象类名及HASH为\n{}\n释放过当前类的对象类名及HASH为\n{}", objSeq, StringUtils.join(referenceCLassNameAndHashList, "\n"),
+                        StringUtils.join(releaseCLassNameAndHashList, "\n"));
+                dataSource.close();
+                closed = true;
+                return;
+            }
+            logger.info("[{}] 暂不关闭数据源，当前类被引用次数为 {} ，调用当前方法的对象为: {}", objSeq, referenceCounter.getCount(), closeDbOperSimpleCLassNameAndHash);
+            return;
         }
+        logger.info("[{}] 数据源已被关闭，不需要再关闭，调用当前方法的对象为: {}", objSeq, JACGUtil.getObjSimpleClassNameAndHash(callerObject));
     }
 
     /**
@@ -181,18 +189,35 @@ public class DbOperator {
         tableName = tableName.trim();
 
         // 检查数据库表是否创建成功，可能出现上述建表语句执行失败但未抛出异常的情况
-        if (useH2Db) {
-            if (!checkTableExistsH2(tableName)) {
-                return false;
-            }
-        } else {
-            if (!checkTableExistsNonH2(tableName)) {
-                return false;
-            }
+        if (!checkTableExists(tableName)) {
+            return false;
         }
-
         logger.info("[{}] 数据库表创建成功 [{}]", objSeq, tableName);
         return true;
+    }
+
+    /**
+     * 检查指定的数据库表是否存在
+     *
+     * @param tableName
+     * @return
+     */
+    public boolean checkTableExists(String tableName) {
+        if (dbConfInfo.isUseH2Db()) {
+            return checkTableExistsH2(tableName);
+        }
+        return checkTableExistsNonH2(tableName);
+    }
+
+    /**
+     * 检查指定的数据库表是否存在
+     *
+     * @param dbTableInfoEnum
+     * @return
+     */
+    public boolean checkTableExists(DbTableInfoEnum dbTableInfoEnum) {
+        String tableName = JACGSqlUtil.replaceFlagInSql(dbTableInfoEnum.getTableName(), getAppName(), getTableSuffix());
+        return checkTableExists(tableName);
     }
 
     /**
@@ -205,7 +230,7 @@ public class DbOperator {
         List<String> list = queryListOneColumn("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?",
                 String.class, JACGConstants.H2_SCHEMA, tableName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
-            logger.error("数据库表创建失败 [{}]", tableName);
+            logger.error("数据库表不存在 [{}]", tableName);
             return false;
         }
         return true;
@@ -220,7 +245,7 @@ public class DbOperator {
     private boolean checkTableExistsNonH2(String tableName) {
         List<String> list = queryListOneColumn("show tables like ?", String.class, tableName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
-            logger.error("数据库表创建失败 [{}]", tableName);
+            logger.error("数据库表不存在 [{}]", tableName);
             return false;
         }
         return true;
@@ -234,7 +259,7 @@ public class DbOperator {
      */
     public boolean truncateTable(String tableName) {
         String sql = "truncate table " + tableName;
-        sql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
+        sql = JACGSqlUtil.replaceFlagInSql(sql, getAppName(), getTableSuffix());
         logger.info("[{}] truncate table sql: [{}]", objSeq, sql);
         return executeDDLSql(sql);
     }
@@ -266,10 +291,10 @@ public class DbOperator {
         try {
             return jdbcTemplate.update(sql, arguments);
         } catch (Exception e) {
-            if (!noticeDropTable(e, sql)) {
-                logger.error("error [{}] ", sql, e);
+            if (!handleSpecialException(e, sql)) {
+                logger.error("更新失败 [{}] ", sql, e);
             }
-            return null;
+            throw new JACGSQLException("更新失败");
         }
     }
 
@@ -285,16 +310,14 @@ public class DbOperator {
             jdbcTemplate.batchUpdate(sql, argumentList);
             return true;
         } catch (Exception e) {
-            if (!noticeDropTable(e, sql)) {
-                if (argumentList.size() == 1) {
-                    // 打印插入失败的数据
-                    logger.error("error\nsql: [{}]\n数据: [{}]", sql, StringUtils.join(argumentList.get(0), JACGConstants.FLAG_COMMA_WITH_SPACE), e);
-                } else {
-                    logger.error("error 为了打印插入失败的数据，可将{} {}参数值设置为1\nsql: [{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(),
-                            ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getKey(), sql, e);
-                }
+            // 打印插入失败的数据
+            for (int i = 0; i < argumentList.size(); i++) {
+                logger.error("插入失败的数据 序号: [{}] 数据: [{}]", i, StringUtils.join(argumentList.get(i), JACGConstants.FLAG_COMMA_WITH_SPACE));
             }
-            return false;
+            if (!handleSpecialException(e, sql)) {
+                logger.error("插入失败 sql: [{}] ", sql, e);
+            }
+            throw new JACGSQLException("插入失败");
         }
     }
 
@@ -327,10 +350,10 @@ public class DbOperator {
         try {
             return jdbcTemplate.queryForList(sql, type, arguments);
         } catch (Exception e) {
-            if (!noticeDropTable(e, sql)) {
-                logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            if (!handleSpecialException(e, sql)) {
+                logger.error("查询失败 [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             }
-            return null;
+            throw new JACGSQLException("查询失败");
         }
     }
 
@@ -349,10 +372,10 @@ public class DbOperator {
                     k -> new BeanPropertyRowMapper<>(type));
             return jdbcTemplate.query(sql, (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
         } catch (Exception e) {
-            if (!noticeDropTable(e, sql)) {
-                logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            if (!handleSpecialException(e, sql)) {
+                logger.error("查询失败 [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             }
-            return null;
+            throw new JACGSQLException("查询失败");
         }
     }
 
@@ -368,10 +391,10 @@ public class DbOperator {
         try {
             return jdbcTemplate.queryForObject(sql, type, arguments);
         } catch (Exception e) {
-            if (!noticeDropTable(e, sql)) {
-                logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            if (!handleSpecialException(e, sql)) {
+                logger.error("查询失败 [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             }
-            return null;
+            throw new JACGSQLException("查询失败");
         }
     }
 
@@ -390,37 +413,81 @@ public class DbOperator {
                     k -> new BeanPropertyRowMapper<>(type));
             return jdbcTemplate.queryForObject(sql, (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
         } catch (Exception e) {
-            if (!noticeDropTable(e, sql)) {
-                logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+            if (!handleSpecialException(e, sql)) {
+                logger.error("查询失败 [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
             }
-            return null;
+            throw new JACGSQLException("查询失败");
         }
     }
 
     /**
-     * 出现异常时，判断是否需要提示drop对应的数据库表
+     * 处理特殊的异常
      *
      * @param e
      * @param sql
-     * @return true: 需要 false: 不需要
+     * @return true: 不需要继续处理 false: 需要继续处理
      */
-    private boolean noticeDropTable(Exception e, String sql) {
+    private boolean handleSpecialException(Exception e, String sql) {
       /*
             使用H2数据库时，e的类型为org.h2.jdbc.JdbcSQLSyntaxErrorException
             使用MySQL数据库时，e.getCause()的类型为SQLSyntaxErrorException
          */
         if (ExceptionUtils.indexOfType(e, SQLSyntaxErrorException.class) != -1) {
-            logger.error("\n请检查数据库表是否需要使用最新版本重新创建，可先drop对应的数据库表" +
+            logger.error("[{}] 数据库操作失败" +
+                    "\n1. 请检查数据库表是否有成功创建" +
+                    "\n2. 再检查数据库表是否需要使用最新版本重新创建，可先drop对应的数据库表" +
                     "\n请重新执行 com.adrninistrator.jacg.unzip.UnzipFile 类释放最新的SQL语句（需要先删除现有的SQL语句）" +
                     "\n若使用H2数据库，需要删除对应的数据库文件 {}" +
-                    "\n[{}] ", dataSource.getUrl(), sql, e);
+                    "\n[{}] ", objSeq, dataSource.getUrl(), sql, e);
+            return true;
+        }
+        if (ExceptionUtils.indexOfType(e, DataSourceClosedException.class) != -1) {
+            logger.error("[{}] 当前数据源已被关闭，关闭数据源的对象为 {} [{}] ", objSeq, getLastReleaseCLassNameAndHash(), sql, e);
             return true;
         }
         return false;
     }
 
+    /**
+     * 使用try-with-resource方式时，使用以下方法关闭
+     *
+     * @throws Exception
+     */
+    @Override
+    public void close() throws Exception {
+        closeDs(this);
+    }
+
+    // 获得释放了当前类的对象类名及HASH列表中的最后一个
+    private String getLastReleaseCLassNameAndHash() {
+        int listSize = releaseCLassNameAndHashList.size();
+        if (listSize <= 1) {
+            return "";
+        }
+        return releaseCLassNameAndHashList.get(listSize - 1);
+    }
+
+    // 引用数据库操作类
+    public void referenceDbOperator(String callerClassNameAndHash) {
+        referenceCounter.addAndGet();
+        referenceCLassNameAndHashList.add(callerClassNameAndHash);
+        logger.info("[{}] 增加引用当前对象的信息 {} {}", objSeq, referenceCounter.getCount(), callerClassNameAndHash);
+    }
+
     public String getAppName() {
-        return appName;
+        return dbConfInfo.getAppName();
+    }
+
+    public String getTableSuffix() {
+        return dbConfInfo.getTableSuffix();
+    }
+
+    public int getDbInsertBatchSize() {
+        return dbConfInfo.getDbInsertBatchSize();
+    }
+
+    public DbConfInfo getDbConfInfo() {
+        return dbConfInfo;
     }
 
     public boolean isClosed() {

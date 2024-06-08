@@ -1,0 +1,23 @@
+CREATE TABLE if not exists jacg_field_relationship_{appName} (
+  fld_relationship_id int NOT NULL COMMENT '字段关联关系id，从1开始',
+  get_method_call_id int NOT NULL COMMENT 'get方法调用序号，从1开始',
+  set_method_call_id int NOT NULL COMMENT 'set方法调用序号，从1开始',
+  caller_full_method text NOT NULL COMMENT '调用方，完整方法（类名+方法名+参数）',
+  caller_line_number int NOT NULL COMMENT '调用方，源代码行号',
+  get_simple_class_name varchar(255) NOT NULL COMMENT 'get方法唯一类名',
+  get_method_name varchar(200) NOT NULL COMMENT 'get方法方法名',
+  get_class_name varchar(255) NOT NULL COMMENT 'get方法完整类名',
+  set_simple_class_name varchar(255) NOT NULL COMMENT 'set方法唯一类名',
+  set_method_name varchar(200) NOT NULL COMMENT 'set方法方法名',
+  set_class_name varchar(255) NOT NULL COMMENT 'set方法完整类名',
+  valid tinyint NOT NULL COMMENT '关联关系是否有效，1:是，0:否',
+  type varchar(10) NOT NULL COMMENT '关联关系类型，参考 java-callgraph2 项目 JavaCGFieldRelationshipTypeEnum 类',
+  relationship_flags int NOT NULL COMMENT '字段关联关系标志',
+  bean_util_call_id int NOT NULL COMMENT 'BeanUtil方法调用序号，从1开始',
+  bean_util_method text NULL COMMENT 'BeanUtil属性拷贝方法',
+  PRIMARY KEY (fld_relationship_id),
+  INDEX idx_gsr_gmci_{appName}(get_method_call_id),
+  INDEX idx_gsr_smci_{appName}(set_method_call_id),
+  INDEX idx_gsr_scm_{appName}(set_simple_class_name, set_method_name),
+  INDEX idx_gsr_gcm_{appName}(get_simple_class_name, get_method_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='通过get/set方法关联的字段关系';

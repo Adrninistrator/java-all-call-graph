@@ -25,7 +25,7 @@ public class LambdaMethodCallDetail extends LambdaMethodCall {
 
     public static LambdaMethodCallDetail genLambdaMethodCallDetail(LambdaMethodCall lambdaMethodCall) {
         LambdaMethodCallDetail lambdaMethodCallDetail = new LambdaMethodCallDetail();
-        lambdaMethodCallDetail.setCallId(lambdaMethodCall.getCallId());
+        lambdaMethodCallDetail.setMethodCallId(lambdaMethodCall.getMethodCallId());
         lambdaMethodCallDetail.setCallerFullMethod(lambdaMethodCall.getCallerFullMethod());
         lambdaMethodCallDetail.setCallerLineNumber(lambdaMethodCall.getCallerLineNumber());
         lambdaMethodCallDetail.setCalleeFullMethod(lambdaMethodCall.getCalleeFullMethod());

@@ -1,8 +1,9 @@
 package com.adrninistrator.jacg.util;
 
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +26,50 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class JACGUtil {
     private static final Logger logger = LoggerFactory.getLogger(JACGUtil.class);
 
+    /**
+     * 为字符串生成HASH+长度
+     *
+     * @param data
+     * @return
+     */
     public static String genHashWithLen(String data) {
         byte[] md5 = DigestUtils.md5(data);
         // 以下使用的BASE64方法输出结果范围为字母+"-"+"_"，不是原始的字母+"+"+"/"
         return String.format("%s#%03x", Base64.getUrlEncoder().encodeToString(md5), data.length());
     }
 
+    /**
+     * 从List中获取指定元素
+     *
+     * @param list
+     * @param index
+     * @param <E>
+     * @return
+     */
+    public static <E> E getListElement(List<E> list, int index) {
+        if (list == null || list.size() < index + 1) {
+            return null;
+        }
+        return list.get(index);
+    }
+
+    /**
+     * 判断Map是否为空
+     *
+     * @param map
+     * @param <K>
+     * @param <V>
+     * @return
+     */
     public static <K, V> boolean isMapEmpty(Map<K, V> map) {
         return map == null || map.isEmpty();
     }
 
+    /**
+     * 等待指定时间
+     *
+     * @param time
+     */
     public static void sleep(long time) {
         try {
             Thread.sleep(time);
@@ -44,7 +80,7 @@ public class JACGUtil {
     }
 
     /**
-     * 根据类名获取对应实例
+     * 根据类名获取对应实例，构造函数无参数
      *
      * @param className
      * @param classType
@@ -52,10 +88,47 @@ public class JACGUtil {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getClassObject(String className, Class<T> classType) {
+    public static <T> T genClassObject(String className, Class<T> classType) {
         try {
             Class<?> clazz = Class.forName(className);
             Object obj = clazz.newInstance();
+
+            if (!classType.isAssignableFrom(clazz)) {
+                logger.error("指定的类 {} 不是 {} 的实现类", className, classType.getName());
+                return null;
+            }
+
+            return (T) obj;
+        } catch (Exception e) {
+            logger.error("根据指定类名 {} 获得 {} 类的实例异常 ", className, classType.getName(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 根据类名获取对应实例，构造函数有参数
+     *
+     * @param className
+     * @param classType
+     * @param argTypes
+     * @param argValues
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T genClassObject(String className, Class<T> classType, Class<?>[] argTypes, Object[] argValues) {
+        if (ArrayUtils.isEmpty(argTypes)) {
+            logger.error("未指定参数类型");
+            throw new JavaCGRuntimeException("未指定参数类型");
+        }
+        if (ArrayUtils.isEmpty(argValues)) {
+            logger.error("未指定参数值");
+            throw new JavaCGRuntimeException("未指定参数值");
+        }
+        try {
+            Class<?> clazz = Class.forName(className);
+            Constructor<?> constructor = clazz.getConstructor(argTypes);
+            Object obj = constructor.newInstance(argValues);
 
             if (!classType.isAssignableFrom(clazz)) {
                 logger.error("指定的类 {} 不是 {} 的实现类", className, classType.getName());
@@ -128,36 +201,6 @@ public class JACGUtil {
     }
 
     /**
-     * 生成方法调用关系对象对应的数组
-     *
-     * @param data
-     * @return
-     */
-    public static Object[] genMethodCallObjectArray(WriteDbData4MethodCall data) {
-        return new Object[]{
-                data.getCallId(),
-                data.getCallType(),
-                data.getCalleeObjType(),
-                data.getEnabled(),
-                data.getCallerMethodHash(),
-                data.getCallerSimpleClassName(),
-                data.getCallerMethodName(),
-                data.getCallerFullMethod(),
-                data.getCallerLineNumber(),
-                data.getCallerReturnType(),
-                data.getCalleeMethodHash(),
-                data.getCalleeSimpleClassName(),
-                data.getCalleeMethodName(),
-                data.getCalleeFullMethod(),
-                data.getCallFlags(),
-                data.getRawReturnType(),
-                data.getActualReturnType(),
-                data.getCallerJarNum(),
-                data.getCalleeJarNum()
-        };
-    }
-
-    /**
      * 将源列表中的元素添加到目标列表中
      * 忽略空的元素，忽略重复的元素
      *
@@ -166,7 +209,7 @@ public class JACGUtil {
      */
     public static void addList2List(List<String> srcList, List<String> destList) {
         if (srcList == null || destList == null) {
-            throw new JavaCGRuntimeException("传入参数不允许为空");
+            throw new JavaCGRuntimeException("参数不允许为空");
         }
         for (String src : srcList) {
             if (StringUtils.isBlank(src) || destList.contains(src)) {
@@ -205,8 +248,13 @@ public class JACGUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getArgAt(int index, Object... args) {
-        if (ArrayUtils.isEmpty(args) || index >= args.length) {
-            return null;
+        if (ArrayUtils.isEmpty(args)) {
+            logger.error("指定的参数为空");
+            throw new JavaCGRuntimeException("指定的参数为空");
+        }
+        if (index >= args.length) {
+            logger.error("指定下标的参数不存在 {} {}", index, args.length);
+            throw new JavaCGRuntimeException("指定下标的参数不存在");
         }
 
         return (T) args[index];
@@ -219,6 +267,45 @@ public class JACGUtil {
      */
     public static String getInputRootPath() {
         return JavaCGUtil.getDirPathInJvmOptions(JavaCGConstants.PROPERTY_INPUT_ROOT_PATH);
+    }
+
+    /**
+     * 检查指定的字符串中是否包含回车换行
+     *
+     * @param data
+     * @return
+     */
+    public static boolean containsCRLF(String data) {
+        return StringUtils.containsAny(data, "\r", "\n");
+    }
+
+    /**
+     * 获得对象的简单类名+对象HASH
+     *
+     * @param object
+     * @return [对象的简单类名]@[对象HASH]
+     */
+    public static String getObjSimpleClassNameAndHash(Object object) {
+        return object.getClass().getSimpleName() + JACGConstants.FLAG_AT + System.identityHashCode(object);
+    }
+
+    /**
+     * 获取指定的调用堆栈中指定下标的方法
+     *
+     * @param stackTraceElements
+     * @param index
+     * @return
+     */
+    public static String getMethodInStackTrace(StackTraceElement[] stackTraceElements, int index) {
+        if (ArrayUtils.isEmpty(stackTraceElements)) {
+            return "";
+        }
+
+        if (stackTraceElements.length < index) {
+            return "";
+        }
+        StackTraceElement stackTraceElement = stackTraceElements[index];
+        return JavaCGClassMethodUtil.formatFullMethodWithArgTypes(stackTraceElement.getClassName(), stackTraceElement.getMethodName());
     }
 
     private JACGUtil() {

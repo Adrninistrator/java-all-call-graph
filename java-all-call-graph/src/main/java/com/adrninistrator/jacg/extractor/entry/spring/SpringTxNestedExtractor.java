@@ -3,22 +3,21 @@ package com.adrninistrator.jacg.extractor.entry.spring;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.dto.info_with_hash.AbstractInfoWithMethodHash;
-import com.adrninistrator.jacg.extensions.find_stack_filter.SpringTxMethodCallFilter;
-import com.adrninistrator.jacg.extractor.dto.common.extract_file.AbstractCallGraphExtractedFile;
-import com.adrninistrator.jacg.extractor.dto.common.extract_file.CallerExtractedFile;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.entry_method.SpTxEntryMethodTxAnnotation;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.entry_method.SpTxEntryMethodTxTpl;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.extract.SpTxCalleeInfo;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.extract_combined.SpTxNestedCombined;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.extract_file.SpTxNestedByAnnotationFile;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.extract_file.SpTxNestedByTplFile;
+import com.adrninistrator.jacg.dto.infowithhash.AbstractInfoWithMethodHash;
+import com.adrninistrator.jacg.extensions.findstackfilter.SpringTxMethodCallFilter;
+import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGraphExtractedFile;
+import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedFile;
+import com.adrninistrator.jacg.extractor.dto.springtx.entrymethod.SpTxEntryMethodTxAnnotation;
+import com.adrninistrator.jacg.extractor.dto.springtx.entrymethod.SpTxEntryMethodTxTpl;
+import com.adrninistrator.jacg.extractor.dto.springtx.extract.SpTxCalleeInfo;
+import com.adrninistrator.jacg.extractor.dto.springtx.extractcombined.SpTxNestedCombined;
+import com.adrninistrator.jacg.extractor.dto.springtx.extractfile.SpTxNestedByAnnotationFile;
+import com.adrninistrator.jacg.extractor.dto.springtx.extractfile.SpTxNestedByTplFile;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -51,27 +50,19 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
         genDbObject(configureWrapper);
 
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
-            ConfigureWrapper usedConfigureWrapper;
             String outputSubDirName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME);
             if (!outputSubDirName.isEmpty()) {
-                // 有指定生成调用链文件的子目录名，需要生成新的配置对象，避免修改传入的配置对象
-                usedConfigureWrapper = configureWrapper.copy();
-            } else {
-                usedConfigureWrapper = configureWrapper;
-            }
-
-            if (!outputSubDirName.isEmpty()) {
                 // 有指定生成调用链文件的子目录名，以下会生成两次方法调用链文件，需要分别使用不同的输出子目录名，否则会输出到同一个目录中
-                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
+                configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
             }
             // 处理事务注解
-            List<SpTxNestedByAnnotationFile> spTxNestedByAnnotationFileList = handleTxAnnotation(usedConfigureWrapper, annotationHandler);
+            ListWithResult<SpTxNestedByAnnotationFile> spTxNestedByAnnotationFileList = handleTxAnnotation(configureWrapper, annotationHandler);
 
             if (!outputSubDirName.isEmpty()) {
-                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_TEMPLATE);
+                configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_TEMPLATE);
             }
             // 处理事务模板
-            List<SpTxNestedByTplFile> spTxNestedByTplFileList = handleTxTpl(usedConfigureWrapper, annotationHandler);
+            ListWithResult<SpTxNestedByTplFile> spTxNestedByTplFileList = handleTxTpl(configureWrapper, annotationHandler);
 
             return new SpTxNestedCombined(spTxNestedByAnnotationFileList, spTxNestedByTplFileList);
         } finally {
@@ -86,15 +77,15 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
      * @param annotationHandler
      * @return
      */
-    private List<SpTxNestedByAnnotationFile> handleTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
+    private ListWithResult<SpTxNestedByAnnotationFile> handleTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
         // 提取使用@Transactional注解的方法相关信息
-        List<CallerExtractedFile> callerExtractedFileList = extractTxAnnotation(configureWrapper, annotationHandler);
-        if (JavaCGUtil.isCollectionEmpty(callerExtractedFileList)) {
-            return Collections.emptyList();
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxAnnotation(configureWrapper, annotationHandler);
+        if (!callerExtractedFileList.isSuccess()) {
+            return ListWithResult.genFail();
         }
 
-        List<SpTxNestedByAnnotationFile> spTxNestedByAnnotationFileList = new ArrayList<>(callerExtractedFileList.size());
-        for (CallerExtractedFile callerExtractedFile : callerExtractedFileList) {
+        List<SpTxNestedByAnnotationFile> spTxNestedByAnnotationFileList = new ArrayList<>(callerExtractedFileList.getList().size());
+        for (CallerExtractedFile callerExtractedFile : callerExtractedFileList.getList()) {
             String txEntryFullMethod = callerExtractedFile.getFullMethod();
             // 查询事务注解对应的事务传播行为
             String txPropagation = queryTxAnnotationPropagation(annotationHandler, txEntryFullMethod);
@@ -108,7 +99,7 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
             AbstractCallGraphExtractedFile.copy(callerExtractedFile, spTxNestedByAnnotationFile);
             spTxNestedByAnnotationFileList.add(spTxNestedByAnnotationFile);
         }
-        return spTxNestedByAnnotationFileList;
+        return new ListWithResult<>(spTxNestedByAnnotationFileList);
     }
 
     /**
@@ -117,11 +108,11 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
      * @param configureWrapper
      * @return
      */
-    private List<SpTxNestedByTplFile> handleTxTpl(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
+    private ListWithResult<SpTxNestedByTplFile> handleTxTpl(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
         List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList = new ArrayList<>();
-        List<CallerExtractedFile> callerExtractedFileList = extractTxTpl(configureWrapper, spTxEntryMethodTxTplList);
-        if (JavaCGUtil.isCollectionEmpty(callerExtractedFileList)) {
-            return Collections.emptyList();
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxTpl(configureWrapper, spTxEntryMethodTxTplList);
+        if (!callerExtractedFileList.isSuccess()) {
+            return ListWithResult.genFail();
         }
 
         /*
@@ -134,9 +125,8 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
         Map<String, SpTxEntryMethodTxTpl> spTxEntryMethodTxTplMap = AbstractInfoWithMethodHash.buildMap(spTxEntryMethodTxTplList);
 
         // 处理根据事务模板找到的事务嵌套，找到对应的方法入口
-        List<SpTxNestedByTplFile> spTxNestedByTplFileList = new ArrayList<>(callerExtractedFileList.size());
-        for (CallerExtractedFile callerExtractedFile : callerExtractedFileList) {
-
+        List<SpTxNestedByTplFile> spTxNestedByTplFileList = new ArrayList<>(callerExtractedFileList.getList().size());
+        for (CallerExtractedFile callerExtractedFile : callerExtractedFileList.getList()) {
             // 根据调用堆栈文件，生成Spring事务被调用信息列表
             List<SpTxCalleeInfo> spTxCalleeInfoList = genSpTxCalleeInfoList(annotationHandler, callerExtractedFile.getCallerExtractedLineList());
             SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = spTxEntryMethodTxTplMap.get(callerExtractedFile.getMethodHash());
@@ -146,7 +136,7 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
             spTxNestedByTplFileList.add(spTxNestedByTplFile);
         }
 
-        return spTxNestedByTplFileList;
+        return new ListWithResult<>(spTxNestedByTplFileList);
     }
 
     // 指定配置参数

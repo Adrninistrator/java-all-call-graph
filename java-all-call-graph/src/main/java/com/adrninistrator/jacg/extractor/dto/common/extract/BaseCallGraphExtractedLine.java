@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.extractor.dto.common.extract;
 
-import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
+import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 
 /**
  * @author adrninistrator

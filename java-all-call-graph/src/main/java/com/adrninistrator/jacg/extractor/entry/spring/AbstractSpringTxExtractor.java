@@ -6,20 +6,21 @@ import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.SpecialCallTypeEnum;
+import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
+import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.extractor.common.enums.SpringTxTypeEnum;
 import com.adrninistrator.jacg.extractor.dto.common.extract.BaseCalleeExtractedMethod;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;
-import com.adrninistrator.jacg.extractor.dto.common.extract_file.CallerExtractedFile;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.entry_method.SpTxEntryMethodTxTpl;
-import com.adrninistrator.jacg.extractor.dto.spring_tx.extract.SpTxCalleeInfo;
+import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedFile;
+import com.adrninistrator.jacg.extractor.dto.springtx.entrymethod.SpTxEntryMethodTxTpl;
+import com.adrninistrator.jacg.extractor.dto.springtx.extract.SpTxCalleeInfo;
 import com.adrninistrator.jacg.extractor.entry.CallerGraphBaseExtractor;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
-import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
+import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByClassMethodName;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.util.JavaCGUtil;
@@ -28,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -47,11 +47,14 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
      * @param annotationHandler 外层需要使用try-with-resource的方式，确保使用完后close
      * @return
      */
-    protected List<CallerExtractedFile> extractTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
-        List<String> springTransactionalMethodList = annotationHandler.queryMethodsWithAnnotations(true, JACGCommonNameConstants.SPRING_TX_ANNOTATION);
+    protected ListWithResult<CallerExtractedFile> extractTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
+        List<String> springTransactionalMethodList = annotationHandler.queryMethodsWithAnnotation(true, JACGCommonNameConstants.SPRING_TX_ANNOTATION);
+        if (springTransactionalMethodList == null) {
+            return ListWithResult.genFail();
+        }
         if (JavaCGUtil.isCollectionEmpty(springTransactionalMethodList)) {
             logger.info("未找到@Transactional注解对应的方法");
-            return Collections.emptyList();
+            return ListWithResult.genEmpty();
         }
 
         logger.info("找到@Transactional注解对应的方法\n{}", StringUtils.join(springTransactionalMethodList, "\n"));
@@ -59,12 +62,12 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, new HashSet<>(springTransactionalMethodList));
 
         // 调用父类的方法生成调用堆栈文件，参数2设为false，使父类不关闭数据源
-        List<CallerExtractedFile> callerExtractedFileList = baseExtract(configureWrapper, false);
-        if (JavaCGUtil.isCollectionEmpty(callerExtractedFileList)) {
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = baseExtract(configureWrapper, false);
+        if (!callerExtractedFileList.isSuccess()) {
             logger.info("未找到@Transactional注解对应的方法对应的调用堆栈文件");
-            return Collections.emptyList();
+        } else {
+            logger.info("找到@Transactional注解对应的方法对应的调用堆栈文件 {}", callerExtractedFileList.getList().size());
         }
-        logger.info("找到@Transactional注解对应的方法对应的调用堆栈文件 {}", callerExtractedFileList.size());
         return callerExtractedFileList;
     }
 
@@ -75,13 +78,13 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
      * @param spTxEntryMethodTxTplList
      * @return
      */
-    protected List<CallerExtractedFile> extractTxTpl(ConfigureWrapper configureWrapper, List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList) {
+    protected ListWithResult<CallerExtractedFile> extractTxTpl(ConfigureWrapper configureWrapper, List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList) {
         List<String> txTplEntryMethodList = new ArrayList<>();
         // 查询事务模板对应的入口方法
-        queryTxTplEntryMethodInfo(configureWrapper, spTxEntryMethodTxTplList, txTplEntryMethodList);
+        queryTxTplEntryMethod(configureWrapper, spTxEntryMethodTxTplList, txTplEntryMethodList);
         if (txTplEntryMethodList.isEmpty()) {
             logger.info("未找到TransactionTemplate对应的方法");
-            return Collections.emptyList();
+            return ListWithResult.genEmpty();
         }
 
         logger.info("找到TransactionTemplate对应的方法\n{}", StringUtils.join(txTplEntryMethodList, "\n"));
@@ -89,16 +92,16 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, new HashSet<>(txTplEntryMethodList));
 
         // 调用父类的方法生成调用堆栈文件，参数2设为false，使父类不关闭数据源
-        List<CallerExtractedFile> callerExtractedFileList = baseExtract(configureWrapper, false);
-        if (JavaCGUtil.isCollectionEmpty(callerExtractedFileList)) {
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = baseExtract(configureWrapper, false);
+        if (!callerExtractedFileList.isSuccess()) {
             logger.info("未找到TransactionTemplate对应的方法对应的调用堆栈文件");
-            return Collections.emptyList();
+        } else {
+            logger.info("找到TransactionTemplate对应的方法对应的调用堆栈文件 {}", callerExtractedFileList.getList().size());
         }
-        logger.info("找到TransactionTemplate对应的方法对应的调用堆栈文件 {}", callerExtractedFileList.size());
         return callerExtractedFileList;
     }
 
-    protected void queryTxTplEntryMethodInfo(ConfigureWrapper configureWrapper, List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList, List<String> txTplEntryMethodList) {
+    protected void queryTxTplEntryMethod(ConfigureWrapper configureWrapper, List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList, List<String> txTplEntryMethodList) {
         // 查询TransactionTemplate使用匿名内部类的方法
         try (JACGExtendsImplHandler jacgExtendsImplHandler = new JACGExtendsImplHandler(configureWrapper)) {
             // 查询事务模板使用匿名内部类的信息
@@ -154,7 +157,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
 
         for (String childClassName : childClassNameList) {
             // 查询对指定类指定事务方法的调用
-            List<WriteDbData4MethodCall> methodCallList = dbOperWrapper.getMethodCallByCalleeFullClassMethod(childClassName, method);
+            List<WriteDbData4MethodCall> methodCallList = methodCallHandler.getNormalMethodCallByCalleeClassMethod(childClassName, method);
             if (JavaCGUtil.isCollectionEmpty(methodCallList)) {
                 continue;
             }

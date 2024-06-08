@@ -2,8 +2,8 @@ package test.junit.spring;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import test.call_graph.spring.bean.use.wrong_name.TestSpringWrongNameService1;
-import test.call_graph.spring.bean.use.wrong_name.TestSpringWrongNameService3;
+import test.callgraph.spring.bean.use.wrongname.TestSpringWrongNameService1;
+import test.callgraph.spring.bean.use.wrongname.TestSpringWrongNameService3;
 import test.junit.base.TestSpringBase;
 
 /**

@@ -1,9 +1,10 @@
 package com.adrninistrator.jacg.annotation.formatter;
 
+import com.adrninistrator.jacg.annotation.util.AnnotationAttributesParseUtil;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.ListStringAnnotationAttribute;
-import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
+import com.adrninistrator.jacg.util.JACGSpringUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
 
     @Override
     public boolean checkHandleAnnotation(String annotationName) {
-        return SpringMvcRequestMappingUtil.isRequestMappingAnnotation(annotationName);
+        return JACGSpringUtil.isRequestMappingAnnotation(annotationName);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
     }
 
     private String doGetPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap, String attributeName) {
-        ListStringAnnotationAttribute listStringAnnotationAttribute = annotationHandler.getAttributeFromMap(annotationAttributeMap, attributeName,
+        ListStringAnnotationAttribute listStringAnnotationAttribute = AnnotationAttributesParseUtil.getAttributeValueFromMap(annotationAttributeMap, attributeName,
                 ListStringAnnotationAttribute.class);
         if (listStringAnnotationAttribute == null) {
             // 尝试不同的属性名称，可能不存在，不需要打印日志
@@ -93,7 +94,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
         for (Map.Entry<String, Map<String, BaseAnnotationAttribute>> classAnnotationMapEntry : classAnnotationMap.entrySet()) {
             String annotationName = classAnnotationMapEntry.getKey();
             // 判断是否为Spring MVC的RequestMapping注解
-            if (SpringMvcRequestMappingUtil.isRequestMappingAnnotation(annotationName)) {
+            if (JACGSpringUtil.isRequestMappingAnnotation(annotationName)) {
                 return getPathInRequestMappingAnnotation(classAnnotationMapEntry.getValue());
             }
         }

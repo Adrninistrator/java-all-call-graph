@@ -2,8 +2,8 @@ package test.junit.spring;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import test.call_graph.custom_flow.method_call_args.service.TestCFMCAService1;
-import test.call_graph.custom_flow.method_call_args.service.TestCFMCAService2;
+import test.callgraph.customflow.methodcallargs.service.TestCFMCAService1;
+import test.callgraph.customflow.methodcallargs.service.TestCFMCAService2;
 import test.junit.base.TestSpringBase;
 
 /**

@@ -1,0 +1,88 @@
+package com.adrninistrator.jacg.handler.writedb;
+
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
+import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MybatisMSEntity;
+import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlEntityInfoCodeParser;
+import com.adrninistrator.jacg.util.JACGFileUtil;
+
+/**
+ * @author adrninistrator
+ * @date 2023/7/24
+ * @description: 写入数据库，MyBatis的Entity与Mapper、表名（使用MySQL）
+ */
+@JACGWriteDbHandler(
+        readFile = true,
+        otherFileName = MyBatisMySqlEntityInfoCodeParser.FILE_NAME,
+        minColumnNum = 4,
+        maxColumnNum = 4,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_MYBATIS_MS_ENTITY
+)
+public class WriteDbHandler4MybatisMSEntity extends AbstractWriteDbHandler<WriteDbData4MybatisMSEntity> {
+
+    public WriteDbHandler4MybatisMSEntity(WriteDbResult writeDbResult) {
+        super(writeDbResult);
+    }
+
+    @Override
+    protected WriteDbData4MybatisMSEntity genData(String[] array) {
+        String mapperInterfaceName = array[0];
+        String entityClassName = array[1];
+        // 根据类名前缀判断是否需要处理
+        if (!isAllowedClassPrefix(mapperInterfaceName) || !isAllowedClassPrefix(entityClassName)) {
+            return null;
+        }
+
+        String tableName = array[2];
+        String xmlFilePath = array[3];
+        String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
+        String mapperSimpleInterfaceName = dbOperWrapper.getSimpleClassName(mapperInterfaceName);
+        String entitySimpleClassName = dbOperWrapper.getSimpleClassName(entityClassName);
+        return new WriteDbData4MybatisMSEntity(
+                mapperSimpleInterfaceName,
+                entitySimpleClassName,
+                tableName,
+                mapperInterfaceName,
+                entityClassName,
+                xmlFileName,
+                xmlFilePath
+        );
+    }
+
+    @Override
+    protected Object[] genObjectArray(WriteDbData4MybatisMSEntity data) {
+        return new Object[]{
+                genNextRecordId(),
+                data.getMapperSimpleClassName(),
+                data.getEntitySimpleClassName(),
+                data.getTableName(),
+                data.getMapperClassName(),
+                data.getEntityClassName(),
+                data.getXmlFileName(),
+                data.getXmlFilePath()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "MyBatis Mapper接口类名",
+                "MyBatis的Entity类名",
+                "数据库表名",
+                "MyBatis XML文件路径"
+        };
+    }
+
+    @Override
+    public String chooseNotMainFileDesc() {
+        return "MyBatis的Entity与Mapper、表名（使用MySQL）";
+    }
+
+    @Override
+    public String[] chooseFileDetailInfo() {
+        return new String[]{
+                "使用MySQL时，MyBatis的Entity类名与Mapper类名、数据库表名"
+        };
+    }
+}

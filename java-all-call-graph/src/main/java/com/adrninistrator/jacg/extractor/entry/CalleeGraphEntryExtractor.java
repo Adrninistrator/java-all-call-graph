@@ -2,15 +2,14 @@ package com.adrninistrator.jacg.extractor.entry;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.extractor.dto.common.extract_file.CalleeExtractedFile;
-
-import java.util.List;
+import com.adrninistrator.jacg.extractor.dto.common.extractfile.CalleeExtractedFile;
 
 /**
  * @author adrninistrator
  * @date 2023/4/22
- * @description: 对调用链结果文件进行数据提取，向上的方法调用链，提取从指定被调用方法对应的入口方法的信息
+ * @description: 对向上的方法调用链文件进行数据提取，提取从指定被调用方法对应的入口方法的信息
  */
 public class CalleeGraphEntryExtractor extends CalleeGraphBaseExtractor {
 
@@ -19,7 +18,7 @@ public class CalleeGraphEntryExtractor extends CalleeGraphBaseExtractor {
      *
      * @return
      */
-    public List<CalleeExtractedFile> extract() {
+    public ListWithResult<CalleeExtractedFile> extract() {
         ConfigureWrapper configureWrapper = new ConfigureWrapper(false);
         // 指定生成方法调用堆栈时的关键字使用代表入口方法的标志
         setFindStackKeyword4ee(configureWrapper);
@@ -32,7 +31,7 @@ public class CalleeGraphEntryExtractor extends CalleeGraphBaseExtractor {
      * @param configureWrapper
      * @return
      */
-    public List<CalleeExtractedFile> extract(ConfigureWrapper configureWrapper) {
+    public ListWithResult<CalleeExtractedFile> extract(ConfigureWrapper configureWrapper) {
         // 指定生成方法调用堆栈时的关键字使用代表入口方法的标志
         setFindStackKeyword4ee(configureWrapper);
         return baseExtract(configureWrapper);

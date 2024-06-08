@@ -2,11 +2,11 @@ package test.junit.spring;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import test.call_graph.spring.bean.use.TestSpringBeanE1;
-import test.call_graph.spring.bean.use.TestSpringBeanE2;
-import test.call_graph.spring.bean.use.javax_inject.TestJavaxInjectClassA;
-import test.call_graph.spring.bean.use.javax_inject.TestJavaxInjectClassB;
-import test.call_graph.spring.bean.use.javax_inject.TestJavaxInjectClassC;
+import test.callgraph.spring.bean.use.TestSpringBeanE1;
+import test.callgraph.spring.bean.use.TestSpringBeanE2;
+import test.callgraph.spring.bean.use.javaxinject.TestJavaxInjectClassA;
+import test.callgraph.spring.bean.use.javaxinject.TestJavaxInjectClassB;
+import test.callgraph.spring.bean.use.javaxinject.TestJavaxInjectClassC;
 import test.junit.base.TestSpringBase;
 
 /**

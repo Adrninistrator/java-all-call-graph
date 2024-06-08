@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.comparator;
 
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 
 import java.util.Comparator;
 

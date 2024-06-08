@@ -1,5 +1,9 @@
 package com.adrninistrator.jacg.common;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -30,14 +34,14 @@ public class JACGCommonNameConstants {
             "path"
     };
 
-    public static final String[] CLASS_NAMES_STREAM = {
+    public static final String[] STREAM_CLASS_NAMES = {
             Stream.class.getName(),
             DoubleStream.class.getName(),
             IntStream.class.getName(),
             LongStream.class.getName()
     };
 
-    public static final String[] METHOD_NAMES_STREAM_INTERMEDIATE = {
+    public static final String[] STREAM_INTERMEDIATE_METHOD_NAMES = {
             "filter",
             "map",
             "mapToInt",
@@ -61,7 +65,7 @@ public class JACGCommonNameConstants {
             "mapToInt"
     };
 
-    public static final String[] METHOD_NAMES_STREAM_TERMINAL = {
+    public static final String[] STREAM_TERMINAL_METHOD_NAMES = {
             "forEach",
             "forEachOrdered",
             "toArray",
@@ -82,13 +86,21 @@ public class JACGCommonNameConstants {
             "spliterator"
     };
 
-    public static final String SPRING_TRANSACTION_TEMPLATE_CLASS = "org.springframework.transaction.support.TransactionTemplate";
-
-    public static final String SPRING_TX_ANNOTATION = "org.springframework.transaction.annotation.Transactional";
-
+    public static final String SPRING_TRANSACTION_TEMPLATE_CLASS = TransactionTemplate.class.getName();
+    public static final String SPRING_TX_ANNOTATION = Transactional.class.getName();
     public static final String SPRING_TX_ATTRIBUTE_PROPAGATION = "propagation";
-
     public static final String SPRING_ASYNC_ANNOTATION = "org.springframework.scheduling.annotation.Async";
+
+    public static final String SPRING_MULTI_PART_FILE_CLASS = "org.springframework.web.multipart.MultipartFile";
+    public static final String SPRING_COMMONS_MULTI_PART_FILE_CLASS = "org.springframework.web.multipart.commons.CommonsMultipartFile";
+
+    public static final String SPRING_TASK_ANNOTATION = "org.springframework.scheduling.annotation.Scheduled";
+
+    public static final String JSON_PROPERTY_ANNOTATION_NAME_ = JsonProperty.class.getName();
+
+    public static final String MYBATIS_PARAM_ANNOTATION_NAME = "org.apache.ibatis.annotations.Param";
+
+    public static final String ANNOTATION_ATTRIBUTE_NAME_VALUE = "value";
 
     private JACGCommonNameConstants() {
         throw new IllegalStateException("illegal");

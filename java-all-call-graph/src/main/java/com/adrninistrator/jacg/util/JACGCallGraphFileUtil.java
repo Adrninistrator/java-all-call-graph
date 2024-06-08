@@ -1,10 +1,10 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.dto.call_line.CallGraphLineParsed;
+import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
-import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
+import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
 import com.adrninistrator.jacg.markdown.JACGMarkdownConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
@@ -226,7 +226,7 @@ public class JACGCallGraphFileUtil {
             throw new JavaCGRuntimeException("传入的行内容为空");
         }
 
-        String[] array = StringUtils.splitPreserveAllTokens(line, JACGConstants.FLAG_TAB);
+        String[] array = StringUtils.splitPreserveAllTokens(line, JavaCGConstants.FLAG_TAB);
         if (calleeGraph) {
             if (array.length < JACGConstants.CALL_GRAPH_EE_LINE_MIN_COLUMN_NUM) {
                 throw new JavaCGRuntimeException("向上的方法完整调用链文件分隔后列数太小 " + array.length);
@@ -259,8 +259,8 @@ public class JACGCallGraphFileUtil {
         }
 
         // 对方法完整调用链文件行进行分隔
-        String[] array = splitCallGraphLine(line, true);
-        String column1 = array[0];
+        String[] lineColumns = splitCallGraphLine(line, true);
+        String column1 = lineColumns[0];
         String fullMethodWithAnnotations;
         int nextStartIndex;
 
@@ -283,7 +283,17 @@ public class JACGCallGraphFileUtil {
             nextStartIndex = 2;
         }
         // 为方法完整调用链解析每行包含的内容
-        return parseCallGraphLine(line, methodLevel, fullMethodWithAnnotations, array, nextStartIndex);
+        CallGraphLineParsed callGraphLineParsed = parseCallGraphLine(line, methodLevel, fullMethodWithAnnotations, lineColumns, nextStartIndex);
+        // 获取调用方法代码行号
+        for (String column : lineColumns) {
+            if (column.startsWith(JavaCGConstants.FLAG_LEFT_BRACKET) && column.endsWith(JavaCGConstants.FLAG_RIGHT_BRACKET)) {
+                int indexStart = column.indexOf(JavaCGConstants.FLAG_COLON);
+                String lineNumber = column.substring(indexStart + JavaCGConstants.FLAG_COLON.length(), column.length() - JavaCGConstants.FLAG_RIGHT_BRACKET.length());
+                callGraphLineParsed.setCallerLineNumber(Integer.valueOf(lineNumber));
+                break;
+            }
+        }
+        return callGraphLineParsed;
     }
 
     /**
@@ -298,23 +308,34 @@ public class JACGCallGraphFileUtil {
         }
 
         // 对方法完整调用链文件行进行分隔
-        String[] array = splitCallGraphLine(line, false);
+        String[] lineColumns = splitCallGraphLine(line, false);
         String fullMethodWithAnnotations;
         int nextStartIndex;
 
         // 获取方法级别
         int methodLevel = getMethodLevel(line);
+        // 包含调用方法代码行号的内容
+        String contentContainsLineNumber = null;
         if (methodLevel == JACGConstants.CALL_GRAPH_METHOD_LEVEL_START) {
             // 获取方法级别为0的完整方法及注解
-            fullMethodWithAnnotations = getFullMethodWithAnnotations4Level0(array[0]);
+            fullMethodWithAnnotations = getFullMethodWithAnnotations4Level0(lineColumns[0]);
             nextStartIndex = 1;
         } else {
             // 方法级别大于0
-            fullMethodWithAnnotations = array[1];
+            contentContainsLineNumber = lineColumns[0];
+            fullMethodWithAnnotations = lineColumns[1];
             nextStartIndex = 2;
         }
         // 为方法完整调用链解析每行包含的内容
-        return parseCallGraphLine(line, methodLevel, fullMethodWithAnnotations, array, nextStartIndex);
+        CallGraphLineParsed callGraphLineParsed = parseCallGraphLine(line, methodLevel, fullMethodWithAnnotations, lineColumns, nextStartIndex);
+        if (contentContainsLineNumber != null) {
+            // 获取调用方法代码行号
+            int indexStart = contentContainsLineNumber.indexOf(JavaCGConstants.FLAG_COLON);
+            String lineNumber = contentContainsLineNumber.substring(indexStart + JavaCGConstants.FLAG_COLON.length(),
+                    contentContainsLineNumber.length() - JACGConstants.FLAG_RIGHT_PARENTHESES.length());
+            callGraphLineParsed.setCallerLineNumber(Integer.valueOf(lineNumber));
+        }
+        return callGraphLineParsed;
     }
 
     /**
@@ -341,11 +362,7 @@ public class JACGCallGraphFileUtil {
      * @param nextStartIndex            后续内容起始下标
      * @return
      */
-    private static CallGraphLineParsed parseCallGraphLine(String line,
-                                                          int methodLevel,
-                                                          String fullMethodWithAnnotations,
-                                                          String[] lineColumns,
-                                                          int nextStartIndex) {
+    private static CallGraphLineParsed parseCallGraphLine(String line, int methodLevel, String fullMethodWithAnnotations, String[] lineColumns, int nextStartIndex) {
         if (fullMethodWithAnnotations == null) {
             throw new JavaCGRuntimeException("获取方法与注解信息失败 " + line);
         }
@@ -388,7 +405,7 @@ public class JACGCallGraphFileUtil {
             } else if (JACGConstants.CALL_FLAG_RUN_IN_OTHER_THREAD_NO_TAB.equals(column)) {
                 // 在其他线程中执行
                 callGraphLineParsed.setRunInOtherThread(true);
-            } else if (JACGConstants.CALL_FLAG_RUN_IN_TRANSACTION_NO_TAB.equals(column)) {
+            } else if (JACGConstants.CALL_FLAG_RUN_IN_SPRING_TX_NO_TAB.equals(column)) {
                 // 在事务中执行
                 callGraphLineParsed.setRunInTransaction(true);
             }
@@ -398,7 +415,7 @@ public class JACGCallGraphFileUtil {
     }
 
     /**
-     * 判断是否包含在其他线程中执行的标记（不对行数据进行完整解析）
+     * 判断是否包含在其他线程中执行的标志（不对行数据进行完整解析）
      *
      * @param line
      * @return
@@ -408,13 +425,13 @@ public class JACGCallGraphFileUtil {
     }
 
     /**
-     * 判断是否包含在事务中执行的标记（不对行数据进行完整解析）
+     * 判断是否包含在事务中执行的标志（不对行数据进行完整解析）
      *
      * @param line
      * @return
      */
     public static boolean checkRunInTransaction(String line) {
-        return StringUtils.contains(line, JACGConstants.CALL_FLAG_RUN_IN_TRANSACTION);
+        return StringUtils.contains(line, JACGConstants.CALL_FLAG_RUN_IN_SPRING_TX);
     }
 
     // 处理完整方法及注解

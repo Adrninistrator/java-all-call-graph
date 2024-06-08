@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.handler.dto.spring;
 
-import com.adrninistrator.jacg.dto.method_call.MethodCallPair;
+import com.adrninistrator.jacg.dto.methodcall.MethodCallPair;
 
 /**
  * @author adrninistrator

@@ -2,11 +2,15 @@ package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
+import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,20 +43,6 @@ public class JACGClassMethodUtil {
     }
 
     /**
-     * 从完整类名中获取简单类名（去掉包名）
-     *
-     * @param className 完整类名
-     * @return
-     */
-    public static String getSimpleClassNameFromFull(String className) {
-        int indexLastDot = className.lastIndexOf(JavaCGConstants.FLAG_DOT);
-        if (indexLastDot == -1) {
-            return className;
-        }
-        return className.substring(indexLastDot + 1);
-    }
-
-    /**
      * 从完整方法信息中获取简单类名（去掉包名）
      *
      * @param method 完整方法信息
@@ -60,7 +50,7 @@ public class JACGClassMethodUtil {
      */
     public static String getSimpleClassNameFromMethod(String method) {
         String className = getClassNameFromMethod(method);
-        return getSimpleClassNameFromFull(className);
+        return JavaCGClassMethodUtil.getSimpleClassNameFromFull(className);
     }
 
     /**
@@ -71,6 +61,16 @@ public class JACGClassMethodUtil {
      */
     public static String getMethodNameWithArgsFromFull(String fullMethod) {
         return StringUtils.substringAfter(fullMethod, JavaCGConstants.FLAG_COLON);
+    }
+
+    /**
+     * 从完整方法信息中获取方法参数类型，不包含括号
+     *
+     * @param fullMethod 完整方法信息
+     * @return
+     */
+    public static String getMethodArgTypes(String fullMethod) {
+        return StringUtils.substringBetween(fullMethod, JavaCGConstants.FLAG_LEFT_BRACKET, JavaCGConstants.FLAG_RIGHT_BRACKET);
     }
 
     /**
@@ -123,28 +123,6 @@ public class JACGClassMethodUtil {
     }
 
     /**
-     * 判断是否为匿名内部类
-     *
-     * @param className
-     * @return
-     */
-    public static boolean isAnonymousInnerClass(String className) {
-        if (!className.contains("$")) {
-            return false;
-        }
-
-        String[] array = StringUtils.splitPreserveAllTokens(className, "$");
-        if (array.length != 2) {
-            return false;
-        }
-
-        if (!JavaCGUtil.isNumStr(array[1])) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * 生成方法详细信息
      *
      * @param fullMethod
@@ -155,11 +133,10 @@ public class JACGClassMethodUtil {
         int indexColon = fullMethod.indexOf(JavaCGConstants.FLAG_COLON);
         int indexLeftBrackets = fullMethod.indexOf(JavaCGConstants.FLAG_LEFT_BRACKET);
         String methodName = fullMethod.substring(indexColon + 1, indexLeftBrackets);
-        String argStr = fullMethod.substring(indexLeftBrackets);
         int indexRightBrackets = fullMethod.lastIndexOf(JavaCGConstants.FLAG_RIGHT_BRACKET);
-        String argWithoutBrackets = fullMethod.substring(indexLeftBrackets + JavaCGConstants.FLAG_LEFT_BRACKET.length(), indexRightBrackets);
-        String[] args = StringUtils.splitPreserveAllTokens(argWithoutBrackets, JavaCGConstants.FLAG_COMMA);
-        return new MethodDetail(fullMethod, className, methodName, argStr, args);
+        // 不包含括号的方法参数类型字符串
+        String argTypeStr = fullMethod.substring(indexLeftBrackets + JavaCGConstants.FLAG_LEFT_BRACKET.length(), indexRightBrackets);
+        return new MethodDetail(fullMethod, className, methodName, argTypeStr, genMethodArgTypeList(fullMethod));
     }
 
     /**
@@ -169,8 +146,8 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static List<String> genMethodArgTypeList(String fullMethod) {
-        MethodDetail methodDetail = genMethodDetail(fullMethod);
-        return Arrays.asList(methodDetail.getArgs());
+        String[] argTypes = StringUtils.splitPreserveAllTokens(getMethodArgTypes(fullMethod), JavaCGConstants.FLAG_COMMA);
+        return Arrays.asList(argTypes);
     }
 
     /**
@@ -181,7 +158,7 @@ public class JACGClassMethodUtil {
      * @param methodName
      * @return
      */
-    public static String getClassAndMethodName(String className, String methodName) {
+    public static String genClassAndMethodName(String className, String methodName) {
         return className + JavaCGConstants.FLAG_COLON + methodName;
     }
 
@@ -197,6 +174,91 @@ public class JACGClassMethodUtil {
             throw new JavaCGRuntimeException("指定的字符串不满足[类名]:[方法名]格式 " + methodInfo);
         }
         return new ClassAndMethodName(array[0], array[1]);
+    }
+
+    /**
+     * 生成get方法对应的set方法名
+     *
+     * @param getMethodName
+     * @return
+     */
+    public static String genSetMethodName4GetMethod(String getMethodName) {
+        return "s" + getMethodName.substring(1);
+    }
+
+    /**
+     * 生成set方法对应的get方法名
+     *
+     * @param getMethodName
+     * @return
+     */
+    public static String genGetMethodName4SetMethod(String getMethodName) {
+        return "g" + getMethodName.substring(1);
+    }
+
+    /**
+     * 判断方法调用中被调用方法是否匹配get方法
+     *
+     * @param methodCall
+     * @return
+     */
+    public static boolean calleeMatchesGetMethod(WriteDbData4MethodCall methodCall) {
+        if (!JavaCGClassMethodUtil.matchesGetMethod(methodCall.getCalleeMethodName()) ||
+                JavaCGCommonNameConstants.RETURN_TYPE_VOID.equals(methodCall.getRawReturnType()) ||
+                JavaCGCallTypeEnum.CTE_RAW_INVOKE_STATIC.getType().equals(methodCall.getCallType())) {
+            return false;
+        }
+        List<String> argTypeList = genMethodArgTypeList(methodCall.getCalleeFullMethod());
+        return argTypeList.isEmpty();
+    }
+
+    /**
+     * 判断方法调用中被调用方法是否匹配set方法
+     *
+     * @param methodCall
+     * @return
+     */
+    public static boolean calleeMatchesSetMethod(WriteDbData4MethodCall methodCall) {
+        if (!JavaCGClassMethodUtil.matchesSetMethod(methodCall.getCalleeMethodName())) {
+            return false;
+        }
+        // 在这里不判断方法返回类型，因为有的set方法返回类型非void
+        List<String> argTypeList = genMethodArgTypeList(methodCall.getCalleeFullMethod());
+        return argTypeList.size() == 1;
+    }
+
+    /**
+     * 将字符串形式的类名与方法名数组转换为对象列表形式
+     *
+     * @param classMethodStringArray 类名与方法名数组
+     *                               格式：[类名]:[方法名]
+     *                               示例：org.slf4j.Logger:error org.slf4j.Logger:info org.slf4j.Logger:warn
+     * @return
+     */
+    public static List<ClassAndMethodName> genClassAndMethodNameListFromString(String[] classMethodStringArray) {
+        List<ClassAndMethodName> classAndMethodNameList = new ArrayList<>(classMethodStringArray.length);
+        for (String expectedMethod : classMethodStringArray) {
+            classAndMethodNameList.add(JACGClassMethodUtil.parseClassAndMethodName(expectedMethod));
+        }
+        return classAndMethodNameList;
+    }
+
+    /**
+     * 检查方法是否在方法列表中
+     *
+     * @param fullMethod
+     * @param classAndMethodNameList
+     * @return true: 在 false: 不在
+     */
+    public static boolean checkMethodInList(String fullMethod, List<ClassAndMethodName> classAndMethodNameList) {
+        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+        String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
+        for (ClassAndMethodName classAndMethodName : classAndMethodNameList) {
+            if (className.equals(classAndMethodName.getClassName()) && methodName.equals(classAndMethodName.getMethodName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private JACGClassMethodUtil() {

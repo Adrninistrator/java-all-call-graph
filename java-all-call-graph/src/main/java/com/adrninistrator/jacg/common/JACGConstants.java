@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.common;
 
+import com.adrninistrator.javacg.common.JavaCGConstants;
+
 /**
  * @author adrninistrator
  * @date 2021/6/17
@@ -9,8 +11,8 @@ package com.adrninistrator.jacg.common;
 public class JACGConstants {
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLEE = "_jacg_o_ee";
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLER = "_jacg_o_er";
-    public static final String DIR_OUTPUT_METHODS = "methods";
     public static final String DIR_OUTPUT_STACK = "_stack";
+    public static final String DIR_OUTPUT_STACK_SEPARATE = "_separate";
     public static final String DIR_KEYWORDS_NOT_FOUND = "_keywords_not_found";
     public static final String DIR_OUTPUT_UNITTEST = "_unittest_output";
 
@@ -19,6 +21,14 @@ public class JACGConstants {
     // 保存当前有使用的配置参数信息文件
     public static final String FILE_JACG_USED_CONFIG_MD = "_jacg_used_config.md";
     public static final String FILE_JAVACG_USED_CONFIG_MD = "_javacg_used_config.md";
+    public static final String FILE_STACK_SUMMARY_CALLEE_MD = "_summary_callee.md";
+    public static final String FILE_STACK_SUMMARY_CALLER_MD = "_summary_caller.md";
+
+    public static final String FILE_JAR_DIFF_MODIFIED_METHODS_BASE = "_modified_methods_base.md";
+    public static final String FILE_JAR_DIFF_MODIFIED_METHODS_STACK = "_modified_methods_stack.md";
+
+    public static final String JAR_DIFF_METHOD_EXISTED = "existed";
+    public static final String JAR_DIFF_METHOD_NEW = "new";
 
     public static final String USED_CONFIG_FLAG_FILE_KEY = "配置文件名称";
     public static final String USED_CONFIG_FLAG_FILE_DESC = "配置文件说明";
@@ -28,8 +38,10 @@ public class JACGConstants {
     public static final String USED_CONFIG_FLAG_CONF_LIST = "区分顺序的其他配置信息";
     public static final String USED_CONFIG_FLAG_CONF_SET = "不区分顺序的其他配置信息";
 
+    public static final String TABLE_PREFIX = "jacg_";
+
     // sql语句中用于替换的appName
-    public static final String APP_NAME_IN_SQL = "{appName}";
+    public static final String REPLACE_SQL_FLAG_APP_NAME = "{appName}";
 
     public static final String SQL_CREATE_TABLE_HEAD = "CREATE TABLE if not exists";
     public static final String SQL_ENGINE_INNODB = "ENGINE=InnoDB";
@@ -43,7 +55,6 @@ public class JACGConstants {
     public static final String FLAG_AT_FULL_WIDTH = "＠";
     public static final String FLAG_MINUS = "-";
     public static final String FLAG_UNDER_LINE = "_";
-    public static final String FLAG_TAB = "\t";
     public static final String FLAG_COMMA_WITH_SPACE = ", ";
     public static final String FLAG_FILE_PROTOCOL = "file:/";
     public static final String FLAG_EXCLAMATION = "!";
@@ -60,22 +71,22 @@ public class JACGConstants {
     public static final String EXT_EMPTY_MD = FLAG_EMPTY + EXT_MD;
     public static final String EXT_SQL = ".sql";
     public static final String EXT_CLASS = ".class";
-
-    public static final String NEW_LINE = "\n";
+    public static final String EXT_XML = ".xml";
+    public static final String EXT_PROPERTIES = ".properties";
 
     // 调用链文件中，每个级别之间的缩进，两个空格
     public static final String OUTPUT_SPLIT_FLAG = FLAG_SPACE + FLAG_SPACE;
 
     public static final String CALLEE_FLAG_ENTRY_NO_TAB = "!entry!";
-    public static final String CALLEE_FLAG_ENTRY = FLAG_TAB + CALLEE_FLAG_ENTRY_NO_TAB;
+    public static final String CALLEE_FLAG_ENTRY = JavaCGConstants.FLAG_TAB + CALLEE_FLAG_ENTRY_NO_TAB;
     public static final String CALL_FLAG_CYCLE_START = "!cycle" + JACGConstants.FLAG_LEFT_PARENTHESES;
     public static final String CALL_FLAG_CYCLE_END = JACGConstants.FLAG_RIGHT_PARENTHESES + "!";
     public static final String CALL_FLAG_CYCLE = CALL_FLAG_CYCLE_START + "%d" + CALL_FLAG_CYCLE_END;
     public static final String CALL_FLAG_BUSINESS_DATA = "!busi_data!";
     public static final String CALL_FLAG_RUN_IN_OTHER_THREAD_NO_TAB = "!run_in_other_thread!";
-    public static final String CALL_FLAG_RUN_IN_OTHER_THREAD = FLAG_TAB + CALL_FLAG_RUN_IN_OTHER_THREAD_NO_TAB;
-    public static final String CALL_FLAG_RUN_IN_TRANSACTION_NO_TAB = "!run_in_transaction!";
-    public static final String CALL_FLAG_RUN_IN_TRANSACTION = FLAG_TAB + CALL_FLAG_RUN_IN_TRANSACTION_NO_TAB;
+    public static final String CALL_FLAG_RUN_IN_OTHER_THREAD = JavaCGConstants.FLAG_TAB + CALL_FLAG_RUN_IN_OTHER_THREAD_NO_TAB;
+    public static final String CALL_FLAG_RUN_IN_SPRING_TX_NO_TAB = "!run_in_spring_tx!";
+    public static final String CALL_FLAG_RUN_IN_SPRING_TX = JavaCGConstants.FLAG_TAB + CALL_FLAG_RUN_IN_SPRING_TX_NO_TAB;
 
     public static final String MYSQL_FLAG = "mysql";
     public static final String MYSQL_REWRITEBATCHEDSTATEMENTS = "rewriteBatchedStatements=true";
@@ -91,9 +102,7 @@ public class JACGConstants {
     public static final int MAX_DB_INSERT_BATCH_SIZE = 5000;
     // 数据库分页操作数量
     public static final int DB_PAGE_HANDLE_SIZE = 1000;
-
-    // 代表分页查询失败
-    public static final int PAGE_QUERY_FAIL = -2;
+    public static final int DB_PAGE_HANDLE_SIZE_MINUS_1 = DB_PAGE_HANDLE_SIZE - 1;
     // 代表最后一次分页查询
     public static final int PAGE_QUERY_LAST = -1;
 
@@ -114,8 +123,11 @@ public class JACGConstants {
     // 向下的方法完整调用链文件名，使用"@"进行分隔后最小的列数
     public static final int CALLER_FILE_NAME_SPLIT_BY_AT_MIN_COLUMNS = 3;
 
-    // 方法调用表最大序号，代表非法的值
-    public static final int MAX_METHOD_CALL_ID_ILLEGAL = -1;
+    // 方法调用表序号，代表非法的值
+    public static final int METHOD_CALL_ID_ILLEGAL = -1;
+
+    // 记录id，代表非法的值
+    public static final int RECORD_ID_ILLEGAL = -1;
 
     // 方法完整调用链文件中的级别，代表起始的值
     public static final int CALL_GRAPH_METHOD_LEVEL_START = 0;
@@ -130,9 +142,14 @@ public class JACGConstants {
     public static final int CALL_GRAPH_ER_LINE_MIN_COLUMN_NUM = 1;
 
     // 输出的注解信息文件，包含属性时的列数
-    public static final int ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE = 5;
+    public static final int ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE_5 = 5;
     // 输出的注解信息文件，不包含属性时的列数
-    public static final int ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE = 2;
+    public static final int ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_2 = 2;
+
+    // 输出的注解信息文件，多一列其他信息，包含属性时的列数
+    public static final int ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE_6 = 6;
+    // 输出的注解信息文件，多一列其他信息，不包含属性时的列数
+    public static final int ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_3 = 3;
 
     public static final String H2_PROTOCOL = "jdbc:h2:file:";
     public static final String H2_SCHEMA = "jacg";
@@ -144,6 +161,19 @@ public class JACGConstants {
     public static final String SPRING_TX_TYPE_ANNOTATION = "annotation";
     // Spring事务类型，使用事务模板
     public static final String SPRING_TX_TYPE_TEMPLATE = "template";
+
+    // Spring Task类型，通过XML定义
+    public static final String SPRING_TASK_TYPE_XML = "XML";
+    // Spring Task类型，通过注解定义
+    public static final String SPRING_TASK_TYPE_ANNOTATION = "annotation";
+
+    // 代表类或方法为空的标志
+    public static final String EMPTY_CLASS_METHOD = "#empty#";
+
+    // 数据库表后缀，代表旧的
+    public static final String TABLE_SUFFIX_OLD = "_1";
+    // 数据库表后缀，代表新的
+    public static final String TABLE_SUFFIX_NEW = "_2";
 
     private JACGConstants() {
         throw new IllegalStateException("illegal");

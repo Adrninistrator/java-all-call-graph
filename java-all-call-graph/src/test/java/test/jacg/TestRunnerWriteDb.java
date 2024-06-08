@@ -1,6 +1,7 @@
 package test.jacg;
 
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
+import org.junit.Assert;
 
 /**
  * @author adrninistrator
@@ -11,6 +12,6 @@ import com.adrninistrator.jacg.runner.RunnerWriteDb;
 public class TestRunnerWriteDb {
 
     public static void main(String[] args) {
-        new RunnerWriteDb().run();
+        Assert.assertTrue(new RunnerWriteDb().run());
     }
 }

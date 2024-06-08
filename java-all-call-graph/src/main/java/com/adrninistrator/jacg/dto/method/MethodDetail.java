@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.dto.method;
 
+import java.util.List;
+
 /**
  * @author adrninistrator
  * @date 2022/12/10
@@ -9,29 +11,29 @@ public class MethodDetail extends ClassAndMethodName {
     // 完整方法
     private final String fullMethod;
 
-    // 参数
-    private final String argStr;
+    // 参数类型字符串（不包含括号）
+    private final String argTypeStr;
 
-    // 参数数组
-    private final String[] args;
+    // 参数类型数组（不可修改）
+    private final List<String> argTypeList;
 
-    public MethodDetail(String fullMethod, String className, String methodName, String argStr, String[] args) {
+    public MethodDetail(String fullMethod, String className, String methodName, String argTypeStr, List<String> argTypeList) {
         super(className, methodName);
         this.fullMethod = fullMethod;
-        this.argStr = argStr;
-        this.args = args;
+        this.argTypeStr = argTypeStr;
+        this.argTypeList = argTypeList;
     }
 
     public String getFullMethod() {
         return fullMethod;
     }
 
-    public String getArgStr() {
-        return argStr;
+    public String getArgTypeStr() {
+        return argTypeStr;
     }
 
-    public String[] getArgs() {
-        return args;
+    public List<String> getArgTypeList() {
+        return argTypeList;
     }
 
     @Override

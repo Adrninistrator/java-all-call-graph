@@ -3,13 +3,18 @@ package com.adrninistrator.jacg.runner;
 import com.adrninistrator.jacg.annotation.attributes.AnnotationAttributesFormatter;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.interfaces.ConfigInterface;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.MyBatisMySqlSqlInfoCodeParser;
-import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.MyBatisMySqlWriteSqlInfoCodeParser;
-import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.SpringTaskCodeParser;
-import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.SpringXmlBeanParser;
-import com.adrninistrator.jacg.extensions.code_parser.method_annotation.MyBatisAnnotationCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlColumnInfoCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlEntityInfoCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlSelectColumnCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlSetColumnCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlSqlInfoCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlWhereColumnCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlWriteSqlInfoCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.PropertiesConfCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.SpringTaskXmlCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.SpringXmlBeanParser;
+import com.adrninistrator.jacg.extensions.codeparser.methodannotation.MyBatisAnnotationCodeParser;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -19,7 +24,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseListEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseSetEnum;
 import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
 import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
-import com.adrninistrator.javacg.extensions.code_parser.CodeParserInterface;
+import com.adrninistrator.javacg.extensions.codeparser.CodeParserInterface;
 import com.adrninistrator.javacg.stat.JCallGraph;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -50,17 +55,24 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
     // java-callgraph2的入口类
     private JCallGraph jCallGraph;
 
+    public RunnerWriteCallGraphFile() {
+        super();
+    }
+
+    public RunnerWriteCallGraphFile(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
+    }
+
     /**
      * 入口方法
      * 可以调用run(ConfigureWrapper configureWrapper)方法，不需要指定JavaCGConfigureWrapper参数
      *
-     * @param configureWrapper
      * @param javaCGConfigureWrapper
      * @return
      */
-    public boolean run(ConfigureWrapper configureWrapper, JavaCGConfigureWrapper javaCGConfigureWrapper) {
+    public boolean run(JavaCGConfigureWrapper javaCGConfigureWrapper) {
         this.javaCGConfigureWrapper = javaCGConfigureWrapper;
-        return run(configureWrapper);
+        return run();
     }
 
     @Override
@@ -71,7 +83,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
     @Override
     protected void handle() {
         // 调用java-callgraph2生成jar包的方法调用关系
-        if (!callJavaCallGraph2()) {
+        if (!callJavaCallGraph2(null)) {
             // 记录执行失败
             recordTaskFail();
         }
@@ -87,14 +99,20 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
     }
 
     // 调用java-callgraph2生成jar包的方法调用关系
-    protected boolean callJavaCallGraph2() {
-        List<String> jarPathList = getJarPathList();
-        if (JavaCGUtil.isCollectionEmpty(jarPathList)) {
+    protected boolean callJavaCallGraph2(List<String> jarPathList) {
+        List<String> usedJarPathList;
+        if (!JavaCGUtil.isCollectionEmpty(jarPathList)) {
+            usedJarPathList = jarPathList;
+        } else {
+            // 获得需要处理的jar包列表
+            usedJarPathList = getJarPathList();
+        }
+        if (JavaCGUtil.isCollectionEmpty(usedJarPathList)) {
             logger.error("请在配置文件 {} 中指定需要处理的jar包，或保存class、jar文件的目录", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
             return false;
         }
 
-        for (String jarPath : jarPathList) {
+        for (String jarPath : usedJarPathList) {
             if (!new File(jarPath).exists()) {
                 logger.error("文件或目录不存在 {}", jarPath);
                 return false;
@@ -137,35 +155,55 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
 
     // 添加代码解析扩展类
     private boolean addCodeParserExtensions() {
-        List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, true);
-        // 检查扩展类
-        if (!checkExtensions(codeParserExtensionClassList, OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER,
+        String[] defaultCodeParserNameArray = new String[]{
                 MyBatisMySqlSqlInfoCodeParser.class.getName(),
+                MyBatisMySqlColumnInfoCodeParser.class.getName(),
+                MyBatisMySqlEntityInfoCodeParser.class.getName(),
                 MyBatisMySqlWriteSqlInfoCodeParser.class.getName(),
-                SpringTaskCodeParser.class.getName(),
+                MyBatisMySqlSetColumnCodeParser.class.getName(),
+                MyBatisMySqlSelectColumnCodeParser.class.getName(),
+                MyBatisMySqlWhereColumnCodeParser.class.getName(),
+                SpringTaskXmlCodeParser.class.getName(),
                 MyBatisAnnotationCodeParser.class.getName(),
                 SpringXmlBeanParser.class.getName()
-        )) {
-            return false;
-        }
+        };
+
+        List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, true);
 
         // 添加默认的代码解析扩展类
         MyBatisMySqlSqlInfoCodeParser myBatisMySqlSqlInfoCodeParser = new MyBatisMySqlSqlInfoCodeParser();
-        MyBatisMySqlWriteSqlInfoCodeParser myBatisMySqlWriteSqlInfoCodeParser = new MyBatisMySqlWriteSqlInfoCodeParser();
-        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWriteSqlInfoCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
-        jCallGraph.addCodeParser(myBatisMySqlSqlInfoCodeParser);
-        jCallGraph.addCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
-        jCallGraph.addCodeParser(new SpringTaskCodeParser());
-        jCallGraph.addCodeParser(new MyBatisAnnotationCodeParser());
 
-        // 设置对Spring XML中的Bean解析的类
-        jCallGraph.setSpringXmlBeanParser(new SpringXmlBeanParser());
+        MyBatisMySqlColumnInfoCodeParser myBatisMySqlColumnInfoCodeParser = new MyBatisMySqlColumnInfoCodeParser();
+        MyBatisMySqlEntityInfoCodeParser myBatisMySqlEntityInfoCodeParser = new MyBatisMySqlEntityInfoCodeParser();
+        MyBatisMySqlWriteSqlInfoCodeParser myBatisMySqlWriteSqlInfoCodeParser = new MyBatisMySqlWriteSqlInfoCodeParser();
+        MyBatisMySqlSetColumnCodeParser myBatisMySqlSetColumnCodeParser = new MyBatisMySqlSetColumnCodeParser();
+        MyBatisMySqlSelectColumnCodeParser myBatisMySqlSelectColumnCodeParser = new MyBatisMySqlSelectColumnCodeParser();
+        MyBatisMySqlWhereColumnCodeParser myBatisMySqlWhereColumnCodeParser = new MyBatisMySqlWhereColumnCodeParser();
+
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlColumnInfoCodeParser(myBatisMySqlColumnInfoCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlEntityInfoCodeParser(myBatisMySqlEntityInfoCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWriteSqlInfoCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSetColumnCodeParser(myBatisMySqlSetColumnCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSelectColumnCodeParser(myBatisMySqlSelectColumnCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWhereColumnCodeParser(myBatisMySqlWhereColumnCodeParser);
+
+        jCallGraph.addCodeParser(myBatisMySqlSqlInfoCodeParser);
+        jCallGraph.addCodeParser(myBatisMySqlColumnInfoCodeParser);
+        jCallGraph.addCodeParser(myBatisMySqlEntityInfoCodeParser);
+        jCallGraph.addCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
+        jCallGraph.addCodeParser(myBatisMySqlSetColumnCodeParser);
+        jCallGraph.addCodeParser(myBatisMySqlSelectColumnCodeParser);
+        jCallGraph.addCodeParser(myBatisMySqlWhereColumnCodeParser);
+        jCallGraph.addCodeParser(new SpringTaskXmlCodeParser());
+        jCallGraph.addCodeParser(new MyBatisAnnotationCodeParser());
+        jCallGraph.addCodeParser(new PropertiesConfCodeParser());
+        jCallGraph.addCodeParser(new SpringXmlBeanParser());
 
         // 添加参数配置中的代码解析扩展类
         if (!JavaCGUtil.isCollectionEmpty(codeParserExtensionClassList)) {
             logger.info("添加参数配置中的代码解析扩展类\n{}", StringUtils.join(codeParserExtensionClassList, "\n"));
             for (String extensionClass : codeParserExtensionClassList) {
-                CodeParserInterface codeParser = JACGUtil.getClassObject(extensionClass, CodeParserInterface.class);
+                CodeParserInterface codeParser = JACGUtil.genClassObject(extensionClass, CodeParserInterface.class);
                 if (codeParser == null) {
                     return false;
                 }
@@ -174,15 +212,11 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
             }
         }
 
-        return true;
-    }
-
-    // 检查扩展类类
-    private boolean checkExtensions(List<String> extensionClassList, ConfigInterface config, String... disallowedClassNames) {
-        String disallowedClassName = JACGUtil.findStringInList(extensionClassList, disallowedClassNames);
-        if (disallowedClassName != null) {
-            logger.error("当前类默认会添加，不需要在配置文件中指定 {} {}", disallowedClassName, config.getKey());
-            return false;
+        // 在参数配置中增加以上默认添加的类，使生成的使用的参数配置中能够显示
+        for (String defaultCodeParserName : defaultCodeParserNameArray) {
+            if (!codeParserExtensionClassList.contains(defaultCodeParserName)) {
+                configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, defaultCodeParserName);
+            }
         }
         return true;
     }

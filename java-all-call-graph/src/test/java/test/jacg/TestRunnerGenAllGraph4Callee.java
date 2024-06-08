@@ -1,6 +1,7 @@
 package test.jacg;
 
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
+import org.junit.Assert;
 
 /**
  * @author adrninistrator
@@ -11,6 +12,6 @@ import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 public class TestRunnerGenAllGraph4Callee {
 
     public static void main(String[] args) {
-        new RunnerGenAllGraph4Callee().run();
+        Assert.assertTrue(new RunnerGenAllGraph4Callee().run());
     }
 }
