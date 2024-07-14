@@ -67,6 +67,18 @@ public class MethodInfoHandler extends BaseHandler {
     }
 
     /**
+     * 根据完整类名与方法名查询方法信息
+     *
+     * @param className
+     * @param methodName
+     * @return
+     */
+    public List<WriteDbData4MethodInfo> queryMethodInfoByClassMethod(String className, String methodName) {
+        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        return queryMethodInfoBySimpleClassMethod(simpleClassName, methodName);
+    }
+
+    /**
      * 根据唯一类名与方法名查询方法信息
      *
      * @param simpleClassName

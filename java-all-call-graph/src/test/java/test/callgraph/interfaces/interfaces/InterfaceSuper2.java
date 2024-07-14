@@ -7,4 +7,8 @@ package test.callgraph.interfaces.interfaces;
  */
 public interface InterfaceSuper2 {
     void testSuper2();
+
+    default void testSuper2D() {
+        System.out.println("");
+    }
 }

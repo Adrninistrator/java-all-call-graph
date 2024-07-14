@@ -10,6 +10,7 @@ import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,6 +28,13 @@ import java.util.Set;
 )
 public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbData4MethodCall> {
 
+    /*
+        涉及继承的唯一类名
+        key     子类唯一类名
+        value   对应的父类唯一类名
+     */
+    private Map<String, String> extendsSimpleClassNameMap;
+
     // 有注解的方法HASH+长度
     private Set<String> withAnnotationMethodHashSet;
 
@@ -39,11 +47,30 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     // 方法返回存在泛型类型的方法HASH+长度
     private Set<String> withReturnGenericsTypeMethodHashSet;
 
-    // 保存MyBatis Mapper类名
-    private Set<String> myBatisMapperClassNameSet;
+    // 保存MyBatis Mapper唯一类名
+    private Set<String> myBatisMapperSimpleNameSet;
 
     // 保存MyBatis写数据库的Mapper方法
     private Set<String> myBatisMapperMethodWriteSet;
+
+    /*
+        get方法对应的信息
+        key
+            唯一类名
+        value
+            get方法名称Set
+     */
+    private Map<String, Set<String>> getMethodSimpleClassMap;
+
+
+    /*
+        set方法对应的信息
+        key
+            唯一类名
+        value
+            set方法名称Set
+     */
+    private Map<String, Set<String>> setMethodSimpleClassMap;
 
     public WriteDbHandler4MethodCall(WriteDbResult writeDbResult) {
         super(writeDbResult);
@@ -140,40 +167,60 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         String callerMethodHash = writeDbData4MethodCall.getCallerMethodHash();
         String calleeMethodHash = writeDbData4MethodCall.getCalleeMethodHash();
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(writeDbData4MethodCall.getCalleeFullMethod());
+        String calleeSimpleClassName = dbOperWrapper.getSimpleClassName(calleeClassName);
+        String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(writeDbData4MethodCall.getCalleeFullMethod());
         int callFlags = 0;
+
         if (withAnnotationMethodHashSet.contains(callerMethodHash)) {
             callFlags = MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.setFlag(callFlags);
         }
+
         if (withAnnotationMethodHashSet.contains(calleeMethodHash)) {
             callFlags = MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.setFlag(callFlags);
         }
+
         if (withInfoCallIdSet.contains(callId)) {
             callFlags = MethodCallFlagsEnum.MCFE_METHOD_CALL_INFO.setFlag(callFlags);
         }
+
         if (withArgsGenericsTypeMethodHashSet.contains(calleeMethodHash)) {
             callFlags = MethodCallFlagsEnum.MCFE_EE_ARGS_WITH_GENERICS_TYPE.setFlag(callFlags);
         }
+
         if (withArgsGenericsTypeMethodHashSet.contains(callerMethodHash)) {
             callFlags = MethodCallFlagsEnum.MCFE_ER_ARGS_WITH_GENERICS_TYPE.setFlag(callFlags);
         }
+
         if (withReturnGenericsTypeMethodHashSet.contains(calleeMethodHash)) {
             callFlags = MethodCallFlagsEnum.MCFE_EE_RETURN_WITH_GENERICS_TYPE.setFlag(callFlags);
         }
+
         if (withReturnGenericsTypeMethodHashSet.contains(callerMethodHash)) {
             callFlags = MethodCallFlagsEnum.MCFE_ER_RETURN_WITH_GENERICS_TYPE.setFlag(callFlags);
         }
-        if (myBatisMapperClassNameSet.contains(calleeClassName)) {
+
+        if (myBatisMapperSimpleNameSet.contains(calleeSimpleClassName)) {
             callFlags = MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER.setFlag(callFlags);
-            String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(writeDbData4MethodCall.getCalleeFullMethod());
             String calleeClassAndMethodName = JACGClassMethodUtil.genClassAndMethodName(calleeClassName, calleeMethodName);
             if (myBatisMapperMethodWriteSet.contains(calleeClassAndMethodName)) {
                 callFlags = MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER_WRITE.setFlag(callFlags);
             }
         }
+
+        // 检查是否为dto的get/set方法
+        if (checkDtoGetSetMethod(true, calleeSimpleClassName, calleeMethodName, getMethodSimpleClassMap, extendsSimpleClassNameMap)) {
+            callFlags = MethodCallFlagsEnum.MCFE_EE_DTO_GET_SET_METHOD.setFlag(callFlags);
+        } else if (checkDtoGetSetMethod(false, calleeSimpleClassName, calleeMethodName, setMethodSimpleClassMap, extendsSimpleClassNameMap)) {
+            callFlags = MethodCallFlagsEnum.MCFE_EE_DTO_GET_SET_METHOD.setFlag(callFlags);
+        }
         writeDbData4MethodCall.setCallFlags(callFlags);
     }
 
     //
+    public void setExtendsSimpleClassNameMap(Map<String, String> extendsSimpleClassNameMap) {
+        this.extendsSimpleClassNameMap = extendsSimpleClassNameMap;
+    }
+
     public void setWithAnnotationMethodHashSet(Set<String> withAnnotationMethodHashSet) {
         this.withAnnotationMethodHashSet = withAnnotationMethodHashSet;
     }
@@ -190,11 +237,27 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         this.withReturnGenericsTypeMethodHashSet = withReturnGenericsTypeMethodHashSet;
     }
 
-    public void setMyBatisMapperClassNameSet(Set<String> myBatisMapperClassNameSet) {
-        this.myBatisMapperClassNameSet = myBatisMapperClassNameSet;
+    public void setMyBatisMapperSimpleNameSet(Set<String> myBatisMapperSimpleNameSet) {
+        this.myBatisMapperSimpleNameSet = myBatisMapperSimpleNameSet;
     }
 
     public void setMyBatisMapperMethodWriteSet(Set<String> myBatisMapperMethodWriteSet) {
         this.myBatisMapperMethodWriteSet = myBatisMapperMethodWriteSet;
+    }
+
+    public Map<String, Set<String>> getGetMethodSimpleClassMap() {
+        return getMethodSimpleClassMap;
+    }
+
+    public void setGetMethodSimpleClassMap(Map<String, Set<String>> getMethodSimpleClassMap) {
+        this.getMethodSimpleClassMap = getMethodSimpleClassMap;
+    }
+
+    public Map<String, Set<String>> getSetMethodSimpleClassMap() {
+        return setMethodSimpleClassMap;
+    }
+
+    public void setSetMethodSimpleClassMap(Map<String, Set<String>> setMethodSimpleClassMap) {
+        this.setMethodSimpleClassMap = setMethodSimpleClassMap;
     }
 }

@@ -33,11 +33,11 @@ public class TestRBCComposite extends TestRunByCodeBase {
 //        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH,"D:/desktop");
         ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
 
-        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 FindCallStackTrace.class.getSimpleName() + JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLEE);
         runFindCallStackTraceAndCheck(new FindCallStackTrace(true, configureWrapperCopy));
 
-        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 FindCallStackTrace.class.getSimpleName() + JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER);
         runFindCallStackTraceAndCheck(new FindCallStackTrace(false, configureWrapperCopy));
     }
@@ -52,11 +52,11 @@ public class TestRBCComposite extends TestRunByCodeBase {
         configureWrapperCopy.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IGNORE_METHOD_PREFIX,
                 "test1(");
 
-        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 FindCallStackTrace.class.getSimpleName() + JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLEE);
         runFindCallStackTraceAndCheck(new FindCallStackTrace(true, configureWrapperCopy));
 
-        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 FindCallStackTrace.class.getSimpleName() + JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER);
         runFindCallStackTraceAndCheck(new FindCallStackTrace(false, configureWrapperCopy));
     }

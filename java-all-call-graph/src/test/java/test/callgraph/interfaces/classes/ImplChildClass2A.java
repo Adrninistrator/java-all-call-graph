@@ -17,4 +17,10 @@ public class ImplChildClass2A implements InterfaceChild2 {
     public void testSuper2() {
         System.getProperty("", "");
     }
+
+    public void test1(){
+        testSuper1();
+        testSuper2();
+        testSuper2D();
+    }
 }

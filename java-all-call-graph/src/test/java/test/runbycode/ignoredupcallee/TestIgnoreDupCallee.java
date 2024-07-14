@@ -24,11 +24,11 @@ public class TestIgnoreDupCallee extends TestRunByCodeBase {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(), DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, simpleClassName + "-data_no-ignore_no");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, simpleClassName + "-data_no-ignore_no");
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
 
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.TRUE.toString());
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, simpleClassName + "-data_no-ignore_yes");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, simpleClassName + "-data_no-ignore_yes");
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
 
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
@@ -36,11 +36,11 @@ public class TestIgnoreDupCallee extends TestRunByCodeBase {
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType(),
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, simpleClassName + "-data_yes-ignore_no");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, simpleClassName + "-data_yes-ignore_no");
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
 
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.TRUE.toString());
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, simpleClassName + "-data_yes-ignore_yes");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, simpleClassName + "-data_yes-ignore_yes");
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
     }
 }

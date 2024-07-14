@@ -67,6 +67,9 @@ public class JACGMethodCallInfoUtil {
             case MCIT_METHOD_CALL_RETURN_CALL_ID_EQC:
                 methodCallInfo.setMethodCallReturnIdEQC(value);
                 break;
+            case MCIT_METHOD_CATCH_EXCEPTION_FROM_OFFSET:
+                // 什么也不做
+                break;
             default:
                 logger.error("未知类型 {}", type);
         }

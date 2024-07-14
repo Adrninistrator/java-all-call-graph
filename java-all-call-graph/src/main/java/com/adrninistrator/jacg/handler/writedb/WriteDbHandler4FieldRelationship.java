@@ -88,14 +88,14 @@ public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<Wri
         }
 
         // 检查存在关联关系的get方法是否是dto的get方法
-        if (!checkLegalGetSetMethod(getSimpleClassName, getMethodName, getMethodSimpleClassMap)) {
+        if (!checkDtoGetSetMethod(true, getSimpleClassName, getMethodName, getMethodSimpleClassMap, extendsSimpleClassNameMap)) {
             logger.warn("与set方法存在关联关系的get方法不是dto的get方法，当前关联关系设置为无效，假如确实是dto的get方法，请检查对应类及超类所在的jar包是否有指定需要解析 {} {} {} {}",
                     callerFullMethod, callerLineNumber, getClassName, getMethodName);
             valid = JavaCGYesNoEnum.NO.getIntValue();
         }
 
         // 检查存在关联关系的set方法是否是dto的set方法
-        if (!checkLegalGetSetMethod(setSimpleClassName, setMethodName, setMethodSimpleClassMap)) {
+        if (!checkDtoGetSetMethod(false, setSimpleClassName, setMethodName, setMethodSimpleClassMap, extendsSimpleClassNameMap)) {
             logger.warn("与get方法存在关联关系的set方法不是dto的set方法，当前关联关系设置为无效，假如确实是dto的set方法，请检查对应类及超类所在的jar包是否有指定需要解析 {} {} {} {}",
                     callerFullMethod, callerLineNumber, setClassName, setMethodName);
             valid = JavaCGYesNoEnum.NO.getIntValue();
@@ -148,31 +148,6 @@ public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<Wri
         return new String[]{
                 "通过get/set方法关联的字段关系，包含了set方法及用于赋值的get方法，以及set方法所在的方法"
         };
-    }
-
-    /**
-     * 检查存在关联关系的get/set方法是否是dto的get/set方法
-     *
-     * @param simpleClassName            唯一类名
-     * @param getSetMethodName           get/set方法名
-     * @param getSetMethodSimpleClassMap dto的get/set方法Map
-     * @return true: 是dto的get/set方法 false: 不是dto的get/set方法
-     */
-    private boolean checkLegalGetSetMethod(String simpleClassName, String getSetMethodName, Map<String, Set<String>> getSetMethodSimpleClassMap) {
-        String currentSimpleClassName = simpleClassName;
-        while (true) {
-            // 当前当前类的get/set方法是否是dto的get/set方法
-            Set<String> methodSet = getSetMethodSimpleClassMap.get(currentSimpleClassName);
-            if (methodSet != null && methodSet.contains(getSetMethodName)) {
-                return true;
-            }
-            // 获取当前类的父类
-            String superSimpleClassName = extendsSimpleClassNameMap.get(currentSimpleClassName);
-            if (superSimpleClassName == null) {
-                return false;
-            }
-            currentSimpleClassName = superSimpleClassName;
-        }
     }
 
     public void setGetMethodSimpleClassMap(Map<String, Set<String>> getMethodSimpleClassMap) {

@@ -443,7 +443,8 @@ public class ConfigureWrapper {
 
             if (ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER == mainConfig
                     || ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED == mainConfig
-                    || ConfigKeyEnum.CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP == mainConfig) {
+                    || ConfigKeyEnum.CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP == mainConfig
+            ) {
                 // 当前参数允许为空，默认为false
                 return Boolean.FALSE;
             }
@@ -457,10 +458,6 @@ public class ConfigureWrapper {
             return handleOutputDetail(strValue);
         }
 
-        if (ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH == mainConfig) {
-            return handleDbH2FilePath(strValue);
-        }
-
         if (ConfigKeyEnum.CKE_THREAD_NUM == mainConfig) {
             // 处理线程数
             return handleThreadNum(strValue);
@@ -469,6 +466,20 @@ public class ConfigureWrapper {
         if (ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE == mainConfig) {
             // 处理批量写入数据库时每次插入的数量
             return handleBatchInsertSize(strValue);
+        }
+
+        if (ConfigKeyEnum.CKE_OUTPUT_DIR_NAME == mainConfig) {
+            // 处理生成调用链文件的目录名
+            return handleOutputDirName(strValue);
+        }
+
+        if (ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG == mainConfig) {
+            // 处理生成调用链文件的目录名
+            return handleOutputDirFlag(strValue);
+        }
+
+        if (ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH == mainConfig) {
+            return handleDbH2FilePath(strValue);
         }
 
         if (String.class == mainConfig.getType()) {
@@ -510,6 +521,34 @@ public class ConfigureWrapper {
             return null;
         }
         return threadNum;
+    }
+
+    // 处理生成调用链文件的目录名
+    private String handleOutputDirName(String outputDirName) {
+        if (StringUtils.isBlank(outputDirName)) {
+            return "";
+        }
+        // 使用指定的名称作为子目录名
+        if (JACGFileUtil.checkFilePathContainsSeparator(outputDirName)) {
+            logger.error("指定的目录名中不允许包含目录分隔符 {} {} {}", ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getFileName(),
+                    ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getKey(), outputDirName);
+            return null;
+        }
+        return outputDirName;
+    }
+
+    // 处理生成调用链文件的目录名
+    private String handleOutputDirFlag(String outputDirFlag) {
+        if (StringUtils.isBlank(outputDirFlag)) {
+            return "";
+        }
+        // 使用指定的名称作为子目录名
+        if (JACGFileUtil.checkFilePathContainsSeparator(outputDirFlag)) {
+            logger.error("指定的目录标志中不允许包含目录分隔符 {} {} {}", ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.getFileName(),
+                    ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.getKey(), outputDirFlag);
+            return null;
+        }
+        return outputDirFlag;
     }
 
     // 处理批量写入数据库时每次插入的数量

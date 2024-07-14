@@ -6,4 +6,7 @@ package test.callgraph.interfaces.interfaces;
  * @description:
  */
 public interface InterfaceChild2 extends InterfaceSuper1, InterfaceSuper2 {
+    default void testSuper2D() {
+        System.getProperty("");
+    }
 }

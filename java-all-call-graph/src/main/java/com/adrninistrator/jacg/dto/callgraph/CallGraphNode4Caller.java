@@ -17,7 +17,7 @@ public class CallGraphNode4Caller {
     private final String callerFullMethod;
 
     // 当前调用方法的被调用方法数量
-    private int callerMethodNum = 0;
+    private int calleeMethodNum = 0;
 
     public CallGraphNode4Caller(String callerMethodHash, int methodCallId, String callerFullMethod) {
         this.callerMethodHash = callerMethodHash;
@@ -27,12 +27,12 @@ public class CallGraphNode4Caller {
 
     @Override
     public String toString() {
-        return callerMethodNum + " " + callerFullMethod;
+        return calleeMethodNum + " " + callerFullMethod;
     }
 
     // 当前调用方法的被调用方法数量加1
     public void addCallerMethodNum() {
-        callerMethodNum++;
+        calleeMethodNum++;
     }
 
     // get
@@ -48,8 +48,8 @@ public class CallGraphNode4Caller {
         return callerFullMethod;
     }
 
-    public int getCallerMethodNum() {
-        return callerMethodNum;
+    public int getCalleeMethodNum() {
+        return calleeMethodNum;
     }
 
     // set

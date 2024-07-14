@@ -35,7 +35,6 @@ import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -92,6 +91,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 当方法名为以下前缀时，生成方法完整调用链时忽略
     protected Set<String> ignoreMethodPrefixSet;
+
+    // 完整方法（类名+方法名+参数）为以下前缀时，生成方法完整调用链时包含
+    protected Set<String> includeFullMethodPrefixSet;
 
     // 需要显示的业务功能数据类型，Set格式
     protected Set<String> businessDataTypeSet;
@@ -230,6 +232,11 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         if (ignoreMethodPrefixSet == null) {
             return false;
         }
+
+        includeFullMethodPrefixSet = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_INCLUDE_FULL_METHOD_PREFIX, true);
+        if (includeFullMethodPrefixSet == null) {
+            return false;
+        }
         return true;
     }
 
@@ -326,27 +333,23 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 outputDirPrefix = prefix + File.separator;
             }
 
-            String outputSubDirNameInProperties = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME);
-            if (StringUtils.isNotBlank(outputSubDirNameInProperties)) {
-                // 使用指定的名称作为子目录名
-                if (JACGFileUtil.checkFilePathContainsSeparator(outputSubDirNameInProperties)) {
-                    logger.error("指定的子目录名中不允许包含目录分隔符 {} {} {}", ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME.getFileName(),
-                            ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME.getKey(), outputSubDirNameInProperties);
-                    return false;
-                }
-                outputDirPrefix += outputSubDirNameInProperties;
+            String outputDirName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME);
+            if (StringUtils.isNotBlank(outputDirName)) {
+                // 使用指定的名称作为目录名
+                outputDirPrefix += outputDirName;
             } else {
-                // 使用当前时间作为子目录名
-                outputDirPrefix = outputDirPrefix + appName + JACGConstants.FLAG_UNDER_LINE + JavaCGUtil.currentTime();
+                // 完整目录名使用[app.name][output.dir.flag]_[当前时间]
+                String outputDirFlag = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG);
+                outputDirPrefix = outputDirPrefix + appName + outputDirFlag + JACGConstants.FLAG_UNDER_LINE + JavaCGUtil.currentTime();
             }
 
             File currentOutputDir = new File(outputDirPrefix);
             currentOutputDirPath = currentOutputDir.getAbsolutePath();
             logger.info("创建保存输出文件的目录 {}", currentOutputDirPath);
 
-            if (StringUtils.isNotBlank(outputSubDirNameInProperties) && currentOutputDir.exists()) {
-                logger.error("指定的输出目录已存在，若确实需要在该目录中输出，请先删除该目录\n{} {} {}\n{}", ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME.getFileName(),
-                        ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME.getKey(), outputSubDirNameInProperties, currentOutputDirPath);
+            if (StringUtils.isNotBlank(outputDirName) && currentOutputDir.exists()) {
+                logger.error("指定的输出目录已存在，若确实需要在该目录中输出，请先删除该目录\n{} {} {}\n{}", ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getFileName(),
+                        ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getKey(), outputDirName, currentOutputDirPath);
                 return false;
             }
 
@@ -936,6 +939,24 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     /**
+     * 根据前缀判断完整方法（类名+方法名+参数）是否需要包含
+     *
+     * @param fullMethod 完整方法（类名+方法名+参数）
+     * @return true: 包含，false: 未指定需要包含
+     */
+    protected boolean isIncludeFullMethodWithPrefixByFullMethod(String fullMethod) {
+        for (String includeFullMethodPrefix : includeFullMethodPrefixSet) {
+            if (fullMethod.startsWith(includeFullMethodPrefix)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("包含完整方法使用该前缀的方法 {} {}", includeFullMethodPrefix, fullMethod);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 判断当前找到的方法是否需要忽略
      *
      * @param callType
@@ -948,24 +969,27 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return true;
         }
 
-        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-        // 根据关键字判断类名是否需要忽略
-        if (isIgnoredClassWithKeywordByClass(className)) {
-            return true;
-        }
+        // 检查当前方法是否需要包含
+        if (!isIncludeFullMethodWithPrefixByFullMethod(fullMethod)) {
+            String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+            // 根据关键字判断类名是否需要忽略
+            if (isIgnoredClassWithKeywordByClass(className)) {
+                return true;
+            }
 
-        // 根据前缀判断完整方法（类名+方法名+参数）是否需要忽略
-        if (isIgnoredFullMethodWithPrefixByFullMethod(fullMethod)) {
-            return true;
-        }
+            // 根据前缀判断完整方法（类名+方法名+参数）是否需要忽略
+            if (isIgnoredFullMethodWithPrefixByFullMethod(fullMethod)) {
+                return true;
+            }
 
-        String methodNameWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(fullMethod);
-        /*
-            根据方法名前缀判断是否需要忽略，使用包含参数的方法名进行比较
-            若当前调用类型为Runnable/Callable实现类子类构造函数调用run()方法，或其他类似情况，则不判断方法名前缀是否需要忽略（<init> -> run()，可能会被指定为忽略）
-         */
-        if (!JavaCGCallTypeEnum.isInitMethodCallType(callType) && isIgnoredMethodWithPrefixByMethodName(methodNameWithArgs)) {
-            return true;
+            String methodNameWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(fullMethod);
+            /*
+                根据方法名前缀判断是否需要忽略，使用包含参数的方法名进行比较
+                若当前调用类型为Runnable/Callable实现类子类构造函数调用run()方法，或其他类似情况，则不判断方法名前缀是否需要忽略（<init> -> run()，可能会被指定为忽略）
+             */
+            if (!JavaCGCallTypeEnum.isInitMethodCallType(callType) && isIgnoredMethodWithPrefixByMethodName(methodNameWithArgs)) {
+                return true;
+            }
         }
         return false;
     }

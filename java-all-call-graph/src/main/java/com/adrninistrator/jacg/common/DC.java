@@ -169,8 +169,16 @@ public class DC {
     public static final String CSEI1_TYPE = "type";
     public static final String CSEI1_SUPER_ITF_CLASS_NAME = "super_itf_class_name";
     public static final String CSEI1_SEQ = "seq";
-    public static final String CSEI1_SIGN_CLASS_NAME = "sign_class_name";
+    public static final String CSEI1_USE_CLASS_NAME = "use_class_name";
+    public static final String CSEI1_SIGN_CLASS_GENERICS_NAME = "sign_class_generics_name";
     public static final String CSEI1_CLASS_NAME = "class_name";
+
+    public static final String CSG_RECORD_ID = "record_id";
+    public static final String CSG_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String CSG_SEQ = "seq";
+    public static final String CSG_GENERICS_NAME = "generics_name";
+    public static final String CSG_GENERICS_EXTENDS_CLASS_NAME = "generics_extends_class_name";
+    public static final String CSG_CLASS_NAME = "class_name";
 
     public static final String MMT_RECORD_ID = "record_id";
     public static final String MMT_MAPPER_SIMPLE_CLASS_NAME = "mapper_simple_class_name";

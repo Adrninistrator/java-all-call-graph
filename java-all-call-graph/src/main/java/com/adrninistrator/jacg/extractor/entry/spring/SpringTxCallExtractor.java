@@ -51,23 +51,23 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
 
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             ConfigureWrapper usedConfigureWrapper;
-            String outputSubDirName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME);
-            if (!outputSubDirName.isEmpty()) {
+            String outputDirName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME);
+            if (!outputDirName.isEmpty()) {
                 // 有指定生成调用链文件的子目录名，需要生成新的配置对象，避免修改传入的配置对象
                 usedConfigureWrapper = configureWrapper.copy();
             } else {
                 usedConfigureWrapper = configureWrapper;
             }
 
-            if (!outputSubDirName.isEmpty()) {
+            if (!outputDirName.isEmpty()) {
                 // 有指定生成调用链文件的子目录名，以下会生成两次方法调用链文件，需要分别使用不同的输出子目录名，否则会输出到同一个目录中
-                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
+                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, outputDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
             }
             // 处理事务注解
             ListWithResult<SpTxCallByAnnotationFile> spTxCallByAnnotationFileList = handleTxAnnotation(usedConfigureWrapper, annotationHandler);
 
-            if (!outputSubDirName.isEmpty()) {
-                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, outputSubDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_TEMPLATE);
+            if (!outputDirName.isEmpty()) {
+                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, outputDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_TEMPLATE);
             }
             // 处理事务模板
             ListWithResult<SpTxCallByTplFile> spTxCallByTplFileList = handleTxTpl(usedConfigureWrapper);

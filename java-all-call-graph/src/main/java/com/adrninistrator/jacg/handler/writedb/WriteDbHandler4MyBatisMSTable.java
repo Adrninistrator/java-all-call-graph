@@ -23,8 +23,8 @@ import java.util.Set;
 )
 public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteDbData4MyBatisMSTable> {
 
-    // 保存MyBatis Mapper类名
-    private Set<String> myBatisMapperSet;
+    // 保存MyBatis Mapper唯一类名
+    private Set<String> myBatisMapperSimpleNameSet;
 
     public WriteDbHandler4MyBatisMSTable(WriteDbResult writeDbResult) {
         super(writeDbResult);
@@ -38,8 +38,6 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
             return null;
         }
 
-        // 记录MyBatis Mapper类名
-        myBatisMapperSet.add(mapperClassName);
         String mapperMethodName = array[1];
         String sqlStatement = array[2];
         int tableSeq = Integer.parseInt(array[3]);
@@ -47,6 +45,8 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
         String xmlFilePath = array[5];
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
         String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
+        // 记录MyBatis Mapper唯一类名
+        myBatisMapperSimpleNameSet.add(mapperSimpleClassName);
         return new WriteDbData4MyBatisMSTable(
                 mapperSimpleClassName,
                 mapperMethodName,
@@ -98,7 +98,7 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
         };
     }
 
-    public void setMyBatisMapperSet(Set<String> myBatisMapperSet) {
-        this.myBatisMapperSet = myBatisMapperSet;
+    public void setMyBatisMapperSimpleNameSet(Set<String> myBatisMapperSimpleNameSet) {
+        this.myBatisMapperSimpleNameSet = myBatisMapperSimpleNameSet;
     }
 }

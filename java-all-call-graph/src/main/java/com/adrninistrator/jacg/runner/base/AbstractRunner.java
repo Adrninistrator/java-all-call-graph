@@ -44,11 +44,8 @@ import java.util.concurrent.TimeUnit;
  * @date 2021/6/17
  * @description:
  */
-public abstract class AbstractRunner {
+public abstract class AbstractRunner extends AbstractExecutor{
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunner.class);
-
-    // 配置信息包装类
-    protected ConfigureWrapper configureWrapper;
 
     // 当前的输出目录
     protected String currentOutputDirPath;
@@ -61,24 +58,17 @@ public abstract class AbstractRunner {
 
     protected String tableSuffix;
 
-    protected ThreadPoolExecutor threadPoolExecutor;
-
     // 任务执行失败标志
     protected boolean someTaskFail = false;
 
     // 记录执行失败的任务信息
     protected List<String> failTaskList = new ArrayList<>();
 
-    // 任务队列最大长度
-    protected int taskQueueMaxSize;
-
     // 继承与实际相关的处理类
     protected JACGExtendsImplHandler jacgExtendsImplHandler;
 
     // 对解析的jar包及目录信息处理的类
     protected JarInfoHandler jarInfoHandler;
-
-    protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
     public AbstractRunner() {
         this(new ConfigureWrapper(false));
@@ -210,36 +200,6 @@ public abstract class AbstractRunner {
             logger.error("{} 有任务执行失败，请检查\n{}", currentSimpleClassName, StringUtils.join(failTaskList, "\n"));
         } else {
             logger.info("{} 任务执行完毕", currentSimpleClassName);
-        }
-    }
-
-    /**
-     * 创建线程池
-     *
-     * @param taskNum 任务数量，非空时尝试根据任务数量调中实际创建的线程数
-     */
-    protected void createThreadPoolExecutor(Integer taskNum) {
-        int threadNum = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_THREAD_NUM);
-        if (taskNum != null && taskNum < threadNum) {
-            // 任务数量比配置文件中指定的线程数少，则调小实际创建的线程数
-            threadNum = taskNum;
-        }
-
-        // 任务队列最大长度，设置为线程数2倍
-        taskQueueMaxSize = threadNum * 2;
-        logger.info("任务数量 {} 创建的线程池线程数 {}", (taskNum == null ? "-" : taskNum), threadNum);
-        threadPoolExecutor = new ThreadPoolExecutor(threadNum, threadNum, 10L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(taskQueueMaxSize), new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER));
-    }
-
-    // 等待直到任务执行完毕
-    protected void wait4TPEDone() {
-        while (true) {
-            if (threadPoolExecutor.getActiveCount() == 0 && threadPoolExecutor.getQueue().isEmpty()) {
-                return;
-            }
-            logger.debug("{} wait4TPEDone ...", currentSimpleClassName);
-            JACGUtil.sleep(100L);
         }
     }
 

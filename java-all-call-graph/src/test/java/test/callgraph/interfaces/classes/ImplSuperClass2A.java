@@ -12,4 +12,8 @@ public class ImplSuperClass2A implements InterfaceSuper2 {
     public void testSuper2() {
         System.getProperty("@@@");
     }
+
+    public void test1() {
+        testSuper2D();
+    }
 }

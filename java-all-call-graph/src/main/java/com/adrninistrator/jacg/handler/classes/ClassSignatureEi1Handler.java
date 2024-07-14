@@ -108,7 +108,7 @@ public class ClassSignatureEi1Handler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CSEI1_QUERY_SIGNATURE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + DC.CSEI1_SIGN_CLASS_NAME +
+            sql = "select " + DC.CSEI1_SIGN_CLASS_GENERICS_NAME +
                     " from " + DbTableInfoEnum.DTIE_CLASS_SIGNATURE_EI1.getTableName() +
                     " where " + DC.CSEI1_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.CSEI1_SUPER_ITF_CLASS_NAME + " = ?" +

@@ -93,6 +93,9 @@ task test_gen_diff_jar(type: Jar) {
 }
 
 /*
+    测试代码生成jar包
+    gradlew test_gen_jar
+
     生成用于比较的示例jar包
     gradlew test_gen_diff_jar -Pexample_flag=1
     gradlew test_gen_diff_jar -Pexample_flag=2

@@ -16,6 +16,7 @@ public enum MethodCallFlagsEnum {
     MCFE_EE_BUSINESS_DATA(1 << 7, "被调用方法存在业务功能数据"),
     MCFE_EE_RETURN_WITH_GENERICS_TYPE(1 << 8, "被调用方法返回存在泛型类型"),
     MCFE_ER_RETURN_WITH_GENERICS_TYPE(1 << 9, "调用方法返回存在泛型类型"),
+    MCFE_EE_DTO_GET_SET_METHOD(1 << 10, "被调用方法属于dto的get/set方法"),
     ;
 
     // 需要定义为1，以及2的幂

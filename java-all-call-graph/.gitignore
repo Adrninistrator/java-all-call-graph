@@ -13,6 +13,7 @@ _jacg_o_er/
 _unittest_output/
 jar_output_dir/
 log/*.log
+log/*.gz
 src/test/resources/_jacg_config/
 src/test/resources/_jacg_find_stack_keyword/
 src/test/resources/_jacg_jar_diff_callee_graph/

@@ -15,4 +15,10 @@ public class ExtendsClass2A extends AbstractImplClass2A {
     public void testSuper2() {
         System.out.print("");
     }
+
+    public void test1() {
+        testSuper1();
+        testSuper2();
+        testSuper2D();
+    }
 }

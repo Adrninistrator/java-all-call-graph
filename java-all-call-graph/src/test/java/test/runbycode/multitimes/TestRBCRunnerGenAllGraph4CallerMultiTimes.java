@@ -23,7 +23,7 @@ public class TestRBCRunnerGenAllGraph4CallerMultiTimes extends TestRunByCodeBase
 
     @Test
     public void test1() {
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName);
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName);
         RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
         Assert.assertTrue(runnerGenAllGraph4Caller.run());
         logger.error("以下出现ERROR日志是符合预期的，同一个类执行多次会出现以下提示");
@@ -32,7 +32,7 @@ public class TestRBCRunnerGenAllGraph4CallerMultiTimes extends TestRunByCodeBase
 
     @Test
     public void test2() {
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, "");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, "");
         RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
         Assert.assertTrue(runnerGenAllGraph4Caller.run());
         logger.error("以下出现ERROR日志是符合预期的，同一个类执行多次会出现以下提示");

@@ -50,7 +50,7 @@ public class TestRunAllClasses extends TestRunByCodeBase {
             sql = dbOperWrapper.formatSql(sql);
             List<String> callerSimpleClassNameList = dbOperator.queryListOneColumn(sql, String.class);
             configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, new HashSet<>(callerSimpleClassNameList));
-            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName);
+            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName);
             Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
         } catch (Exception e) {
             logger.error("error ", e);
@@ -82,7 +82,7 @@ public class TestRunAllClasses extends TestRunByCodeBase {
                 }
             }
             configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, calleeSimpleClassNameSet);
-            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName);
+            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName);
             Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapper).run());
         } catch (Exception e) {
             logger.error("error ", e);

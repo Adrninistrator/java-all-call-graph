@@ -12,18 +12,21 @@ public class WriteDbData4ClassSignatureEi1 implements BaseWriteDbData {
     private String type;
     private String superItfClassName;
     private int seq;
-    private String signClassName;
+    private int useClassName;
+    private String signClassGenericsName;
     private String className;
 
     public WriteDbData4ClassSignatureEi1() {
     }
 
-    public WriteDbData4ClassSignatureEi1(String simpleClassName, String type, String superItfClassName, int seq, String signClassName, String className) {
+    public WriteDbData4ClassSignatureEi1(String simpleClassName, String type, String superItfClassName, int seq, int useClassName, String signClassGenericsName,
+                                         String className) {
         this.simpleClassName = simpleClassName;
         this.type = type;
         this.superItfClassName = superItfClassName;
         this.seq = seq;
-        this.signClassName = signClassName;
+        this.useClassName = useClassName;
+        this.signClassGenericsName = signClassGenericsName;
         this.className = className;
     }
 
@@ -59,12 +62,20 @@ public class WriteDbData4ClassSignatureEi1 implements BaseWriteDbData {
         this.seq = seq;
     }
 
-    public String getSignClassName() {
-        return signClassName;
+    public int getUseClassName() {
+        return useClassName;
     }
 
-    public void setSignClassName(String signClassName) {
-        this.signClassName = signClassName;
+    public void setUseClassName(int useClassName) {
+        this.useClassName = useClassName;
+    }
+
+    public String getSignClassGenericsName() {
+        return signClassGenericsName;
+    }
+
+    public void setSignClassGenericsName(String signClassGenericsName) {
+        this.signClassGenericsName = signClassGenericsName;
     }
 
     public String getClassName() {

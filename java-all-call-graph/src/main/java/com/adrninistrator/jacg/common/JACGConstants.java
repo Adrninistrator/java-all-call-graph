@@ -21,6 +21,8 @@ public class JACGConstants {
     // 保存当前有使用的配置参数信息文件
     public static final String FILE_JACG_USED_CONFIG_MD = "_jacg_used_config.md";
     public static final String FILE_JAVACG_USED_CONFIG_MD = "_javacg_used_config.md";
+    public static final String FILE_STACK_CALLEE_MD = "_stack_callee.md";
+    public static final String FILE_STACK_CALLER_MD = "_stack_caller.md";
     public static final String FILE_STACK_SUMMARY_CALLEE_MD = "_summary_callee.md";
     public static final String FILE_STACK_SUMMARY_CALLER_MD = "_summary_caller.md";
 
@@ -79,6 +81,8 @@ public class JACGConstants {
 
     public static final String CALLEE_FLAG_ENTRY_NO_TAB = "!entry!";
     public static final String CALLEE_FLAG_ENTRY = JavaCGConstants.FLAG_TAB + CALLEE_FLAG_ENTRY_NO_TAB;
+    public static final String CALLEE_FLAG_NO_CALLEE_NO_TAB = "!no_callee!";
+    public static final String CALLEE_FLAG_NO_CALLEE = JavaCGConstants.FLAG_TAB + CALLEE_FLAG_NO_CALLEE_NO_TAB;
     public static final String CALL_FLAG_CYCLE_START = "!cycle" + JACGConstants.FLAG_LEFT_PARENTHESES;
     public static final String CALL_FLAG_CYCLE_END = JACGConstants.FLAG_RIGHT_PARENTHESES + "!";
     public static final String CALL_FLAG_CYCLE = CALL_FLAG_CYCLE_START + "%d" + CALL_FLAG_CYCLE_END;

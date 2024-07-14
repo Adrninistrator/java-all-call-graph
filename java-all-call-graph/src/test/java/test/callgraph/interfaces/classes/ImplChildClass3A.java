@@ -22,4 +22,17 @@ public class ImplChildClass3A implements InterfaceChild3 {
     public void testSuper2() {
         System.out.println("");
     }
+
+    @Override
+    public void testSuper2D() {
+        System.setProperty("", "");
+    }
+
+    public void test1(){
+        testSuper1();
+        testSuper2();
+        testSuper2D();
+        testChild1();
+        testChild3();
+    }
 }

@@ -267,6 +267,5 @@ public abstract class TestRunByCodeBase {
             Assert.assertFalse(JavaCGUtil.isCollectionEmpty(callStackFileResult.getSeparateStackDirPathList()));
             return;
         }
-        Assert.assertTrue(JavaCGUtil.isCollectionEmpty(callStackFileResult.getSeparateStackDirPathList()));
     }
 }

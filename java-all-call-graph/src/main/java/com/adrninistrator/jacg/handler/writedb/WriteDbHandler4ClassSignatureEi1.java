@@ -15,8 +15,8 @@ import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_CLASS_SIGNATURE_EI1,
-        minColumnNum = 5,
-        maxColumnNum = 5,
+        minColumnNum = 6,
+        maxColumnNum = 6,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_SIGNATURE_EI1
 )
 public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<WriteDbData4ClassSignatureEi1> {
@@ -31,13 +31,14 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
         String type = array[1];
         String superItfClassName = array[2];
         int seq = Integer.parseInt(array[3]);
-        String signClassName = array[4];
+        int useClassName = Integer.parseInt(array[4]);
+        String signClassGenericsName = array[5];
 
         // 根据类名前缀判断是否需要处理
         if (!isAllowedClassPrefix(className)) {
             return null;
         }
-        return new WriteDbData4ClassSignatureEi1(dbOperWrapper.getSimpleClassName(className), type, superItfClassName, seq, signClassName, className);
+        return new WriteDbData4ClassSignatureEi1(dbOperWrapper.getSimpleClassName(className), type, superItfClassName, seq, useClassName, signClassGenericsName, className);
     }
 
     @Override
@@ -48,7 +49,8 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
                 data.getType(),
                 data.getSuperItfClassName(),
                 data.getSeq(),
-                data.getSignClassName(),
+                data.getUseClassName(),
+                data.getSignClassGenericsName(),
                 data.getClassName()
         };
     }
@@ -60,7 +62,8 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
                 "类型，e:继承，i:实现",
                 "父类或接口的类名",
                 "序号，从0开始",
-                "签名中的完整类名"
+                "1:下面的字段代表完整类名，0:下面的字段代表泛型名称",
+                "签名中的完整类名或泛型名称"
         };
     }
 
@@ -68,8 +71,8 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
     public String[] chooseFileDetailInfo() {
         return new String[]{
                 "类在继承类或实现接口时，在签名中指定的泛型类型",
-                "例如：“TestClassWithSignature1 implements TestInterfaceWithSignature<String, Integer>”，包含 String、Integer",
-                "例如：“TestClassWithSignature2 extends TestAbstractClassWithSignature<TestArgument1, TestArgument2>”，包含 TestArgument1、TestArgument2"
+                "例如：“TestClassWithSignature1 implements TestInterfaceWithSignature<String, Integer>”，对应信息中会包含 String、Integer",
+                "例如：“TestClassWithSignature2 extends TestAbstractClassWithSignature<TestArgument1, TestArgument2>”，对应信息中会包含 TestArgument1、TestArgument2"
         };
     }
 }

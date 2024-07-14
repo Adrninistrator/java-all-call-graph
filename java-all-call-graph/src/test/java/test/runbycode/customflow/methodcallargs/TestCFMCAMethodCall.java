@@ -38,11 +38,11 @@ public class TestCFMCAMethodCall extends TestRunByCodeBase {
         commonWriteDb();
         // 不添加方法调用关系
 
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 RunnerGenAllGraph4Callee.class.getSimpleName());
         Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapper).run());
 
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 RunnerGenAllGraph4Caller.class.getSimpleName());
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
     }
@@ -55,11 +55,11 @@ public class TestCFMCAMethodCall extends TestRunByCodeBase {
             cfmcaMethodCallHandler.addMethodCall();
         }
 
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 RunnerGenAllGraph4Callee.class.getSimpleName());
         Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapper).run());
 
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 RunnerGenAllGraph4Caller.class.getSimpleName());
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
     }

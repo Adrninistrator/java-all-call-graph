@@ -28,22 +28,22 @@ public class TestRBCAll extends TestRunByCodeBase {
         Assert.assertTrue(new RunnerWriteDb(configureWrapperCopy).run());
 
         configureWrapperCopy = configureWrapper.copy();
-        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + FindCallStackTrace.class.getSimpleName() +
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + FindCallStackTrace.class.getSimpleName() +
                 JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLEE);
         runFindCallStackTraceAndCheck(new FindCallStackTrace(true, configureWrapperCopy));
 
         configureWrapperCopy = configureWrapper.copy();
-        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + FindCallStackTrace.class.getSimpleName() +
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + FindCallStackTrace.class.getSimpleName() +
                 JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER);
         runFindCallStackTraceAndCheck(new FindCallStackTrace(false, configureWrapperCopy));
 
         configureWrapperCopy = configureWrapper.copy();
-        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT +
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT +
                 RunnerGenAllGraph4Callee.class.getSimpleName());
         Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapperCopy).run());
 
         configureWrapperCopy = configureWrapper.copy();
-        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_SUB_DIR_NAME, currentClassName + JACGConstants.FLAG_AT +
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT +
                 RunnerGenAllGraph4Caller.class.getSimpleName());
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapperCopy).run());
     }

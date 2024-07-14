@@ -1,5 +1,7 @@
 package test.callgraph.argument;
 
+import test.callgraph.fieldrelationships.fra.FRADtoA;
+
 import java.math.BigDecimal;
 
 /**
@@ -8,6 +10,9 @@ import java.math.BigDecimal;
  * @description:
  */
 public class TestArgument2 {
+
+    private int fieldA = 1;
+
     public static void test() {
         int i = (int) System.currentTimeMillis() % 10;
         String s1 = (i == 7 ? "a" : "b");
@@ -64,5 +69,26 @@ public class TestArgument2 {
         TestArgument3 testArgument3 = new TestArgument3();
         testArgument3.test2(new TestClassWithAnnotation1A(), "a", 1);
         testArgument3.test2(new TestClassWithAnnotation2A(), "b", 2);
+    }
+
+    private void test4(FRADtoA fraDtoA) {
+        int a = 1;
+        for (int i = 0; i < 10; i++) {
+            if (a + i < 3) {
+                System.getProperty("aaa");
+            }
+            if (a + i < i + 4) {
+                System.getProperty("aaa");
+            }
+            if (a + i < i - fieldA) {
+                System.getProperty("aaa");
+            }
+            if (a + i < i * fraDtoA.getIntA1()) {
+                System.getProperty("aaa");
+            }
+            if (a + i < i / fraDtoA.getLongA1()) {
+                System.getProperty("aaa");
+            }
+        }
     }
 }

@@ -16,7 +16,7 @@ public enum DbTableInfoEnum {
     DTIE_BUSINESS_DATA("business_data", new String[]{
             DC.BD_CALL_ID,
             DC.BD_DATA_TYPE,
-            DC.BD_DATA_VALUE
+            DC.BD_DATA_VALUE,
     }),
     DTIE_CLASS_ANNOTATION("class_annotation", new String[]{
             DC.CA_RECORD_ID,
@@ -25,7 +25,7 @@ public enum DbTableInfoEnum {
             DC.CA_ATTRIBUTE_NAME,
             DC.CA_ATTRIBUTE_TYPE,
             DC.CA_ATTRIBUTE_VALUE,
-            DC.CA_CLASS_NAME
+            DC.CA_CLASS_NAME,
     }),
     DTIE_CLASS_INFO("class_info", new String[]{
             DC.CI_RECORD_ID,
@@ -33,13 +33,13 @@ public enum DbTableInfoEnum {
             DC.CI_ACCESS_FLAGS,
             DC.CI_CLASS_NAME,
             DC.CI_CLASS_FILE_HASH,
-            DC.CI_JAR_NUM
+            DC.CI_JAR_NUM,
     }),
     DTIE_CLASS_NAME("class_name", new String[]{
             DC.CN_RECORD_ID,
             DC.CN_CLASS_NAME,
             DC.CN_SIMPLE_CLASS_NAME,
-            DC.CN_DUPLICATE_CLASS
+            DC.CN_DUPLICATE_CLASS,
     }),
     DTIE_CLASS_SIGNATURE_EI1("class_signature_ei1", new String[]{
             DC.CSEI1_RECORD_ID,
@@ -47,8 +47,17 @@ public enum DbTableInfoEnum {
             DC.CSEI1_TYPE,
             DC.CSEI1_SUPER_ITF_CLASS_NAME,
             DC.CSEI1_SEQ,
-            DC.CSEI1_SIGN_CLASS_NAME,
-            DC.CSEI1_CLASS_NAME
+            DC.CSEI1_USE_CLASS_NAME,
+            DC.CSEI1_SIGN_CLASS_GENERICS_NAME,
+            DC.CSEI1_CLASS_NAME,
+    }),
+    DTIE_CLASS_SIGNATURE_GENERICS("class_signature_generics", new String[]{
+            DC.CSG_RECORD_ID,
+            DC.CSG_SIMPLE_CLASS_NAME,
+            DC.CSG_SEQ,
+            DC.CSG_GENERICS_NAME,
+            DC.CSG_GENERICS_EXTENDS_CLASS_NAME,
+            DC.CSG_CLASS_NAME,
     }),
     DTIE_EXTENDS_IMPL("extends_impl", new String[]{
             DC.EI_RECORD_ID,
@@ -59,14 +68,14 @@ public enum DbTableInfoEnum {
             DC.EI_SEQ,
             DC.EI_EXISTS_DOWNWARD_CLASSES,
             DC.EI_UPWARD_SIMPLE_CLASS_NAME,
-            DC.EI_UPWARD_CLASS_NAME
+            DC.EI_UPWARD_CLASS_NAME,
     }),
     DTIE_INNER_CLASS("inner_class", new String[]{
             DC.IC_INNER_SIMPLE_CLASS_NAME,
             DC.IC_INNER_CLASS_NAME,
             DC.IC_OUTER_SIMPLE_CLASS_NAME,
             DC.IC_OUTER_CLASS_NAME,
-            DC.IC_ANONYMOUS_CLASS
+            DC.IC_ANONYMOUS_CLASS,
     }),
     DTIE_JAR_INFO("jar_info", new String[]{
             DC.JI_JAR_NUM,
@@ -78,7 +87,7 @@ public enum DbTableInfoEnum {
             DC.JI_JAR_FILE_NAME_EXT,
             DC.JI_LAST_MODIFIED_TIME,
             DC.JI_JAR_FILE_HASH,
-            DC.JI_IMPORT_TIME
+            DC.JI_IMPORT_TIME,
     }),
     DTIE_LAMBDA_METHOD_INFO("lambda_method_info", new String[]{
             DC.LMI_CALL_ID,
@@ -90,7 +99,7 @@ public enum DbTableInfoEnum {
             DC.LMI_LAMBDA_NEXT_FULL_METHOD,
             DC.LMI_LAMBDA_NEXT_IS_STREAM,
             DC.LMI_LAMBDA_NEXT_IS_INTERMEDIATE,
-            DC.LMI_LAMBDA_NEXT_IS_TERMINAL
+            DC.LMI_LAMBDA_NEXT_IS_TERMINAL,
     }),
     DTIE_METHOD_ANNOTATION("method_annotation", new String[]{
             DC.MA_RECORD_ID,
@@ -100,7 +109,7 @@ public enum DbTableInfoEnum {
             DC.MA_ATTRIBUTE_TYPE,
             DC.MA_ATTRIBUTE_VALUE,
             DC.MA_FULL_METHOD,
-            DC.MA_SIMPLE_CLASS_NAME
+            DC.MA_SIMPLE_CLASS_NAME,
     }),
     DTIE_METHOD_ARG_ANNOTATION("method_arg_annotation", new String[]{
             DC.MAA_RECORD_ID,
@@ -122,7 +131,7 @@ public enum DbTableInfoEnum {
             DC.MAGT_TYPE_SEQ,
             DC.MAGT_SIMPLE_GENERICS_TYPE,
             DC.MAGT_GENERICS_TYPE,
-            DC.MAGT_FULL_METHOD
+            DC.MAGT_FULL_METHOD,
     }),
     DTIE_METHOD_ARGUMENT("method_argument", new String[]{
             DC.MARG_METHOD_HASH,
@@ -131,7 +140,7 @@ public enum DbTableInfoEnum {
             DC.MARG_ARG_NAME,
             DC.MARG_ARG_TYPE,
             DC.MARG_SIMPLE_CLASS_NAME,
-            DC.MARG_FULL_METHOD
+            DC.MARG_FULL_METHOD,
     }),
     DTIE_METHOD_CALL("method_call", new String[]{
             DC.MC_CALL_ID,
@@ -152,7 +161,7 @@ public enum DbTableInfoEnum {
             DC.MC_RAW_RETURN_TYPE,
             DC.MC_ACTUAL_RETURN_TYPE,
             DC.MC_CALLER_JAR_NUM,
-            DC.MC_CALLEE_JAR_NUM
+            DC.MC_CALLEE_JAR_NUM,
     }),
     DTIE_METHOD_CALL_INFO("method_call_info", new String[]{
             DC.MCI_RECORD_ID,
@@ -163,7 +172,7 @@ public enum DbTableInfoEnum {
             DC.MCI_TYPE,
             DC.MCI_ARRAY_FLAG,
             DC.MCI_VALUE_TYPE,
-            DC.MCI_THE_VALUE
+            DC.MCI_THE_VALUE,
     }),
     DTIE_METHOD_CALL_STATIC_FIELD("method_call_static_field", new String[]{
             DC.MCSF_RECORD_ID,
@@ -175,7 +184,7 @@ public enum DbTableInfoEnum {
             DC.MCSF_FIELD_NAME,
             DC.MCSF_SIMPLE_FIELD_TYPE,
             DC.MCSF_CLASS_NAME,
-            DC.MCSF_FIELD_TYPE
+            DC.MCSF_FIELD_TYPE,
     }),
     DTIE_METHOD_INFO("method_info", new String[]{
             DC.MI_METHOD_HASH,
@@ -186,7 +195,7 @@ public enum DbTableInfoEnum {
             DC.MI_SIMPLE_RETURN_TYPE,
             DC.MI_RETURN_TYPE,
             DC.MI_METHOD_INSTRUCTIONS_HASH,
-            DC.MI_JAR_NUM
+            DC.MI_JAR_NUM,
     }),
     DTIE_METHOD_LINE_NUMBER("method_line_number", new String[]{
             DC.MLN_METHOD_HASH,
@@ -194,7 +203,7 @@ public enum DbTableInfoEnum {
             DC.MLN_METHOD_NAME,
             DC.MLN_MIN_LINE_NUMBER,
             DC.MLN_MAX_LINE_NUMBER,
-            DC.MLN_FULL_METHOD
+            DC.MLN_FULL_METHOD,
     }),
     DTIE_METHOD_RETURN_GENERICS_TYPE("method_return_generics_type", new String[]{
             DC.MRGT_RECORD_ID,
@@ -204,7 +213,7 @@ public enum DbTableInfoEnum {
             DC.MRGT_TYPE_SEQ,
             DC.MRGT_SIMPLE_GENERICS_TYPE,
             DC.MRGT_GENERICS_TYPE,
-            DC.MRGT_FULL_METHOD
+            DC.MRGT_FULL_METHOD,
     }),
     DTIE_MYBATIS_MS_TABLE("mybatis_ms_table", new String[]{
             DC.MMT_RECORD_ID,
@@ -215,7 +224,7 @@ public enum DbTableInfoEnum {
             DC.MMT_TABLE_NAME,
             DC.MMT_MAPPER_CLASS_NAME,
             DC.MMT_XML_FILE_NAME,
-            DC.MMT_XML_FILE_PATH
+            DC.MMT_XML_FILE_PATH,
     }),
     DTIE_MYBATIS_MS_WRITE_TABLE("mybatis_ms_write_table", new String[]{
             DC.MMWT_RECORD_ID,
@@ -225,7 +234,7 @@ public enum DbTableInfoEnum {
             DC.MMWT_TABLE_NAME,
             DC.MMWT_MAPPER_CLASS_NAME,
             DC.MMWT_XML_FILE_NAME,
-            DC.MMWT_XML_FILE_PATH
+            DC.MMWT_XML_FILE_PATH,
     }),
     DTIE_SF_FIELD_METHOD_CALL("sf_field_method_call", new String[]{
             DC.SFFMC_RECORD_ID,
@@ -236,14 +245,14 @@ public enum DbTableInfoEnum {
             DC.SFFMC_FIELD_TYPE,
             DC.SFFMC_CLASS_NAME,
             DC.SFFMC_CALLEE_CLASS_NAME,
-            DC.SFFMC_CALLEE_METHOD_NAME
+            DC.SFFMC_CALLEE_METHOD_NAME,
     }),
     DTIE_SPRING_BEAN("spring_bean", new String[]{
             DC.SPB_RECORD_ID,
             DC.SPB_SPRING_BEAN_NAME,
             DC.SPB_SEQ,
             DC.SPB_CLASS_NAME,
-            DC.SPB_BEAN_TYPE
+            DC.SPB_BEAN_TYPE,
     }),
     DTIE_SPRING_CONTROLLER("spring_controller", new String[]{
             DC.SPC_METHOD_HASH,
@@ -253,7 +262,7 @@ public enum DbTableInfoEnum {
             DC.SPC_METHOD_PATH,
             DC.SPC_ANNOTATION_ANNOTATION_NAME,
             DC.SPC_SIMPLE_CLASS_NAME,
-            DC.SPC_FULL_METHOD
+            DC.SPC_FULL_METHOD,
     }),
     DTIE_SPRING_TASK("spring_task", new String[]{
             DC.SPT_RECORD_ID,
@@ -262,7 +271,7 @@ public enum DbTableInfoEnum {
             DC.SPT_CLASS_NAME,
             DC.SPT_METHOD_NAME,
             DC.SPT_TYPE,
-            DC.SPT_FULL_METHOD
+            DC.SPT_FULL_METHOD,
     }),
     DTIE_FIELD_ANNOTATION("field_annotation", new String[]{
             DC.FA_RECORD_ID,
@@ -272,7 +281,7 @@ public enum DbTableInfoEnum {
             DC.FA_ATTRIBUTE_NAME,
             DC.FA_ATTRIBUTE_TYPE,
             DC.FA_ATTRIBUTE_VALUE,
-            DC.FA_CLASS_NAME
+            DC.FA_CLASS_NAME,
     }),
     DTIE_FIELD_INFO("field_info", new String[]{
             DC.FI_RECORD_ID,
@@ -283,7 +292,7 @@ public enum DbTableInfoEnum {
             DC.FI_PRIMITIVE_TYPE,
             DC.FI_STATIC_FLAG,
             DC.FI_FINAL_FLAG,
-            DC.FI_CLASS_NAME
+            DC.FI_CLASS_NAME,
     }),
     DTIE_GET_METHOD("get_method", DC.GET_SET_METHOD_COLUMNS),
     DTIE_SET_METHOD("set_method", DC.GET_SET_METHOD_COLUMNS),
@@ -304,7 +313,7 @@ public enum DbTableInfoEnum {
             DC.SMAI_FLAG,
             DC.SMAI_FLAG_DESC,
             DC.SMAI_ASSIGN_INFO,
-            DC.SMAI_EQUIVALENT_CONVERSION
+            DC.SMAI_EQUIVALENT_CONVERSION,
     }),
     DTIE_FIELD_RELATIONSHIP("field_relationship", new String[]{
             DC.FR_FLD_RELATIONSHIP_ID,
@@ -322,7 +331,7 @@ public enum DbTableInfoEnum {
             DC.FR_TYPE,
             DC.FR_RELATIONSHIP_FLAGS,
             DC.FR_BEAN_UTIL_CALL_ID,
-            DC.FR_BEAN_UTIL_METHOD
+            DC.FR_BEAN_UTIL_METHOD,
     }),
     DTIE_MYBATIS_MS_COLUMN("mybatis_ms_column", new String[]{
             DC.MMC_RECORD_ID,
@@ -331,7 +340,7 @@ public enum DbTableInfoEnum {
             DC.MMC_COLUMN_NAME,
             DC.MMC_ENTITY_CLASS_NAME,
             DC.MMC_XML_FILE_NAME,
-            DC.MMC_XML_FILE_PATH
+            DC.MMC_XML_FILE_PATH,
     }),
     DTIE_MYBATIS_MS_ENTITY("mybatis_ms_entity", new String[]{
             DC.MME_RECORD_ID,
@@ -341,7 +350,7 @@ public enum DbTableInfoEnum {
             DC.MME_MAPPER_CLASS_NAME,
             DC.MME_ENTITY_CLASS_NAME,
             DC.MME_XML_FILE_NAME,
-            DC.MME_XML_FILE_PATH
+            DC.MME_XML_FILE_PATH,
     }),
     DTIE_FIELD_GENERICS_TYPE("field_generics_type", new String[]{
             DC.FGT_RECORD_ID,
@@ -351,14 +360,14 @@ public enum DbTableInfoEnum {
             DC.FGT_FIELD_CATEGORY,
             DC.FGT_SIMPLE_FIELD_GENERICS_TYPE,
             DC.FGT_FIELD_GENERICS_TYPE,
-            DC.FGT_CLASS_NAME
+            DC.FGT_CLASS_NAME,
     }),
     DTIE_PROPERTIES_CONF("properties_conf", new String[]{
             DC.PC_RECORD_ID,
             DC.PC_PROPERTIES_KEY,
             DC.PC_PROPERTIES_FILE_PATH,
             DC.PC_PROPERTIES_FILE_NAME,
-            DC.PC_PROPERTIES_VALUE
+            DC.PC_PROPERTIES_VALUE,
     }),
     DTIE_MYBATIS_MS_SET_COLUMN("mybatis_ms_set_column", new String[]{
             DC.MMSETC_RECORD_ID,
@@ -371,7 +380,7 @@ public enum DbTableInfoEnum {
             DC.MMSETC_PARAM_RAW_NAME,
             DC.MMSETC_MAPPER_CLASS_NAME,
             DC.MMSETC_XML_FILE_NAME,
-            DC.MMSETC_XML_FILE_PATH
+            DC.MMSETC_XML_FILE_PATH,
     }),
     DTIE_MYBATIS_MS_WHERE_COLUMN("mybatis_ms_where_column", new String[]{
             DC.MMWC_RECORD_ID,
@@ -386,7 +395,7 @@ public enum DbTableInfoEnum {
             DC.MMWC_PARAM_TYPE,
             DC.MMWC_MAPPER_CLASS_NAME,
             DC.MMWC_XML_FILE_NAME,
-            DC.MMWC_XML_FILE_PATH
+            DC.MMWC_XML_FILE_PATH,
     }),
     DTIE_MYBATIS_MS_SELECT_COLUMN("mybatis_ms_select_column", new String[]{
             DC.MMSELC_RECORD_ID,
@@ -397,19 +406,19 @@ public enum DbTableInfoEnum {
             DC.MMSELC_COLUMN_ALIAS,
             DC.MMSELC_MAPPER_CLASS_NAME,
             DC.MMSELC_XML_FILE_NAME,
-            DC.MMSELC_XML_FILE_PATH
+            DC.MMSELC_XML_FILE_PATH,
     }),
     DTIE_METHOD_RETURN_ARG_SEQ("method_return_arg_seq", new String[]{
             DC.MRAS_CALLER_METHOD_HASH,
             DC.MRAS_RETURN_ARG_SEQ,
             DC.MRAS_CALLER_FULL_METHOD,
-            DC.MRAS_EQUIVALENT_CONVERSION
+            DC.MRAS_EQUIVALENT_CONVERSION,
     }),
     DTIE_METHOD_RETURN_CALL_ID("method_return_call_id", new String[]{
             DC.MRCI_CALLER_METHOD_HASH,
             DC.MRCI_RETURN_CALL_ID,
             DC.MRCI_CALLER_FULL_METHOD,
-            DC.MRCI_EQUIVALENT_CONVERSION
+            DC.MRCI_EQUIVALENT_CONVERSION,
     }),
     DTIE_METHOD_CATCH("method_catch", new String[]{
             DC.MCTH_RECORD_ID,
@@ -429,7 +438,7 @@ public enum DbTableInfoEnum {
             DC.MCTH_CATCH_END_LINE_NUMBER,
             DC.MCTH_CATCH_MIN_CALL_ID,
             DC.MCTH_CATCH_MAX_CALL_ID,
-            DC.MCTH_FULL_METHOD
+            DC.MCTH_FULL_METHOD,
     }),
     DTIE_METHOD_FINALLY("method_finally", new String[]{
             DC.MF_RECORD_ID,
@@ -455,7 +464,7 @@ public enum DbTableInfoEnum {
             DC.MT_CATCH_START_OFFSET,
             DC.MT_CATCH_EXCEPTION_VARIABLE_NAME,
             DC.MT_CALL_ID,
-            DC.MT_FULL_METHOD
+            DC.MT_FULL_METHOD,
     }),
     DTIE_MYBATIS_MS_GET_SET_DB("mybatis_ms_get_set_db", new String[]{
             DC.MMGSD_RECORD_ID,
@@ -466,7 +475,7 @@ public enum DbTableInfoEnum {
             DC.MMGSD_DB_OPERATE,
             DC.MMGSD_TABLE_NAME,
             DC.MMGSD_COLUMN_NAME,
-            DC.MMGSD_COLUMN_RELATE_DESC
+            DC.MMGSD_COLUMN_RELATE_DESC,
     }),
     DTIE_METHOD_CALL_METHOD_CALL_RETURN("method_call_method_call_return", new String[]{
             DC.MCMCR_RECORD_ID,
@@ -478,7 +487,7 @@ public enum DbTableInfoEnum {
             DC.MCMCR_CALLEE_METHOD_HASH,
             DC.MCMCR_CALLEE_SIMPLE_CLASS_NAME,
             DC.MCMCR_CALLEE_METHOD_NAME,
-            DC.MCMCR_CALLEE_FULL_METHOD
+            DC.MCMCR_CALLEE_FULL_METHOD,
     }),
     DTIE_ILLEGAL("illegal", null),
     ;

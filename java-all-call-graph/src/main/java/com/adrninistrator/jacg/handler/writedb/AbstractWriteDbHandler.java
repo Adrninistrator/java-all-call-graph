@@ -14,6 +14,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
 import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -514,6 +515,39 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     public void addData(T data) {
         dataList.add(data);
+    }
+
+    /**
+     * 判断指定方法是否属于dto的get/set方法，若当前类未找到对应的方法，则在超类中查找
+     *
+     * @param getMethod                  true: 当前为get方法 false: 当前为set方法
+     * @param simpleClassName            唯一类名
+     * @param getSetMethodName           get/set方法名
+     * @param getSetMethodSimpleClassMap dto的get/set方法Map
+     * @param extendsSimpleClassNameMap  涉及继承的唯一类名
+     * @return true: 是dto的get/set方法 false: 不是dto的get/set方法
+     */
+    protected boolean checkDtoGetSetMethod(boolean getMethod, String simpleClassName, String getSetMethodName, Map<String, Set<String>> getSetMethodSimpleClassMap, Map<String,
+            String> extendsSimpleClassNameMap) {
+        if ((getMethod && !JavaCGClassMethodUtil.matchesGetMethod(getSetMethodName)) || (!getMethod && !JavaCGClassMethodUtil.matchesSetMethod(getSetMethodName))) {
+            // 根据方法名称判断不是get/set方法
+            return false;
+        }
+
+        String currentSimpleClassName = simpleClassName;
+        while (true) {
+            // 当前当前类的get/set方法是否是dto的get/set方法
+            Set<String> methodSet = getSetMethodSimpleClassMap.get(currentSimpleClassName);
+            if (methodSet != null && methodSet.contains(getSetMethodName)) {
+                return true;
+            }
+            // 获取当前类的父类
+            String superSimpleClassName = extendsSimpleClassNameMap.get(currentSimpleClassName);
+            if (superSimpleClassName == null) {
+                return false;
+            }
+            currentSimpleClassName = superSimpleClassName;
+        }
     }
 
     //
