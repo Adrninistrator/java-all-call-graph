@@ -107,7 +107,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
     private boolean operate() {
         // 生成需要处理的任务信息
         Map<String, CalleeTaskInfo> calleeTaskInfoMap = genCalleeTaskInfo();
-        if (JACGUtil.isMapEmpty(calleeTaskInfoMap)) {
+        if (JavaCGUtil.isMapEmpty(calleeTaskInfoMap)) {
             logger.error("执行失败，请检查配置文件 {} 的内容", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE);
             return false;
         }

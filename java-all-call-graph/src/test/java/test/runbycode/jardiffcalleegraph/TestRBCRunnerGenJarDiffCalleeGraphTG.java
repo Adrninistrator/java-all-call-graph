@@ -48,6 +48,7 @@ public class TestRBCRunnerGenJarDiffCalleeGraphTG extends TestAbstractRunnerGenJ
         return new TarGzUnpacker(tarGzFilePath,
                 tarGzUnpackDirPath,
                 Collections.singletonList("jar"),
+                null,
                 Arrays.asList(".xml", "properties"),
                 Collections.singletonList("adrninistrator"),
                 Collections.singletonList("com/adrninistrator/mybatismysqltableparser"));

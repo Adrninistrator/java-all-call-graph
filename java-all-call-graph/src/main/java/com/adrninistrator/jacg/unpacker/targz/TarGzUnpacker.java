@@ -1,8 +1,10 @@
 package com.adrninistrator.jacg.unpacker.targz;
 
 import com.adrninistrator.jacg.util.JACGFileUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import net.lingala.zip4j.io.outputstream.ZipOutputStream;
 import net.lingala.zip4j.model.LocalFileHeader;
@@ -37,6 +39,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
     private final TarGzRecorder tarGzRecorder;
 
     private final String unpackDestDirPath;
+    private final List<String> unpackJarNamePrefixList;
     private final List<String> unpackConfigFileTypeList;
 
     // 是否对所有的jar包都解压，不管包名是什么
@@ -63,46 +66,64 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
     /**
      * @param tarGzFilePath            需要解压的tar.gz文件路径
      * @param unpackDestDirPath        保存解压出文件的目录路径，需要保证执行前该目录不存在或为空
-     * @param unpackDirList            需要解压其中的.jar的.tar.gz目录名列表，如 "app"，仅当目录在.tar.gz根路径，且.jar在该目录而非子目录中时认为满足
+     * @param unpackDirList            需要解压tar.gz文件中的jar文件的目录名列表
+     *                                 如 "app"、"WEB-INF/lib"，仅当目录属于tar.gz文件对应目录时认为满足
+     *                                 若为空时则对所有的jar包都解压，不判断对应的目录名
+     * @param unpackJarNamePrefixList  需要解压的jar文件的名称前缀列表
+     *                                 若为空时则所有的jar都解压，不判断对应文件名
      * @param unpackConfigFileTypeList 需要解压的配置文件类型，如 ".xml" ".properties"
-     * @param unpackPackageList        当jar包中存在class文件的包名对应路径匹配当前列表时，解压对应的jar包
-     *                                 在该参数中使用"/"作为分隔符，如 "aaa"、"a/b"
-     *                                 假如当前参数指定了"abc"，jar包中某个class文件的包名对应路径为a/abc/b，则认为匹配
-     *                                 若包含了"*all*"则对所有的jar包都解压
-     * @param noUnpackPackageList      当jar包中的class文件的包名全部匹配当前列表时，不解压对应的class文件到jar包中，使用"/"作为分隔符，如 "aaa"、"a/b"
+     * @param unpackPackageList        当jar包中存在class文件的包名匹配当前列表时，解压对应的class包
+     *                                 假如class文件的包名以当前列表中某个元素开头，或包含某个元素，则认为匹配
+     *                                 例如包名"aaa.bbb.ccc"可以通过"aaa"、"aaa.bbb"、"aaa.bbb.ccc"、"bbb"、"ccc"匹配，但不能通过"b"匹配
+     *                                 若为空时则对所有的class都解压，不判断对应的包名
+     * @param noUnpackPackageList      当jar包中的class文件的包名全部匹配当前列表时，不解压对应的class文件
+     *                                 包名匹配规则同 unpackPackageList
+     *                                 若为空时则对所有的class都解压，不判断对应的包名
+     *                                 首先根据class文件的包名和unpackPackageList判断是否需要解压，再根据noUnpackPackageList判断是否不需要解压
      */
     public TarGzUnpacker(String tarGzFilePath,
                          String unpackDestDirPath,
                          List<String> unpackDirList,
+                         List<String> unpackJarNamePrefixList,
                          List<String> unpackConfigFileTypeList,
                          List<String> unpackPackageList,
                          List<String> noUnpackPackageList) {
         super(tarGzFilePath);
         this.unpackDestDirPath = unpackDestDirPath;
+        this.unpackJarNamePrefixList = unpackJarNamePrefixList;
         this.unpackConfigFileTypeList = unpackConfigFileTypeList;
 
-        if (unpackPackageList.contains(UNPACK_ALL_PACKAGE_FLAG)) {
+        if (JavaCGUtil.isCollectionEmpty(unpackPackageList)) {
             unpackAllPackage = true;
+            logger.info("所有的jar包无论包名是什么都尝试解压");
         } else {
             unpackAllPackage = false;
             for (String unpackPackage : unpackPackageList) {
-                if (unpackPackage.endsWith("/")) {
-                    throw new IllegalArgumentException("unpackPackageList 中的包名不能以/结尾");
+                if (!JACGUtil.checkPackageName(unpackPackage)) {
+                    throw new IllegalArgumentException("unpackPackageList 中的包名不能以.或/结尾");
                 }
-                unpackPackageHeadList.add(unpackPackage + "/");
-                unpackPackageWithSeparatorList.add("/" + unpackPackage + "/");
+                String unpackPackageReplace = JACGUtil.replacePackage2DirPath(unpackPackage);
+                unpackPackageHeadList.add(unpackPackageReplace + "/");
+                unpackPackageWithSeparatorList.add("/" + unpackPackageReplace + "/");
             }
-            for (String noUnpackPackage : noUnpackPackageList) {
-                if (noUnpackPackage.endsWith("/")) {
-                    throw new IllegalArgumentException("noUnpackPackageList 中的包名不能以/结尾");
+
+            if (!JavaCGUtil.isCollectionEmpty(noUnpackPackageList)) {
+                for (String noUnpackPackage : noUnpackPackageList) {
+                    if (!JACGUtil.checkPackageName(noUnpackPackage)) {
+                        throw new IllegalArgumentException("noUnpackPackageList 中的包名不能以.或/结尾");
+                    }
+                    String noUnpackPackageReplace = JACGUtil.replacePackage2DirPath(noUnpackPackage);
+                    noUnpackPackageHeadList.add(noUnpackPackageReplace + "/");
+                    noUnpackPackageWithSeparatorList.add("/" + noUnpackPackageReplace + "/");
                 }
-                noUnpackPackageHeadList.add(noUnpackPackage + "/");
-                noUnpackPackageWithSeparatorList.add("/" + noUnpackPackage + "/");
             }
         }
 
-        if (unpackDirList != null) {
+        if (!JavaCGUtil.isCollectionEmpty(unpackDirList)) {
             for (String unpackDir : unpackDirList) {
+                if (StringUtils.endsWithAny(unpackDir, "/", "\\")) {
+                    throw new IllegalArgumentException("unpackDirList 中的目录名称不能以/或\\结尾");
+                }
                 unpackDirWithSeparatorList.add(unpackDir + "/");
             }
         }
@@ -139,7 +160,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
 
     @Override
     protected void afterDone() {
-        logger.info("jar包中的包名前缀保存在文件 {} 包名层级为 {}", jarPackagePrefixFilePath, packagePrefixLevel);
+        logger.info("jar包中的包名前缀保存在文件 {}", jarPackagePrefixFilePath);
         IOUtils.closeQuietly(jarPackagePrefixWriter);
     }
 
@@ -155,8 +176,8 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
                 }
 
                 String warEntryName = warEntry.getFileName();
-                if ((checkClassFileType(warEntryName) || checkConfigFileType(warEntryName))) {
-                    // 对于.war文件中的.class文件与配置文件，写到生成的.war文件
+                if (checkClassFileType(warEntryName) || checkConfigFileType(warEntryName)) {
+                    // 对于.war文件中的.class文件、配置文件，写到生成的.war文件
                     addInput2Jar(warInputInTar, zos, warEntryName);
                 } else if (checkJarFileType(warEntryName)) {
                     handleJarFileInTarWar(new ZipInputStream(warInputInTar), warNameOfTarEntry, warEntryName);
@@ -183,34 +204,8 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
 
     @Override
     protected boolean handleJarFileInTarWar(ZipInputStream jarInputInTarWar, String warNameOfTarEntry, String jarNameOfTarWarEntry) {
-        boolean unpackJar = false;
-        if (warNameOfTarEntry == null) {
-            // 当前的.jar在.tar.gz中
-            int jarNameLevel = StringUtils.split(jarNameOfTarWarEntry, "/").length;
-            // 判断.tar.gz中的.jar是否在需要解压的目录中
-            for (String unpackDirWithSeparator : unpackDirWithSeparatorList) {
-                if (jarNameOfTarWarEntry.startsWith(unpackDirWithSeparator) && jarNameLevel == 2) {
-                    // 仅当.jar在该目录而非子目录中时认为满足
-                    logger.info("当前jar包在[需要]解压的目录中 {} {} {}", tarGzFileName, jarNameOfTarWarEntry, unpackDirWithSeparator);
-                    unpackJar = true;
-                    break;
-                }
-            }
-            if (!unpackJar) {
-                Set<String> packagePrefix4JarInTar = tarGzRecorder.getPackagePrefix4JarInTar(jarNameOfTarWarEntry);
-                // 根据jar包中的包名前缀判断jar包是否需要解压
-                if (checkUnpackJarByPackagePrefix(packagePrefix4JarInTar, jarNameOfTarWarEntry)) {
-                    unpackJar = true;
-                }
-            }
-        } else {
-            // 当前的.jar在.tar.gz的.war中
-            Set<String> packagePrefix4JarInTarWar = tarGzRecorder.getPackagePrefix4JarInTarWar(warNameOfTarEntry, jarNameOfTarWarEntry);
-            // 根据jar包中的包名前缀判断jar包是否需要解压
-            if (checkUnpackJarByPackagePrefix(packagePrefix4JarInTarWar, jarNameOfTarWarEntry)) {
-                unpackJar = true;
-            }
-        }
+        // 判断是否需要解压jar包
+        boolean unpackJar = checkNeedUnpackJar(warNameOfTarEntry, jarNameOfTarWarEntry);
 
         ZipOutputStream zos = null;
         try {
@@ -232,6 +227,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
                     addInput2Jar(jarInputInTarWar, zos, jarEntryName);
                 } else if (checkJarFileType(jarEntryName)) {
                     // spring-boot maven生成的jar包中会存在BOOT-INF/lib/目录，该目录中有其他jar包
+                    // 处理jar包中的jar包
                     if (!handleJarFileInJar(new ZipInputStream(jarInputInTarWar), jarNameOfTarWarEntry, jarEntryName)) {
                         return false;
                     }
@@ -248,10 +244,40 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
         }
     }
 
+    // 判断是否需要解压jar包
+    private boolean checkNeedUnpackJar(String warNameOfTarEntry, String jarNameOfTarWarEntry) {
+        Set<String> packagePrefix4Jar;
+        if (warNameOfTarEntry == null) {
+            // 当前的.war在.tar.gz中
+            // 判断.tar.gz中的.jar是否在需要解压的目录中
+            if (!checkUnpackJarByDirName(jarNameOfTarWarEntry)) {
+                return false;
+            }
+            // 获取当前jar包中的包名前缀
+            packagePrefix4Jar = tarGzRecorder.getPackagePrefix4JarInTar(jarNameOfTarWarEntry);
+        } else {
+            // 当前的.jar在.tar.gz的.war中
+            // 获取当前jar包中的包名前缀
+            packagePrefix4Jar = tarGzRecorder.getPackagePrefix4JarInTarWar(warNameOfTarEntry, jarNameOfTarWarEntry);
+        }
+
+        // 根据jar包中的包名前缀判断jar包是否需要解压
+        if (!checkUnpackJarByPackagePrefix(packagePrefix4Jar, jarNameOfTarWarEntry)) {
+            return false;
+        }
+        // 判断.tar.gz中的.jar文件名前缀是否需要解压
+        return checkUnpackJarByJarName(jarNameOfTarWarEntry);
+    }
+
+    // 处理jar包中的jar包
     private boolean handleJarFileInJar(ZipInputStream jarInputInJar, String outerJarName, String innerJarName) {
         Set<String> packagePrefix4JarInTarJar = tarGzRecorder.getPackagePrefix4JarInTarJar(outerJarName, innerJarName);
         // 根据jar包中的包名前缀判断jar包是否需要解压
         if (!checkUnpackJarByPackagePrefix(packagePrefix4JarInTarJar, innerJarName)) {
+            return true;
+        }
+        // 判断.tar.gz中的.jar文件名前缀是否需要解压
+        if (!checkUnpackJarByJarName(innerJarName)) {
             return true;
         }
 
@@ -330,6 +356,52 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
     }
 
     /**
+     * 判断.tar.gz中的.jar是否在需要解压的目录中
+     *
+     * @param jarNameOfTarWarEntry
+     * @return
+     */
+    private boolean checkUnpackJarByDirName(String jarNameOfTarWarEntry) {
+        if (JavaCGUtil.isCollectionEmpty(unpackDirWithSeparatorList)) {
+            // 未指定需要解压其中的.jar的.tar.gz目录名列表
+            return true;
+        }
+        // 判断.tar.gz中的.jar是否在需要解压的目录中
+        for (String unpackDirWithSeparator : unpackDirWithSeparatorList) {
+            if (jarNameOfTarWarEntry.startsWith(unpackDirWithSeparator)) {
+                // 仅当.jar在该目录而非子目录中时认为满足
+                logger.info("当前jar包在[需要]解压的目录中 {} {} {}", tarGzFileName, jarNameOfTarWarEntry, unpackDirWithSeparator);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断.tar.gz中的.jar文件名前缀是否需要解压
+     *
+     * @param jarNameOfTarWarEntry
+     * @return
+     */
+    private boolean checkUnpackJarByJarName(String jarNameOfTarWarEntry) {
+        if (JavaCGUtil.isCollectionEmpty(unpackJarNamePrefixList)) {
+            // 未指定需要解压.jar的文件名前缀
+            return true;
+        }
+        String jarOnlyFileName = getFileNameFromPath(jarNameOfTarWarEntry);
+        // 判断.tar.gz中的.jar文件名前缀是否需要解压
+        for (String unpackJarNamePrefix : unpackJarNamePrefixList) {
+            if (jarOnlyFileName.startsWith(unpackJarNamePrefix)) {
+                // 仅当.jar文件使用指定前缀时时认为满足
+                logger.info("当前jar包根据前缀判断[需要]解压 {} {} {}", tarGzFileName, jarNameOfTarWarEntry, unpackJarNamePrefix);
+                return true;
+            }
+        }
+        logger.info("当前jar包根据前缀判断[不需要]解压 {} {}", tarGzFileName, jarNameOfTarWarEntry);
+        return false;
+    }
+
+    /**
      * 根据jar包中的包名前缀判断jar包是否需要解压
      *
      * @param jarPackagePrefixSet jar包中的包名前缀
@@ -351,7 +423,6 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
         }
 
         if (unpackAllPackage) {
-            logger.info("所有的jar包都[需要]解压 {} {}", tarGzFileName, jarName);
             return true;
         }
         // 判断当前jar包中的包名是否存在需要解压的包名

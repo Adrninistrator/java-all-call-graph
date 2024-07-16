@@ -12,21 +12,20 @@ public class WriteDbData4ClassSignatureEi1 implements BaseWriteDbData {
     private String type;
     private String superItfClassName;
     private int seq;
-    private int useClassName;
-    private String signClassGenericsName;
+    private String signClassName;
+    private String signGenericsName;
     private String className;
 
     public WriteDbData4ClassSignatureEi1() {
     }
 
-    public WriteDbData4ClassSignatureEi1(String simpleClassName, String type, String superItfClassName, int seq, int useClassName, String signClassGenericsName,
-                                         String className) {
+    public WriteDbData4ClassSignatureEi1(String simpleClassName, String type, String superItfClassName, int seq, String signClassName, String signGenericsName, String className) {
         this.simpleClassName = simpleClassName;
         this.type = type;
         this.superItfClassName = superItfClassName;
         this.seq = seq;
-        this.useClassName = useClassName;
-        this.signClassGenericsName = signClassGenericsName;
+        this.signClassName = signClassName;
+        this.signGenericsName = signGenericsName;
         this.className = className;
     }
 
@@ -62,20 +61,20 @@ public class WriteDbData4ClassSignatureEi1 implements BaseWriteDbData {
         this.seq = seq;
     }
 
-    public int getUseClassName() {
-        return useClassName;
+    public String getSignClassName() {
+        return signClassName;
     }
 
-    public void setUseClassName(int useClassName) {
-        this.useClassName = useClassName;
+    public void setSignClassName(String signClassName) {
+        this.signClassName = signClassName;
     }
 
-    public String getSignClassGenericsName() {
-        return signClassGenericsName;
+    public String getSignGenericsName() {
+        return signGenericsName;
     }
 
-    public void setSignClassGenericsName(String signClassGenericsName) {
-        this.signClassGenericsName = signClassGenericsName;
+    public void setSignGenericsName(String signGenericsName) {
+        this.signGenericsName = signGenericsName;
     }
 
     public String getClassName() {

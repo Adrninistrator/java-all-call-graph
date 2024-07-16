@@ -46,7 +46,6 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
     protected WriteDbData4ClassAnnotation genData(String[] array) {
         // 拆分时限制列数，最后一列注解属性中可能出现空格
         String className = array[0];
-
         // 根据类名前缀判断是否需要处理
         if (!isAllowedClassPrefix(className)) {
             return null;

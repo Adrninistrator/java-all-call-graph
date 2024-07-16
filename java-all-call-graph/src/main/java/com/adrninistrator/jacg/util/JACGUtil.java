@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -51,18 +50,6 @@ public class JACGUtil {
             return null;
         }
         return list.get(index);
-    }
-
-    /**
-     * 判断Map是否为空
-     *
-     * @param map
-     * @param <K>
-     * @param <V>
-     * @return
-     */
-    public static <K, V> boolean isMapEmpty(Map<K, V> map) {
-        return map == null || map.isEmpty();
     }
 
     /**
@@ -306,6 +293,25 @@ public class JACGUtil {
         }
         StackTraceElement stackTraceElement = stackTraceElements[index];
         return JavaCGClassMethodUtil.formatFullMethodWithArgTypes(stackTraceElement.getClassName(), stackTraceElement.getMethodName());
+    }
+
+    /**
+     * 检查包名，若以.或/开头或结尾则检查不通过
+     *
+     * @param packageName
+     * @return
+     */
+    public static boolean checkPackageName(String packageName) {
+        return !StringUtils.startsWithAny(packageName, ".", "/") && !StringUtils.endsWithAny(packageName, ".", "/");
+    }
+
+    /**
+     * 将包名替换为目录路径
+     *
+     * @param packageName
+     */
+    public static String replacePackage2DirPath(String packageName) {
+        return packageName.replace('.', '/');
     }
 
     private JACGUtil() {

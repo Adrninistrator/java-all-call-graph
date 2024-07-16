@@ -25,12 +25,6 @@ public abstract class BaseTarGzUnpacker {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseTarGzUnpacker.class);
 
-    // 对所有的jar包都解压的标志
-    public static final String UNPACK_ALL_PACKAGE_FLAG = "*all*";
-
-    // 包名前缀的层级，默认为4，即最多为a.b.c.d
-    protected int packagePrefixLevel = 4;
-
     // 需要解压的tar.gz文件路径
     protected final String tarGzFilePath;
 
@@ -173,7 +167,6 @@ public abstract class BaseTarGzUnpacker {
 
     /**
      * 获取.class文件的包名前缀
-     * 最多获取使用/分隔后的前4个字符串，若不足则使用整个包名
      * 格式：（a/b/c/d/）
      *
      * @param fileName
@@ -190,7 +183,7 @@ public abstract class BaseTarGzUnpacker {
             return null;
         }
         List<String> packageList = new ArrayList<>();
-        for (int i = 1; i <= packagePrefixLevel; i++) {
+        for (int i = 1; i < packageArray.length; i++) {
             if (i + 1 > packageArray.length) {
                 // 假如包名使用/分隔后长度不够则结束循环
                 break;
@@ -207,10 +200,5 @@ public abstract class BaseTarGzUnpacker {
             return;
         }
         packagePrefixSet.add(packagePrefix);
-    }
-
-    //
-    public void setPackagePrefixLevel(int packagePrefixLevel) {
-        this.packagePrefixLevel = packagePrefixLevel;
     }
 }

@@ -28,7 +28,6 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
     @Override
     protected WriteDbData4FieldInfo genData(String[] array) {
         String className = array[0];
-
         // 根据类名前缀判断是否需要处理
         if (!isAllowedClassPrefix(className)) {
             return null;

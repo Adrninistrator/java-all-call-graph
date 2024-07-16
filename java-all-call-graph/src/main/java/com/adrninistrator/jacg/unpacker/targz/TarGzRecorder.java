@@ -73,8 +73,7 @@ public class TarGzRecorder extends BaseTarGzUnpacker {
 
                 String warEntryName = warEntry.getFileName();
                 if (checkClassFileType(warEntryName)) {
-                    // war包中的class文件都进行处理，不忽略（war包一般都是子系统的代码）
-                    // 将包名前缀记录到Set中
+                    // 将war包中的包名前缀记录到Set中
                     recordClassFilePackagePrefix(warPackagePrefixSet, warEntryName);
                 } else if (checkJarFileType(warEntryName)) {
                     handleJarFileInTarWar(new ZipInputStream(warInputInTar), warNameOfTarEntry, warEntryName);

@@ -68,7 +68,7 @@ public class ClassSignatureEi1Handler extends BaseHandler {
                     当前的继承父类/实现接口与指定的相同，或指定的类是当前的继承父类/实现接口的父类/接口
                     查询指定类，及指定父类/接口对应的签名中的类名列表
                  */
-                List<String> signatureClassList = queryClassSignatureList(simpleClassName, superOrItfClassName);
+                List<String> signatureClassList = queryClassSignatureClassNameList(simpleClassName, superOrItfClassName);
                 if (JavaCGUtil.isCollectionEmpty(superOrItfClassNameList)) {
                     logger.error("指定类不存在对应父类/接口的签名信息 {} {}", simpleClassName, superOrItfClassName);
                 }
@@ -104,11 +104,11 @@ public class ClassSignatureEi1Handler extends BaseHandler {
      * @param superOrItfClassName
      * @return
      */
-    private List<String> queryClassSignatureList(String simpleClassName, String superOrItfClassName) {
+    private List<String> queryClassSignatureClassNameList(String simpleClassName, String superOrItfClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CSEI1_QUERY_SIGNATURE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + DC.CSEI1_SIGN_CLASS_GENERICS_NAME +
+            sql = "select " + DC.CSEI1_SIGN_CLASS_NAME +
                     " from " + DbTableInfoEnum.DTIE_CLASS_SIGNATURE_EI1.getTableName() +
                     " where " + DC.CSEI1_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.CSEI1_SUPER_ITF_CLASS_NAME + " = ?" +

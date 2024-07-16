@@ -19,6 +19,7 @@ import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGFieldRelationshipTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,7 +183,7 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
         Map<String, JACGFieldMethodInfo> getFieldBehaviorInfoMap = chooseAllFieldMethodInfo(getClassName, true);
         Map<String, JACGFieldMethodInfo> setFieldBehaviorInfoMap = chooseAllFieldMethodInfo(setClassName, false);
 
-        if (JACGUtil.isMapEmpty(getFieldBehaviorInfoMap) || JACGUtil.isMapEmpty(setFieldBehaviorInfoMap)) {
+        if (JavaCGUtil.isMapEmpty(getFieldBehaviorInfoMap) || JavaCGUtil.isMapEmpty(setFieldBehaviorInfoMap)) {
             logger.error("从指定类中未获取到字段信息 {} {}", getClassName, setClassName);
             return;
         }

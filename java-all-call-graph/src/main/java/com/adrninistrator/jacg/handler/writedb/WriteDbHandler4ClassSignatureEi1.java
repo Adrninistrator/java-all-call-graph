@@ -28,17 +28,17 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
     @Override
     protected WriteDbData4ClassSignatureEi1 genData(String[] array) {
         String className = array[0];
-        String type = array[1];
-        String superItfClassName = array[2];
-        int seq = Integer.parseInt(array[3]);
-        int useClassName = Integer.parseInt(array[4]);
-        String signClassGenericsName = array[5];
-
         // 根据类名前缀判断是否需要处理
         if (!isAllowedClassPrefix(className)) {
             return null;
         }
-        return new WriteDbData4ClassSignatureEi1(dbOperWrapper.getSimpleClassName(className), type, superItfClassName, seq, useClassName, signClassGenericsName, className);
+        String type = array[1];
+        String superItfClassName = array[2];
+        int seq = Integer.parseInt(array[3]);
+        String signClassName = array[4];
+        String signGenericsName = array[5];
+
+        return new WriteDbData4ClassSignatureEi1(dbOperWrapper.getSimpleClassName(className), type, superItfClassName, seq, signClassName, signGenericsName, className);
     }
 
     @Override
@@ -49,8 +49,8 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
                 data.getType(),
                 data.getSuperItfClassName(),
                 data.getSeq(),
-                data.getUseClassName(),
-                data.getSignClassGenericsName(),
+                data.getSignClassName(),
+                data.getSignGenericsName(),
                 data.getClassName()
         };
     }
@@ -62,8 +62,8 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
                 "类型，e:继承，i:实现",
                 "父类或接口的类名",
                 "序号，从0开始",
-                "1:下面的字段代表完整类名，0:下面的字段代表泛型名称",
-                "签名中的完整类名或泛型名称"
+                "签名中的完整类名",
+                "签名中的泛型名称"
         };
     }
 

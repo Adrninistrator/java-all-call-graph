@@ -20,6 +20,7 @@ import com.adrninistrator.jacg.handler.writedb.AbstractWriteDbHandler;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassAnnotation;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassName;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassSigExtImplGenerics;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassSignatureEi1;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassSignatureGenerics;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ExtendsImpl;
@@ -799,7 +800,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
         WriteDbHandler4ClassSignatureGenerics writeDbHandler4ClassSignatureGenerics = new WriteDbHandler4ClassSignatureGenerics(writeDbResult);
         initWriteDbHandler(writeDbHandler4ClassSignatureGenerics);
-        return writeDbHandler4ClassSignatureGenerics.handle(javaCGOutputInfo);
+        if (!writeDbHandler4ClassSignatureGenerics.handle(javaCGOutputInfo)) {
+            return false;
+        }
+
+        WriteDbHandler4ClassSigExtImplGenerics writeDbHandler4ClassSigExtImplGenerics = new WriteDbHandler4ClassSigExtImplGenerics(writeDbResult);
+        initWriteDbHandler(writeDbHandler4ClassSigExtImplGenerics);
+        return writeDbHandler4ClassSigExtImplGenerics.handle(javaCGOutputInfo);
     }
 
     // 处理get/set方法，以对应的调用关系

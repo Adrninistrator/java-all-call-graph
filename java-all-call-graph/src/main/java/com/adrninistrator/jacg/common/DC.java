@@ -169,9 +169,20 @@ public class DC {
     public static final String CSEI1_TYPE = "type";
     public static final String CSEI1_SUPER_ITF_CLASS_NAME = "super_itf_class_name";
     public static final String CSEI1_SEQ = "seq";
-    public static final String CSEI1_USE_CLASS_NAME = "use_class_name";
-    public static final String CSEI1_SIGN_CLASS_GENERICS_NAME = "sign_class_generics_name";
+    public static final String CSEI1_SIGN_CLASS_NAME = "sign_class_name";
+    public static final String CSEI1_SIGN_GENERICS_NAME = "sign_generics_name";
     public static final String CSEI1_CLASS_NAME = "class_name";
+
+    public static final String CSEIG_RECORD_ID = "record_id";
+    public static final String CSEIG_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String CSEIG_GENERICS_NAME = "generics_name";
+    public static final String CSEIG_SEQ = "seq";
+    public static final String CSEIG_EXT_TYPE = "ext_type";
+    public static final String CSEIG_SUPER_ITF_SIMPLE_CLASS_NAME = "super_itf_simple_class_name";
+    public static final String CSEIG_SUPER_ITF_GENERICS_EXTENDS_CLASS_NAME = "super_itf_generics_extends_class_name";
+    public static final String CSEIG_SUPER_ITF_SEQ = "super_itf_seq";
+    public static final String CSEIG_CLASS_NAME = "class_name";
+    public static final String CSEIG_SUPER_ITF_CLASS_NAME = "super_itf_class_name";
 
     public static final String CSG_RECORD_ID = "record_id";
     public static final String CSG_SIMPLE_CLASS_NAME = "simple_class_name";

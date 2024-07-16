@@ -1,6 +1,5 @@
 package com.adrninistrator.jacg.dto.methodcall;
 
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,7 +36,7 @@ public class ObjArgsInfoInMethodCall {
      */
     @JsonIgnore
     public boolean isArgInfoMapEmpty() {
-        return JACGUtil.isMapEmpty(argInfoMap);
+        return JavaCGUtil.isMapEmpty(argInfoMap);
     }
 
     /**

@@ -13,7 +13,6 @@ import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
@@ -234,7 +233,7 @@ public abstract class TestRunByCodeBase {
     protected <T> void printMapContent(Map<String, T> map, String... flags) {
         commonPrintHandle(flags);
 
-        if (JACGUtil.isMapEmpty(map)) {
+        if (JavaCGUtil.isMapEmpty(map)) {
             printInfo("map为空");
             return;
         }

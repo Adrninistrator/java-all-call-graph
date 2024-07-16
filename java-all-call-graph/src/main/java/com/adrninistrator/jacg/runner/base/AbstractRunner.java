@@ -2,7 +2,6 @@ package com.adrninistrator.jacg.runner.base;
 
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
@@ -14,7 +13,6 @@ import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.handler.jarinfo.JarInfoHandler;
-import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
@@ -35,16 +33,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author adrninistrator
  * @date 2021/6/17
  * @description:
  */
-public abstract class AbstractRunner extends AbstractExecutor{
+public abstract class AbstractRunner extends AbstractExecutor {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunner.class);
 
     // 当前的输出目录
@@ -299,7 +294,7 @@ public abstract class AbstractRunner extends AbstractExecutor{
     protected boolean checkSomeJarModified(List<String> jarPathList) {
         // 查询jar包与目录信息
         Map<String, WriteDbData4JarInfo> jarInfoMap = queryJarFileInfo();
-        if (JACGUtil.isMapEmpty(jarInfoMap)) {
+        if (JavaCGUtil.isMapEmpty(jarInfoMap)) {
             logger.info("{} 表的内容为空", DbTableInfoEnum.DTIE_JAR_INFO.getTableNameKeyword());
             return true;
         }

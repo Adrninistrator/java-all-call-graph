@@ -28,14 +28,14 @@ public class WriteDbHandler4ClassSignatureGenerics extends AbstractWriteDbHandle
     @Override
     protected WriteDbData4ClassSignatureGenerics genData(String[] array) {
         String className = array[0];
-        int seq = Integer.parseInt(array[1]);
-        String genericsName = array[2];
-        String genericsExtendsClassName = array[3];
-
         // 根据类名前缀判断是否需要处理
         if (!isAllowedClassPrefix(className)) {
             return null;
         }
+        int seq = Integer.parseInt(array[1]);
+        String genericsName = array[2];
+        String genericsExtendsClassName = array[3];
+
         return new WriteDbData4ClassSignatureGenerics(dbOperWrapper.getSimpleClassName(className), seq, genericsName, genericsExtendsClassName, className);
     }
 

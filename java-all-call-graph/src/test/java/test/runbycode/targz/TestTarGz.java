@@ -19,17 +19,18 @@ import java.util.Collections;
 public class TestTarGz extends TestRunByCodeBase {
 
     public static final String TAR_GZ_DIR = "build/tar_gz";
-    public static final String TAR_GZ_FILE_NAME = "java-all-call-graph.tar.gz";
+    public static final String TAR_GZ_FILE_NAME = "java-all-call-graph-2.0.1.tar.gz";
     public static final String TAR_GZ_UNPACK_DIR = TAR_GZ_DIR + File.separator + "tar_gz@" + TAR_GZ_FILE_NAME;
 
     @Test
     public void test1Unpack() {
         TarGzUnpacker tarGzUnpacker = new TarGzUnpacker(TAR_GZ_DIR + File.separator + TAR_GZ_FILE_NAME,
                 TAR_GZ_UNPACK_DIR,
-                Collections.singletonList("jar"),
+                Arrays.asList("jar", "lib"),
+                Arrays.asList("run_jacg", "java-callgraph2", "mybatis-mysql-table-parser", "log4j-"),
                 Arrays.asList(".xml", "properties"),
-                Collections.singletonList("adrninistrator"),
-                Collections.singletonList("com/adrninistrator/mybatismysqltableparser"));
+                Arrays.asList("adrninistrator", "org.apache.logging.log4j.core"),
+                Collections.singletonList("com.adrninistrator.mybatismysqltableparser"));
         Assert.assertTrue(tarGzUnpacker.unpack());
     }
 

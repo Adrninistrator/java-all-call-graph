@@ -1,8 +1,8 @@
 package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.extensions.codeparser.AbstractSaveData2FileParser;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import com.adrninistrator.mybatismysqltableparser.dto.MyBatisMySqlInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class MyBatisMySqlColumnInfoCodeParser extends AbstractSaveData2FileParse
             String entityClassName = myBatisMySqlInfo.getEntityClassName();
 
             Map<String, String> entityAndColumnNameMap = myBatisMySqlInfo.getEntityAndColumnNameMap();
-            if (!JACGUtil.isMapEmpty(entityAndColumnNameMap)) {
+            if (!JavaCGUtil.isMapEmpty(entityAndColumnNameMap)) {
                 List<String> entityColumnNameList = new ArrayList<>(entityAndColumnNameMap.keySet());
                 Collections.sort(entityColumnNameList);
                 for (String entityColumnName : entityColumnNameList) {

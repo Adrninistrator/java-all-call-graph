@@ -4,7 +4,6 @@ import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldAnnotation;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,11 +57,11 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     public void testQueryAnnotationAttributes4Class() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             Map<String, BaseAnnotationAttribute> map = annotationHandler.queryAnnotationAttributes4Class(SpringServiceImplB2.class.getName(), Service.class.getName());
-            Assert.assertFalse(JACGUtil.isMapEmpty(map));
+            Assert.assertFalse(JavaCGUtil.isMapEmpty(map));
             printMapContent(map, SpringServiceImplB2.class.getName(), Service.class.getName());
 
             map = annotationHandler.queryAnnotationAttributes4Class(SpringServiceImplB2.class.getName(), Controller.class.getName());
-            Assert.assertTrue(JACGUtil.isMapEmpty(map));
+            Assert.assertTrue(JavaCGUtil.isMapEmpty(map));
             printMapContent(map, SpringServiceImplB2.class.getName(), Controller.class.getName());
         }
     }
@@ -75,7 +74,7 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
             printListContent(methodList, "methodList");
             for (String method : methodList) {
                 Map<String, BaseAnnotationAttribute> map = annotationHandler.queryMethodAnnotationAttributes(method, PostMapping.class.getName());
-                Assert.assertFalse(JACGUtil.isMapEmpty(map));
+                Assert.assertFalse(JavaCGUtil.isMapEmpty(map));
                 printMapContent(map, method, PostMapping.class.getName());
             }
         }
@@ -114,7 +113,7 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
             for (WriteDbData4FieldAnnotation fieldAnnotation : list) {
                 Map<String, BaseAnnotationAttribute> map = annotationHandler.queryAnnotationAttributes4Field(fieldAnnotation.getClassName(), fieldAnnotation.getFieldName(),
                         Resource.class.getName());
-                Assert.assertFalse(JACGUtil.isMapEmpty(map));
+                Assert.assertFalse(JavaCGUtil.isMapEmpty(map));
                 printMapContent(map, fieldAnnotation.getClassName(), fieldAnnotation.getFieldName(), Resource.class.getName());
             }
         }

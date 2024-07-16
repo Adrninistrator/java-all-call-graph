@@ -2,7 +2,7 @@ package test.runbycode.handler.fieldrelationship;
 
 import com.adrninistrator.jacg.handler.dto.field.JACGFieldMethodInfo;
 import com.adrninistrator.jacg.handler.fieldrelationship.FieldRelationshipHandler;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import test.callgraph.fieldrelationships.fra.FRADtoA;
@@ -28,11 +28,11 @@ public class TestQueryFieldMethodInfo extends TestRunByCodeBase {
     public void testQuery1() {
         try (FieldRelationshipHandler fieldRelationshipHandler = new FieldRelationshipHandler(configureWrapper)) {
             Map<String, JACGFieldMethodInfo> map1 = fieldRelationshipHandler.queryAllFieldMethodInfo(FRADtoA.class.getName(), true, false);
-            Assert.assertFalse(JACGUtil.isMapEmpty(map1));
+            Assert.assertFalse(JavaCGUtil.isMapEmpty(map1));
             printMapContent(map1, "get");
 
             Map<String, JACGFieldMethodInfo> map2 = fieldRelationshipHandler.queryAllFieldMethodInfo(FRADtoA.class.getName(), false, false);
-            Assert.assertFalse(JACGUtil.isMapEmpty(map2));
+            Assert.assertFalse(JavaCGUtil.isMapEmpty(map2));
             printMapContent(map2, "set");
         }
     }
@@ -41,11 +41,11 @@ public class TestQueryFieldMethodInfo extends TestRunByCodeBase {
     public void testQuery2() {
         try (FieldRelationshipHandler fieldRelationshipHandler = new FieldRelationshipHandler(configureWrapper)) {
             Map<String, JACGFieldMethodInfo> map1 = fieldRelationshipHandler.queryAllFieldMethodInfo(FRCDtoC.class.getName(), true, false);
-            Assert.assertFalse(JACGUtil.isMapEmpty(map1));
+            Assert.assertFalse(JavaCGUtil.isMapEmpty(map1));
             printMapContent(map1, "get");
 
             Map<String, JACGFieldMethodInfo> map2 = fieldRelationshipHandler.queryAllFieldMethodInfo(FRCDtoC.class.getName(), false, false);
-            Assert.assertFalse(JACGUtil.isMapEmpty(map2));
+            Assert.assertFalse(JavaCGUtil.isMapEmpty(map2));
             printMapContent(map2, "set");
         }
     }
@@ -54,11 +54,11 @@ public class TestQueryFieldMethodInfo extends TestRunByCodeBase {
     public void testQuery3() {
         try (FieldRelationshipHandler fieldRelationshipHandler = new FieldRelationshipHandler(configureWrapper)) {
             Map<String, JACGFieldMethodInfo> map1 = fieldRelationshipHandler.queryAllFieldMethodInfo(FRCDtoC.class.getName(), true, true);
-            Assert.assertFalse(JACGUtil.isMapEmpty(map1));
+            Assert.assertFalse(JavaCGUtil.isMapEmpty(map1));
             printMapContent(map1, "get");
 
             Map<String, JACGFieldMethodInfo> map2 = fieldRelationshipHandler.queryAllFieldMethodInfo(FRCDtoC.class.getName(), false, true);
-            Assert.assertFalse(JACGUtil.isMapEmpty(map2));
+            Assert.assertFalse(JavaCGUtil.isMapEmpty(map2));
             printMapContent(map2, "set");
         }
     }

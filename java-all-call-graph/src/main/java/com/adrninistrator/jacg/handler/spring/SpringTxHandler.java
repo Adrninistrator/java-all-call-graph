@@ -75,7 +75,7 @@ public class SpringTxHandler extends BaseHandler {
                 // 查询调用方法的Spring事务注解信息
                 Map<String, BaseAnnotationAttribute> transactionalAnnotationAttributeMap = annotationHandler.queryMethodAnnotationAttributes(callerFullMethod,
                         JACGCommonNameConstants.SPRING_TX_ANNOTATION);
-                if (!JACGUtil.isMapEmpty(transactionalAnnotationAttributeMap)) {
+                if (!JavaCGUtil.isMapEmpty(transactionalAnnotationAttributeMap)) {
                     callerWithSpringTx = true;
                     BaseAnnotationAttribute txPropagationAttribute = transactionalAnnotationAttributeMap.get(JACGCommonNameConstants.SPRING_TX_ATTRIBUTE_PROPAGATION);
                     callerTxPropagation = AnnotationAttributesParseUtil.getSpringTxAnnotationPropagation(txPropagationAttribute);
