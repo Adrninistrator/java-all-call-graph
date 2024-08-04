@@ -5,9 +5,14 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.classes.ClassNameAndAccessFlags;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ExtendsImpl;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
+import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
+import com.adrninistrator.jacg.handler.dto.classes.ClassNameAndAccessFlags;
+import com.adrninistrator.jacg.handler.dto.classes.ClassNameAndType;
+import com.adrninistrator.jacg.handler.dto.extendsimpl.ExtendsImplInfo;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
@@ -19,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,12 +51,18 @@ public class JACGExtendsImplHandler extends BaseHandler {
      */
     private final Map<String, Set<ClassNameAndAccessFlags>> allDownwardClassInfoMap = new ConcurrentHashMap<>();
 
+    protected ClassInfoHandler classInfoHandler;
+
     public JACGExtendsImplHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
+        if (!useNeo4j()) {
+            classInfoHandler = new ClassInfoHandler(dbOperWrapper);
+        }
     }
 
     public JACGExtendsImplHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
+        classInfoHandler = new ClassInfoHandler(dbOperWrapper);
     }
 
     /**
@@ -58,29 +71,17 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * @param upwardSimpleClassName 父类/接口的唯一类名
      */
     private void loadChildrenOrImplClassInfo(String upwardSimpleClassName) {
-        if (loadedDownwardSimpleClassNameSet.contains(upwardSimpleClassName)) {
-            return;
-        }
-
         logger.debug("向下加载父类/接口对应的子类/子接口/实现类 {}", upwardSimpleClassName);
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.EI_QUERY_DOWNWARD;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.EI_SIMPLE_CLASS_NAME, DC.EI_CLASS_NAME, DC.EI_ACCESS_FLAGS, DC.EI_EXISTS_DOWNWARD_CLASSES) +
-                    " from " + DbTableInfoEnum.DTIE_EXTENDS_IMPL.getTableName() +
-                    " where " + DC.EI_UPWARD_SIMPLE_CLASS_NAME + " = ?";
-            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
 
         Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.computeIfAbsent(upwardSimpleClassName, k -> ConcurrentHashMap.newKeySet());
 
         // 查询当前类的子类/子接口/实现类
-        List<String> downwardSimpleClassNameList = doLoadChildrenOrImplClassInfo(upwardSimpleClassName, sql, allClassNameAndAccessFlagsSet);
+        List<String> downwardSimpleClassNameList = doLoadChildrenOrImplClassInfo(upwardSimpleClassName, allClassNameAndAccessFlagsSet);
         while (!downwardSimpleClassNameList.isEmpty()) {
             List<String> allDownwardSimpleClassNameList = new ArrayList<>();
             // 继续查询子类/子接口/实现类
             for (String downwardSimpleClassName : downwardSimpleClassNameList) {
-                List<String> tmpDownwardSimpleClassNameList = doLoadChildrenOrImplClassInfo(downwardSimpleClassName, sql, allClassNameAndAccessFlagsSet);
+                List<String> tmpDownwardSimpleClassNameList = doLoadChildrenOrImplClassInfo(downwardSimpleClassName, allClassNameAndAccessFlagsSet);
                 allDownwardSimpleClassNameList.addAll(tmpDownwardSimpleClassNameList);
             }
 
@@ -94,13 +95,12 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * 执行向下加载父类/接口对应的子类/子接口/实现类
      *
      * @param simpleClassName
-     * @param sql
      * @param allClassNameAndAccessFlagsSet
      * @return 下一层子类/子接口/实现类名称列表
      */
-    private List<String> doLoadChildrenOrImplClassInfo(String simpleClassName, String sql, Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet) {
+    private List<String> doLoadChildrenOrImplClassInfo(String simpleClassName, Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet) {
         logger.debug("执行向下加载父类/接口对应的子类/子接口/实现类 {}", simpleClassName);
-        List<WriteDbData4ExtendsImpl> list = dbOperator.queryList(sql, WriteDbData4ExtendsImpl.class, simpleClassName);
+        List<WriteDbData4ExtendsImpl> list = queryDownloadBySimple(simpleClassName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
@@ -141,8 +141,10 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * @return false: 不存在继承或实现关系 true: 存在继承或实现关系
      */
     public boolean checkExtendsOrImplBySimple(String upwardSimpleClassName, String downwardSimpleClassName) {
-        // 向下加载父类/接口对应的子类/子接口/实现类
-        loadChildrenOrImplClassInfo(upwardSimpleClassName);
+        if (!loadedDownwardSimpleClassNameSet.contains(upwardSimpleClassName)) {
+            // 向下加载父类/接口对应的子类/子接口/实现类
+            loadChildrenOrImplClassInfo(upwardSimpleClassName);
+        }
 
         // 获取父类/接口对应的所有子类/子接口/实现类
         Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.get(upwardSimpleClassName);
@@ -211,8 +213,10 @@ public class JACGExtendsImplHandler extends BaseHandler {
             throw new JavaCGRuntimeException("参数指定包含非抽象类时，需要指定包含类");
         }
 
-        // 向下加载父类/接口对应的子类/子接口/实现类
-        loadChildrenOrImplClassInfo(superSimpleClassName);
+        if (!loadedDownwardSimpleClassNameSet.contains(superSimpleClassName)) {
+            // 向下加载父类/接口对应的子类/子接口/实现类
+            loadChildrenOrImplClassInfo(superSimpleClassName);
+        }
 
         // 获取父类/接口对应的所有子类/子接口/实现类
         Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.get(superSimpleClassName);
@@ -318,11 +322,11 @@ public class JACGExtendsImplHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        String upwardSimpleClassName = dbOperator.queryObjectOneColumn(sql, String.class, simpleClassName, JavaCGConstants.FILE_KEY_EXTENDS);
-        if (upwardSimpleClassName == null) {
+        String upwardClassName = dbOperator.queryObjectOneColumn(sql, String.class, simpleClassName, JavaCGConstants.FILE_KEY_EXTENDS);
+        if (upwardClassName == null) {
             logger.debug("未查询到指定类的父类 {}", simpleClassName);
         }
-        return upwardSimpleClassName;
+        return upwardClassName;
     }
 
     /**
@@ -343,5 +347,209 @@ public class JACGExtendsImplHandler extends BaseHandler {
         }
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);
         return dbOperator.queryListOneColumn(sql, String.class, simpleClassName, JavaCGConstants.FILE_KEY_IMPLEMENTS);
+    }
+
+    /**
+     * 根据类名向上查询对应的父类、实现的接口信息
+     *
+     * @param className
+     * @return
+     */
+    public List<ClassNameAndType> queryUpwardByClassName(String className) {
+        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.EI_QUERY_UPWARD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.EI_UPWARD_CLASS_NAME, DC.EI_UPWARD_SIMPLE_CLASS_NAME, DC.EI_TYPE) +
+                    " from " + DbTableInfoEnum.DTIE_EXTENDS_IMPL.getTableName() +
+                    " where " + DC.EI_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        List<WriteDbData4ExtendsImpl> writeDbData4ExtendsList = dbOperator.queryList(sql, WriteDbData4ExtendsImpl.class, simpleClassName);
+        if (JavaCGUtil.isCollectionEmpty(writeDbData4ExtendsList)) {
+            return Collections.emptyList();
+        }
+        List<ClassNameAndType> classNameAndTypesList = new ArrayList<>(writeDbData4ExtendsList.size());
+        for (WriteDbData4ExtendsImpl writeDbData4ExtendsImpl : writeDbData4ExtendsList) {
+            ClassInterfaceEnum classInterfaceEnum;
+            if (JavaCGConstants.FILE_KEY_IMPLEMENTS.equals(writeDbData4ExtendsImpl.getType())) {
+                classInterfaceEnum = ClassInterfaceEnum.CIE_INTERFACE;
+            } else {
+                // 查询父类的access_flags
+                classInterfaceEnum = classInfoHandler.queryClassInterfaceEnumBySimple(writeDbData4ExtendsImpl.getUpwardSimpleClassName());
+            }
+            ClassNameAndType classNameAndType = new ClassNameAndType(writeDbData4ExtendsImpl.getUpwardClassName(), classInterfaceEnum);
+            classNameAndTypesList.add(classNameAndType);
+        }
+        return classNameAndTypesList;
+    }
+
+    /**
+     * 向下查询继承/实现信息，使用完整类名
+     *
+     * @param className
+     * @return
+     */
+    private List<WriteDbData4ExtendsImpl> queryDownload(String className) {
+        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        return queryDownloadBySimple(simpleClassName);
+    }
+
+    /**
+     * 向下查询继承/实现信息，使用唯一类名
+     *
+     * @param simpleClassName
+     * @return
+     */
+    protected List<WriteDbData4ExtendsImpl> queryDownloadBySimple(String simpleClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.EI_QUERY_DOWNWARD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.EI_SIMPLE_CLASS_NAME, DC.EI_CLASS_NAME, DC.EI_ACCESS_FLAGS, DC.EI_EXISTS_DOWNWARD_CLASSES) +
+                    " from " + DbTableInfoEnum.DTIE_EXTENDS_IMPL.getTableName() +
+                    " where " + DC.EI_UPWARD_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4ExtendsImpl.class, simpleClassName);
+    }
+
+    /**
+     * 根据类名向下查询对应的子类、实现类信息
+     *
+     * @param className
+     * @return
+     */
+    public List<ClassNameAndType> queryDownwardByClassName(String className) {
+        List<WriteDbData4ExtendsImpl> writeDbData4ExtendsList = queryDownload(className);
+        if (JavaCGUtil.isCollectionEmpty(writeDbData4ExtendsList)) {
+            return Collections.emptyList();
+        }
+        List<ClassNameAndType> classNameAndTypesList = new ArrayList<>(writeDbData4ExtendsList.size());
+        for (WriteDbData4ExtendsImpl writeDbData4ExtendsImpl : writeDbData4ExtendsList) {
+            ClassInterfaceEnum classInterfaceEnum = JACGClassMethodUtil.getClassInterfaceEnum(writeDbData4ExtendsImpl.getAccessFlags());
+            ClassNameAndType classNameAndType = new ClassNameAndType(writeDbData4ExtendsImpl.getClassName(), classInterfaceEnum);
+            classNameAndTypesList.add(classNameAndType);
+        }
+        return classNameAndTypesList;
+    }
+
+    /**
+     * 从指定的类开始向上查询对应的继承与实现信息
+     *
+     * @param startClassName 指定的类名
+     * @return key 子类类名 value 当前类/接口的类型，及父类与实现接口的信息
+     */
+    public Map<String, ExtendsImplInfo> queryExtendsImplInfoUpward(String startClassName) {
+        return queryExtendsImplInfoUpDownward(startClassName, null, true);
+    }
+
+    // 从指定的类开始向上或向下查询对应的继承与实现信息
+    private Map<String, ExtendsImplInfo> queryExtendsImplInfoUpDownward(String startClassName, List<ClassNameAndType> startClassNameAndTypeList, boolean upward) {
+        Map<String, ExtendsImplInfo> resultMap = new HashMap<>();
+        Set<ClassNameAndType> classNameAndTypeSet = new HashSet<>();
+        if (startClassName != null) {
+            classNameAndTypeSet.add(new ClassNameAndType(startClassName, null));
+        } else {
+            classNameAndTypeSet.addAll(startClassNameAndTypeList);
+        }
+        while (true) {
+            Set<ClassNameAndType> tmpClassNameAndTypeSet = new HashSet<>();
+            for (ClassNameAndType classNameAndType : classNameAndTypeSet) {
+                Set<ClassNameAndType> returnClassNameAndTypeSet = queryExtendsImplInfoUpDownward(resultMap, classNameAndType, upward);
+                tmpClassNameAndTypeSet.addAll(returnClassNameAndTypeSet);
+            }
+            if (JavaCGUtil.isCollectionEmpty(tmpClassNameAndTypeSet)) {
+                break;
+            }
+            classNameAndTypeSet = tmpClassNameAndTypeSet;
+        }
+        return resultMap;
+    }
+
+    /**
+     * 执行从指定的类开始向上查询对应的继承与实现信息
+     *
+     * @param resultMap
+     * @param classNameAndType
+     * @return 下一次需要查询的类名列表，若为空则不需要再查询
+     */
+    private Set<ClassNameAndType> queryExtendsImplInfoUpDownward(Map<String, ExtendsImplInfo> resultMap, ClassNameAndType classNameAndType, boolean upward) {
+        Set<ClassNameAndType> newClassNameAndTypeSet = new HashSet<>();
+        String className = classNameAndType.getClassName();
+        if (resultMap.containsKey(className)) {
+            // 已经处理过的类不再处理
+            return newClassNameAndTypeSet;
+        }
+        // 根据类名查询对应的父类、实现的接口信息
+        List<ClassNameAndType> upDownwardClassInfoList;
+        if (upward) {
+            upDownwardClassInfoList = queryUpwardByClassName(className);
+        } else {
+            upDownwardClassInfoList = queryDownwardByClassName(className);
+        }
+        if (JavaCGUtil.isCollectionEmpty(upDownwardClassInfoList)) {
+            return newClassNameAndTypeSet;
+        }
+        ClassInterfaceEnum classInterfaceEnum = classInfoHandler.queryClassInterfaceEnum(className);
+        ExtendsImplInfo extendsImplInfo = new ExtendsImplInfo();
+        extendsImplInfo.setClassType(classInterfaceEnum);
+        extendsImplInfo.setExtendsImplClassInfoList(upDownwardClassInfoList);
+        resultMap.put(className, extendsImplInfo);
+
+        newClassNameAndTypeSet.addAll(upDownwardClassInfoList);
+        return newClassNameAndTypeSet;
+    }
+
+    /**
+     * 从指定的类开始向下查询对应的继承与实现信息
+     *
+     * @param startClassName 指定的类名
+     * @return key 父类/接口名称 value 当前类/接口的类型，及子类与实现类信息
+     */
+    public Map<String, ExtendsImplInfo> queryExtendsImplInfoDownward(String startClassName) {
+        return queryExtendsImplInfoUpDownward(startClassName, null, false);
+    }
+
+    /**
+     * 查询某个类的顶层父类或接口
+     *
+     * @param className
+     * @return
+     */
+    public List<ClassNameAndType> queryTopCLassList(String className) {
+        List<ClassNameAndType> classNameAndTypeList = new ArrayList<>();
+        Map<String, ExtendsImplInfo> resultMap = new HashMap<>();
+        Set<ClassNameAndType> classNameAndTypeSet = new HashSet<>();
+        classNameAndTypeSet.add(new ClassNameAndType(className, null));
+        while (true) {
+            Set<ClassNameAndType> tmpClassNameAndTypeSet = new HashSet<>();
+            for (ClassNameAndType classNameAndType : classNameAndTypeSet) {
+                Set<ClassNameAndType> returnClassNameAndTypeSet = queryExtendsImplInfoUpDownward(resultMap, classNameAndType, true);
+                tmpClassNameAndTypeSet.addAll(returnClassNameAndTypeSet);
+                if (JavaCGUtil.isCollectionEmpty(returnClassNameAndTypeSet)) {
+                    // 当前类向上未查询到父类或实现接口
+                    classNameAndTypeList.add(classNameAndType);
+                }
+            }
+            if (JavaCGUtil.isCollectionEmpty(tmpClassNameAndTypeSet)) {
+                break;
+            }
+            classNameAndTypeSet = tmpClassNameAndTypeSet;
+        }
+        return classNameAndTypeList;
+    }
+
+    /**
+     * 从指定的类的所有顶层父类/接口开始向下查询对应的继承与实现信息
+     *
+     * @param startClassName 指定的类名
+     * @return key 父类/接口名称 value 当前类/接口的类型，及子类与实现类信息
+     */
+    public Map<String, ExtendsImplInfo> queryExtendsImplInfoDownwardFromTop(String startClassName) {
+        List<ClassNameAndType> topClassNameAndTypeList = queryTopCLassList(startClassName);
+        if (JavaCGUtil.isCollectionEmpty(topClassNameAndTypeList)) {
+            return Collections.emptyMap();
+        }
+        return queryExtendsImplInfoUpDownward(null, topClassNameAndTypeList, false);
     }
 }

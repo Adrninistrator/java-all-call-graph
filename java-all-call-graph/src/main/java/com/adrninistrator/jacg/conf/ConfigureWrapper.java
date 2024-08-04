@@ -444,6 +444,7 @@ public class ConfigureWrapper {
             if (ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER == mainConfig
                     || ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED == mainConfig
                     || ConfigKeyEnum.CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP == mainConfig
+                    || ConfigKeyEnum.CKE_CALL_GRAPH_GEN_JSON_CALLER == mainConfig
             ) {
                 // 当前参数允许为空，默认为false
                 return Boolean.FALSE;
@@ -657,8 +658,15 @@ public class ConfigureWrapper {
         copied.usedOtherListConfigSet = new HashSet<>(this.usedOtherListConfigSet);
         copied.usedOtherSetConfigSet = new HashSet<>(this.usedOtherSetConfigSet);
         copied.mainConfigMap = new HashMap<>(this.mainConfigMap);
-        copied.otherConfigSetMap = new HashMap<>(this.otherConfigSetMap);
+        // 以下的Map的value为List或Set，也需要进行复制
+        copied.otherConfigSetMap = new HashMap<>();
+        for (Map.Entry<String, Set<String>> entry : this.otherConfigSetMap.entrySet()) {
+            copied.otherConfigSetMap.put(entry.getKey(), new HashSet<>(entry.getValue()));
+        }
         copied.otherConfigListMap = new HashMap<>(this.otherConfigListMap);
+        for (Map.Entry<String, List<String>> entry : this.otherConfigListMap.entrySet()) {
+            copied.otherConfigListMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+        }
         // 不拷贝DbOperWrapper dbOperWrapper字段
         return copied;
     }

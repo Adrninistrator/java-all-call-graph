@@ -162,7 +162,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         }
 
         boolean genSeparateStack = false;
-        if (OutputDetailEnum.ODE_1.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, true))) {
+        if (OutputDetailEnum.ODE_1.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL))) {
             logger.info("生成调用链时的详细程度是详细，后续会为每个调用堆栈生成独立的文件");
             genSeparateStack = true;
         } else {

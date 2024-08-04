@@ -16,5 +16,6 @@ log/*.log
 log/*.gz
 src/test/resources/_jacg_config/
 src/test/resources/_jacg_find_stack_keyword/
+src/test/resources/ogm.properties
 src/test/resources/_jacg_jar_diff_callee_graph/
 runlocal/

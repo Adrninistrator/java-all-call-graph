@@ -14,6 +14,7 @@ public class JACGConstants {
     public static final String DIR_OUTPUT_STACK = "_stack";
     public static final String DIR_OUTPUT_STACK_SEPARATE = "_separate";
     public static final String DIR_KEYWORDS_NOT_FOUND = "_keywords_not_found";
+    public static final String DIR_OUTPUT_JSON = "_json";
     public static final String DIR_OUTPUT_UNITTEST = "_unittest_output";
 
     // 保存全部的配置参数信息文件
@@ -75,6 +76,7 @@ public class JACGConstants {
     public static final String EXT_CLASS = ".class";
     public static final String EXT_XML = ".xml";
     public static final String EXT_PROPERTIES = ".properties";
+    public static final String EXT_JSON = ".json";
 
     // 调用链文件中，每个级别之间的缩进，两个空格
     public static final String OUTPUT_SPLIT_FLAG = FLAG_SPACE + FLAG_SPACE;
@@ -99,11 +101,11 @@ public class JACGConstants {
     public static final int NO_CYCLE_CALL_FLAG = -1;
 
     // 允许使用的最大线程数
-    public static final int MAX_THREAD_NUM = 100;
+    public static final int MAX_THREAD_NUM = 1000;
     // 生成调用链文件时，记录数达到多少以后打印日志
     public static final int NOTICE_LINE_NUM = 5000;
     // 批量写入数据库时每次插入的数量允许的最大值
-    public static final int MAX_DB_INSERT_BATCH_SIZE = 5000;
+    public static final int MAX_DB_INSERT_BATCH_SIZE = 50000;
     // 数据库分页操作数量
     public static final int DB_PAGE_HANDLE_SIZE = 1000;
     public static final int DB_PAGE_HANDLE_SIZE_MINUS_1 = DB_PAGE_HANDLE_SIZE - 1;

@@ -125,17 +125,6 @@ public abstract class BaseTarGzUnpacker {
     protected abstract boolean handleOtherFileInTar(TarInputStream inputStream, TarEntry tarEntry);
 
     /**
-     * 根据文件路径获取文件名
-     *
-     * @param filePath
-     * @return
-     */
-    protected String getFileNameFromPath(String filePath) {
-        String[] nameArray = StringUtils.split(filePath, "/");
-        return nameArray[nameArray.length - 1];
-    }
-
-    /**
      * 判断指定的文件类型是否为.class
      *
      * @param fileName

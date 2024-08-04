@@ -120,8 +120,8 @@ public class MethodCallHandler extends BaseHandler {
      * 使用自定义框架导致方法调用关系在字节码中缺失时使用，例如使用XML、注解等方式的情况
      * 当前方法不允许并发调用
      *
-     * @param callerFullMethod 调用者完整方法
-     * @param calleeFullMethod 被调用者完整方法
+     * @param callerFullMethod 调用方完整方法
+     * @param calleeFullMethod 被调用方完整方法
      * @return
      */
     public synchronized boolean manualAddMethodCall(String callerFullMethod, String calleeFullMethod) {
@@ -187,7 +187,7 @@ public class MethodCallHandler extends BaseHandler {
     }
 
     /**
-     * 根据调用者完整方法HASH+长度，从方法调用表获取对应的完整方法
+     * 根据调用方完整方法HASH+长度，从方法调用表获取对应的完整方法
      *
      * @param methodHash 完整方法HASH+长度
      * @return
@@ -204,13 +204,13 @@ public class MethodCallHandler extends BaseHandler {
         }
         String callerFullMethod = dbOperator.queryObjectOneColumn(sql, String.class, methodHash);
         if (callerFullMethod == null) {
-            logger.warn("根据调用者完整方法HASH+长度未找到完整方法 {}", methodHash);
+            logger.warn("根据调用方完整方法HASH+长度未找到完整方法 {}", methodHash);
         }
         return callerFullMethod;
     }
 
     /**
-     * 根据被调用者完整方法HASH+长度，从方法调用表获取对应的完整方法
+     * 根据被调用方完整方法HASH+长度，从方法调用表获取对应的完整方法
      *
      * @param methodHash 完整方法HASH+长度
      * @return
@@ -227,7 +227,7 @@ public class MethodCallHandler extends BaseHandler {
         }
         String calleeFullMethod = dbOperator.queryObjectOneColumn(sql, String.class, methodHash);
         if (calleeFullMethod == null) {
-            logger.warn("根据被调用者完整方法HASH+长度未找到完整方法 {}", methodHash);
+            logger.warn("根据被调用方完整方法HASH+长度未找到完整方法 {}", methodHash);
         }
         return calleeFullMethod;
     }
@@ -331,7 +331,7 @@ public class MethodCallHandler extends BaseHandler {
     }
 
     /**
-     * 查询调用方法时包含指定方法调用业务功能数据的调用者完整方法
+     * 查询调用方法时包含指定方法调用业务功能数据的调用方完整方法
      *
      * @param dataTypeList    方法调用业务功能数据类型，可指定多个，关系为或（in xxx）
      * @param dataKeywordList 方法调用业务功能数据关键字，可指定多个，关系为且（like xxx and like xxx）

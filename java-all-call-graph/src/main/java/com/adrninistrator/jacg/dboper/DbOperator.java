@@ -299,7 +299,7 @@ public class DbOperator implements AutoCloseable {
     }
 
     /**
-     * 指量写入数据库
+     * 批量写入数据库
      *
      * @param sql
      * @param argumentList

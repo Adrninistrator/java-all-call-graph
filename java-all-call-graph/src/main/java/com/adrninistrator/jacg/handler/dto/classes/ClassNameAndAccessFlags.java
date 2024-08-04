@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.dto.classes;
+package com.adrninistrator.jacg.handler.dto.classes;
 
 import java.util.Objects;
 

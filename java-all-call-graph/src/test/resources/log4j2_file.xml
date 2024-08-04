@@ -30,5 +30,12 @@
             <AppenderRef ref="console" />
             <AppenderRef ref="async" />
         </AsyncLogger>
+
+        <Logger name="org.neo4j.ogm.drivers.bolt.response.BoltResponse" level="off" additivity="false"/>
+
+<!--        <Logger name="org.springframework.data.neo4j" level="info" additivity="false">-->
+<!--            <AppenderRef ref="console"/>-->
+<!--            <AppenderRef ref="async" />-->
+<!--        </Logger>-->
     </Loggers>
 </Configuration>

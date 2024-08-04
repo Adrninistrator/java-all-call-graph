@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.unpacker.targz;
 
 import com.adrninistrator.jacg.unpacker.common.enums.JarFileLocationEnum;
 import com.adrninistrator.jacg.unpacker.dto.JarPackagePrefixInfo;
+import com.adrninistrator.jacg.util.JACGFileUtil;
 import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import net.lingala.zip4j.model.LocalFileHeader;
 import org.apache.tools.tar.TarEntry;
@@ -259,7 +260,7 @@ public class TarGzRecorder extends BaseTarGzUnpacker {
     private void setWarOrOuterJarFileName(JarPackagePrefixInfo jarPackagePrefixInfo, String warOrOuterJarFileName) {
         jarPackagePrefixInfo.setWarOrOuterJarFileName(warOrOuterJarFileName);
         if (!warOrOuterJarFileName.isEmpty()) {
-            jarPackagePrefixInfo.setWarOrOuterJarFileOnlyName(getFileNameFromPath(warOrOuterJarFileName));
+            jarPackagePrefixInfo.setWarOrOuterJarFileOnlyName(JACGFileUtil.getFileNameFromPathInJar(warOrOuterJarFileName));
         }
     }
 
@@ -267,7 +268,7 @@ public class TarGzRecorder extends BaseTarGzUnpacker {
     private void setJarFileName(JarPackagePrefixInfo jarPackagePrefixInfo, String jarFileName) {
         jarPackagePrefixInfo.setJarFileName(jarFileName);
         if (!jarFileName.isEmpty()) {
-            jarPackagePrefixInfo.setJarFileOnlyName(getFileNameFromPath(jarFileName));
+            jarPackagePrefixInfo.setJarFileOnlyName(JACGFileUtil.getFileNameFromPathInJar(jarFileName));
         }
     }
 }

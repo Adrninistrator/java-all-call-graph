@@ -29,6 +29,7 @@ import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SetMethodAssignInfo;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGFieldRelationshipTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
@@ -125,11 +126,11 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             logger.error("出现异常 ", e);
             return false;
         } finally {
+            // 写入最后的数据
             writeDbHandler4SetMethodAssignInfo.afterHandle();
             // 人工增加get/set方法字段关联关系后的处理
             manualAddFieldRelationshipHandler.afterAdd();
-            double spendTime = (System.currentTimeMillis() - startTime) / 1000.0D;
-            logger.info("处理通过方法调用传递的get/set方法关联关系-处理完毕，耗时: {} 秒", spendTime);
+            logger.info("处理通过方法调用传递的get/set方法关联关系-处理完毕，耗时: {} 秒", JACGUtil.getSpendSeconds(startTime));
         }
     }
 

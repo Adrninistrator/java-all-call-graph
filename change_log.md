@@ -567,3 +567,21 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 ## 1.14. (1.0.15)临时说明
 
 支持Spring Controller类上只有@Controller类注解，没有@RequestMapping类注解情况的情况
+
+## 1.15. (2.0.0)临时说明
+
+支持识别通过dto的get/set方法关联的字段关联关系
+
+## 1.16. (2.0.1)临时说明
+
+支持处理类的签名中的泛型信息
+
+## 1.17. (2.0.2)临时说明
+
+支持处理类的签名中继承或实现的泛型关系
+
+## 1.18. (2.0.3)临时说明
+
+支持将java-callgraph2生成的文件的数据保存到Neo4j图数据库
+
+支持读取Neo4j保存的方法调用数据，生成向下的完整方法调用链

@@ -314,6 +314,26 @@ public class JACGUtil {
         return packageName.replace('.', '/');
     }
 
+    /**
+     * 获得经过的时间秒数
+     *
+     * @param startTime
+     * @return
+     */
+    public static double getSpendSeconds(long startTime) {
+        return getSecondsFromMilli(System.currentTimeMillis() - startTime);
+    }
+
+    /**
+     * 将耗时的毫秒数改为秒
+     *
+     * @param spendTime
+     * @return
+     */
+    public static double getSecondsFromMilli(long spendTime) {
+        return spendTime / 1000.0D;
+    }
+
     private JACGUtil() {
         throw new IllegalStateException("illegal");
     }

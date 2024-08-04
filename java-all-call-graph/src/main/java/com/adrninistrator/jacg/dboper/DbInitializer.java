@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.DbConfInfo;
+import com.adrninistrator.jacg.neo4j.dboper.Neo4jDbOperWrapper;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import org.slf4j.Logger;
@@ -26,6 +27,25 @@ public class DbInitializer {
      * @return
      */
     public static DbOperWrapper genDbOperWrapper(ConfigureWrapper configureWrapper, Object callerObject) {
+        return genDbOperWrapper(configureWrapper, false, callerObject);
+    }
+
+    /**
+     * 创建数据库操作包装类DbOperWrapper实例
+     *
+     * @param configureWrapper 配置参数类
+     * @param useNeo4j         是否使用neo4j
+     * @param callerObject     调用当前方法的对象
+     * @return
+     */
+    public static DbOperWrapper genDbOperWrapper(ConfigureWrapper configureWrapper, boolean useNeo4j, Object callerObject) {
+        if (!useNeo4j) {
+            return genDbOperWrapperDb(configureWrapper, callerObject);
+        }
+        return genDbOperWrapperNeo4j(configureWrapper);
+    }
+
+    private static DbOperWrapper genDbOperWrapperDb(ConfigureWrapper configureWrapper, Object callerObject) {
         String callerSimpleClassName = callerObject.getClass().getSimpleName();
         DbConfInfo dbConfInfo = new DbConfInfo();
         String appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
@@ -78,6 +98,14 @@ public class DbInitializer {
         // 记录数据库操作对象
         configureWrapper.setDbOperWrapper(dbOperWrapper);
         return dbOperWrapper;
+    }
+
+    private static DbOperWrapper genDbOperWrapperNeo4j(ConfigureWrapper configureWrapper) {
+        String appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
+        int dbInsertBatchSize = 5000;
+        logger.info("使用neo4j时批量插入数量使用 {}", dbInsertBatchSize);
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, String.valueOf(dbInsertBatchSize));
+        return new Neo4jDbOperWrapper(appName, dbInsertBatchSize);
     }
 
     private DbInitializer() {

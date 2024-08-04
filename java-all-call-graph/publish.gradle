@@ -4,6 +4,8 @@ apply plugin: 'signing'
 apply from: 'build.gradle'
 
 task sourcesJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    
     doFirst {
         archiveClassifier.set('sources')
         from sourceSets.main.allJava

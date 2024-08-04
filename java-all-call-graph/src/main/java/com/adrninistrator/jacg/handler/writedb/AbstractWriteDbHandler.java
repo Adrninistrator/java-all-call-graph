@@ -8,6 +8,8 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
+import com.adrninistrator.jacg.neo4j.util.JACGNeo4jUtil;
+import com.adrninistrator.jacg.spring.context.SpringContextManager;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
@@ -21,6 +23,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -41,8 +45,6 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractWriteDbHandler.class);
 
     protected final String currentSimpleClassName = this.getClass().getSimpleName();
-
-    private final WriteDbResult writeDbResult;
 
     // 是否需要读取java-callgraph2生成的文件
     private final boolean readFile;
@@ -96,10 +98,12 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     private DbOperator dbOperator;
 
+    protected String appName;
+
     // 需要处理的包名/类名前缀
     private Set<String> allowedClassPrefixSet;
 
-    private ThreadPoolExecutor threadPoolExecutor;
+    protected ThreadPoolExecutor threadPoolExecutor;
 
     // 任务最大队列数
     private int taskQueueMaxSize;
@@ -108,7 +112,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     private int recordId = 0;
 
     // 保存需要写入数据库的数据列表
-    private List<T> dataList;
+    protected List<T> dataList;
 
     // 用于统计序号的Map
     private Map<String, Integer> seqMap;
@@ -116,13 +120,20 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     // 若当前实例不是从文件读取，则将获取的信息写入对应文件
     protected Writer fileWriter;
 
+    protected Neo4jRepository neo4jRepository;
+
+    protected ApplicationContext applicationContext;
+
     public AbstractWriteDbHandler(WriteDbResult writeDbResult) {
-        this.writeDbResult = writeDbResult;
 
         JACGWriteDbHandler jacgWriteDbHandler = this.getClass().getAnnotation(JACGWriteDbHandler.class);
         if (jacgWriteDbHandler == null) {
-            logger.error("类缺少注解 {} {}", currentSimpleClassName, JACGWriteDbHandler.class.getName());
-            throw new JavaCGRuntimeException("类缺少注解");
+            // 假如类上未获取到注解，则使用父类上的
+            jacgWriteDbHandler = this.getClass().getSuperclass().getAnnotation(JACGWriteDbHandler.class);
+        }
+        if (jacgWriteDbHandler == null) {
+            logger.error("类及父类缺少注解 {} {}", currentSimpleClassName, JACGWriteDbHandler.class.getName());
+            throw new JavaCGRuntimeException("类及父类缺少注解");
         }
 
         // 是否需要读取文件
@@ -210,12 +221,35 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         }
     }
 
+    // 是否使用neo4j
+    protected boolean useNeo4j() {
+        return false;
+    }
+
+    // 使用neo4j时，选择当前类使用的Neo4jRepository
+    protected Class<Neo4jRepository> chooseNeo4jRepository() {
+        throw new JavaCGRuntimeException("子类需要重载当前方法 " + currentSimpleClassName);
+    }
+
+    // 使用neo4j时，将当前解析的数据转换为Neo4jDomain
+    protected Object transferNeo4jDomain(T data) {
+        throw new JavaCGRuntimeException("子类需要重载当前方法 " + currentSimpleClassName);
+    }
+
     /**
      * 自定义初始化操作
      */
-    public void init() {
+    public void init(WriteDbResult writeDbResult) {
         dataList = new ArrayList<>(dbInsertBatchSize);
         inited = true;
+
+        if (useNeo4j()) {
+            applicationContext = SpringContextManager.getApplicationContext();
+            Class<Neo4jRepository> neo4jRepositoryClass = chooseNeo4jRepository();
+            neo4jRepository = applicationContext.getBean(neo4jRepositoryClass);
+        }
+
+        writeDbResult.getWriteDbHandlerMap().put(currentSimpleClassName, this);
     }
 
     /**
@@ -325,7 +359,19 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         if (!readFile && fileWriter != null) {
             IOUtils.closeQuietly(fileWriter);
         }
-        writeDbResult.getAfterHandleMap().put(currentSimpleClassName, Boolean.TRUE);
+    }
+
+    /**
+     * 最后的检查
+     *
+     * @return true: 通过 false: 未通过
+     */
+    public boolean finalCheck() {
+        if (!dataList.isEmpty()) {
+            logger.error("{} 存在 {} 条数据还未入数据库，在结束前需要调用 afterHandle 方法写入数据库", currentSimpleClassName, dataList.size());
+            return false;
+        }
+        return true;
     }
 
     private void checkInited() {
@@ -345,6 +391,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         checkInited();
 
         String filePath = mainFile ? javaCGOutputInfo.getMainFilePath(mainFileTypeEnum) : javaCGOutputInfo.getOtherFilePath(otherFileName);
+        logger.info("{} 开始处理文件 {}", currentSimpleClassName, filePath);
         try (BufferedReader br = JavaCGFileUtil.genBufferedReader(filePath)) {
             // 执行开始之前的操作
             beforeHandle(javaCGOutputInfo.getOutputDirPath());
@@ -375,7 +422,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
             return !checkFailed();
         } catch (Exception e) {
-            logger.error("error ", e);
+            logger.error("出现异常 {} ", currentSimpleClassName, e);
             return false;
         } finally {
             // 执行完成之后的操作
@@ -387,8 +434,6 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
      * 尝试将数据写入数据库
      */
     public void tryInsertDb() {
-        checkInited();
-
         if (dataList.size() >= dbInsertBatchSize) {
             insertDb();
         }
@@ -420,44 +465,100 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         if (logger.isDebugEnabled()) {
             logger.debug("写入数据库 {} {}", currentSimpleClassName, dataList.size());
         }
-        // 生成用于插入数据的sql语句
-        String sql = dbOperWrapper.genAndCacheInsertSql(dbTableInfoEnum, DbInsertMode.DIME_INSERT);
 
-        // 根据需要写入的数据生成Object数组
-        List<Object[]> objectList = new ArrayList<>(dataList.size());
-        for (T data : dataList) {
-            // genObjectArray()方法在当前线程中执行，没有线程安全问题
-            Object[] objects = genObjectArray(data);
-            if (!readFile) {
-                if (fileWriter == null) {
-                    logger.error("写入文件的对象未生成，需要先调用 beforeHandle 方法创建 {}", currentSimpleClassName);
-                    failNum.addAndGet();
-                    throw new JavaCGRuntimeException("写入文件的对象未生成，需要先调用 beforeHandle 方法创建");
-                }
-
-                try {
-                    fileWriter.write(StringUtils.join(objects, JavaCGConstants.FLAG_TAB) + JavaCGConstants.NEW_LINE);
-                } catch (Exception e) {
-                    logger.error("写文件出现异常 {} ", currentSimpleClassName, e);
-                }
-            }
-            objectList.add(objects);
+        if (!readFile && fileWriter == null) {
+            logger.error("写入文件的对象未生成，需要先调用 beforeHandle 方法创建 {}", currentSimpleClassName);
+            failNum.addAndGet();
+            throw new JavaCGRuntimeException("写入文件的对象未生成，需要先调用 beforeHandle 方法创建");
         }
 
         // 等待直到允许任务执行
         JACGUtil.wait4TPEExecute(threadPoolExecutor, taskQueueMaxSize);
 
+        if (!useNeo4j() || !readFile) {
+            // 不使用neo4j，或都不需要读取文件时，处理相关数据
+            // 根据需要写入的数据生成Object数组
+            List<Object[]> objectList = new ArrayList<>(dataList.size());
+            for (T data : dataList) {
+                // genObjectArray()方法在当前线程中执行，没有线程安全问题
+                Object[] objects = genObjectArray(data);
+                if (!readFile) {
+                    try {
+                        fileWriter.write(StringUtils.join(objects, JavaCGConstants.FLAG_TAB) + JavaCGConstants.NEW_LINE);
+                    } catch (Exception e) {
+                        logger.error("写文件出现异常 {} ", currentSimpleClassName, e);
+                    }
+                }
+                objectList.add(objects);
+            }
+            if (!useNeo4j()) {
+                // 不使用neo4j时，执行插入操作
+                doInsertDb(objectList);
+            }
+        }
+        if (useNeo4j()) {
+            // 使用neo4j时，执行插入操作
+            doInsertNeo4j();
+        }
+        dataList.clear();
+    }
+
+    private void doInsertDb(List<Object[]> objectList) {
+        if (dbOperator == null) {
+            logger.error("dbOperator为空 {}", currentSimpleClassName);
+            throw new JavaCGRuntimeException("dbOperator为空");
+        }
+
+        // 生成用于插入数据的sql语句
+        String sql = dbOperWrapper.genAndCacheInsertSql(dbTableInfoEnum, DbInsertMode.DIME_INSERT);
+
         threadPoolExecutor.execute(() -> {
-            // 指量写入数据库
+            // 批量写入数据库
             try {
                 if (!dbOperator.batchInsert(sql, objectList)) {
                     failNum.addAndGet();
                 }
             } catch (JACGSQLException e) {
+                logger.error("{} 出现异常 ", currentSimpleClassName, e);
                 failNum.addAndGet();
             }
         });
-        dataList.clear();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void doInsertNeo4j() {
+        List<T> usedDataList = new ArrayList<>(dataList);
+
+        // 在线程池中执行插入neo4j数据操作
+        threadPoolExecutor.execute(() -> {
+            try {
+                if (handleNeo4jDataList(usedDataList)) {
+                    // 写入neo4j的数据的自定义处理
+                    return;
+                }
+
+                // 写入neo4j数据不执行自定义处理，执行统一的处理
+                List<Object> neo4jDomainList = new ArrayList<>(usedDataList.size());
+                for (T data : usedDataList) {
+                    Object neo4jDomain = transferNeo4jDomain(data);
+                    neo4jDomainList.add(neo4jDomain);
+                }
+                JACGNeo4jUtil.saveAll(neo4jRepository, neo4jDomainList);
+            } catch (Exception e) {
+                logger.error("出现异常 {} ", currentSimpleClassName, e);
+                failNum.addAndGet();
+            }
+        });
+    }
+
+    /**
+     * 处理需要写入neo4j的数据的自定义处理
+     *
+     * @param dataList
+     * @return true: 进行自定义处理 false: 不进行自定义处理
+     */
+    protected boolean handleNeo4jDataList(List<T> dataList) {
+        return false;
     }
 
     /**
@@ -582,6 +683,10 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     public void setDbInsertBatchSize(int dbInsertBatchSize) {
         this.dbInsertBatchSize = dbInsertBatchSize;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     public void setAllowedClassPrefixSet(Set<String> allowedClassPrefixSet) {

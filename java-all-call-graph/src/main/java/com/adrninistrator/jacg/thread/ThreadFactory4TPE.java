@@ -13,6 +13,8 @@ public class ThreadFactory4TPE implements ThreadFactory {
 
     private static final AtomicInteger ai = new AtomicInteger(0);
 
+    private final JACGUncaughtExceptionHandler jacgUncaughtExceptionHandler = new JACGUncaughtExceptionHandler();
+
     private final String threadNamePrefix;
 
     public ThreadFactory4TPE(String threadNamePrefix) {
@@ -23,10 +25,14 @@ public class ThreadFactory4TPE implements ThreadFactory {
     public Thread newThread(Runnable r) {
         Thread thread = new Thread(r);
         thread.setName(threadNamePrefix + "-" + ai.addAndGet(1));
-        thread.setUncaughtExceptionHandler(LogUncaughtExceptionHandler.getInstance());
+        thread.setUncaughtExceptionHandler(jacgUncaughtExceptionHandler);
         // 设置线程为非守护线程
         thread.setDaemon(false);
 
         return thread;
+    }
+
+    public int getExceptionCount() {
+        return jacgUncaughtExceptionHandler.getExceptionCount();
     }
 }

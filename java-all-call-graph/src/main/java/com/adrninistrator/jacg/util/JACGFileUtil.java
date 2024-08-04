@@ -527,6 +527,17 @@ public class JACGFileUtil {
         }
     }
 
+    /**
+     * 将文件路径中的分隔符替换为.
+     *
+     * @param filePath
+     * @return
+     */
+    public static String replaceFileSeparator2Dot(String filePath) {
+        String tmp = StringUtils.replace(filePath, "\\", ".");
+        return StringUtils.replace(tmp, "/", ".");
+    }
+
     private JACGFileUtil() {
         throw new IllegalStateException("illegal");
     }

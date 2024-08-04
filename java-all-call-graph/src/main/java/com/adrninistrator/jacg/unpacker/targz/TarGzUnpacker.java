@@ -388,7 +388,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
             // 未指定需要解压.jar的文件名前缀
             return true;
         }
-        String jarOnlyFileName = getFileNameFromPath(jarNameOfTarWarEntry);
+        String jarOnlyFileName = JACGFileUtil.getFileNameFromPathInJar(jarNameOfTarWarEntry);
         // 判断.tar.gz中的.jar文件名前缀是否需要解压
         for (String unpackJarNamePrefix : unpackJarNamePrefixList) {
             if (jarOnlyFileName.startsWith(unpackJarNamePrefix)) {
@@ -409,7 +409,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
      * @return
      */
     private boolean checkUnpackJarByPackagePrefix(Set<String> jarPackagePrefixSet, String jarName) {
-        String jarOnlyFileName = getFileNameFromPath(jarName);
+        String jarOnlyFileName = JACGFileUtil.getFileNameFromPathInJar(jarName);
         List<String> jarPackagePrefixList = new ArrayList<>(jarPackagePrefixSet);
         if (jarPackagePrefixList.isEmpty()) {
             jarPackagePrefixList.add("");

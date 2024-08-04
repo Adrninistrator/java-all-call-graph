@@ -39,6 +39,7 @@ public class TestRBCComposite extends TestRunByCodeBase {
 
         configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 FindCallStackTrace.class.getSimpleName() + JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER);
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_JSON_CALLER, Boolean.TRUE.toString());
         runFindCallStackTraceAndCheck(new FindCallStackTrace(false, configureWrapperCopy));
     }
 

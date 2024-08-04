@@ -104,7 +104,7 @@ public class FieldRelationshipHandler extends BaseHandler {
     }
 
     /**
-     * 根据get/set方法对应的类名、方法名，查询通过这些方法进行赋值的调用者方法
+     * 根据get/set方法对应的类名、方法名，查询通过这些方法进行赋值的调用方方法
      *
      * @param getClassName  get方法类名
      * @param getMethodName get方法名

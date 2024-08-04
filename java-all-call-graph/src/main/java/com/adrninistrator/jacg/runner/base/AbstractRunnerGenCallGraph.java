@@ -74,12 +74,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 配置文件中指定的需要处理的任务
     protected Set<String> taskSet;
 
-    /*
-        key: 配置文件中指定的类名
-        value: 对应的简单类名或完整类名
-     */
-    protected Map<String, String> simpleClassNameMap = new HashMap<>();
-
     // 当方法调用类型在以下Set中时，生成方法完整调用链时忽略
     protected Set<String> ignoreCallTypeSet;
 
@@ -162,6 +156,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         super(configureWrapper);
     }
 
+    protected boolean handleDb() {
+        return true;
+    }
+
     // 公共预处理
     protected boolean commonPreHandle() {
         outputDetailEnum = OutputDetailEnum.getFromDetail(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL));
@@ -171,41 +169,43 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return false;
         }
 
-        // 初始相关处理类
-        annotationHandler = new AnnotationHandler(dbOperWrapper);
-        methodCallHandler = new MethodCallHandler(dbOperWrapper);
-        lambdaMethodHandler = new LambdaMethodHandler(dbOperWrapper);
+        if (!useNeo4j()) {
+            // 初始相关处理类
+            annotationHandler = new AnnotationHandler(dbOperWrapper);
+            methodCallHandler = new MethodCallHandler(dbOperWrapper);
+            lambdaMethodHandler = new LambdaMethodHandler(dbOperWrapper);
 
-        if (!Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED))) {
-            logger.info("不检查jar包文件是否有变化");
-        } else {
-            // 检查jar包文件是否有变化
-            List<String> jarPathList = getJarPathList();
-            if (checkSomeJarModified(jarPathList)) {
-                logger.error("请先执行 {} 类导入数据库\n假如不需要检查jar包文件是否有变化，可修改配置文件 {} 参数值 {} 为 {}",
-                        RunnerWriteDb.class.getSimpleName(), ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED.getFileName(),
-                        ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED.getKey(), Boolean.FALSE);
+            if (!Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED))) {
+                logger.info("不检查jar包文件是否有变化");
+            } else {
+                // 检查jar包文件是否有变化
+                List<String> jarPathList = getJarPathList();
+                if (checkSomeJarModified(jarPathList)) {
+                    logger.error("请先执行 {} 类导入数据库\n假如不需要检查jar包文件是否有变化，可修改配置文件 {} 参数值 {} 为 {}",
+                            RunnerWriteDb.class.getSimpleName(), ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED.getFileName(),
+                            ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED.getKey(), Boolean.FALSE);
+                    return false;
+                }
+            }
+
+            // 检查允许处理的类名或包名前缀是否有变化
+            if (checkAllowedClassPrefixModified()) {
+                return false;
+            }
+
+            // 添加用于添加对方法上的注解进行处理的类
+            if (!addMethodAnnotationHandlerExtensions()) {
+                return false;
+            }
+
+            // 初始化默认的处理业务功能数据的类
+            if (!initDefaultBusinessDataHandler()) {
                 return false;
             }
         }
 
-        // 检查允许处理的类名或包名前缀是否有变化
-        if (checkAllowedClassPrefixModified()) {
-            return false;
-        }
-
         // 获取生成方法完整调用链时需要忽略的信息
         if (!initIgnoreInfo()) {
-            return false;
-        }
-
-        // 添加用于添加对方法上的注解进行处理的类
-        if (!addMethodAnnotationHandlerExtensions()) {
-            return false;
-        }
-
-        // 初始化默认的处理业务功能数据的类
-        if (!initDefaultBusinessDataHandler()) {
             return false;
         }
         return true;
@@ -238,69 +238,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return false;
         }
         return true;
-    }
-
-    /**
-     * 获取唯一类名（简单类名或完整类名）
-     *
-     * @param className
-     * @return null: 未获取到，非null: 若不存在同名类，则返回简单类名；若存在同名类，则返回完整类名
-     */
-    protected String getSimpleClassName(String className) {
-        String simpleClassName = simpleClassNameMap.get(className);
-        if (simpleClassName != null) {
-            return simpleClassName;
-        }
-
-        // 执行获取唯一类名（简单类名或完整类名）
-        simpleClassName = doGetSimpleClassName(className);
-        if (simpleClassName == null) {
-            return null;
-        }
-
-        simpleClassNameMap.put(className, simpleClassName);
-        return simpleClassName;
-    }
-
-    // 执行获取唯一类名（简单类名或完整类名）
-    protected String doGetSimpleClassName(String className) {
-        if (className.contains(JavaCGConstants.FLAG_DOT)) {
-            // 当前指定的是完整类名，查找对应的简单类名
-            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_SIMPLE_CLASS;
-            String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-            if (sql == null) {
-                sql = "select " + DC.CN_SIMPLE_CLASS_NAME +
-                        " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName() +
-                        " where " + DC.CN_CLASS_NAME + " = ?";
-                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-            }
-
-            String simpleClassName = dbOperator.queryObjectOneColumn(sql, String.class, className);
-            if (simpleClassName == null) {
-                logger.error("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定",
-                        className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
-            }
-            return simpleClassName;
-        }
-
-        // 当前指定的是简单类名
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_CLASS;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select " + DC.CN_SIMPLE_CLASS_NAME +
-                    " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName() +
-                    " where " + DC.CN_SIMPLE_CLASS_NAME + " = ?";
-            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
-
-        String simpleClassName = dbOperator.queryObjectOneColumn(sql, String.class, className);
-        if (simpleClassName == null) {
-            logger.error("指定的简单类名 {} 不存在，请检查，可能因为以下原因\n" +
-                            "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
-                            "2. 指定的类存在同名类，需要使用完整类名形式",
-                    className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
-        }
-        return simpleClassName;
     }
 
     // 读取配置文件中指定的需要处理的任务
@@ -458,15 +395,15 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 打印存在一对多的方法调用
     private void printMultiMethodCall(Map<String, MultiCallInfo> methodCallMap, Set<String> multiCallerFullMethodSet, JavaCGCallTypeEnum callTypeEnum) {
-        // 判断相关存在一对多的调用者方法是否有被其他方法调用，若未被调用则不显示
+        // 判断相关存在一对多的调用方方法是否有被其他方法调用，若未被调用则不显示
         List<String> multiCallerFullMethodList = new ArrayList<>(multiCallerFullMethodSet.size());
         for (String multiCallerFullMethod : multiCallerFullMethodSet) {
             String multiCallerMethodHash = JACGUtil.genHashWithLen(multiCallerFullMethod);
             if (methodCallHandler.checkExistsNormalMethodCallByCalleeMethodHash(multiCallerMethodHash)) {
-                // 当前存在一对多的调用者方法有被其他方法调用
+                // 当前存在一对多的调用方方法有被其他方法调用
                 multiCallerFullMethodList.add(multiCallerFullMethod);
             } else {
-                logger.warn("当前存在一对多的调用者方法未被其他方法调用，不打印到文件中 {}", multiCallerFullMethod);
+                logger.warn("当前存在一对多的调用方方法未被其他方法调用，不打印到文件中 {}", multiCallerFullMethod);
             }
         }
 
@@ -814,20 +751,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      * @return
      */
     protected FindMethodTaskInfo findMethodByLineNumber(boolean isCallee, String simpleClassName, int methodLineNum) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MLN_QUERY_METHOD_HASH;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.MLN_METHOD_HASH, DC.MLN_FULL_METHOD) +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_LINE_NUMBER.getTableName() +
-                    " where " + DC.MLN_SIMPLE_CLASS_NAME + " = ?" +
-                    " and " + DC.MLN_MIN_LINE_NUMBER + " <= ?" +
-                    " and " + DC.MLN_MAX_LINE_NUMBER + " >= ?" +
-                    " limit 1";
-            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
-
-        WriteDbData4MethodLineNumber methodAndHash = dbOperator.queryObject(sql, WriteDbData4MethodLineNumber.class, simpleClassName, methodLineNum, methodLineNum);
-        if (methodAndHash == null) {
+        WriteDbData4MethodLineNumber writeDbData4MethodLineNumber = dbOperWrapper.queryMethodLineNumber(simpleClassName, methodLineNum);
+        if (writeDbData4MethodLineNumber == null) {
             logger.warn("指定类的代码行号未查找到对应方法，请检查，可能因为以下原因\n" +
                     "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
                     "2. 指定的方法是接口中未实现的方法\n" +
@@ -837,11 +762,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         // 查询方法的标志
-        WriteDbData4MethodCall methodCallExtraInfo = queryMethodCallExtraInfo(isCallee, methodAndHash.getMethodHash());
+        WriteDbData4MethodCall methodCallExtraInfo = queryMethodCallExtraInfo(isCallee, writeDbData4MethodLineNumber.getMethodHash());
         String methodReturnType = isCallee ? methodCallExtraInfo.getRawReturnType() : methodCallExtraInfo.getCallerReturnType();
         // 指定类的代码行号查找到对应方法
         FindMethodTaskInfo findMethodTaskInfo = FindMethodTaskInfo.genFindMethodInfoSuccess();
-        findMethodTaskInfo.addTaskElement(methodAndHash.getMethodHash(), methodAndHash.getFullMethod(), methodCallExtraInfo.getCallFlags(), methodReturnType);
+        findMethodTaskInfo.addTaskElement(writeDbData4MethodLineNumber.getMethodHash(), writeDbData4MethodLineNumber.getFullMethod(), methodCallExtraInfo.getCallFlags(),
+                methodReturnType);
         return findMethodTaskInfo;
     }
 
@@ -852,19 +778,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      * @param methodHash
      * @return
      */
-    protected WriteDbData4MethodCall queryMethodCallExtraInfo(boolean isCallee, String methodHash) {
-        SqlKeyEnum sqlKeyEnum = isCallee ? SqlKeyEnum.MC_QUERY_FLAG_4EE : SqlKeyEnum.MC_QUERY_FLAG_4ER;
-        String whereColumnName = isCallee ? DC.MC_CALLEE_METHOD_HASH : DC.MC_CALLER_METHOD_HASH;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_RETURN_TYPE, DC.MC_CALL_FLAGS, DC.MC_RAW_RETURN_TYPE) +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
-                    " where " + whereColumnName + " = ?" +
-                    " limit 1";
-            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
-
-        WriteDbData4MethodCall writeDbData4MethodCall = dbOperator.queryObject(sql, WriteDbData4MethodCall.class, methodHash);
+    private WriteDbData4MethodCall queryMethodCallExtraInfo(boolean isCallee, String methodHash) {
+        // 查询方法调用的额外信息
+        WriteDbData4MethodCall writeDbData4MethodCall = dbOperWrapper.queryMethodCallExtraInfo(isCallee, methodHash);
         if (writeDbData4MethodCall == null) {
             writeDbData4MethodCall = new WriteDbData4MethodCall();
             writeDbData4MethodCall.setCallerReturnType("");

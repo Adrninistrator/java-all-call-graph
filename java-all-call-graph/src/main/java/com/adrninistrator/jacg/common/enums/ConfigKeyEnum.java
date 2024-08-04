@@ -18,6 +18,7 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_DB_INSERT_BATCH_SIZE("db.insert.batch.size", "批量写入数据库时每次插入的数量", Integer.class, true),
     CKE_CHECK_JAR_FILE_UPDATED("check.jar.file.updated", "检查jar包文件是否有更新", Boolean.class, false),
     CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP("handle.get.set.field.relationship", "处理通过get/set方法关联的字段关联关系", Boolean.class, false),
+    CKE_CALL_GRAPH_GEN_JSON_CALLER("call.graph.gen.json.caller", "生成向下的方法调用链时，是否需要输出JSON格式的内容", Boolean.class, false),
     ;
 
     // 参数key

@@ -35,8 +35,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -169,6 +171,15 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         };
 
         List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, true);
+        Set<String> codeParserExtensionClassSet = new HashSet<>(codeParserExtensionClassList);
+        if (codeParserExtensionClassList.size() != codeParserExtensionClassSet.size()) {
+            logger.info("指定的用于对代码进行解析的扩展类存在重复 {} {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getKey(), StringUtils.join(codeParserExtensionClassList));
+            return false;
+        }
+        if (codeParserExtensionClassSet.contains(MyBatisMySqlSqlInfoCodeParser.class.getName())) {
+            logger.info("用于对代码进行解析的扩展类不能在配置文件 {} 中指定 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getKey(), MyBatisMySqlSqlInfoCodeParser.class.getName());
+            return false;
+        }
 
         // 添加默认的代码解析扩展类
         MyBatisMySqlSqlInfoCodeParser myBatisMySqlSqlInfoCodeParser = new MyBatisMySqlSqlInfoCodeParser();

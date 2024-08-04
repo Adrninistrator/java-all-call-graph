@@ -5,14 +5,37 @@
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %C{1}.%M(%L) - %m%n"/>
         </Console>
+
+        <RollingFile name="file" fileName="log/jacg.log" filePattern="log/jacg.log.%d{yyyy-MM-dd}.%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}.%M(%F:%L) - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="1024 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="512"/>
+        </RollingFile>
+
+        <Async name="async" bufferSize="512" includeLocation="true">
+            <AppenderRef ref="file"/>
+        </Async>
+
     </Appenders>
     <Loggers>
         <Root level="info">
             <AppenderRef ref="console"/>
+            <AppenderRef ref="async"/>
         </Root>
 
-        <Logger name="com.adrninistrator" level="info" additivity="false">
+        <AsyncLogger name="com.adrninistrator" level="info" additivity="false" includeLocation="true">
             <AppenderRef ref="console" />
-        </Logger>
+            <AppenderRef ref="async" />
+        </AsyncLogger>
+
+        <Logger name="org.neo4j.ogm.drivers.bolt.response.BoltResponse" level="off" additivity="false"/>
+
+        <!--        <Logger name="org.springframework.data.neo4j" level="info" additivity="false">-->
+        <!--            <AppenderRef ref="console"/>-->
+        <!--            <AppenderRef ref="async" />-->
+        <!--        </Logger>-->
     </Loggers>
 </Configuration>

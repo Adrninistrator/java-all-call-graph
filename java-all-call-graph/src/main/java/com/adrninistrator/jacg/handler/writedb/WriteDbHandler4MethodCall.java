@@ -10,6 +10,7 @@ import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,8 +48,8 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     // 方法返回存在泛型类型的方法HASH+长度
     private Set<String> withReturnGenericsTypeMethodHashSet;
 
-    // 保存MyBatis Mapper唯一类名
-    private Set<String> myBatisMapperSimpleNameSet;
+    // 保存MyBatis Mapper方法
+    private Set<String> myBatisMapperMethodSet;
 
     // 保存MyBatis写数据库的Mapper方法
     private Set<String> myBatisMapperMethodWriteSet;
@@ -151,7 +152,7 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     @Override
     public String[] chooseFileDetailInfo() {
         return new String[]{
-                "方法调用信息，每个方法调用占一行，包括调用者方法与被调用者方法",
+                "方法调用信息，每个方法调用占一行，包括调用方方法与被调用方方法",
                 "方法调用类型，详细信息见[call_type.md](call_type.md)"
         };
     }
@@ -199,9 +200,9 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
             callFlags = MethodCallFlagsEnum.MCFE_ER_RETURN_WITH_GENERICS_TYPE.setFlag(callFlags);
         }
 
-        if (myBatisMapperSimpleNameSet.contains(calleeSimpleClassName)) {
+        String calleeClassAndMethodName = JACGClassMethodUtil.genClassAndMethodName(calleeClassName, calleeMethodName);
+        if (myBatisMapperMethodSet.contains(calleeClassAndMethodName)) {
             callFlags = MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER.setFlag(callFlags);
-            String calleeClassAndMethodName = JACGClassMethodUtil.genClassAndMethodName(calleeClassName, calleeMethodName);
             if (myBatisMapperMethodWriteSet.contains(calleeClassAndMethodName)) {
                 callFlags = MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER_WRITE.setFlag(callFlags);
             }
@@ -237,8 +238,8 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         this.withReturnGenericsTypeMethodHashSet = withReturnGenericsTypeMethodHashSet;
     }
 
-    public void setMyBatisMapperSimpleNameSet(Set<String> myBatisMapperSimpleNameSet) {
-        this.myBatisMapperSimpleNameSet = myBatisMapperSimpleNameSet;
+    public void setMyBatisMapperMethodSet(Set<String> myBatisMapperMethodSet) {
+        this.myBatisMapperMethodSet = myBatisMapperMethodSet;
     }
 
     public void setMyBatisMapperMethodWriteSet(Set<String> myBatisMapperMethodWriteSet) {

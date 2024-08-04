@@ -51,7 +51,7 @@ public abstract class BaseExtractor {
      */
     protected ListWithResult<String> findStack(ConfigureWrapper configureWrapper) {
         // 判断生成调用链时的详细程度是否为详细
-        if (!OutputDetailEnum.ODE_1.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, true))) {
+        if (!OutputDetailEnum.ODE_1.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL))) {
             logger.warn("生成调用链时的详细程度自动设置为详细 {} {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getKey(), OutputDetailEnum.ODE_1.getDetail());
             configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_1.getDetail());
         }
@@ -130,7 +130,7 @@ public abstract class BaseExtractor {
             return;
         }
 
-        // 根据调用者完整方法HASH+长度，从方法调用表获取对应的完整方法
+        // 根据调用方完整方法HASH+长度，从方法调用表获取对应的完整方法
         String fullMethod;
         if (order4ee) {
             fullMethod = methodCallHandler.getCalleeFullMethodByHash(callGraphExtractedFile.getMethodHash());

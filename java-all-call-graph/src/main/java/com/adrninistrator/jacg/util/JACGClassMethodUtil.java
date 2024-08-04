@@ -3,10 +3,12 @@ package com.adrninistrator.jacg.util;
 import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg.util.JavaCGByteCodeUtil;
 import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,6 +32,16 @@ public class JACGClassMethodUtil {
      */
     public static String genFullMethodWithReturnType(String fullMethod, String returnType) {
         return fullMethod + JavaCGConstants.FLAG_COLON + returnType;
+    }
+
+    /**
+     * 从完整类名中获取包名
+     *
+     * @param className
+     * @return 完整类名
+     */
+    public static String getPackageNameFromFullClassName(String className) {
+        return StringUtils.substringBeforeLast(className, JavaCGConstants.FLAG_DOT);
     }
 
     /**
@@ -259,6 +271,24 @@ public class JACGClassMethodUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * 根据accessFlags获得类名接口的类型
+     *
+     * @param accessFlags
+     * @return
+     */
+    public static ClassInterfaceEnum getClassInterfaceEnum(Integer accessFlags) {
+        if (accessFlags != null) {
+            if (JavaCGByteCodeUtil.isInterfaceFlag(accessFlags)) {
+                return ClassInterfaceEnum.CIE_INTERFACE;
+            }
+            if (JavaCGByteCodeUtil.isAbstractFlag(accessFlags)) {
+                return ClassInterfaceEnum.CIE_ABSTRACT_CLASS;
+            }
+        }
+        return ClassInterfaceEnum.CIE_CLASS;
     }
 
     private JACGClassMethodUtil() {

@@ -25,6 +25,8 @@ public abstract class AbstractExecutor {
     // 配置信息包装类
     protected ConfigureWrapper configureWrapper;
 
+    protected ThreadFactory4TPE threadFactory4TPE;
+
     protected ThreadPoolExecutor threadPoolExecutor;
 
     // 任务队列最大长度
@@ -45,8 +47,9 @@ public abstract class AbstractExecutor {
         // 任务队列最大长度，设置为线程数2倍
         taskQueueMaxSize = threadNum * 2;
         logger.info("任务数量 {} 创建的线程池线程数 {}", (taskNum == null ? "-" : taskNum), threadNum);
+        threadFactory4TPE = new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER);
         threadPoolExecutor = new ThreadPoolExecutor(threadNum, threadNum, 10L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(taskQueueMaxSize), new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER));
+                new LinkedBlockingQueue<>(taskQueueMaxSize), threadFactory4TPE);
     }
 
     // 等待直到任务执行完毕

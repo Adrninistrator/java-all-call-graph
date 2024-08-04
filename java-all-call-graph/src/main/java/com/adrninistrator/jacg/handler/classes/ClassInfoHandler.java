@@ -8,6 +8,8 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassName;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.dto.accessflag.JavaCGAccessFlags;
 import org.slf4j.Logger;
@@ -107,6 +109,16 @@ public class ClassInfoHandler extends BaseHandler {
      */
     public Integer queryClassAccessFlag(String className) {
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        return queryClassAccessFlagBySimple(simpleClassName);
+    }
+
+    /**
+     * 根据唯一类名查询类的access_flags
+     *
+     * @param simpleClassName 唯一类名
+     * @return 可能为null
+     */
+    public Integer queryClassAccessFlagBySimple(String simpleClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CI_QUERY_ACCESS_FLAGS;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -116,6 +128,28 @@ public class ClassInfoHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObjectOneColumn(sql, Integer.class, simpleClassName);
+    }
+
+    /**
+     * 根据唯一类名查询类的类型
+     *
+     * @param simpleClassName 唯一类名
+     * @return
+     */
+    public ClassInterfaceEnum queryClassInterfaceEnumBySimple(String simpleClassName) {
+        Integer superClassAccessFlags = queryClassAccessFlagBySimple(simpleClassName);
+        return JACGClassMethodUtil.getClassInterfaceEnum(superClassAccessFlags);
+    }
+
+    /**
+     * 根据完整类名查询类的类型
+     *
+     * @param className 唯一类名
+     * @return
+     */
+    public ClassInterfaceEnum queryClassInterfaceEnum(String className) {
+        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        return queryClassInterfaceEnumBySimple(simpleClassName);
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.dto.writedb.base;
 
+import org.neo4j.ogm.annotation.Transient;
+
 /**
  * @author adrninistrator
  * @date 2023/7/25
@@ -20,12 +22,15 @@ public class BaseWriteDbData4GetSetMethod implements BaseWriteDbData {
 
     // 不出现在数据库表中的字段
     // 当前方法是否在超类中
+    @Transient
     private boolean inSuperClass;
 
     // 当前属于get方法还是set方法
+    @Transient
     private boolean getOrSet;
 
     // 当前get/set方法对应的被调用时的方法调用id
+    @Transient
     private int methodCallId;
     // 不出现在数据库表中的字段
 

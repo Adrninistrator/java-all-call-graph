@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.dto.writedb;
 
+import com.adrninistrator.jacg.handler.writedb.AbstractWriteDbHandler;
 import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
 
 import java.util.HashMap;
@@ -21,8 +22,8 @@ public class WriteDbResult {
     // 记录处理失败的次数
     private final Map<String, JavaCGCounter> failNumMap = new HashMap<>();
 
-    // 记录是否执行 afterHandle 方法
-    private final Map<String, Boolean> afterHandleMap = new HashMap<>();
+    // 记录写入数据库的类
+    private final Map<String, AbstractWriteDbHandler<?>> writeDbHandlerMap = new HashMap<>();
 
     public Map<String, JavaCGCounter> getWriteDbNumMap() {
         return writeDbNumMap;
@@ -36,7 +37,7 @@ public class WriteDbResult {
         return failNumMap;
     }
 
-    public Map<String, Boolean> getAfterHandleMap() {
-        return afterHandleMap;
+    public Map<String, AbstractWriteDbHandler<?>> getWriteDbHandlerMap() {
+        return writeDbHandlerMap;
     }
 }

@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MyBatisMSTable;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlSqlInfoCodeParser;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 
 import java.util.Set;
@@ -23,8 +24,8 @@ import java.util.Set;
 )
 public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteDbData4MyBatisMSTable> {
 
-    // 保存MyBatis Mapper唯一类名
-    private Set<String> myBatisMapperSimpleNameSet;
+    // 保存MyBatis Mapper方法
+    private Set<String> myBatisMapperMethodSet;
 
     public WriteDbHandler4MyBatisMSTable(WriteDbResult writeDbResult) {
         super(writeDbResult);
@@ -45,8 +46,8 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
         String xmlFilePath = array[5];
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
         String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
-        // 记录MyBatis Mapper唯一类名
-        myBatisMapperSimpleNameSet.add(mapperSimpleClassName);
+        // 记录MyBatis Mapper方法
+        myBatisMapperMethodSet.add(JACGClassMethodUtil.genClassAndMethodName(mapperClassName, mapperMethodName));
         return new WriteDbData4MyBatisMSTable(
                 mapperSimpleClassName,
                 mapperMethodName,
@@ -98,7 +99,7 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
         };
     }
 
-    public void setMyBatisMapperSimpleNameSet(Set<String> myBatisMapperSimpleNameSet) {
-        this.myBatisMapperSimpleNameSet = myBatisMapperSimpleNameSet;
+    public void setMyBatisMapperMethodSet(Set<String> myBatisMapperMethodSet) {
+        this.myBatisMapperMethodSet = myBatisMapperMethodSet;
     }
 }

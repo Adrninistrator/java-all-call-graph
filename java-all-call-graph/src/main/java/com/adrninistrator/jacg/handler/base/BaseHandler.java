@@ -3,16 +3,19 @@ package com.adrninistrator.jacg.handler.base;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
+import com.adrninistrator.jacg.spring.context.SpringContextManager;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -42,6 +45,13 @@ public abstract class BaseHandler implements Closeable {
     // 记录是否需要关闭数据库操作对象
     private boolean needCloseDb = false;
 
+    protected String appName;
+
+    protected ApplicationContext applicationContext;
+
+    protected BaseHandler() {
+    }
+
     /**
      * 调用该构造函数时，[会]创建新的数据源，结束前[需要]手动关闭数据库操作对象
      * 建议使用try-with-resource方式创建当前类的子类实例，保证操作结束时关闭数据源
@@ -64,6 +74,15 @@ public abstract class BaseHandler implements Closeable {
             throw new JavaCGRuntimeException("传入配置不允许为null");
         }
 
+        if (useNeo4j()) {
+            applicationContext = SpringContextManager.getApplicationContext();
+            appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME, true);
+            this.tableSuffix = null;
+            // 完成需要使用的基础配置的初始化
+            dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, true, this);
+            return;
+        }
+
         // 处理数据库表名后缀
         ConfigureWrapper usedConfigureWrapper;
         if (StringUtils.isNotBlank(tableSuffix)) {
@@ -75,7 +94,7 @@ public abstract class BaseHandler implements Closeable {
 
         this.tableSuffix = tableSuffix;
         // 完成需要使用的基础配置的初始化
-        dbOperWrapper = DbInitializer.genDbOperWrapper(usedConfigureWrapper, this);
+        dbOperWrapper = DbInitializer.genDbOperWrapper(usedConfigureWrapper, false, this);
         dbOperator = dbOperWrapper.getDbOperator();
 
         logger.warn("调用该构造函数时，结束前[需要]手动关闭数据库操作对象");
@@ -89,13 +108,17 @@ public abstract class BaseHandler implements Closeable {
      * @param dbOperWrapper 已完成初始化的数据库操作包装对象
      */
     public BaseHandler(DbOperWrapper dbOperWrapper) {
-        if (dbOperWrapper == null || dbOperWrapper.getDbOperator() == null) {
+        if (dbOperWrapper == null || (!useNeo4j() && dbOperWrapper.getDbOperator() == null)) {
             logger.error("{} 参数不允许为空", this.getClass().getName());
             throw new JavaCGRuntimeException("参数不允许为空");
         }
 
         this.dbOperator = dbOperWrapper.getDbOperator();
         this.dbOperWrapper = dbOperWrapper;
+    }
+
+    protected boolean useNeo4j() {
+        return false;
     }
 
     /**

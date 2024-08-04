@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "2.0.2"
+version = "2.0.3"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -66,15 +66,17 @@ List h2database = ["com.h2database:h2:2.2.220"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:2.0.4']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:2.0.5']
 
-List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.0.7']
+List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.0']
 
 List jackson = ["com.fasterxml.jackson.core:jackson-databind:2.14.0"]
 
 List jdom = ['org.jdom:jdom2:2.0.6.1']
 
-List spring_jdbc = ['org.springframework:spring-jdbc:5.3.26']
+def spring_version = "5.3.33"
+
+List spring_jdbc = ["org.springframework:spring-jdbc:$spring_version"]
 
 List log4j = [
         'org.apache.logging.log4j:log4j-api:2.20.0',
@@ -84,6 +86,13 @@ List log4j = [
 
 List disruptor = ['com.lmax:disruptor:3.3.7']
 
+List spring = [
+        "org.springframework:spring-aspects:$spring_version",
+        "org.springframework:spring-context-support:$spring_version"
+]
+
+List spring_data_neo4j = ['org.springframework.data:spring-data-neo4j:5.3.9.RELEASE']
+
 List junit = [
         'org.junit.platform:junit-platform-launcher:1.9.3',
         'org.junit.jupiter:junit-jupiter-engine:5.9.3',
@@ -91,19 +100,19 @@ List junit = [
 ]
 
 List spring_for_test = [
-        'org.springframework:spring-beans:5.3.26',
-        'org.springframework:spring-context:5.3.26',
-        'org.springframework:spring-web:5.3.26'
+        "org.springframework:spring-beans:$spring_version",
+        "org.springframework:spring-context:$spring_version",
+        "org.springframework:spring-web:$spring_version"
 ]
 
 List javax_inject = ['javax.inject:javax.inject:1']
 
-List spring_test = ['org.springframework:spring-test:5.3.26']
+List spring_test = ["org.springframework:spring-test:$spring_version"]
 
 List commons_bean_utils = ['commons-beanutils:commons-beanutils:1.9.4']
 
 dependencies {
-    api apache_ant, apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc
+    api apache_ant, apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc, spring, spring_data_neo4j
     testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, commons_bean_utils
 }
 
@@ -121,6 +130,8 @@ task createProject {
 }
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
     from(sourceSets.test.allJava) {
         include 'test/jacg/*.java'
         into '/'

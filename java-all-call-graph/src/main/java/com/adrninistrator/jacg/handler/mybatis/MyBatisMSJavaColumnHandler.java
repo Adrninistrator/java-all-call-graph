@@ -130,11 +130,11 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             logger.error("出现异常 ", e);
             return false;
         } finally {
+            // 写入最后的数据
             writeDbHandler4MybatisMSMapperArgDb.afterHandle();
             // 人工增加get/set方法字段关联关系后的处理
             manualAddFieldRelationshipHandler.afterAdd();
-            double spendTime = (System.currentTimeMillis() - startTime) / 1000.0D;
-            logger.info("MyBatis XML文件中sql脚本的字段与Java代码的关联关系（使用MySQL）-处理完毕，耗时: {} 秒", spendTime);
+            logger.info("MyBatis XML文件中sql脚本的字段与Java代码的关联关系（使用MySQL）-处理完毕，耗时: {} 秒", JACGUtil.getSpendSeconds(startTime));
         }
     }
 

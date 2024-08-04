@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.runner.base;
 
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
@@ -13,6 +14,7 @@ import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.handler.jarinfo.JarInfoHandler;
+import com.adrninistrator.jacg.neo4j.handler.extendsimpl.Neo4jExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
@@ -72,9 +74,13 @@ public abstract class AbstractRunner extends AbstractExecutor {
     public AbstractRunner(ConfigureWrapper configureWrapper) {
         this.configureWrapper = configureWrapper;
         // 判断当前的子类是否需要操作数据库，RunnerWriteCallGraphFile 类不需要
-        if (handleDb()) {
+        if (useNeo4j()) {
+            dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, true, this);
+            appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
+            jacgExtendsImplHandler = new Neo4jExtendsImplHandler(configureWrapper);
+        } else if (handleDb()) {
             // 完成需要使用的基础配置的初始化
-            dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, this);
+            dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, false, this);
             dbOperator = dbOperWrapper.getDbOperator();
             appName = dbOperator.getAppName();
             tableSuffix = dbOperator.getTableSuffix();
@@ -138,6 +144,14 @@ public abstract class AbstractRunner extends AbstractExecutor {
             // 执行处理
             handle();
 
+            if (threadFactory4TPE != null) {
+                int threadPoolExceptionCount = threadFactory4TPE.getExceptionCount();
+                if (threadPoolExceptionCount > 0) {
+                    logger.error("线程池执行的任务失败次数为 {}", threadPoolExceptionCount);
+                    someTaskFail = true;
+                }
+            }
+
             if (someTaskFail) {
                 logger.error("{} 执行失败", currentSimpleClassName);
                 return false;
@@ -148,11 +162,10 @@ public abstract class AbstractRunner extends AbstractExecutor {
             } else {
                 logger.info("没有执行生成文件的操作，不打印当前使用的配置信息");
             }
-            long spendTime = System.currentTimeMillis() - startTime;
-            logger.info("{} 执行完毕，耗时: {} 秒", currentSimpleClassName, spendTime / 1000.0D);
+            logger.info("{} 执行完毕，耗时: {} 秒", currentSimpleClassName, JACGUtil.getSpendSeconds(startTime));
             return true;
         } catch (Exception e) {
-            logger.error("error {} ", currentSimpleClassName, e);
+            logger.error("出现异常 {} ", currentSimpleClassName, e);
             return false;
         } finally {
             // 结束前的处理，需要确保能执行到，在其中会关闭数据源
@@ -174,9 +187,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
             }
 
             // 使用H2数据库时，检查数据库文件
-            if (dbOperator.getDbConfInfo().isUseH2Db() && !checkH2DbFile()) {
-                return false;
-            }
+            return !dbOperator.getDbConfInfo().isUseH2Db() || checkH2DbFile();
         }
         return true;
     }
@@ -263,7 +274,16 @@ public abstract class AbstractRunner extends AbstractExecutor {
      * @return true: 需要操作数据库 false: 不需要操作数据库
      */
     protected boolean handleDb() {
-        return true;
+        return false;
+    }
+
+    /**
+     * 是否使用neo4j
+     *
+     * @return true: 使用neo4j false: 不使用neo4j
+     */
+    protected boolean useNeo4j() {
+        return false;
     }
 
     // 查询jar包与目录信息

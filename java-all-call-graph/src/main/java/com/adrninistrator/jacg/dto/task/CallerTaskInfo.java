@@ -9,19 +9,19 @@ public class CallerTaskInfo {
     // 配置文件中指定的任务原始文本
     private String origText;
 
-    // 调用者类名，简单类名或完整类名
+    // 调用方类名，简单类名或完整类名
     private String callerSimpleClassName;
 
-    // 调用者方法名，可包括参数
+    // 调用方方法名，可包括参数
     private String callerMethodName;
 
-    // 调用者方法代码行号
+    // 调用方方法代码行号
     private int methodLineNumber;
 
-    // 调用者方法起始代码行号
+    // 调用方方法起始代码行号
     private int lineNumStart;
 
-    // 调用者方法结束代码行号
+    // 调用方方法结束代码行号
     private int lineNumEnd;
 
     // 当前任务需要保存的目录
