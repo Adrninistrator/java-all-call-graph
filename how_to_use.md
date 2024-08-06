@@ -74,6 +74,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:2.0.3'
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
   <version>2.0.3</version>
+  <scope>test</scope>
 </dependency>
 ```
 
@@ -123,7 +124,7 @@ java-all-call-graph对应代码地址为[https://github.com/Adrninistrator/java-
 com.adrninistrator.jacg.unzip.UnzipFile
 ```
 
-需要选择classpath对应模块为test。
+假如使用IDEA及Gradle，执行以上方法时需要选择classpath对应模块为test。
 
 执行以上类后，会将java-all-callgraph.jar中保存配置文件的_jacg_config、_jacg_extensions、_jacg_find_keyword、_jacg_sql目录，保存启动类（下文涉及的Test...类）的“test/jacg”目录，分别释放到当前Java项目的test模块的resources、java目录中（仅在本地生效，避免发布到服务器中）。
 
