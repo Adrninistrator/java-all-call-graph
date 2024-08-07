@@ -30,7 +30,7 @@ com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum
 在项目根目录执行以下命令
 
 ```
-gradlew test_jar
+gradlew test_gen_jar
 ```
 
 - 解析测试代码并将结果写入数据库
@@ -38,7 +38,7 @@ gradlew test_jar
 执行以下类
 
 ```
-test.run_by_code.TestRBC0RunnerWriteDb
+test.runbycode.TestRBC0RunnerWriteDb
 ```
 
 - 生成向上的方法完整调用链
@@ -46,7 +46,7 @@ test.run_by_code.TestRBC0RunnerWriteDb
 执行以下类
 
 ```
-test.run_by_code.TestRBCRunnerGenAllGraph4Callee
+test.runbycode.TestRBCRunnerGenAllGraph4Callee
 ```
 
 - 生成向下的方法完整调用链
@@ -54,7 +54,7 @@ test.run_by_code.TestRBCRunnerGenAllGraph4Callee
 执行以下类
 
 ```
-test.run_by_code.TestRBCRunnerGenAllGraph4Caller
+test.runbycode.TestRBCRunnerGenAllGraph4Caller
 ```
 
 # 3. 引入组件
@@ -520,7 +520,7 @@ func1(java.lang.String)
 TestMulti.test1()方法对应文件中调用Interface1.f1()方法的信息如下：
 
 ```
-[1]#  [TestMulti:22]	test.call_graph.implement.Interface1:f1	!ext_data!JUMP_MULTI_IMPL@Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029
+[1]#  [TestMulti:22]	test.callgraph.implement.Interface1:f1	!ext_data!JUMP_MULTI_IMPL@Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029
 ```
 
 生成Interface1.f1()方法对应的目录，目录名为“Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029”
