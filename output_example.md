@@ -16,7 +16,7 @@
 
 以上对应的调用关系如下所示：
 
-![](pic/example-cg-4callee.png)
+![](https://gitee.com/adrninistrator/java-all-call-graph/raw/main/pic/example-cg-4callee.png)
 
 调用指定类方法向上的完整调用链输出结果格式类似一棵树，每行代表一个调用者Java方法，前面的数字越大代表调用层级越靠上，0代表被调用的指定类中的方法。
 
@@ -60,7 +60,7 @@ org.mybatis.spring.MyBatisExceptionTranslator:initExceptionTranslator()
 
 以上对应的调用关系如下所示：
 
-![](pic/example-cg-4caller.png)
+![](https://gitee.com/adrninistrator/java-all-call-graph/raw/main/pic/example-cg-4caller.png)
 
 指定方法向下完整调用链输出结果类似一棵树，每行代表一个被调用者Java方法，与实际的代码执行顺序一致，前面的数字越大代表调用层级越靠下，0代表指定方法。
 

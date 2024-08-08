@@ -108,7 +108,7 @@ java-all-call-graph对应代码地址为[https://github.com/Adrninistrator/java-
 
 如下图所示：
 
-![](pic/step-all.png)
+![](https://gitee.com/adrninistrator/java-all-call-graph/raw/main/pic/step-all.png)
 
 ## 4.2. 释放启动类及配置文件
 
@@ -158,7 +158,7 @@ test.jacg.TestRunnerWriteDb
 
 当前步骤执行的操作及使用的相关参数如下图所示：
 
-![](pic/args-use-b.png)
+![](https://gitee.com/adrninistrator/java-all-call-graph/raw/main/pic/args-use-b.png)
 
 ### 4.3.1. b.1 调用增强后的java-callgraph2.jar中的类的方法
 
@@ -278,7 +278,7 @@ test.jacg.TestRunnerGenAllGraph4Callee
 
 当前步骤执行的操作及使用的相关参数如下图所示：
 
-![](pic/args-use-c.1.png)
+![](https://gitee.com/adrninistrator/java-all-call-graph/raw/main/pic/args-use-c.1.png)
 
 ### 4.4.1. c.1.1 从数据库读取Java方法调用关系
 
@@ -409,7 +409,7 @@ test.jacg.TestRunnerGenAllGraph4Caller
 
 当前步骤执行的操作及使用的相关参数如下图所示：
 
-![](pic/args-use-c.2.png)
+![](https://gitee.com/adrninistrator/java-all-call-graph/raw/main/pic/args-use-c.2.png)
 
 ### 4.5.2. c.2.1 从数据库读取Java方法调用关系
 
