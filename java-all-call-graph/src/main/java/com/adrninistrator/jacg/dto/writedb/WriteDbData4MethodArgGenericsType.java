@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，方法参数泛型类型
  */
 public class WriteDbData4MethodArgGenericsType implements BaseWriteDbData {
+    private int recordId;
     private String methodHash;
     private String simpleClassName;
     private int argSeq;
@@ -17,19 +18,12 @@ public class WriteDbData4MethodArgGenericsType implements BaseWriteDbData {
     private String genericsType;
     private String fullMethod;
 
-    public WriteDbData4MethodArgGenericsType() {
+    public int getRecordId() {
+        return recordId;
     }
 
-    public WriteDbData4MethodArgGenericsType(String methodHash, String simpleClassName, int argSeq, String type, int typeSeq, String simpleGenericsType, String genericsType,
-                                             String fullMethod) {
-        this.methodHash = methodHash;
-        this.simpleClassName = simpleClassName;
-        this.argSeq = argSeq;
-        this.type = type;
-        this.typeSeq = typeSeq;
-        this.simpleGenericsType = simpleGenericsType;
-        this.genericsType = genericsType;
-        this.fullMethod = fullMethod;
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
     }
 
     public String getMethodHash() {

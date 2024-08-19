@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "2.0.3"
+version = "2.0.4"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -66,7 +66,7 @@ List h2database = ["com.h2database:h2:2.2.220"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:2.0.5']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:2.0.6']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.0']
 
@@ -112,8 +112,9 @@ List spring_test = ["org.springframework:spring-test:$spring_version"]
 List commons_bean_utils = ['commons-beanutils:commons-beanutils:1.9.4']
 
 dependencies {
-    api apache_ant, apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc, spring, spring_data_neo4j
-    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, commons_bean_utils
+    api apache_ant, apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc, spring
+    compileOnly spring_data_neo4j
+    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, commons_bean_utils, spring_data_neo4j
 }
 
 compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"

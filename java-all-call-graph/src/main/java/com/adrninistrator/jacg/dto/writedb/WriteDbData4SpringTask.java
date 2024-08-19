@@ -8,12 +8,21 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，Spring定时任务信息
  */
 public class WriteDbData4SpringTask implements BaseWriteDbData {
+    private int recordId;
     private String methodHash;
     private String springBeanName;
     private String className;
     private String methodName;
     private String type;
     private String fullMethod;
+
+    public int getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
+    }
 
     public String getMethodHash() {
         return methodHash;

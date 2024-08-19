@@ -41,6 +41,7 @@ public class WriteDbHandler4FieldGenericsType extends AbstractWriteDbHandler<Wri
         String simpleFieldGenericsType = dbOperWrapper.getSimpleClassName(fieldGenericsType);
 
         WriteDbData4FieldGenericsType writeDbData4FieldGenericsType = new WriteDbData4FieldGenericsType();
+        writeDbData4FieldGenericsType.setRecordId(genNextRecordId());
         writeDbData4FieldGenericsType.setSimpleClassName(simpleClassName);
         writeDbData4FieldGenericsType.setFieldName(fieldName);
         writeDbData4FieldGenericsType.setSeq(seq);
@@ -54,7 +55,7 @@ public class WriteDbHandler4FieldGenericsType extends AbstractWriteDbHandler<Wri
     @Override
     protected Object[] genObjectArray(WriteDbData4FieldGenericsType data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getFieldName(),
                 data.getSeq(),

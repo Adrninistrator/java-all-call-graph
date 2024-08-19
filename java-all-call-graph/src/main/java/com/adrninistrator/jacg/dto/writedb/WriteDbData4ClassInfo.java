@@ -8,11 +8,20 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，类的信息
  */
 public class WriteDbData4ClassInfo implements BaseWriteDbData {
+    private int recordId;
     private String simpleClassName;
     private int accessFlags;
     private String className;
     private String classFileHash;
     private int jarNum;
+
+    public int getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
+    }
 
     public String getSimpleClassName() {
         return simpleClassName;

@@ -44,6 +44,7 @@ public class WriteDbHandler4MethodCallMethodCallReturn extends AbstractWriteDbHa
         String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
 
         WriteDbData4MethodCallMethodCallReturn writeDbData4MethodCallMethodCallReturn = new WriteDbData4MethodCallMethodCallReturn();
+        writeDbData4MethodCallMethodCallReturn.setRecordId(genNextRecordId());
         writeDbData4MethodCallMethodCallReturn.setCallId(callId);
         writeDbData4MethodCallMethodCallReturn.setObjArgsSeq(Integer.parseInt(objArgsSeq));
         writeDbData4MethodCallMethodCallReturn.setSeq(Integer.parseInt(seq));
@@ -59,7 +60,7 @@ public class WriteDbHandler4MethodCallMethodCallReturn extends AbstractWriteDbHa
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodCallMethodCallReturn data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getCallId(),
                 data.getObjArgsSeq(),
                 data.getSeq(),

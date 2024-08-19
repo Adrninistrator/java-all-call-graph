@@ -40,6 +40,7 @@ public class WriteDbHandler4ClassSigExtImplGenerics extends AbstractWriteDbHandl
         int superItfSeq = Integer.parseInt(array[6]);
 
         WriteDbData4ClassSigExtImplGenerics writeDbData4ClassSigExtImplGenerics = new WriteDbData4ClassSigExtImplGenerics();
+        writeDbData4ClassSigExtImplGenerics.setRecordId(genNextRecordId());
         writeDbData4ClassSigExtImplGenerics.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
         writeDbData4ClassSigExtImplGenerics.setGenericsName(genericsName);
         writeDbData4ClassSigExtImplGenerics.setSeq(seq);
@@ -55,7 +56,7 @@ public class WriteDbHandler4ClassSigExtImplGenerics extends AbstractWriteDbHandl
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassSigExtImplGenerics data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getGenericsName(),
                 data.getSeq(),

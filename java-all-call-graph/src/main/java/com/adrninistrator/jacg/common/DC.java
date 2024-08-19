@@ -22,6 +22,12 @@ public class DC {
     public static final String CN_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String CN_DUPLICATE_CLASS = "duplicate_class";
 
+    public static final String CR_RECORD_ID = "record_id";
+    public static final String CR_CLASS_NAME = "class_name";
+    public static final String CR_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String CR_REFERENCED_CLASS_NAME = "referenced_class_name";
+    public static final String CR_REFERENCED_SIMPLE_CLASS_NAME = "referenced_simple_class_name";
+
     public static final String CA_RECORD_ID = "record_id";
     public static final String CA_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String CA_ANNOTATION_NAME = "annotation_name";

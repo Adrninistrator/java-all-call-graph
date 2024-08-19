@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.neo4j.runner;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassName;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassReference;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ExtendsImpl;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4GetMethod;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCall;
@@ -16,6 +17,7 @@ import com.adrninistrator.jacg.neo4j.domain.node.AbstractJACGNeo4jNode;
 import com.adrninistrator.jacg.neo4j.util.JACGNeo4jUtil;
 import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4ClassInfo;
 import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4ClassName;
+import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4ClassReference;
 import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4ExtendsImpl;
 import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4GetMethod;
 import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4MethodCall;
@@ -72,6 +74,11 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
     @Override
     protected WriteDbHandler4ClassName genWriteDbHandler4ClassName() {
         return new Neo4jWriteDbHandler4ClassName(writeDbResult);
+    }
+
+    @Override
+    protected WriteDbHandler4ClassReference genWriteDbHandler4ClassReference() {
+        return new Neo4jWriteDbHandler4ClassReference(writeDbResult);
     }
 
     @Override

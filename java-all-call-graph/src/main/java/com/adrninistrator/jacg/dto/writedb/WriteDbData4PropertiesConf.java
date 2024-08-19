@@ -15,17 +15,6 @@ public class WriteDbData4PropertiesConf implements BaseWriteDbData {
     private String propertiesFileName;
     private String propertiesValue;
 
-    public WriteDbData4PropertiesConf() {
-    }
-
-    public WriteDbData4PropertiesConf(int recordId, String propertiesKey, String propertiesFilePath, String propertiesFileName, String propertiesValue) {
-        this.recordId = recordId;
-        this.propertiesKey = propertiesKey;
-        this.propertiesFilePath = propertiesFilePath;
-        this.propertiesFileName = propertiesFileName;
-        this.propertiesValue = propertiesValue;
-    }
-
     public int getRecordId() {
         return recordId;
     }

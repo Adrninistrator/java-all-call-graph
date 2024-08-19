@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，MyBatis Mapper方法写的数据库表信息（使用MySQL）
  */
 public class WriteDbData4MyBatisMSWriteTable implements BaseWriteDbData {
+    private int recordId;
     private String mapperSimpleClassName;
     private String mapperMethodName;
     private String sqlStatement;
@@ -16,18 +17,12 @@ public class WriteDbData4MyBatisMSWriteTable implements BaseWriteDbData {
     private String xmlFileName;
     private String xmlFilePath;
 
-    public WriteDbData4MyBatisMSWriteTable() {
+    public int getRecordId() {
+        return recordId;
     }
 
-    public WriteDbData4MyBatisMSWriteTable(String mapperSimpleClassName, String mapperMethodName, String sqlStatement, String tableName, String mapperClassName,
-                                           String xmlFileName, String xmlFilePath) {
-        this.mapperSimpleClassName = mapperSimpleClassName;
-        this.mapperMethodName = mapperMethodName;
-        this.sqlStatement = sqlStatement;
-        this.tableName = tableName;
-        this.mapperClassName = mapperClassName;
-        this.xmlFileName = xmlFileName;
-        this.xmlFilePath = xmlFilePath;
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
     }
 
     public String getMapperSimpleClassName() {

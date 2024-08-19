@@ -36,13 +36,20 @@ public class WriteDbHandler4ClassSignatureGenerics extends AbstractWriteDbHandle
         String genericsName = array[2];
         String genericsExtendsClassName = array[3];
 
-        return new WriteDbData4ClassSignatureGenerics(dbOperWrapper.getSimpleClassName(className), seq, genericsName, genericsExtendsClassName, className);
+        WriteDbData4ClassSignatureGenerics writeDbData4ClassSignatureGenerics = new WriteDbData4ClassSignatureGenerics();
+        writeDbData4ClassSignatureGenerics.setRecordId(genNextRecordId());
+        writeDbData4ClassSignatureGenerics.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+        writeDbData4ClassSignatureGenerics.setSeq(seq);
+        writeDbData4ClassSignatureGenerics.setGenericsName(genericsName);
+        writeDbData4ClassSignatureGenerics.setGenericsExtendsClassName(genericsExtendsClassName);
+        writeDbData4ClassSignatureGenerics.setClassName(className);
+        return writeDbData4ClassSignatureGenerics;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassSignatureGenerics data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getSeq(),
                 data.getGenericsName(),

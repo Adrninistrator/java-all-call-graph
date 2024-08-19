@@ -45,6 +45,7 @@ public class WriteDbHandler4MyBatisMSWhereColumn extends AbstractWriteDbHandler<
         String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
         ParameterName parameterName = MyBatisTableParserUtil.genParameterName(paramRawName);
         WriteDbData4MyBatisMSWhereColumn writeDbData4MyBatisMSWhereColumn = new WriteDbData4MyBatisMSWhereColumn();
+        writeDbData4MyBatisMSWhereColumn.setRecordId(genNextRecordId());
         writeDbData4MyBatisMSWhereColumn.setMapperSimpleClassName(mapperSimpleClassName);
         writeDbData4MyBatisMSWhereColumn.setMapperMethodName(mapperMethodName);
         writeDbData4MyBatisMSWhereColumn.setTableName(tableName);
@@ -63,7 +64,7 @@ public class WriteDbHandler4MyBatisMSWhereColumn extends AbstractWriteDbHandler<
     @Override
     protected Object[] genObjectArray(WriteDbData4MyBatisMSWhereColumn data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMapperSimpleClassName(),
                 data.getMapperMethodName(),
                 data.getTableName(),

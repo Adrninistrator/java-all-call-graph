@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，static、字段初始化方法信息
  */
 public class WriteDbData4SfFieldMethodCall implements BaseWriteDbData {
+    private int recordId;
     private String simpleClassName;
     private String fieldName;
     private int seq;
@@ -16,6 +17,14 @@ public class WriteDbData4SfFieldMethodCall implements BaseWriteDbData {
     private String className;
     private String calleeClassName;
     private String calleeMethodName;
+
+    public int getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
+    }
 
     public String getSimpleClassName() {
         return simpleClassName;

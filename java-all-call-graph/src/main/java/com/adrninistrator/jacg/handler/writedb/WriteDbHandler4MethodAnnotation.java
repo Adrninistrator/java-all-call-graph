@@ -104,6 +104,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         handleSpringTaskAnnotation(fullMethod, annotationName);
 
         WriteDbData4MethodAnnotation writeDbData4MethodAnnotation = new WriteDbData4MethodAnnotation();
+        writeDbData4MethodAnnotation.setRecordId(genNextRecordId());
         writeDbData4MethodAnnotation.setMethodHash(methodHash);
         writeDbData4MethodAnnotation.setAnnotationName(annotationName);
         writeDbData4MethodAnnotation.setAttributeName(attributeName);
@@ -117,7 +118,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodAnnotation data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getAnnotationName(),
                 data.getAttributeName(),
@@ -220,6 +221,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
         String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
         WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
+        writeDbData4SpringTask.setRecordId(writeDbHandler4SpringTaskAnnotation.genNextRecordId());
         writeDbData4SpringTask.setMethodHash(JACGUtil.genHashWithLen(fullMethod));
         writeDbData4SpringTask.setSpringBeanName("");
         writeDbData4SpringTask.setClassName(className);

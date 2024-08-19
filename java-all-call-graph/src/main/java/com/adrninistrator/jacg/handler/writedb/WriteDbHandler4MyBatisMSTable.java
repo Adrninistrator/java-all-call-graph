@@ -48,22 +48,23 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
         String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
         // 记录MyBatis Mapper方法
         myBatisMapperMethodSet.add(JACGClassMethodUtil.genClassAndMethodName(mapperClassName, mapperMethodName));
-        return new WriteDbData4MyBatisMSTable(
-                mapperSimpleClassName,
-                mapperMethodName,
-                sqlStatement,
-                tableSeq,
-                tableName,
-                mapperClassName,
-                xmlFileName,
-                xmlFilePath
-        );
+        WriteDbData4MyBatisMSTable writeDbData4MyBatisMSTable = new WriteDbData4MyBatisMSTable();
+        writeDbData4MyBatisMSTable.setRecordId(genNextRecordId());
+        writeDbData4MyBatisMSTable.setMapperSimpleClassName(mapperSimpleClassName);
+        writeDbData4MyBatisMSTable.setMapperMethodName(mapperMethodName);
+        writeDbData4MyBatisMSTable.setSqlStatement(sqlStatement);
+        writeDbData4MyBatisMSTable.setTableSeq(tableSeq);
+        writeDbData4MyBatisMSTable.setTableName(tableName);
+        writeDbData4MyBatisMSTable.setMapperClassName(mapperClassName);
+        writeDbData4MyBatisMSTable.setXmlFileName(xmlFileName);
+        writeDbData4MyBatisMSTable.setXmlFilePath(xmlFilePath);
+        return writeDbData4MyBatisMSTable;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MyBatisMSTable data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMapperSimpleClassName(),
                 data.getMapperMethodName(),
                 data.getSqlStatement(),

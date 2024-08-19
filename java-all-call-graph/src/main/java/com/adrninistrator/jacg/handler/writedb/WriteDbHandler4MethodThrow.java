@@ -48,6 +48,7 @@ public class WriteDbHandler4MethodThrow extends AbstractWriteDbHandler<WriteDbDa
         Integer callId = JavaCGUtil.genIntegerFromString(array[8]);
 
         WriteDbData4MethodThrow writeDbData4MethodThrow = new WriteDbData4MethodThrow();
+        writeDbData4MethodThrow.setRecordId(genNextRecordId());
         writeDbData4MethodThrow.setMethodHash(methodHash);
         writeDbData4MethodThrow.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
         writeDbData4MethodThrow.setThrowOffset(throwOffset);
@@ -65,7 +66,7 @@ public class WriteDbHandler4MethodThrow extends AbstractWriteDbHandler<WriteDbDa
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodThrow data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getSimpleClassName(),
                 data.getThrowOffset(),

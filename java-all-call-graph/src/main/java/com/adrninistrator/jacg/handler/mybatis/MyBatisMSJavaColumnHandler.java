@@ -65,7 +65,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
 
     private final JavaCGCounter recordId = new JavaCGCounter(-1);
 
-    private WriteDbHandler4MybatisMSGetSetDb writeDbHandler4MybatisMSMapperArgDb;
+    private WriteDbHandler4MybatisMSGetSetDb writeDbHandler4MybatisMSGetSetDb;
 
     public MyBatisMSJavaColumnHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
@@ -123,7 +123,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             return false;
         }
         try {
-            writeDbHandler4MybatisMSMapperArgDb.beforeHandle(javaCgOutputPath);
+            writeDbHandler4MybatisMSGetSetDb.beforeHandle(javaCgOutputPath);
             // 分页查询并处理
             return QueryByPageHandler.queryAndHandle(this, JavaCGConstants.RECORD_ID_MIN_BEFORE);
         } catch (Exception e) {
@@ -131,7 +131,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             return false;
         } finally {
             // 写入最后的数据
-            writeDbHandler4MybatisMSMapperArgDb.afterHandle();
+            writeDbHandler4MybatisMSGetSetDb.afterHandle();
             // 人工增加get/set方法字段关联关系后的处理
             manualAddFieldRelationshipHandler.afterAdd();
             logger.info("MyBatis XML文件中sql脚本的字段与Java代码的关联关系（使用MySQL）-处理完毕，耗时: {} 秒", JACGUtil.getSpendSeconds(startTime));
@@ -702,9 +702,9 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
                     String whereOperate = updateOrSelect ? JACGSqlStatementConstants.UPDATE_WHERE : JACGSqlStatementConstants.SELECT_WHERE;
                     String setOperate = updateOrSelect ? JACGSqlStatementConstants.UPDATE_SET : null;
                     // 方法参数类型非Entity时，插入MyBatis的Mapper方法参数所对应的数据库信息
-                    insertMybatisMsMapperArgDbList(myBatisMSMapperParamDbInfoList4Where, fieldRelationship.getFldRelationshipId(), fieldRelationship.getSetMethodCallId(),
+                    insertMybatisMsGetSetDbList(myBatisMSMapperParamDbInfoList4Where, fieldRelationship.getFldRelationshipId(), fieldRelationship.getSetMethodCallId(),
                             whereOperate, MyBatisColumnRelateDescEnum.MBCRD_OBJECT);
-                    insertMybatisMsMapperArgDbList(myBatisMSMapperParamDbInfoList4Set, fieldRelationship.getFldRelationshipId(), fieldRelationship.getSetMethodCallId(), setOperate,
+                    insertMybatisMsGetSetDbList(myBatisMSMapperParamDbInfoList4Set, fieldRelationship.getFldRelationshipId(), fieldRelationship.getSetMethodCallId(), setOperate,
                             MyBatisColumnRelateDescEnum.MBCRD_OBJECT);
                 }
             }
@@ -749,13 +749,13 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         String whereOperate = updateOrSelect ? JACGSqlStatementConstants.UPDATE_WHERE : JACGSqlStatementConstants.SELECT_WHERE;
         String setOperate = updateOrSelect ? JACGSqlStatementConstants.UPDATE_SET : null;
         // 插入MyBatis的Mapper方法参数所对应的数据库信息
-        insertMybatisMsMapperArgDbList(myBatisMSMapperParamDbInfoList4Where, insertFRRecordId, callId, whereOperate, MyBatisColumnRelateDescEnum.MBCRD_BASE_TYPE);
-        insertMybatisMsMapperArgDbList(myBatisMSMapperParamDbInfoList4Set, insertFRRecordId, callId, setOperate, MyBatisColumnRelateDescEnum.MBCRD_BASE_TYPE);
+        insertMybatisMsGetSetDbList(myBatisMSMapperParamDbInfoList4Where, insertFRRecordId, callId, whereOperate, MyBatisColumnRelateDescEnum.MBCRD_BASE_TYPE);
+        insertMybatisMsGetSetDbList(myBatisMSMapperParamDbInfoList4Set, insertFRRecordId, callId, setOperate, MyBatisColumnRelateDescEnum.MBCRD_BASE_TYPE);
     }
 
     // 插入MyBatis的Mapper方法参数所对应的数据库信息
-    private void insertMybatisMsMapperArgDbList(List<MyBatisMSMapperParamDbInfo> myBatisMSMapperParamDbInfoList, int fldRelationshipId, int getMethodCallId,
-                                                String sqlStatement, MyBatisColumnRelateDescEnum myBatisColumnRelateDescEnum) {
+    private void insertMybatisMsGetSetDbList(List<MyBatisMSMapperParamDbInfo> myBatisMSMapperParamDbInfoList, int fldRelationshipId, int getMethodCallId,
+                                             String sqlStatement, MyBatisColumnRelateDescEnum myBatisColumnRelateDescEnum) {
         if (JavaCGUtil.isCollectionEmpty(myBatisMSMapperParamDbInfoList)) {
             return;
         }
@@ -779,8 +779,8 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         writeDbData4MybatisMsGetSetDb.setTableName(tableName);
         writeDbData4MybatisMsGetSetDb.setColumnName(columnName);
         writeDbData4MybatisMsGetSetDb.setColumnRelateDesc(myBatisColumnRelateDescEnum.getType());
-        writeDbHandler4MybatisMSMapperArgDb.addData(writeDbData4MybatisMsGetSetDb);
-        writeDbHandler4MybatisMSMapperArgDb.tryInsertDb();
+        writeDbHandler4MybatisMSGetSetDb.addData(writeDbData4MybatisMsGetSetDb);
+        writeDbHandler4MybatisMSGetSetDb.tryInsertDb();
     }
 
     /**
@@ -814,7 +814,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
                 FieldRelationshipFlagsEnum.FRF_SET_MYBATIS_MAPPER_ARG_OPERATE.getFlag());
     }
 
-    public void setWriteDbHandler4MybatisMSMapperArgDb(WriteDbHandler4MybatisMSGetSetDb writeDbHandler4MybatisMSMapperArgDb) {
-        this.writeDbHandler4MybatisMSMapperArgDb = writeDbHandler4MybatisMSMapperArgDb;
+    public void setWriteDbHandler4MybatisMSGetSetDb(WriteDbHandler4MybatisMSGetSetDb writeDbHandler4MybatisMSGetSetDb) {
+        this.writeDbHandler4MybatisMSGetSetDb = writeDbHandler4MybatisMSGetSetDb;
     }
 }

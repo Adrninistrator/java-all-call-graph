@@ -78,13 +78,21 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
             }
         }
 
-        return new WriteDbData4ClassAnnotation(simpleClassName, annotationName, attributeName, attributeType, attributeValue, className);
+        WriteDbData4ClassAnnotation writeDbData4ClassAnnotation = new WriteDbData4ClassAnnotation();
+        writeDbData4ClassAnnotation.setRecordId(genNextRecordId());
+        writeDbData4ClassAnnotation.setSimpleClassName(simpleClassName);
+        writeDbData4ClassAnnotation.setAnnotationName(annotationName);
+        writeDbData4ClassAnnotation.setAttributeName(attributeName);
+        writeDbData4ClassAnnotation.setAnnotationType(attributeType);
+        writeDbData4ClassAnnotation.setAttributeValue(attributeValue);
+        writeDbData4ClassAnnotation.setClassName(className);
+        return writeDbData4ClassAnnotation;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassAnnotation data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getAnnotationName(),
                 data.getAttributeName(),

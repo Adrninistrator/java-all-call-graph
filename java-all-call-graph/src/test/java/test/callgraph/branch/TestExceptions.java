@@ -1,8 +1,13 @@
 package test.callgraph.branch;
 
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.callgraph.branch.dto.AIV;
+import test.callgraph.branch.dto.BRD;
+import test.callgraph.branch.dto.ORE;
+import test.callgraph.branch.dto.RAR;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -14,7 +19,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -698,5 +705,132 @@ public class TestExceptions {
 
     private static int time() {
         return (int) System.currentTimeMillis() % 7;
+    }
+
+
+    public void aCheck() {
+        List<String> aivList = new ArrayList<>();
+        List<String> raList = new ArrayList<>();
+        for (int i = raList.size() - 1; i >= 0; i--) {
+            Boolean flag = Boolean.TRUE;
+            Boolean al = Boolean.TRUE;
+
+            if (flag.booleanValue()) {
+                flag = Boolean.FALSE;
+            }
+
+            if (flag.booleanValue()) {
+                flag = Boolean.FALSE;
+            }
+
+            if (flag.booleanValue()) {
+                flag = Boolean.FALSE;
+                al = Boolean.FALSE;
+            }
+
+            try {
+                if (flag.booleanValue()) {
+                    flag = Boolean.FALSE;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (flag.booleanValue()) {
+
+                try {
+                    int a = 1;
+                } catch (Exception e) {
+                    flag = Boolean.FALSE;
+                }
+            }
+            if (!flag.booleanValue()) {
+                if (al.booleanValue()) {
+
+                    if (System.currentTimeMillis() == 0) {
+                        i++;
+                    } else {
+                        raList.remove(i);
+                    }
+                } else {
+
+                    boolean isSet = false;
+                    for (int index = 10; index < aivList.size(); index++) {
+
+                        if (!aivList.get(index).equals("aa")) {
+                            raList.set(i, aivList.get(index));
+                            isSet = true;
+                            i++;
+                            break;
+                        }
+                    }
+                    if (!isSet) {
+                        raList.remove(i);
+                    }
+                }
+            }
+        }
+    }
+
+    private void setADT(RAR rar, List<AIV> aivList) {
+        String type = new String();
+        if (StringUtils.isBlank(rar.getAdt())) {
+
+            for (AIV aiv : aivList) {
+                if (StringUtils.isBlank(type)) {
+                    type = aiv.getAit();
+                    continue;
+                }
+                if (!type.equals(aiv.getAit())) {
+                    type = "0";
+                }
+            }
+            if (aivList.size() == 0) {
+                rar.setAdt("1");
+            } else if (type.equals("2")) {
+                rar.setAdt("3");
+            } else if (type.contains("4") || "5".equals(type)) {
+                rar.setAdt("6");
+            } else if (type.equals("7")) {
+                if (aivList.size() == 1) {
+                    if ("8".equals(System.getProperty("9"))) {
+                        rar.setAdt("a");
+                    } else {
+                        rar.setAdt("b");
+                    }
+                } else {
+                    rar.setAdt("c");
+                }
+            } else if (type.equals("d")) {
+                rar.setAdt("e");
+            } else if (type.equals("f")) {
+                rar.setAdt("g");
+            } else {
+                rar.setAdt("h");
+            }
+        }
+    }
+
+    public BRD getOrderStatus(String orderNo, String ownerLog) {
+        BRD baseResDto = new BRD();
+        try {
+            ORE ore = new ORE();
+            String os = new String();
+            if (!Objects.isNull(ore) && "3".equals(ore.getOs())) {
+                os = "1";
+            } else {
+                os = "2";
+            }
+            baseResDto.setResultCode("0000");
+            baseResDto.setResultMsg("aaa");
+            Map<String, String> responseData = new HashMap<String, String>();
+            responseData.put("os", os);
+            baseResDto.setData(responseData);
+            return baseResDto;
+        } catch (Exception e) {
+            logger.error(e.toString(), e);
+            baseResDto.setResultCode("0001");
+            baseResDto.setResultMsg(e.toString());
+            return baseResDto;
+        }
     }
 }

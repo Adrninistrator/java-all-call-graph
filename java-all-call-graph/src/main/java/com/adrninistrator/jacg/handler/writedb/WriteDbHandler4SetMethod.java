@@ -58,6 +58,7 @@ public class WriteDbHandler4SetMethod extends AbstractWriteDbHandler<WriteDbData
         setMethodSet.add(methodName);
 
         WriteDbData4SetMethod writeDbData4SetMethod = new WriteDbData4SetMethod();
+        writeDbData4SetMethod.setRecordId(genNextRecordId());
         writeDbData4SetMethod.setSimpleClassName(simpleClassName);
         writeDbData4SetMethod.setMethodName(methodName);
         writeDbData4SetMethod.setFieldName(fieldName);
@@ -73,7 +74,7 @@ public class WriteDbHandler4SetMethod extends AbstractWriteDbHandler<WriteDbData
     @Override
     protected Object[] genObjectArray(WriteDbData4SetMethod data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getMethodName(),
                 data.getFieldName(),

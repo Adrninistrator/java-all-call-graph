@@ -8,7 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，dto的非静态字段集合中涉及的泛型类型
  */
 public class WriteDbData4FieldGenericsType implements BaseWriteDbData {
-    public String recordId;
+    public int recordId;
     public String simpleClassName;
     public String fieldName;
     public int seq;
@@ -17,11 +17,11 @@ public class WriteDbData4FieldGenericsType implements BaseWriteDbData {
     public String fieldGenericsType;
     public String className;
 
-    public String getRecordId() {
+    public int getRecordId() {
         return recordId;
     }
 
-    public void setRecordId(String recordId) {
+    public void setRecordId(int recordId) {
         this.recordId = recordId;
     }
 

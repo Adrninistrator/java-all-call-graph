@@ -8,19 +8,18 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，Spring Bean信息
  */
 public class WriteDbData4SpringBean implements BaseWriteDbData {
+    private int recordId;
     private String springBeanName;
     private int seq;
     private String className;
     private String beanType;
 
-    public WriteDbData4SpringBean() {
+    public int getRecordId() {
+        return recordId;
     }
 
-    public WriteDbData4SpringBean(String springBeanName, int seq, String className, String beanType) {
-        this.springBeanName = springBeanName;
-        this.seq = seq;
-        this.className = className;
-        this.beanType = beanType;
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
     }
 
     public String getSpringBeanName() {

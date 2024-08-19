@@ -55,6 +55,7 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
         // 记录被调用对象及参数存在信息的call_id
         withInfoCallIdSet.add(callId);
         WriteDbData4MethodCallInfo writeDbData4MethodCallInfo = new WriteDbData4MethodCallInfo();
+        writeDbData4MethodCallInfo.setRecordId(genNextRecordId());
         writeDbData4MethodCallInfo.setCallId(callId);
         writeDbData4MethodCallInfo.setObjArgsSeq(Integer.parseInt(objArgsSeq));
         writeDbData4MethodCallInfo.setSeq(Integer.parseInt(seq));
@@ -69,7 +70,7 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodCallInfo data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getCallId(),
                 data.getObjArgsSeq(),
                 data.getSeq(),

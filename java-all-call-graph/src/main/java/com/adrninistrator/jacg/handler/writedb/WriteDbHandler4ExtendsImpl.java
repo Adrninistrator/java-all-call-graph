@@ -66,6 +66,7 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
         }
 
         WriteDbData4ExtendsImpl writeDbData4ExtendsImpl = new WriteDbData4ExtendsImpl();
+        writeDbData4ExtendsImpl.setRecordId(genNextRecordId());
         writeDbData4ExtendsImpl.setSimpleClassName(simpleClassName);
         writeDbData4ExtendsImpl.setClassName(className);
         writeDbData4ExtendsImpl.setAccessFlags(accessFlags);
@@ -80,7 +81,7 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
     @Override
     protected Object[] genObjectArray(WriteDbData4ExtendsImpl data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getClassName(),
                 data.getAccessFlags(),

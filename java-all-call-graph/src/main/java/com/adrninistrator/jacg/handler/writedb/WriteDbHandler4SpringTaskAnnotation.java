@@ -48,6 +48,6 @@ public class WriteDbHandler4SpringTaskAnnotation extends AbstractWriteDbHandler<
 
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringTask data) {
-        return JACGSqlUtil.genWriteDbData4SpringTask(data, genNextRecordId());
+        return JACGSqlUtil.genWriteDbData4SpringTask(data);
     }
 }

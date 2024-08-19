@@ -52,6 +52,7 @@ public class WriteDbHandler4MethodCatch extends AbstractWriteDbHandler<WriteDbDa
         int catchMaxCallId = Integer.parseInt(array[12]);
 
         WriteDbData4MethodCatch writeDbData4MethodCatch = new WriteDbData4MethodCatch();
+        writeDbData4MethodCatch.setRecordId(genNextRecordId());
         writeDbData4MethodCatch.setMethodHash(methodHash);
         writeDbData4MethodCatch.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
         writeDbData4MethodCatch.setMethodName(methodName);
@@ -75,7 +76,7 @@ public class WriteDbHandler4MethodCatch extends AbstractWriteDbHandler<WriteDbDa
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodCatch data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getSimpleClassName(),
                 data.getMethodName(),

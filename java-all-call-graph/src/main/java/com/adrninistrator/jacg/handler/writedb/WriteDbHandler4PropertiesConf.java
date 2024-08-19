@@ -39,13 +39,13 @@ public class WriteDbHandler4PropertiesConf extends AbstractWriteDbHandler<WriteD
         if (useBase64) {
             propertiesValue = JavaCGUtil.base64Decode(propertiesValue);
         }
-        return new WriteDbData4PropertiesConf(
-                genNextRecordId(),
-                propertiesKey,
-                propertiesFilePath,
-                propertiesFileName,
-                propertiesValue
-        );
+        WriteDbData4PropertiesConf writeDbData4PropertiesConf = new WriteDbData4PropertiesConf();
+        writeDbData4PropertiesConf.setRecordId(genNextRecordId());
+        writeDbData4PropertiesConf.setPropertiesKey(propertiesKey);
+        writeDbData4PropertiesConf.setPropertiesFilePath(propertiesFilePath);
+        writeDbData4PropertiesConf.setPropertiesFileName(propertiesFileName);
+        writeDbData4PropertiesConf.setPropertiesValue(propertiesValue);
+        return writeDbData4PropertiesConf;
     }
 
     @Override

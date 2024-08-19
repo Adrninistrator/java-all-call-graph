@@ -38,13 +38,22 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
         String signClassName = array[4];
         String signGenericsName = array[5];
 
-        return new WriteDbData4ClassSignatureEi1(dbOperWrapper.getSimpleClassName(className), type, superItfClassName, seq, signClassName, signGenericsName, className);
+        WriteDbData4ClassSignatureEi1 writeDbData4ClassSignatureEi1 = new WriteDbData4ClassSignatureEi1();
+        writeDbData4ClassSignatureEi1.setRecordId(genNextRecordId());
+        writeDbData4ClassSignatureEi1.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+        writeDbData4ClassSignatureEi1.setType(type);
+        writeDbData4ClassSignatureEi1.setSuperItfClassName(superItfClassName);
+        writeDbData4ClassSignatureEi1.setSeq(seq);
+        writeDbData4ClassSignatureEi1.setSignClassName(signClassName);
+        writeDbData4ClassSignatureEi1.setSignGenericsName(signGenericsName);
+        writeDbData4ClassSignatureEi1.setClassName(className);
+        return writeDbData4ClassSignatureEi1;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassSignatureEi1 data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getType(),
                 data.getSuperItfClassName(),

@@ -30,6 +30,7 @@ public class Neo4jWriteDbHandler4ClassInfo extends WriteDbHandler4ClassInfo {
     protected Object transferNeo4jDomain(WriteDbData4ClassInfo data) {
         JACGClassInfo jacgClassInfo = new JACGClassInfo();
         jacgClassInfo.setAppName(appName);
+        jacgClassInfo.setRecordId(data.getRecordId());
         jacgClassInfo.setSimpleClassName(data.getSimpleClassName());
         jacgClassInfo.setAccessFlags(data.getAccessFlags());
         jacgClassInfo.setClassName(data.getClassName());

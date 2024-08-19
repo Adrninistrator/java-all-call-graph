@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，方法调用信息
  */
 public class WriteDbData4MethodCallInfo implements BaseWriteDbData {
+    private int recordId;
     private int callId;
     private int objArgsSeq;
     private int seq;
@@ -18,6 +19,14 @@ public class WriteDbData4MethodCallInfo implements BaseWriteDbData {
     private String theValue;
     // 数据库中保存的原始的值内容，对应the_value字段（这个字段本身不写到数据库）
     private String origValue;
+
+    public int getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
+    }
 
     public int getCallId() {
         return callId;

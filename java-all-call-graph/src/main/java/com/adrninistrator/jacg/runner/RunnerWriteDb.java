@@ -20,6 +20,7 @@ import com.adrninistrator.jacg.handler.writedb.AbstractWriteDbHandler;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassAnnotation;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassName;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassReference;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassSigExtImplGenerics;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassSignatureEi1;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassSignatureGenerics;
@@ -553,11 +554,19 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         return new WriteDbHandler4ClassName(writeDbResult);
     }
 
+    protected WriteDbHandler4ClassReference genWriteDbHandler4ClassReference() {
+        return new WriteDbHandler4ClassReference(writeDbResult);
+    }
+
     // 处理引用的类信息，需要首先处理
     private boolean handleClassName() {
         WriteDbHandler4ClassName writeDbHandler4ClassName = genWriteDbHandler4ClassName();
         initWriteDbHandler(writeDbHandler4ClassName);
-        if (!writeDbHandler4ClassName.handle(javaCGOutputInfo)) {
+
+        WriteDbHandler4ClassReference writeDbHandler4ClassReference = genWriteDbHandler4ClassReference();
+        initWriteDbHandler(writeDbHandler4ClassReference);
+        writeDbHandler4ClassReference.setWriteDbHandler4ClassName(writeDbHandler4ClassName);
+        if (!writeDbHandler4ClassReference.handle(javaCGOutputInfo)) {
             return false;
         }
 
@@ -957,11 +966,11 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         if (useNeo4j()) {
             return true;
         }
-        WriteDbHandler4MybatisMSGetSetDb writeDbHandler4MybatisMsMapperArgDb = new WriteDbHandler4MybatisMSGetSetDb(writeDbResult);
-        initWriteDbHandler(writeDbHandler4MybatisMsMapperArgDb);
+        WriteDbHandler4MybatisMSGetSetDb writeDbHandler4MybatisMSGetSetDb = new WriteDbHandler4MybatisMSGetSetDb(writeDbResult);
+        initWriteDbHandler(writeDbHandler4MybatisMSGetSetDb);
 
         MyBatisMSJavaColumnHandler myBatisMSJavaColumnHandler = new MyBatisMSJavaColumnHandler(dbOperWrapper);
-        myBatisMSJavaColumnHandler.setWriteDbHandler4MybatisMSMapperArgDb(writeDbHandler4MybatisMsMapperArgDb);
+        myBatisMSJavaColumnHandler.setWriteDbHandler4MybatisMSGetSetDb(writeDbHandler4MybatisMSGetSetDb);
         return myBatisMSJavaColumnHandler.handle(javaCGOutputInfo.getOutputDirPath());
     }
 

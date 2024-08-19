@@ -4,14 +4,16 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
 
 /**
  * @author adrninistrator
- * @date 2022/11/16
- * @description: 用于写入数据库的数据，类名
+ * @date 2024/8/17
+ * @description: 用于写入数据库的数据，引用的类
  */
-public class WriteDbData4ClassName implements BaseWriteDbData {
+public class WriteDbData4ClassReference implements BaseWriteDbData {
+
     private int recordId;
     private String className;
     private String simpleClassName;
-    private int duplicateClass;
+    private String referencedClassName;
+    private String referencedSimpleClassName;
 
     public int getRecordId() {
         return recordId;
@@ -37,11 +39,20 @@ public class WriteDbData4ClassName implements BaseWriteDbData {
         this.simpleClassName = simpleClassName;
     }
 
-    public int getDuplicateClass() {
-        return duplicateClass;
+    public String getReferencedClassName() {
+        return referencedClassName;
     }
 
-    public void setDuplicateClass(int duplicateClass) {
-        this.duplicateClass = duplicateClass;
+    public void setReferencedClassName(String referencedClassName) {
+        this.referencedClassName = referencedClassName;
+    }
+
+    public String getReferencedSimpleClassName() {
+        return referencedSimpleClassName;
+    }
+
+    public void setReferencedSimpleClassName(String referencedSimpleClassName) {
+        this.referencedSimpleClassName = referencedSimpleClassName;
     }
 }
+

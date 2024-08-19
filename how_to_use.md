@@ -64,7 +64,7 @@ test.runbycode.TestRBCRunnerGenAllGraph4Caller
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:2.0.3'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:2.0.4'
 ```
 
 - Maven
@@ -73,7 +73,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:2.0.3'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>2.0.3</version>
+  <version>2.0.4</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -83,8 +83,8 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:2.0.3'
 `由于Maven间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定java-all-call-graph依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过java-all-call-graph与java-callgraph2的pom文件的dependencies元素查看依赖组件版本`
 
 ```
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/2.0.3/java-all-call-graph-2.0.3.pom
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/2.0.5/java-callgraph2-2.0.5.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/2.0.4/java-all-call-graph-2.0.4.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/2.0.6/java-callgraph2-2.0.6.pom
 ```
 
 以上版本号可能需要替换为最新版本

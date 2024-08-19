@@ -15,17 +15,6 @@ public class WriteDbData4ClassSignatureGenerics implements BaseWriteDbData {
     private String genericsExtendsClassName;
     private String className;
 
-    public WriteDbData4ClassSignatureGenerics() {
-    }
-
-    public WriteDbData4ClassSignatureGenerics(String simpleClassName, int seq, String genericsName, String genericsExtendsClassName, String className) {
-        this.simpleClassName = simpleClassName;
-        this.seq = seq;
-        this.genericsName = genericsName;
-        this.genericsExtendsClassName = genericsExtendsClassName;
-        this.className = className;
-    }
-
     public int getRecordId() {
         return recordId;
     }

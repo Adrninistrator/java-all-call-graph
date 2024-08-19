@@ -45,6 +45,7 @@ public class WriteDbHandler4MethodFinally extends AbstractWriteDbHandler<WriteDb
         int finallyCatchStartLineNumber = Integer.parseInt(array[6]);
 
         WriteDbData4MethodFinally writeDbData4MethodFinally = new WriteDbData4MethodFinally();
+        writeDbData4MethodFinally.setRecordId(genNextRecordId());
         writeDbData4MethodFinally.setMethodHash(methodHash);
         writeDbData4MethodFinally.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
         writeDbData4MethodFinally.setTryCatch(tryCatch);
@@ -60,7 +61,7 @@ public class WriteDbHandler4MethodFinally extends AbstractWriteDbHandler<WriteDb
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodFinally data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getSimpleClassName(),
                 data.getTryCatch(),

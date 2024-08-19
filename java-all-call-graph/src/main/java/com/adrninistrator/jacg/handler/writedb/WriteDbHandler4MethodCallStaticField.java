@@ -42,6 +42,7 @@ public class WriteDbHandler4MethodCallStaticField extends AbstractWriteDbHandler
         String fieldType = array[5];
 
         WriteDbData4MethodCallStaticField writeDbData4MethodCallStaticField = new WriteDbData4MethodCallStaticField();
+        writeDbData4MethodCallStaticField.setRecordId(genNextRecordId());
         writeDbData4MethodCallStaticField.setCallId(callId);
         writeDbData4MethodCallStaticField.setObjArgsSeq(Integer.parseInt(objArgsSeq));
         writeDbData4MethodCallStaticField.setSeq(Integer.parseInt(seq));
@@ -58,7 +59,7 @@ public class WriteDbHandler4MethodCallStaticField extends AbstractWriteDbHandler
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodCallStaticField data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getCallId(),
                 data.getObjArgsSeq(),
                 data.getSeq(),

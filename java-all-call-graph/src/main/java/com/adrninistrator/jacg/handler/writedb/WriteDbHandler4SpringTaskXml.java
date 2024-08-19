@@ -66,6 +66,7 @@ public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDb
         String fullMethod = JavaCGClassMethodUtil.formatFullMethodNoArgs(springBeanClassName, methodName);
 
         WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
+        writeDbData4SpringTask.setRecordId(genNextRecordId());
         writeDbData4SpringTask.setMethodHash(JACGUtil.genHashWithLen(fullMethod));
         writeDbData4SpringTask.setSpringBeanName(springBeanName);
         writeDbData4SpringTask.setClassName(springBeanClassName);
@@ -77,7 +78,7 @@ public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDb
 
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringTask data) {
-        return JACGSqlUtil.genWriteDbData4SpringTask(data, genNextRecordId());
+        return JACGSqlUtil.genWriteDbData4SpringTask(data);
     }
 
     @Override

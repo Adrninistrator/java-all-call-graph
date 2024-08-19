@@ -30,6 +30,7 @@ public class Neo4jWriteDbHandler4ExtendsImpl extends WriteDbHandler4ExtendsImpl 
     protected Object transferNeo4jDomain(WriteDbData4ExtendsImpl data) {
         JACGExtendsImpl jacgExtendsImpl = new JACGExtendsImpl();
         jacgExtendsImpl.setAppName(appName);
+        jacgExtendsImpl.setRecordId(data.getRecordId());
         jacgExtendsImpl.setSimpleClassName(data.getSimpleClassName());
         jacgExtendsImpl.setClassName(data.getClassName());
         jacgExtendsImpl.setAccessFlags(data.getAccessFlags());

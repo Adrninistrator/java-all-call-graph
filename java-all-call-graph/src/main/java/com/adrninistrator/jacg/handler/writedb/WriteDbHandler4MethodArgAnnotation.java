@@ -56,6 +56,7 @@ public class WriteDbHandler4MethodArgAnnotation extends AbstractWriteDbHandler<W
         }
 
         WriteDbData4MethodArgAnnotation WriteDbData4MethodArgAnnotation = new WriteDbData4MethodArgAnnotation();
+        WriteDbData4MethodArgAnnotation.setRecordId(genNextRecordId());
         WriteDbData4MethodArgAnnotation.setMethodHash(methodHash);
         WriteDbData4MethodArgAnnotation.setArgSeq(argSeq);
         WriteDbData4MethodArgAnnotation.setAnnotationName(annotationName);
@@ -70,7 +71,7 @@ public class WriteDbHandler4MethodArgAnnotation extends AbstractWriteDbHandler<W
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodArgAnnotation data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getArgSeq(),
                 data.getAnnotationName(),

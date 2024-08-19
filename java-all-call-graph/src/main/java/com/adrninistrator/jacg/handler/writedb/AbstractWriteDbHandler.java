@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.handler.writedb;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.common.enums.WriteDbHandlerWriteFileEnum;
 import com.adrninistrator.jacg.common.exceptions.JACGSQLException;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
@@ -46,11 +47,11 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
-    // 是否需要读取java-callgraph2生成的文件
-    private final boolean readFile;
-
     // 需要读取的文件是属于主要的文件还是其他的文件
     private final boolean mainFile;
+
+    // 是否需要写文件
+    private final boolean writeFile;
 
     // 需要读取的主要文件类型
     private final JavaCGOutPutFileTypeEnum mainFileTypeEnum;
@@ -136,11 +137,14 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
             throw new JavaCGRuntimeException("类及父类缺少注解");
         }
 
-        // 是否需要读取文件
-        readFile = jacgWriteDbHandler.readFile();
+        // 是否需要读取java-callgraph2生成的文件
+        boolean readFile = jacgWriteDbHandler.readFile();
         mainFile = jacgWriteDbHandler.mainFile();
         mainFileTypeEnum = jacgWriteDbHandler.mainFileTypeEnum();
         otherFileName = jacgWriteDbHandler.otherFileName();
+        // 是否读取其他文件
+        boolean readOtherFile = StringUtils.isNotBlank(otherFileName);
+        writeFile = (WriteDbHandlerWriteFileEnum.WDHWFE_NONE != jacgWriteDbHandler.writeFileEnum());
         writeFileName = jacgWriteDbHandler.writeFileEnum().getName();
         minColumnNum = jacgWriteDbHandler.minColumnNum();
         maxColumnNum = jacgWriteDbHandler.maxColumnNum();
@@ -155,14 +159,13 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         if (readFile) {
             if ((minColumnNum == 0 || maxColumnNum == 0
                     || (mainFile && (mainFileTypeEnum == null || JavaCGOutPutFileTypeEnum.OPFTE_ILLEGAL == mainFileTypeEnum))
-                    || (!mainFile && StringUtils.isBlank(otherFileName))
+                    || (!mainFile && !readOtherFile)
             )) {
                 logger.error("类需要读取文件但配置错误 {}", currentSimpleClassName);
                 throw new JavaCGRuntimeException("类需要读取文件但配置错误");
             }
         } else {
-            if (StringUtils.isBlank(writeFileName) || mainFile || (mainFileTypeEnum != null && JavaCGOutPutFileTypeEnum.OPFTE_ILLEGAL != mainFileTypeEnum)
-                    || StringUtils.isNotBlank(otherFileName)) {
+            if (mainFile || (mainFileTypeEnum != null && JavaCGOutPutFileTypeEnum.OPFTE_ILLEGAL != mainFileTypeEnum) || readOtherFile) {
                 logger.error("类不需要读取文件但配置错误 {}", currentSimpleClassName);
                 throw new JavaCGRuntimeException("类不需要读取文件但配置错误");
             }
@@ -172,39 +175,48 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         }
 
         String[] fileColumnDesc = chooseFileColumnDesc();
-        if (ArrayUtils.isEmpty(fileColumnDesc)) {
-            logger.error("当前处理的文件列的描述为空 {}", currentSimpleClassName);
-            throw new JavaCGRuntimeException("当前处理的文件列的描述为空");
-        }
-        if (mainFile) {
+        if (readFile) {
+            // 需要读取文件
             if (fileColumnDesc.length != maxColumnNum) {
                 logger.error("当前处理的文件列的描述数量与最大列数不同 {} {} {}", currentSimpleClassName, fileColumnDesc.length, maxColumnNum);
                 throw new JavaCGRuntimeException("当前处理的文件列的描述数量与最大列数不同");
             }
+        }
+
+        if (mainFile) {
             fileName = mainFileTypeEnum.getFileName();
             fileDesc = mainFileTypeEnum.getDesc();
         } else {
             fileName = readFile ? otherFileName : writeFileName;
             fileDesc = chooseNotMainFileDesc();
         }
-        if (StringUtils.isBlank(fileDesc)) {
-            logger.error("当前类未定义文件描述 {}", currentSimpleClassName);
-            throw new JavaCGRuntimeException("当前类未定义文件描述");
-        }
-        String[] fileDetailInfoArray = chooseFileDetailInfo();
-        if (ArrayUtils.isEmpty(fileDetailInfoArray)) {
-            logger.error("当前类未定义文件详情 {}", currentSimpleClassName);
-            throw new JavaCGRuntimeException("当前类未定义文件详情");
+
+        if (readFile || writeFile) {
+            // 需要读取或者写文件
+            String[] fileDetailInfoArray = chooseFileDetailInfo();
+            if (ArrayUtils.isEmpty(fileDetailInfoArray)) {
+                logger.error("当前类未定义文件详情 {}", currentSimpleClassName);
+                throw new JavaCGRuntimeException("当前类未定义文件详情");
+            }
+
+            if (ArrayUtils.isEmpty(fileColumnDesc)) {
+                logger.error("当前处理的文件列的描述为空 {}", currentSimpleClassName);
+                throw new JavaCGRuntimeException("当前处理的文件列的描述为空");
+            }
+
+            if (StringUtils.isBlank(fileDesc)) {
+                logger.error("当前类未定义文件描述 {}", currentSimpleClassName);
+                throw new JavaCGRuntimeException("当前类未定义文件描述");
+            }
         }
 
         // 由于不同的类可能写相同的数据库表，因此以下使用computeIfAbsent
         writeDbNum = writeDbResult.getWriteDbNumMap().computeIfAbsent(dbTableInfoEnum.getTableNameKeyword(), k -> new JavaCGCounter(0));
-        if (!readFile) {
+        if (writeFile) {
             if (fileColumnDesc.length != dbTableInfoEnum.getColumns().length) {
                 logger.error("当前处理的文件列的描述数量与数据库表字段数量不同 {} {} {}", currentSimpleClassName, fileColumnDesc.length, dbTableInfoEnum.getColumns().length);
                 throw new JavaCGRuntimeException("当前处理的文件列的描述数量与数据库表字段数量不同");
             }
-
             writeFileNum = new JavaCGCounter(0);
             JavaCGCounter existedWriteFileNum = writeDbResult.getWriteFileNumMap().putIfAbsent(writeFileName, writeFileNum);
             if (existedWriteFileNum != null) {
@@ -212,6 +224,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
                 throw new JavaCGRuntimeException("当前写文件的信息已被设置过");
             }
         }
+
         failNum = new JavaCGCounter(0);
         JavaCGCounter existedFailNum = writeDbResult.getFailNumMap().putIfAbsent(currentSimpleClassName, failNum);
         if (existedFailNum != null) {
@@ -269,7 +282,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
      *
      * @return
      */
-    public abstract String[] chooseFileColumnDesc();
+    public String[] chooseFileColumnDesc() {
+        return null;
+    }
 
     /**
      * 返回非主要文件的描述，包括需要读取的其他文件、需要写文件的情况
@@ -285,7 +300,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
      *
      * @return
      */
-    public abstract String[] chooseFileDetailInfo();
+    public String[] chooseFileDetailInfo() {
+        return null;
+    }
 
     /**
      * 根据需要写入的数据生成Object数组
@@ -342,7 +359,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
      * 执行开始之前的操作
      */
     public void beforeHandle(String javaCgOutputPath) throws FileNotFoundException {
-        if (!readFile) {
+        if (writeFile) {
             String outputFilePath = javaCgOutputPath + writeFileName;
             logger.info("{} 将结果写入文件 {}", currentSimpleClassName, outputFilePath);
             fileWriter = JavaCGFileUtil.genBufferedWriter(outputFilePath);
@@ -356,7 +373,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         // 结束前将剩余数据写入数据库
         insertDb();
 
-        if (!readFile && fileWriter != null) {
+        if (writeFile && fileWriter != null) {
             IOUtils.closeQuietly(fileWriter);
         }
     }
@@ -455,7 +472,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         }
         writeDbNum.addAndGet(dataList.size());
 
-        if (!readFile) {
+        if (writeFile) {
             if (writeFileNum == null) {
                 logger.error("记录写入文件记录数量的对象未生成，需要先调用 beforeHandle 方法创建 {}", currentSimpleClassName);
                 throw new JavaCGRuntimeException("记录写入文件记录数量的对象未生成，需要先调用 beforeHandle 方法创建");
@@ -466,7 +483,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
             logger.debug("写入数据库 {} {}", currentSimpleClassName, dataList.size());
         }
 
-        if (!readFile && fileWriter == null) {
+        if (writeFile && fileWriter == null) {
             logger.error("写入文件的对象未生成，需要先调用 beforeHandle 方法创建 {}", currentSimpleClassName);
             failNum.addAndGet();
             throw new JavaCGRuntimeException("写入文件的对象未生成，需要先调用 beforeHandle 方法创建");
@@ -475,14 +492,14 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         // 等待直到允许任务执行
         JACGUtil.wait4TPEExecute(threadPoolExecutor, taskQueueMaxSize);
 
-        if (!useNeo4j() || !readFile) {
-            // 不使用neo4j，或都不需要读取文件时，处理相关数据
+        if (!useNeo4j() || writeFile) {
+            // 不使用neo4j，或需要写文件时，处理相关数据
             // 根据需要写入的数据生成Object数组
             List<Object[]> objectList = new ArrayList<>(dataList.size());
             for (T data : dataList) {
                 // genObjectArray()方法在当前线程中执行，没有线程安全问题
                 Object[] objects = genObjectArray(data);
-                if (!readFile) {
+                if (writeFile) {
                     try {
                         fileWriter.write(StringUtils.join(objects, JavaCGConstants.FLAG_TAB) + JavaCGConstants.NEW_LINE);
                     } catch (Exception e) {

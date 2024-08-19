@@ -46,13 +46,19 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
         }
         String beanType = array[3];
         springBeanMap.put(springBeanName, className);
-        return new WriteDbData4SpringBean(springBeanName, Integer.parseInt(seq), className, beanType);
+        WriteDbData4SpringBean writeDbData4SpringBean = new WriteDbData4SpringBean();
+        writeDbData4SpringBean.setRecordId(genNextRecordId());
+        writeDbData4SpringBean.setSpringBeanName(springBeanName);
+        writeDbData4SpringBean.setSeq(Integer.parseInt(seq));
+        writeDbData4SpringBean.setClassName(className);
+        writeDbData4SpringBean.setBeanType(beanType);
+        return writeDbData4SpringBean;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringBean data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSpringBeanName(),
                 data.getSeq(),
                 data.getClassName(),

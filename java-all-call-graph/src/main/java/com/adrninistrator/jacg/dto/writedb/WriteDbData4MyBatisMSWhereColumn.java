@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，MyBatis的XML中where子句的字段信息（使用MySQL）
  */
 public class WriteDbData4MyBatisMSWhereColumn implements BaseWriteDbData {
+    private int recordId;
     private String mapperSimpleClassName;
     private String mapperMethodName;
     private String tableName;
@@ -20,6 +21,14 @@ public class WriteDbData4MyBatisMSWhereColumn implements BaseWriteDbData {
     private String mapperClassName;
     private String xmlFileName;
     private String xmlFilePath;
+
+    public int getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
+    }
 
     public String getMapperSimpleClassName() {
         return mapperSimpleClassName;

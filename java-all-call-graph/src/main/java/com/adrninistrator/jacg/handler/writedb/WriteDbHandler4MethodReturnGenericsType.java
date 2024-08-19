@@ -47,19 +47,22 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
         String genericsType = array[3];
 
         withReturnGenericsTypeMethodHash.add(methodHash);
-        return new WriteDbData4MethodReturnGenericsType(methodHash,
-                simpleClassName,
-                type,
-                typeSeq,
-                dbOperWrapper.getSimpleClassName(genericsType),
-                genericsType,
-                fullMethod);
+        WriteDbData4MethodReturnGenericsType writeDbData4MethodReturnGenericsType = new WriteDbData4MethodReturnGenericsType();
+        writeDbData4MethodReturnGenericsType.setRecordId(genNextRecordId());
+        writeDbData4MethodReturnGenericsType.setMethodHash(methodHash);
+        writeDbData4MethodReturnGenericsType.setSimpleClassName(simpleClassName);
+        writeDbData4MethodReturnGenericsType.setType(type);
+        writeDbData4MethodReturnGenericsType.setTypeSeq(typeSeq);
+        writeDbData4MethodReturnGenericsType.setSimpleGenericsType(dbOperWrapper.getSimpleClassName(genericsType));
+        writeDbData4MethodReturnGenericsType.setGenericsType(genericsType);
+        writeDbData4MethodReturnGenericsType.setFullMethod(fullMethod);
+        return writeDbData4MethodReturnGenericsType;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodReturnGenericsType data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getSimpleClassName(),
                 data.getType(),

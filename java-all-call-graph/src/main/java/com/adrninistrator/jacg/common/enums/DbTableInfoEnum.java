@@ -41,6 +41,13 @@ public enum DbTableInfoEnum {
             DC.CN_SIMPLE_CLASS_NAME,
             DC.CN_DUPLICATE_CLASS,
     }),
+    DTIE_CLASS_REFERENCE("class_reference", new String[]{
+            DC.CR_RECORD_ID,
+            DC.CR_CLASS_NAME,
+            DC.CR_SIMPLE_CLASS_NAME,
+            DC.CR_REFERENCED_CLASS_NAME,
+            DC.CR_REFERENCED_SIMPLE_CLASS_NAME,
+    }),
     DTIE_CLASS_SIGNATURE_EI1("class_signature_ei1", new String[]{
             DC.CSEI1_RECORD_ID,
             DC.CSEI1_SIMPLE_CLASS_NAME,

@@ -157,19 +157,6 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
 
     // 添加代码解析扩展类
     private boolean addCodeParserExtensions() {
-        String[] defaultCodeParserNameArray = new String[]{
-                MyBatisMySqlSqlInfoCodeParser.class.getName(),
-                MyBatisMySqlColumnInfoCodeParser.class.getName(),
-                MyBatisMySqlEntityInfoCodeParser.class.getName(),
-                MyBatisMySqlWriteSqlInfoCodeParser.class.getName(),
-                MyBatisMySqlSetColumnCodeParser.class.getName(),
-                MyBatisMySqlSelectColumnCodeParser.class.getName(),
-                MyBatisMySqlWhereColumnCodeParser.class.getName(),
-                SpringTaskXmlCodeParser.class.getName(),
-                MyBatisAnnotationCodeParser.class.getName(),
-                SpringXmlBeanParser.class.getName()
-        };
-
         List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, true);
         Set<String> codeParserExtensionClassSet = new HashSet<>(codeParserExtensionClassList);
         if (codeParserExtensionClassList.size() != codeParserExtensionClassSet.size()) {
@@ -222,13 +209,6 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
                 jCallGraph.addCodeParser(codeParser);
             }
         }
-
-        // 在参数配置中增加以上默认添加的类，使生成的使用的参数配置中能够显示
-        for (String defaultCodeParserName : defaultCodeParserNameArray) {
-            if (!codeParserExtensionClassList.contains(defaultCodeParserName)) {
-                configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, defaultCodeParserName);
-            }
-        }
         return true;
     }
 
@@ -269,6 +249,12 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         JavaCGOtherConfigFileUseListEnum[] configs = JavaCGOtherConfigFileUseListEnum.values();
         for (int i = 0; i < configs.length; i++) {
             JavaCGOtherConfigFileUseListEnum currentConfig = configs[i];
+            if (JavaCGOtherConfigFileUseListEnum.OCFULE_CODE_PARSER_ONLY_4SHOW == currentConfig) {
+                // 代码解析扩展类名特殊处理
+                List<String> allCodeParserNameList = jCallGraph.getAllCodeParserNameList();
+                configureWrapper.doPrintListConfigInfo(markdownWriter, i, currentConfig.getFileName(), currentConfig.getDesc(), allCodeParserNameList);
+                continue;
+            }
             configureWrapper.doPrintListConfigInfo(markdownWriter, i, currentConfig.getFileName(), currentConfig.getDesc(), javaCGConfigureWrapper.getOtherConfigList(currentConfig
                     , false));
         }

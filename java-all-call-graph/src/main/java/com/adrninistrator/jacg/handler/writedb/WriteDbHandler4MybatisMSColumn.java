@@ -38,20 +38,21 @@ public class WriteDbHandler4MybatisMSColumn extends AbstractWriteDbHandler<Write
         String xmlFilePath = array[3];
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
         String entitySimpleClassName = dbOperWrapper.getSimpleClassName(entityClassName);
-        return new WriteDbData4MybatisMSColumn(
-                entitySimpleClassName,
-                entityColumnName,
-                columnName,
-                entityClassName,
-                xmlFileName,
-                xmlFilePath
-        );
+        WriteDbData4MybatisMSColumn writeDbData4MybatisMSColumn = new WriteDbData4MybatisMSColumn();
+        writeDbData4MybatisMSColumn.setRecordId(genNextRecordId());
+        writeDbData4MybatisMSColumn.setEntitySimpleClassName(entitySimpleClassName);
+        writeDbData4MybatisMSColumn.setEntityFieldName(entityColumnName);
+        writeDbData4MybatisMSColumn.setColumnName(columnName);
+        writeDbData4MybatisMSColumn.setEntityClassName(entityClassName);
+        writeDbData4MybatisMSColumn.setXmlFileName(xmlFileName);
+        writeDbData4MybatisMSColumn.setXmlFilePath(xmlFilePath);
+        return writeDbData4MybatisMSColumn;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MybatisMSColumn data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getEntitySimpleClassName(),
                 data.getEntityFieldName(),
                 data.getColumnName(),

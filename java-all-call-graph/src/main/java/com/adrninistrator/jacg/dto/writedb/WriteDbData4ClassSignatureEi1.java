@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，类的签名中涉及继承与实现的信息1
  */
 public class WriteDbData4ClassSignatureEi1 implements BaseWriteDbData {
+    private int recordId;
     private String simpleClassName;
     private String type;
     private String superItfClassName;
@@ -16,17 +17,12 @@ public class WriteDbData4ClassSignatureEi1 implements BaseWriteDbData {
     private String signGenericsName;
     private String className;
 
-    public WriteDbData4ClassSignatureEi1() {
+    public int getRecordId() {
+        return recordId;
     }
 
-    public WriteDbData4ClassSignatureEi1(String simpleClassName, String type, String superItfClassName, int seq, String signClassName, String signGenericsName, String className) {
-        this.simpleClassName = simpleClassName;
-        this.type = type;
-        this.superItfClassName = superItfClassName;
-        this.seq = seq;
-        this.signClassName = signClassName;
-        this.signGenericsName = signGenericsName;
-        this.className = className;
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
     }
 
     public String getSimpleClassName() {

@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，字段的注解
  */
 public class WriteDbData4FieldAnnotation implements BaseWriteDbData {
+    private int recordId;
     private String simpleClassName;
     private String fieldName;
     private String annotationName;
@@ -16,18 +17,12 @@ public class WriteDbData4FieldAnnotation implements BaseWriteDbData {
     private String attributeValue;
     private String className;
 
-    public WriteDbData4FieldAnnotation() {
+    public int getRecordId() {
+        return recordId;
     }
 
-    public WriteDbData4FieldAnnotation(String simpleClassName, String fieldName, String annotationName, String attributeName, String annotationType, String attributeValue,
-                                       String className) {
-        this.simpleClassName = simpleClassName;
-        this.fieldName = fieldName;
-        this.annotationName = annotationName;
-        this.attributeName = attributeName;
-        this.annotationType = annotationType;
-        this.attributeValue = attributeValue;
-        this.className = className;
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
     }
 
     public String getSimpleClassName() {

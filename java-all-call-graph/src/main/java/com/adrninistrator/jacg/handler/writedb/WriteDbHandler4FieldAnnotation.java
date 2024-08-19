@@ -51,13 +51,22 @@ public class WriteDbHandler4FieldAnnotation extends AbstractWriteDbHandler<Write
             attributeValue = AnnotationAttributesParseUtil.parseFromFile(attributeType, array[5]);
         }
 
-        return new WriteDbData4FieldAnnotation(simpleClassName, fieldName, annotationName, attributeName, attributeType, attributeValue, className);
+        WriteDbData4FieldAnnotation writeDbData4FieldAnnotation = new WriteDbData4FieldAnnotation();
+        writeDbData4FieldAnnotation.setRecordId(genNextRecordId());
+        writeDbData4FieldAnnotation.setSimpleClassName(simpleClassName);
+        writeDbData4FieldAnnotation.setFieldName(fieldName);
+        writeDbData4FieldAnnotation.setAnnotationName(annotationName);
+        writeDbData4FieldAnnotation.setAttributeName(attributeName);
+        writeDbData4FieldAnnotation.setAnnotationType(attributeType);
+        writeDbData4FieldAnnotation.setAttributeValue(attributeValue);
+        writeDbData4FieldAnnotation.setClassName(className);
+        return writeDbData4FieldAnnotation;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4FieldAnnotation data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getFieldName(),
                 data.getAnnotationName(),

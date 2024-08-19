@@ -3,79 +3,63 @@ package com.adrninistrator.jacg.handler.writedb;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassName;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassReference;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * @author adrninistrator
  * @date 2022/11/16
- * @description: 写入数据库，引用的类
+ * @description: 写入数据库，类名
  */
 @JACGWriteDbHandler(
-        readFile = true,
-        mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_CLASS_NAME,
-        minColumnNum = 1,
-        maxColumnNum = 1,
+        readFile = false,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_NAME
 )
 public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData4ClassName> {
-    private final Set<String> handledClassNameSet = new HashSet<>();
-
     public WriteDbHandler4ClassName(WriteDbResult writeDbResult) {
         super(writeDbResult);
     }
 
+    private final Set<String> classNameSet = new HashSet<>();
+
+    // 增加数据
+    public void addClassReference(WriteDbData4ClassReference data) {
+        classNameSet.add(data.getClassName());
+        classNameSet.add(data.getReferencedClassName());
+    }
+
     @Override
-    protected WriteDbData4ClassName genData(String[] array) {
-        String line = array[0];
-        if (JavaCGConstants.FLAG_HASHTAG.equals(line)) {
-            return null;
+    public void afterHandle() {
+        List<String> classNameList = new ArrayList<>(classNameSet);
+        Collections.sort(classNameList);
+        for (String className : classNameList) {
+            WriteDbData4ClassName writeDbData4ClassName = new WriteDbData4ClassName();
+            writeDbData4ClassName.setRecordId(genNextRecordId());
+            writeDbData4ClassName.setClassName(className);
+            writeDbData4ClassName.setSimpleClassName(JavaCGClassMethodUtil.getSimpleClassNameFromFull(className));
+            writeDbData4ClassName.setDuplicateClass(JavaCGYesNoEnum.NO.getIntValue());
+            dataList.add(writeDbData4ClassName);
+            tryInsertDb();
         }
 
-        // line为类名
-        if (!isAllowedClassPrefix(line) ||
-                !handledClassNameSet.add(line)) {
-             /*
-                根据类名前缀判断不需要处理时则不处理
-                或者已处理过则不处理
-             */
-            return null;
-        }
-
-        String simpleClassName = JavaCGClassMethodUtil.getSimpleClassNameFromFull(line);
-        return new WriteDbData4ClassName(line, simpleClassName, JavaCGYesNoEnum.NO.getIntValue());
+        super.afterHandle();
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassName data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getClassName(),
                 data.getSimpleClassName(),
                 data.getDuplicateClass()
-        };
-    }
-
-    @Override
-    public String[] chooseFileColumnDesc() {
-        return new String[]{
-                "完整类名"
-        };
-    }
-
-    @Override
-    public String[] chooseFileDetailInfo() {
-        return new String[]{
-                "项目中所有引用的类",
-                "文件中内容为#的行将各个类中引用的类分隔开；第一个类代表引用其他类的类，后面的类代表被引用的类",
-                "可能出现重复值"
         };
     }
 }

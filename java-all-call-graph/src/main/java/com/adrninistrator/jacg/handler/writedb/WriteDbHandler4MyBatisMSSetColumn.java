@@ -42,7 +42,9 @@ public class WriteDbHandler4MyBatisMSSetColumn extends AbstractWriteDbHandler<Wr
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
         String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
         ParameterName parameterName = MyBatisTableParserUtil.genParameterName(paramRawName);
+
         WriteDbData4MyBatisMSSetColumn writeDbData4MyBatisMSSetColumn = new WriteDbData4MyBatisMSSetColumn();
+        writeDbData4MyBatisMSSetColumn.setRecordId(genNextRecordId());
         writeDbData4MyBatisMSSetColumn.setMapperSimpleClassName(mapperSimpleClassName);
         writeDbData4MyBatisMSSetColumn.setMapperMethodName(mapperMethodName);
         writeDbData4MyBatisMSSetColumn.setTableName(tableName);
@@ -59,7 +61,7 @@ public class WriteDbHandler4MyBatisMSSetColumn extends AbstractWriteDbHandler<Wr
     @Override
     protected Object[] genObjectArray(WriteDbData4MyBatisMSSetColumn data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMapperSimpleClassName(),
                 data.getMapperMethodName(),
                 data.getTableName(),

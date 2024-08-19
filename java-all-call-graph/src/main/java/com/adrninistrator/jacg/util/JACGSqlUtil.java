@@ -138,9 +138,9 @@ public class JACGSqlUtil {
      * @param data
      * @return
      */
-    public static Object[] genWriteDbData4SpringTask(WriteDbData4SpringTask data, int recordId) {
+    public static Object[] genWriteDbData4SpringTask(WriteDbData4SpringTask data) {
         return new Object[]{
-                recordId,
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getSpringBeanName(),
                 data.getClassName(),

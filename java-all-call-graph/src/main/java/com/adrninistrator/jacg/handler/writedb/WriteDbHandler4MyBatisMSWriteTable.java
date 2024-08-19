@@ -48,21 +48,22 @@ public class WriteDbHandler4MyBatisMSWriteTable extends AbstractWriteDbHandler<W
 
         // 记录MyBatis写数据库的Mapper方法
         myBatisMapperMethodWriteSet.add(JACGClassMethodUtil.genClassAndMethodName(mapperClassName, mapperMethodName));
-        return new WriteDbData4MyBatisMSWriteTable(
-                mapperSimpleClassName,
-                mapperMethodName,
-                sqlStatement,
-                tableName,
-                mapperClassName,
-                xmlFileName,
-                xmlFilePath
-        );
+        WriteDbData4MyBatisMSWriteTable writeDbData4MyBatisMSWriteTable = new WriteDbData4MyBatisMSWriteTable();
+        writeDbData4MyBatisMSWriteTable.setRecordId(genNextRecordId());
+        writeDbData4MyBatisMSWriteTable.setMapperSimpleClassName(mapperSimpleClassName);
+        writeDbData4MyBatisMSWriteTable.setMapperMethodName(mapperMethodName);
+        writeDbData4MyBatisMSWriteTable.setSqlStatement(sqlStatement);
+        writeDbData4MyBatisMSWriteTable.setTableName(tableName);
+        writeDbData4MyBatisMSWriteTable.setMapperClassName(mapperClassName);
+        writeDbData4MyBatisMSWriteTable.setXmlFileName(xmlFileName);
+        writeDbData4MyBatisMSWriteTable.setXmlFilePath(xmlFilePath);
+        return writeDbData4MyBatisMSWriteTable;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MyBatisMSWriteTable data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMapperSimpleClassName(),
                 data.getMapperMethodName(),
                 data.getSqlStatement(),

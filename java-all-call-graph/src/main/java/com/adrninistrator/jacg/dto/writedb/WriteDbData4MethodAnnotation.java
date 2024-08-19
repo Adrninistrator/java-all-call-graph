@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，方法的注解
  */
 public class WriteDbData4MethodAnnotation implements BaseWriteDbData {
+    private int recordId;
     private String methodHash;
     private String annotationName;
     private String attributeName;
@@ -16,7 +17,14 @@ public class WriteDbData4MethodAnnotation implements BaseWriteDbData {
     private String fullMethod;
     private String simpleClassName;
 
-    //
+    public int getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
+    }
+
     public String getMethodHash() {
         return methodHash;
     }

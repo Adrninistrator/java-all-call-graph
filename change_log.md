@@ -585,3 +585,7 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 支持将java-callgraph2生成的文件的数据保存到Neo4j图数据库
 
 支持读取Neo4j保存的方法调用数据，生成向下的完整方法调用链
+
+## 1.19. (2.0.4)临时说明
+
+增加数据库表记录类之间的引用关系

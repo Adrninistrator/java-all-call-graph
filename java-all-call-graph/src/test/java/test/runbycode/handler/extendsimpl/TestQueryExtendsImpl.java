@@ -108,14 +108,14 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
     @Test
     public void testQueryAllSuperClassName() {
         try (JACGExtendsImplHandler jacgExtendsImplHandler = new JACGExtendsImplHandler(configureWrapper)) {
-            doTestQueryAllSuperClassName(jacgExtendsImplHandler, I3_1_1_2.class.getName());
-            doTestQueryAllSuperClassName(jacgExtendsImplHandler, FutureImpl.class.getName());
+            doTestQueryAllSuperClassName(jacgExtendsImplHandler, I3_1_1_2.class.getName(),false);
+            doTestQueryAllSuperClassName(jacgExtendsImplHandler, FutureImpl.class.getName(),true);
         }
     }
 
-    private void doTestQueryAllSuperClassName(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
+    private void doTestQueryAllSuperClassName(JACGExtendsImplHandler jacgExtendsImplHandler, String className, boolean empty) {
         List<String> allSuperClassNameList = jacgExtendsImplHandler.queryAllSuperClassName(className);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(allSuperClassNameList));
+        Assert.assertEquals(empty, JavaCGUtil.isCollectionEmpty(allSuperClassNameList));
         printListContent(allSuperClassNameList, className);
     }
 

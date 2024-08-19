@@ -30,6 +30,7 @@ public class Neo4jWriteDbHandler4ClassName extends WriteDbHandler4ClassName {
     protected Object transferNeo4jDomain(WriteDbData4ClassName data) {
         JACGClassName jacgClassName = new JACGClassName();
         jacgClassName.setAppName(appName);
+        jacgClassName.setRecordId(data.getRecordId());
         jacgClassName.setClassName(data.getClassName());
         jacgClassName.setSimpleClassName(data.getSimpleClassName());
         jacgClassName.setDuplicateClass(data.getDuplicateClass());

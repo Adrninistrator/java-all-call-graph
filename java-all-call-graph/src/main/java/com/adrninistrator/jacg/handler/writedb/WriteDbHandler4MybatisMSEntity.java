@@ -39,21 +39,23 @@ public class WriteDbHandler4MybatisMSEntity extends AbstractWriteDbHandler<Write
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
         String mapperSimpleInterfaceName = dbOperWrapper.getSimpleClassName(mapperInterfaceName);
         String entitySimpleClassName = dbOperWrapper.getSimpleClassName(entityClassName);
-        return new WriteDbData4MybatisMSEntity(
-                mapperSimpleInterfaceName,
-                entitySimpleClassName,
-                tableName,
-                mapperInterfaceName,
-                entityClassName,
-                xmlFileName,
-                xmlFilePath
-        );
+
+        WriteDbData4MybatisMSEntity writeDbData4MybatisMSEntity = new WriteDbData4MybatisMSEntity();
+        writeDbData4MybatisMSEntity.setRecordId(genNextRecordId());
+        writeDbData4MybatisMSEntity.setMapperSimpleClassName(mapperSimpleInterfaceName);
+        writeDbData4MybatisMSEntity.setEntitySimpleClassName(entitySimpleClassName);
+        writeDbData4MybatisMSEntity.setTableName(tableName);
+        writeDbData4MybatisMSEntity.setMapperClassName(mapperInterfaceName);
+        writeDbData4MybatisMSEntity.setEntityClassName(entityClassName);
+        writeDbData4MybatisMSEntity.setXmlFileName(xmlFileName);
+        writeDbData4MybatisMSEntity.setXmlFilePath(xmlFilePath);
+        return writeDbData4MybatisMSEntity;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MybatisMSEntity data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getMapperSimpleClassName(),
                 data.getEntitySimpleClassName(),
                 data.getTableName(),

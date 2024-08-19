@@ -8,7 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，MyBatis的Entity与Mapper、表名（使用MySQL）
  */
 public class WriteDbData4MybatisMSEntity implements BaseWriteDbData {
-
+    private int recordId;
     private String mapperSimpleClassName;
     private String entitySimpleClassName;
     private String tableName;
@@ -17,18 +17,12 @@ public class WriteDbData4MybatisMSEntity implements BaseWriteDbData {
     private String xmlFileName;
     private String xmlFilePath;
 
-    public WriteDbData4MybatisMSEntity() {
+    public int getRecordId() {
+        return recordId;
     }
 
-    public WriteDbData4MybatisMSEntity(String mapperSimpleClassName, String entitySimpleClassName, String tableName, String mapperClassName, String entityClassName,
-                                       String xmlFileName, String xmlFilePath) {
-        this.mapperSimpleClassName = mapperSimpleClassName;
-        this.entitySimpleClassName = entitySimpleClassName;
-        this.tableName = tableName;
-        this.mapperClassName = mapperClassName;
-        this.entityClassName = entityClassName;
-        this.xmlFileName = xmlFileName;
-        this.xmlFilePath = xmlFilePath;
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
     }
 
     public String getMapperSimpleClassName() {

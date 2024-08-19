@@ -51,6 +51,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
         int jarNum = Integer.parseInt(array[3]);
 
         WriteDbData4ClassInfo writeDbData4ClassInfo = new WriteDbData4ClassInfo();
+        writeDbData4ClassInfo.setRecordId(genNextRecordId());
         writeDbData4ClassInfo.setSimpleClassName(simpleClassName);
         writeDbData4ClassInfo.setAccessFlags(accessFlags);
         writeDbData4ClassInfo.setClassName(className);
@@ -63,7 +64,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassInfo data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getAccessFlags(),
                 data.getClassName(),

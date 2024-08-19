@@ -41,6 +41,7 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
         int staticFlag = Integer.parseInt(array[5]);
         int finalFlag = Integer.parseInt(array[6]);
         WriteDbData4FieldInfo writeDbData4FieldInfo = new WriteDbData4FieldInfo();
+        writeDbData4FieldInfo.setRecordId(genNextRecordId());
         writeDbData4FieldInfo.setSimpleClassName(simpleClassName);
         writeDbData4FieldInfo.setFieldName(fieldName);
         writeDbData4FieldInfo.setFieldType(fieldType);
@@ -55,7 +56,7 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
     @Override
     protected Object[] genObjectArray(WriteDbData4FieldInfo data) {
         return new Object[]{
-                genNextRecordId(),
+                data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getFieldName(),
                 data.getFieldType(),
