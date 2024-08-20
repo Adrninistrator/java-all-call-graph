@@ -154,6 +154,10 @@ task gen_run_jar(type: Jar) {
         into '/'
     }
 
+    doFirst {
+        delete "${jar_output_dir}"
+    }
+
     doLast {
         def jacgConfigDirs = new File('src/main/resources').listFiles().findAll { File f -> (f.isDirectory() && f.name.startsWith('_jacg_')) }
         copy {
@@ -197,7 +201,7 @@ task gen_run_jar(type: Jar) {
                             || f.name.startsWith("spring-core-")
                             || f.name.startsWith("spring-jcl-")
                             || f.name.startsWith("spring-jdbc-")
-                            || f.name.startsWith("spring-tx-")) && !f.name.startsWith('junit-') && !f.name.startsWith('hamcrest-core-'))
+                            || f.name.startsWith("spring-tx-")) && !f.name.startsWith('hamcrest-core-'))
             }
             into "${jar_output_dir}/lib"
         }
