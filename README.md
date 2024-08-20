@@ -38,38 +38,44 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 [更新说明](change_log.md)
 
-# 6. 使用说明
+# 6. 配置参数示例
+
+`使用说明中的配置参数未来得及修改，以配置参数示例中的说明为准，详细说明见对应配置文件中的说明`
+
+[配置参数示例](config_example.md)
+
+# 7. 使用说明
 
 [使用说明](how_to_use.md)
 
-# 7. 使用Neo4j图数据库
+# 8. 使用Neo4j图数据库
 
 [使用Neo4j图数据库](use_neo4j.md)
 
-# 8. JVM参数及Java代码开关
+# 9. JVM参数及Java代码开关
 
 [JVM参数及Java代码开关](jvm_options_java_switch.md)
 
-# 9. 二次开发
+# 10. 二次开发
 
 [二次开发](custom_development.md)
 
-# 10. 其他功能
+# 11. 其他功能
 
 [其他功能](other_functions.md)
 
-# 11. 扩展功能
+# 12. 扩展功能
 
 [扩展功能](extensions.md)
 
-# 12. 原理说明
+# 13. 原理说明
 
 [原理说明](how_to_implementation.md)
 
-# 13. 其他说明
+# 14. 其他说明
 
 [其他说明](other_instructions.md)
 
-# 14. 常见问题
+# 15. 常见问题
 
 [常见问题](question_answer.md)
