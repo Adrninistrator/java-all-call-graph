@@ -18,18 +18,20 @@
 com.adrninistrator.jacg.conf.ConfigureWrapper
 ```
 
-以下方法在执行时支持传入ConfigureWrapper对象，支持每次执行任务使用独立的配置信息，可支持多个任务并行执行（适用于在Web项目中使用java-all-call-graph的场景）
+以下类的构造函数支持传入ConfigureWrapper对象，以支持每次执行任务使用独立的配置信息，以下方法可支持多个任务并行执行（适用于在Web项目中使用java-all-call-graph的场景），每次需要创建以下类新的实例
 
 |类|方法|作用|
 |---|---|---|
-|RunnerWriteDb|run(ConfigureWrapper configureWrapper)|生成Java方法调用关系并写入数据库|
-|RunnerGenAllGraph4Callee|run(ConfigureWrapper configureWrapper)|生成调用指定类方法向上的完整调用链|
-|RunnerGenAllGraph4Caller|run(ConfigureWrapper configureWrapper)|生成指定方法向下完整调用链|
-|FindKeywordCallGraph|find(boolean order4ee, ConfigureWrapper configureWrapper)|生成包含关键字的所有方法到起始方法之间的调用链|
+|RunnerWriteDb|run()|生成Java方法调用关系并写入数据库|
+|RunnerGenAllGraph4Callee|run()|生成调用指定类方法向上的完整调用链|
+|RunnerGenAllGraph4Caller|run()|生成指定方法向下完整调用链|
+|FindCallStackTrace|find(boolean order4ee)|生成包含关键字的所有方法到起始方法之间的调用链|
 
 ## 2.2. 示例
 
 以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中创建了ConfigureWrapper对象，并在该类的子类中使用ConfigureWrapper对象调用相关的方法。
+
+可参考`test.runbycode.config.TestConfigGenerator`类中通过代码进行配置的方式
 
 ### 2.2.1. 设置_jacg_config/config.properties配置文件参数
 

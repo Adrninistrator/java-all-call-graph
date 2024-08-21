@@ -10,8 +10,8 @@
 
 |完整类名|说明|
 |---|---|
-|test.jacg.TestFindKeywordCallGraph4ee|处理向上的完整调用链文件，按照层级减小的方向显示|
-|test.jacg.TestFindKeywordCallGraph4er|处理向下的完整调用链文件，按照层级增大的方向显示|
+|test.jacg.TestFindCallStackTrace4ee|处理向上的完整调用链文件，按照层级减小的方向显示|
+|test.jacg.TestFindCallStackTrace4er|处理向下的完整调用链文件，按照层级增大的方向显示|
 
 以上类在执行时支持不指定程序参数（即main()方法处理的参数），或指定程序参数，建议使用不指定程序参数的方式。
 
@@ -19,7 +19,7 @@
 
 执行以上类时不指定程序参数，则会先生成对应的向上（或向下）方法完整调用链，再对生成目录的文件根据关键字生成到起始方法的调用链。
 
-执行TestFindKeywordCallGraph4ee类时，关键字在配置文件“_jacg_find_keyword/find_keyword_4callee.properties”中指定；执行TestFindKeywordCallGraph4er类时，关键字在配置文件“_jacg_find_keyword/find_keyword_4caller.properties”中指定。
+执行TestFindCallStackTrace4ee类时，关键字在配置文件“_jacg_find_keyword/find_keyword_4callee.properties”中指定；执行TestFindCallStackTrace4er类时，关键字在配置文件“_jacg_find_keyword/find_keyword_4caller.properties”中指定。
 
 - 指定程序参数
 
