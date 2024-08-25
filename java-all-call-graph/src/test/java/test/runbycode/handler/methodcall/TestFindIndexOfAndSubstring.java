@@ -33,7 +33,7 @@ public class TestFindIndexOfAndSubstring extends TestRunByCodeBase {
              RecordCallerMethodCallByEEDetailHandler recordCallerMethodCallByEEDetailHandler = new RecordCallerMethodCallByEEDetailHandler(configureWrapper);
              ShowAllMethodCallByERDetailHandler showAllMethodCallByERDetailHandler = new ShowAllMethodCallByERDetailHandler(configureWrapper)) {
             // 查找被调用的StringUtil相关类名
-            List<WriteDbData4ClassName> writeDbData4ClassNameList = classInfoHandler.getClassNameEndsWith("StringUtil");
+            List<WriteDbData4ClassName> writeDbData4ClassNameList = classInfoHandler.queryClassNameEndsWith("StringUtil");
             List<String> stringUtilCalleeClassNameList = new ArrayList<>();
             for (WriteDbData4ClassName writeDbData4ClassName : writeDbData4ClassNameList) {
                 stringUtilCalleeClassNameList.add(writeDbData4ClassName.getClassName());

@@ -39,7 +39,7 @@ public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<Writ
         String maxLineNumber = array[2];
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
         return new WriteDbData4MethodLineNumber(methodHash, simpleClassName, methodName, Integer.parseInt(minLineNumber), Integer.parseInt(maxLineNumber), fullMethod);
     }

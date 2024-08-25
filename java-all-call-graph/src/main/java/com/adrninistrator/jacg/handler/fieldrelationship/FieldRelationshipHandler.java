@@ -125,8 +125,8 @@ public class FieldRelationshipHandler extends BaseHandler {
                     " and " + DC.FR_VALID + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        String simpleGetClassName = dbOperWrapper.getSimpleClassName(getClassName);
-        String simpleSetClassName = dbOperWrapper.getSimpleClassName(setClassName);
+        String simpleGetClassName = dbOperWrapper.querySimpleClassName(getClassName);
+        String simpleSetClassName = dbOperWrapper.querySimpleClassName(setClassName);
         return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, simpleGetClassName, getMethodName, simpleSetClassName, setMethodName,
                 JavaCGYesNoEnum.YES.getIntValue());
     }
@@ -155,7 +155,7 @@ public class FieldRelationshipHandler extends BaseHandler {
                     " and " + DC.FR_VALID + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, simpleClassName, methodName, simpleClassName, setMethodName, JavaCGYesNoEnum.YES.getIntValue());
     }
 
@@ -183,7 +183,7 @@ public class FieldRelationshipHandler extends BaseHandler {
                     " and " + DC.FR_VALID + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, simpleClassName, methodName, simpleClassName, getMethodName, JavaCGYesNoEnum.YES.getIntValue());
     }
 

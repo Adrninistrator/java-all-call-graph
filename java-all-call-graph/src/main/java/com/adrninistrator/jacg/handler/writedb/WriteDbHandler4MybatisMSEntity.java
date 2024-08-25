@@ -37,8 +37,8 @@ public class WriteDbHandler4MybatisMSEntity extends AbstractWriteDbHandler<Write
         String tableName = array[2];
         String xmlFilePath = array[3];
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
-        String mapperSimpleInterfaceName = dbOperWrapper.getSimpleClassName(mapperInterfaceName);
-        String entitySimpleClassName = dbOperWrapper.getSimpleClassName(entityClassName);
+        String mapperSimpleInterfaceName = dbOperWrapper.querySimpleClassName(mapperInterfaceName);
+        String entitySimpleClassName = dbOperWrapper.querySimpleClassName(entityClassName);
 
         WriteDbData4MybatisMSEntity writeDbData4MybatisMSEntity = new WriteDbData4MybatisMSEntity();
         writeDbData4MybatisMSEntity.setRecordId(genNextRecordId());

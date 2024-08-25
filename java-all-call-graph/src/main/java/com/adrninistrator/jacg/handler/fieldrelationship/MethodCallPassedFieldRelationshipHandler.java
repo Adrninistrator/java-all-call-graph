@@ -155,7 +155,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             }
 
             // 查询set方法的被调用情况
-            List<WriteDbData4MethodCall> setMethodCallList = methodCallHandler.getMethodCallByCalleeFullMethod(setMethod.getFullMethod());
+            List<WriteDbData4MethodCall> setMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(setMethod.getFullMethod());
             if (JavaCGUtil.isCollectionEmpty(setMethodCallList)) {
                 // set方法未被调用，不向dto的set方法被调用时的赋值信息表写入数据，因为当set方法在父类中时，会被子类写入多次，属于重复数据
                 continue;
@@ -323,7 +323,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             if (methodCallInfoParsed instanceof MethodCallInfoParsed4MCReturnCallId) {
                 // 当前处理的方法调用解析后信息属于通过方法调用返回值进行传递
                 MethodCallInfoParsed4MCReturnCallId methodCallInfoParsed4MCReturnCallId = (MethodCallInfoParsed4MCReturnCallId) methodCallInfoParsed;
-                WriteDbData4MethodCall tmpMethodCall = methodCallHandler.getMethodCallByCallId(methodCallInfoParsed4MCReturnCallId.getMethodCallId());
+                WriteDbData4MethodCall tmpMethodCall = methodCallHandler.queryMethodCallByCallId(methodCallInfoParsed4MCReturnCallId.getMethodCallId());
                 // 向dto的set方法被调用时的赋值信息表写入数据
                 insertSetMethodAssignInfo(addedSuperSeqStepMap, setMethodCallId, setMethod, upperMethodCall, seq, i, tmpMethodCall.getCalleeFullMethod(),
                         SetMethodAssignFlagEnum.SMAFE_METHOD_CALL_RETURN, null, methodCallPassedFRNode);
@@ -344,7 +344,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
                                                      MethodCallInfoParsed4MCReturnCallId methodCallInfoParsed4MCReturnCallId, MethodCallPassedFRNode currentNode,
                                                      JavaCGCounter seq, int step) {
         // 查询当前的方法调用
-        WriteDbData4MethodCall currentMethodCall = methodCallHandler.getMethodCallByCallId(methodCallInfoParsed4MCReturnCallId.getMethodCallId());
+        WriteDbData4MethodCall currentMethodCall = methodCallHandler.queryMethodCallByCallId(methodCallInfoParsed4MCReturnCallId.getMethodCallId());
         String currentCalleeClassName = JACGClassMethodUtil.getClassNameFromMethod(currentMethodCall.getCalleeFullMethod());
 
         if (JACGClassMethodUtil.calleeMatchesGetMethod(currentMethodCall)) {
@@ -440,7 +440,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
                                               MethodCallInfoParsed4MethodArg methodCallInfoParsed4MethodArg, MethodCallPassedFRNode currentNode, JavaCGCounter seq,
                                               int step) {
         // 查询当前方法的被调用情况
-        List<WriteDbData4MethodCall> callerMethodCallList = methodCallHandler.getMethodCallByCalleeFullMethod(currentMethodCall.getCallerFullMethod());
+        List<WriteDbData4MethodCall> callerMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(currentMethodCall.getCallerFullMethod());
         if (JavaCGUtil.isCollectionEmpty(callerMethodCallList)) {
             // 向dto的set方法被调用时的赋值信息表写入数据
             insertSetMethodAssignInfo(addedSuperSeqStepMap, setMethodCallId, setMethod, currentMethodCall, seq, step, currentMethodCall.getCallerFullMethod(),

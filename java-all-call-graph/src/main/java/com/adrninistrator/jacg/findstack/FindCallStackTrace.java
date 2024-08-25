@@ -200,7 +200,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         }
 
         if (usedKeywordList.isEmpty()) {
-            logger.error("请在配置文件中指定需要生成到起始方法之间调用链的合法关键字 {}", otherConfigFileUseListEnum.getKey());
+            logger.error("请在配置文件中指定需要生成到起始方法之间调用链的合法关键字 {}", otherConfigFileUseListEnum.getConfigPrintInfo());
             return false;
         }
 

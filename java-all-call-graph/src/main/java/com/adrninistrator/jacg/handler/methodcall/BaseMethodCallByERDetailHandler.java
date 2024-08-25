@@ -101,7 +101,7 @@ public abstract class BaseMethodCallByERDetailHandler extends BaseHandler implem
         // 获得被调用类名的简单类名列表
         List<String> calleeSimpleClassNameList = new ArrayList<>(calleeClassNameList.size());
         for (String calleeClassName : calleeClassNameList) {
-            String simpleCalleeClassName = classInfoHandler.getExactlySimpleClassName(calleeClassName);
+            String simpleCalleeClassName = classInfoHandler.queryExactlySimpleClassName(calleeClassName);
             if (simpleCalleeClassName != null) {
                 calleeSimpleClassNameList.add(simpleCalleeClassName);
             }

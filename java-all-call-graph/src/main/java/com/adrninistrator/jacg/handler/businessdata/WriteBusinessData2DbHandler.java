@@ -108,7 +108,7 @@ public abstract class WriteBusinessData2DbHandler extends BaseHandler implements
         for (Integer methodCallId : dataList) {
             if (handleTimes.getCount() == 0) {
                 // 第一次处理时，查询当前处理的被调用方法参数类型列表
-                String calleeFullMethod = methodCallHandler.getCalleeFullMethodById(methodCallId);
+                String calleeFullMethod = methodCallHandler.queryCalleeFullMethodById(methodCallId);
                 if (calleeFullMethod == null) {
                     // 查询失败
                     return false;
@@ -234,7 +234,7 @@ public abstract class WriteBusinessData2DbHandler extends BaseHandler implements
      * @return
      */
     private boolean handleMethodCallByCalleeMethod(String calleeClassName, String calleeMethodName, String insertSql) {
-        String calleeSimpleClassName = dbOperWrapper.getSimpleClassName(calleeClassName);
+        String calleeSimpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
         // 从方法调用表查询指定被调用类最小的call_id
         Integer minCallId = methodCallHandler.queryMinCallIdEESCN(calleeSimpleClassName);
         if (minCallId == null) {

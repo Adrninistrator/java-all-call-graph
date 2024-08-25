@@ -47,7 +47,6 @@ public class JACGConstants {
     public static final String REPLACE_SQL_FLAG_APP_NAME = "{appName}";
 
     public static final String SQL_CREATE_TABLE_HEAD = "CREATE TABLE if not exists";
-    public static final String SQL_ENGINE_INNODB = "ENGINE=InnoDB";
 
     public static final String FLAG_LEFT_PARENTHESES = "[";
     public static final String FLAG_RIGHT_PARENTHESES = "]";

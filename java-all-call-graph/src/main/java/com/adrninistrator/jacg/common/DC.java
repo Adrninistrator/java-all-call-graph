@@ -124,6 +124,7 @@ public class DC {
     public static final String MI_RETURN_TYPE = "return_type";
     public static final String MI_METHOD_INSTRUCTIONS_HASH = "method_instructions_hash";
     public static final String MI_JAR_NUM = "jar_num";
+    public static final String MI_CLASS_NAME = "class_name";
 
     public static final String EI_RECORD_ID = "record_id";
     public static final String EI_SIMPLE_CLASS_NAME = "simple_class_name";

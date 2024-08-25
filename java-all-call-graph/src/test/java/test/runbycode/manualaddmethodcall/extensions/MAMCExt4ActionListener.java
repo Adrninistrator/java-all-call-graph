@@ -39,7 +39,7 @@ public class MAMCExt4ActionListener extends AbstractManualAddMethodCall1 {
     @Override
     protected List<MethodCallPair> chooseAddMethodCallPairList(String className) {
         // ActionListener实现类使用匿名内部类形式时，构造函数参数类型不固定，需要查询当前类的所有构造函数并处理
-        List<String> fullMethodList = methodInfoHandler.getMethodByClassMethod(className, JavaCGCommonNameConstants.METHOD_NAME_INIT);
+        List<String> fullMethodList = methodInfoHandler.queryMethodByClassMethod(className, JavaCGCommonNameConstants.METHOD_NAME_INIT);
         if (JavaCGUtil.isCollectionEmpty(fullMethodList)) {
             return null;
         }

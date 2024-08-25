@@ -33,7 +33,7 @@ public class TestCharset1MethodCallByERDetailHandler extends TestRunByCodeBase {
 
         try (ClassInfoHandler classInfoHandler = new ClassInfoHandler(configureWrapper);
              ShowAllMethodCallByERDetailHandler showAllMethodCallByERDetailHandler = new ShowAllMethodCallByERDetailHandler(configureWrapper)) {
-            List<WriteDbData4ClassName> writeDbData4ClassNameList = classInfoHandler.getClassNameEndsWith(StringUtils.class.getSimpleName());
+            List<WriteDbData4ClassName> writeDbData4ClassNameList = classInfoHandler.queryClassNameEndsWith(StringUtils.class.getSimpleName());
 
             List<String> calleeClassNameList = new ArrayList<>();
             calleeClassNameList.add(String.class.getName());

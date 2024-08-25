@@ -119,7 +119,7 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
         for (WriteDbData4MethodCallInfo methodCallInfo : dataList) {
             // 判断是否需要处理当前查询到的方法调用参数信息
             if (needHandleMethodCallInfo(methodCallInfo)) {
-                WriteDbData4MethodCall methodCall = methodCallHandler.getMethodCallByCallId(methodCallInfo.getCallId());
+                WriteDbData4MethodCall methodCall = methodCallHandler.queryMethodCallByCallId(methodCallInfo.getCallId());
                 if (methodCall == null) {
                     logger.warn("未查询到指定的方法调用，可能是同一个方法的递归调用未写入数据库 {}", methodCallInfo.getCallId());
                     continue;

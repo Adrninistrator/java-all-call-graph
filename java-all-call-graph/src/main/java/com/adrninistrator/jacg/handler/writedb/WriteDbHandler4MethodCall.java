@@ -108,9 +108,9 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(
                 callType,
                 calleeObjType,
-                dbOperWrapper.getSimpleClassName(callerClassName),
+                dbOperWrapper.querySimpleClassName(callerClassName),
                 callerFullMethod,
-                dbOperWrapper.getSimpleClassName(calleeClassName),
+                dbOperWrapper.querySimpleClassName(calleeClassName),
                 calleeFullMethod,
                 callId,
                 callerLineNum,
@@ -167,7 +167,7 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         String callerMethodHash = writeDbData4MethodCall.getCallerMethodHash();
         String calleeMethodHash = writeDbData4MethodCall.getCalleeMethodHash();
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(writeDbData4MethodCall.getCalleeFullMethod());
-        String calleeSimpleClassName = dbOperWrapper.getSimpleClassName(calleeClassName);
+        String calleeSimpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
         String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(writeDbData4MethodCall.getCalleeFullMethod());
         int callFlags = 0;
 

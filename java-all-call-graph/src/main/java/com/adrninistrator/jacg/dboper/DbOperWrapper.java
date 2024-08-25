@@ -306,8 +306,8 @@ public class DbOperWrapper {
      * @param className
      * @return
      */
-    public String getSimpleClassName(String className) {
-        return getSimpleClassName(className, tableSuffix);
+    public String querySimpleClassName(String className) {
+        return querySimpleClassName(className, tableSuffix);
     }
 
     /**
@@ -320,7 +320,7 @@ public class DbOperWrapper {
      * @param tableSuffix 表名后缀
      * @return 完整类名或简单类名
      */
-    public String getSimpleClassName(String className, String tableSuffix) {
+    public String querySimpleClassName(String className, String tableSuffix) {
         Set<String> usedDuplicateSimpleClassNameSet = null;
         // 根据表名后缀选择当前使用的类名相同但包名不同的类名Set
         if (StringUtils.isBlank(tableSuffix)) {
@@ -357,7 +357,7 @@ public class DbOperWrapper {
      * @param className
      * @return null: 未获取到，非null: 若不存在同名类，则返回简单类名；若存在同名类，则返回完整类名
      */
-    public String getSimpleClassNameInTask(String className) {
+    public String querySimpleClassNameInTask(String className) {
         String simpleClassName = simpleClassNameInTaskMap.get(className);
         if (simpleClassName != null) {
             return simpleClassName;
@@ -377,27 +377,26 @@ public class DbOperWrapper {
     private String doGetSimpleClassNameInTask(String className) {
         if (className.contains(JavaCGConstants.FLAG_DOT)) {
             // 当前指定的是完整类名，查找对应的简单类名
-            String simpleClassName = getSimpleClassNameByFull(className);
+            String simpleClassName = querySimpleClassNameByFull(className);
             if (simpleClassName == null) {
-                logger.error("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定",
-                        className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
+                logger.error("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定", className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
             }
             return simpleClassName;
         }
 
         // 当前指定的是简单类名
-        String simpleClassName = getSimpleClassNameBySimple(className);
+        String simpleClassName = querySimpleClassNameBySimple(className);
         if (simpleClassName == null) {
             logger.error("指定的简单类名 {} 不存在，请检查，可能因为以下原因\n" +
                             "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
                             "2. 指定的类存在同名类，需要使用完整类名形式",
-                    className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
+                    className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
         }
         return simpleClassName;
     }
 
     // 根据完整类名查询对应的唯一类名
-    protected String getSimpleClassNameByFull(String className) {
+    protected String querySimpleClassNameByFull(String className) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_SIMPLE_CLASS;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -410,7 +409,7 @@ public class DbOperWrapper {
     }
 
     // 根据简单类名查询对应的唯一类名
-    protected String getSimpleClassNameBySimple(String simpleCassName) {
+    protected String querySimpleClassNameBySimple(String simpleCassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_CLASS;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -423,7 +422,7 @@ public class DbOperWrapper {
     }
 
     // 从方法调用表中查询调用方类对应的完整方法
-    public List<String> getCallerFullMethodOfClass(String simpleClassName) {
+    public List<String> queryCallerFullMethodOfClass(String simpleClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLER_ALL_METHODS;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -436,7 +435,7 @@ public class DbOperWrapper {
     }
 
     // 根据调用方简单类名，查找1个对应的完整方法
-    public String getOneFullMethodByCallerSCN(String callerSimpleClassName) {
+    public String queryOneFullMethodByCallerSCN(String callerSimpleClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLER_FULL_METHOD;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -457,8 +456,7 @@ public class DbOperWrapper {
             sql = "select distinct " + JACGSqlUtil.joinColumns(DC.MC_CALLER_METHOD_HASH, DC.MC_CALLER_FULL_METHOD, DC.MC_CALLER_RETURN_TYPE, DC.MC_CALL_FLAGS) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLER_SIMPLE_CLASS_NAME + " = ?" +
-                    " and " + DC.MC_CALLER_FULL_METHOD +
-                    " like concat(?, '%')";
+                    " and " + DC.MC_CALLER_FULL_METHOD + " like concat(?, '%')";
             sql = cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryList(sql, WriteDbData4MethodCall.class, callerSimpleClassName, fullMethodPrefix);
@@ -513,7 +511,7 @@ public class DbOperWrapper {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_METHOD_HASH;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = " select " + DC.MI_METHOD_HASH +
+            sql = "select " + DC.MI_METHOD_HASH +
                     " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
                     " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MI_FULL_METHOD + " like concat(?, '%')" +

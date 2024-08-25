@@ -346,7 +346,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
                 return true;
             }
         }
-        logger.info("配置文件 {} 中指定的jar包都在jar_info表中且未发生变化", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
+        logger.info("配置文件 {} 中指定的jar包都在 {} 表中且未发生变化", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo(), DbTableInfoEnum.DTIE_JAR_INFO.getTableNameKeyword());
         return false;
     }
 

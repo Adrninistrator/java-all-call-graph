@@ -33,12 +33,12 @@ public class WriteDbHandler4FieldGenericsType extends AbstractWriteDbHandler<Wri
             return null;
         }
 
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String fieldName = array[1];
         int seq = Integer.parseInt(array[2]);
         String fieldCategory = array[3];
         String fieldGenericsType = array[4];
-        String simpleFieldGenericsType = dbOperWrapper.getSimpleClassName(fieldGenericsType);
+        String simpleFieldGenericsType = dbOperWrapper.querySimpleClassName(fieldGenericsType);
 
         WriteDbData4FieldGenericsType writeDbData4FieldGenericsType = new WriteDbData4FieldGenericsType();
         writeDbData4FieldGenericsType.setRecordId(genNextRecordId());

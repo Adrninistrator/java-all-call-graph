@@ -157,7 +157,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
 
         for (String childClassName : childClassNameList) {
             // 查询对指定类指定事务方法的调用
-            List<WriteDbData4MethodCall> methodCallList = methodCallHandler.getNormalMethodCallByCalleeClassMethod(childClassName, method);
+            List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryNormalMethodCallByCalleeClassMethod(childClassName, method, false);
             if (JavaCGUtil.isCollectionEmpty(methodCallList)) {
                 continue;
             }

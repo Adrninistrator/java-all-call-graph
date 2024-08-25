@@ -72,13 +72,13 @@ public class MethodCallStaticFieldHandler extends BaseHandler {
         }
 
         List<WriteDbData4MethodCallStaticField> methodCallStaticFieldList = dbOperator.queryList(sql, WriteDbData4MethodCallStaticField.class,
-                dbOperWrapper.getSimpleClassName(className), fieldName);
+                dbOperWrapper.querySimpleClassName(className), fieldName);
         if (JavaCGUtil.isCollectionEmpty(methodCallStaticFieldList)) {
             return;
         }
 
         for (WriteDbData4MethodCallStaticField methodCallStaticField : methodCallStaticFieldList) {
-            WriteDbData4MethodCall methodCall = methodCallHandler.getMethodCallByCallId(methodCallStaticField.getCallId());
+            WriteDbData4MethodCall methodCall = methodCallHandler.queryMethodCallByCallId(methodCallStaticField.getCallId());
             MethodCallWithStaticField methodCallWithStaticField = new MethodCallWithStaticField(methodCall, methodCallStaticField);
             methodCallWithStaticFieldList.add(methodCallWithStaticField);
         }
@@ -95,6 +95,6 @@ public class MethodCallStaticFieldHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.getSimpleClassName(className));
+        return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(className));
     }
 }

@@ -33,7 +33,7 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
             return null;
         }
 
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String fieldName = array[1];
         String fieldType = array[2];
         String modifiers = array[3];

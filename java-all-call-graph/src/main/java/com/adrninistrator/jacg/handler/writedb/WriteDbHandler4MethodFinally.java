@@ -47,7 +47,7 @@ public class WriteDbHandler4MethodFinally extends AbstractWriteDbHandler<WriteDb
         WriteDbData4MethodFinally writeDbData4MethodFinally = new WriteDbData4MethodFinally();
         writeDbData4MethodFinally.setRecordId(genNextRecordId());
         writeDbData4MethodFinally.setMethodHash(methodHash);
-        writeDbData4MethodFinally.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+        writeDbData4MethodFinally.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4MethodFinally.setTryCatch(tryCatch);
         writeDbData4MethodFinally.setTryCatchStartLineNumber(tryCatchStartLineNumber);
         writeDbData4MethodFinally.setTryCatchEndLineNumber(tryCatchEndLineNumber);

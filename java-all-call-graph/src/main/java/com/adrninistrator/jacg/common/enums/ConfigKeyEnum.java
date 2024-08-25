@@ -48,6 +48,11 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     }
 
     @Override
+    public String getConfigPrintInfo() {
+        return key + " " + ConfigKeyEnum.class.getSimpleName() + "." + name();
+    }
+
+    @Override
     public Class<?> getType() {
         return type;
     }

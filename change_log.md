@@ -589,3 +589,7 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 ## 1.19. (2.0.4)临时说明
 
 增加数据库表记录类之间的引用关系
+
+## 1.19. (2.0.5)临时说明
+
+增加说明文档，增加示例

@@ -290,7 +290,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private void addMyBatisInsertFlags4FieldRelationshipBySet(List<Integer> mapperArgAsObjCallIdList) {
         for (Integer methodCallId : mapperArgAsObjCallIdList) {
             // 查询对应的方法调用
-            WriteDbData4MethodCall methodCall = methodCallHandler.getMethodCallByCallId(methodCallId);
+            WriteDbData4MethodCall methodCall = methodCallHandler.queryMethodCallByCallId(methodCallId);
             if (!JACGClassMethodUtil.calleeMatchesSetMethod(methodCall)) {
                 // 通过名称判断不是set方法，跳过
                 logger.info("通过名称判断不是set方法，跳过 {} {}", methodCallId, methodCall.getCalleeFullMethod());
@@ -334,7 +334,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
 
             logger.info("找到MyBatis Mapper用于插入Entity数据的方法 {}", mapperMethodInfo.getFullMethod());
             // 查询调用以上Mapper方法的方法
-            List<WriteDbData4MethodCall> insertEntityMethodCallList = methodCallHandler.getMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
+            List<WriteDbData4MethodCall> insertEntityMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
             if (JavaCGUtil.isCollectionEmpty(insertEntityMethodCallList)) {
                 // 当前Mapper方法未找到调用方法
                 continue;
@@ -397,7 +397,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         for (WriteDbData4MethodInfo mapperMethodInfo : mapperMethodInfoList) {
             boolean returnTypeIsEntity = StringUtils.equals(entityClassName, mapperMethodInfo.getReturnType());
             // 查询调用以上Mapper方法的方法
-            List<WriteDbData4MethodCall> selectMethodCallList = methodCallHandler.getMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
+            List<WriteDbData4MethodCall> selectMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
             if (JavaCGUtil.isCollectionEmpty(selectMethodCallList)) {
                 // 当前Mapper方法未找到调用方法
                 continue;
@@ -472,7 +472,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         }
         for (Integer selectReturnCallId : mapperSelectReturnAsObjCallIdList) {
             // 查询以Mapper接口的select方法返回值，作为方法调用被调用对象时的方法调用
-            WriteDbData4MethodCall selectReturnAsObjMethodCall = methodCallHandler.getMethodCallByCallId(selectReturnCallId);
+            WriteDbData4MethodCall selectReturnAsObjMethodCall = methodCallHandler.queryMethodCallByCallId(selectReturnCallId);
             if (!JACGClassMethodUtil.calleeMatchesGetMethod(selectReturnAsObjMethodCall)) {
                 // 被调用方法不满足get方法，不处理
                 continue;
@@ -574,7 +574,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             }
 
             // 查询调用以上Mapper方法的方法
-            List<WriteDbData4MethodCall> updateMethodCallList = methodCallHandler.getMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
+            List<WriteDbData4MethodCall> updateMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
             if (JavaCGUtil.isCollectionEmpty(updateMethodCallList)) {
                 // 当前Mapper方法未找到调用方法
                 return;
@@ -655,7 +655,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
 
         for (Integer mapperArgAsObjCallId : mapperArgAsObjCallIdList) {
             // 查询Mapper接口方法参数对象对应的方法调用
-            WriteDbData4MethodCall mapperArgMethodCall = methodCallHandler.getMethodCallByCallId(mapperArgAsObjCallId);
+            WriteDbData4MethodCall mapperArgMethodCall = methodCallHandler.queryMethodCallByCallId(mapperArgAsObjCallId);
             if (!JACGClassMethodUtil.calleeMatchesSetMethod(mapperArgMethodCall)) {
                 // 当前方法调用不符合set方法，跳过
                 continue;
@@ -720,7 +720,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         }
         int callId = Integer.parseInt(methodCallInfo.getTheValue());
         // 查询Mapper方法参数使用方法调用返回值，查询对应的方法调用
-        WriteDbData4MethodCall methodCallReturnAsMapperArg = methodCallHandler.getMethodCallByCallId(callId);
+        WriteDbData4MethodCall methodCallReturnAsMapperArg = methodCallHandler.queryMethodCallByCallId(callId);
         if (!JACGClassMethodUtil.calleeMatchesGetMethod(methodCallReturnAsMapperArg)) {
             return;
         }

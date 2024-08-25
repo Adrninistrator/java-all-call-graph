@@ -77,7 +77,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
      * @return
      */
     public MyBatisMSTableInfo queryMyBatisMySqlTableInfo(String mapperClassName, String mapperMethodName) {
-        String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
+        String mapperSimpleClassName = dbOperWrapper.querySimpleClassName(mapperClassName);
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MMT_QUERY_TABLE_BY_MAPPER;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
@@ -154,7 +154,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
                     " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
+        String mapperSimpleClassName = dbOperWrapper.querySimpleClassName(mapperClassName);
         WriteDbData4MyBatisMSWriteTable writeDbData4MyBatisMSWriteTable = dbOperator.queryObject(sql, WriteDbData4MyBatisMSWriteTable.class, mapperSimpleClassName,
                 mapperMethodName);
         if (writeDbData4MyBatisMSWriteTable == null) {
@@ -178,7 +178,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
                     " where " + DC.MME_ENTITY_SIMPLE_CLASS_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        String entitySimpleClassName = dbOperWrapper.getSimpleClassName(entityClassName);
+        String entitySimpleClassName = dbOperWrapper.querySimpleClassName(entityClassName);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, entitySimpleClassName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return null;
@@ -207,7 +207,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
                     " and " + DC.MMC_ENTITY_FIELD_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        String entitySimpleClassName = dbOperWrapper.getSimpleClassName(entityClassName);
+        String entitySimpleClassName = dbOperWrapper.querySimpleClassName(entityClassName);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, entitySimpleClassName, entityFieldName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return null;
@@ -350,7 +350,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
                     " and " + DC.MMSETC_PARAM_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4MyBatisMSSetColumn.class, dbOperWrapper.getSimpleClassName(mapperClassName), mapperMethodName, parameterName);
+        return dbOperator.queryList(sql, WriteDbData4MyBatisMSSetColumn.class, dbOperWrapper.querySimpleClassName(mapperClassName), mapperMethodName, parameterName);
     }
 
     /**
@@ -424,7 +424,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
                     " and " + DC.MMSETC_MAPPER_METHOD_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, MyBatisMSMapperParamDbInfo.class, dbOperWrapper.getSimpleClassName(mapperClassName), mapperMethodName);
+        return dbOperator.queryList(sql, MyBatisMSMapperParamDbInfo.class, dbOperWrapper.querySimpleClassName(mapperClassName), mapperMethodName);
     }
 
     /**
@@ -445,7 +445,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
                     " and " + DC.MMWC_OPERATION + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, MyBatisMSMapperParamDbInfo.class, dbOperWrapper.getSimpleClassName(mapperClassName), mapperMethodName,
+        return dbOperator.queryList(sql, MyBatisMSMapperParamDbInfo.class, dbOperWrapper.querySimpleClassName(mapperClassName), mapperMethodName,
                 SQLBinaryOperator.Equality.getName());
     }
 
@@ -554,7 +554,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
                     " and " + DC.MMSELC_MAPPER_METHOD_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4MyBatisMSSelectColumn.class, dbOperWrapper.getSimpleClassName(mapperClassName), mapperMethodName);
+        return dbOperator.queryList(sql, WriteDbData4MyBatisMSSelectColumn.class, dbOperWrapper.querySimpleClassName(mapperClassName), mapperMethodName);
     }
 
     /**

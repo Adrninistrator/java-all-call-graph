@@ -105,25 +105,25 @@ public class Neo4jDbOperWrapper extends DbOperWrapper {
 
     // 根据完整类名查询对应的唯一类名
     @Override
-    protected String getSimpleClassNameByFull(String className) {
+    protected String querySimpleClassNameByFull(String className) {
         return jacgClassNameRepository.querySimpleClassNameByFull(appName, className);
     }
 
     // 根据简单类名查询对应的唯一类名
     @Override
-    protected String getSimpleClassNameBySimple(String simpleCassName) {
+    protected String querySimpleClassNameBySimple(String simpleCassName) {
         return jacgClassNameRepository.querySimpleClassNameBySimple(appName, simpleCassName);
     }
 
     // 从方法调用表中查询调用方类对应的完整方法
     @Override
-    public List<String> getCallerFullMethodOfClass(String simpleClassName) {
+    public List<String> queryCallerFullMethodOfClass(String simpleClassName) {
         return jacgMethodInMCRepository.queryDupClassNameByFlag(appName, simpleClassName);
     }
 
     // 根据调用方简单类名，查找1个对应的完整方法
     @Override
-    public String getOneFullMethodByCallerSCN(String callerSimpleClassName) {
+    public String queryOneFullMethodByCallerSCN(String callerSimpleClassName) {
         return jacgMethodInMCRepository.queryOneFullMethodByCallerSCN(appName, callerSimpleClassName);
     }
 

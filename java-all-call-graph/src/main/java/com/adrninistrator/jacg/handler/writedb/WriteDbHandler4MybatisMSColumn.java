@@ -37,7 +37,7 @@ public class WriteDbHandler4MybatisMSColumn extends AbstractWriteDbHandler<Write
         String columnName = array[2];
         String xmlFilePath = array[3];
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
-        String entitySimpleClassName = dbOperWrapper.getSimpleClassName(entityClassName);
+        String entitySimpleClassName = dbOperWrapper.querySimpleClassName(entityClassName);
         WriteDbData4MybatisMSColumn writeDbData4MybatisMSColumn = new WriteDbData4MybatisMSColumn();
         writeDbData4MybatisMSColumn.setRecordId(genNextRecordId());
         writeDbData4MybatisMSColumn.setEntitySimpleClassName(entitySimpleClassName);

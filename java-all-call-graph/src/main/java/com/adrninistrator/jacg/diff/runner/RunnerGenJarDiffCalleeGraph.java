@@ -91,7 +91,7 @@ public class RunnerGenJarDiffCalleeGraph {
         if (!skipWriteDb) {
             List<String> jarDiffDirPathList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR, true);
             if (JavaCGUtil.isCollectionEmpty(jarDiffDirPathList) || jarDiffDirPathList.size() != 2) {
-                logger.error("请修改配置文件，或通过代码指定对应的参数，在其中指定两行内容，第一行为旧目录的路径，第二行为新目录的路径 {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getKey());
+                logger.error("请修改配置文件，或通过代码指定对应的参数，在其中指定两行内容，第一行为旧目录的路径，第二行为新目录的路径 {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getConfigPrintInfo());
                 return false;
             }
 
@@ -392,7 +392,7 @@ public class RunnerGenJarDiffCalleeGraph {
 
     // 查询新的方法信息
     private List<WriteDbData4MethodInfo> queryMethodInfoNew(int jarNum, String className) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className, chooseTableSuffixNew());
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className, chooseTableSuffixNew());
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_ALL_BY_CLASS_JAR_METHOD_NEW;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -434,12 +434,12 @@ public class RunnerGenJarDiffCalleeGraph {
     // 解析新旧目录的jar包并写入数据库
     private boolean writeDb(String dirPathOld, String dirPathNew) {
         if (!JavaCGFileUtil.isDirectoryExists(dirPathOld, false)) {
-            logger.error("配置文件中指定的需要比较的旧目录不存在 {} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getKey(), dirPathOld);
+            logger.error("配置文件中指定的需要比较的旧目录不存在 {} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getConfigPrintInfo(), dirPathOld);
             return false;
         }
 
         if (!JavaCGFileUtil.isDirectoryExists(dirPathNew, false)) {
-            logger.error("配置文件中指定的需要比较的新目录不存在 {} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getKey(), dirPathNew);
+            logger.error("配置文件中指定的需要比较的新目录不存在 {} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getConfigPrintInfo(), dirPathNew);
             return false;
         }
 

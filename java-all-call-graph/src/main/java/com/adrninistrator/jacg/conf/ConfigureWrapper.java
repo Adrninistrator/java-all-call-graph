@@ -179,15 +179,15 @@ public class ConfigureWrapper {
         // 生成并检查主要配置参数值
         Object value = genMainConfigValue(mainConfig, strValue);
         if (value == null) {
-            logger.error("配置参数非法 {} {} {}", mainConfig.getFileName(), mainConfig.getKey(), mainConfig.getType().getName());
+            logger.error("配置参数非法 {} {} {}", mainConfig.getFileName(), mainConfig.getConfigPrintInfo(), mainConfig.getType().getName());
             throw new JavaCGError("配置参数非法");
         }
 
         if (!mainConfig.getType().isAssignableFrom(value.getClass())) {
-            logger.error("生成的参数值类型与预期的不一致 {} {} {} {}", mainConfig.getFileName(), mainConfig.getKey(), value.getClass().getName(), mainConfig.getType().getName());
+            logger.error("生成的参数值类型与预期的不一致 {} {} {} {}", mainConfig.getFileName(), mainConfig.getConfigPrintInfo(), value.getClass().getName(), mainConfig.getType().getName());
             throw new JavaCGError("生成的参数值类型与预期的不一致");
         }
-        logger.info("通过代码设置主要配置的参数 {} {}", mainConfig.getFileName(), mainConfig.getKey());
+        logger.info("通过代码设置主要配置的参数 {} {}", mainConfig.getFileName(), mainConfig.getConfigPrintInfo());
         if (cacheValue) {
             // 缓存当前的参数值
             mainConfigMap.put(mainConfig.getKey(), value);
@@ -213,9 +213,9 @@ public class ConfigureWrapper {
      */
     public void setOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet) {
         if (configSet == null) {
-            throw new JavaCGError("不允许传入null，只能传入内容为空的Set " + otherConfigFileUseSetEnum.getKey());
+            throw new JavaCGError("不允许传入null，只能传入内容为空的Set " + otherConfigFileUseSetEnum.getConfigPrintInfo());
         }
-        logger.info("通过代码设置Set格式配置的参数 {}", otherConfigFileUseSetEnum.getKey());
+        logger.info("通过代码设置Set格式配置的参数 {}", otherConfigFileUseSetEnum.getConfigPrintInfo());
         otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), configSet);
     }
 
@@ -237,9 +237,9 @@ public class ConfigureWrapper {
      */
     public void addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet) {
         if (configSet == null) {
-            throw new JavaCGError("不允许传入null，只能传入内容为空的Set " + otherConfigFileUseSetEnum.getKey());
+            throw new JavaCGError("不允许传入null，只能传入内容为空的Set " + otherConfigFileUseSetEnum.getConfigPrintInfo());
         }
-        logger.info("通过代码添加Set格式配置的参数 {}", otherConfigFileUseSetEnum.getKey());
+        logger.info("通过代码添加Set格式配置的参数 {}", otherConfigFileUseSetEnum.getConfigPrintInfo());
         Set<String> existedSet = otherConfigSetMap.get(otherConfigFileUseSetEnum.getKey());
         if (existedSet == null) {
             otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), configSet);
@@ -266,9 +266,9 @@ public class ConfigureWrapper {
      */
     public void setOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList) {
         if (configList == null) {
-            throw new JavaCGError("不允许传入null，只能传入内容为空的List " + otherConfigFileUseListEnum.getKey());
+            throw new JavaCGError("不允许传入null，只能传入内容为空的List " + otherConfigFileUseListEnum.getConfigPrintInfo());
         }
-        logger.info("通过代码设置List格式配置的参数 {}", otherConfigFileUseListEnum.getKey());
+        logger.info("通过代码设置List格式配置的参数 {}", otherConfigFileUseListEnum.getConfigPrintInfo());
         otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), configList);
     }
 
@@ -290,9 +290,9 @@ public class ConfigureWrapper {
      */
     public void addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList) {
         if (configList == null) {
-            throw new JavaCGError("不允许传入null，只能传入内容为空的List " + otherConfigFileUseListEnum.getKey());
+            throw new JavaCGError("不允许传入null，只能传入内容为空的List " + otherConfigFileUseListEnum.getConfigPrintInfo());
         }
-        logger.info("通过代码添加List格式配置的参数 {}", otherConfigFileUseListEnum.getKey());
+        logger.info("通过代码添加List格式配置的参数 {}", otherConfigFileUseListEnum.getConfigPrintInfo());
         List<String> existedList = otherConfigListMap.get(otherConfigFileUseListEnum.getKey());
         if (existedList == null) {
             List<String> newList = new ArrayList<>();
@@ -330,8 +330,8 @@ public class ConfigureWrapper {
             if (useConfig) {
                 // 判断不允许为空的参数是否有指定值
                 if (mainConfig.notBlank() && value instanceof String && StringUtils.isBlank((String) value)) {
-                    logger.error("需要使用的配置参数未在代码中指定 {} {}", mainConfig.getFileName(), mainConfig.getKey());
-                    throw new JavaCGError("需要使用的配置参数未在代码中指定: " + mainConfig.getFileName() + " " + mainConfig.getKey());
+                    logger.error("需要使用的配置参数未在代码中指定 {} {}", mainConfig.getFileName(), mainConfig.getConfigPrintInfo());
+                    throw new JavaCGError("需要使用的配置参数未在代码中指定: " + mainConfig.getFileName() + " " + mainConfig.getConfigPrintInfo());
                 }
 
                 // 记录有被使用的主要配置
@@ -358,8 +358,8 @@ public class ConfigureWrapper {
         String strValue = properties.getProperty(key);
         if (useConfig) {
             if (mainConfig.notBlank() && StringUtils.isBlank(strValue)) {
-                logger.error("需要使用的配置参数未在配置文件中指定 {} {}", mainConfig.getFileName(), mainConfig.getKey());
-                throw new JavaCGError("需要使用的配置参数未在配置文件中指定: " + mainConfig.getFileName() + " " + mainConfig.getKey());
+                logger.error("需要使用的配置参数未在配置文件中指定 {} {}", mainConfig.getFileName(), mainConfig.getConfigPrintInfo());
+                throw new JavaCGError("需要使用的配置参数未在配置文件中指定: " + mainConfig.getFileName() + " " + mainConfig.getConfigPrintInfo());
             }
             // 记录有被使用的主要配置
             recordUsedMainConfig(mainConfig);
@@ -501,7 +501,7 @@ public class ConfigureWrapper {
     // 处理数据库里的表名后缀
     private String handleAppName(String appName) {
         if (!APP_NAME_PATTERN.matcher(appName).matches()) {
-            logger.error("属性只支持字母、数字及下划线\n{} {} {}", ConfigKeyEnum.CKE_APP_NAME.getFileName(), ConfigKeyEnum.CKE_APP_NAME.getKey(), appName);
+            logger.error("属性只支持字母、数字及下划线\n{} {} {}", ConfigKeyEnum.CKE_APP_NAME.getFileName(), ConfigKeyEnum.CKE_APP_NAME.getConfigPrintInfo(), appName);
             return null;
         }
         // 将app.name参数中的-替换为_
@@ -514,11 +514,12 @@ public class ConfigureWrapper {
         try {
             threadNum = Integer.parseInt(strThreadNum);
         } catch (NumberFormatException e) {
-            logger.error("非法线程数 {} {} {}", ConfigKeyEnum.CKE_THREAD_NUM.getFileName(), ConfigKeyEnum.CKE_THREAD_NUM.getKey(), strThreadNum);
+            logger.error("非法线程数 {} {} {}", ConfigKeyEnum.CKE_THREAD_NUM.getFileName(), ConfigKeyEnum.CKE_THREAD_NUM.getConfigPrintInfo(), strThreadNum);
             return null;
         }
         if (threadNum <= 0 || threadNum > JACGConstants.MAX_THREAD_NUM) {
-            logger.error("参数配置非法\n{} {}\n应在以下范围: (0,{}]", ConfigKeyEnum.CKE_THREAD_NUM.getFileName(), ConfigKeyEnum.CKE_THREAD_NUM.getKey(), JACGConstants.MAX_THREAD_NUM);
+            logger.error("参数配置非法\n{} {}\n应在以下范围: (0,{}]", ConfigKeyEnum.CKE_THREAD_NUM.getFileName(), ConfigKeyEnum.CKE_THREAD_NUM.getConfigPrintInfo(),
+                    JACGConstants.MAX_THREAD_NUM);
             return null;
         }
         return threadNum;
@@ -531,8 +532,7 @@ public class ConfigureWrapper {
         }
         // 使用指定的名称作为子目录名
         if (JACGFileUtil.checkFilePathContainsSeparator(outputDirName)) {
-            logger.error("指定的目录名中不允许包含目录分隔符 {} {} {}", ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getFileName(),
-                    ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getKey(), outputDirName);
+            logger.error("指定的目录名中不允许包含目录分隔符 {} {} {}", ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getFileName(), ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getConfigPrintInfo(), outputDirName);
             return null;
         }
         return outputDirName;
@@ -545,8 +545,7 @@ public class ConfigureWrapper {
         }
         // 使用指定的名称作为子目录名
         if (JACGFileUtil.checkFilePathContainsSeparator(outputDirFlag)) {
-            logger.error("指定的目录标志中不允许包含目录分隔符 {} {} {}", ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.getFileName(),
-                    ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.getKey(), outputDirFlag);
+            logger.error("指定的目录标志中不允许包含目录分隔符 {} {} {}", ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.getFileName(), ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.getConfigPrintInfo(), outputDirFlag);
             return null;
         }
         return outputDirFlag;
@@ -558,12 +557,13 @@ public class ConfigureWrapper {
         try {
             dbInsertBatchSize = Integer.parseInt(strDbBatchInsertSize);
         } catch (NumberFormatException e) {
-            logger.error("批量写入数据库时每次插入的数量非法 {} {} {}", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(), ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getKey(), strDbBatchInsertSize);
+            logger.error("批量写入数据库时每次插入的数量非法 {} {} {}", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(), ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getConfigPrintInfo(),
+                    strDbBatchInsertSize);
             return null;
         }
 
         if (dbInsertBatchSize <= 0 || dbInsertBatchSize > JACGConstants.MAX_DB_INSERT_BATCH_SIZE) {
-            logger.error("参数配置非法 {} {} 应在以下范围: (0,{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(), ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getKey(),
+            logger.error("参数配置非法 {} {} 应在以下范围: (0,{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(), ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getConfigPrintInfo(),
                     JACGConstants.MAX_DB_INSERT_BATCH_SIZE);
             return null;
         }
@@ -573,7 +573,8 @@ public class ConfigureWrapper {
     // 处理生成调用链时的详细程度
     private String handleOutputDetail(String outputDetail) {
         if (OutputDetailEnum.ODE_ILLEGAL == OutputDetailEnum.getFromDetail(outputDetail)) {
-            logger.error("参数配置非法\n{} {} {}\n可选值如下: {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getFileName(), ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getKey(), outputDetail,
+            logger.error("参数配置非法\n{} {} {}\n可选值如下: {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getFileName(), ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getConfigPrintInfo()
+                    , outputDetail,
                     OutputDetailEnum.getValidValues());
             return null;
         }
@@ -584,7 +585,7 @@ public class ConfigureWrapper {
     private String handleDbH2FilePath(String dbH2FilePath) {
         if (StringUtils.endsWithIgnoreCase(dbH2FilePath, JACGConstants.H2_FILE_EXT)) {
             logger.error("不需要指定H2数据库的后缀{}\n{} {}\n{}", JACGConstants.H2_FILE_EXT, ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH.getFileName(),
-                    ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH.getKey(), dbH2FilePath);
+                    ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH.getConfigPrintInfo(), dbH2FilePath);
             return null;
         }
         return dbH2FilePath;
@@ -603,20 +604,20 @@ public class ConfigureWrapper {
         }
         for (OtherConfigFileUseSetEnum otherConfigFileUseSetEnum : OtherConfigFileUseSetEnum.values()) {
             if (!otherConfigFileUseSetEnum.isCanUseConfigInFile()) {
-                logger.info("List格式的配置仅使用代码中指定的参数，若代码中未指定则为空 {}", otherConfigFileUseSetEnum.getKey());
+                logger.info("List格式的配置仅使用代码中指定的参数，若代码中未指定则为空 {}", otherConfigFileUseSetEnum.getConfigPrintInfo());
                 // 不使用Collections.emptySet()，否则后续无法修改
                 otherConfigSetMap.put(otherConfigFileUseSetEnum.getKey(), new HashSet<>());
             } else {
-                logger.info("List格式的配置优先使用代码中指定的参数，若代码中未指定则使用配置文件中的参数 {}", otherConfigFileUseSetEnum.getKey());
+                logger.info("List格式的配置优先使用代码中指定的参数，若代码中未指定则使用配置文件中的参数 {}", otherConfigFileUseSetEnum.getConfigPrintInfo());
             }
         }
         for (OtherConfigFileUseListEnum otherConfigFileUseListEnum : OtherConfigFileUseListEnum.values()) {
             if (!otherConfigFileUseListEnum.isCanUseConfigInFile()) {
-                logger.info("Set格式的配置仅使用代码中指定的参数，若代码中未指定则为空 {}", otherConfigFileUseListEnum.getKey());
+                logger.info("Set格式的配置仅使用代码中指定的参数，若代码中未指定则为空 {}", otherConfigFileUseListEnum.getConfigPrintInfo());
                 // 不使用Collections.emptyList()，否则后续无法修改
                 otherConfigListMap.put(otherConfigFileUseListEnum.getKey(), new ArrayList<>());
             } else {
-                logger.info("Set格式的配置优先使用代码中指定的参数，若代码中未指定则使用配置文件中的参数 {}", otherConfigFileUseListEnum.getKey());
+                logger.info("Set格式的配置优先使用代码中指定的参数，若代码中未指定则使用配置文件中的参数 {}", otherConfigFileUseListEnum.getConfigPrintInfo());
             }
         }
 

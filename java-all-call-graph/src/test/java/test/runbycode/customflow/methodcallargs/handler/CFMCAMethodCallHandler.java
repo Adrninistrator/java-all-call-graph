@@ -41,7 +41,7 @@ public class CFMCAMethodCallHandler extends BaseHandler {
 
     public void addMethodCall() {
         // 根据被调用类名与方法名查询调用方信息
-        List<WriteDbData4MethodCall> allerInfoList = methodCallHandler.getCallerInfoByCallee(TestCFMCAFlow.class.getName(), "handle");
+        List<WriteDbData4MethodCall> allerInfoList = methodCallHandler.queryCallerInfoByCallee(TestCFMCAFlow.class.getName(), "handle");
         if (JavaCGUtil.isCollectionEmpty(allerInfoList)) {
             return;
         }

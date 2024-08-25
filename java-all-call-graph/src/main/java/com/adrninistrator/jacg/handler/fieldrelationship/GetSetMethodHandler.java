@@ -53,7 +53,7 @@ public class GetSetMethodHandler extends BaseHandler {
             // 当前的类名与参数中的类名不同，说明当前方法在超类中
             getSetMethod.setInSuperClass(true);
             getSetMethod.setClassName(className);
-            getSetMethod.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+            getSetMethod.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
             String methodNameWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(getSetMethod.getFullMethod());
             getSetMethod.setFullMethod(JavaCGClassMethodUtil.formatFullMethodWithArgTypes(className, methodNameWithArgs));
         }
@@ -96,7 +96,7 @@ public class GetSetMethodHandler extends BaseHandler {
      * @return
      */
     public List<BaseWriteDbData4GetSetMethod> queryGetSetMethodByClassName(boolean queryGetMethod, String className) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         SqlKeyEnum sqlKeyEnum = queryGetMethod ? SqlKeyEnum.GM_QUERY_BY_CLASS_NAME : SqlKeyEnum.SM_QUERY_BY_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -150,7 +150,7 @@ public class GetSetMethodHandler extends BaseHandler {
      * @return
      */
     public BaseWriteDbData4GetSetMethod queryGetSetMethodByClassMethod(boolean queryGetMethod, String className, String methodName) {
-        return queryGetSetMethodBySimpleClassMethod(queryGetMethod, dbOperWrapper.getSimpleClassName(className), methodName);
+        return queryGetSetMethodBySimpleClassMethod(queryGetMethod, dbOperWrapper.querySimpleClassName(className), methodName);
     }
 
     /**
@@ -206,7 +206,7 @@ public class GetSetMethodHandler extends BaseHandler {
      * @return
      */
     public List<BaseWriteDbData4GetSetMethod> queryGetSetMethodListByFieldName(boolean queryGetMethod, String className, String fieldName) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         SqlKeyEnum sqlKeyEnum = queryGetMethod ? SqlKeyEnum.GM_QUERY_BY_FIELD_NAME : SqlKeyEnum.SM_QUERY_BY_FIELD_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -284,7 +284,7 @@ public class GetSetMethodHandler extends BaseHandler {
      * @return
      */
     public WriteDbData4GetMethod queryGetMethodBySetMethod(String className, String methodName) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.GM_QUERY_BY_SET_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -311,7 +311,7 @@ public class GetSetMethodHandler extends BaseHandler {
      * @return
      */
     public WriteDbData4SetMethod querySetMethodByGetMethod(String className, String methodName) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SM_QUERY_BY_GET_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -346,7 +346,7 @@ public class GetSetMethodHandler extends BaseHandler {
                     " where " + DC.GSM_SIMPLE_FIELD_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.getSimpleClassName(fieldType));
+        return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(fieldType));
     }
 
     private String getGetSetMethodTableName(boolean getMethod) {

@@ -63,12 +63,12 @@ public class MethodExceptionHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCTH_QUERY_BY_TYPE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = " select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CATCH) +
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CATCH) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CATCH.getTableName() +
                     " where " + DC.MCTH_SIMPLE_CATCH_EXCEPTION_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4MethodCatch.class, dbOperWrapper.getSimpleClassName(simpleCatchExceptionType));
+        return dbOperator.queryList(sql, WriteDbData4MethodCatch.class, dbOperWrapper.querySimpleClassName(simpleCatchExceptionType));
     }
 
     /**
@@ -98,7 +98,7 @@ public class MethodExceptionHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCTH_QUERY_BY_SIMPLE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = " select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CATCH) +
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CATCH) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CATCH.getTableName() +
                     " where " + DC.MCTH_SIMPLE_CLASS_NAME + " = ?" +
                     " order by " + DC.MCTH_RECORD_ID;
@@ -117,7 +117,7 @@ public class MethodExceptionHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCTH_QUERY_BY_SIMPLE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = " select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CATCH) +
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CATCH) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CATCH.getTableName() +
                     " where " + DC.MCTH_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MCTH_CATCH_FLAG + " = ''" +
@@ -138,7 +138,7 @@ public class MethodExceptionHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MT_QUERY_BY_METHOD_HASH_CATCH_START_OFFSET;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = " select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_THROW) +
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_THROW) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_THROW.getTableName() +
                     " where " + DC.MT_METHOD_HASH + " = ?" +
                     " and " + DC.MT_CATCH_START_OFFSET + " = ?" +
@@ -160,7 +160,7 @@ public class MethodExceptionHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MT_QUERY_BY_METHOD_HASH_THROW_OFFSET_RANGE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = " select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_THROW) +
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_THROW) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_THROW.getTableName() +
                     " where " + DC.MT_METHOD_HASH + " = ?" +
                     " and " + DC.MT_THROW_OFFSET + " >= ?" +
@@ -182,7 +182,7 @@ public class MethodExceptionHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MT_QUERY_BY_METHOD_HASH_CALL_ID;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = " select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_THROW) +
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_THROW) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_THROW.getTableName() +
                     " where " + DC.MT_METHOD_HASH + " = ?" +
                     " and " + DC.MT_CALL_ID + " = ?" +
@@ -218,7 +218,7 @@ public class MethodExceptionHandler extends BaseHandler {
             // 查询catch代码块中调用的方法
             if (methodCatch.getCatchMinCallId() >= JavaCGConstants.METHOD_CALL_ID_MIN) {
                 for (int catchCallId = methodCatch.getCatchMinCallId(); catchCallId <= methodCatch.getCatchMaxCallId(); catchCallId++) {
-                    WriteDbData4MethodCall methodCall = methodCallHandler.getMethodCallByCallId(catchCallId);
+                    WriteDbData4MethodCall methodCall = methodCallHandler.queryMethodCallByCallId(catchCallId);
                     NoMCEU4MethodCall noMCEU4MethodCall = new NoMCEU4MethodCall();
                     if (JACGClassMethodUtil.checkMethodInList(methodCall.getCalleeFullMethod(), expectedClassAndMethodNameList)) {
                         noMCEU4MethodCall.setUseEInExpectedMethodCall(true);
@@ -261,7 +261,7 @@ public class MethodExceptionHandler extends BaseHandler {
                 methodCallInfo.getObjArgsSeq(), methodCallInfo.getSeq(), JavaCGMethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType());
         String catchExceptionVariableName = (methodCallInfo4NameOfVariable == null ? "" : methodCallInfo4NameOfVariable.getTheValue());
 
-        WriteDbData4MethodCall methodCall = methodCallHandler.getMethodCallByCallId(callId);
+        WriteDbData4MethodCall methodCall = methodCallHandler.queryMethodCallByCallId(callId);
         if (JavaCGConstants.METHOD_CALL_OBJECT_SEQ == methodCallInfo.getObjArgsSeq()) {
             // catch的异常对象是方法调用中的被调用对象
             if (!JavaCGCommonNameConstants.RETURN_TYPE_VOID.equals(methodCall.getRawReturnType())) {
@@ -270,7 +270,7 @@ public class MethodExceptionHandler extends BaseHandler {
                         methodCallInfoHandler.queryMethodCallInfo4CallerByMethodCallOrArg(methodCallInfo.getCallerMethodHash(), true, callId);
                 for (WriteDbData4MethodCallInfo useEReturnMethodCallInfo : useEReturnMethodCallInfoList) {
                     // 查询使用catch的异常对象的方法调用返回值作为被调用对象或参数的方法调用
-                    WriteDbData4MethodCall useEReturnMethodCall = methodCallHandler.getMethodCallByCallId(useEReturnMethodCallInfo.getCallId());
+                    WriteDbData4MethodCall useEReturnMethodCall = methodCallHandler.queryMethodCallByCallId(useEReturnMethodCallInfo.getCallId());
 
                     // 查询在方法调用中使用catch的异常对象的方法调用返回值作为被调用对象或参数，使用该方法调用返回值进行throw的情况
                     List<WriteDbData4MethodThrow> methodThrowList = queryMethodThrowByMethodHashCallId(methodCatch.getMethodHash(), useEReturnMethodCall.getCallId());

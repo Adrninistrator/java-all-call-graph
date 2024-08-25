@@ -67,7 +67,7 @@ public class CharsetMethodCallByArgsHandler extends BaseMethodCallByArgsHandler 
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(methodCall.getCalleeFullMethod());
         if (CLASS_NAME_CHARSET.equals(calleeClassName) && METHOD_NAME_FOR_NAME.equals(methodCall.getCalleeMethodName())) {
             // 被调用方法为Charset.forName()，查询下一个被调用的方法
-            WriteDbData4MethodCall nextMethodCall = methodCallHandler.getMethodCallByCallId(methodCall.getCallId() + 1);
+            WriteDbData4MethodCall nextMethodCall = methodCallHandler.queryMethodCallByCallId(methodCall.getCallId() + 1);
             if (nextMethodCall != null) {
                 logger.info("### next {}", nextMethodCall.getCalleeFullMethod());
             }

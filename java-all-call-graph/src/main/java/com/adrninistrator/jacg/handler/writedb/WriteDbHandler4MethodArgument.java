@@ -43,10 +43,10 @@ public class WriteDbHandler4MethodArgument extends AbstractWriteDbHandler<WriteD
 
         return new WriteDbData4MethodArgument(methodHash,
                 argSeq,
-                dbOperWrapper.getSimpleClassName(argType),
+                dbOperWrapper.querySimpleClassName(argType),
                 argName,
                 argType,
-                dbOperWrapper.getSimpleClassName(className),
+                dbOperWrapper.querySimpleClassName(className),
                 fullMethod);
     }
 

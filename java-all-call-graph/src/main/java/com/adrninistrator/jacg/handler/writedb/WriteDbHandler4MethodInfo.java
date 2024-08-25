@@ -38,10 +38,10 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         String accessFlags = array[1];
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
         String returnType = array[2];
-        String simpleReturnType = dbOperWrapper.getSimpleClassName(returnType);
+        String simpleReturnType = dbOperWrapper.querySimpleClassName(returnType);
         String methodInstructionsHash = array[3];
         int jarNum = Integer.parseInt(array[4]);
 
@@ -55,6 +55,7 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
         methodInfo.setReturnType(returnType);
         methodInfo.setMethodInstructionsHash(methodInstructionsHash);
         methodInfo.setJarNum(jarNum);
+        methodInfo.setClassName(className);
         return methodInfo;
     }
 
@@ -69,7 +70,8 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
                 data.getSimpleReturnType(),
                 data.getReturnType(),
                 data.getMethodInstructionsHash(),
-                data.getJarNum()
+                data.getJarNum(),
+                data.getClassName()
         };
     }
 

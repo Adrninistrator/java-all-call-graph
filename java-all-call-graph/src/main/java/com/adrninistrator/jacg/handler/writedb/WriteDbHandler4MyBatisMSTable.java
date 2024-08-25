@@ -45,7 +45,7 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
         String tableName = array[4];
         String xmlFilePath = array[5];
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
-        String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
+        String mapperSimpleClassName = dbOperWrapper.querySimpleClassName(mapperClassName);
         // 记录MyBatis Mapper方法
         myBatisMapperMethodSet.add(JACGClassMethodUtil.genClassAndMethodName(mapperClassName, mapperMethodName));
         WriteDbData4MyBatisMSTable writeDbData4MyBatisMSTable = new WriteDbData4MyBatisMSTable();

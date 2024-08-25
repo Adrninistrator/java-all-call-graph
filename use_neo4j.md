@@ -14,8 +14,16 @@ org.springframework.data:spring-data-neo4j:5.3.9.RELEASE
 
 使用的Neo4j的配置需要在配置文件ogm.properties中进行配置，格式如下：
 
-```
+```properties
 URI=bolt://username:password@host:port
+```
+
+假如使用Neo4j集群，则需要配置如下：
+
+```properties
+URIS=neo4j://host1:port1,host2:port2,host3:port3
+username=xxx
+password=xxx
 ```
 
 # 4. 解析数据并导入Neo4j

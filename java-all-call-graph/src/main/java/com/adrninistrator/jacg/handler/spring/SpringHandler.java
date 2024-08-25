@@ -54,7 +54,7 @@ public class SpringHandler extends BaseHandler {
      *
      * @return
      */
-    public List<SpringControllerInfo> getAllControllerMethod() {
+    public List<SpringControllerInfo> queryAllControllerMethod() {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -81,7 +81,7 @@ public class SpringHandler extends BaseHandler {
      *
      * @return
      */
-    public List<String> getAllTaskMethod() {
+    public List<String> queryAllTaskMethod() {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPT_QUERY;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -109,7 +109,7 @@ public class SpringHandler extends BaseHandler {
      * @param fullMethod
      * @return 空列表: 指定的方法不是Spring Controller方法
      */
-    public List<String> getControllerUriList(String fullMethod) {
+    public List<String> queryControllerUriList(String fullMethod) {
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY_BY_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
@@ -130,8 +130,8 @@ public class SpringHandler extends BaseHandler {
      * @param fullMethod
      * @return null: 指定的方法不是Spring Controller方法
      */
-    public String getControllerUri(String fullMethod) {
-        List<String> uriList = getControllerUriList(fullMethod);
+    public String queryControllerUri(String fullMethod) {
+        List<String> uriList = queryControllerUriList(fullMethod);
         if (JavaCGUtil.isCollectionEmpty(uriList)) {
             return null;
         }
@@ -158,7 +158,7 @@ public class SpringHandler extends BaseHandler {
         Collections.sort(fullMethodList);
         for (String fullMethod : fullMethodList) {
             // 判断方法是否属于Spring Controller方法
-            String uri = getControllerUri(fullMethod);
+            String uri = queryControllerUri(fullMethod);
             if (uri == null) {
                 continue;
             }

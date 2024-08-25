@@ -222,7 +222,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             }
 
             // 获取唯一类名（简单类名或完整类名）
-            String simpleClassName = dbOperWrapper.getSimpleClassNameInTask(callerClassName);
+            String simpleClassName = dbOperWrapper.querySimpleClassNameInTask(callerClassName);
             if (simpleClassName == null) {
                 return Collections.emptyList();
             }
@@ -255,7 +255,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 将一个类的全部方法添加至任务中
     private boolean addAllMethodsInClass2Task(String className, Set<String> handledClassNameSet, List<CallerTaskInfo> callerTaskInfoList) {
         // 获取唯一类名（简单类名或完整类名）
-        String simpleClassName = dbOperWrapper.getSimpleClassNameInTask(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassNameInTask(className);
         if (simpleClassName == null) {
             return false;
         }
@@ -267,7 +267,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         // 查询当前类的所有方法
-        List<String> fullMethodList = dbOperWrapper.getCallerFullMethodOfClass(simpleClassName);
+        List<String> fullMethodList = dbOperWrapper.queryCallerFullMethodOfClass(simpleClassName);
         if (fullMethodList == null) {
             return false;
         }
@@ -693,7 +693,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         if (JavaCGCallTypeEnum.isChildCallSuperType(callType)) {
             // 当前方法调用类型是子类调用父类方法，记录子类方法调用父类方法对应信息的栈入栈
             String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
-            String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
+            String callerSimpleClassName = dbOperWrapper.querySimpleClassName(callerClassName);
             ChildCallSuperInfo childCallSuperInfo = new ChildCallSuperInfo(nodeLevel, callerSimpleClassName, callerClassName, callerFullMethod);
             childCallSuperInfoStack.push(childCallSuperInfo);
             return new MethodAndHash(calleeFullMethod, calleeMethodHash);
@@ -730,7 +730,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
-        String calleeSimpleClassName = dbOperWrapper.getSimpleClassName(calleeClassName);
+        String calleeSimpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
 
         String ccsChildFullMethod = null;
         String ccsChildMethodHash = null;
@@ -981,7 +981,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         } else {
             // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
             calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(actualCalleeFullMethod);
-            String calleeSimpleClassName = dbOperWrapper.getSimpleClassName(calleeClassName);
+            String calleeSimpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
             calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(actualCalleeFullMethod);
             calleeInfo.append(calleeSimpleClassName)
                     .append(JavaCGConstants.FLAG_COLON)
@@ -1066,7 +1066,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         stringBuilder.append(prefix);
 
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
-        String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
+        String callerSimpleClassName = dbOperWrapper.querySimpleClassName(callerClassName);
 
         // 写入调用方行号信息：   "[Service1Impl:29]	"
         // 显示调用方代码行号
@@ -1130,7 +1130,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
 
         // 根据调用方简单类名，查找1个对应的完整方法
-        String fullMethod = dbOperWrapper.getOneFullMethodByCallerSCN(callerSimpleClassName);
+        String fullMethod = dbOperWrapper.queryOneFullMethodByCallerSCN(callerSimpleClassName);
         if (fullMethod == null) {
             logger.warn("从方法调用关系表未找到对应的完整类名 {}", callerSimpleClassName);
             return null;

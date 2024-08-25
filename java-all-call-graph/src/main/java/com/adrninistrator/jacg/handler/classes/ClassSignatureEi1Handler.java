@@ -42,7 +42,7 @@ public class ClassSignatureEi1Handler extends BaseHandler {
      * @return
      */
     public List<String> queryClassSignatureEi1InfoFull(String className, String upperClassName) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         return queryClassSignatureEi1InfoSimple(simpleClassName, upperClassName);
     }
 

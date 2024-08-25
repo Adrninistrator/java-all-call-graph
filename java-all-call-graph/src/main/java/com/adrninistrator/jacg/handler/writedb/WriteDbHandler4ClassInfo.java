@@ -40,7 +40,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
             return null;
         }
 
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         int accessFlags = Integer.parseInt(array[1]);
         if (JavaCGByteCodeUtil.isEnumFlag(accessFlags)) {
             // 记录枚举唯一类名

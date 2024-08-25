@@ -42,7 +42,7 @@ public class WriteDbHandler4MyBatisMSWhereColumn extends AbstractWriteDbHandler<
         String paramType = array[6];
         String xmlFilePath = array[7];
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
-        String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
+        String mapperSimpleClassName = dbOperWrapper.querySimpleClassName(mapperClassName);
         ParameterName parameterName = MyBatisTableParserUtil.genParameterName(paramRawName);
         WriteDbData4MyBatisMSWhereColumn writeDbData4MyBatisMSWhereColumn = new WriteDbData4MyBatisMSWhereColumn();
         writeDbData4MyBatisMSWhereColumn.setRecordId(genNextRecordId());

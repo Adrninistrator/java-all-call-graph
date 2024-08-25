@@ -129,7 +129,7 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
      * @return true: 处理成功 false: 处理失败
      */
     public boolean handleMethodCallByEECMKeyword(String calleeClassName, String methodNameKeyword, Object... args) {
-        List<String> methodNameList = methodCallHandler.getCalleeMethodNameLike(calleeClassName, methodNameKeyword);
+        List<String> methodNameList = methodCallHandler.queryCalleeMethodNameLike(calleeClassName, methodNameKeyword);
         if (JavaCGUtil.isCollectionEmpty(methodNameList)) {
             logger.error("根据方法关键字查询到被调用方法为空 {} {}", calleeClassName, methodNameKeyword);
             return true;
@@ -149,7 +149,7 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
     public boolean handleMethodCallByEECMKeyword(String calleeClassName, List<String> methodNameKeywordList, Object... args) {
         List<String> methodNameList = new ArrayList<>();
         for (String methodNameKeyword : methodNameKeywordList) {
-            List<String> tmpMethodNameList = methodCallHandler.getCalleeMethodNameLike(calleeClassName, methodNameKeyword);
+            List<String> tmpMethodNameList = methodCallHandler.queryCalleeMethodNameLike(calleeClassName, methodNameKeyword);
             if (!JavaCGUtil.isCollectionEmpty(tmpMethodNameList)) {
                 methodNameList.addAll(tmpMethodNameList);
             }
@@ -182,7 +182,7 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
      * @return true: 处理成功 false: 处理失败
      */
     public boolean handleMethodCallByEECM(String calleeClassName, List<String> methodNameList, Object... args) {
-        String calleeSimpleClassName = classInfoHandler.getExactlySimpleClassName(calleeClassName);
+        String calleeSimpleClassName = classInfoHandler.queryExactlySimpleClassName(calleeClassName);
         if (calleeSimpleClassName == null) {
             return true;
         }

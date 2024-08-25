@@ -3,6 +3,8 @@ package com.adrninistrator.jacg.util;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
+import net.lingala.zip4j.io.inputstream.ZipInputStream;
+import net.lingala.zip4j.model.LocalFileHeader;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -536,6 +538,33 @@ public class JACGFileUtil {
     public static String replaceFileSeparator2Dot(String filePath) {
         String tmp = StringUtils.replace(filePath, "\\", ".");
         return StringUtils.replace(tmp, "/", ".");
+    }
+
+    /**
+     * 查找jar包中指定目录中指定文件后缀的文件路径
+     *
+     * @param jarFilePath
+     * @param dirPath
+     * @param fileExt
+     * @return
+     */
+    public static List<String> findFilePathInJarDir(String jarFilePath, String dirPath, String fileExt) {
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(jarFilePath))) {
+            List<String> filePathList = new ArrayList<>();
+            LocalFileHeader fileHeader;
+            while ((fileHeader = zis.getNextEntry()) != null) {
+                if (!fileHeader.isDirectory()) {
+                    String fileName = fileHeader.getFileName();
+                    if (fileName.startsWith(dirPath) && fileName.endsWith(fileExt)) {
+                        filePathList.add(fileName);
+                    }
+                }
+            }
+            return filePathList;
+        } catch (IOException e) {
+            logger.error("error ", e);
+            return null;
+        }
     }
 
     private JACGFileUtil() {

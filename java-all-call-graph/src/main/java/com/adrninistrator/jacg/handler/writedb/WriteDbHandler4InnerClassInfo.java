@@ -44,9 +44,9 @@ public class WriteDbHandler4InnerClassInfo extends AbstractWriteDbHandler<WriteD
         String outerClassName = array[1];
         int anonymousClass = Integer.parseInt(array[2]);
         return new WriteDbData4InnerClass(
-                dbOperWrapper.getSimpleClassName(innerClassName),
+                dbOperWrapper.querySimpleClassName(innerClassName),
                 innerClassName,
-                dbOperWrapper.getSimpleClassName(outerClassName),
+                dbOperWrapper.querySimpleClassName(outerClassName),
                 outerClassName,
                 anonymousClass);
     }

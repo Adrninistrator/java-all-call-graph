@@ -38,7 +38,7 @@ public class WriteDbHandler4MyBatisMSSelectColumn extends AbstractWriteDbHandler
         String columnAlias = array[4];
         String xmlFilePath = array[5];
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
-        String mapperSimpleClassName = dbOperWrapper.getSimpleClassName(mapperClassName);
+        String mapperSimpleClassName = dbOperWrapper.querySimpleClassName(mapperClassName);
         WriteDbData4MyBatisMSSelectColumn writeDbData4MyBatisMSSelectColumn = new WriteDbData4MyBatisMSSelectColumn();
         writeDbData4MyBatisMSSelectColumn.setRecordId(genNextRecordId());
         writeDbData4MyBatisMSSelectColumn.setMapperSimpleClassName(mapperSimpleClassName);

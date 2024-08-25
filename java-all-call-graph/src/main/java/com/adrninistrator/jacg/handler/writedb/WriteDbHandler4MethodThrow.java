@@ -50,7 +50,7 @@ public class WriteDbHandler4MethodThrow extends AbstractWriteDbHandler<WriteDbDa
         WriteDbData4MethodThrow writeDbData4MethodThrow = new WriteDbData4MethodThrow();
         writeDbData4MethodThrow.setRecordId(genNextRecordId());
         writeDbData4MethodThrow.setMethodHash(methodHash);
-        writeDbData4MethodThrow.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+        writeDbData4MethodThrow.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4MethodThrow.setThrowOffset(throwOffset);
         writeDbData4MethodThrow.setLineNumber(lineNumber);
         writeDbData4MethodThrow.setSeq(seq);

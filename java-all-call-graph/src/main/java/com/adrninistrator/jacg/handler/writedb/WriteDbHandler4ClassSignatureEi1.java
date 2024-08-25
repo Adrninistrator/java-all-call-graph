@@ -40,7 +40,7 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
 
         WriteDbData4ClassSignatureEi1 writeDbData4ClassSignatureEi1 = new WriteDbData4ClassSignatureEi1();
         writeDbData4ClassSignatureEi1.setRecordId(genNextRecordId());
-        writeDbData4ClassSignatureEi1.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+        writeDbData4ClassSignatureEi1.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4ClassSignatureEi1.setType(type);
         writeDbData4ClassSignatureEi1.setSuperItfClassName(superItfClassName);
         writeDbData4ClassSignatureEi1.setSeq(seq);

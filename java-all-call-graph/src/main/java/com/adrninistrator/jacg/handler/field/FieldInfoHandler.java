@@ -60,7 +60,7 @@ public class FieldInfoHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql, excludedTypeNum);
         }
         List<Object> argList = new ArrayList<>(excludedTypeNum + 2);
-        argList.add(dbOperWrapper.getSimpleClassName(className));
+        argList.add(dbOperWrapper.querySimpleClassName(className));
         argList.add(typePackage);
         argList.add(JavaCGCommonNameConstants.MODIFIERS_PUBLIC);
         argList.add(JavaCGYesNoEnum.NO.getIntValue());
@@ -88,7 +88,7 @@ public class FieldInfoHandler extends BaseHandler {
                     " and " + DC.FI_PRIMITIVE_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4FieldInfo.class, dbOperWrapper.getSimpleClassName(className), JavaCGCommonNameConstants.PACKAGE_JAVA,
+        return dbOperator.queryList(sql, WriteDbData4FieldInfo.class, dbOperWrapper.querySimpleClassName(className), JavaCGCommonNameConstants.PACKAGE_JAVA,
                 JavaCGYesNoEnum.NO.getIntValue());
     }
 
@@ -110,7 +110,7 @@ public class FieldInfoHandler extends BaseHandler {
                     " order by " + DC.FGT_SEQ;
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4FieldGenericsType.class, dbOperWrapper.getSimpleClassName(className), fieldName);
+        return dbOperator.queryList(sql, WriteDbData4FieldGenericsType.class, dbOperWrapper.querySimpleClassName(className), fieldName);
     }
 
     /**
@@ -128,6 +128,6 @@ public class FieldInfoHandler extends BaseHandler {
                     " where " + DC.FGT_SIMPLE_FIELD_GENERICS_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.getSimpleClassName(fieldType));
+        return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(fieldType));
     }
 }

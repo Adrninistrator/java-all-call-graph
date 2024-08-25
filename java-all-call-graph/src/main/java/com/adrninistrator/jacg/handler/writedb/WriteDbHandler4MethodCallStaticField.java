@@ -47,9 +47,9 @@ public class WriteDbHandler4MethodCallStaticField extends AbstractWriteDbHandler
         writeDbData4MethodCallStaticField.setObjArgsSeq(Integer.parseInt(objArgsSeq));
         writeDbData4MethodCallStaticField.setSeq(Integer.parseInt(seq));
         writeDbData4MethodCallStaticField.setCallerMethodHash(JACGUtil.genHashWithLen(callerFullMethod));
-        writeDbData4MethodCallStaticField.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+        writeDbData4MethodCallStaticField.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4MethodCallStaticField.setFieldName(fieldName);
-        writeDbData4MethodCallStaticField.setSimpleFieldType(dbOperWrapper.getSimpleClassName(fieldType));
+        writeDbData4MethodCallStaticField.setSimpleFieldType(dbOperWrapper.querySimpleClassName(fieldType));
         writeDbData4MethodCallStaticField.setClassName(className);
         writeDbData4MethodCallStaticField.setFieldType(fieldType);
 

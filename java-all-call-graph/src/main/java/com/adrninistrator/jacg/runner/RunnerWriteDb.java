@@ -170,7 +170,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         useH2Db = dbConfInfo.isUseH2Db();
         if (!useH2Db && JACGSqlUtil.isMySQLDb(dbConfInfo.getDriverClassName())) {
             if (!dbConfInfo.getDbUrl().contains(JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS)) {
-                logger.error("使用MYSQL时，请在{}参数指定{}", ConfigDbKeyEnum.CDKE_DB_URL.getKey(), JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS);
+                logger.error("使用MYSQL时，请在{}参数指定{}", ConfigDbKeyEnum.CDKE_DB_URL.getConfigPrintInfo(), JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS);
                 return false;
             }
         }
@@ -380,7 +380,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private boolean addManualAddMethodCallExtensions() {
         List<String> manualAddMethodCallClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1, true);
         if (JavaCGUtil.isCollectionEmpty(manualAddMethodCallClassList)) {
-            logger.info("未指定用于人工添加方法调用关系的处理类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1.getKey());
+            logger.info("未指定用于人工添加方法调用关系的处理类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1.getConfigPrintInfo());
             manualAddMethodCall1List = Collections.emptyList();
             return true;
         }
@@ -492,18 +492,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
     // 对建表sql语句进行转换
     private String transformCreateTableSql(String sql, boolean useH2Db) {
-        if (sql.startsWith(JACGConstants.SQL_CREATE_TABLE_HEAD)) {
+        if (StringUtils.startsWithIgnoreCase(sql, JACGConstants.SQL_CREATE_TABLE_HEAD)) {
             // CREATE TABLE if not exists开头
             return JACGSqlUtil.replaceFlagInSql(sql, appName, tableSuffix);
-        }
-
-        if (sql.contains(JACGConstants.SQL_ENGINE_INNODB)) {
-            // 包含ENGINE=InnoDB
-            if (useH2Db) {
-                return sql.replace(JACGConstants.SQL_ENGINE_INNODB, "")
-                        .replace("COLLATE=utf8_bin", "");
-            }
-            return sql;
         }
 
         String trimSql = sql.trim();
@@ -517,10 +508,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         }
 
         // 其他情况
-        if (useH2Db) {
-            return sql.replace(" text ", " varchar(65536) ")
-                    .replace("COLLATE utf8mb4_bin", "");
-        }
         return sql;
     }
 
@@ -1073,7 +1060,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             logger.info("{} 写入数据库表记录数 {}", writeDbName, writeDbNum);
             if (DbTableInfoEnum.DTIE_CLASS_NAME.getTableNameKeyword().equals(writeDbName) && writeDbNum == 0) {
                 logger.warn("未向数据库写入数据，请检查方法调用文件是否为空\n{}\n以及写入数据库时需要处理的类名前缀配置 {}", javaCGOutputInfo.getMainFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL),
-                        OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX.getKey());
+                        OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX.getConfigPrintInfo());
             }
         }
 

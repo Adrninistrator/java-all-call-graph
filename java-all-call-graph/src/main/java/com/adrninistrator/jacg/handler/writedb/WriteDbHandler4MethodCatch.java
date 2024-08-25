@@ -54,9 +54,9 @@ public class WriteDbHandler4MethodCatch extends AbstractWriteDbHandler<WriteDbDa
         WriteDbData4MethodCatch writeDbData4MethodCatch = new WriteDbData4MethodCatch();
         writeDbData4MethodCatch.setRecordId(genNextRecordId());
         writeDbData4MethodCatch.setMethodHash(methodHash);
-        writeDbData4MethodCatch.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+        writeDbData4MethodCatch.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4MethodCatch.setMethodName(methodName);
-        writeDbData4MethodCatch.setSimpleCatchExceptionType(dbOperWrapper.getSimpleClassName(catchExceptionType));
+        writeDbData4MethodCatch.setSimpleCatchExceptionType(dbOperWrapper.querySimpleClassName(catchExceptionType));
         writeDbData4MethodCatch.setCatchExceptionType(catchExceptionType);
         writeDbData4MethodCatch.setCatchFlag(catchFlag);
         writeDbData4MethodCatch.setTryStartLineNumber(tryStartLineNumber);

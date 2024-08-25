@@ -78,7 +78,7 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
         }
 
         // 查询数据库通过get/set方法关联的字段关系表最大记录id
-        currentMaxRecordId = getMaxRecordId();
+        currentMaxRecordId = queryMaxRecordId();
         if (currentMaxRecordId == JACGConstants.RECORD_ID_ILLEGAL) {
             return false;
         }
@@ -278,10 +278,10 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
         fieldRelationship.setSetMethodCallId(setMethodCallId);
         fieldRelationship.setCallerFullMethod(callerFullMethod);
         fieldRelationship.setCallerLineNumber(callerLineNumber);
-        fieldRelationship.setSetSimpleClassName(dbOperWrapper.getSimpleClassName(setClassName));
+        fieldRelationship.setSetSimpleClassName(dbOperWrapper.querySimpleClassName(setClassName));
         fieldRelationship.setSetMethodName(setMethodName);
         fieldRelationship.setSetClassName(setClassName);
-        fieldRelationship.setGetSimpleClassName(dbOperWrapper.getSimpleClassName(getClassName));
+        fieldRelationship.setGetSimpleClassName(dbOperWrapper.querySimpleClassName(getClassName));
         fieldRelationship.setGetMethodName(getMethodName);
         fieldRelationship.setGetClassName(getClassName);
         fieldRelationship.setValid(JavaCGYesNoEnum.YES.getIntValue());
@@ -332,7 +332,7 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
      *
      * @return
      */
-    private int getMaxRecordId() {
+    private int queryMaxRecordId() {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.FR_QUERY_MAX_RECORD_ID;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {

@@ -57,7 +57,7 @@ public class SpringTxHandler extends BaseHandler {
         // 查找调用当前实例的@Transactional注解方法
         for (String springTransactionalMethod : springTransactionalMethodList) {
             String methodHash = JACGUtil.genHashWithLen(springTransactionalMethod);
-            List<WriteDbData4MethodCall> methodCallList = methodCallHandler.getMethodCallByCalleeHashObjType(methodHash, JavaCGCalleeObjTypeEnum.COTE_THIS.getType());
+            List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryMethodCallByCalleeHashObjType(methodHash, JavaCGCalleeObjTypeEnum.COTE_THIS.getType());
             if (JavaCGUtil.isCollectionEmpty(methodCallList)) {
                 // 当前@Transactional注解方法不存在当前实例调用的情况
                 continue;
@@ -109,7 +109,7 @@ public class SpringTxHandler extends BaseHandler {
         for (String springTransactionalMethod : springTransactionalMethodList) {
             String methodHash = JACGUtil.genHashWithLen(springTransactionalMethod);
             // 获取方法对应的标志
-            Integer methodFlags = methodInfoHandler.getMethodFlags(methodHash);
+            Integer methodFlags = methodInfoHandler.queryMethodFlags(methodHash);
             if (methodFlags == null) {
                 continue;
             }

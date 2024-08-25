@@ -80,8 +80,8 @@ public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<Wri
             return null;
         }
 
-        String getSimpleClassName = dbOperWrapper.getSimpleClassName(getClassName);
-        String setSimpleClassName = dbOperWrapper.getSimpleClassName(setClassName);
+        String getSimpleClassName = dbOperWrapper.querySimpleClassName(getClassName);
+        String setSimpleClassName = dbOperWrapper.querySimpleClassName(setClassName);
         if (enumSimpleClassNameSet.contains(setSimpleClassName) || enumSimpleClassNameSet.contains(getSimpleClassName)) {
             // 存在关联关系的get/set方法对应的类为枚举，不写入数据库，不打印提示日志
             return null;

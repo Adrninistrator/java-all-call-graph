@@ -128,7 +128,7 @@ public class MethodArgReturnHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        String simpleArgType = dbOperWrapper.getSimpleClassName(argType);
+        String simpleArgType = dbOperWrapper.querySimpleClassName(argType);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptySet();
@@ -152,7 +152,7 @@ public class MethodArgReturnHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        String simpleArgType = dbOperWrapper.getSimpleClassName(argType);
+        String simpleArgType = dbOperWrapper.querySimpleClassName(argType);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptySet();
@@ -176,7 +176,7 @@ public class MethodArgReturnHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        String simpleArgType = dbOperWrapper.getSimpleClassName(returnType);
+        String simpleArgType = dbOperWrapper.querySimpleClassName(returnType);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptySet();
@@ -200,7 +200,7 @@ public class MethodArgReturnHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        String simpleArgType = dbOperWrapper.getSimpleClassName(returnType);
+        String simpleArgType = dbOperWrapper.querySimpleClassName(returnType);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             return Collections.emptySet();

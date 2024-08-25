@@ -39,7 +39,7 @@ public class WriteDbHandler4SfFieldMethodCall extends AbstractWriteDbHandler<Wri
         String fieldType = array[4];
         String calleeClassName = array[5];
         String calleeMethodName = array[6];
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         WriteDbData4SfFieldMethodCall writeDbData4SfFieldMethodCall = new WriteDbData4SfFieldMethodCall();
         writeDbData4SfFieldMethodCall.setRecordId(genNextRecordId());
         writeDbData4SfFieldMethodCall.setSimpleClassName(simpleClassName);

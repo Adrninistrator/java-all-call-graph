@@ -96,7 +96,7 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
         }
 
         // 根据被调用方完整方法HASH+长度，从方法调用表获取对应的完整方法
-        String callerFullMethod = methodCallHandler.getCalleeFullMethodByHash(calleeExtractedFile.getMethodHash());
+        String callerFullMethod = methodCallHandler.queryCalleeFullMethodByHash(calleeExtractedFile.getMethodHash());
         calleeExtractedFile.setFullMethod(callerFullMethod);
         if (callerFullMethod != null) {
             calleeExtractedFile.setClassName(JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod));

@@ -58,8 +58,8 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
         // 判断当前类是否存在子类或子接口
         int existsDownwardClasses = JavaCGYesNoEnum.parseIntValue(superClassOrInterfaceNameSet.contains(className));
 
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
-        String simpleUpwardClassName = dbOperWrapper.getSimpleClassName(upwardClassName);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
+        String simpleUpwardClassName = dbOperWrapper.querySimpleClassName(upwardClassName);
         if (JavaCGConstants.FILE_KEY_EXTENDS.equals(type)) {
             // 记录子类及对应的父类唯一类名
             extendsSimpleClassNameMap.put(simpleClassName, simpleUpwardClassName);

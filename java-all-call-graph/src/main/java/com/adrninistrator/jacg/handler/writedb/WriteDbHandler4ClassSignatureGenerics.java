@@ -38,7 +38,7 @@ public class WriteDbHandler4ClassSignatureGenerics extends AbstractWriteDbHandle
 
         WriteDbData4ClassSignatureGenerics writeDbData4ClassSignatureGenerics = new WriteDbData4ClassSignatureGenerics();
         writeDbData4ClassSignatureGenerics.setRecordId(genNextRecordId());
-        writeDbData4ClassSignatureGenerics.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+        writeDbData4ClassSignatureGenerics.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4ClassSignatureGenerics.setSeq(seq);
         writeDbData4ClassSignatureGenerics.setGenericsName(genericsName);
         writeDbData4ClassSignatureGenerics.setGenericsExtendsClassName(genericsExtendsClassName);

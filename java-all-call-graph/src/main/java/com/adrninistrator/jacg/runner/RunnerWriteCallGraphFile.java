@@ -110,7 +110,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
             usedJarPathList = getJarPathList();
         }
         if (JavaCGUtil.isCollectionEmpty(usedJarPathList)) {
-            logger.error("请在配置文件 {} 中指定需要处理的jar包，或保存class、jar文件的目录", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
+            logger.error("请在配置文件 {} 中指定需要处理的jar包，或保存class、jar文件的目录", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
             return false;
         }
 
@@ -160,11 +160,11 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, true);
         Set<String> codeParserExtensionClassSet = new HashSet<>(codeParserExtensionClassList);
         if (codeParserExtensionClassList.size() != codeParserExtensionClassSet.size()) {
-            logger.info("指定的用于对代码进行解析的扩展类存在重复 {} {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getKey(), StringUtils.join(codeParserExtensionClassList));
+            logger.info("指定的用于对代码进行解析的扩展类存在重复 {} {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getConfigPrintInfo(), StringUtils.join(codeParserExtensionClassList));
             return false;
         }
         if (codeParserExtensionClassSet.contains(MyBatisMySqlSqlInfoCodeParser.class.getName())) {
-            logger.info("用于对代码进行解析的扩展类不能在配置文件 {} 中指定 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getKey(), MyBatisMySqlSqlInfoCodeParser.class.getName());
+            logger.info("用于对代码进行解析的扩展类不能在配置文件 {} 中指定 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getConfigPrintInfo(), MyBatisMySqlSqlInfoCodeParser.class.getName());
             return false;
         }
 

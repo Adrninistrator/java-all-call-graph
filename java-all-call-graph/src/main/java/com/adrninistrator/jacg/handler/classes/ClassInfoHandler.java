@@ -40,7 +40,7 @@ public class ClassInfoHandler extends BaseHandler {
      * @param classNameSuffix 类名后缀
      * @return
      */
-    public List<WriteDbData4ClassName> getClassNameEndsWith(String classNameSuffix) {
+    public List<WriteDbData4ClassName> queryClassNameEndsWith(String classNameSuffix) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_CLASS_LIKE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -59,9 +59,9 @@ public class ClassInfoHandler extends BaseHandler {
      * @param className 完整类名信息
      * @return 完整类名或简单类名，或null
      */
-    public String getExactlySimpleClassName(String className) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
-        WriteDbData4ClassName writeDbData4ClassName = getClassNameEquals(simpleClassName);
+    public String queryExactlySimpleClassName(String className) {
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
+        WriteDbData4ClassName writeDbData4ClassName = queryClassNameEquals(simpleClassName);
         if (writeDbData4ClassName == null || !className.equals(writeDbData4ClassName.getClassName())) {
             logger.warn("指定的类名不存在 {}", className);
             return null;
@@ -75,7 +75,7 @@ public class ClassInfoHandler extends BaseHandler {
      * @param simpleClassName 完整类名或简单类名
      * @return
      */
-    public WriteDbData4ClassName getClassNameEquals(String simpleClassName) {
+    public WriteDbData4ClassName queryClassNameEquals(String simpleClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_CLASS_EQUALS;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -108,7 +108,7 @@ public class ClassInfoHandler extends BaseHandler {
      * @return 可能为null
      */
     public Integer queryClassAccessFlag(String className) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         return queryClassAccessFlagBySimple(simpleClassName);
     }
 
@@ -148,7 +148,7 @@ public class ClassInfoHandler extends BaseHandler {
      * @return
      */
     public ClassInterfaceEnum queryClassInterfaceEnum(String className) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         return queryClassInterfaceEnumBySimple(simpleClassName);
     }
 

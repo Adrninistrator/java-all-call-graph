@@ -220,7 +220,7 @@ public class AnnotationHandler extends BaseHandler {
                 key     注解类名
                 value   Map<String, BaseAnnotationAttribute> key：注解属性名称，value：注解属性
          */
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         logger.debug("根据完整类名获取对应的注解信息 {}", simpleClassName);
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CA_QUERY_ANNOTATIONS_BY_SIMPLE_CLASS_NAME;
@@ -245,7 +245,7 @@ public class AnnotationHandler extends BaseHandler {
      * @return 若返回map isEmpty()为true，代表类上没有对应的注解。若返回map isEmpty()为false，代表代表类上有对应的注解，key：注解属性名称，value：注解属性
      */
     public Map<String, BaseAnnotationAttribute> queryAnnotationAttributes4Class(String className, String annotationName) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         logger.debug("获取指定类上指定注解对应的注解属性 {}", simpleClassName);
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CA_QUERY_ONE_ANNOTATION_BY_SIMPLE_CLASS_NAME;
@@ -359,7 +359,7 @@ public class AnnotationHandler extends BaseHandler {
      * @return 若返回map isEmpty()为true，代表类上没有对应的注解。若返回map isEmpty()为false，代表代表类上有对应的注解，key：注解属性名称，value：注解属性
      */
     public Map<String, BaseAnnotationAttribute> queryAnnotationAttributes4Field(String className, String fieldName, String annotationName) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         logger.debug("获取指定字段上指定注解对应的注解属性 {} {}", simpleClassName, fieldName);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.FA_QUERY_ONE_ANNOTATION_BY_CLASS_FIELD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);

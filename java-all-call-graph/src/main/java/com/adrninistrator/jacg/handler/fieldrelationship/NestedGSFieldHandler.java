@@ -114,7 +114,7 @@ public class NestedGSFieldHandler extends BaseHandler {
         // 记录指定类在上层类中的字段名
         String fieldName = null;
         // 首先从get方法表中查询指定类以非集合类型被嵌套使用的上层类的类型
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.GM_QUERY_UPPER_NESTED_FIELD_TYPE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {

@@ -215,6 +215,7 @@ public enum DbTableInfoEnum {
             DC.MI_RETURN_TYPE,
             DC.MI_METHOD_INSTRUCTIONS_HASH,
             DC.MI_JAR_NUM,
+            DC.MI_CLASS_NAME,
     }),
     DTIE_METHOD_LINE_NUMBER("method_line_number", new String[]{
             DC.MLN_METHOD_HASH,

@@ -39,7 +39,7 @@ public class WriteDbHandler4MethodArgAnnotation extends AbstractWriteDbHandler<W
         }
 
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         int argSeq = Integer.parseInt(array[1]);
         String annotationName = array[2];

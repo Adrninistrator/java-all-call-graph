@@ -128,8 +128,8 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * @return false: 不存在继承或实现关系 true: 存在继承或实现关系
      */
     public boolean checkExtendsOrImplFull(String upwardClassName, String downwardClassName) {
-        String upwardSimpleClassName = dbOperWrapper.getSimpleClassName(upwardClassName);
-        String downwardSimpleClassName = dbOperWrapper.getSimpleClassName(downwardClassName);
+        String upwardSimpleClassName = dbOperWrapper.querySimpleClassName(upwardClassName);
+        String downwardSimpleClassName = dbOperWrapper.querySimpleClassName(downwardClassName);
         return checkExtendsOrImplBySimple(upwardSimpleClassName, downwardSimpleClassName);
     }
 
@@ -177,7 +177,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
                                                   boolean includeClass,
                                                   boolean includeAbstractClass,
                                                   boolean includeNonAbstractClass) {
-        String superSimpleClassName = dbOperWrapper.getSimpleClassName(superClassName);
+        String superSimpleClassName = dbOperWrapper.querySimpleClassName(superClassName);
         return queryChildClassListBySimple(superSimpleClassName, includeInterface, includeClass, includeAbstractClass, includeNonAbstractClass);
     }
 
@@ -301,7 +301,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * @return
      */
     public String querySuperClassNameByFull(String className) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         return querySuperClassNameBySimple(simpleClassName);
     }
 
@@ -345,7 +345,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
                     " and " + DC.EI_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         return dbOperator.queryListOneColumn(sql, String.class, simpleClassName, JavaCGConstants.FILE_KEY_IMPLEMENTS);
     }
 
@@ -356,7 +356,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * @return
      */
     public List<ClassNameAndType> queryUpwardByClassName(String className) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.EI_QUERY_UPWARD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -391,7 +391,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * @return
      */
     private List<WriteDbData4ExtendsImpl> queryDownload(String className) {
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         return queryDownloadBySimple(simpleClassName);
     }
 

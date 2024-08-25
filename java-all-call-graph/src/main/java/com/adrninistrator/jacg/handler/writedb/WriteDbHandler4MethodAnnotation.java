@@ -79,7 +79,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         }
 
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         String annotationName = array[1];
         // 若当前行的注解信息无属性，注解属性名称设为空字符串

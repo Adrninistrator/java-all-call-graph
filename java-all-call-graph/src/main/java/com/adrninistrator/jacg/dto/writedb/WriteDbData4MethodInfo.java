@@ -17,6 +17,7 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
     private String returnType;
     private String methodInstructionsHash;
     private int jarNum;
+    private String className;
 
     public String getMethodHash() {
         return methodHash;
@@ -88,6 +89,14 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
 
     public void setJarNum(int jarNum) {
         this.jarNum = jarNum;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 
     @Override

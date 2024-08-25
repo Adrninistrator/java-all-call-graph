@@ -9,4 +9,6 @@ public interface ConfigInterface {
     String getKey();
 
     String getDesc();
+
+    String getConfigPrintInfo();
 }

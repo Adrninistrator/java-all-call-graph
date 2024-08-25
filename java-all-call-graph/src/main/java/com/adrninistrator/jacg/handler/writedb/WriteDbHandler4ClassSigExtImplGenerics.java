@@ -41,11 +41,11 @@ public class WriteDbHandler4ClassSigExtImplGenerics extends AbstractWriteDbHandl
 
         WriteDbData4ClassSigExtImplGenerics writeDbData4ClassSigExtImplGenerics = new WriteDbData4ClassSigExtImplGenerics();
         writeDbData4ClassSigExtImplGenerics.setRecordId(genNextRecordId());
-        writeDbData4ClassSigExtImplGenerics.setSimpleClassName(dbOperWrapper.getSimpleClassName(className));
+        writeDbData4ClassSigExtImplGenerics.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4ClassSigExtImplGenerics.setGenericsName(genericsName);
         writeDbData4ClassSigExtImplGenerics.setSeq(seq);
         writeDbData4ClassSigExtImplGenerics.setExtType(extType);
-        writeDbData4ClassSigExtImplGenerics.setSuperItfSimpleClassName(dbOperWrapper.getSimpleClassName(superItfClassName));
+        writeDbData4ClassSigExtImplGenerics.setSuperItfSimpleClassName(dbOperWrapper.querySimpleClassName(superItfClassName));
         writeDbData4ClassSigExtImplGenerics.setSuperItfGenericsExtendsClassName(superItfGenericsExtendsClassName);
         writeDbData4ClassSigExtImplGenerics.setSuperItfSeq(superItfSeq);
         writeDbData4ClassSigExtImplGenerics.setClassName(className);

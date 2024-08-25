@@ -36,7 +36,7 @@ public class WriteDbHandler4FieldAnnotation extends AbstractWriteDbHandler<Write
             return null;
         }
 
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String fieldName = array[1];
         String annotationName = array[2];
         // 假如当前行的注解信息无属性，注解属性名称设为空字符串

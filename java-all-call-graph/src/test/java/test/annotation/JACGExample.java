@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.neo4j.annoataion;
+package test.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,12 +7,14 @@ import java.lang.annotation.Target;
 
 /**
  * @author adrninistrator
- * @date 2024/7/26
- * @description: 自动创建Neo4j索引，多个索引
+ * @date 2024/8/24
+ * @description:
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Neo4jIndexes {
+public @interface JACGExample {
 
-    Neo4jIndex[] indexes();
+    String title();
+
+    String[] desc();
 }

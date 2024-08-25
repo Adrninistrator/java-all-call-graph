@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "2.0.4"
+version = "2.0.5"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -74,7 +74,7 @@ List jackson = ["com.fasterxml.jackson.core:jackson-databind:2.14.0"]
 
 List jdom = ['org.jdom:jdom2:2.0.6.1']
 
-def spring_version = "5.3.33"
+def spring_version = "5.3.39"
 
 List spring_jdbc = ["org.springframework:spring-jdbc:$spring_version"]
 

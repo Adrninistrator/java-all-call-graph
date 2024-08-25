@@ -183,7 +183,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 if (checkSomeJarModified(jarPathList)) {
                     logger.error("请先执行 {} 类导入数据库\n假如不需要检查jar包文件是否有变化，可修改配置文件 {} 参数值 {} 为 {}",
                             RunnerWriteDb.class.getSimpleName(), ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED.getFileName(),
-                            ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED.getKey(), Boolean.FALSE);
+                            ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED.getConfigPrintInfo(), Boolean.FALSE);
                     return false;
                 }
             }
@@ -244,7 +244,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     protected boolean readTaskInfo(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum) {
         taskSet = configureWrapper.getOtherConfigSet(otherConfigFileUseSetEnum, true);
         if (JavaCGUtil.isCollectionEmpty(taskSet)) {
-            logger.error("读取文件不存在或内容为空 {}", otherConfigFileUseSetEnum.getKey());
+            logger.error("读取文件不存在或内容为空 {}", otherConfigFileUseSetEnum.getConfigPrintInfo());
             return false;
         }
 
@@ -286,7 +286,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
             if (StringUtils.isNotBlank(outputDirName) && currentOutputDir.exists()) {
                 logger.error("指定的输出目录已存在，若确实需要在该目录中输出，请先删除该目录\n{} {} {}\n{}", ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getFileName(),
-                        ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getKey(), outputDirName, currentOutputDirPath);
+                        ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getConfigPrintInfo(), outputDirName, currentOutputDirPath);
                 return false;
             }
 
@@ -757,7 +757,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                     "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
                     "2. 指定的方法是接口中未实现的方法\n" +
                     "3. 指定的方法是抽象方法\n" +
-                    "{} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey(), simpleClassName, methodLineNum);
+                    "{} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo(), simpleClassName, methodLineNum);
             return FindMethodTaskInfo.genFindMethodInfoGenEmptyFile();
         }
 
@@ -932,7 +932,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         if (JavaCGCallTypeEnum.CTE_LAMBDA.getType().equals(callType)) {
-            WriteDbData4LambdaMethodInfo lambdaCalleeInfo = lambdaMethodHandler.getLambdaCalleeInfo(methodCallId);
+            WriteDbData4LambdaMethodInfo lambdaCalleeInfo = lambdaMethodHandler.queryLambdaCalleeInfo(methodCallId);
             if (lambdaCalleeInfo != null &&
                     ((JavaCGCommonNameConstants.CLASS_NAME_RUNNABLE.equals(lambdaCalleeInfo.getLambdaCalleeClassName()) &&
                             JavaCGCommonNameConstants.METHOD_RUNNABLE_RUN.equals(lambdaCalleeInfo.getLambdaCalleeMethodName()))
@@ -972,7 +972,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         if (JavaCGCallTypeEnum.CTE_LAMBDA.getType().equals(callType)) {
-            WriteDbData4LambdaMethodInfo lambdaCalleeInfo = lambdaMethodHandler.getLambdaCalleeInfo(methodCallId);
+            WriteDbData4LambdaMethodInfo lambdaCalleeInfo = lambdaMethodHandler.queryLambdaCalleeInfo(methodCallId);
             if (lambdaCalleeInfo != null && (
                     (JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK.equals(lambdaCalleeInfo.getLambdaCalleeClassName()) &&
                             JavaCGCommonNameConstants.METHOD_DO_IN_TRANSACTION.equals(lambdaCalleeInfo.getLambdaCalleeMethodName()))

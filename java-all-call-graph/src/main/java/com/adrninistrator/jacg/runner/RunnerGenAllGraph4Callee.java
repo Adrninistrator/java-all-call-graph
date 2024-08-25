@@ -154,7 +154,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             String className = taskArray[0];
 
             // 获取唯一类名（简单类名或完整类名）
-            String simpleClassName = dbOperWrapper.getSimpleClassNameInTask(className);
+            String simpleClassName = dbOperWrapper.querySimpleClassNameInTask(className);
             if (simpleClassName == null) {
                 return Collections.emptyMap();
             }
@@ -590,7 +590,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         if (JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD.getType().equals(callType)) {
             // 当前方法调用类型是父类调用子类方法，记录父类方法调用子类方法对应信息的栈入栈
             String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
-            String calleeSimpleClassName = dbOperWrapper.getSimpleClassName(calleeClassName);
+            String calleeSimpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
             SuperCallChildInfo superCallChildInfo = new SuperCallChildInfo(nodeLevel, calleeSimpleClassName, calleeClassName, calleeFullMethod);
             superCallChildInfoStack.push(superCallChildInfo);
             return new MethodAndHash(callerFullMethod, callerMethodHash);
@@ -627,7 +627,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         }
 
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
-        String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
+        String callerSimpleClassName = dbOperWrapper.querySimpleClassName(callerClassName);
 
         String sccChildFullMethod = null;
         String sccChildMethodHash = null;
@@ -841,7 +841,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                                                    String actualCallerMethodHash,
                                                    int back2Level) {
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(actualCallerFullMethod);
-        String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
+        String callerSimpleClassName = dbOperWrapper.querySimpleClassName(callerClassName);
 
         StringBuilder callerInfo = new StringBuilder();
         callerInfo.append(JACGCallGraphFileUtil.genOutputPrefix(currentNodeLevel + 1));

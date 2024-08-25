@@ -54,7 +54,7 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
         super(configureWrapper);
         neo4jDbOperWrapper = (Neo4jDbOperWrapper) dbOperWrapper;
 
-        nodeClassNameList = JACGFindClassUtil.getClassNameListFromDirOrJar(AbstractJACGNeo4jNode.class);
+        nodeClassNameList = JACGFindClassUtil.getOrdinaryClassNameListFromDirOrJar(AbstractJACGNeo4jNode.class);
         if (JavaCGUtil.isCollectionEmpty(nodeClassNameList)) {
             logger.error("未找到neo4j节点类");
             throw new JavaCGRuntimeException("未找到neo4j节点类");

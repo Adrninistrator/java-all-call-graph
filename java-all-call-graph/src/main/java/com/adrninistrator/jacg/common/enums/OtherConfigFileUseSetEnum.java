@@ -58,6 +58,11 @@ public enum OtherConfigFileUseSetEnum implements ConfigInterface {
         return desc;
     }
 
+    @Override
+    public String getConfigPrintInfo() {
+        return fileName + " " + OtherConfigFileUseSetEnum.class.getSimpleName() + "." + name();
+    }
+
     public boolean isCanUseConfigInFile() {
         return canUseConfigInFile;
     }

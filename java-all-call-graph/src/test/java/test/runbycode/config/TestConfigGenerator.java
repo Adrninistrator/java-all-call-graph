@@ -36,11 +36,14 @@ import test.runbycode.util.JACGTestUtil;
  */
 public class TestConfigGenerator {
 
+    public static final String RUN_BY_CODE_APP_NAME = "test_rbc";
+    public static final String RUN_BY_CODE_APP_NAME_WITH_HEAD = "_" + RUN_BY_CODE_APP_NAME;
+
     // 生成通用的参数配置
     public static ConfigureWrapper genConfigureWrapper() {
         // java-all-call-graph的配置
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, "test_rbc");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, RUN_BY_CODE_APP_NAME);
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_2.getDetail());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM, "20");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());

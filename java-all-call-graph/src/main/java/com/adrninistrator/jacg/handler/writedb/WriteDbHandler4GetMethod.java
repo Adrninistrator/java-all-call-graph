@@ -46,7 +46,7 @@ public class WriteDbHandler4GetMethod extends AbstractWriteDbHandler<WriteDbData
             return null;
         }
 
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = array[1];
         String fieldName = array[2];
         String fieldCategory = array[3];
@@ -63,7 +63,7 @@ public class WriteDbHandler4GetMethod extends AbstractWriteDbHandler<WriteDbData
         writeDbData4GetMethod.setMethodName(methodName);
         writeDbData4GetMethod.setFieldName(fieldName);
         writeDbData4GetMethod.setFieldCategory(fieldCategory);
-        writeDbData4GetMethod.setSimpleFieldType(dbOperWrapper.getSimpleClassName(fieldType));
+        writeDbData4GetMethod.setSimpleFieldType(dbOperWrapper.querySimpleClassName(fieldType));
         writeDbData4GetMethod.setFieldType(fieldType);
         writeDbData4GetMethod.setClassName(className);
         writeDbData4GetMethod.setMethodHash(JACGUtil.genHashWithLen(fullMethod));

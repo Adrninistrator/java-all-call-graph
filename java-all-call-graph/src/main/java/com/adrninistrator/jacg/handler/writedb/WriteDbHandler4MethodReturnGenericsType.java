@@ -40,7 +40,7 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
         }
 
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         String type = array[1];
         int typeSeq = Integer.parseInt(array[2]);
@@ -53,7 +53,7 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
         writeDbData4MethodReturnGenericsType.setSimpleClassName(simpleClassName);
         writeDbData4MethodReturnGenericsType.setType(type);
         writeDbData4MethodReturnGenericsType.setTypeSeq(typeSeq);
-        writeDbData4MethodReturnGenericsType.setSimpleGenericsType(dbOperWrapper.getSimpleClassName(genericsType));
+        writeDbData4MethodReturnGenericsType.setSimpleGenericsType(dbOperWrapper.querySimpleClassName(genericsType));
         writeDbData4MethodReturnGenericsType.setGenericsType(genericsType);
         writeDbData4MethodReturnGenericsType.setFullMethod(fullMethod);
         return writeDbData4MethodReturnGenericsType;

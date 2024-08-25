@@ -44,6 +44,11 @@ public enum ConfigDbKeyEnum implements MainConfigInterface {
     }
 
     @Override
+    public String getConfigPrintInfo() {
+        return key + " " + ConfigDbKeyEnum.class.getSimpleName() + "." + name();
+    }
+
+    @Override
     public Class<?> getType() {
         return type;
     }

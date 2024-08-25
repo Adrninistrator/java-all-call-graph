@@ -29,7 +29,7 @@ public class LambdaMethodHandler extends BaseHandler {
      * @param methodCallId
      * @return
      */
-    public WriteDbData4LambdaMethodInfo getLambdaCalleeInfo(int methodCallId) {
+    public WriteDbData4LambdaMethodInfo queryLambdaCalleeInfo(int methodCallId) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.LMI_QUERY_CALLEE_INFO;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {

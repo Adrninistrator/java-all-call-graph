@@ -51,7 +51,7 @@ public class WriteDbHandler4MethodCallMethodCallReturn extends AbstractWriteDbHa
         writeDbData4MethodCallMethodCallReturn.setArrayFlag(arrayFlag);
         writeDbData4MethodCallMethodCallReturn.setUseReturnCallId(useReturnCallId);
         writeDbData4MethodCallMethodCallReturn.setCalleeMethodHash(JACGUtil.genHashWithLen(calleeFullMethod));
-        writeDbData4MethodCallMethodCallReturn.setCalleeSimpleClassName(dbOperWrapper.getSimpleClassName(calleeClassName));
+        writeDbData4MethodCallMethodCallReturn.setCalleeSimpleClassName(dbOperWrapper.querySimpleClassName(calleeClassName));
         writeDbData4MethodCallMethodCallReturn.setCalleeMethodName(calleeMethodName);
         writeDbData4MethodCallMethodCallReturn.setCalleeFullMethod(calleeFullMethod);
         return writeDbData4MethodCallMethodCallReturn;
