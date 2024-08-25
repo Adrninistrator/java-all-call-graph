@@ -64,22 +64,26 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 [二次开发](custom_development.md)
 
-# 12. 其他功能
+# 12. 通过代码执行的其他示例
+
+[通过代码执行的其他示例](run_by_code_example.md)
+
+# 13. 其他功能
 
 [其他功能](other_functions.md)
 
-# 13. 扩展功能
+# 14. 扩展功能
 
 [扩展功能](extensions.md)
 
-# 14. 原理说明
+# 15. 原理说明
 
 [原理说明](how_to_implementation.md)
 
-# 15. 其他说明
+# 16. 其他说明
 
 [其他说明](other_instructions.md)
 
-# 16. 常见问题
+# 17. 常见问题
 
 [常见问题](question_answer.md)
