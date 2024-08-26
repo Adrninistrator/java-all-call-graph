@@ -48,21 +48,21 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 [使用说明](how_to_use.md)
 
-# 8. 数据库表说明
+# 8. 通过源码执行
+
+[通过源码执行](run_by_code.md)
+
+# 9. 数据库表说明
 
 [数据库表说明](db_tables.md)
 
-# 9. 使用Neo4j图数据库
+# 10. 使用Neo4j图数据库
 
 [使用Neo4j图数据库](use_neo4j.md)
 
-# 10. JVM参数及Java代码开关
+# 11. JVM参数及Java代码开关
 
 [JVM参数及Java代码开关](jvm_options_java_switch.md)
-
-# 11. 二次开发
-
-[二次开发](custom_development.md)
 
 # 12. 通过代码执行的其他示例
 

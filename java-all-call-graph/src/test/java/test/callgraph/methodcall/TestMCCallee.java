@@ -31,4 +31,8 @@ public class TestMCCallee {
         System.out.println(s1);
         return "";
     }
+
+    public static void testFindEntry() {
+        System.out.println("ok");
+    }
 }

@@ -50,7 +50,122 @@
 
 以上功能也支持对保存完整调用链文件的目录进行处理，生成的文件保存在指定目录的“find_keyword_\[yyyyMMdd-HHmmss.SSS\]”子目录中。
 
-## 1.2. 处理循环方法调用
+## 1.2. 获取调用指定方法的入口方法
+
+- 获取方式
+
+假如存在调用链“ a -> b -> c -> d -> e ”，将方法a称为入口方法（即向上没有被其他方法调用的方法），获得从哪些入口方法会直接或间接调用到方法e（或b、c、d），可以使用以下方法获取：
+
+```java
+com.adrninistrator.jacg.extractor.entry.CalleeGraphBaseExtractor#baseExtract(com.adrninistrator.jacg.conf.ConfigureWrapper)
+```
+
+通过 OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE 指定需要查找的被调用方法
+
+可参考以下方法中的调用方式
+
+```java
+test.runbycode.example.TestExtractCalleeGraphToEntry
+```
+
+- 示例
+
+以上为 TestMCCallee.test2() 方法的被调用情况
+
+```java
+public class TestMCCaller {
+    public void testFindEntryA1() {
+        testFindEntryA2();
+    }
+
+    public void testFindEntryA2() {
+        TestMCCallee.testFindEntry();
+    }
+
+    public void testFindEntryB1() {
+        TestMCCallee.testFindEntry();
+    }
+}
+```
+
+通过以上方式获取调用 TestMCCallee.testFindEntry() 方法的入口方法的结果，找到对应的入口方法： TestMCCaller:testFindEntryB1() 、TestMCCaller:testFindEntryA1() ，示例如下：
+
+
+```log
+{
+  "stackFilePath" : "D:\\gitee-dir\\pri-code\\java-callgraph-dir\\java-all-call-graph\\_jacg_o_ee\\test_rbc_20240826-192941.564\\_stack\\TestMCCallee@testFindEntry@fLQrsLa-8-Wfbwr0udN48g==#036.md",
+  "stackFileName" : "TestMCCallee@testFindEntry@fLQrsLa-8-Wfbwr0udN48g==#036.md",
+  "emptyStackFile" : false,
+  "simpleClassName" : "TestMCCallee",
+  "className" : "test.callgraph.methodcall.TestMCCallee",
+  "methodName" : "testFindEntry",
+  "methodHash" : "fLQrsLa-8-Wfbwr0udN48g==#036",
+  "fullMethod" : "test.callgraph.methodcall.TestMCCallee:testFindEntry()",
+  "calleeExtractedLineList" : [ {
+    "dataSeq" : 1,
+    "lineNumber" : 13,
+    "lineContent" : "[1]#  test.callgraph.methodcall.TestMCCaller:testFindEntryB1()\t(TestMCCaller:219)\t!entry!",
+    "callGraphLineParsed" : {
+      "methodLevel" : 1,
+      "methodDetail" : {
+        "className" : "test.callgraph.methodcall.TestMCCaller",
+        "methodName" : "testFindEntryB1",
+        "fullMethod" : "test.callgraph.methodcall.TestMCCaller:testFindEntryB1()",
+        "argTypeStr" : "",
+        "argTypeList" : [ ]
+      },
+      "callerLineNumber" : 219,
+      "businessDataList" : [ ],
+      "cycleCall" : false,
+      "cycleCallLevel" : 0,
+      "entryMethod" : true,
+      "runInOtherThread" : false,
+      "runInTransaction" : false,
+      "callerLineNumberStr" : "219"
+    },
+    "runInOtherThread" : false,
+    "runInTransaction" : false,
+    "nextLineContent" : "[0]#test.callgraph.methodcall.TestMCCallee:testFindEntry()"
+  }, {
+    "dataSeq" : 2,
+    "lineNumber" : 20,
+    "lineContent" : "[2]#    test.callgraph.methodcall.TestMCCaller:testFindEntryA1()\t(TestMCCaller:211)\t!entry!",
+    "callGraphLineParsed" : {
+      "methodLevel" : 2,
+      "methodDetail" : {
+        "className" : "test.callgraph.methodcall.TestMCCaller",
+        "methodName" : "testFindEntryA1",
+        "fullMethod" : "test.callgraph.methodcall.TestMCCaller:testFindEntryA1()",
+        "argTypeStr" : "",
+        "argTypeList" : [ ]
+      },
+      "callerLineNumber" : 211,
+      "businessDataList" : [ ],
+      "cycleCall" : false,
+      "cycleCallLevel" : 0,
+      "entryMethod" : true,
+      "runInOtherThread" : false,
+      "runInTransaction" : false,
+      "callerLineNumberStr" : "211"
+    },
+    "runInOtherThread" : false,
+    "runInTransaction" : false,
+    "nextLineContent" : "[1]#  test.callgraph.methodcall.TestMCCaller:testFindEntryA2()\t(TestMCCaller:215)"
+  } ]
+}
+```
+
+在以上输出结果中， calleeExtractedLineList\[n\].callGraphLineParsed 代表入口方法的信息
+
+### 1.2.1. 执行顺序
+
+使用以上方式，首先需要使对应jar包完成解析并写入数据库，使用以下方法：
+
+```
+com.adrninistrator.jacg.runner.RunnerWriteDb:run()
+```
+
+## 1.3. 处理循环方法调用
 
 在生成Java方法完整调用链时，若出现了循环方法调用，本工具会从循环调用中跳出，并在生成的方法调用链中对出现循环调用的方法增加标记“!cycle\[n\]!”，其中n代表被循环调用的方法对应层级。
 

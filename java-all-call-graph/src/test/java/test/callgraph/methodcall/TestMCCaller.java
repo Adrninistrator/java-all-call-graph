@@ -206,4 +206,16 @@ public class TestMCCaller {
     public AbstractSuperClassA[] returnArray2() {
         return SUPER_CLASSA_ARRAY;
     }
+
+    public void testFindEntryA1() {
+        testFindEntryA2();
+    }
+
+    public void testFindEntryA2() {
+        TestMCCallee.testFindEntry();
+    }
+
+    public void testFindEntryB1() {
+        TestMCCallee.testFindEntry();
+    }
 }

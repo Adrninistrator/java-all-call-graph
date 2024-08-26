@@ -124,9 +124,9 @@ public class MACGActionListenerParser extends AbstractManualAddCallGraphSimplePa
 以上类在生成的方法调用关系文件中增加的调用关系如下所示：
 
 ```
-M:9 test.call_graph.action_listener.ActionListener1:<init>() (MA)test.call_graph.action_listener.ActionListener1:actionPerformed(java.awt.event.ActionEvent) 0 1
-M:16 test.call_graph.action_listener.TestActionListener$1:<init>(test.call_graph.action_listener.TestActionListener) (MA)test.call_graph.action_listener.TestActionListener$1:actionPerformed(java.awt.event.ActionEvent) 0 1
-M:20 test.call_graph.action_listener.TestActionListener$2:<init>(test.call_graph.action_listener.TestActionListener) (MA)test.call_graph.action_listener.TestActionListener$2:actionPerformed(java.awt.event.ActionEvent) 0 1
+M:9 test.callgraph.actionlistener.ActionListener1:<init>() (MA)test.callgraph.actionlistener.ActionListener1:actionPerformed(java.awt.event.ActionEvent) 0 1
+M:16 test.callgraph.actionlistener.TestActionListener$1:<init>(test.callgraph.actionlistener.TestActionListener) (MA)test.callgraph.actionlistener.TestActionListener$1:actionPerformed(java.awt.event.ActionEvent) 0 1
+M:20 test.callgraph.actionlistener.TestActionListener$2:<init>(test.callgraph.actionlistener.TestActionListener) (MA)test.callgraph.actionlistener.TestActionListener$2:actionPerformed(java.awt.event.ActionEvent) 0 1
 ```
 
 #### 1.1.2.2. 继承父类的情况
@@ -163,7 +163,7 @@ public class MACGFixedService1Parser extends AbstractManualAddCallGraphSimplePar
     @Override
     public String chooseTopSuperOrItfClassFullName() {
         // AbstractFixedService1类的完整类名
-        return "test.call_graph.manual_add_callgraph.fixed.AbstractFixedService1";
+        return "test.callgraph.manual_add_callgraph.fixed.AbstractFixedService1";
     }
 
     @Override
@@ -195,11 +195,11 @@ public class MACGFixedService1Parser extends AbstractManualAddCallGraphSimplePar
 以上类在生成的方法调用关系文件中增加的调用关系如下所示：
 
 ```
-M:162 test.call_graph.manual_add_callgraph.fixed.FixedService1b:invoke() (MA)test.call_graph.manual_add_callgraph.fixed.FixedService1b:execute() 0 1
-M:165 test.call_graph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$1:invoke() (MA)test.call_graph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$1:execute() 0 1
-M:168 test.call_graph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$2:invoke() (MA)test.call_graph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$2:execute() 0 1
-M:171 test.call_graph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$3:invoke() (MA)test.call_graph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$3:execute() 0 1
-M:174 test.call_graph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$4:invoke() (MA)test.call_graph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$4:execute() 0 1
+M:162 test.callgraph.manual_add_callgraph.fixed.FixedService1b:invoke() (MA)test.callgraph.manual_add_callgraph.fixed.FixedService1b:execute() 0 1
+M:165 test.callgraph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$1:invoke() (MA)test.callgraph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$1:execute() 0 1
+M:168 test.callgraph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$2:invoke() (MA)test.callgraph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$2:execute() 0 1
+M:171 test.callgraph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$3:invoke() (MA)test.callgraph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$3:execute() 0 1
+M:174 test.callgraph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$4:invoke() (MA)test.callgraph.manual_add_callgraph.fixed.TestFixedManualAddCallGraph$4:execute() 0 1
 ```
 
 #### 1.1.2.3. 继承父类的情况（方法参数使用范型）
@@ -255,7 +255,7 @@ public class MACGFixedService1Parser extends AbstractManualAddCallGraphSimplePar
     @Override
     public String chooseTopSuperOrItfClassFullName() {
         // AbstractFixedService1类的完整类名
-        return "test.call_graph.manual_add_callgraph.fixed.AbstractFixedService1";
+        return "test.callgraph.manual_add_callgraph.fixed.AbstractFixedService1";
     }
 
     @Override
@@ -287,10 +287,10 @@ public class MACGFixedService1Parser extends AbstractManualAddCallGraphSimplePar
 以上类在生成的方法调用关系文件中增加的调用关系如下所示：
 
 ```
-M:189 test.call_graph.manual_add_callgraph.unfixed.UnfixedService1a:invoke(java.lang.Object,java.util.Collection) (MA)test.call_graph.manual_add_callgraph.unfixed.UnfixedService1a:execute(java.lang.Object,java.util.Collection) 0 1
-M:194 test.call_graph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$1:invoke(java.lang.Object,java.util.Collection) (MA)test.call_graph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$1:execute(java.lang.Object,java.util.Collection) 0 1
-M:197 test.call_graph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$2:invoke(java.lang.Object,java.util.Collection) (MA)test.call_graph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$2:execute(java.lang.Object,java.util.Collection) 0 1
-M:200 test.call_graph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$3:invoke(java.lang.Object,java.util.Collection) (MA)test.call_graph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$3:execute(java.lang.Object,java.util.Collection) 0 1
+M:189 test.callgraph.manual_add_callgraph.unfixed.UnfixedService1a:invoke(java.lang.Object,java.util.Collection) (MA)test.callgraph.manual_add_callgraph.unfixed.UnfixedService1a:execute(java.lang.Object,java.util.Collection) 0 1
+M:194 test.callgraph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$1:invoke(java.lang.Object,java.util.Collection) (MA)test.callgraph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$1:execute(java.lang.Object,java.util.Collection) 0 1
+M:197 test.callgraph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$2:invoke(java.lang.Object,java.util.Collection) (MA)test.callgraph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$2:execute(java.lang.Object,java.util.Collection) 0 1
+M:200 test.callgraph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$3:invoke(java.lang.Object,java.util.Collection) (MA)test.callgraph.manual_add_callgraph.unfixed.TestUnfixedManualAddCallGraph$3:execute(java.lang.Object,java.util.Collection) 0 1
 ```
 
 # 2. java-all-call-graph提供的扩展功能

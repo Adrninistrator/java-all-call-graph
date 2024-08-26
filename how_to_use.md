@@ -10,52 +10,9 @@
 
 若需要通过源码启动，需要安装Gradle
 
-# 2. 通过源码启动
+# 2. 通过源码执行
 
-通过源码启动时，可以使用测试代码进行功能验证
-
-以下使用Java代码中指定的参数配置，与通过配置文件配置的效果一样
-
-相关的参数定义可参考以下类
-
-```
-com.adrninistrator.jacg.common.enums.ConfigKeyEnum
-com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum
-com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum
-com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum
-```
-
-- 编译测试代码
-
-在项目根目录执行以下命令
-
-```
-gradlew test_gen_jar
-```
-
-- 解析测试代码并将结果写入数据库
-
-执行以下类
-
-```
-test.runbycode.TestRBC0RunnerWriteDb
-```
-
-- 生成向上的方法完整调用链
-
-执行以下类
-
-```
-test.runbycode.TestRBCRunnerGenAllGraph4Callee
-```
-
-- 生成向下的方法完整调用链
-
-执行以下类
-
-```
-test.runbycode.TestRBCRunnerGenAllGraph4Caller
-```
+参考[通过源码执行](custom_development.md)的相关内容
 
 # 3. 引入组件
 
