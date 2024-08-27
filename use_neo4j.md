@@ -26,9 +26,13 @@ username=xxx
 password=xxx
 ```
 
-# 4. 解析数据并导入Neo4j
+# 4. 解析数据并将结果写入Neo4j
 
-参考 test.neo4j.runner.Test0Neo4jRunnerWriteDb 类
+参考 test.neo4j.runner.Test0WriteData2Neo4j 类
+
+# 2. 解析数据并将结果写入Neo4j及数据库
+
+参考 test.neo4j.runner.Test0WriteData2Neo4jAndDb 类
 
 # 5. 读取Neo4j生成向下的完整方法调用链
 

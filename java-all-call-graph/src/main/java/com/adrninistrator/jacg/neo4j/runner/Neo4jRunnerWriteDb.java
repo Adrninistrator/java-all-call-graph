@@ -200,11 +200,12 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
         // 创建索引
         createIndexes();
 
-        if (!writeDbFlag) {
+        if (!writeDbFlag || javaCGOutputInfo == null) {
             return;
         }
         // 将数据写入数据库
         RunnerWriteDb runnerWriteDb = new RunnerWriteDb(configureWrapper);
+        runnerWriteDb.configSkipCallJavaCG(javaCGOutputInfo, currentOutputDirPath);
         if (!runnerWriteDb.run()) {
             this.setSomeTaskFail(true);
         }

@@ -374,8 +374,10 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
-        // 打印重复的类名
-        printDuplicateClasses();
+        if (!skipCallJavaCG) {
+            // 打印重复的类名
+            printDuplicateClasses();
+        }
 
         if (useH2Db) {
             // 显示H2数据库JDBC URL

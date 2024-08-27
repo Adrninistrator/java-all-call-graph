@@ -597,3 +597,7 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 ## 1.21. (2.0.6)临时说明
 
 支持将代码解析数据写入Neo4j时同时写入数据库中
+
+## 1.22. (2.0.7)临时说明
+
+同上
