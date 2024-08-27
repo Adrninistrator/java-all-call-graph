@@ -72,6 +72,7 @@ import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
+import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
 import com.adrninistrator.javacg.util.JavaCGFileUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -113,6 +114,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
     // 写数据库次数
     private int writeDbTimes = 0;
+
+    // 跳过调用java-callgraph2的步骤
+    private boolean skipCallJavaCG = false;
 
     public RunnerWriteDb() {
         super();
@@ -222,9 +226,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             }
         }
 
-        // 调用java-callgraph2生成jar包的方法调用关系
-        if (!callJavaCallGraph2(jarPathList)) {
-            return false;
+        if (skipCallJavaCG) {
+            logger.info("已配置不调用java-callgraph2生成jar包的方法调用关系");
+        } else {
+            // 调用java-callgraph2生成jar包的方法调用关系
+            if (!callJavaCallGraph2(jarPathList)) {
+                return false;
+            }
         }
 
         // 创建线程，参数固定指定为10，即使用10个线程
@@ -1085,6 +1093,17 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     protected boolean handleDb() {
         // 返回需要操作数据库
         return true;
+    }
+
+    /**
+     * 跳过调用java-callgraph2的步骤
+     *
+     * @param javaCGOutputInfo
+     * @param currentOutputDirPath
+     */
+    public void configSkipCallJavaCG(JavaCGOutputInfo javaCGOutputInfo, String currentOutputDirPath) {
+        this.javaCGOutputInfo = javaCGOutputInfo;
+        this.currentOutputDirPath = currentOutputDirPath;
     }
 
     public boolean isSkipWhenNotModified() {

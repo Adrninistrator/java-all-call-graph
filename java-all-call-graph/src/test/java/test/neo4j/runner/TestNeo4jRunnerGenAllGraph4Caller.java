@@ -6,6 +6,7 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.neo4j.runner.Neo4jRunnerGenAllGraph4Caller;
 import org.junit.Assert;
 import org.junit.Test;
+import test.annotation.JACGExample;
 import test.callgraph.argument.TestArgumentGenerics1;
 import test.callgraph.extendcomplex2.TestUseService;
 import test.callgraph.extendsimple.ChildClassSA1;
@@ -27,6 +28,8 @@ import test.neo4j.base.TestNeo4jBase;
  * @date 2024/7/23
  * @description:
  */
+@JACGExample(title = "根据Neo4j的数据生成向下的方法完整调用链",
+        desc = {})
 public class TestNeo4jRunnerGenAllGraph4Caller extends TestNeo4jBase {
 
     @Test

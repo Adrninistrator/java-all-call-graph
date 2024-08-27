@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import org.junit.Assert;
 import org.junit.Test;
+import test.annotation.JACGExample;
 import test.runbycode.base.TestRunByCodeBase;
 
 /**
@@ -11,6 +12,8 @@ import test.runbycode.base.TestRunByCodeBase;
  * @date 2022/4/20
  * @description:
  */
+@JACGExample(title = "解析代码并将结果写入数据库",
+        desc = {"所有的包名都处理"})
 public class TestRBC0RunnerAllWriteDb extends TestRunByCodeBase {
 
     @Test

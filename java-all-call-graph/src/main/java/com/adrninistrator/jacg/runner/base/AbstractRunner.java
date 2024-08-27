@@ -416,6 +416,14 @@ public abstract class AbstractRunner extends AbstractExecutor {
         return false;
     }
 
+    public boolean isSomeTaskFail() {
+        return someTaskFail;
+    }
+
+    public void setSomeTaskFail(boolean someTaskFail) {
+        this.someTaskFail = someTaskFail;
+    }
+
     /**
      * 获取执行失败的任务信息
      *

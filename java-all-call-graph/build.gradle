@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "2.0.5"
+version = "2.0.6"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -60,7 +60,7 @@ List apache_common = [
 
 List druid = ['com.alibaba:druid:1.2.15']
 
-List mysql = ['com.mysql:mysql-connector-j:8.0.31']
+List mysql = ['com.mysql:mysql-connector-j:8.4.0']
 
 List h2database = ["com.h2database:h2:2.2.220"]
 

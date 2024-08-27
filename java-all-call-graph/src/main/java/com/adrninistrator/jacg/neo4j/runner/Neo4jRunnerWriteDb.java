@@ -50,6 +50,9 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
 
     private final List<String> nodeClassNameList;
 
+    // 写数据库的标志，为true时在将数据写入Neo4j后，还会写入数据库中（默认不写入数据库）
+    private boolean writeDbFlag = false;
+
     public Neo4jRunnerWriteDb(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
         neo4jDbOperWrapper = (Neo4jDbOperWrapper) dbOperWrapper;
@@ -160,7 +163,7 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
                 for (Neo4jIndex neo4jIndex : neo4jIndexes.indexes()) {
                     String propertiesInIndex = JACGNeo4jUtil.formatPropertiesInIndex(neo4jIndex.properties());
                     if (!propertiesSet.add(propertiesInIndex)) {
-                        logger.info("当前节点属性对应的索引已存在，不再创建 {} {}", nodeName, propertiesInIndex);
+                        logger.info("当前节点属性对应的索引已存在，不再创建 {} [{}]", nodeName, propertiesInIndex);
                         continue;
                     }
                     // 创建对应索引
@@ -196,5 +199,21 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
 
         // 创建索引
         createIndexes();
+
+        if (!writeDbFlag) {
+            return;
+        }
+        // 将数据写入数据库
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(configureWrapper);
+        if (!runnerWriteDb.run()) {
+            this.setSomeTaskFail(true);
+        }
+        if (runnerWriteDb.isSomeTaskFail()) {
+            this.setSomeTaskFail(true);
+        }
+    }
+
+    public void setWriteDbFlag(boolean writeDbFlag) {
+        this.writeDbFlag = writeDbFlag;
     }
 }
