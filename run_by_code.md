@@ -42,7 +42,7 @@ test.runbycode.TestRBCRunnerGenAllGraph4Callee
 test.runbycode.TestRBCRunnerGenAllGraph4Caller
 ```
 
-## 3.1. 通过Java代码对配置参数进行设置
+## 2.1. 通过Java代码对配置参数进行设置
 
 支持通过Java代码对配置参数进行设置，可覆盖配置文件中的参数（或仅使用Java代码中设置的参数，不使用配置文件中的参数）
 
@@ -72,13 +72,19 @@ com.adrninistrator.jacg.conf.ConfigureWrapper
 |RunnerGenAllGraph4Caller|run()|生成指定方法向下完整调用链|
 |FindCallStackTrace|find(boolean order4ee)|生成包含关键字的所有方法到起始方法之间的调用链|
 
-## 3.2. 示例
+## 2.2. 示例
 
 以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中创建了ConfigureWrapper对象，并在该类的子类中使用ConfigureWrapper对象调用相关的方法。
 
 可参考`test.runbycode.config.TestConfigGenerator`类中通过代码进行配置的方式
 
-### 3.2.1. 设置_jacg_config/config.properties配置文件参数
+### 2.2.1. 配置文件说明
+
+参考[通过代码执行的其他示例](run_by_code_example.md)，该文档中有每个配置文件的简单说明，以及对应的枚举信息。每个配置文件的详细说明可打开配置文件查看
+
+通过枚举修改配置的方式与修改配置文件的效果相同
+
+### 2.2.2. 设置_jacg_config/config.properties配置文件参数
 
 ```java
 configureWrapper.setConfig(ConfigKeyEnum configKeyEnum, String value);
@@ -96,7 +102,7 @@ ConfigKeyEnum枚举类中定义了_jacg_config/config.properties配置文件中�
 configureWrapper.setConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
 ```
 
-### 3.2.2. 设置_jacg_config、_jacg_extensions目录配置文件参数
+### 2.2.3. 设置_jacg_config、_jacg_extensions目录配置文件参数
 
 ```java
 configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
@@ -115,7 +121,7 @@ configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_C
         "java.")));
 ```
 
-### 3.2.3. 设置_jacg_find_keyword目录配置文件参数
+### 2.2.4. 设置_jacg_find_keyword目录配置文件参数
 
 ```java
 configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList);
