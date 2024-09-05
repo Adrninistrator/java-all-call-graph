@@ -4,9 +4,9 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ExtendsImpl;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.Set;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_EXTENDS_IMPL,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_EXTENDS_IMPL,
         minColumnNum = 4,
         maxColumnNum = 4,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_EXTENDS_IMPL
@@ -54,13 +54,13 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
         }
 
         // 生成下一个序号，从0开始
-        Integer seq = genNextSeq(className + JavaCGConstants.FLAG_COLON + type);
+        Integer seq = genNextSeq(className + JavaCG2Constants.FLAG_COLON + type);
         // 判断当前类是否存在子类或子接口
-        int existsDownwardClasses = JavaCGYesNoEnum.parseIntValue(superClassOrInterfaceNameSet.contains(className));
+        int existsDownwardClasses = JavaCG2YesNoEnum.parseIntValue(superClassOrInterfaceNameSet.contains(className));
 
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String simpleUpwardClassName = dbOperWrapper.querySimpleClassName(upwardClassName);
-        if (JavaCGConstants.FILE_KEY_EXTENDS.equals(type)) {
+        if (JavaCG2Constants.FILE_KEY_EXTENDS.equals(type)) {
             // 记录子类及对应的父类唯一类名
             extendsSimpleClassNameMap.put(simpleClassName, simpleUpwardClassName);
         }

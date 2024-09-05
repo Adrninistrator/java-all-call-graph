@@ -30,14 +30,14 @@ import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SetMethodAssignInfo;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGFieldRelationshipTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.dto.accessflag.JavaCGAccessFlags;
-import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
-import com.adrninistrator.javacg.dto.stack.ListAsStack;
-import com.adrninistrator.javacg.util.JavaCGByteCodeUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2FieldRelationshipTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.dto.accessflag.JavaCG2AccessFlags;
+import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
+import com.adrninistrator.javacg2.dto.stack.ListAsStack;
+import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +109,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
         return true;
     }
 
-    public boolean handle(String javaCgOutputPath) {
+    public boolean handle(String javaCG2OutputPath) {
         long startTime = System.currentTimeMillis();
         logger.info("处理通过方法调用传递的get/set方法关联关系-开始处理");
 
@@ -119,9 +119,9 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             return false;
         }
         try {
-            writeDbHandler4SetMethodAssignInfo.beforeHandle(javaCgOutputPath);
+            writeDbHandler4SetMethodAssignInfo.beforeHandle(javaCG2OutputPath);
             // 分页查询并处理
-            return QueryByPageHandler.queryAndHandle(this, JavaCGConstants.RECORD_ID_MIN_BEFORE);
+            return QueryByPageHandler.queryAndHandle(this, JavaCG2Constants.RECORD_ID_MIN_BEFORE);
         } catch (Exception e) {
             logger.error("出现异常 ", e);
             return false;
@@ -136,7 +136,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
 
     // 执行处理
     private void doHandle(WriteDbData4ClassInfo classInfo) {
-        JavaCGAccessFlags accessFlags = new JavaCGAccessFlags(classInfo.getAccessFlags());
+        JavaCG2AccessFlags accessFlags = new JavaCG2AccessFlags(classInfo.getAccessFlags());
         if (accessFlags.isEnum() || accessFlags.isInterface() || accessFlags.isAnnotation()) {
             // 对于枚举、接口、注解，跳过
             return;
@@ -144,26 +144,26 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
 
         // 查询当前类及超类中的set方法
         List<BaseWriteDbData4GetSetMethod> setMethodList = getSetMethodHandler.queryGetSetMethodByClassNameSuper(false, classInfo.getClassName());
-        if (JavaCGUtil.isCollectionEmpty(setMethodList)) {
+        if (JavaCG2Util.isCollectionEmpty(setMethodList)) {
             return;
         }
 
         for (BaseWriteDbData4GetSetMethod setMethod : setMethodList) {
-            if (!JavaCGConstants.FILE_KEY_CATEGORY_JDK.equals(setMethod.getFieldCategory())) {
+            if (!JavaCG2Constants.FILE_KEY_CATEGORY_JDK.equals(setMethod.getFieldCategory())) {
                 // 假如set方法对应字段类型不是JDK中的类型，则跳过
                 continue;
             }
 
             // 查询set方法的被调用情况
             List<WriteDbData4MethodCall> setMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(setMethod.getFullMethod());
-            if (JavaCGUtil.isCollectionEmpty(setMethodCallList)) {
+            if (JavaCG2Util.isCollectionEmpty(setMethodCallList)) {
                 // set方法未被调用，不向dto的set方法被调用时的赋值信息表写入数据，因为当set方法在父类中时，会被子类写入多次，属于重复数据
                 continue;
             }
             for (WriteDbData4MethodCall setMethodCall : setMethodCallList) {
                 // 查询set方法被调用时的参数1信息解析后的数据
                 List<AbstractMethodCallInfoParsed> methodCallInfoParsedList = methodCallInfoHandler.queryMethodCallInfoParsedObjArg(setMethodCall.getCallId(),
-                        JavaCGConstants.METHOD_CALL_ARGUMENTS_START_SEQ, false);
+                        JavaCG2Constants.METHOD_CALL_ARGUMENTS_START_SEQ, false);
 
                 // 查询set方法对应的直接赋值字段关联关系
                 List<WriteDbData4FieldRelationship> fieldRelationshipList = fieldRelationshipHandler.queryDirectlyRelationshipBySetMethodCallId(setMethodCall.getCallId());
@@ -174,7 +174,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
                 if (methodCallInfoParsedList.size() <= fieldRelationshipList.size()) {
                     // set方法被调用时的参数1信息解析后的数据数量，小于等于set方法对应的字段关联关系数量，说明set方法都使用了get方法返回值作为参数
                     // 向dto的set方法被调用时的赋值信息表写入数据
-                    insertSetMethodAssignInfo(null, setMethodCall.getCallId(), setMethod, setMethodCall, new JavaCGCounter(0), 0, "", SetMethodAssignFlagEnum.SMAFE_GET, null,
+                    insertSetMethodAssignInfo(null, setMethodCall.getCallId(), setMethod, setMethodCall, new JavaCG2Counter(0), 0, "", SetMethodAssignFlagEnum.SMAFE_GET, null,
                             null);
                     continue;
                 }
@@ -204,7 +204,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
          */
         methodCallPassedFRStack.push(new MethodCallPassedFRNode(setMethodCall, methodCallInfoParsedList));
         // 代表当前处理的路径序号，初始为0
-        JavaCGCounter seq = new JavaCGCounter(0);
+        JavaCG2Counter seq = new JavaCG2Counter(0);
         /*
             记录已经写入数据库的seq+step
             key:    seq
@@ -255,7 +255,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
      */
     private void handleOneMethodCallInfoParsed(Map<Integer, Set<Integer>> addedSuperSeqStepMap, int setMethodCallId, BaseWriteDbData4GetSetMethod setMethod,
                                                ListAsStack<MethodCallPassedFRNode> methodCallPassedFRStack, WriteDbData4MethodCall currentMethodCall,
-                                               JavaCGCounter seq, int step, MethodCallPassedFRNode currentNode, Set<Integer> fieldRelationshipGetMethodCallIdSet) {
+                                               JavaCG2Counter seq, int step, MethodCallPassedFRNode currentNode, Set<Integer> fieldRelationshipGetMethodCallIdSet) {
         AbstractMethodCallInfoParsed currentMethodCallInfoParsed = currentNode.getCurrentMethodCallInfoParsed();
 //        logger.info("handleOneMethodCallInfoParsed {} {} {} {} {}", setMethodCallId, seq, step, currentMethodCall, currentMethodCallInfoParsed);
         // 检查是否需要终止步骤
@@ -299,7 +299,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
      * @return true: 继续处理 false: 当前节点不处理
      */
     private boolean handleUpperStackNode(Map<Integer, Set<Integer>> addedSuperSeqStepMap, int setMethodCallId, BaseWriteDbData4GetSetMethod setMethod,
-                                         ListAsStack<MethodCallPassedFRNode> methodCallPassedFRStack, JavaCGCounter seq, WriteDbData4MethodCall currentMethodCall) {
+                                         ListAsStack<MethodCallPassedFRNode> methodCallPassedFRStack, JavaCG2Counter seq, WriteDbData4MethodCall currentMethodCall) {
         if (seq.getCount() == 0 && methodCallPassedFRStack.getHead() == 0) {
             // 当序号等于0，且处理栈中栈底元素时，不需要后续处理
             return true;
@@ -342,7 +342,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
     private void handleSetMethodWithMethodCallReturn(Map<Integer, Set<Integer>> addedSuperSeqStepMap, int setMethodCallId, BaseWriteDbData4GetSetMethod setMethod,
                                                      ListAsStack<MethodCallPassedFRNode> methodCallPassedFRStack,
                                                      MethodCallInfoParsed4MCReturnCallId methodCallInfoParsed4MCReturnCallId, MethodCallPassedFRNode currentNode,
-                                                     JavaCGCounter seq, int step) {
+                                                     JavaCG2Counter seq, int step) {
         // 查询当前的方法调用
         WriteDbData4MethodCall currentMethodCall = methodCallHandler.queryMethodCallByCallId(methodCallInfoParsed4MCReturnCallId.getMethodCallId());
         String currentCalleeClassName = JACGClassMethodUtil.getClassNameFromMethod(currentMethodCall.getCalleeFullMethod());
@@ -356,8 +356,8 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
                 // set方法的参数的来源属于get方法
                 // 判断栈中当前处理的各层节点的方法调用解析后信息是否有属于等值转换的情况
                 boolean equivalentConversionFlag = checkStackNodeEQC(methodCallPassedFRStack);
-                JavaCGFieldRelationshipTypeEnum relationshipTypeEnum = equivalentConversionFlag ? JavaCGFieldRelationshipTypeEnum.FRTE_METHOD_CALL_PASSED_EQC :
-                        JavaCGFieldRelationshipTypeEnum.FRTE_METHOD_CALL_PASSED;
+                JavaCG2FieldRelationshipTypeEnum relationshipTypeEnum = equivalentConversionFlag ? JavaCG2FieldRelationshipTypeEnum.FRTE_METHOD_CALL_PASSED_EQC :
+                        JavaCG2FieldRelationshipTypeEnum.FRTE_METHOD_CALL_PASSED;
                 // 人工添加字段关联关系
                 Integer fldRelationshipId = manualAddFieldRelationshipHandler.manualAddFieldRelationship(currentMethodCall.getCallerFullMethod(),
                         currentMethodCall.getCallerLineNumber(), currentMethodCall.getCallId(), setMethodCallId, currentGetMethod.getClassName(),
@@ -374,11 +374,11 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
         List<AbstractMethodCallInfoParsed> add2StackMethodCallInfoParsedList = new ArrayList<>();
         // 查询set方法参数对应方法返回的方法参数序号
         List<WriteDbData4MethodReturnArgSeq> methodReturnArgSeqList = methodArgReturnHandler.queryMethodReturnArgSeq(currentMethodCall.getCalleeFullMethod());
-        if (!JavaCGUtil.isCollectionEmpty(methodReturnArgSeqList)) {
+        if (!JavaCG2Util.isCollectionEmpty(methodReturnArgSeqList)) {
             for (WriteDbData4MethodReturnArgSeq setMethodArgMethodArgSeq : methodReturnArgSeqList) {
                 // set方法参数来源为方法调用返回值，查询被调用方法返回对应的方法参数
                 List<AbstractMethodCallInfoParsed> setMethodArgMethodCallInfoParsed = methodCallInfoHandler.queryMethodCallInfoParsedObjArg(currentMethodCall.getCallId(),
-                        setMethodArgMethodArgSeq.getReturnArgSeq(), JavaCGYesNoEnum.isYes(setMethodArgMethodArgSeq.getEquivalentConversion()));
+                        setMethodArgMethodArgSeq.getReturnArgSeq(), JavaCG2YesNoEnum.isYes(setMethodArgMethodArgSeq.getEquivalentConversion()));
                 if (setMethodArgMethodCallInfoParsed != null) {
                     add2StackMethodCallInfoParsedList.addAll(setMethodArgMethodCallInfoParsed);
                 }
@@ -387,10 +387,10 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
 
         // 查询set方法参数对应方法返回的方法调用ID
         List<WriteDbData4MethodReturnCallId> methodReturnCallIdList = methodArgReturnHandler.queryMethodReturnCallId(currentMethodCall.getCalleeFullMethod());
-        if (!JavaCGUtil.isCollectionEmpty(methodReturnCallIdList)) {
+        if (!JavaCG2Util.isCollectionEmpty(methodReturnCallIdList)) {
             for (WriteDbData4MethodReturnCallId methodReturnCallId : methodReturnCallIdList) {
                 MethodCallInfoParsed4MCReturnCallId methodCallInfoParsed =
-                        new MethodCallInfoParsed4MCReturnCallId(JavaCGYesNoEnum.isYes(methodReturnCallId.getEquivalentConversion()));
+                        new MethodCallInfoParsed4MCReturnCallId(JavaCG2YesNoEnum.isYes(methodReturnCallId.getEquivalentConversion()));
                 methodCallInfoParsed.setMethodCallId(methodReturnCallId.getReturnCallId());
                 add2StackMethodCallInfoParsedList.add(methodCallInfoParsed);
             }
@@ -400,7 +400,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             // 查询set方法参数对应的方法调用返回的调用信息为空
             SetMethodAssignFlagEnum setMethodAssignFlagEnum = SetMethodAssignFlagEnum.SMAFE_MC_NO_RETURN;
             Integer classAccessFlag = classInfoHandler.queryClassAccessFlag(currentCalleeClassName);
-            if (classAccessFlag != null && JavaCGByteCodeUtil.isEnumFlag(classAccessFlag)) {
+            if (classAccessFlag != null && JavaCG2ByteCodeUtil.isEnumFlag(classAccessFlag)) {
                 setMethodAssignFlagEnum = SetMethodAssignFlagEnum.SMAFE_MC_ENUM;
             }
             // 向dto的set方法被调用时的赋值信息表写入数据
@@ -437,11 +437,11 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
     // 处理set方法，参数为调用方法参数
     private void handleSetMethodWithMethodArg(Map<Integer, Set<Integer>> addedSuperSeqStepMap, int setMethodCallId, BaseWriteDbData4GetSetMethod setMethod,
                                               ListAsStack<MethodCallPassedFRNode> methodCallPassedFRStack, WriteDbData4MethodCall currentMethodCall,
-                                              MethodCallInfoParsed4MethodArg methodCallInfoParsed4MethodArg, MethodCallPassedFRNode currentNode, JavaCGCounter seq,
+                                              MethodCallInfoParsed4MethodArg methodCallInfoParsed4MethodArg, MethodCallPassedFRNode currentNode, JavaCG2Counter seq,
                                               int step) {
         // 查询当前方法的被调用情况
         List<WriteDbData4MethodCall> callerMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(currentMethodCall.getCallerFullMethod());
-        if (JavaCGUtil.isCollectionEmpty(callerMethodCallList)) {
+        if (JavaCG2Util.isCollectionEmpty(callerMethodCallList)) {
             // 向dto的set方法被调用时的赋值信息表写入数据
             insertSetMethodAssignInfo(addedSuperSeqStepMap, setMethodCallId, setMethod, currentMethodCall, seq, step, currentMethodCall.getCallerFullMethod(),
                     SetMethodAssignFlagEnum.SMAFE_ARG_NO_MC, null, currentNode);
@@ -455,7 +455,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             // set方法参数来源为方法参数，查询对应方法对应参数被调用时的信息
             List<AbstractMethodCallInfoParsed> methodCallInfoParsedList = methodCallInfoHandler.queryMethodCallInfoParsedObjArg(callerMethodCall.getCallId(),
                     methodCallInfoParsed4MethodArg.getMethodArgSeq(), methodCallInfoParsed4MethodArg.isEquivalentConversion());
-            if (!JavaCGUtil.isCollectionEmpty(methodCallInfoParsedList)) {
+            if (!JavaCG2Util.isCollectionEmpty(methodCallInfoParsedList)) {
                 for (AbstractMethodCallInfoParsed methodCallInfoParsed : methodCallInfoParsedList) {
                     allMethodCallList.add(callerMethodCall);
                     allMethodCallInfoParsedList.add(methodCallInfoParsed);
@@ -489,7 +489,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
      * @return true: 需要终止步骤 false: 不终止步骤
      */
     private boolean checkTerminateStep(Map<Integer, Set<Integer>> addedSuperSeqStepMap, int setMethodCallId, BaseWriteDbData4GetSetMethod setMethod,
-                                       WriteDbData4MethodCall currentMethodCall, MethodCallPassedFRNode currentNode, JavaCGCounter seq, int step,
+                                       WriteDbData4MethodCall currentMethodCall, MethodCallPassedFRNode currentNode, JavaCG2Counter seq, int step,
                                        AbstractMethodCallInfoParsed currentMethodCallInfoParsed) {
         String assignInfo = null;
         SetMethodAssignFlagEnum setMethodAssignFlagEnum = null;
@@ -519,7 +519,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
                                            int setMethodCallId,
                                            BaseWriteDbData4GetSetMethod setMethod,
                                            WriteDbData4MethodCall currMethodCall,
-                                           JavaCGCounter seq,
+                                           JavaCG2Counter seq,
                                            int step,
                                            String assignInfo,
                                            SetMethodAssignFlagEnum setMethodAssignFlagEnum,
@@ -552,11 +552,11 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
         writeDbData4SetMethodAssignInfo.setCalleeFullMethod(currMethodCall == null ? "" : currMethodCall.getCalleeFullMethod());
         writeDbData4SetMethodAssignInfo.setSetMethodHash(setMethod.getMethodHash());
         writeDbData4SetMethodAssignInfo.setSetFullMethod(setMethod.getFullMethod());
-        writeDbData4SetMethodAssignInfo.setSetMethodInSuper(JavaCGYesNoEnum.parseIntValue(setMethod.isInSuperClass()));
+        writeDbData4SetMethodAssignInfo.setSetMethodInSuper(JavaCG2YesNoEnum.parseIntValue(setMethod.isInSuperClass()));
         writeDbData4SetMethodAssignInfo.setFlag(setMethodAssignFlagEnum.getFlag());
         writeDbData4SetMethodAssignInfo.setFlagDesc(setMethodAssignFlagEnum.getDesc());
         writeDbData4SetMethodAssignInfo.setAssignInfo(assignInfo);
-        writeDbData4SetMethodAssignInfo.setEquivalentConversion(JavaCGYesNoEnum.parseIntValue(equivalentConversion));
+        writeDbData4SetMethodAssignInfo.setEquivalentConversion(JavaCG2YesNoEnum.parseIntValue(equivalentConversion));
 
 //        logger.info("### {}", writeDbData4SetMethodAssignInfo);
         writeDbHandler4SetMethodAssignInfo.addData(writeDbData4SetMethodAssignInfo);

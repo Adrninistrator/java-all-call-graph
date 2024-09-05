@@ -17,9 +17,9 @@ import com.adrninistrator.jacg.handler.jarinfo.JarInfoHandler;
 import com.adrninistrator.jacg.neo4j.handler.extendsimpl.Neo4jExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author adrninistrator
@@ -66,6 +67,8 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
     // 对解析的jar包及目录信息处理的类
     protected JarInfoHandler jarInfoHandler;
+
+    private final AtomicBoolean runFlag = new AtomicBoolean(false);
 
     public AbstractRunner() {
         this(new ConfigureWrapper(false));
@@ -112,10 +115,8 @@ public abstract class AbstractRunner extends AbstractExecutor {
      * 打印当前使用的配置信息
      */
     protected void printAllConfigInfo() {
-        String configMdFilePath = JavaCGUtil.addSeparator4FilePath(currentOutputDirPath) + JACGConstants.FILE_JACG_ALL_CONFIG_MD;
-        logger.info("{} 全部的配置参数信息保存到以下文件\n{}", currentSimpleClassName, configMdFilePath);
         // 打印所有的配置参数信息
-        configureWrapper.printConfigInfo(currentSimpleClassName, configMdFilePath, true);
+        configureWrapper.printAllConfigInfo(currentSimpleClassName, currentOutputDirPath);
     }
 
     /**
@@ -124,6 +125,11 @@ public abstract class AbstractRunner extends AbstractExecutor {
      * @return
      */
     public boolean run() {
+        if (!runFlag.compareAndSet(false, true)) {
+            logger.error("当前类的实例在创建后只能使用一次，假如需要再次执行，请创建新的实例 {}", currentSimpleClassName);
+            return false;
+        }
+
         try {
             logger.info("{} 开始执行", currentSimpleClassName);
             long startTime = System.currentTimeMillis();
@@ -235,7 +241,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
             try (FileChannel channel = FileChannel.open(h2DbFile.toPath(), StandardOpenOption.WRITE)) {
                 FileLock fileLock = channel.tryLock();
                 if (fileLock == null) {
-                    logger.error("{} H2数据库文件无法写入，请先关闭H2数据库工具打开的H2数据库文件 {}", currentSimpleClassName, JavaCGFileUtil.getCanonicalPath(h2DbFile));
+                    logger.error("{} H2数据库文件无法写入，请先关闭H2数据库工具打开的H2数据库文件 {}", currentSimpleClassName, JavaCG2FileUtil.getCanonicalPath(h2DbFile));
                     return false;
                 }
 
@@ -244,11 +250,11 @@ public abstract class AbstractRunner extends AbstractExecutor {
                 return true;
             } catch (OverlappingFileLockException e) {
                 // 某些情况下会出现以上异常，当作正常处理
-                logger.warn("{} 检查H2数据库文件是否可以写入时，出现重复对文件加锁的异常，当作正常处理 {} {} {}", currentSimpleClassName, JavaCGFileUtil.getCanonicalPath(h2DbFile),
+                logger.warn("{} 检查H2数据库文件是否可以写入时，出现重复对文件加锁的异常，当作正常处理 {} {} {}", currentSimpleClassName, JavaCG2FileUtil.getCanonicalPath(h2DbFile),
                         e.getClass().getName(), e.getMessage());
                 return true;
             } catch (Exception e) {
-                logger.error("{} 检查H2数据库文件是否可以写入失败，请重试 {} ", currentSimpleClassName, JavaCGFileUtil.getCanonicalPath(h2DbFile), e);
+                logger.error("{} 检查H2数据库文件是否可以写入失败，请重试 {} ", currentSimpleClassName, JavaCG2FileUtil.getCanonicalPath(h2DbFile), e);
                 return false;
             }
         }
@@ -290,14 +296,14 @@ public abstract class AbstractRunner extends AbstractExecutor {
     protected Map<String, WriteDbData4JarInfo> queryJarFileInfo() {
         // 查询所有的jar包和目录信息
         List<WriteDbData4JarInfo> list = jarInfoHandler.queryAllJarInfo();
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             logger.error("查询到jar包信息为空");
             return null;
         }
 
         Map<String, WriteDbData4JarInfo> rtnMap = new HashMap<>(list.size());
         for (WriteDbData4JarInfo writeDbData4JarInfo : list) {
-            if (!JavaCGConstants.FILE_KEY_RESULT_DIR_INFO_PREFIX.equals(writeDbData4JarInfo.getJarType())) {
+            if (!JavaCG2Constants.FILE_KEY_RESULT_DIR_INFO_PREFIX.equals(writeDbData4JarInfo.getJarType())) {
                 // 跳过解析结果文件保存目录
                 rtnMap.put(writeDbData4JarInfo.getJarPathHash(), writeDbData4JarInfo);
             }
@@ -314,21 +320,14 @@ public abstract class AbstractRunner extends AbstractExecutor {
     protected boolean checkSomeJarModified(List<String> jarPathList) {
         // 查询jar包与目录信息
         Map<String, WriteDbData4JarInfo> jarInfoMap = queryJarFileInfo();
-        if (JavaCGUtil.isMapEmpty(jarInfoMap)) {
+        if (JavaCG2Util.isMapEmpty(jarInfoMap)) {
             logger.info("{} 表的内容为空", DbTableInfoEnum.DTIE_JAR_INFO.getTableNameKeyword());
             return true;
         }
 
         // 不检查配置文件中指定的jar包与数据库表中的数量，因为配置文件中可能指定目录，数据库表中保存的是目录中的jar包
-
         for (String jarPath : jarPathList) {
-            if (!JACGFileUtil.isFileExists(jarPath)) {
-                // 非文件则不检查，对于 RunnerWriteDb 类调用当前方法时，已经提前检查过传入的 jarPathList 都是文件，没有影响
-                logger.info("非文件，不检查HASH {}", jarPath);
-                continue;
-            }
-
-            String jarFilePath = JavaCGFileUtil.getCanonicalPath(jarPath);
+            String jarFilePath = JavaCG2FileUtil.getCanonicalPath(jarPath);
             if (jarFilePath == null) {
                 logger.error("获取文件路径失败 {}", jarPath);
                 return true;
@@ -337,11 +336,12 @@ public abstract class AbstractRunner extends AbstractExecutor {
             String jarPathHash = JACGUtil.genHashWithLen(jarFilePath);
             WriteDbData4JarInfo jarInfo = jarInfoMap.get(jarPathHash);
             if (jarInfo == null) {
-                logger.info("指定的jar包未导入数据库中 {} {}", jarPath, jarFilePath);
+                logger.error("指定的jar包或目录未导入数据库中 {} {}", jarPath, jarFilePath);
                 return true;
             }
 
-            if (checkJarFileModified(jarFilePath, jarInfo)) {
+            if (JACGFileUtil.isFileExists(jarPath) && checkJarFileModified(jarFilePath, jarInfo)) {
+                // 对文件检查HASH
                 logger.info("指定的jar包文件内容有变化 {} {}", jarPath, jarFilePath);
                 return true;
             }
@@ -392,7 +392,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
         List<String> allowedClassPrefixListInDb = dbOperator.queryListOneColumn(sql, String.class);
         // 获取当前指定的配置
         Set<String> allowedClassPrefixSetInConfig = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true);
-        if (JavaCGUtil.isCollectionEmpty(allowedClassPrefixListInDb) && allowedClassPrefixSetInConfig.isEmpty()) {
+        if (JavaCG2Util.isCollectionEmpty(allowedClassPrefixListInDb) && allowedClassPrefixSetInConfig.isEmpty()) {
             return false;
         }
 

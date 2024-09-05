@@ -34,6 +34,11 @@ public enum ConfigDbKeyEnum implements MainConfigInterface {
     }
 
     @Override
+    public String getEnumName() {
+        return name();
+    }
+
+    @Override
     public String getKey() {
         return key;
     }
@@ -66,14 +71,5 @@ public enum ConfigDbKeyEnum implements MainConfigInterface {
     @Override
     public String getFileName() {
         return InputDirEnum.IDE_CONFIG.getDirName() + "/config_db.properties";
-    }
-
-    public static String getDescFromKey(String key) {
-        for (ConfigDbKeyEnum configDbKeyEnum : ConfigDbKeyEnum.values()) {
-            if (configDbKeyEnum.getKey().equals(key)) {
-                return configDbKeyEnum.getDesc();
-            }
-        }
-        return "";
     }
 }

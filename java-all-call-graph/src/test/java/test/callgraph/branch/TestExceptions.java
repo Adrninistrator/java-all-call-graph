@@ -1,6 +1,6 @@
 package test.callgraph.branch;
 
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -539,7 +539,7 @@ public class TestExceptions {
 
     public static void test6() {
         try {
-            throw new JavaCGRuntimeException("111");
+            throw new JavaCG2RuntimeException("111");
         } finally {
             System.getProperty("222");
         }

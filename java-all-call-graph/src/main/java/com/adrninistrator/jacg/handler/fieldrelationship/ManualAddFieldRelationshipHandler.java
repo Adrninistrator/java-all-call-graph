@@ -16,10 +16,10 @@ import com.adrninistrator.jacg.handler.dto.field.JACGFieldMethodInfo;
 import com.adrninistrator.jacg.handler.methodcall.BaseMethodCallByEEDetailHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGFieldRelationshipTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2FieldRelationshipTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,7 +183,7 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
         Map<String, JACGFieldMethodInfo> getFieldBehaviorInfoMap = chooseAllFieldMethodInfo(getClassName, true);
         Map<String, JACGFieldMethodInfo> setFieldBehaviorInfoMap = chooseAllFieldMethodInfo(setClassName, false);
 
-        if (JavaCGUtil.isMapEmpty(getFieldBehaviorInfoMap) || JavaCGUtil.isMapEmpty(setFieldBehaviorInfoMap)) {
+        if (JavaCG2Util.isMapEmpty(getFieldBehaviorInfoMap) || JavaCG2Util.isMapEmpty(setFieldBehaviorInfoMap)) {
             logger.error("从指定类中未获取到字段信息 {} {}", getClassName, setClassName);
             return;
         }
@@ -199,7 +199,7 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
             JACGFieldMethodInfo setFieldMethodInfo = setEntry.getValue();
             // 向通过get/set方法关联的字段关系表插入数据，用于BeanUtil方法
             addFieldRelationship4BeanUtil(methodCall.getCallerFullMethod(), methodCall.getCallerLineNumber(), getClassName, getFieldMethodInfo.getMethodName(), setClassName,
-                    setFieldMethodInfo.getMethodName(), JavaCGFieldRelationshipTypeEnum.FRTE_BEAN_UTIL, 0, methodCall.getCallId(), methodCall.getCalleeFullMethod());
+                    setFieldMethodInfo.getMethodName(), JavaCG2FieldRelationshipTypeEnum.FRTE_BEAN_UTIL, 0, methodCall.getCallId(), methodCall.getCalleeFullMethod());
         }
     }
 
@@ -219,9 +219,9 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
      * @return
      */
     public Integer manualAddFieldRelationship(String callerFullMethod, int callerLineNumber, int getMethodCallId, int setMethodCallId, String getClassName, String getMethodName
-            , String setClassName, String setMethodName, JavaCGFieldRelationshipTypeEnum fieldRelationshipTypeEnum, int relationshipFlags) {
+            , String setClassName, String setMethodName, JavaCG2FieldRelationshipTypeEnum fieldRelationshipTypeEnum, int relationshipFlags) {
         return doAddFieldRelationship(callerFullMethod, callerLineNumber, getMethodCallId, setMethodCallId, getClassName, getMethodName, setClassName, setMethodName,
-                fieldRelationshipTypeEnum, relationshipFlags, JavaCGConstants.RECORD_ID_MIN_BEFORE, null);
+                fieldRelationshipTypeEnum, relationshipFlags, JavaCG2Constants.RECORD_ID_MIN_BEFORE, null);
     }
 
     /**
@@ -240,9 +240,9 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
      * @return
      */
     public Integer addFieldRelationship4BeanUtil(String callerFullMethod, int callerLineNumber, String getClassName, String getMethodName, String setClassName,
-                                                 String setMethodName, JavaCGFieldRelationshipTypeEnum fieldRelationshipTypeEnum, int relationshipFlags, int beanUtilCallId,
+                                                 String setMethodName, JavaCG2FieldRelationshipTypeEnum fieldRelationshipTypeEnum, int relationshipFlags, int beanUtilCallId,
                                                  String beanUtilMethod) {
-        return doAddFieldRelationship(callerFullMethod, callerLineNumber, JavaCGConstants.RECORD_ID_MIN_BEFORE, JavaCGConstants.RECORD_ID_MIN_BEFORE, getClassName, getMethodName
+        return doAddFieldRelationship(callerFullMethod, callerLineNumber, JavaCG2Constants.RECORD_ID_MIN_BEFORE, JavaCG2Constants.RECORD_ID_MIN_BEFORE, getClassName, getMethodName
                 , setClassName, setMethodName, fieldRelationshipTypeEnum, relationshipFlags, beanUtilCallId, beanUtilMethod);
     }
 
@@ -263,7 +263,7 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
      */
     private Integer doAddFieldRelationship(String callerFullMethod, int callerLineNumber, int getMethodCallId, int setMethodCallId,
                                            String getClassName, String getMethodName, String setClassName, String setMethodName,
-                                           JavaCGFieldRelationshipTypeEnum fieldRelationshipTypeEnum, int relationshipFlags, int beanUtilCallId, String beanUtilMethod) {
+                                           JavaCG2FieldRelationshipTypeEnum fieldRelationshipTypeEnum, int relationshipFlags, int beanUtilCallId, String beanUtilMethod) {
         if (!RUNNING_FLAG.get()) {
             logger.error("需要先调用beforeAdd方法后再执行当前方法");
             return null;
@@ -284,7 +284,7 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
         fieldRelationship.setGetSimpleClassName(dbOperWrapper.querySimpleClassName(getClassName));
         fieldRelationship.setGetMethodName(getMethodName);
         fieldRelationship.setGetClassName(getClassName);
-        fieldRelationship.setValid(JavaCGYesNoEnum.YES.getIntValue());
+        fieldRelationship.setValid(JavaCG2YesNoEnum.YES.getIntValue());
         fieldRelationship.setType(fieldRelationshipTypeEnum.getType());
         fieldRelationship.setRelationshipFlags(relationshipFlags);
         fieldRelationship.setBeanUtilCallId(beanUtilCallId);
@@ -341,7 +341,7 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        Integer maxId = dbOperator.queryObjectOneColumn(sql, Integer.class, JavaCGConstants.RECORD_ID_MIN_BEFORE);
+        Integer maxId = dbOperator.queryObjectOneColumn(sql, Integer.class, JavaCG2Constants.RECORD_ID_MIN_BEFORE);
         if (maxId == null) {
             logger.error("查询数据库通过get/set方法关联的字段关系表最大记录id结果为null");
             return JACGConstants.RECORD_ID_ILLEGAL;

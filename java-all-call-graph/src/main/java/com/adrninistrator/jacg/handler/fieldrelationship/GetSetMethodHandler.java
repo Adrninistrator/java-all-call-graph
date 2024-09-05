@@ -13,9 +13,9 @@ import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class GetSetMethodHandler extends BaseHandler {
             getSetMethod.setClassName(className);
             getSetMethod.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
             String methodNameWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(getSetMethod.getFullMethod());
-            getSetMethod.setFullMethod(JavaCGClassMethodUtil.formatFullMethodWithArgTypes(className, methodNameWithArgs));
+            getSetMethod.setFullMethod(JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(className, methodNameWithArgs));
         }
     }
 
@@ -188,11 +188,11 @@ public class GetSetMethodHandler extends BaseHandler {
      */
     public BaseWriteDbData4GetSetMethod queryGetSetMethodByFieldName(boolean queryGetMethod, String className, String fieldName) {
         List<BaseWriteDbData4GetSetMethod> list = queryGetSetMethodListByFieldName(queryGetMethod, className, fieldName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return null;
         }
         if (list.size() > 1) {
-            logger.error("类的字段存在多个{}方法 {} {}", (queryGetMethod ? JavaCGConstants.METHOD_PREFIX_GET : JavaCGConstants.METHOD_PREFIX_SET), className, fieldName);
+            logger.error("类的字段存在多个{}方法 {} {}", (queryGetMethod ? JavaCG2Constants.METHOD_PREFIX_GET : JavaCG2Constants.METHOD_PREFIX_SET), className, fieldName);
         }
         return list.get(0);
     }

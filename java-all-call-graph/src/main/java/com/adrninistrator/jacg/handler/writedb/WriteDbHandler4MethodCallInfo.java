@@ -5,9 +5,9 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGMethodCallInfoTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 import java.util.Set;
 
@@ -19,7 +19,7 @@ import java.util.Set;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL_INFO,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL_INFO,
         minColumnNum = 8,
         maxColumnNum = 8,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL_INFO
@@ -47,9 +47,9 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
         int arrayFlag = Integer.parseInt(array[4]);
         String valueType = array[5];
         String value = array[6];
-        if (JavaCGMethodCallInfoTypeEnum.MCIT_BASE64_VALUE.getType().equals(type)) {
+        if (JavaCG2MethodCallInfoTypeEnum.MCIT_BASE64_VALUE.getType().equals(type)) {
             // bv类型数据需要进行base64解码
-            value = JavaCGUtil.base64Decode(value);
+            value = JavaCG2Util.base64Decode(value);
         }
 
         // 记录被调用对象及参数存在信息的call_id
@@ -88,9 +88,9 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
                 "方法调用序号，从1开始",
                 "被调用对象或参数序号，",
                 "序号，从0开始，大于0代表有多种可能",
-                "类型，含义参考 JavaCGMethodCallInfoTypeEnum 类",
+                "类型，含义参考 JavaCG2MethodCallInfoTypeEnum 类",
                 "是否为数组格式，1:是，0:否",
-                "值的类型，含义参考 JavaCGConstantTypeEnum 类",
+                "值的类型，含义参考 JavaCG2ConstantTypeEnum 类",
                 "对应的值",
                 "调用方，完整方法（类名+方法名+参数）"
         };

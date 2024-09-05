@@ -6,9 +6,9 @@ import com.adrninistrator.jacg.dto.methodcall.MethodCallPair;
 import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,8 +39,8 @@ public class MAMCExt4ActionListener extends AbstractManualAddMethodCall1 {
     @Override
     protected List<MethodCallPair> chooseAddMethodCallPairList(String className) {
         // ActionListener实现类使用匿名内部类形式时，构造函数参数类型不固定，需要查询当前类的所有构造函数并处理
-        List<String> fullMethodList = methodInfoHandler.queryMethodByClassMethod(className, JavaCGCommonNameConstants.METHOD_NAME_INIT);
-        if (JavaCGUtil.isCollectionEmpty(fullMethodList)) {
+        List<String> fullMethodList = methodInfoHandler.queryMethodByClassMethod(className, JavaCG2CommonNameConstants.METHOD_NAME_INIT);
+        if (JavaCG2Util.isCollectionEmpty(fullMethodList)) {
             return null;
         }
 
@@ -48,7 +48,7 @@ public class MAMCExt4ActionListener extends AbstractManualAddMethodCall1 {
         for (String fullMethod : fullMethodList) {
             // 当ActionListener接口实现类的构造函数被调用时，添加调用actionPerformed()方法
             String methodAndArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(fullMethod);
-            return Collections.singletonList(new MethodCallPair(methodAndArgs, JavaCGClassMethodUtil.formatMethodWithArgTypes("actionPerformed", ActionEvent.class)));
+            return Collections.singletonList(new MethodCallPair(methodAndArgs, JavaCG2ClassMethodUtil.formatMethodWithArgTypes("actionPerformed", ActionEvent.class)));
         }
         return methodCallPairList;
     }

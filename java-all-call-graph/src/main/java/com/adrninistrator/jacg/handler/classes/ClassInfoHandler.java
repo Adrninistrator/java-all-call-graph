@@ -11,7 +11,7 @@ import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.dto.accessflag.JavaCGAccessFlags;
+import com.adrninistrator.javacg2.dto.accessflag.JavaCG2AccessFlags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,17 +88,17 @@ public class ClassInfoHandler extends BaseHandler {
     }
 
     /**
-     * 根据完整类名查询类的JavaCGAccessFlags对象，可调用方法判断类的属性
+     * 根据完整类名查询类的JavaCG2AccessFlags对象，可调用方法判断类的属性
      *
      * @param className 完整类名
      * @return 可能为null
      */
-    public JavaCGAccessFlags queryClassJavaCGAccessFlags(String className) {
+    public JavaCG2AccessFlags queryClassJavaCG2AccessFlags(String className) {
         Integer accessFlags = queryClassAccessFlag(className);
         if (accessFlags == null) {
             return null;
         }
-        return new JavaCGAccessFlags(accessFlags);
+        return new JavaCG2AccessFlags(accessFlags);
     }
 
     /**

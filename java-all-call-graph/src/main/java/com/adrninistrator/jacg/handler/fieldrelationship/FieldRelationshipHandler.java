@@ -16,9 +16,9 @@ import com.adrninistrator.jacg.handler.dto.field.JACGFieldMethodInfo;
 import com.adrninistrator.jacg.handler.fieldrelationship.filler.FieldBehaviorFillerInterface;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGFieldRelationshipTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2FieldRelationshipTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ public class FieldRelationshipHandler extends BaseHandler {
         for (FieldBehaviorFillerInterface fieldBehaviorFiller : fieldBehaviorFillers) {
             List<FieldBehavior> newFieldBehaviorList = fieldBehaviorFiller.fillIn(fieldBehavior, FieldRelationshipIdTypeEnum.FRITE_FIELD_RELATIONSHIP_ID,
                     fldRelationshipId);
-            if (!JavaCGUtil.isCollectionEmpty(newFieldBehaviorList)) {
+            if (!JavaCG2Util.isCollectionEmpty(newFieldBehaviorList)) {
                 return newFieldBehaviorList;
             }
         }
@@ -100,7 +100,7 @@ public class FieldRelationshipHandler extends BaseHandler {
         }
         FieldBehavior fieldBehavior = new FieldBehavior(className, fieldName, fieldType, getMethodName, setMethodName, getOrSet, fieldRelationship.getRelationshipFlags());
         List<FieldBehavior> newFieldBehaviorList = fillInInfo4RelatedField(fieldBehavior, fieldRelationship.getFldRelationshipId(), fieldBehaviorFillers);
-        return !JavaCGUtil.isCollectionEmpty(newFieldBehaviorList) ? newFieldBehaviorList : Collections.singletonList(fieldBehavior);
+        return !JavaCG2Util.isCollectionEmpty(newFieldBehaviorList) ? newFieldBehaviorList : Collections.singletonList(fieldBehavior);
     }
 
     /**
@@ -128,7 +128,7 @@ public class FieldRelationshipHandler extends BaseHandler {
         String simpleGetClassName = dbOperWrapper.querySimpleClassName(getClassName);
         String simpleSetClassName = dbOperWrapper.querySimpleClassName(setClassName);
         return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, simpleGetClassName, getMethodName, simpleSetClassName, setMethodName,
-                JavaCGYesNoEnum.YES.getIntValue());
+                JavaCG2YesNoEnum.YES.getIntValue());
     }
 
     /**
@@ -156,7 +156,7 @@ public class FieldRelationshipHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, simpleClassName, methodName, simpleClassName, setMethodName, JavaCGYesNoEnum.YES.getIntValue());
+        return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, simpleClassName, methodName, simpleClassName, setMethodName, JavaCG2YesNoEnum.YES.getIntValue());
     }
 
     /**
@@ -184,7 +184,7 @@ public class FieldRelationshipHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, simpleClassName, methodName, simpleClassName, getMethodName, JavaCGYesNoEnum.YES.getIntValue());
+        return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, simpleClassName, methodName, simpleClassName, getMethodName, JavaCG2YesNoEnum.YES.getIntValue());
     }
 
     /**
@@ -203,7 +203,7 @@ public class FieldRelationshipHandler extends BaseHandler {
                     " and " + DC.FR_VALID + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, setMethodCallId, JavaCGYesNoEnum.YES.getIntValue());
+        return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, setMethodCallId, JavaCG2YesNoEnum.YES.getIntValue());
     }
 
     /**
@@ -223,8 +223,8 @@ public class FieldRelationshipHandler extends BaseHandler {
                     " and " + DC.FR_VALID + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, setMethodCallId, JavaCGFieldRelationshipTypeEnum.FRTE_DIRECTLY.getType(),
-                JavaCGFieldRelationshipTypeEnum.FRTE_DIRECTLY_EQUIVALENT_CONVERSION.getType(), JavaCGYesNoEnum.YES.getIntValue());
+        return dbOperator.queryList(sql, WriteDbData4FieldRelationship.class, setMethodCallId, JavaCG2FieldRelationshipTypeEnum.FRTE_DIRECTLY.getType(),
+                JavaCG2FieldRelationshipTypeEnum.FRTE_DIRECTLY_EQUIVALENT_CONVERSION.getType(), JavaCG2YesNoEnum.YES.getIntValue());
     }
 
     /**
@@ -266,7 +266,7 @@ public class FieldRelationshipHandler extends BaseHandler {
     public Map<String, JACGFieldMethodInfo> queryAllFieldMethodInfo(String className, boolean queryGetMethod, boolean useJsonProperty) {
         // 根据类名，查询对应的get/set方法，若指定的类中不存在则从超类中查询
         List<BaseWriteDbData4GetSetMethod> getSetMethodList = getSetMethodHandler.queryGetSetMethodByClassNameSuper(queryGetMethod, className);
-        if (JavaCGUtil.isCollectionEmpty(getSetMethodList)) {
+        if (JavaCG2Util.isCollectionEmpty(getSetMethodList)) {
             return null;
         }
         Map<String, JACGFieldMethodInfo> fieldMethodInfoMap = new HashMap<>();

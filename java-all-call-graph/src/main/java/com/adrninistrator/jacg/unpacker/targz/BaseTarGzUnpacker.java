@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.unpacker.targz;
 
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -131,7 +131,7 @@ public abstract class BaseTarGzUnpacker {
      * @return
      */
     protected boolean checkClassFileType(String fileName) {
-        return StringUtils.endsWithIgnoreCase(fileName, JavaCGConstants.EXT_CLASS);
+        return StringUtils.endsWithIgnoreCase(fileName, JavaCG2Constants.EXT_CLASS);
     }
 
     /**
@@ -141,7 +141,7 @@ public abstract class BaseTarGzUnpacker {
      * @return
      */
     protected boolean checkJarFileType(String fileName) {
-        return StringUtils.endsWithIgnoreCase(fileName, JavaCGConstants.EXT_JAR);
+        return StringUtils.endsWithIgnoreCase(fileName, JavaCG2Constants.EXT_JAR);
     }
 
     /**
@@ -151,7 +151,7 @@ public abstract class BaseTarGzUnpacker {
      * @return
      */
     protected boolean checkWarFileType(String fileName) {
-        return StringUtils.endsWithIgnoreCase(fileName, JavaCGConstants.EXT_WAR);
+        return StringUtils.endsWithIgnoreCase(fileName, JavaCG2Constants.EXT_WAR);
     }
 
     /**
@@ -162,10 +162,10 @@ public abstract class BaseTarGzUnpacker {
      * @return
      */
     protected String getClassFilePackagePrefix(String fileName) {
-        if (fileName.startsWith(JavaCGConstants.WEB_INF_CLASSES)) {
-            fileName = fileName.substring(JavaCGConstants.WEB_INF_CLASSES.length());
-        } else if (fileName.startsWith(JavaCGConstants.BOOT_INF_CLASSES)) {
-            fileName = fileName.substring(JavaCGConstants.BOOT_INF_CLASSES.length());
+        if (fileName.startsWith(JavaCG2Constants.WEB_INF_CLASSES)) {
+            fileName = fileName.substring(JavaCG2Constants.WEB_INF_CLASSES.length());
+        } else if (fileName.startsWith(JavaCG2Constants.BOOT_INF_CLASSES)) {
+            fileName = fileName.substring(JavaCG2Constants.BOOT_INF_CLASSES.length());
         }
         String[] packageArray = StringUtils.split(fileName, "/");
         if (packageArray.length == 1) {

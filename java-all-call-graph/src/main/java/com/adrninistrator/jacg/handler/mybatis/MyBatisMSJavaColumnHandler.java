@@ -32,13 +32,13 @@ import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MybatisMSGetSetDb;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGFieldRelationshipTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGMethodCallInfoTypeEnum;
-import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2FieldRelationshipTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
+import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.adrninistrator.mybatismysqltableparser.common.enums.MySqlStatementEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -63,7 +63,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private final ManualAddFieldRelationshipHandler manualAddFieldRelationshipHandler;
     private final GetSetMethodHandler getSetMethodHandler;
 
-    private final JavaCGCounter recordId = new JavaCGCounter(-1);
+    private final JavaCG2Counter recordId = new JavaCG2Counter(-1);
 
     private WriteDbHandler4MybatisMSGetSetDb writeDbHandler4MybatisMSGetSetDb;
 
@@ -113,7 +113,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
      *
      * @return
      */
-    public boolean handle(String javaCgOutputPath) {
+    public boolean handle(String javaCG2OutputPath) {
         long startTime = System.currentTimeMillis();
         logger.info("MyBatis XML文件中sql脚本的字段与Java代码的关联关系（使用MySQL）-开始处理");
 
@@ -123,9 +123,9 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             return false;
         }
         try {
-            writeDbHandler4MybatisMSGetSetDb.beforeHandle(javaCgOutputPath);
+            writeDbHandler4MybatisMSGetSetDb.beforeHandle(javaCG2OutputPath);
             // 分页查询并处理
-            return QueryByPageHandler.queryAndHandle(this, JavaCGConstants.RECORD_ID_MIN_BEFORE);
+            return QueryByPageHandler.queryAndHandle(this, JavaCG2Constants.RECORD_ID_MIN_BEFORE);
         } catch (Exception e) {
             logger.error("出现异常 ", e);
             return false;
@@ -142,7 +142,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private void doHandle(WriteDbData4MybatisMSEntity mybatisMSEntity) {
         // 根据MyBatis Mapper唯一类名查询 mybatis_ms_table 表中的Mapper方法名与sql语句类型
         List<WriteDbData4MyBatisMSTable> myBatisMSTableList = myBatisMSMapperEntityHandler.queryMapperMethodAndSqlStatement(mybatisMSEntity.getMapperSimpleClassName());
-        if (JavaCGUtil.isCollectionEmpty(myBatisMSTableList)) {
+        if (JavaCG2Util.isCollectionEmpty(myBatisMSTableList)) {
             logger.info("未查询到Mapper方法名与sql语句类型 {}", mybatisMSEntity.getMapperSimpleClassName());
             return;
         }
@@ -224,7 +224,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             // 方法参数类型为Entity
             return Boolean.TRUE;
         }
-        if (JavaCGCommonNameConstants.CLASS_NAME_OBJECT.equals(methodArgTypeList.get(0))) {
+        if (JavaCG2CommonNameConstants.CLASS_NAME_OBJECT.equals(methodArgTypeList.get(0))) {
             // 方法参数类型为Object，需要继续判断
             return Boolean.FALSE;
         }
@@ -244,7 +244,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         List<String> mismatchEntityTypeList = new ArrayList<>(1);
         // 继续检查方法参数类型
         for (WriteDbData4MethodCallInfo methodCallInfo : methodCallInfoList) {
-            if (JavaCGMethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
+            if (JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
                 if (StringUtils.equals(entityClassName, methodCallInfo.getTheValue())) {
                     matchesEntityType = true;
                     break;
@@ -267,14 +267,14 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
      * @return
      */
     private List<Integer> queryMapperArgAsObjCallIdList(WriteDbData4MethodCall methodCall, WriteDbData4MethodCallInfo methodCallInfo) {
-        if (StringUtils.equalsAny(methodCallInfo.getType(), JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType(),
-                JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ_EQC.getType())) {
+        if (StringUtils.equalsAny(methodCallInfo.getType(), JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType(),
+                JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ_EQC.getType())) {
             // 以Mapper接口的方法参数是调用方法参数，查询以其作为被调用对象的方法调用序号
             return methodCallInfoHandler.queryCallIdInCaller4ObjByMethodCallArg(methodCall.getCallerMethodHash(), false, Integer.parseInt(methodCallInfo.getTheValue()), true,
                     methodCall.getCallId());
         }
-        if (StringUtils.equalsAny(methodCallInfo.getType(), JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType(),
-                JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID_EQC.getType())) {
+        if (StringUtils.equalsAny(methodCallInfo.getType(), JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType(),
+                JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID_EQC.getType())) {
             // 以Mapper接口的方法参数是方法调用返回值，查询以其作为被调用对象的方法调用序号
             return methodCallInfoHandler.queryCallIdInCaller4ObjByMethodCallArg(methodCall.getCallerMethodHash(), true, Integer.parseInt(methodCallInfo.getTheValue()), true,
                     methodCall.getCallId());
@@ -299,7 +299,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
 
             // 通过Mapper接口的方法参数对应的set方法调用序号查找匹配的字段关联关系
             List<WriteDbData4FieldRelationship> fieldRelationshipList = fieldRelationshipHandler.queryDirectlyRelationshipBySetMethodCallId(methodCallId);
-            if (JavaCGUtil.isCollectionEmpty(fieldRelationshipList)) {
+            if (JavaCG2Util.isCollectionEmpty(fieldRelationshipList)) {
                 logger.info("通过Mapper接口的方法参数对应的set方法调用序号，未查找到匹配的字段关联关系 {}", methodCallId);
                 continue;
             }
@@ -322,7 +322,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         logger.info("处理insert相关的MyBatis Mapper方法 {} {}", mybatisMSEntity.getMapperClassName(), insertMapperMethodName);
         // 查询Mapper方法信息
         List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMSuperInterface(mybatisMSEntity.getMapperClassName(), insertMapperMethodName);
-        if (JavaCGUtil.isCollectionEmpty(mapperMethodInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(mapperMethodInfoList)) {
             return;
         }
         for (WriteDbData4MethodInfo mapperMethodInfo : mapperMethodInfoList) {
@@ -335,7 +335,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             logger.info("找到MyBatis Mapper用于插入Entity数据的方法 {}", mapperMethodInfo.getFullMethod());
             // 查询调用以上Mapper方法的方法
             List<WriteDbData4MethodCall> insertEntityMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
-            if (JavaCGUtil.isCollectionEmpty(insertEntityMethodCallList)) {
+            if (JavaCG2Util.isCollectionEmpty(insertEntityMethodCallList)) {
                 // 当前Mapper方法未找到调用方法
                 continue;
             }
@@ -356,7 +356,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private void handleInsertEntityMethodCall(WriteDbData4MethodCall methodCall, boolean argTypeIsEntity, String entityClassName) {
         // 查找Mapper接口的方法被调用时的参数信息
         List<WriteDbData4MethodCallInfo> methodCallInfoList = methodCallInfoHandler.queryMethodCallInfoObjArg(methodCall.getCallId(), 1);
-        if (JavaCGUtil.isCollectionEmpty(methodCallInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(methodCallInfoList)) {
             return;
         }
 
@@ -370,7 +370,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         for (WriteDbData4MethodCallInfo methodCallInfo : methodCallInfoList) {
             // 查询以Mapper接口的方法参数作为被调用对象的方法调用序号
             List<Integer> mapperArgAsObjCallIdList = queryMapperArgAsObjCallIdList(methodCall, methodCallInfo);
-            if (JavaCGUtil.isCollectionEmpty(mapperArgAsObjCallIdList)) {
+            if (JavaCG2Util.isCollectionEmpty(mapperArgAsObjCallIdList)) {
                 continue;
             }
 
@@ -390,7 +390,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         logger.info("处理select相关的MyBatis Mapper方法 {} {}", mybatisMSEntity.getMapperClassName(), selectMapperMethodName);
         // 查询Mapper方法信息
         List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMSuperInterface(mybatisMSEntity.getMapperClassName(), selectMapperMethodName);
-        if (JavaCGUtil.isCollectionEmpty(mapperMethodInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(mapperMethodInfoList)) {
             return;
         }
         String entityClassName = mybatisMSEntity.getEntityClassName();
@@ -398,7 +398,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             boolean returnTypeIsEntity = StringUtils.equals(entityClassName, mapperMethodInfo.getReturnType());
             // 查询调用以上Mapper方法的方法
             List<WriteDbData4MethodCall> selectMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
-            if (JavaCGUtil.isCollectionEmpty(selectMethodCallList)) {
+            if (JavaCG2Util.isCollectionEmpty(selectMethodCallList)) {
                 // 当前Mapper方法未找到调用方法
                 continue;
             }
@@ -409,7 +409,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
                             selectMethodCall.getCalleeFullMethod(), selectMethodCall.getActualReturnType());
                     // 处理MyBatis select Entity操作相关的方法调用
                     handleSelectEntityMethodCall(selectMethodCall);
-                } else if (JavaCGClassMethodUtil.isCustomType(mapperMethodInfo.getReturnType())) {
+                } else if (JavaCG2ClassMethodUtil.isCustomType(mapperMethodInfo.getReturnType())) {
                     // 返回类型非Entity，属于自定义对象时的处理
                     logger.info("当前方法是MyBatis用于查询自定义对象的方法 {} {} {} {}", selectMethodCall.getCallerFullMethod(), selectMethodCall.getCallerLineNumber(),
                             selectMethodCall.getCalleeFullMethod(), mapperMethodInfo.getReturnType());
@@ -420,7 +420,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
                 // 查询指定MyBatis Mapper方法的参数所对应的数据库信息，包括对应的set与where的字段与数据库信息
                 List<AbstractMyBatisMapperArg> myBatisMapperArgList = myBatisMSMapperEntityHandler.queryParamDbInfo4MyBatisMapperMethod(mybatisMSEntity.getMapperClassName(),
                         selectMapperMethodName, mapperMethodInfo.getFullMethod(), myBatisMapperArgAndParamDbInfoList4Where, null);
-                if (JavaCGUtil.isCollectionEmpty(myBatisMapperArgList)) {
+                if (JavaCG2Util.isCollectionEmpty(myBatisMapperArgList)) {
                     // select方法无参数，不处理
                     continue;
                 }
@@ -435,14 +435,14 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         // 查询以Mapper接口的select方法返回值，作为方法调用被调用对象时的方法调用序号
         List<Integer> mapperSelectReturnAsObjCallIdList = methodCallInfoHandler.queryCallIdInCaller4ObjByMethodCallArg(selectMethodCall.getCallerMethodHash(), true,
                 selectMethodCall.getCallId(), false, selectMethodCall.getCallId());
-        if (JavaCGUtil.isCollectionEmpty(mapperSelectReturnAsObjCallIdList)) {
+        if (JavaCG2Util.isCollectionEmpty(mapperSelectReturnAsObjCallIdList)) {
             return;
         }
         // 为MyBatis select操作增加信息
         for (Integer selectReturnCallId : mapperSelectReturnAsObjCallIdList) {
             // 通过Mapper接口的select方法参数对应的get方法调用序号查找匹配的字段关联关系
             List<WriteDbData4FieldRelationship> fieldRelationshipList = fieldRelationshipHandler.queryRelationshipByGetMethodCallId(selectReturnCallId);
-            if (JavaCGUtil.isCollectionEmpty(fieldRelationshipList)) {
+            if (JavaCG2Util.isCollectionEmpty(fieldRelationshipList)) {
                 continue;
             }
 
@@ -460,14 +460,14 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         String mapperClassName = JACGClassMethodUtil.getClassNameFromMethod(mapperMethodInfo.getFullMethod());
         String mapperMethodName = JACGClassMethodUtil.getMethodNameFromFull(mapperMethodInfo.getFullMethod());
         List<WriteDbData4MyBatisMSSelectColumn> selectColumnList = myBatisMSMapperEntityHandler.queryMybatisMSSelectDbInfo(mapperClassName, mapperMethodName);
-        if (JavaCGUtil.isCollectionEmpty(selectColumnList)) {
+        if (JavaCG2Util.isCollectionEmpty(selectColumnList)) {
             logger.info("未查询到Mapper方法select返回的字段信息 {} {}", mapperClassName, mapperMethodName);
             return;
         }
         // 查询以Mapper接口的select方法返回值，作为方法调用被调用对象时的方法调用序号
         List<Integer> mapperSelectReturnAsObjCallIdList = methodCallInfoHandler.queryCallIdInCaller4ObjByMethodCallArg(selectMethodCall.getCallerMethodHash(), true,
                 selectMethodCall.getCallId(), false, selectMethodCall.getCallId());
-        if (JavaCGUtil.isCollectionEmpty(mapperSelectReturnAsObjCallIdList)) {
+        if (JavaCG2Util.isCollectionEmpty(mapperSelectReturnAsObjCallIdList)) {
             return;
         }
         for (Integer selectReturnCallId : mapperSelectReturnAsObjCallIdList) {
@@ -493,7 +493,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
 
             // 通过Mapper接口的select方法参数对应的get方法调用序号查找匹配的字段关联关系
             List<WriteDbData4FieldRelationship> fieldRelationshipList = fieldRelationshipHandler.queryRelationshipByGetMethodCallId(selectReturnCallId);
-            if (JavaCGUtil.isCollectionEmpty(fieldRelationshipList)) {
+            if (JavaCG2Util.isCollectionEmpty(fieldRelationshipList)) {
                 continue;
             }
 
@@ -527,7 +527,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         for (int argSeq = 0; argSeq < myBatisMapperArgList.size(); argSeq++) {
             // 查找Mapper接口的方法被调用时的参数信息，参数序号从1开始，需要加1
             List<WriteDbData4MethodCallInfo> methodCallInfoList = methodCallInfoHandler.queryMethodCallInfoObjArg(selectMethodCall.getCallId(), argSeq + 1);
-            if (JavaCGUtil.isCollectionEmpty(methodCallInfoList)) {
+            if (JavaCG2Util.isCollectionEmpty(methodCallInfoList)) {
                 continue;
             }
             // 当前处理的Mapper方法参数
@@ -535,7 +535,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             // 当前参数对应的Where字段信息
             MyBatisMapperArgAndParamDbInfo myBatisMapperArgAndParamDbInfo4Where = JACGUtil.getListElement(myBatisMapperArgAndParamDbInfoList4Where, argSeq);
             // 判断当前参数是否为对象
-            boolean mapperArgIsObject = JavaCGClassMethodUtil.isCustomType(myBatisMapperArg.getArgType());
+            boolean mapperArgIsObject = JavaCG2ClassMethodUtil.isCustomType(myBatisMapperArg.getArgType());
             for (WriteDbData4MethodCallInfo methodCallInfo : methodCallInfoList) {
                 if (mapperArgIsObject) {
                     // 处理MyBatis的Mapper方法参数，使用对象的情况
@@ -558,7 +558,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         logger.info("处理update相关的MyBatis Mapper方法 {} {}", mybatisMSEntity.getMapperClassName(), updateMapperMethodName);
         // 查询Mapper方法信息
         List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMSuperInterface(mybatisMSEntity.getMapperClassName(), updateMapperMethodName);
-        if (JavaCGUtil.isCollectionEmpty(mapperMethodInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(mapperMethodInfoList)) {
             return;
         }
 
@@ -568,14 +568,14 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             // 查询指定MyBatis Mapper方法的参数所对应的数据库信息，包括对应的set与where的字段与数据库信息
             List<AbstractMyBatisMapperArg> myBatisMapperArgList = myBatisMSMapperEntityHandler.queryParamDbInfo4MyBatisMapperMethod(mybatisMSEntity.getMapperClassName(),
                     updateMapperMethodName, mapperMethodInfo.getFullMethod(), myBatisMapperArgAndParamDbInfoList4Where, myBatisMapperArgAndParamDbInfoList4Set);
-            if (JavaCGUtil.isCollectionEmpty(myBatisMapperArgList)) {
+            if (JavaCG2Util.isCollectionEmpty(myBatisMapperArgList)) {
                 // update方法无参数，不处理
                 return;
             }
 
             // 查询调用以上Mapper方法的方法
             List<WriteDbData4MethodCall> updateMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
-            if (JavaCGUtil.isCollectionEmpty(updateMethodCallList)) {
+            if (JavaCG2Util.isCollectionEmpty(updateMethodCallList)) {
                 // 当前Mapper方法未找到调用方法
                 return;
             }
@@ -603,7 +603,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         for (int argSeq = 0; argSeq < myBatisMapperArgList.size(); argSeq++) {
             // 查找Mapper接口的方法被调用时的参数信息，参数序号从1开始，需要加1
             List<WriteDbData4MethodCallInfo> methodCallInfoList = methodCallInfoHandler.queryMethodCallInfoObjArg(updateMethodCall.getCallId(), argSeq + 1);
-            if (JavaCGUtil.isCollectionEmpty(methodCallInfoList)) {
+            if (JavaCG2Util.isCollectionEmpty(methodCallInfoList)) {
                 continue;
             }
             // 当前处理的Mapper方法参数
@@ -614,15 +614,15 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             // 判断当前参数类型是否为Entity
             boolean mapperArgIsEntity = entityClassName.equals(myBatisMapperArg.getArgType());
             // 判断当前参数是否为对象
-            boolean mapperArgIsObject = JavaCGClassMethodUtil.isCustomType(myBatisMapperArg.getArgType());
+            boolean mapperArgIsObject = JavaCG2ClassMethodUtil.isCustomType(myBatisMapperArg.getArgType());
             if (!mapperArgIsEntity || !mapperArgIsObject) {
                 // 有可能参数类型定义为Object，实际传入的参数类型是对象，判断实际传入的参数类型是否为对象
                 for (WriteDbData4MethodCallInfo methodCallInfo : methodCallInfoList) {
-                    if (JavaCGMethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
+                    if (JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
                         if (entityClassName.equals(methodCallInfo.getTheValue())) {
                             mapperArgIsEntity = true;
                         }
-                        if (JavaCGClassMethodUtil.isCustomType(methodCallInfo.getTheValue())) {
+                        if (JavaCG2ClassMethodUtil.isCustomType(methodCallInfo.getTheValue())) {
                             mapperArgIsObject = true;
                         }
                     }
@@ -649,7 +649,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
                                           MyBatisMapperArgAndParamDbInfo myBatisMapperArgAndParamDbInfo4Where, MyBatisMapperArgAndParamDbInfo myBatisMapperArgAndParamDbInfo4Set) {
         // 查询以Mapper接口的方法参数作为被调用对象的方法调用序号
         List<Integer> mapperArgAsObjCallIdList = queryMapperArgAsObjCallIdList(updateOrSelectMethodCall, methodCallInfo);
-        if (JavaCGUtil.isCollectionEmpty(mapperArgAsObjCallIdList)) {
+        if (JavaCG2Util.isCollectionEmpty(mapperArgAsObjCallIdList)) {
             return;
         }
 
@@ -672,20 +672,20 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             List<MyBatisMSMapperParamDbInfo> myBatisMSMapperParamDbInfoList4Where = findParamDbInfoBySetFieldName(myBatisMapperArgAndParamDbInfo4Where, setMethod.getFieldName());
             // 根据set方法设置的字段名称，判断对应的set子句对应的数据库字段
             List<MyBatisMSMapperParamDbInfo> myBatisMSMapperParamDbInfoList4Set = findParamDbInfoBySetFieldName(myBatisMapperArgAndParamDbInfo4Set, setMethod.getFieldName());
-            if (JavaCGUtil.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Where) && JavaCGUtil.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Set)) {
+            if (JavaCG2Util.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Where) && JavaCG2Util.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Set)) {
                 // 当前的set方法设置的字段未查找到where、set子句对应的数据库字段
                 continue;
             }
             // 通过Mapper接口的方法参数对应的set方法调用序号查找匹配的字段关联关系
             List<WriteDbData4FieldRelationship> fieldRelationshipList = fieldRelationshipHandler.queryDirectlyRelationshipBySetMethodCallId(mapperArgMethodCall.getCallId());
-            if (JavaCGUtil.isCollectionEmpty(fieldRelationshipList)) {
+            if (JavaCG2Util.isCollectionEmpty(fieldRelationshipList)) {
                 continue;
             }
 
             FieldRelationshipFlagsEnum fieldRelationshipFlagsEnum = FieldRelationshipFlagsEnum.FRF_SET_MYBATIS_MAPPER_ARG_OPERATE;
             if (updateOrSelect && mapperArgIsEntity) {
                 // update方法，且当前参数是Entity
-                if (!JavaCGUtil.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Where)) {
+                if (!JavaCG2Util.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Where)) {
                     fieldRelationshipFlagsEnum = FieldRelationshipFlagsEnum.FRF_SET_MYBATIS_UPDATE_WHERE_ENTITY;
                 } else {
                     fieldRelationshipFlagsEnum = FieldRelationshipFlagsEnum.FRF_SET_MYBATIS_UPDATE_SET_ENTITY;
@@ -714,7 +714,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     // 处理MyBatis的Mapper方法参数，使用基本类型的情况
     private void handleMapperArgUseBaseType(boolean updateOrSelect, WriteDbData4MethodCallInfo methodCallInfo, MyBatisMapperArgAndParamDbInfo myBatisMapperArgAndParamDbInfo4Where,
                                             MyBatisMapperArgAndParamDbInfo myBatisMapperArgAndParamDbInfo4Set) {
-        if (!JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType().equals(methodCallInfo.getType())) {
+        if (!JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType().equals(methodCallInfo.getType())) {
             // 以Mapper接口的方法参数不是方法调用返回值
             return;
         }
@@ -736,7 +736,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
                 myBatisMapperArgAndParamDbInfo4Where.getMyBatisMSMapperParamDbInfoList();
         List<MyBatisMSMapperParamDbInfo> myBatisMSMapperParamDbInfoList4Set = myBatisMapperArgAndParamDbInfo4Set == null ? null :
                 myBatisMapperArgAndParamDbInfo4Set.getMyBatisMSMapperParamDbInfoList();
-        if (JavaCGUtil.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Where) && JavaCGUtil.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Set)) {
+        if (JavaCG2Util.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Where) && JavaCG2Util.isCollectionEmpty(myBatisMSMapperParamDbInfoList4Set)) {
             // 当前的参数未查找到对应where、set子句的数据库字段
             return;
         }
@@ -756,7 +756,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     // 插入MyBatis的Mapper方法参数所对应的数据库信息
     private void insertMybatisMsGetSetDbList(List<MyBatisMSMapperParamDbInfo> myBatisMSMapperParamDbInfoList, int fldRelationshipId, int getMethodCallId,
                                              String sqlStatement, MyBatisColumnRelateDescEnum myBatisColumnRelateDescEnum) {
-        if (JavaCGUtil.isCollectionEmpty(myBatisMSMapperParamDbInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(myBatisMSMapperParamDbInfoList)) {
             return;
         }
         for (MyBatisMSMapperParamDbInfo myBatisMSMapperParamDbInfo : myBatisMSMapperParamDbInfoList) {
@@ -772,9 +772,9 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         WriteDbData4MybatisMSGetSetDb writeDbData4MybatisMsGetSetDb = new WriteDbData4MybatisMSGetSetDb();
         writeDbData4MybatisMsGetSetDb.setRecordId(recordId.addAndGet());
         writeDbData4MybatisMsGetSetDb.setFldRelationshipId(fldRelationshipId);
-        writeDbData4MybatisMsGetSetDb.setGetOrSet(getOrSet ? JavaCGConstants.METHOD_PREFIX_GET : JavaCGConstants.METHOD_PREFIX_SET);
-        writeDbData4MybatisMsGetSetDb.setGetMethodCallId(getOrSet ? getMethodCallId : JavaCGConstants.RECORD_ID_MIN_BEFORE);
-        writeDbData4MybatisMsGetSetDb.setSetMethodCallId(getOrSet ? JavaCGConstants.RECORD_ID_MIN_BEFORE : setMethodCallId);
+        writeDbData4MybatisMsGetSetDb.setGetOrSet(getOrSet ? JavaCG2Constants.METHOD_PREFIX_GET : JavaCG2Constants.METHOD_PREFIX_SET);
+        writeDbData4MybatisMsGetSetDb.setGetMethodCallId(getOrSet ? getMethodCallId : JavaCG2Constants.RECORD_ID_MIN_BEFORE);
+        writeDbData4MybatisMsGetSetDb.setSetMethodCallId(getOrSet ? JavaCG2Constants.RECORD_ID_MIN_BEFORE : setMethodCallId);
         writeDbData4MybatisMsGetSetDb.setDbOperate(sqlStatement);
         writeDbData4MybatisMsGetSetDb.setTableName(tableName);
         writeDbData4MybatisMsGetSetDb.setColumnName(columnName);
@@ -794,7 +794,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             return null;
         }
         List<MyBatisMSMapperParamDbInfo> myBatisMSMapperParamDbInfoList = myBatisMapperArgAndParamDbInfo.getMyBatisMSMapperParamDbInfoList();
-        if (JavaCGUtil.isCollectionEmpty(myBatisMSMapperParamDbInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(myBatisMSMapperParamDbInfoList)) {
             return null;
         }
         List<MyBatisMSMapperParamDbInfo> returnMyBatisMSMapperParamDbInfoList = new ArrayList<>();
@@ -809,8 +809,8 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     //  人工增加一条通过get / set方法关联的字段关系，set方法信息设为空
     private Integer manualAddFieldRelationship4Get(WriteDbData4MethodCall methodCallReturnAsMapperArg, String getClassName, String getMethodName) {
         return manualAddFieldRelationshipHandler.manualAddFieldRelationship(methodCallReturnAsMapperArg.getCallerFullMethod(), methodCallReturnAsMapperArg.getCallerLineNumber(),
-                methodCallReturnAsMapperArg.getCallId(), JavaCGConstants.RECORD_ID_MIN_BEFORE, getClassName, getMethodName, JACGConstants.EMPTY_CLASS_METHOD,
-                JACGConstants.EMPTY_CLASS_METHOD, JavaCGFieldRelationshipTypeEnum.FRTE_MYBATIS_MAPPER_ARG_DB,
+                methodCallReturnAsMapperArg.getCallId(), JavaCG2Constants.RECORD_ID_MIN_BEFORE, getClassName, getMethodName, JACGConstants.EMPTY_CLASS_METHOD,
+                JACGConstants.EMPTY_CLASS_METHOD, JavaCG2FieldRelationshipTypeEnum.FRTE_MYBATIS_MAPPER_ARG_DB,
                 FieldRelationshipFlagsEnum.FRF_SET_MYBATIS_MAPPER_ARG_OPERATE.getFlag());
     }
 

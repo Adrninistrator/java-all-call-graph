@@ -6,7 +6,7 @@ import com.adrninistrator.jacg.dto.lambda.LambdaMethodCall;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ public class LambdaMethodHandlerByClassNamePrefix extends BaseLambdaMethodPageHa
     public List<LambdaMethodCall> queryByClassNamePrefix(String lambdaCalleeClassNamePrefix, String lambdaNextClassNamePrefix) {
         logger.info("通过类名前缀查询Lambda表达式方法调用信息 {} {}", lambdaCalleeClassNamePrefix, lambdaNextClassNamePrefix);
         // 分页查询，结果合并到List中
-        return QueryByPageHandler.queryAll2List(this, JavaCGConstants.METHOD_CALL_ID_MIN_BEFORE, lambdaCalleeClassNamePrefix, lambdaNextClassNamePrefix);
+        return QueryByPageHandler.queryAll2List(this, JavaCG2Constants.METHOD_CALL_ID_MIN_BEFORE, lambdaCalleeClassNamePrefix, lambdaNextClassNamePrefix);
     }
 
     /**

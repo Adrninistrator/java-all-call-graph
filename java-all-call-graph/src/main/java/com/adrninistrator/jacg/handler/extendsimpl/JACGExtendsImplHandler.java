@@ -14,11 +14,11 @@ import com.adrninistrator.jacg.handler.dto.classes.ClassNameAndType;
 import com.adrninistrator.jacg.handler.dto.extendsimpl.ExtendsImplInfo;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.dto.accessflag.JavaCGAccessFlags;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.dto.accessflag.JavaCG2AccessFlags;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +101,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
     private List<String> doLoadChildrenOrImplClassInfo(String simpleClassName, Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet) {
         logger.debug("执行向下加载父类/接口对应的子类/子接口/实现类 {}", simpleClassName);
         List<WriteDbData4ExtendsImpl> list = queryDownloadBySimple(simpleClassName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
 
@@ -112,7 +112,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
                     writeDbData4ExtendsImpl.getAccessFlags());
             allClassNameAndAccessFlagsSet.add(classNameAndAccessFlags);
 
-            if (JavaCGYesNoEnum.isYes(writeDbData4ExtendsImpl.getExistsDownwardClasses())) {
+            if (JavaCG2YesNoEnum.isYes(writeDbData4ExtendsImpl.getExistsDownwardClasses())) {
                 // 当前类或接口还存在下一层的类或接口，记录需要返回的下一层子类/子接口/实现类名称
                 downwardSimpleClassNameList.add(writeDbData4ExtendsImpl.getSimpleClassName());
             }
@@ -198,19 +198,19 @@ public class JACGExtendsImplHandler extends BaseHandler {
                                                     boolean includeAbstractClass,
                                                     boolean includeNonAbstractClass) {
         if (!includeInterface && !includeClass) {
-            throw new JavaCGRuntimeException("类和接口至少需要包含一种");
+            throw new JavaCG2RuntimeException("类和接口至少需要包含一种");
         }
 
         if (includeClass && !includeAbstractClass && !includeNonAbstractClass) {
-            throw new JavaCGRuntimeException("抽象类与非抽象类至少需要包含一种");
+            throw new JavaCG2RuntimeException("抽象类与非抽象类至少需要包含一种");
         }
 
         if (includeAbstractClass && !includeClass) {
-            throw new JavaCGRuntimeException("参数指定包含抽象类时，需要指定包含类");
+            throw new JavaCG2RuntimeException("参数指定包含抽象类时，需要指定包含类");
         }
 
         if (includeNonAbstractClass && !includeClass) {
-            throw new JavaCGRuntimeException("参数指定包含非抽象类时，需要指定包含类");
+            throw new JavaCG2RuntimeException("参数指定包含非抽象类时，需要指定包含类");
         }
 
         if (!loadedDownwardSimpleClassNameSet.contains(superSimpleClassName)) {
@@ -237,37 +237,37 @@ public class JACGExtendsImplHandler extends BaseHandler {
 
     // 根据类的access_flags判断指定类的是否需要包含在结果中
     private boolean checkIncludeClass(int accessFlags, boolean includeInterface, boolean includeClass, boolean includeAbstractClass, boolean includeNonAbstractClass) {
-        JavaCGAccessFlags javaCGAccessFlags = new JavaCGAccessFlags(accessFlags);
+        JavaCG2AccessFlags javaCG2AccessFlags = new JavaCG2AccessFlags(accessFlags);
 
         // 先判断是否不满足
-        if (!includeInterface && javaCGAccessFlags.isInterface()) {
+        if (!includeInterface && javaCG2AccessFlags.isInterface()) {
             return false;
         }
-        if (!includeClass && !javaCGAccessFlags.isInterface()) {
+        if (!includeClass && !javaCG2AccessFlags.isInterface()) {
             return false;
         }
         if (includeClass) {
-            if (!includeAbstractClass && javaCGAccessFlags.isAbstract()) {
+            if (!includeAbstractClass && javaCG2AccessFlags.isAbstract()) {
                 return false;
             }
-            if (!includeNonAbstractClass && !javaCGAccessFlags.isAbstract()) {
+            if (!includeNonAbstractClass && !javaCG2AccessFlags.isAbstract()) {
                 return false;
             }
         }
 
         // 再判断是否满足
-        if (includeInterface && javaCGAccessFlags.isInterface()) {
+        if (includeInterface && javaCG2AccessFlags.isInterface()) {
             return true;
         }
         // 以下代码虽然会提示不需要，但为了保持逻辑清晰，还是保留
         if (includeClass) {
-            if (includeAbstractClass && javaCGAccessFlags.isAbstract()) {
+            if (includeAbstractClass && javaCG2AccessFlags.isAbstract()) {
                 return true;
             }
-            if (includeNonAbstractClass && !javaCGAccessFlags.isAbstract()) {
+            if (includeNonAbstractClass && !javaCG2AccessFlags.isAbstract()) {
                 return true;
             }
-            if (!javaCGAccessFlags.isInterface()) {
+            if (!javaCG2AccessFlags.isInterface()) {
                 return true;
             }
         }
@@ -322,7 +322,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        String upwardClassName = dbOperator.queryObjectOneColumn(sql, String.class, simpleClassName, JavaCGConstants.FILE_KEY_EXTENDS);
+        String upwardClassName = dbOperator.queryObjectOneColumn(sql, String.class, simpleClassName, JavaCG2Constants.FILE_KEY_EXTENDS);
         if (upwardClassName == null) {
             logger.debug("未查询到指定类的父类 {}", simpleClassName);
         }
@@ -346,7 +346,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        return dbOperator.queryListOneColumn(sql, String.class, simpleClassName, JavaCGConstants.FILE_KEY_IMPLEMENTS);
+        return dbOperator.queryListOneColumn(sql, String.class, simpleClassName, JavaCG2Constants.FILE_KEY_IMPLEMENTS);
     }
 
     /**
@@ -366,13 +366,13 @@ public class JACGExtendsImplHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         List<WriteDbData4ExtendsImpl> writeDbData4ExtendsList = dbOperator.queryList(sql, WriteDbData4ExtendsImpl.class, simpleClassName);
-        if (JavaCGUtil.isCollectionEmpty(writeDbData4ExtendsList)) {
+        if (JavaCG2Util.isCollectionEmpty(writeDbData4ExtendsList)) {
             return Collections.emptyList();
         }
         List<ClassNameAndType> classNameAndTypesList = new ArrayList<>(writeDbData4ExtendsList.size());
         for (WriteDbData4ExtendsImpl writeDbData4ExtendsImpl : writeDbData4ExtendsList) {
             ClassInterfaceEnum classInterfaceEnum;
-            if (JavaCGConstants.FILE_KEY_IMPLEMENTS.equals(writeDbData4ExtendsImpl.getType())) {
+            if (JavaCG2Constants.FILE_KEY_IMPLEMENTS.equals(writeDbData4ExtendsImpl.getType())) {
                 classInterfaceEnum = ClassInterfaceEnum.CIE_INTERFACE;
             } else {
                 // 查询父类的access_flags
@@ -421,7 +421,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
      */
     public List<ClassNameAndType> queryDownwardByClassName(String className) {
         List<WriteDbData4ExtendsImpl> writeDbData4ExtendsList = queryDownload(className);
-        if (JavaCGUtil.isCollectionEmpty(writeDbData4ExtendsList)) {
+        if (JavaCG2Util.isCollectionEmpty(writeDbData4ExtendsList)) {
             return Collections.emptyList();
         }
         List<ClassNameAndType> classNameAndTypesList = new ArrayList<>(writeDbData4ExtendsList.size());
@@ -458,7 +458,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
                 Set<ClassNameAndType> returnClassNameAndTypeSet = queryExtendsImplInfoUpDownward(resultMap, classNameAndType, upward);
                 tmpClassNameAndTypeSet.addAll(returnClassNameAndTypeSet);
             }
-            if (JavaCGUtil.isCollectionEmpty(tmpClassNameAndTypeSet)) {
+            if (JavaCG2Util.isCollectionEmpty(tmpClassNameAndTypeSet)) {
                 break;
             }
             classNameAndTypeSet = tmpClassNameAndTypeSet;
@@ -487,7 +487,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
         } else {
             upDownwardClassInfoList = queryDownwardByClassName(className);
         }
-        if (JavaCGUtil.isCollectionEmpty(upDownwardClassInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(upDownwardClassInfoList)) {
             return newClassNameAndTypeSet;
         }
         ClassInterfaceEnum classInterfaceEnum = classInfoHandler.queryClassInterfaceEnum(className);
@@ -526,12 +526,12 @@ public class JACGExtendsImplHandler extends BaseHandler {
             for (ClassNameAndType classNameAndType : classNameAndTypeSet) {
                 Set<ClassNameAndType> returnClassNameAndTypeSet = queryExtendsImplInfoUpDownward(resultMap, classNameAndType, true);
                 tmpClassNameAndTypeSet.addAll(returnClassNameAndTypeSet);
-                if (JavaCGUtil.isCollectionEmpty(returnClassNameAndTypeSet)) {
+                if (JavaCG2Util.isCollectionEmpty(returnClassNameAndTypeSet)) {
                     // 当前类向上未查询到父类或实现接口
                     classNameAndTypeList.add(classNameAndType);
                 }
             }
-            if (JavaCGUtil.isCollectionEmpty(tmpClassNameAndTypeSet)) {
+            if (JavaCG2Util.isCollectionEmpty(tmpClassNameAndTypeSet)) {
                 break;
             }
             classNameAndTypeSet = tmpClassNameAndTypeSet;
@@ -547,7 +547,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
      */
     public Map<String, ExtendsImplInfo> queryExtendsImplInfoDownwardFromTop(String startClassName) {
         List<ClassNameAndType> topClassNameAndTypeList = queryTopCLassList(startClassName);
-        if (JavaCGUtil.isCollectionEmpty(topClassNameAndTypeList)) {
+        if (JavaCG2Util.isCollectionEmpty(topClassNameAndTypeList)) {
             return Collections.emptyMap();
         }
         return queryExtendsImplInfoUpDownward(null, topClassNameAndTypeList, false);

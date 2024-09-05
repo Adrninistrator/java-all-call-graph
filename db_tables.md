@@ -276,7 +276,7 @@ jacg_field_relationship
 |set_method_name|VARCHAR|200|set方法方法名|
 |set_class_name|VARCHAR|255|set方法完整类名|
 |valid|TINYINT|3|关联关系是否有效，1:是，0:否|
-|type|VARCHAR|10|关联关系类型，参考 java-callgraph2 项目 JavaCGFieldRelationshipTypeEnum 类|
+|type|VARCHAR|10|关联关系类型，参考 java-callgraph2 项目 JavaCG2FieldRelationshipTypeEnum 类|
 |relationship_flags|INT|10|字段关联关系标志|
 |bean_util_call_id|INT|10|BeanUtil方法调用序号，从1开始|
 |bean_util_method|TEXT|65535|BeanUtil属性拷贝方法|
@@ -470,9 +470,9 @@ jacg_method_call_info
 |obj_args_seq|INT|10|被调用对象或参数序号，0代表被调用对象，1开始为参数|
 |seq|INT|10|序号，从0开始，大于0代表有多种可能|
 |caller_method_hash|VARCHAR|30|调用方，方法hash+字节数|
-|type|VARCHAR|10|类型，含义参考 JavaCGMethodCallInfoTypeEnum 类|
+|type|VARCHAR|10|类型，含义参考 JavaCG2MethodCallInfoTypeEnum 类|
 |array_flag|INT|10|是否为数组格式，1:是，0:否|
-|value_type|VARCHAR|30|值的类型，含义参考 JavaCGConstantTypeEnum 类|
+|value_type|VARCHAR|30|值的类型，含义参考 JavaCG2ConstantTypeEnum 类|
 |the_value|TEXT|65535|对应的值|
 
 # 24. jacg_method_call_method_call_return 方法调用使用方法调用返回值信息表
@@ -628,7 +628,7 @@ jacg_method_info
 |return_type|VARCHAR|255|返回类型类名|
 |method_instructions_hash|VARCHAR|32|方法指令的HASH值（MD5），可能为空字符串|
 |jar_num|INT|10|方法所在的Jar包序号|
-|class_name|VARCHAR|255|唯一类名|
+|class_name|VARCHAR|255|完整类名|
 
 # 30. jacg_method_line_number 方法代码行号信息表
 

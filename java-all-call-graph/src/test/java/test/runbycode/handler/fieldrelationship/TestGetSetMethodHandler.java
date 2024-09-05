@@ -2,7 +2,7 @@ package test.runbycode.handler.fieldrelationship;
 
 import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData4GetSetMethod;
 import com.adrninistrator.jacg.handler.fieldrelationship.GetSetMethodHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.callgraph.fieldrelationships.fra.FRADtoA;
@@ -27,7 +27,7 @@ public class TestGetSetMethodHandler extends TestRunByCodeBase {
     public void test2() {
         try (GetSetMethodHandler getSetMethodHandler = new GetSetMethodHandler(configureWrapper)) {
             List<BaseWriteDbData4GetSetMethod> list = getSetMethodHandler.queryGetSetMethodByClassName(true, FRADtoA.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, "queryGetSetMethodByClassName-get");
         }
     }
@@ -36,7 +36,7 @@ public class TestGetSetMethodHandler extends TestRunByCodeBase {
     public void test3() {
         try (GetSetMethodHandler getSetMethodHandler = new GetSetMethodHandler(configureWrapper)) {
             List<BaseWriteDbData4GetSetMethod> list = getSetMethodHandler.queryGetSetMethodByClassName(false, FRADtoA.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, "queryGetSetMethodByClassName-set");
         }
     }

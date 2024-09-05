@@ -20,7 +20,7 @@ import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -265,7 +265,7 @@ public class AnnotationHandler extends BaseHandler {
 
     // 根据从数据库的查询结果生成注解对应的Map信息
     private Map<String, Map<String, BaseAnnotationAttribute>> genAnnotationMapFromQueryResult(List<AnnotationWithAttributeInfo> list) {
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptyMap();
         }
         Map<String, Map<String, BaseAnnotationAttribute>> resultMap = new HashMap<>();
@@ -405,7 +405,7 @@ public class AnnotationHandler extends BaseHandler {
      * @return
      */
     private Map<String, BaseAnnotationAttribute> genAnnotationAttributeMap(List<AnnotationAttributeInfo> list) {
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptyMap();
         }
 

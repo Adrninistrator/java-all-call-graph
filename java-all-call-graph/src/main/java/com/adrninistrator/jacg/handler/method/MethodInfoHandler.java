@@ -11,9 +11,9 @@ import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.dto.stack.ListAsStack;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.dto.stack.ListAsStack;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +122,7 @@ public class MethodInfoHandler extends BaseHandler {
 
             // 查询当前处理的Mapper接口的父接口
             List<String> interfaceNameList = jacgExtendsImplHandler.queryImplInterfaceNameByClassName(currentClassName);
-            if (JavaCGUtil.isCollectionEmpty(interfaceNameList)) {
+            if (JavaCG2Util.isCollectionEmpty(interfaceNameList)) {
                 continue;
             }
             for (String interfaceName : interfaceNameList) {
@@ -159,7 +159,7 @@ public class MethodInfoHandler extends BaseHandler {
         // 使用当前处理的Mapper接口类名查询对应的方法信息
         String currentSimpleClassName = dbOperWrapper.querySimpleClassName(currentClassName);
         List<WriteDbData4MethodInfo> methodInfoList = queryMethodInfoBySimpleClassMethod(currentSimpleClassName, methodName);
-        if (JavaCGUtil.isCollectionEmpty(methodInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(methodInfoList)) {
             return;
         }
         for (WriteDbData4MethodInfo methodInfo : methodInfoList) {
@@ -170,7 +170,7 @@ public class MethodInfoHandler extends BaseHandler {
             } else {
                 // 当前查询的类与参数指定的不同，使用替换了类名后的完整方法
                 String methodNameWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(methodInfo.getFullMethod());
-                returnWriteDbData4MethodInfo.setFullMethod(JavaCGClassMethodUtil.formatFullMethodWithArgTypes(className, methodNameWithArgs));
+                returnWriteDbData4MethodInfo.setFullMethod(JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(className, methodNameWithArgs));
             }
             returnWriteDbData4MethodInfo.setReturnType(methodInfo.getReturnType());
             allMethodInfoList.add(returnWriteDbData4MethodInfo);

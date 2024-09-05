@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
-import com.adrninistrator.javacg.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.mybatismysqltableparser.dto.MyBatisMySqlInfo;
 import com.adrninistrator.mybatismysqltableparser.dto.MySqlSetColumnInfo;
 import com.adrninistrator.mybatismysqltableparser.dto.MySqlTableColumnInfo;
@@ -50,7 +50,7 @@ public class MyBatisMySqlSetColumnCodeParser extends AbstractSaveData2FileParser
             for (String methodName : methodNameList) {
                 MySqlTableColumnInfo mySqlTableColumnInfo = mySqlTableColumnInfoMap.get(methodName);
                 for (MySqlSetColumnInfo mySqlSetColumnInfo : mySqlTableColumnInfo.getMySqlSetColumnInfoList()) {
-                    JavaCGFileUtil.write2FileWithTab(writer, mapperInterfaceName, methodName, mySqlSetColumnInfo.getDbTableName(), mySqlSetColumnInfo.getDbColumnName(),
+                    JavaCG2FileUtil.write2FileWithTab(writer, mapperInterfaceName, methodName, mySqlSetColumnInfo.getDbTableName(), mySqlSetColumnInfo.getDbColumnName(),
                             mySqlSetColumnInfo.getParameterName(), mybatisXmlFilePath);
                 }
             }

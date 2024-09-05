@@ -5,7 +5,7 @@ import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.ListStringAnnotationAttribute;
 import com.adrninistrator.jacg.util.JACGSpringUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
         String path = getPath(className, attributesMap);
 
         // 返回：注解类名(path)
-        return annotationName + JavaCGConstants.FLAG_LEFT_BRACKET + path + JavaCGConstants.FLAG_RIGHT_BRACKET;
+        return annotationName + JavaCG2Constants.FLAG_LEFT_BRACKET + path + JavaCG2Constants.FLAG_RIGHT_BRACKET;
     }
 
     /**
@@ -113,23 +113,23 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
             return null;
         }
 
-        int indexLeftBracket = annotationInfo.indexOf(JavaCGConstants.FLAG_LEFT_BRACKET);
+        int indexLeftBracket = annotationInfo.indexOf(JavaCG2Constants.FLAG_LEFT_BRACKET);
         if (indexLeftBracket == -1) {
-            logger.error("注解信息中未找到{}字符 {}", JavaCGConstants.FLAG_LEFT_BRACKET, annotationInfo);
+            logger.error("注解信息中未找到{}字符 {}", JavaCG2Constants.FLAG_LEFT_BRACKET, annotationInfo);
             return null;
         }
 
-        int indexRightBracket = annotationInfo.lastIndexOf(JavaCGConstants.FLAG_RIGHT_BRACKET);
+        int indexRightBracket = annotationInfo.lastIndexOf(JavaCG2Constants.FLAG_RIGHT_BRACKET);
         if (indexRightBracket == -1) {
-            logger.error("注解信息中未找到{}字符 {}", JavaCGConstants.FLAG_RIGHT_BRACKET, annotationInfo);
+            logger.error("注解信息中未找到{}字符 {}", JavaCG2Constants.FLAG_RIGHT_BRACKET, annotationInfo);
             return null;
         }
 
         if (indexLeftBracket >= indexRightBracket) {
-            logger.error("注解信息中 {} {} 字符位置非法 {}", JavaCGConstants.FLAG_LEFT_BRACKET, JavaCGConstants.FLAG_RIGHT_BRACKET, annotationInfo);
+            logger.error("注解信息中 {} {} 字符位置非法 {}", JavaCG2Constants.FLAG_LEFT_BRACKET, JavaCG2Constants.FLAG_RIGHT_BRACKET, annotationInfo);
             return null;
         }
 
-        return annotationInfo.substring(indexLeftBracket + JavaCGConstants.FLAG_LEFT_BRACKET.length(), indexRightBracket);
+        return annotationInfo.substring(indexLeftBracket + JavaCG2Constants.FLAG_LEFT_BRACKET.length(), indexRightBracket);
     }
 }

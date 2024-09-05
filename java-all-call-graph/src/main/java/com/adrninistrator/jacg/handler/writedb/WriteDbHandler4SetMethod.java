@@ -5,7 +5,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SetMethod;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -19,7 +19,7 @@ import java.util.Set;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_SET_METHOD,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_SET_METHOD,
         minColumnNum = 6,
         maxColumnNum = 6,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_SET_METHOD

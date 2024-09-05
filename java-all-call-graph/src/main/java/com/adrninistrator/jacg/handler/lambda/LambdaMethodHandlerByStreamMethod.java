@@ -6,9 +6,9 @@ import com.adrninistrator.jacg.dto.lambda.LambdaMethodCall;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,15 +44,15 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodPageHandl
 
         if (lambdaNextIsStream != null) {
             sql = sql + " and lmi." + DC.LMI_LAMBDA_NEXT_IS_STREAM + " = ?";
-            argList.add(JavaCGYesNoEnum.parseIntValue(lambdaNextIsStream));
+            argList.add(JavaCG2YesNoEnum.parseIntValue(lambdaNextIsStream));
         }
         if (Boolean.TRUE.equals(lambdaNextIsIntermediate)) {
             sql = sql + " and lmi." + DC.LMI_LAMBDA_NEXT_IS_INTERMEDIATE + " = ?";
-            argList.add(JavaCGYesNoEnum.YES.getStrValue());
+            argList.add(JavaCG2YesNoEnum.YES.getStrValue());
         }
         if (Boolean.FALSE.equals(lambdaNextIsIntermediate)) {
             sql = sql + " and lmi." + DC.LMI_LAMBDA_NEXT_IS_TERMINAL + " = ?";
-            argList.add(JavaCGYesNoEnum.YES.getStrValue());
+            argList.add(JavaCG2YesNoEnum.YES.getStrValue());
         }
         return dbOperator.queryList(sql, LambdaMethodCall.class, argList.toArray());
     }
@@ -66,12 +66,12 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodPageHandl
      */
     public List<LambdaMethodCall> queryByStreamMethod(Boolean lambdaNextIsStream, Boolean lambdaNextIsIntermediate) {
         if (!Boolean.TRUE.equals(lambdaNextIsStream) && (lambdaNextIsIntermediate != null)) {
-            throw new JavaCGRuntimeException("仅当参数1为true时，参数2允许为非null");
+            throw new JavaCG2RuntimeException("仅当参数1为true时，参数2允许为非null");
         }
 
         logger.info("通过Stream条件查询Lambda表达式方法调用信息 {} {}", lambdaNextIsStream, lambdaNextIsIntermediate);
         // 分页查询，结果合并到List中
-        return QueryByPageHandler.queryAll2List(this, JavaCGConstants.METHOD_CALL_ID_MIN_BEFORE, lambdaNextIsStream, lambdaNextIsIntermediate);
+        return QueryByPageHandler.queryAll2List(this, JavaCG2Constants.METHOD_CALL_ID_MIN_BEFORE, lambdaNextIsStream, lambdaNextIsIntermediate);
     }
 
     /**

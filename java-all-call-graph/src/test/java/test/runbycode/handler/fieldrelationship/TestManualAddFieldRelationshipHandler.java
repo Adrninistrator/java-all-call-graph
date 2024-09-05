@@ -1,7 +1,7 @@
 package test.runbycode.handler.fieldrelationship;
 
 import com.adrninistrator.jacg.handler.fieldrelationship.ManualAddFieldRelationshipHandler;
-import com.adrninistrator.javacg.common.enums.JavaCGFieldRelationshipTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2FieldRelationshipTypeEnum;
 import org.junit.Assert;
 import org.junit.Test;
 import test.runbycode.base.TestRunByCodeBase;
@@ -26,7 +26,7 @@ public class TestManualAddFieldRelationshipHandler extends TestRunByCodeBase {
         try (ManualAddFieldRelationshipHandler manualAddFieldRelationshipHandler = new ManualAddFieldRelationshipHandler(configureWrapper)) {
             Assert.assertTrue(manualAddFieldRelationshipHandler.beforeAdd());
             manualAddFieldRelationshipHandler.manualAddFieldRelationship("a.b.C:f()", 123, 0, 0, "a.b.GetClass", "getB2", "a.b.SetClass", "setA1",
-                    JavaCGFieldRelationshipTypeEnum.FRTE_BEAN_UTIL, 0);
+                    JavaCG2FieldRelationshipTypeEnum.FRTE_BEAN_UTIL, 0);
             manualAddFieldRelationshipHandler.afterAdd();
         }
     }

@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.common.annotations;
 
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.WriteDbHandlerWriteFileEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -25,7 +25,7 @@ public @interface JACGWriteDbHandler {
     boolean mainFile() default false;
 
     // 需要读取的主要文件类型
-    JavaCGOutPutFileTypeEnum mainFileTypeEnum() default JavaCGOutPutFileTypeEnum.OPFTE_ILLEGAL;
+    JavaCG2OutPutFileTypeEnum mainFileTypeEnum() default JavaCG2OutPutFileTypeEnum.OPFTE_ILLEGAL;
 
     // 需要读取的其他文件名称
     String otherFileName() default "";

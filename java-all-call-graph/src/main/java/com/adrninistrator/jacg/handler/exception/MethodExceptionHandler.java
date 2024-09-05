@@ -24,10 +24,10 @@ import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGMethodCallInfoTypeEnum;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -205,8 +205,8 @@ public class MethodExceptionHandler extends BaseHandler {
 
         // 查询当前catch的异常对象在方法调用中被使用的情况
         List<WriteDbData4MethodCallInfo> catchExceptionMethodCallInfoList = methodCallInfoHandler.queryMethodCallInfo4CallerByTypeValue(methodCatch.getMethodHash(),
-                String.valueOf(methodCatch.getCatchStartOffset()), JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CATCH_EXCEPTION_FROM_OFFSET.getType());
-        if (!JavaCGUtil.isCollectionEmpty(catchExceptionMethodCallInfoList)) {
+                String.valueOf(methodCatch.getCatchStartOffset()), JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CATCH_EXCEPTION_FROM_OFFSET.getType());
+        if (!JavaCG2Util.isCollectionEmpty(catchExceptionMethodCallInfoList)) {
             for (WriteDbData4MethodCallInfo methodCallInfo : catchExceptionMethodCallInfoList) {
                 // 处理catch的异常对象在方法调用中的使用情况
                 handleMethodCatchExceptionMethodCall(methodCatch, methodCallInfo, methodCatchExceptionUsageList, expectedClassAndMethodNameList);
@@ -216,7 +216,7 @@ public class MethodExceptionHandler extends BaseHandler {
         if (methodCatchExceptionUsageList.isEmpty()) {
             // 未查询到catch的异常对象的使用情况
             // 查询catch代码块中调用的方法
-            if (methodCatch.getCatchMinCallId() >= JavaCGConstants.METHOD_CALL_ID_MIN) {
+            if (methodCatch.getCatchMinCallId() >= JavaCG2Constants.METHOD_CALL_ID_MIN) {
                 for (int catchCallId = methodCatch.getCatchMinCallId(); catchCallId <= methodCatch.getCatchMaxCallId(); catchCallId++) {
                     WriteDbData4MethodCall methodCall = methodCallHandler.queryMethodCallByCallId(catchCallId);
                     NoMCEU4MethodCall noMCEU4MethodCall = new NoMCEU4MethodCall();
@@ -231,7 +231,7 @@ public class MethodExceptionHandler extends BaseHandler {
             // 查询catch代码块中通过throw抛出的异常
             List<WriteDbData4MethodThrow> methodThrowList = queryMethodThrowByMethodHashThrowOffsetRange(methodCatch.getMethodHash(), methodCatch.getCatchStartOffset(),
                     methodCatch.getCatchEndOffset());
-            if (!JavaCGUtil.isCollectionEmpty(methodThrowList)) {
+            if (!JavaCG2Util.isCollectionEmpty(methodThrowList)) {
                 for (WriteDbData4MethodThrow methodThrow : methodThrowList) {
                     NoMCEU4MethodThrow noMCEU4MethodThrow = new NoMCEU4MethodThrow();
                     noMCEU4MethodThrow.setThrowLineNumber(methodThrow.getLineNumber());
@@ -258,13 +258,13 @@ public class MethodExceptionHandler extends BaseHandler {
 
         // 查询当前catch的异常对应变量名称
         WriteDbData4MethodCallInfo methodCallInfo4NameOfVariable = methodCallInfoHandler.queryMethodCallInfoByCallIdType(methodCallInfo.getCallId(),
-                methodCallInfo.getObjArgsSeq(), methodCallInfo.getSeq(), JavaCGMethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType());
+                methodCallInfo.getObjArgsSeq(), methodCallInfo.getSeq(), JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType());
         String catchExceptionVariableName = (methodCallInfo4NameOfVariable == null ? "" : methodCallInfo4NameOfVariable.getTheValue());
 
         WriteDbData4MethodCall methodCall = methodCallHandler.queryMethodCallByCallId(callId);
-        if (JavaCGConstants.METHOD_CALL_OBJECT_SEQ == methodCallInfo.getObjArgsSeq()) {
+        if (JavaCG2Constants.METHOD_CALL_OBJECT_SEQ == methodCallInfo.getObjArgsSeq()) {
             // catch的异常对象是方法调用中的被调用对象
-            if (!JavaCGCommonNameConstants.RETURN_TYPE_VOID.equals(methodCall.getRawReturnType())) {
+            if (!JavaCG2CommonNameConstants.RETURN_TYPE_VOID.equals(methodCall.getRawReturnType())) {
                 // 被调用方法返回值非void，查询在方法调用中使用catch的异常对象的方法调用返回值作为被调用对象或参数的情况
                 List<WriteDbData4MethodCallInfo> useEReturnMethodCallInfoList =
                         methodCallInfoHandler.queryMethodCallInfo4CallerByMethodCallOrArg(methodCallInfo.getCallerMethodHash(), true, callId);
@@ -274,7 +274,7 @@ public class MethodExceptionHandler extends BaseHandler {
 
                     // 查询在方法调用中使用catch的异常对象的方法调用返回值作为被调用对象或参数，使用该方法调用返回值进行throw的情况
                     List<WriteDbData4MethodThrow> methodThrowList = queryMethodThrowByMethodHashCallId(methodCatch.getMethodHash(), useEReturnMethodCall.getCallId());
-                    if (!JavaCGUtil.isCollectionEmpty(methodThrowList)) {
+                    if (!JavaCG2Util.isCollectionEmpty(methodThrowList)) {
                         // 在方法调用中使用catch的异常对象的方法调用返回值作为被调用对象或参数，使用该方法调用返回值进行throw
                         for (WriteDbData4MethodThrow methodThrow : methodThrowList) {
                             MCEU4ThrowMCUseEMCReturn mceu4ThrowMCUseEMCReturn = new MCEU4ThrowMCUseEMCReturn();
@@ -323,7 +323,7 @@ public class MethodExceptionHandler extends BaseHandler {
         // catch的异常对象是方法调用中的参数
         // 查询将当前方法调用返回值通过throw抛出异常的信息
         List<WriteDbData4MethodThrow> methodThrowList = queryMethodThrowByMethodHashCallId(methodCatch.getMethodHash(), callId);
-        if (!JavaCGUtil.isCollectionEmpty(methodThrowList)) {
+        if (!JavaCG2Util.isCollectionEmpty(methodThrowList)) {
             // 当前方法调用返回值通过throw抛出异常
             for (WriteDbData4MethodThrow methodThrow : methodThrowList) {
                 MCEU4ThrowMCUseE mceu4ThrowMCUseE = new MCEU4ThrowMCUseE();
@@ -352,7 +352,7 @@ public class MethodExceptionHandler extends BaseHandler {
     private void handleMethodCatchExceptionThrow(WriteDbData4MethodCatch methodCatch, List<BaseMethodCatchExceptionUsage> methodCatchExceptionUsageList) {
         // 查询方法中throw异常的信息，查询条件为方法HASH+长度，与抛出的异常对象对应的catch代码块开始指令
         List<WriteDbData4MethodThrow> methodThrowList = queryMethodThrowByMethodHashCatchStartOffset(methodCatch.getMethodHash(), methodCatch.getCatchStartOffset());
-        if (JavaCGUtil.isCollectionEmpty(methodThrowList)) {
+        if (JavaCG2Util.isCollectionEmpty(methodThrowList)) {
             return;
         }
         for (WriteDbData4MethodThrow methodThrow : methodThrowList) {

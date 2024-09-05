@@ -601,3 +601,18 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 ## 1.22. (2.0.7)临时说明
 
 同上
+
+## 1.23. (2.0.8)临时说明
+
+java-callgraph2 使用 2.0.8 版本
+
+为了使 java-callgraph2 的代码及配置文件与“jacg”更容易区分，对代码及配置文件进行以下名称修改
+
+|内容|修改前的名称|修改后的名称|
+|---|---|---|
+|包名|com.adrninistrator.javacg|com.adrninistrator.javacg2|
+|主类|com.adrninistrator.javacg.stat.JCallGraph|com.adrninistrator.javacg2.entry.JavaCG2Entry|
+|目录、文件名称|javacg|javacg2|
+|类名前缀|JavaCG|JavaCG2|
+
+`当升级到该版本时，假如之前有对目录进行过分析，则相关目录中的“-javacg_merged.jar”文件需要删除`

@@ -6,7 +6,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallMethodCallRetur
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 /**
  * @author adrninistrator
@@ -16,7 +16,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL_METHOD_CALL_RETURN,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL_METHOD_CALL_RETURN,
         minColumnNum = 6,
         maxColumnNum = 6,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL_METHOD_CALL_RETURN

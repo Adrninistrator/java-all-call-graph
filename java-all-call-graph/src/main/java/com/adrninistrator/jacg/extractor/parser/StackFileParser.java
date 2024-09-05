@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.extractor.parser;
 
 import com.adrninistrator.jacg.extractor.callback.StackFileParsedCallback;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public class StackFileParser {
         // 是否在事务中执行
         boolean runInTransaction = false;
 
-        try (BufferedReader br = JavaCGFileUtil.genBufferedReader(stackFilePath)) {
+        try (BufferedReader br = JavaCG2FileUtil.genBufferedReader(stackFilePath)) {
             while ((line = br.readLine()) != null) {
                 lineNumber++;
 

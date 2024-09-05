@@ -1,6 +1,6 @@
 package test.callgraph.customflow.methodcallargs.flow;
 
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class TestCFMCAFlow {
     @SuppressWarnings("unchecked")
     public void handle(TestBaseCFMCAHandler<?>... handlers) {
         if (ArrayUtils.isEmpty(handlers)) {
-            throw new JavaCGRuntimeException("不允许为空");
+            throw new JavaCG2RuntimeException("不允许为空");
         }
 
         for (TestBaseCFMCAHandler handler : handlers) {

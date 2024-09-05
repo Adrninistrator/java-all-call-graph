@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldAnnotation;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +39,7 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     public void testQueryClassesWithAnnotationsSimple() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<String> simpleClassList = annotationHandler.queryClassesWithAnnotation(true, Configuration.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(simpleClassList));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(simpleClassList));
             printListContent(simpleClassList, "simpleClassList");
         }
     }
@@ -48,7 +48,7 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     public void testQueryClassesWithAnnotationsFull() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<String> classList = annotationHandler.queryClassesWithAnnotation(false, RequestMapping.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(classList));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(classList));
             printListContent(classList, "classList");
         }
     }
@@ -57,11 +57,11 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     public void testQueryAnnotationAttributes4Class() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             Map<String, BaseAnnotationAttribute> map = annotationHandler.queryAnnotationAttributes4Class(SpringServiceImplB2.class.getName(), Service.class.getName());
-            Assert.assertFalse(JavaCGUtil.isMapEmpty(map));
+            Assert.assertFalse(JavaCG2Util.isMapEmpty(map));
             printMapContent(map, SpringServiceImplB2.class.getName(), Service.class.getName());
 
             map = annotationHandler.queryAnnotationAttributes4Class(SpringServiceImplB2.class.getName(), Controller.class.getName());
-            Assert.assertTrue(JavaCGUtil.isMapEmpty(map));
+            Assert.assertTrue(JavaCG2Util.isMapEmpty(map));
             printMapContent(map, SpringServiceImplB2.class.getName(), Controller.class.getName());
         }
     }
@@ -70,11 +70,11 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     public void testQueryMethodsWithAnnotationsFullMethod() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<String> methodList = annotationHandler.queryMethodsWithAnnotation(true, PostMapping.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(methodList));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(methodList));
             printListContent(methodList, "methodList");
             for (String method : methodList) {
                 Map<String, BaseAnnotationAttribute> map = annotationHandler.queryMethodAnnotationAttributes(method, PostMapping.class.getName());
-                Assert.assertFalse(JavaCGUtil.isMapEmpty(map));
+                Assert.assertFalse(JavaCG2Util.isMapEmpty(map));
                 printMapContent(map, method, PostMapping.class.getName());
             }
         }
@@ -84,7 +84,7 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     public void testQueryMethodsWithAnnotationsMethodHash() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<String> methodHashList = annotationHandler.queryMethodsWithAnnotation(false, Bean.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(methodHashList));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(methodHashList));
             printListContent(methodHashList, "methodHashList");
         }
     }
@@ -94,12 +94,12 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<SuperClassWithAnnotation> superClassWithAnnotationList1 = annotationHandler.querySuperClassesInfo(TestClassWithAnnotation2A.class.getName(),
                     TestAnnotation1.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(superClassWithAnnotationList1));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(superClassWithAnnotationList1));
             printListContent(superClassWithAnnotationList1, TestClassWithAnnotation2A.class.getName(), TestAnnotation1.class.getName());
 
             List<SuperClassWithAnnotation> superClassWithAnnotationList2 = annotationHandler.querySuperClassesInfo(TestClassWithAnnotation3A.class.getName(),
                     TestAnnotation1.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(superClassWithAnnotationList2));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(superClassWithAnnotationList2));
             printListContent(superClassWithAnnotationList2, TestClassWithAnnotation3A.class.getName(), TestAnnotation1.class.getName());
         }
     }
@@ -108,12 +108,12 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     public void testQueryClassFieldsWithAnnotation() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             List<WriteDbData4FieldAnnotation> list = annotationHandler.queryClassFieldsWithAnnotation(Resource.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list);
             for (WriteDbData4FieldAnnotation fieldAnnotation : list) {
                 Map<String, BaseAnnotationAttribute> map = annotationHandler.queryAnnotationAttributes4Field(fieldAnnotation.getClassName(), fieldAnnotation.getFieldName(),
                         Resource.class.getName());
-                Assert.assertFalse(JavaCGUtil.isMapEmpty(map));
+                Assert.assertFalse(JavaCG2Util.isMapEmpty(map));
                 printMapContent(map, fieldAnnotation.getClassName(), fieldAnnotation.getFieldName(), Resource.class.getName());
             }
         }

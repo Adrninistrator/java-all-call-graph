@@ -11,7 +11,7 @@ import com.adrninistrator.jacg.handler.common.enums.MyBatisColumnRelateDescEnum;
 import com.adrninistrator.jacg.handler.dto.field.FieldBehavior;
 import com.adrninistrator.jacg.handler.dto.field.FieldBehavior4MyBatisEntity;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMSMapperEntityHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ public class MyBatisEntityFieldBehaviorFiller extends BaseHandler implements Fie
             // 当前对应set方法，处理MyBatis Mapper方法参数对应的数据库信息
             fieldBehaviorList = handleMyBatisMapperArgReturnDbInfo(fieldBehavior, fieldRelationshipIdTypeEnum, id);
         }
-        if (!JavaCGUtil.isCollectionEmpty(fieldBehaviorList)) {
+        if (!JavaCG2Util.isCollectionEmpty(fieldBehaviorList)) {
             return fieldBehaviorList;
         }
 
@@ -90,7 +90,7 @@ public class MyBatisEntityFieldBehaviorFiller extends BaseHandler implements Fie
         } else if (FieldRelationshipIdTypeEnum.FRITE_SET_METHOD_CALL_ID == fieldRelationshipIdTypeEnum) {
             mybatisMSGetSetDbList = myBatisMSMapperEntityHandler.queryMybatisMSGetSetDbInfoBySetMethodCallId(id);
         }
-        if (JavaCGUtil.isCollectionEmpty(mybatisMSGetSetDbList)) {
+        if (JavaCG2Util.isCollectionEmpty(mybatisMSGetSetDbList)) {
             logger.warn("从MyBatis的Mapper方法参数所对应的数据库信息表根据通过get/set方法关联的字段关系ID查询相关信息不存在 {} {}", fieldRelationshipIdTypeEnum, id);
             return null;
         }

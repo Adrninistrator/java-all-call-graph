@@ -18,15 +18,15 @@ import com.adrninistrator.jacg.extensions.codeparser.methodannotation.MyBatisAnn
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGConfigKeyEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseListEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseSetEnum;
-import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
-import com.adrninistrator.javacg.dto.output.JavaCGOutputInfo;
-import com.adrninistrator.javacg.extensions.codeparser.CodeParserInterface;
-import com.adrninistrator.javacg.stat.JCallGraph;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2ConfigKeyEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OtherConfigFileUseListEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OtherConfigFileUseSetEnum;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
+import com.adrninistrator.javacg2.dto.output.JavaCG2OutputInfo;
+import com.adrninistrator.javacg2.entry.JavaCG2Entry;
+import com.adrninistrator.javacg2.extensions.codeparser.CodeParserInterface;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,13 +49,13 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
     private static final Logger logger = LoggerFactory.getLogger(RunnerWriteCallGraphFile.class);
 
     // java-callgraph2输出文件信息
-    protected JavaCGOutputInfo javaCGOutputInfo;
+    protected JavaCG2OutputInfo javaCG2OutputInfo;
 
     // java-callgraph2的配置包装类
-    protected JavaCGConfigureWrapper javaCGConfigureWrapper;
+    protected JavaCG2ConfigureWrapper javaCG2ConfigureWrapper;
 
     // java-callgraph2的入口类
-    private JCallGraph jCallGraph;
+    private JavaCG2Entry javaCG2Entry;
 
     public RunnerWriteCallGraphFile() {
         super();
@@ -67,13 +67,13 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
 
     /**
      * 入口方法
-     * 可以调用run(ConfigureWrapper configureWrapper)方法，不需要指定JavaCGConfigureWrapper参数
+     * 可以调用run(ConfigureWrapper configureWrapper)方法，不需要指定JavaCG2ConfigureWrapper参数
      *
-     * @param javaCGConfigureWrapper
+     * @param javaCG2ConfigureWrapper
      * @return
      */
-    public boolean run(JavaCGConfigureWrapper javaCGConfigureWrapper) {
-        this.javaCGConfigureWrapper = javaCGConfigureWrapper;
+    public boolean run(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper) {
+        this.javaCG2ConfigureWrapper = javaCG2ConfigureWrapper;
         return run();
     }
 
@@ -103,13 +103,13 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
     // 调用java-callgraph2生成jar包的方法调用关系
     protected boolean callJavaCallGraph2(List<String> jarPathList) {
         List<String> usedJarPathList;
-        if (!JavaCGUtil.isCollectionEmpty(jarPathList)) {
+        if (!JavaCG2Util.isCollectionEmpty(jarPathList)) {
             usedJarPathList = jarPathList;
         } else {
             // 获得需要处理的jar包列表
             usedJarPathList = getJarPathList();
         }
-        if (JavaCGUtil.isCollectionEmpty(usedJarPathList)) {
+        if (JavaCG2Util.isCollectionEmpty(usedJarPathList)) {
             logger.error("请在配置文件 {} 中指定需要处理的jar包，或保存class、jar文件的目录", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
             return false;
         }
@@ -122,13 +122,13 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         }
 
         // 生成java-callgraph2使用的配置信息
-        if (javaCGConfigureWrapper == null) {
-            javaCGConfigureWrapper = configureWrapper.genJavaCGConfigureWrapper();
+        if (javaCG2ConfigureWrapper == null) {
+            javaCG2ConfigureWrapper = configureWrapper.genJavaCG2ConfigureWrapper();
         }
+        javaCG2Entry = new JavaCG2Entry(javaCG2ConfigureWrapper);
 
-        jCallGraph = new JCallGraph();
         // 设置对注解属性进行格式化的类
-        jCallGraph.setAnnotationAttributesFormatter(new AnnotationAttributesFormatter());
+        javaCG2Entry.setAnnotationAttributesFormatter(new AnnotationAttributesFormatter());
 
         // 添加用于对代码进行解析的处理类
         if (!addCodeParserExtensions()) {
@@ -137,21 +137,21 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
 
         // 调用java-callgraph2
         logger.info("调用java-callgraph2生成jar包的方法调用关系");
-        boolean success = jCallGraph.run(javaCGConfigureWrapper);
+        boolean success = javaCG2Entry.run();
         if (!success) {
             logger.error("调用java-callgraph2生成jar包的方法调用关系失败");
             return false;
         }
 
         // 获取输出信息
-        javaCGOutputInfo = jCallGraph.getJavaCGOutputInfo();
-        currentOutputDirPath = javaCGOutputInfo.getOutputDirPath();
+        javaCG2OutputInfo = javaCG2Entry.getJavaCG2OutputInfo();
+        currentOutputDirPath = javaCG2OutputInfo.getOutputDirPath();
 
         // 打印当前使用的配置信息
         printAllConfigInfo();
 
         // 打印java-callgraph2当前使用的配置信息
-        printJavaCGUsedConfigInfo();
+        printJavaCG2UsedConfigInfo();
         return true;
     }
 
@@ -160,11 +160,13 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, true);
         Set<String> codeParserExtensionClassSet = new HashSet<>(codeParserExtensionClassList);
         if (codeParserExtensionClassList.size() != codeParserExtensionClassSet.size()) {
-            logger.info("指定的用于对代码进行解析的扩展类存在重复 {} {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getConfigPrintInfo(), StringUtils.join(codeParserExtensionClassList));
+            logger.info("指定的用于对代码进行解析的扩展类存在重复 {} {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getConfigPrintInfo(),
+                    StringUtils.join(codeParserExtensionClassList));
             return false;
         }
         if (codeParserExtensionClassSet.contains(MyBatisMySqlSqlInfoCodeParser.class.getName())) {
-            logger.info("用于对代码进行解析的扩展类不能在配置文件 {} 中指定 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getConfigPrintInfo(), MyBatisMySqlSqlInfoCodeParser.class.getName());
+            logger.info("用于对代码进行解析的扩展类不能在配置文件 {} 中指定 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getConfigPrintInfo(),
+                    MyBatisMySqlSqlInfoCodeParser.class.getName());
             return false;
         }
 
@@ -185,20 +187,20 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSelectColumnCodeParser(myBatisMySqlSelectColumnCodeParser);
         myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWhereColumnCodeParser(myBatisMySqlWhereColumnCodeParser);
 
-        jCallGraph.addCodeParser(myBatisMySqlSqlInfoCodeParser);
-        jCallGraph.addCodeParser(myBatisMySqlColumnInfoCodeParser);
-        jCallGraph.addCodeParser(myBatisMySqlEntityInfoCodeParser);
-        jCallGraph.addCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
-        jCallGraph.addCodeParser(myBatisMySqlSetColumnCodeParser);
-        jCallGraph.addCodeParser(myBatisMySqlSelectColumnCodeParser);
-        jCallGraph.addCodeParser(myBatisMySqlWhereColumnCodeParser);
-        jCallGraph.addCodeParser(new SpringTaskXmlCodeParser());
-        jCallGraph.addCodeParser(new MyBatisAnnotationCodeParser());
-        jCallGraph.addCodeParser(new PropertiesConfCodeParser());
-        jCallGraph.addCodeParser(new SpringXmlBeanParser());
+        javaCG2Entry.addCodeParser(myBatisMySqlSqlInfoCodeParser);
+        javaCG2Entry.addCodeParser(myBatisMySqlColumnInfoCodeParser);
+        javaCG2Entry.addCodeParser(myBatisMySqlEntityInfoCodeParser);
+        javaCG2Entry.addCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
+        javaCG2Entry.addCodeParser(myBatisMySqlSetColumnCodeParser);
+        javaCG2Entry.addCodeParser(myBatisMySqlSelectColumnCodeParser);
+        javaCG2Entry.addCodeParser(myBatisMySqlWhereColumnCodeParser);
+        javaCG2Entry.addCodeParser(new SpringTaskXmlCodeParser());
+        javaCG2Entry.addCodeParser(new MyBatisAnnotationCodeParser());
+        javaCG2Entry.addCodeParser(new PropertiesConfCodeParser());
+        javaCG2Entry.addCodeParser(new SpringXmlBeanParser());
 
         // 添加参数配置中的代码解析扩展类
-        if (!JavaCGUtil.isCollectionEmpty(codeParserExtensionClassList)) {
+        if (!JavaCG2Util.isCollectionEmpty(codeParserExtensionClassList)) {
             logger.info("添加参数配置中的代码解析扩展类\n{}", StringUtils.join(codeParserExtensionClassList, "\n"));
             for (String extensionClass : codeParserExtensionClassList) {
                 CodeParserInterface codeParser = JACGUtil.genClassObject(extensionClass, CodeParserInterface.class);
@@ -206,7 +208,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
                     return false;
                 }
                 // 添加代码解析扩展类
-                jCallGraph.addCodeParser(codeParser);
+                javaCG2Entry.addCodeParser(codeParser);
             }
         }
         return true;
@@ -215,64 +217,71 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
     /**
      * 打印当前使用的配置信息
      */
-    protected void printJavaCGUsedConfigInfo() {
-        String configMdFilePath = JavaCGUtil.addSeparator4FilePath(currentOutputDirPath) + JACGConstants.FILE_JAVACG_USED_CONFIG_MD;
-        logger.info("{} 全部的配置参数信息保存到以下文件 {}", JCallGraph.class.getSimpleName(), configMdFilePath);
+    protected void printJavaCG2UsedConfigInfo() {
+        String configMdFilePath = JavaCG2Util.addSeparator4FilePath(currentOutputDirPath) + JACGConstants.FILE_JAVACG2_ALL_CONFIG_MD;
+        logger.info("{} 全部的配置参数信息保存到以下文件 {}", JavaCG2Entry.class.getSimpleName(), configMdFilePath);
         try (MarkdownWriter markdownWriter = new MarkdownWriter(configMdFilePath, true)) {
             // 打印java-callgraph2的主要配置信息
-            printJavaCGMainConfigInfo(markdownWriter);
+            printJavaCG2MainConfigInfo(markdownWriter);
 
             // 打印Set格式的其他配置信息
-            printJavaCGOtherSetConfigInfo(markdownWriter);
+            printJavaCG2OtherSetConfigInfo(markdownWriter);
 
             // 打印List格式的其他配置信息
-            printJavaCGOtherListConfigInfo(markdownWriter);
+            printJavaCG2OtherListConfigInfo(markdownWriter);
         } catch (Exception e) {
             logger.error("{} error ", currentSimpleClassName, e);
         }
     }
 
     // 打印java-callgraph2的主要配置信息
-    private void printJavaCGMainConfigInfo(MarkdownWriter markdownWriter) throws IOException {
+    private void printJavaCG2MainConfigInfo(MarkdownWriter markdownWriter) throws IOException {
+        // 添加公共的说明
+        configureWrapper.addCommonDesc(markdownWriter);
+        markdownWriter.addTitle(1, JACGConstants.MAIN_CONFIG);
         // 写入配置文件名
-        markdownWriter.addTitle(1, JavaCGConstants.DIR_CONFIG + "/" + JavaCGConstants.FILE_CONFIG);
-        markdownWriter.addTableHead(JACGConstants.USED_CONFIG_FLAG_CONF_KEY, JACGConstants.USED_CONFIG_FLAG_CONF_DESC, JACGConstants.USED_CONFIG_FLAG_CONF_VALUE);
-        for (JavaCGConfigKeyEnum javaCGConfigKeyEnum : JavaCGConfigKeyEnum.values()) {
-            String value = javaCGConfigureWrapper.getConfig(null, javaCGConfigKeyEnum, false);
-            markdownWriter.addTableBody(javaCGConfigKeyEnum.getKey(), javaCGConfigKeyEnum.getDesc(), (value == null ? "" : value));
+        markdownWriter.addTitle(2, JavaCG2Constants.DIR_CONFIG + "/" + JavaCG2Constants.FILE_CONFIG);
+        markdownWriter.addListWithNewLine(JACGConstants.USED_CONFIG_FLAG_FILE_ENUM_CLASS);
+        markdownWriter.addLineWithNewLine(JavaCG2ConfigKeyEnum.class.getSimpleName());
+        markdownWriter.addTableHead(JACGConstants.USED_CONFIG_FLAG_CONF_KEY, JACGConstants.USED_CONFIG_FLAG_CONF_ENUM_NAME, JACGConstants.USED_CONFIG_FLAG_CONF_DESC,
+                JACGConstants.USED_CONFIG_FLAG_CONF_VALUE);
+        for (JavaCG2ConfigKeyEnum javaCG2ConfigKeyEnum : JavaCG2ConfigKeyEnum.values()) {
+            String value = javaCG2ConfigureWrapper.getConfig(null, javaCG2ConfigKeyEnum, false);
+            markdownWriter.addTableBody(javaCG2ConfigKeyEnum.getKey(), javaCG2ConfigKeyEnum.name(), javaCG2ConfigKeyEnum.getDesc(), (value == null ? "" : value));
         }
         markdownWriter.addEmptyLine();
     }
 
     // 打印List格式的其他配置信息
-    private void printJavaCGOtherListConfigInfo(MarkdownWriter markdownWriter) throws IOException {
-        JavaCGOtherConfigFileUseListEnum[] configs = JavaCGOtherConfigFileUseListEnum.values();
+    private void printJavaCG2OtherListConfigInfo(MarkdownWriter markdownWriter) throws IOException {
+        JavaCG2OtherConfigFileUseListEnum[] configs = JavaCG2OtherConfigFileUseListEnum.values();
         for (int i = 0; i < configs.length; i++) {
-            JavaCGOtherConfigFileUseListEnum currentConfig = configs[i];
-            if (JavaCGOtherConfigFileUseListEnum.OCFULE_CODE_PARSER_ONLY_4SHOW == currentConfig) {
+            JavaCG2OtherConfigFileUseListEnum currentConfig = configs[i];
+            if (JavaCG2OtherConfigFileUseListEnum.OCFULE_CODE_PARSER_ONLY_4SHOW == currentConfig) {
                 // 代码解析扩展类名特殊处理
-                List<String> allCodeParserNameList = jCallGraph.getAllCodeParserNameList();
-                configureWrapper.doPrintListConfigInfo(markdownWriter, i, currentConfig.getFileName(), currentConfig.getDesc(), allCodeParserNameList);
+                List<String> allCodeParserNameList = javaCG2Entry.getAllCodeParserNameList();
+                configureWrapper.doPrintListConfigInfo(markdownWriter, i, currentConfig.getFileName(), currentConfig.getClass().getSimpleName(), currentConfig.name(),
+                        currentConfig.getDesc(), allCodeParserNameList);
                 continue;
             }
-            configureWrapper.doPrintListConfigInfo(markdownWriter, i, currentConfig.getFileName(), currentConfig.getDesc(), javaCGConfigureWrapper.getOtherConfigList(currentConfig
-                    , false));
+            configureWrapper.doPrintListConfigInfo(markdownWriter, i, currentConfig.getFileName(), currentConfig.getClass().getSimpleName(), currentConfig.name(),
+                    currentConfig.getDesc(), javaCG2ConfigureWrapper.getOtherConfigList(currentConfig, false));
         }
     }
 
     // 打印Set格式的其他配置信息
-    private void printJavaCGOtherSetConfigInfo(MarkdownWriter markdownWriter) throws IOException {
-        JavaCGOtherConfigFileUseSetEnum[] configs = JavaCGOtherConfigFileUseSetEnum.values();
+    private void printJavaCG2OtherSetConfigInfo(MarkdownWriter markdownWriter) throws IOException {
+        JavaCG2OtherConfigFileUseSetEnum[] configs = JavaCG2OtherConfigFileUseSetEnum.values();
         for (int i = 0; i < configs.length; i++) {
-            JavaCGOtherConfigFileUseSetEnum currentConfig = configs[i];
-            configureWrapper.doPrintSetConfigInfo(markdownWriter, i, currentConfig.getFileName(), currentConfig.getDesc(), javaCGConfigureWrapper.getOtherConfigSet(currentConfig,
-                    false));
+            JavaCG2OtherConfigFileUseSetEnum currentConfig = configs[i];
+            configureWrapper.doPrintSetConfigInfo(markdownWriter, i, currentConfig.getFileName(), currentConfig.getClass().getSimpleName(), currentConfig.name(),
+                    currentConfig.getDesc(), javaCG2ConfigureWrapper.getOtherConfigSet(currentConfig, false));
         }
     }
 
     // 打印重复的类名
     protected void printDuplicateClasses() {
-        Map<String, List<String>> duplicateClassNameMap = jCallGraph.getDuplicateClassNameMap();
+        Map<String, List<String>> duplicateClassNameMap = javaCG2Entry.getDuplicateClassNameMap();
         if (duplicateClassNameMap.isEmpty()) {
             logger.info("不存在重复的类名");
             return;

@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SfFieldMethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 /**
  * @author adrninistrator
@@ -14,7 +14,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_SF_FIELD_METHOD_CALL,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_SF_FIELD_METHOD_CALL,
         minColumnNum = 7,
         maxColumnNum = 7,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_SF_FIELD_METHOD_CALL

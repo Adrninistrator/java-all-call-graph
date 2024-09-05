@@ -10,7 +10,7 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4PropertiesConf;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +113,7 @@ public class PropertiesConfHandler extends BaseHandler {
             sql = "select ifnull(max(" + DC.PC_RECORD_ID + "),?) from " + DbTableInfoEnum.DTIE_PROPERTIES_CONF.getTableName();
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        Integer maxId = dbOperator.queryObjectOneColumn(sql, Integer.class, JavaCGConstants.RECORD_ID_MIN_BEFORE);
+        Integer maxId = dbOperator.queryObjectOneColumn(sql, Integer.class, JavaCG2Constants.RECORD_ID_MIN_BEFORE);
         if (maxId == null) {
             logger.error("查询数据库表properties文件配置的最大id为null");
             return JACGConstants.RECORD_ID_ILLEGAL;

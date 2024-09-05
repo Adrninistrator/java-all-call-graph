@@ -4,8 +4,8 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassReference;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 /**
  * @author adrninistrator
@@ -15,7 +15,7 @@ import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_CLASS_REFERENCE,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_CLASS_REFERENCE,
         minColumnNum = 2,
         maxColumnNum = 2,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_REFERENCE
@@ -43,8 +43,8 @@ public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteD
             return null;
         }
 
-        String simpleClassName = JavaCGClassMethodUtil.getSimpleClassNameFromFull(className);
-        String referencedSimpleClassName = JavaCGClassMethodUtil.getSimpleClassNameFromFull(referenceClassName);
+        String simpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(className);
+        String referencedSimpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(referenceClassName);
         WriteDbData4ClassReference writeDbData4ClassReference = new WriteDbData4ClassReference();
         writeDbData4ClassReference.setRecordId(genNextRecordId());
         writeDbData4ClassReference.setClassName(className);

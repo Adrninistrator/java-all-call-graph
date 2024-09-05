@@ -6,7 +6,7 @@ import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.common.enums.FieldRelationshipIdTypeEnum;
 import com.adrninistrator.jacg.handler.dto.field.FieldBehavior;
 import com.adrninistrator.jacg.util.field.FieldBehaviorUtil;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,10 +43,10 @@ public abstract class DefaultFieldBehaviorCachedFiller<T extends FieldBehaviorFi
     @Override
     public void init() {
         if (actualFieldBehaviorFiller == null) {
-            throw new JavaCGRuntimeException("未设置实际使用的字段行为填充类");
+            throw new JavaCG2RuntimeException("未设置实际使用的字段行为填充类");
         }
         if (cachedFieldBehaviorMap != null) {
-            throw new JavaCGRuntimeException("为了避免被分析的不同应用间的数据有冲突，当前类需要在处理每个应用时创建新的实例");
+            throw new JavaCG2RuntimeException("为了避免被分析的不同应用间的数据有冲突，当前类需要在处理每个应用时创建新的实例");
         }
         cachedFieldBehaviorMap = new HashMap<>();
     }

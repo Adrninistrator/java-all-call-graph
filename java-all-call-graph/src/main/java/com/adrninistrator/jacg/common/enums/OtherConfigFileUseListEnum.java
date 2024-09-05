@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.common.enums;
 
 import com.adrninistrator.jacg.common.enums.interfaces.ConfigInterface;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
 /**
  * @author adrninistrator
@@ -40,6 +41,11 @@ public enum OtherConfigFileUseListEnum implements ConfigInterface {
     }
 
     @Override
+    public String getEnumName() {
+        return name();
+    }
+
+    @Override
     public String getKey() {
         return fileName;
     }
@@ -58,13 +64,13 @@ public enum OtherConfigFileUseListEnum implements ConfigInterface {
         return canUseConfigInFile;
     }
 
-    public static String getDescFromKey(String key) {
+    public static OtherConfigFileUseListEnum getFromKey(String key) {
         for (OtherConfigFileUseListEnum otherConfigFileUseListEnum : OtherConfigFileUseListEnum.values()) {
             if (otherConfigFileUseListEnum.getKey().equals(key)) {
-                return otherConfigFileUseListEnum.getDesc();
+                return otherConfigFileUseListEnum;
             }
         }
-        return "";
+        throw new JavaCG2RuntimeException("不存在的key " + key);
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class SpringTxMethodCallFilter implements FindStackKeywordFilterInterface {
     private static final String TRANSACTION_TEMPLATE_EXECUTE_METHOD = JACGClassMethodUtil.genClassAndMethodName(JACGCommonNameConstants.SPRING_TRANSACTION_TEMPLATE_CLASS,
-            "execute" + JavaCGConstants.FLAG_LEFT_BRACKET);
+            "execute" + JavaCG2Constants.FLAG_LEFT_BRACKET);
     private static final String TRANSACTIONAL_ANNOTATION = JACGConstants.FLAG_AT + JACGCommonNameConstants.SPRING_TX_ANNOTATION;
 
 

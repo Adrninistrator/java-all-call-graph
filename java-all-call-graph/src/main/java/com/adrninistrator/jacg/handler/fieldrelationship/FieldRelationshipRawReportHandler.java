@@ -15,9 +15,9 @@ import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class FieldRelationshipRawReportHandler extends BaseHandler implements Qu
         }
 
         List<Object> argList = new ArrayList<>();
-        argList.add(JavaCGYesNoEnum.YES.getIntValue());
+        argList.add(JavaCG2YesNoEnum.YES.getIntValue());
         argList.add(currentStartId);
         if (!lastQuery) {
             argList.add(currentEndId);
@@ -109,9 +109,9 @@ public class FieldRelationshipRawReportHandler extends BaseHandler implements Qu
 
             for (FieldBehavior getFieldBehavior : getFieldBehaviorList) {
                 for (FieldBehavior setFieldBehavior : setFieldBehaviorList) {
-                    String getFieldData = getFieldBehavior.genLineContent(JavaCGConstants.FLAG_TAB);
-                    String setFieldData = setFieldBehavior.genLineContent(JavaCGConstants.FLAG_TAB);
-                    JavaCGFileUtil.write2FileWithTab(writer, getFieldData, setFieldData, fieldRelationship.getType(),
+                    String getFieldData = getFieldBehavior.genLineContent(JavaCG2Constants.FLAG_TAB);
+                    String setFieldData = setFieldBehavior.genLineContent(JavaCG2Constants.FLAG_TAB);
+                    JavaCG2FileUtil.write2FileWithTab(writer, getFieldData, setFieldData, fieldRelationship.getType(),
                             fieldRelationship.getCallerFullMethod(), String.valueOf(fieldRelationship.getCallerLineNumber()));
                 }
             }
@@ -138,9 +138,9 @@ public class FieldRelationshipRawReportHandler extends BaseHandler implements Qu
         }
 
         // 写报告文件时使用追加模式
-        try (BufferedWriter writer = JavaCGFileUtil.genBufferedWriter(reportFilePath)) {
+        try (BufferedWriter writer = JavaCG2FileUtil.genBufferedWriter(reportFilePath)) {
             // 分页查询并处理
-            return QueryByPageHandler.queryAndHandle(this, JavaCGConstants.RECORD_ID_MIN_BEFORE, writer, fieldBehaviorFillers);
+            return QueryByPageHandler.queryAndHandle(this, JavaCG2Constants.RECORD_ID_MIN_BEFORE, writer, fieldBehaviorFillers);
         } catch (Exception e) {
             logger.error("error ", e);
             return false;

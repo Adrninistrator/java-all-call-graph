@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassSignatureEi1;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 /**
  * @author adrninistrator
@@ -14,7 +14,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_CLASS_SIGNATURE_EI1,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_CLASS_SIGNATURE_EI1,
         minColumnNum = 6,
         maxColumnNum = 6,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_SIGNATURE_EI1

@@ -6,9 +6,9 @@ import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
 import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
 import com.adrninistrator.jacg.markdown.JACGMarkdownConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +49,8 @@ public class JACGCallGraphFileUtil {
      */
     public static int getDataSeqFromLine(String line) {
         String dataSeq = StringUtils.substringBetween(line, JACGMarkdownConstants.FLAG_SPACE, JACGMarkdownConstants.FLAG_DOT);
-        if (!JavaCGUtil.isNumStr(dataSeq)) {
-            throw new JavaCGRuntimeException("方法调用行内容非法 " + line);
+        if (!JavaCG2Util.isNumStr(dataSeq)) {
+            throw new JavaCG2RuntimeException("方法调用行内容非法 " + line);
         }
         return Integer.parseInt(dataSeq);
     }
@@ -160,7 +160,7 @@ public class JACGCallGraphFileUtil {
      */
     public static String genOutputLevelSpaceFlag(int level) {
         if (level < 0) {
-            throw new JavaCGRuntimeException("指定的方法级别非法 " + level);
+            throw new JavaCG2RuntimeException("指定的方法级别非法 " + level);
         }
         if (level == 0) {
             return "";
@@ -185,7 +185,7 @@ public class JACGCallGraphFileUtil {
      * @return
      */
     public static String genOutputPrefix(int level) {
-        return genOutputLevelFlag(level) + JavaCGConstants.FLAG_HASHTAG + genOutputLevelSpaceFlag(level);
+        return genOutputLevelFlag(level) + JavaCG2Constants.FLAG_HASHTAG + genOutputLevelSpaceFlag(level);
     }
 
     /**
@@ -223,16 +223,16 @@ public class JACGCallGraphFileUtil {
      */
     public static String[] splitCallGraphLine(String line, boolean calleeGraph) {
         if (StringUtils.isBlank(line)) {
-            throw new JavaCGRuntimeException("传入的行内容为空");
+            throw new JavaCG2RuntimeException("传入的行内容为空");
         }
 
-        String[] array = StringUtils.splitPreserveAllTokens(line, JavaCGConstants.FLAG_TAB);
+        String[] array = StringUtils.splitPreserveAllTokens(line, JavaCG2Constants.FLAG_TAB);
         if (calleeGraph) {
             if (array.length < JACGConstants.CALL_GRAPH_EE_LINE_MIN_COLUMN_NUM) {
-                throw new JavaCGRuntimeException("向上的方法完整调用链文件分隔后列数太小 " + array.length);
+                throw new JavaCG2RuntimeException("向上的方法完整调用链文件分隔后列数太小 " + array.length);
             }
         } else if (array.length < JACGConstants.CALL_GRAPH_ER_LINE_MIN_COLUMN_NUM) {
-            throw new JavaCGRuntimeException("向下的方法完整调用链文件分隔后列数太小 " + array.length);
+            throw new JavaCG2RuntimeException("向下的方法完整调用链文件分隔后列数太小 " + array.length);
         }
         return array;
     }
@@ -244,7 +244,7 @@ public class JACGCallGraphFileUtil {
      * @return
      */
     private static String getFullMethodWithAnnotations4Level0(String column1) {
-        return StringUtils.substringAfter(column1, JavaCGConstants.FLAG_HASHTAG);
+        return StringUtils.substringAfter(column1, JavaCG2Constants.FLAG_HASHTAG);
     }
 
     /**
@@ -273,11 +273,11 @@ public class JACGCallGraphFileUtil {
         } else {
             // 方法级别大于0
             // 获取第1个#之后的内容
-            int indexHashTag = column1.indexOf(JavaCGConstants.FLAG_HASHTAG);
+            int indexHashTag = column1.indexOf(JavaCG2Constants.FLAG_HASHTAG);
             if (indexHashTag == -1) {
-                throw new JavaCGRuntimeException(line + " 未找到字符 " + JavaCGConstants.FLAG_HASHTAG);
+                throw new JavaCG2RuntimeException(line + " 未找到字符 " + JavaCG2Constants.FLAG_HASHTAG);
             }
-            String column1SubString = column1.substring(indexHashTag + JavaCGConstants.FLAG_HASHTAG.length());
+            String column1SubString = column1.substring(indexHashTag + JavaCG2Constants.FLAG_HASHTAG.length());
             // 获取第1个非空格开始的子字符串
             fullMethodWithAnnotations = JACGUtil.getFirstExcludeSubString(column1SubString, JACGConstants.FLAG_CHAR_SPACE);
             nextStartIndex = 2;
@@ -286,9 +286,9 @@ public class JACGCallGraphFileUtil {
         CallGraphLineParsed callGraphLineParsed = parseCallGraphLine(line, methodLevel, fullMethodWithAnnotations, lineColumns, nextStartIndex);
         // 获取调用方法代码行号
         for (String column : lineColumns) {
-            if (column.startsWith(JavaCGConstants.FLAG_LEFT_BRACKET) && column.endsWith(JavaCGConstants.FLAG_RIGHT_BRACKET)) {
-                int indexStart = column.indexOf(JavaCGConstants.FLAG_COLON);
-                String lineNumber = column.substring(indexStart + JavaCGConstants.FLAG_COLON.length(), column.length() - JavaCGConstants.FLAG_RIGHT_BRACKET.length());
+            if (column.startsWith(JavaCG2Constants.FLAG_LEFT_BRACKET) && column.endsWith(JavaCG2Constants.FLAG_RIGHT_BRACKET)) {
+                int indexStart = column.indexOf(JavaCG2Constants.FLAG_COLON);
+                String lineNumber = column.substring(indexStart + JavaCG2Constants.FLAG_COLON.length(), column.length() - JavaCG2Constants.FLAG_RIGHT_BRACKET.length());
                 callGraphLineParsed.setCallerLineNumber(Integer.valueOf(lineNumber));
                 break;
             }
@@ -330,8 +330,8 @@ public class JACGCallGraphFileUtil {
         CallGraphLineParsed callGraphLineParsed = parseCallGraphLine(line, methodLevel, fullMethodWithAnnotations, lineColumns, nextStartIndex);
         if (contentContainsLineNumber != null) {
             // 获取调用方法代码行号
-            int indexStart = contentContainsLineNumber.indexOf(JavaCGConstants.FLAG_COLON);
-            String lineNumber = contentContainsLineNumber.substring(indexStart + JavaCGConstants.FLAG_COLON.length(),
+            int indexStart = contentContainsLineNumber.indexOf(JavaCG2Constants.FLAG_COLON);
+            String lineNumber = contentContainsLineNumber.substring(indexStart + JavaCG2Constants.FLAG_COLON.length(),
                     contentContainsLineNumber.length() - JACGConstants.FLAG_RIGHT_PARENTHESES.length());
             callGraphLineParsed.setCallerLineNumber(Integer.valueOf(lineNumber));
         }
@@ -346,8 +346,8 @@ public class JACGCallGraphFileUtil {
      */
     public static int getMethodLevel(String line) {
         String level = StringUtils.substringBetween(line, JACGConstants.FLAG_LEFT_PARENTHESES, JACGConstants.FLAG_RIGHT_PARENTHESES);
-        if (!JavaCGUtil.isNumStr(level)) {
-            throw new JavaCGRuntimeException("方法调用行内容非法 " + line);
+        if (!JavaCG2Util.isNumStr(level)) {
+            throw new JavaCG2RuntimeException("方法调用行内容非法 " + line);
         }
         return Integer.parseInt(level);
     }
@@ -364,7 +364,7 @@ public class JACGCallGraphFileUtil {
      */
     private static CallGraphLineParsed parseCallGraphLine(String line, int methodLevel, String fullMethodWithAnnotations, String[] lineColumns, int nextStartIndex) {
         if (fullMethodWithAnnotations == null) {
-            throw new JavaCGRuntimeException("获取方法与注解信息失败 " + line);
+            throw new JavaCG2RuntimeException("获取方法与注解信息失败 " + line);
         }
 
         CallGraphLineParsed callGraphLineParsed = new CallGraphLineParsed();
@@ -396,7 +396,7 @@ public class JACGCallGraphFileUtil {
                 callGraphLineParsed.setCycleCall(true);
                 String level = StringUtils.substringBetween(column, JACGConstants.FLAG_LEFT_PARENTHESES, JACGConstants.FLAG_RIGHT_PARENTHESES);
                 if (level == null) {
-                    throw new JavaCGRuntimeException("方法调用行内容非法 " + line);
+                    throw new JavaCG2RuntimeException("方法调用行内容非法 " + line);
                 }
                 callGraphLineParsed.setCycleCallLevel(Integer.parseInt(level));
             } else if (JACGConstants.CALLEE_FLAG_ENTRY_NO_TAB.equals(column)) {

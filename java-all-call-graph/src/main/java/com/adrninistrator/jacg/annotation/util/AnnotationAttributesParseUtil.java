@@ -11,7 +11,7 @@ import com.adrninistrator.jacg.dto.annotation.MapAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.StringAnnotationAttribute;
 import com.adrninistrator.jacg.extractor.common.enums.SpTxPropagationEnum;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -95,7 +95,7 @@ public class AnnotationAttributesParseUtil {
     public static String parseFromFile(String attributeType, String attributeValue) {
         if (AnnotationAttributesTypeEnum.AATE_STRING_BASE64.getPrefix().equals(attributeType)) {
             // AATE_STRING_BASE64类型数据需要进行解码
-            return JavaCGUtil.base64Decode(attributeValue);
+            return JavaCG2Util.base64Decode(attributeValue);
         }
 
         return attributeValue;

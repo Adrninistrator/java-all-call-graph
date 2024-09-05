@@ -1,8 +1,8 @@
 package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.javacg.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.mybatismysqltableparser.common.enums.MySqlStatementEnum;
 import com.adrninistrator.mybatismysqltableparser.dto.MyBatisMySqlInfo;
 import com.adrninistrator.mybatismysqltableparser.dto.MySqlTableColumnInfo;
@@ -121,7 +121,7 @@ public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
             return;
         }
         for (int i = 0; i < tableList.size(); i++) {
-            JavaCGFileUtil.write2FileWithTab(writer, mapperInterfaceName, methodName, initials, String.valueOf(i), tableList.get(i), mybatisXmlFilePath);
+            JavaCG2FileUtil.write2FileWithTab(writer, mapperInterfaceName, methodName, initials, String.valueOf(i), tableList.get(i), mybatisXmlFilePath);
         }
     }
 

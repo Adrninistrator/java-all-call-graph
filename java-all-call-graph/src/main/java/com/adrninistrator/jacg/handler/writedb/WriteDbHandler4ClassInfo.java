@@ -5,8 +5,8 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.util.JavaCGByteCodeUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
 
 import java.util.Set;
 
@@ -18,7 +18,7 @@ import java.util.Set;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_CLASS_INFO,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_CLASS_INFO,
         minColumnNum = 4,
         maxColumnNum = 4,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_INFO
@@ -42,7 +42,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
 
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         int accessFlags = Integer.parseInt(array[1]);
-        if (JavaCGByteCodeUtil.isEnumFlag(accessFlags)) {
+        if (JavaCG2ByteCodeUtil.isEnumFlag(accessFlags)) {
             // 记录枚举唯一类名
             enumSimpleClassNameSet.add(simpleClassName);
         }

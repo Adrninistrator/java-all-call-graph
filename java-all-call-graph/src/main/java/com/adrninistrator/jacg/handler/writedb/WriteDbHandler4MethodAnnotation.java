@@ -11,7 +11,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSpringUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ import java.util.Set;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_ANNOTATION,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_ANNOTATION,
         minColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_2,
         maxColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE_5,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_ANNOTATION
@@ -54,11 +54,11 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     }
 
     @Override
-    public void beforeHandle(String javaCgOutputPath) throws FileNotFoundException {
-        super.beforeHandle(javaCgOutputPath);
+    public void beforeHandle(String javaCG2OutputPath) throws FileNotFoundException {
+        super.beforeHandle(javaCG2OutputPath);
 
-        writeDbHandler4SpringController.beforeHandle(javaCgOutputPath);
-        writeDbHandler4SpringTaskAnnotation.beforeHandle(javaCgOutputPath);
+        writeDbHandler4SpringController.beforeHandle(javaCG2OutputPath);
+        writeDbHandler4SpringTaskAnnotation.beforeHandle(javaCG2OutputPath);
     }
 
     @Override

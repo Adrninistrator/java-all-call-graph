@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringBean;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 import java.util.Map;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_SPRING_BEAN,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_SPRING_BEAN,
         minColumnNum = 4,
         maxColumnNum = 4,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_SPRING_BEAN

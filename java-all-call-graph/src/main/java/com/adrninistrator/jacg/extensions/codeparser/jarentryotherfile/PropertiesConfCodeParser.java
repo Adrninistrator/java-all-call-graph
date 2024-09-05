@@ -2,10 +2,10 @@ package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +52,13 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
 
             for (String key : keyList) {
                 String value = properties.getProperty(key);
-                JavaCGYesNoEnum useBase64 = JavaCGYesNoEnum.NO;
+                JavaCG2YesNoEnum useBase64 = JavaCG2YesNoEnum.NO;
                 if (JACGUtil.containsCRLF(value)) {
                     // 假如properties文件的值中包含回车换行，则需要进行BASE64编码
-                    value = JavaCGUtil.base64Encode(value);
-                    useBase64 = JavaCGYesNoEnum.YES;
+                    value = JavaCG2Util.base64Encode(value);
+                    useBase64 = JavaCG2YesNoEnum.YES;
                 }
-                JavaCGFileUtil.write2FileWithTab(writer, jarEntryPath, useBase64.getStrValue(), key, value);
+                JavaCG2FileUtil.write2FileWithTab(writer, jarEntryPath, useBase64.getStrValue(), key, value);
             }
         } catch (IOException e) {
             logger.error("error ", e);

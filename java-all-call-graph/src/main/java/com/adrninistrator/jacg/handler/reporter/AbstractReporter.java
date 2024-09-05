@@ -6,9 +6,9 @@ import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGrap
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public abstract class AbstractReporter {
     // 是否需要将调用堆栈文件拷贝到单独的目录
     protected final boolean copyStackFileInSeparateDir;
 
-    protected JavaCGConfigureWrapper javaCGConfigureWrapper;
+    protected JavaCG2ConfigureWrapper javaCG2ConfigureWrapper;
 
     protected String appName;
 
@@ -83,7 +83,7 @@ public abstract class AbstractReporter {
         String newStackFilePath;
         if (copyStackFileInSeparateDir) {
             String newDirPath = dirPath + File.separator + appName;
-            JavaCGFileUtil.isDirectoryExists(newDirPath);
+            JavaCG2FileUtil.isDirectoryExists(newDirPath);
             newStackFilePath = newDirPath + File.separator + srcStackFile.getName();
         } else {
             newStackFilePath = dirPath + File.separator + srcStackFile.getName();
@@ -109,14 +109,14 @@ public abstract class AbstractReporter {
             return false;
         }
 
-        if (!JavaCGFileUtil.isDirectoryExists(reportDirPath)) {
+        if (!JavaCG2FileUtil.isDirectoryExists(reportDirPath)) {
             logger.error("当前结果文件输出的目录创建失败 {}", reportDirPath);
             return false;
         }
 
         logger.info("执行写数据库步骤");
-        if (javaCGConfigureWrapper != null) {
-            return new RunnerWriteDb(configureWrapper).run(javaCGConfigureWrapper);
+        if (javaCG2ConfigureWrapper != null) {
+            return new RunnerWriteDb(configureWrapper).run(javaCG2ConfigureWrapper);
         }
         return new RunnerWriteDb(configureWrapper).run();
     }
@@ -129,10 +129,10 @@ public abstract class AbstractReporter {
      * @throws IOException
      */
     protected void commonWriteData(WriterSupportHeader writerSupportHeader, List<String> stringList) throws IOException {
-        writerSupportHeader.writeLine(StringUtils.join(stringList, JavaCGConstants.FLAG_TAB));
+        writerSupportHeader.writeLine(StringUtils.join(stringList, JavaCG2Constants.FLAG_TAB));
     }
 
-    public void setJavaCGConfigureWrapper(JavaCGConfigureWrapper javaCGConfigureWrapper) {
-        this.javaCGConfigureWrapper = javaCGConfigureWrapper;
+    public void setJavaCG2ConfigureWrapper(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper) {
+        this.javaCG2ConfigureWrapper = javaCG2ConfigureWrapper;
     }
 }

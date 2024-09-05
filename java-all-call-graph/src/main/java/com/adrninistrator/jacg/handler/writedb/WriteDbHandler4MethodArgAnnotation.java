@@ -8,7 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgAnnotation;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 /**
  * @author adrninistrator
@@ -18,7 +18,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_ARG_ANNOTATION,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_ARG_ANNOTATION,
         minColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_3,
         maxColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE_6,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_ARG_ANNOTATION

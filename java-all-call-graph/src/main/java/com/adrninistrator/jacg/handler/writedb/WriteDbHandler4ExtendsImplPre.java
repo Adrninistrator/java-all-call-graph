@@ -4,8 +4,8 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ExtendsImpl;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +18,7 @@ import java.util.Set;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_EXTENDS_IMPL,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_EXTENDS_IMPL,
         minColumnNum = 4,
         maxColumnNum = 4,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_ILLEGAL
@@ -43,17 +43,17 @@ public class WriteDbHandler4ExtendsImplPre extends AbstractWriteDbHandler<WriteD
 
     @Override
     public String[] chooseFileColumnDesc() {
-        throw new JavaCGRuntimeException("不会调用当前方法");
+        throw new JavaCG2RuntimeException("不会调用当前方法");
     }
 
     @Override
     public String[] chooseFileDetailInfo() {
-        throw new JavaCGRuntimeException("不会调用当前方法");
+        throw new JavaCG2RuntimeException("不会调用当前方法");
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4ExtendsImpl data) {
-        throw new JavaCGRuntimeException("不会调用当前方法");
+        throw new JavaCG2RuntimeException("不会调用当前方法");
     }
 
     public Set<String> getSuperClassOrInterfaceNameSet() {

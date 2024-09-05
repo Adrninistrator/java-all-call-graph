@@ -26,9 +26,9 @@ import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4MethodLineNumbe
 import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4SetMethod;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGFindClassUtil;
-import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +58,9 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
         neo4jDbOperWrapper = (Neo4jDbOperWrapper) dbOperWrapper;
 
         nodeClassNameList = JACGFindClassUtil.getOrdinaryClassNameListFromDirOrJar(AbstractJACGNeo4jNode.class);
-        if (JavaCGUtil.isCollectionEmpty(nodeClassNameList)) {
+        if (JavaCG2Util.isCollectionEmpty(nodeClassNameList)) {
             logger.error("未找到neo4j节点类");
-            throw new JavaCGRuntimeException("未找到neo4j节点类");
+            throw new JavaCG2RuntimeException("未找到neo4j节点类");
         }
     }
 
@@ -155,7 +155,7 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
                 }
                 String nodeName = nodeEntity.label();
                 List<Map<String, Object>> indexesList = neo4jDbOperWrapper.queryIndexInfo(nodeName);
-                JavaCGCounter indexMaxSeq = new JavaCGCounter(0);
+                JavaCG2Counter indexMaxSeq = new JavaCG2Counter(0);
                 Set<String> propertiesSet = new HashSet<>();
                 // 遍历节点的索引并记录相关信息
                 recordIndexInfo(indexesList, indexMaxSeq, propertiesSet);
@@ -173,12 +173,12 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
             }
         } catch (Exception e) {
             logger.error("出现异常 ", e);
-            throw new JavaCGRuntimeException("创建索引失败");
+            throw new JavaCG2RuntimeException("创建索引失败");
         }
     }
 
     // 遍历节点的索引并记录相关信息
-    private void recordIndexInfo(List<Map<String, Object>> indexesList, JavaCGCounter indexMaxSeq, Set<String> propertiesSet) {
+    private void recordIndexInfo(List<Map<String, Object>> indexesList, JavaCG2Counter indexMaxSeq, Set<String> propertiesSet) {
         for (Map<String, Object> indexMap : indexesList) {
             String indexName = (String) indexMap.get("name");
             // 记录当前节点的索引的最大序号
@@ -200,12 +200,12 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
         // 创建索引
         createIndexes();
 
-        if (!writeDbFlag || javaCGOutputInfo == null) {
+        if (!writeDbFlag || javaCG2OutputInfo == null) {
             return;
         }
         // 将数据写入数据库
         RunnerWriteDb runnerWriteDb = new RunnerWriteDb(configureWrapper);
-        runnerWriteDb.configSkipCallJavaCG(javaCGOutputInfo, currentOutputDirPath);
+        runnerWriteDb.configSkipCallJavaCG2(javaCG2OutputInfo, currentOutputDirPath);
         if (!runnerWriteDb.run()) {
             this.setSomeTaskFail(true);
         }

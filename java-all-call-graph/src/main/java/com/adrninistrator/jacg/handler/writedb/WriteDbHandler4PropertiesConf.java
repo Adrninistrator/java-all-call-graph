@@ -6,8 +6,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4PropertiesConf;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.PropertiesConfCodeParser;
 import com.adrninistrator.jacg.util.JACGFileUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 /**
  * @author adrninistrator
@@ -32,12 +32,12 @@ public class WriteDbHandler4PropertiesConf extends AbstractWriteDbHandler<WriteD
     @Override
     protected WriteDbData4PropertiesConf genData(String[] array) {
         String propertiesFilePath = array[0];
-        boolean useBase64 = JavaCGYesNoEnum.isYes(array[1]);
+        boolean useBase64 = JavaCG2YesNoEnum.isYes(array[1]);
         String propertiesKey = array[2];
         String propertiesFileName = JACGFileUtil.getFileNameFromPathInJar(propertiesFilePath);
         String propertiesValue = array[3];
         if (useBase64) {
-            propertiesValue = JavaCGUtil.base64Decode(propertiesValue);
+            propertiesValue = JavaCG2Util.base64Decode(propertiesValue);
         }
         WriteDbData4PropertiesConf writeDbData4PropertiesConf = new WriteDbData4PropertiesConf();
         writeDbData4PropertiesConf.setRecordId(genNextRecordId());

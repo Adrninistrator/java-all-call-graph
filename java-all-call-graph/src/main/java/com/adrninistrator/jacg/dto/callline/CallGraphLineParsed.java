@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.dto.callline;
 
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class CallGraphLineParsed {
 
     public String getCallerLineNumberStr() {
         if (callerLineNumber == null) {
-            return JavaCGConstants.DEFAULT_LINE_NUMBER_STR;
+            return JavaCG2Constants.DEFAULT_LINE_NUMBER_STR;
         }
         return String.valueOf(callerLineNumber);
     }

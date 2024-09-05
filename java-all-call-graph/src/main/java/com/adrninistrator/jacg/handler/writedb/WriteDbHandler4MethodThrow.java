@@ -6,8 +6,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodThrow;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 /**
  * @author adrninistrator
@@ -17,7 +17,7 @@ import com.adrninistrator.javacg.util.JavaCGUtil;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_THROW,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_THROW,
         minColumnNum = 9,
         maxColumnNum = 9,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_THROW
@@ -43,9 +43,9 @@ public class WriteDbHandler4MethodThrow extends AbstractWriteDbHandler<WriteDbDa
         int seq = Integer.parseInt(array[3]);
         String throwExceptionType = array[4];
         String throwFlag = array[5];
-        Integer catchStartOffset = JavaCGUtil.genIntegerFromString(array[6]);
+        Integer catchStartOffset = JavaCG2Util.genIntegerFromString(array[6]);
         String catchExceptionVariableName = array[7];
-        Integer callId = JavaCGUtil.genIntegerFromString(array[8]);
+        Integer callId = JavaCG2Util.genIntegerFromString(array[8]);
 
         WriteDbData4MethodThrow writeDbData4MethodThrow = new WriteDbData4MethodThrow();
         writeDbData4MethodThrow.setRecordId(genNextRecordId());

@@ -1,8 +1,8 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class JACGFindClassUtil {
         }
         List<String> newClassNameList = new ArrayList<>();
         for (String className : classNameList) {
-            String simpleClassName = JavaCGClassMethodUtil.getSimpleClassNameFromFull(className);
+            String simpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(className);
             if (simpleClassName.startsWith("Abstract") || simpleClassName.contains("$")) {
                 continue;
             }
@@ -50,7 +50,7 @@ public class JACGFindClassUtil {
      */
     public static List<String> getClassNameListFromDirOrJar(Class<?> clazz) {
         String classDirPathRaw = null;
-        String classDirPathTail = JavaCGClassMethodUtil.getPackageName(clazz.getName()).replace('.', '/');
+        String classDirPathTail = JavaCG2ClassMethodUtil.getPackageName(clazz.getName()).replace('.', '/');
         List<String> classNameList = new ArrayList<>();
         try {
             // 以下getResource()方法参数需要指定为""，以获取到对应类所在目录
@@ -77,7 +77,7 @@ public class JACGFindClassUtil {
             /*
                 当前类在jar包中，在其他项目中通过jar包引用的情况
                 示例：
-                file:/D:/java-callgraph2-2.0.4.jar!/com/adrninistrator/javacg/stat/
+                file:/D:/java-callgraph2-2.0.7.jar!/com/adrninistrator/javacg2/entry/
              */
             int index = classDirPathRaw.indexOf(JACGConstants.FLAG_EXCLAMATION);
             if (index == -1) {
@@ -101,7 +101,7 @@ public class JACGFindClassUtil {
                 return null;
             }
             for (String currentJarFilePath : jarFilePathList) {
-                String currentClassName = StringUtils.substringBeforeLast(currentJarFilePath, JavaCGConstants.EXT_CLASS).replace('/', '.');
+                String currentClassName = StringUtils.substringBeforeLast(currentJarFilePath, JavaCG2Constants.EXT_CLASS).replace('/', '.');
                 classNameList.add(currentClassName);
             }
             return classNameList;

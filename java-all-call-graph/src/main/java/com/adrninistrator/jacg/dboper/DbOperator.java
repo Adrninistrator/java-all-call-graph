@@ -7,9 +7,9 @@ import com.adrninistrator.jacg.conf.DbConfInfo;
 import com.adrninistrator.jacg.druidfilter.DruidMonitorFilter;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.alibaba.druid.pool.DataSourceClosedException;
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +49,7 @@ public class DbOperator implements AutoCloseable {
     private final DruidDataSource dataSource;
 
     // 记录当前对象被引用的次数
-    private final JavaCGCounter referenceCounter = new JavaCGCounter(0);
+    private final JavaCG2Counter referenceCounter = new JavaCG2Counter(0);
 
     // 引用了当前类的对象类名及HASH列表
     private final List<String> referenceCLassNameAndHashList = new ArrayList<>();
@@ -181,7 +181,7 @@ public class DbOperator implements AutoCloseable {
             return false;
         }
 
-        String tableName = StringUtils.substringBetween(sql, JACGConstants.SQL_CREATE_TABLE_HEAD, JavaCGConstants.FLAG_LEFT_BRACKET);
+        String tableName = StringUtils.substringBetween(sql, JACGConstants.SQL_CREATE_TABLE_HEAD, JavaCG2Constants.FLAG_LEFT_BRACKET);
         if (StringUtils.isBlank(tableName)) {
             logger.error("建表SQL语句中未找到表名 {}", sql);
             return false;
@@ -229,7 +229,7 @@ public class DbOperator implements AutoCloseable {
     private boolean checkTableExistsH2(String tableName) {
         List<String> list = queryListOneColumn("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?",
                 String.class, JACGConstants.H2_SCHEMA, tableName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             logger.error("数据库表不存在 [{}]", tableName);
             return false;
         }
@@ -244,7 +244,7 @@ public class DbOperator implements AutoCloseable {
      */
     private boolean checkTableExistsNonH2(String tableName) {
         List<String> list = queryListOneColumn("show tables like ?", String.class, tableName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             logger.error("数据库表不存在 [{}]", tableName);
             return false;
         }

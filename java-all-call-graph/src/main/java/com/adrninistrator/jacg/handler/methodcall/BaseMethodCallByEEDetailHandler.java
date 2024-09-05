@@ -15,7 +15,7 @@ import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +130,7 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
      */
     public boolean handleMethodCallByEECMKeyword(String calleeClassName, String methodNameKeyword, Object... args) {
         List<String> methodNameList = methodCallHandler.queryCalleeMethodNameLike(calleeClassName, methodNameKeyword);
-        if (JavaCGUtil.isCollectionEmpty(methodNameList)) {
+        if (JavaCG2Util.isCollectionEmpty(methodNameList)) {
             logger.error("根据方法关键字查询到被调用方法为空 {} {}", calleeClassName, methodNameKeyword);
             return true;
         }
@@ -150,11 +150,11 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
         List<String> methodNameList = new ArrayList<>();
         for (String methodNameKeyword : methodNameKeywordList) {
             List<String> tmpMethodNameList = methodCallHandler.queryCalleeMethodNameLike(calleeClassName, methodNameKeyword);
-            if (!JavaCGUtil.isCollectionEmpty(tmpMethodNameList)) {
+            if (!JavaCG2Util.isCollectionEmpty(tmpMethodNameList)) {
                 methodNameList.addAll(tmpMethodNameList);
             }
         }
-        if (JavaCGUtil.isCollectionEmpty(methodNameList)) {
+        if (JavaCG2Util.isCollectionEmpty(methodNameList)) {
             logger.error("根据方法关键字查询到被调用方法为空 {}\n[{}]", calleeClassName, StringUtils.join(methodNameKeywordList, "\n"));
             return true;
         }
@@ -205,7 +205,7 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
 
     // 分页查询类的指定方法调用列表
     private List<WriteDbData4MethodCall> queryMethodCallByPage(String calleeClassName, List<String> methodNameList, boolean lastQuery, int startCallId, int endCallId) {
-        if (JavaCGUtil.isCollectionEmpty(methodNameList)) {
+        if (JavaCG2Util.isCollectionEmpty(methodNameList)) {
             // 分页查询类的所有方法调用列表
             return queryAllMethodsCallByPage(calleeClassName, lastQuery, startCallId, endCallId);
         }

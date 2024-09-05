@@ -14,8 +14,8 @@ import com.adrninistrator.jacg.handler.dto.genericstype.GenericsTypeValue;
 import com.adrninistrator.jacg.handler.dto.genericstype.MethodArgGenericsTypeInfo;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,7 +57,7 @@ public class MethodArgReturnHandler extends BaseHandler {
         }
 
         List<WriteDbData4MethodArgGenericsType> list = dbOperator.queryList(sql, WriteDbData4MethodArgGenericsType.class, methodHash);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return null;
         }
 
@@ -66,7 +66,7 @@ public class MethodArgReturnHandler extends BaseHandler {
         for (WriteDbData4MethodArgGenericsType writeDbData4MethodArgGenericsType : list) {
             GenericsTypeValue methodArgGenericsTypeValue = genericsTypeMap.computeIfAbsent(writeDbData4MethodArgGenericsType.getArgSeq(),
                     k -> new GenericsTypeValue());
-            if (JavaCGConstants.FILE_KEY_CLASS_TYPE.equals(writeDbData4MethodArgGenericsType.getType())) {
+            if (JavaCG2Constants.FILE_KEY_CLASS_TYPE.equals(writeDbData4MethodArgGenericsType.getType())) {
                 methodArgGenericsTypeValue.setType(writeDbData4MethodArgGenericsType.getGenericsType());
             } else {
                 methodArgGenericsTypeValue.addGenericsType(writeDbData4MethodArgGenericsType.getGenericsType());
@@ -97,13 +97,13 @@ public class MethodArgReturnHandler extends BaseHandler {
         }
 
         List<WriteDbData4MethodReturnGenericsType> list = dbOperator.queryList(sql, WriteDbData4MethodReturnGenericsType.class, methodHash);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return null;
         }
 
         GenericsTypeValue methodReturnGenericsTypeInfo = new GenericsTypeValue();
         for (WriteDbData4MethodReturnGenericsType writeDbData4MethodReturnGenericsType : list) {
-            if (JavaCGConstants.FILE_KEY_CLASS_TYPE.equals(writeDbData4MethodReturnGenericsType.getType())) {
+            if (JavaCG2Constants.FILE_KEY_CLASS_TYPE.equals(writeDbData4MethodReturnGenericsType.getType())) {
                 methodReturnGenericsTypeInfo.setType(writeDbData4MethodReturnGenericsType.getGenericsType());
             } else {
                 methodReturnGenericsTypeInfo.addGenericsType(writeDbData4MethodReturnGenericsType.getGenericsType());
@@ -130,7 +130,7 @@ public class MethodArgReturnHandler extends BaseHandler {
 
         String simpleArgType = dbOperWrapper.querySimpleClassName(argType);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptySet();
         }
         return new HashSet<>(list);
@@ -154,7 +154,7 @@ public class MethodArgReturnHandler extends BaseHandler {
 
         String simpleArgType = dbOperWrapper.querySimpleClassName(argType);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptySet();
         }
         return new HashSet<>(list);
@@ -178,7 +178,7 @@ public class MethodArgReturnHandler extends BaseHandler {
 
         String simpleArgType = dbOperWrapper.querySimpleClassName(returnType);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptySet();
         }
         return new HashSet<>(list);
@@ -202,7 +202,7 @@ public class MethodArgReturnHandler extends BaseHandler {
 
         String simpleArgType = dbOperWrapper.querySimpleClassName(returnType);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, simpleArgType);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptySet();
         }
         return new HashSet<>(list);

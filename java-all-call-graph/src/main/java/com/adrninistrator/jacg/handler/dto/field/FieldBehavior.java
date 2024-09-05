@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.handler.dto.field;
 
 import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 
@@ -79,7 +79,7 @@ public class FieldBehavior {
      */
     @JsonIgnore
     public String genClassAndFieldName() {
-        return JavaCGClassMethodUtil.genClassAndField(className, fieldName);
+        return JavaCG2ClassMethodUtil.genClassAndField(className, fieldName);
     }
 
     /**

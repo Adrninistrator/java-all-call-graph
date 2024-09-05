@@ -1,7 +1,7 @@
 package test.runbycode.handler.method;
 
 import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.callgraph.argument.TestArgument1;
@@ -32,7 +32,7 @@ public class TestFindMethodByDtoHandler extends TestRunByCodeBase {
 
     protected void doTest(MethodArgReturnHandler findMethodByDtoHandler, String className) {
         Set<String> set = findMethodByDtoHandler.findMethodByAllType(className);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(set));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(set));
         printSetContent(set, className);
     }
 }

@@ -5,8 +5,8 @@ import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallPair;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ public abstract class AbstractManualAddMethodCall1 {
 
         // 查询父类或接口的子类或实现类，仅查询非抽象类
         List<String> childOrImplClassList = jacgExtendsImplHandler.queryChildClassListByFull(superOrItfClassName, false, true, false, true);
-        if (JavaCGUtil.isCollectionEmpty(childOrImplClassList)) {
+        if (JavaCG2Util.isCollectionEmpty(childOrImplClassList)) {
             logger.error("未查询到指定的子类或实现类 {}", superOrItfClassName);
             return true;
         }
@@ -73,14 +73,14 @@ public abstract class AbstractManualAddMethodCall1 {
         for (String childOrImplClass : childOrImplClassList) {
             // 不需要判断对应方法是否有被调用，因为可能通过获取Spring Bean的方式被调用
             List<MethodCallPair> methodCallPairList = chooseAddMethodCallPairList(childOrImplClass);
-            if (JavaCGUtil.isCollectionEmpty(methodCallPairList)) {
+            if (JavaCG2Util.isCollectionEmpty(methodCallPairList)) {
                 continue;
             }
 
             for (MethodCallPair methodCallPair : methodCallPairList) {
-                String calleeFullMethod = JavaCGClassMethodUtil.formatFullMethodWithArgTypes(childOrImplClass, methodCallPair.getCallerFullMethod());
+                String calleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(childOrImplClass, methodCallPair.getCallerFullMethod());
                 // 生成需要添加的方法调用关系的被调用完整方法
-                String addCalleeFullMethod = JavaCGClassMethodUtil.formatFullMethodWithArgTypes(childOrImplClass, methodCallPair.getCalleeFullMethod());
+                String addCalleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(childOrImplClass, methodCallPair.getCalleeFullMethod());
                 // 添加方法调用
                 if (!methodCallHandler.manualAddMethodCall(calleeFullMethod, addCalleeFullMethod)) {
                     return false;

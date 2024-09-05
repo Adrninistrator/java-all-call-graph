@@ -8,7 +8,7 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 
 import java.util.List;
 
@@ -57,6 +57,6 @@ public class JarInfoHandler extends BaseHandler {
                     " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryObjectOneColumn(sql, String.class, JavaCGConstants.FILE_KEY_RESULT_DIR_INFO_PREFIX);
+        return dbOperator.queryObjectOneColumn(sql, String.class, JavaCG2Constants.FILE_KEY_RESULT_DIR_INFO_PREFIX);
     }
 }

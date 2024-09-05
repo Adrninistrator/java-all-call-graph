@@ -13,10 +13,10 @@ import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class MethodCallHandler extends BaseHandler {
      * @return
      */
     public boolean enableMethodCall(int methodCallId) {
-        return updateMethodCallEnabled(methodCallId, JavaCGYesNoEnum.YES.getIntValue());
+        return updateMethodCallEnabled(methodCallId, JavaCG2YesNoEnum.YES.getIntValue());
     }
 
     /**
@@ -57,7 +57,7 @@ public class MethodCallHandler extends BaseHandler {
      * @return
      */
     public boolean disableMethodCall(int methodCallId) {
-        return updateMethodCallEnabled(methodCallId, JavaCGYesNoEnum.NO.getIntValue());
+        return updateMethodCallEnabled(methodCallId, JavaCG2YesNoEnum.NO.getIntValue());
     }
 
     // 修改方法调用表启用标志
@@ -147,14 +147,14 @@ public class MethodCallHandler extends BaseHandler {
         logger.info("人工向数据库方法调用表加入数据 {}\n{}\n{}", nextMaxCallId, callerFullMethod, calleeFullMethod);
         // 人工向方法调用表写入数据，行号使用0，jar包序号使用0
         WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(
-                JavaCGCallTypeEnum.CTE_MANUAL_ADDED.getType(),
+                JavaCG2CallTypeEnum.CTE_MANUAL_ADDED.getType(),
                 "",
                 dbOperWrapper.querySimpleClassName(callerClassName),
                 callerFullMethod,
                 dbOperWrapper.querySimpleClassName(calleeClassName),
                 calleeFullMethod,
                 nextMaxCallId,
-                JavaCGConstants.DEFAULT_LINE_NUMBER,
+                JavaCG2Constants.DEFAULT_LINE_NUMBER,
                 "",
                 "",
                 "",
@@ -326,7 +326,7 @@ public class MethodCallHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        Integer maxId = dbOperator.queryObjectOneColumn(sql, Integer.class, JavaCGConstants.RECORD_ID_MIN_BEFORE);
+        Integer maxId = dbOperator.queryObjectOneColumn(sql, Integer.class, JavaCG2Constants.RECORD_ID_MIN_BEFORE);
         return maxId == null ? JACGConstants.METHOD_CALL_ID_ILLEGAL : maxId;
     }
 
@@ -339,7 +339,7 @@ public class MethodCallHandler extends BaseHandler {
      */
     public List<String> queryCallerFullMethodWithBusinessData(List<String> dataTypeList, List<String> dataKeywordList) {
         if (dataKeywordList == null || dataTypeList == null) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.BD_QUERY_METHOD_BY_BUSINESS_DATA;
@@ -372,10 +372,10 @@ public class MethodCallHandler extends BaseHandler {
      */
     public boolean checkExistsNormalMethodCallByCalleeMethodHash(String calleeMethodHash) {
         if (calleeMethodHash == null) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
-        List<String> noInstructionExtendsImplList = JavaCGCallTypeEnum.getNoInstructionExtendsImplList();
+        List<String> noInstructionExtendsImplList = JavaCG2CallTypeEnum.getNoInstructionExtendsImplList();
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CHECK_NORMAL_MC_BY_EE_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -403,10 +403,10 @@ public class MethodCallHandler extends BaseHandler {
      */
     public List<WriteDbData4MethodCall> queryNormalMethodCallByCalleeClassMethod(String calleeClassName, String calleeMethodName, boolean queryAllColumns) {
         if (calleeClassName == null || calleeMethodName == null) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
-        List<String> noInstructionExtendsImplList = JavaCGCallTypeEnum.getNoInstructionExtendsImplList();
+        List<String> noInstructionExtendsImplList = JavaCG2CallTypeEnum.getNoInstructionExtendsImplList();
         SqlKeyEnum sqlKeyEnum = queryAllColumns ? SqlKeyEnum.MC_QUERY_NORMAL_MC_BY_EECM_ALL_COLUMNS : SqlKeyEnum.MC_QUERY_NORMAL_MC_BY_EECM;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {

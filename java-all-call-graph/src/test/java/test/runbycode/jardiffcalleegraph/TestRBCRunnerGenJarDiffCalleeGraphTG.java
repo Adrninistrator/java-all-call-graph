@@ -3,7 +3,7 @@ package test.runbycode.jardiffcalleegraph;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.unpacker.targz.TarGzUnpacker;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.runbycode.util.JACGTestUtil;
@@ -55,7 +55,7 @@ public class TestRBCRunnerGenJarDiffCalleeGraphTG extends TestAbstractRunnerGenJ
     }
 
     private void testFull(boolean useLocalConfig) {
-        String currentTime = JavaCGUtil.currentTime();
+        String currentTime = JavaCG2Util.currentTime();
         String tarGzUnpackDirPathOld = TAR_GZ_DIR + TAR_GZ_FILE_NAME_OLD + "_" + currentTime;
         TarGzUnpacker tarGzUnpackerOld = genTarGzUnpacker(TAR_GZ_DIR + TAR_GZ_FILE_NAME_OLD, tarGzUnpackDirPathOld);
         Assert.assertTrue(tarGzUnpackerOld.unpack());

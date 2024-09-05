@@ -8,7 +8,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.SpringTaskXmlCodeParser;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +63,7 @@ public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDb
         }
 
         String methodName = array[1];
-        String fullMethod = JavaCGClassMethodUtil.formatFullMethodNoArgs(springBeanClassName, methodName);
+        String fullMethod = JavaCG2ClassMethodUtil.formatFullMethodNoArgs(springBeanClassName, methodName);
 
         WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
         writeDbData4SpringTask.setRecordId(genNextRecordId());

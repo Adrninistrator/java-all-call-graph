@@ -7,7 +7,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class ClassSignatureEi1Handler extends BaseHandler {
     public List<String> queryClassSignatureEi1InfoSimple(String simpleClassName, String upperClassName) {
         // 查询指定类存在签名时对应的继承父类/实现接口
         List<String> superOrItfClassNameList = querySuperOrItfClassNameList(simpleClassName);
-        if (JavaCGUtil.isCollectionEmpty(superOrItfClassNameList)) {
+        if (JavaCG2Util.isCollectionEmpty(superOrItfClassNameList)) {
             logger.error("指定类不存在对应的签名信息 {}", simpleClassName);
             return Collections.emptyList();
         }
@@ -69,7 +69,7 @@ public class ClassSignatureEi1Handler extends BaseHandler {
                     查询指定类，及指定父类/接口对应的签名中的类名列表
                  */
                 List<String> signatureClassList = queryClassSignatureClassNameList(simpleClassName, superOrItfClassName);
-                if (JavaCGUtil.isCollectionEmpty(superOrItfClassNameList)) {
+                if (JavaCG2Util.isCollectionEmpty(superOrItfClassNameList)) {
                     logger.error("指定类不存在对应父类/接口的签名信息 {} {}", simpleClassName, superOrItfClassName);
                 }
                 return signatureClassList;

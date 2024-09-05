@@ -2,7 +2,7 @@ package test.runbycode.handler.methodcall;
 
 import com.adrninistrator.jacg.dto.methodcall.parsed.AbstractMethodCallInfoParsed;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class TestMethodCallInfo extends TestRunByCodeBase {
             for (int i = 0; i < 1000; i++) {
                 for (int j = 0; j < 3; j++) {
                     List<AbstractMethodCallInfoParsed> methodCallInfoParsedList = methodCallInfoHandler.queryMethodCallInfoParsedObjArg(i, j, false);
-                    if (!JavaCGUtil.isCollectionEmpty(methodCallInfoParsedList)) {
+                    if (!JavaCG2Util.isCollectionEmpty(methodCallInfoParsedList)) {
                         logger.info("{}", methodCallInfoParsedList.size());
                     }
                 }

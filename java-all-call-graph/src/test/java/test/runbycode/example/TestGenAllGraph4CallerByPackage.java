@@ -3,7 +3,7 @@ package test.runbycode.example;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
@@ -29,7 +29,7 @@ public class TestGenAllGraph4CallerByPackage extends TestRunByCodeBase {
     @Test
     public void test() {
         try (MethodInfoHandler methodInfoHandler = new MethodInfoHandler(configureWrapper)) {
-            String packageName = JavaCGClassMethodUtil.getPackageName(TestMCCaller.class.getName());
+            String packageName = JavaCG2ClassMethodUtil.getPackageName(TestMCCaller.class.getName());
             List<String> fullMethodList = methodInfoHandler.queryMethodByClassNamePrefix(packageName);
             configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, fullMethodList.toArray(new String[0]));
             Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());

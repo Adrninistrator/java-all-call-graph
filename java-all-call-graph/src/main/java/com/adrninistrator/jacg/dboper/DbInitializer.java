@@ -6,7 +6,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.DbConfInfo;
 import com.adrninistrator.jacg.neo4j.dboper.Neo4jDbOperWrapper;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,7 @@ public class DbInitializer {
             if (!existedDbOperator.getDbConfInfo().equals(dbConfInfo)) {
                 logger.error("{} 当前配置类已有的数据库信息与新指定的不同，需要创建新的 {} 对象 {} {}", callerSimpleClassName, ConfigureWrapper.class.getSimpleName(), existedDbOperator.getDbConfInfo(),
                         dbConfInfo);
-                throw new JavaCGRuntimeException("当前配置类已有的数据库信息与新指定的不同，需要创建新的 " + ConfigureWrapper.class.getSimpleName() + " 对象");
+                throw new JavaCG2RuntimeException("当前配置类已有的数据库信息与新指定的不同，需要创建新的 " + ConfigureWrapper.class.getSimpleName() + " 对象");
             }
             if (!existedDbOperator.isClosed()) {
                 // 当前数据库操作类未关闭，引用数据库操作类

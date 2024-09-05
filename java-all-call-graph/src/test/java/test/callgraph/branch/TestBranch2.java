@@ -1,7 +1,7 @@
 package test.callgraph.branch;
 
 
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import test.callgraph.enums.DbStatementEnum;
 
 /**
@@ -82,7 +82,7 @@ public class TestBranch2 {
         if (i == 0) {
             return;
         } else if (i == 1) {
-            throw new JavaCGRuntimeException("illegal");
+            throw new JavaCG2RuntimeException("illegal");
         } else if (i == 2) {
             System.getProperty("aa");
         }
@@ -110,7 +110,7 @@ public class TestBranch2 {
         } else if (i == 1) {
             str = "1";
             System.out.println(str);
-            throw new JavaCGRuntimeException("illegal");
+            throw new JavaCG2RuntimeException("illegal");
         } else if (i == 2) {
             str = "2";
             System.out.println(str);

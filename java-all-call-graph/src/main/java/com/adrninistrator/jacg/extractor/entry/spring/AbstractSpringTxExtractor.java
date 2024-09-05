@@ -22,8 +22,8 @@ import com.adrninistrator.jacg.extractor.entry.CallerGraphBaseExtractor;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByClassMethodName;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         if (springTransactionalMethodList == null) {
             return ListWithResult.genFail();
         }
-        if (JavaCGUtil.isCollectionEmpty(springTransactionalMethodList)) {
+        if (JavaCG2Util.isCollectionEmpty(springTransactionalMethodList)) {
             logger.info("未找到@Transactional注解对应的方法");
             return ListWithResult.genEmpty();
         }
@@ -110,14 +110,14 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
                 查找调用构造函数的代码，能够找到正确的上层调用方法
                 不查找调用doInTransaction方法的代码，否则找到上层调用方法是构造函数，下同
              */
-            queryTxTplAnonymousInnerClassInfo(jacgExtendsImplHandler, JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK,
-                    JavaCGCommonNameConstants.METHOD_NAME_INIT, spTxEntryMethodTxTplList, txTplEntryMethodList);
+            queryTxTplAnonymousInnerClassInfo(jacgExtendsImplHandler, JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK,
+                    JavaCG2CommonNameConstants.METHOD_NAME_INIT, spTxEntryMethodTxTplList, txTplEntryMethodList);
 
             // 查询使用TransactionCallbackWithoutResult的情况
-            queryTxTplAnonymousInnerClassInfo(jacgExtendsImplHandler, JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK_WITHOUT_RESULT,
-                    JavaCGCommonNameConstants.METHOD_NAME_INIT, spTxEntryMethodTxTplList, txTplEntryMethodList);
+            queryTxTplAnonymousInnerClassInfo(jacgExtendsImplHandler, JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK_WITHOUT_RESULT,
+                    JavaCG2CommonNameConstants.METHOD_NAME_INIT, spTxEntryMethodTxTplList, txTplEntryMethodList);
 
-            if (!JavaCGUtil.isCollectionEmpty(txTplEntryMethodList)) {
+            if (!JavaCG2Util.isCollectionEmpty(txTplEntryMethodList)) {
                 logger.info("找到TransactionTemplate使用匿名内部类的方法\n{}", StringUtils.join(txTplEntryMethodList, "\n"));
             }
         }
@@ -126,8 +126,8 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         try (LambdaMethodHandlerByClassMethodName lambdaMethodHandlerByClassMethodName = new LambdaMethodHandlerByClassMethodName(configureWrapper)) {
             // 查询通过Lambda表达式使用TransactionTemplate的情况
             List<LambdaMethodCallDetail> lambdaMethodCallDetailList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaCallee(
-                    JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK, JavaCGCommonNameConstants.METHOD_DO_IN_TRANSACTION);
-            if (!JavaCGUtil.isCollectionEmpty(lambdaMethodCallDetailList)) {
+                    JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK, JavaCG2CommonNameConstants.METHOD_DO_IN_TRANSACTION);
+            if (!JavaCG2Util.isCollectionEmpty(lambdaMethodCallDetailList)) {
                 List<String> lambdaEntryMethodList = new ArrayList<>(lambdaMethodCallDetailList.size());
 
                 for (LambdaMethodCallDetail lambdaMethodCallDetail : lambdaMethodCallDetailList) {
@@ -151,14 +151,14 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
                                                      List<String> txTplEntryMethodList) {
         // 查询指定的事务子类
         List<String> childClassNameList = jacgExtendsImplHandler.queryChildClassListByFull(superClassName, false, true, false, true);
-        if (JavaCGUtil.isCollectionEmpty(childClassNameList)) {
+        if (JavaCG2Util.isCollectionEmpty(childClassNameList)) {
             return;
         }
 
         for (String childClassName : childClassNameList) {
             // 查询对指定类指定事务方法的调用
             List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryNormalMethodCallByCalleeClassMethod(childClassName, method, false);
-            if (JavaCGUtil.isCollectionEmpty(methodCallList)) {
+            if (JavaCG2Util.isCollectionEmpty(methodCallList)) {
                 continue;
             }
 
@@ -260,8 +260,8 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
     // 在需要处理的类名前缀中增加Spring事务模板类
     public void setAllowedClassNamePrefix(ConfigureWrapper configureWrapper) {
         configureWrapper.addAllowedClassNamePrefixes(JACGCommonNameConstants.SPRING_TRANSACTION_TEMPLATE_CLASS,
-                JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK_WITHOUT_RESULT,
-                JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK
+                JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK_WITHOUT_RESULT,
+                JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK
         );
     }
 }

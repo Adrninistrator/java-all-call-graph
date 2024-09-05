@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.handler.querybypage;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,7 @@ public class QueryByPageHandler {
             boolean lastQuery = (currentEndId == JACGConstants.PAGE_QUERY_LAST);
             // 通过类名前缀分页查询Lambda表达式方法调用信息
             List<T> dataList = queryByPageCallBack.queryDataByPage(currentStartId, currentEndId, lastQuery, argsByPage);
-            if (!JavaCGUtil.isCollectionEmpty(dataList)) {
+            if (!JavaCG2Util.isCollectionEmpty(dataList)) {
                 if (queryAll2List) {
                     // 添加当前查询到的数据到结果
                     returnList.addAll(dataList);

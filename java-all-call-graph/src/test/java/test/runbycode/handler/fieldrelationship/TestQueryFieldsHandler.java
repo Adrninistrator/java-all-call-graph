@@ -2,7 +2,7 @@ package test.runbycode.handler.fieldrelationship;
 
 import com.adrninistrator.jacg.handler.dto.field.JACGFieldInfo;
 import com.adrninistrator.jacg.handler.fieldrelationship.QueryGSFieldsHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.callgraph.fieldrelationships.frd.FRDDtoA;
@@ -30,15 +30,15 @@ public class TestQueryFieldsHandler extends TestRunByCodeBase {
     public void test1() {
         try (QueryGSFieldsHandler queryFieldsHandler = new QueryGSFieldsHandler(configureWrapper)) {
             List<JACGFieldInfo> list = queryFieldsHandler.queryAllFieldInfoList(true, TestOutClass.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, TestOutClass.class.getName());
 
             list = queryFieldsHandler.queryAllFieldInfoList(true, TestInClass.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, TestInClass.class.getName());
 
             list = queryFieldsHandler.queryAllFieldInfoList(true, FRFDtoC.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, FRFDtoC.class.getName());
         }
     }
@@ -47,15 +47,15 @@ public class TestQueryFieldsHandler extends TestRunByCodeBase {
     public void test2() {
         try (QueryGSFieldsHandler queryFieldsHandler = new QueryGSFieldsHandler(configureWrapper)) {
             List<String> list = queryFieldsHandler.queryCustomFieldTypeList(true, TestOutClass.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, TestOutClass.class.getName());
 
             list = queryFieldsHandler.queryCustomFieldTypeList(true, TestInClass.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, TestInClass.class.getName());
 
             list = queryFieldsHandler.queryCustomFieldTypeList(true, FRFDtoC.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, FRFDtoC.class.getName());
         }
     }
@@ -64,19 +64,19 @@ public class TestQueryFieldsHandler extends TestRunByCodeBase {
     public void test3() {
         try (QueryGSFieldsHandler queryFieldsHandler = new QueryGSFieldsHandler(configureWrapper)) {
             List<String> list = queryFieldsHandler.queryClassesByFieldType(true, TestOutClass.class.getName());
-            Assert.assertTrue(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertTrue(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, TestOutClass.class.getName());
 
             list = queryFieldsHandler.queryClassesByFieldType(true, TestInClass.TestInInnerData.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, TestInClass.TestInInnerData.class.getName());
 
             list = queryFieldsHandler.queryClassesByFieldType(true, TestInClass.TestInInnerData.TestInInnerData2.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, TestInClass.TestInInnerData.TestInInnerData2.class.getName());
 
             list = queryFieldsHandler.queryClassesByFieldType(true, FRDDtoA.class.getName());
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, FRDDtoA.class.getName());
         }
     }

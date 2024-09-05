@@ -2,7 +2,7 @@ package test.runbycode.handler.fieldrelationship;
 
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldRelationship;
 import com.adrninistrator.jacg.handler.fieldrelationship.FieldRelationshipHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.callgraph.fieldrelationships.fra.FRADtoA;
@@ -28,7 +28,7 @@ public class TestFieldRelationshipHandler extends TestRunByCodeBase {
         try (FieldRelationshipHandler fieldRelationshipHandler = new FieldRelationshipHandler(configureWrapper)) {
             List<WriteDbData4FieldRelationship> list = fieldRelationshipHandler.queryCallerMethodByRelationship(FRADtoB.class.getName(), "setStrField1", FRADtoA.class.getName(),
                     "getStr1");
-            Assert.assertTrue(JavaCGUtil.isCollectionEmpty(list));
+            Assert.assertTrue(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list);
         }
     }
@@ -37,11 +37,11 @@ public class TestFieldRelationshipHandler extends TestRunByCodeBase {
     public void test3() {
         try (FieldRelationshipHandler fieldRelationshipHandler = new FieldRelationshipHandler(configureWrapper)) {
             List<WriteDbData4FieldRelationship> list1 = fieldRelationshipHandler.queryRelatedSetMethod4Get(FRADtoA.class.getName(), "getStrA1");
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list1));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list1));
             printListContent(list1, "queryRelatedSetMethod4Get");
 
             List<WriteDbData4FieldRelationship> list2 = fieldRelationshipHandler.queryRelatedGetMethod4Set(FRADtoB.class.getName(), "setStrFieldB1");
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list2));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list2));
             printListContent(list2, "queryRelatedGetMethod4Set");
         }
     }

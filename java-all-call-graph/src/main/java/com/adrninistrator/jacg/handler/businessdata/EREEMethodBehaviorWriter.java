@@ -5,9 +5,9 @@ import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedF
 import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
 import com.adrninistrator.jacg.handler.dto.businessdata.MethodBehaviorByBusinessData;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,30 +33,30 @@ public abstract class EREEMethodBehaviorWriter {
      */
     public boolean write(String outputFilePath, MethodBehaviorByBusinessData callerMethodBehavior, CallerExtractedFile callerExtractedFile) {
         if (StringUtils.isBlank(outputFilePath) || callerMethodBehavior == null || callerExtractedFile == null) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
         logger.info("当前处理的方法调用堆栈文件为 {}", callerExtractedFile.getStackFilePath());
 
         List<CallerExtractedLine> callerExtractedLineList = callerExtractedFile.getCallerExtractedLineList();
-        if (JavaCGUtil.isCollectionEmpty(callerExtractedLineList)) {
+        if (JavaCG2Util.isCollectionEmpty(callerExtractedLineList)) {
             logger.info("当前处理的方法调用堆栈文件未获取到业务功能数据 {}", callerExtractedFile.getStackFilePath());
             return true;
         }
 
         String callerMethodBehaviorJson = JACGJsonUtil.getJsonStr(callerMethodBehavior);
-        try (BufferedWriter writer = JavaCGFileUtil.genBufferedWriter(outputFilePath, true)) {
+        try (BufferedWriter writer = JavaCG2FileUtil.genBufferedWriter(outputFilePath, true)) {
             for (CallerExtractedLine callerExtractedLine : callerExtractedLineList) {
                 List<BaseBusinessData> businessDataList = callerExtractedLine.getCallGraphLineParsed().getBusinessDataList();
                 for (BaseBusinessData businessData : businessDataList) {
                     // 根据被调用方法的业务功能数据获取对应的方法行为
                     List<MethodBehaviorByBusinessData> methodBehaviorByBusinessDataList = handleBusinessData(businessData);
-                    if (JavaCGUtil.isCollectionEmpty(methodBehaviorByBusinessDataList)) {
+                    if (JavaCG2Util.isCollectionEmpty(methodBehaviorByBusinessDataList)) {
                         continue;
                     }
                     for (MethodBehaviorByBusinessData calleeMethodBehavior : methodBehaviorByBusinessDataList) {
                         String calleeMethodBehaviorJson = JACGJsonUtil.getJsonStr(calleeMethodBehavior);
-                        JavaCGFileUtil.write2FileWithTab(writer, callerMethodBehaviorJson, calleeMethodBehaviorJson);
+                        JavaCG2FileUtil.write2FileWithTab(writer, callerMethodBehaviorJson, calleeMethodBehaviorJson);
                     }
                 }
             }

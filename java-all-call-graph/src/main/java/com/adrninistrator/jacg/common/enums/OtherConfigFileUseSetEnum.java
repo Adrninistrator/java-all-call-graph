@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.common.enums;
 
 import com.adrninistrator.jacg.common.enums.interfaces.ConfigInterface;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
 /**
  * @author adrninistrator
@@ -15,7 +16,7 @@ public enum OtherConfigFileUseSetEnum implements ConfigInterface {
     OCFUSE_METHOD_CLASS_4CALLER(InputDirEnum.IDE_CONFIG.getDirName() + "/method_class_4caller.properties",
             false, "生成指定类/方法调用的所有向下的方法完整调用链时的配置文件，指定需要生成的类名+方法前缀/代码行号，可指定起始代码行号、结束代码行号"),
     OCFUSE_IGNORE_CALL_TYPE(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_call_type.properties",
-            false, "生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件，指定忽略的方法调用类型，指定 JavaCGCallTypeEnum 枚举中的type"),
+            false, "生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件，指定忽略的方法调用类型，指定 JavaCG2CallTypeEnum 枚举中的type"),
     OCFUSE_IGNORE_METHOD_TYPE_4CALLER(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_method_type_4caller.properties",
             false, "生成指定类/方法调用的所有向下的方法完整调用链时的配置文件，指定忽略的方法类型，指定 JACGMethodTypeEnum 枚举中的type"),
     OCFUSE_IGNORE_CLASS_KEYWORD(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_class_keyword.properties",
@@ -49,6 +50,11 @@ public enum OtherConfigFileUseSetEnum implements ConfigInterface {
     }
 
     @Override
+    public String getEnumName() {
+        return name();
+    }
+
+    @Override
     public String getKey() {
         return fileName;
     }
@@ -67,13 +73,13 @@ public enum OtherConfigFileUseSetEnum implements ConfigInterface {
         return canUseConfigInFile;
     }
 
-    public static String getDescFromKey(String key) {
+    public static OtherConfigFileUseSetEnum getFromKey(String key) {
         for (OtherConfigFileUseSetEnum otherConfigFileUseSetEnum : OtherConfigFileUseSetEnum.values()) {
             if (otherConfigFileUseSetEnum.getKey().equals(key)) {
-                return otherConfigFileUseSetEnum.getDesc();
+                return otherConfigFileUseSetEnum;
             }
         }
-        return "";
+        throw new JavaCG2RuntimeException("不存在的key " + key);
     }
 
     @Override

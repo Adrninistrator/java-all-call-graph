@@ -13,10 +13,10 @@ import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.After;
@@ -87,8 +87,8 @@ public abstract class TestRunByCodeBase {
         // 生成通用的参数配置
         configureWrapper = TestConfigGenerator.genConfigureWrapper();
 
-        if (recordLogToFile && !JavaCGFileUtil.isDirectoryExists(JACGConstants.DIR_OUTPUT_UNITTEST)) {
-            throw new JavaCGRuntimeException("创建目录失败");
+        if (recordLogToFile && !JavaCG2FileUtil.isDirectoryExists(JACGConstants.DIR_OUTPUT_UNITTEST)) {
+            throw new JavaCG2RuntimeException("创建目录失败");
         }
 
         // 使用本地的配置参数
@@ -162,9 +162,9 @@ public abstract class TestRunByCodeBase {
         }
         // 将输出记录到文件
         try {
-            currentOutputWriter.write(info + JavaCGConstants.NEW_LINE);
+            currentOutputWriter.write(info + JavaCG2Constants.NEW_LINE);
         } catch (IOException e) {
-            throw new JavaCGRuntimeException(e);
+            throw new JavaCG2RuntimeException(e);
         }
     }
 
@@ -184,9 +184,9 @@ public abstract class TestRunByCodeBase {
             String currentOutputFilePath = JACGConstants.DIR_OUTPUT_UNITTEST + File.separator + currentClassName + JACGConstants.FLAG_AT + currentMethodName +
                     JACGConstants.FLAG_AT + currentMethodRunTimes + JACGConstants.EXT_MD;
             try {
-                currentOutputWriter = JavaCGFileUtil.genBufferedWriter(currentOutputFilePath);
+                currentOutputWriter = JavaCG2FileUtil.genBufferedWriter(currentOutputFilePath);
             } catch (FileNotFoundException e) {
-                throw new JavaCGRuntimeException(e);
+                throw new JavaCG2RuntimeException(e);
             }
         }
         if (!ArrayUtils.isEmpty(flags)) {
@@ -203,7 +203,7 @@ public abstract class TestRunByCodeBase {
     protected <T> void printListContent(List<T> list, boolean printToString, String... flags) {
         commonPrintHandle(flags);
 
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             printInfo("list为空");
             return;
         }
@@ -219,7 +219,7 @@ public abstract class TestRunByCodeBase {
     protected void printSetContent(Set<String> set, String... flags) {
         commonPrintHandle(flags);
 
-        if (JavaCGUtil.isCollectionEmpty(set)) {
+        if (JavaCG2Util.isCollectionEmpty(set)) {
             printInfo("set为空");
             return;
         }
@@ -233,7 +233,7 @@ public abstract class TestRunByCodeBase {
     protected <T> void printMapContent(Map<String, T> map, String... flags) {
         commonPrintHandle(flags);
 
-        if (JavaCGUtil.isMapEmpty(map)) {
+        if (JavaCG2Util.isMapEmpty(map)) {
             printInfo("map为空");
             return;
         }
@@ -259,11 +259,11 @@ public abstract class TestRunByCodeBase {
         CallStackFileResult callStackFileResult = findCallStackTrace.find();
         Assert.assertTrue(callStackFileResult.isSuccess());
         Assert.assertNotNull(callStackFileResult);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(callStackFileResult.getStackFilePathList()));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(callStackFileResult.getStackFilePathList()));
 
         ConfigureWrapper usedConfigureWrapper = findCallStackTrace.getConfigureWrapper();
         if (OutputDetailEnum.ODE_1.getDetail().equals(usedConfigureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, false))) {
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(callStackFileResult.getSeparateStackDirPathList()));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(callStackFileResult.getSeparateStackDirPathList()));
             return;
         }
     }

@@ -11,9 +11,9 @@ import com.adrninistrator.jacg.handler.exception.MethodExceptionHandler;
 import com.adrninistrator.jacg.handler.reporter.AbstractReporter;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -64,11 +64,11 @@ public class MethodCatchExceptionUsageReporter extends AbstractReporter {
             "catch的异常对象的使用方式描述汇总"
     };
 
-    public static final String FILE_HEADER_ALL = StringUtils.join(FILE_HEADER_ARRAY_ALL, JavaCGConstants.FLAG_TAB);
-    public static final String FILE_HEADER_CHECK = StringUtils.join(FILE_HEADER_ARRAY_CHECK, JavaCGConstants.FLAG_TAB);
+    public static final String FILE_HEADER_ALL = StringUtils.join(FILE_HEADER_ARRAY_ALL, JavaCG2Constants.FLAG_TAB);
+    public static final String FILE_HEADER_CHECK = StringUtils.join(FILE_HEADER_ARRAY_CHECK, JavaCG2Constants.FLAG_TAB);
 
     // 方法catch信息序号
-    private JavaCGCounter catchSeq;
+    private JavaCG2Counter catchSeq;
 
     public MethodCatchExceptionUsageReporter(ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile, boolean skipWriteDb) {
         super(configureWrapper, reportDirPath, appendReportFile, skipWriteDb);
@@ -137,7 +137,7 @@ public class MethodCatchExceptionUsageReporter extends AbstractReporter {
         }
 
         if (catchSeq == null) {
-            catchSeq = new JavaCGCounter(0);
+            catchSeq = new JavaCG2Counter(0);
         }
 
         // 将字符串形式的类名与方法名数组转换为对象列表形式
@@ -149,7 +149,7 @@ public class MethodCatchExceptionUsageReporter extends AbstractReporter {
              WriterSupportHeader writer4Check = new WriterSupportHeader(reportFilePathCheck, chooseFileHeader4Check(), appendReportFile)) {
             // 查询方法catch信息表中所有的简单类名
             List<String> methodCatchSimpleClassNameList = methodExceptionHandler.queryMethodCatchSimpleClassNameList();
-            if (JavaCGUtil.isCollectionEmpty(methodCatchSimpleClassNameList)) {
+            if (JavaCG2Util.isCollectionEmpty(methodCatchSimpleClassNameList)) {
                 logger.warn("未查询到方法catch信息");
                 return true;
             }
@@ -238,7 +238,7 @@ public class MethodCatchExceptionUsageReporter extends AbstractReporter {
         }
     }
 
-    public void setCatchSeq(JavaCGCounter catchSeq) {
+    public void setCatchSeq(JavaCG2Counter catchSeq) {
         this.catchSeq = catchSeq;
     }
 }

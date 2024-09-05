@@ -9,7 +9,7 @@ import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +68,7 @@ public abstract class BaseLambdaMethodPageHandler extends BaseHandler implements
      * @return
      */
     protected List<LambdaMethodCallDetail> genDetailList(List<LambdaMethodCall> lambdaMethodCallList) {
-        if (JavaCGUtil.isCollectionEmpty(lambdaMethodCallList)) {
+        if (JavaCG2Util.isCollectionEmpty(lambdaMethodCallList)) {
             return Collections.emptyList();
         }
 

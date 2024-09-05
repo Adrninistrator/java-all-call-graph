@@ -17,10 +17,10 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGMethodCallInfoUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGMethodCallInfoTypeEnum;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +75,7 @@ public class MethodCallInfoHandler extends BaseHandler {
      */
     public ObjArgsInfoInMethodCall queryObjArgsInfoInMethodCall(int methodCallId) {
         List<WriteDbData4MethodCallInfo> list = queryMethodCallInfo(methodCallId);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             logger.warn("从{}表未查询到方法调用中被调用对象与参数使用的信息 methodCallId: {}", DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableNameKeyword(), methodCallId);
             return null;
         }
@@ -140,12 +140,12 @@ public class MethodCallInfoHandler extends BaseHandler {
                                                                 Boolean beforeOrAfterMethodCall,
                                                                 int comparedMethodCallId) {
         List<WriteDbData4MethodCallInfo> methodCallInfoList = queryMethodCallInfo4CallerByMethodCallOrArg(callerMethodHash, byMethodCall, methodCallIdOrArgSeq);
-        if (JavaCGUtil.isCollectionEmpty(methodCallInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(methodCallInfoList)) {
             return null;
         }
         List<Integer> methodCallIdList = new ArrayList<>();
         for (WriteDbData4MethodCallInfo methodCallInfo : methodCallInfoList) {
-            if (methodCallInfo.getObjArgsSeq() != JavaCGConstants.METHOD_CALL_OBJECT_SEQ) {
+            if (methodCallInfo.getObjArgsSeq() != JavaCG2Constants.METHOD_CALL_OBJECT_SEQ) {
                 // 当前方法调用信息不是作为被调用对象使用
                 continue;
             }
@@ -164,7 +164,7 @@ public class MethodCallInfoHandler extends BaseHandler {
 
     // 对方法调用中被调用对象或某个参数的信息进行解析
     private List<AbstractMethodCallInfoParsed> parseMethodCallInfo(List<WriteDbData4MethodCallInfo> methodCallInfoList, boolean equivalentConversion) {
-        if (JavaCGUtil.isCollectionEmpty(methodCallInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(methodCallInfoList)) {
             return null;
         }
         List<AbstractMethodCallInfoParsed> methodCallInfoParsedList = new ArrayList<>();
@@ -172,31 +172,31 @@ public class MethodCallInfoHandler extends BaseHandler {
         for (int i = 0; i < methodCallInfoList.size(); i++) {
             WriteDbData4MethodCallInfo methodCallInfo = methodCallInfoList.get(i);
             AbstractMethodCallInfoParsed methodCallInfoParsed = null;
-            if (JavaCGMethodCallInfoTypeEnum.MCIT_VALUE.getType().equals(methodCallInfo.getType()) ||
-                    JavaCGMethodCallInfoTypeEnum.MCIT_BASE64_VALUE.getType().equals(methodCallInfo.getType())) {
+            if (JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE.getType().equals(methodCallInfo.getType()) ||
+                    JavaCG2MethodCallInfoTypeEnum.MCIT_BASE64_VALUE.getType().equals(methodCallInfo.getType())) {
                 methodCallInfoParsed = new MethodCallInfoParsed4Constant();
                 ((MethodCallInfoParsed4Constant) methodCallInfoParsed).setConstType(methodCallInfo.getValueType());
                 ((MethodCallInfoParsed4Constant) methodCallInfoParsed).setConstValue(methodCallInfo.getTheValue());
-            } else if (JavaCGMethodCallInfoTypeEnum.MCIT_NAME_OF_FIELD.getType().equals(methodCallInfo.getType())) {
+            } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_FIELD.getType().equals(methodCallInfo.getType())) {
                 methodCallInfoParsed = new MethodCallInfoParsed4Field();
                 ((MethodCallInfoParsed4Field) methodCallInfoParsed).setFieldName(methodCallInfo.getTheValue());
-            } else if (JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType().equals(methodCallInfo.getType())) {
+            } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType().equals(methodCallInfo.getType())) {
                 // 是否属于等值转换，使用方法参数中对应的值
                 methodCallInfoParsed = new MethodCallInfoParsed4MethodArg(equivalentConversion);
                 ((MethodCallInfoParsed4MethodArg) methodCallInfoParsed).setMethodArgSeq(Integer.parseInt(methodCallInfo.getTheValue()));
-            } else if (JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType().equals(methodCallInfo.getType())) {
+            } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType().equals(methodCallInfo.getType())) {
                 // 是否属于等值转换，使用方法参数中对应的值
                 methodCallInfoParsed = new MethodCallInfoParsed4MCReturnCallId(equivalentConversion);
                 ((MethodCallInfoParsed4MCReturnCallId) methodCallInfoParsed).setMethodCallId(Integer.parseInt(methodCallInfo.getTheValue()));
-            } else if (JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ_EQC.getType().equals(methodCallInfo.getType())) {
+            } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ_EQC.getType().equals(methodCallInfo.getType())) {
                 // 是否属于等值转换，固定使用true
                 methodCallInfoParsed = new MethodCallInfoParsed4MethodArg(true);
                 ((MethodCallInfoParsed4MethodArg) methodCallInfoParsed).setMethodArgSeq(Integer.parseInt(methodCallInfo.getTheValue()));
-            } else if (JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID_EQC.getType().equals(methodCallInfo.getType())) {
+            } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID_EQC.getType().equals(methodCallInfo.getType())) {
                 // 是否属于等值转换，固定使用true
                 methodCallInfoParsed = new MethodCallInfoParsed4MCReturnCallId(true);
                 ((MethodCallInfoParsed4MCReturnCallId) methodCallInfoParsed).setMethodCallId(Integer.parseInt(methodCallInfo.getTheValue()));
-            } else if (JavaCGMethodCallInfoTypeEnum.MCIT_STATIC_FIELD.getType().equals(methodCallInfo.getType())) {
+            } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD.getType().equals(methodCallInfo.getType())) {
                 methodCallInfoParsed = new MethodCallInfoParsed4StaticField();
                 ((MethodCallInfoParsed4StaticField) methodCallInfoParsed).setClassFieldName(methodCallInfo.getTheValue());
             }
@@ -218,7 +218,7 @@ public class MethodCallInfoHandler extends BaseHandler {
                 if (methodCallInfo.getSeq() != seq) {
                     continue;
                 }
-                if (JavaCGMethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType().equals(methodCallInfo.getType())) {
+                if (JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType().equals(methodCallInfo.getType())) {
                     ((MethodCallInfoParsed4Constant) methodCallInfoParsed).setLocalVariableName(methodCallInfo.getTheValue());
                 }
             }
@@ -229,7 +229,7 @@ public class MethodCallInfoHandler extends BaseHandler {
                 if (methodCallInfo.getSeq() != seq) {
                     continue;
                 }
-                if (JavaCGMethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
+                if (JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
                     ((MethodCallInfoParsed4Field) methodCallInfoParsed).setFieldType(methodCallInfo.getTheValue());
                 }
             }
@@ -240,7 +240,7 @@ public class MethodCallInfoHandler extends BaseHandler {
                 if (methodCallInfo.getSeq() != seq) {
                     continue;
                 }
-                if (JavaCGMethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
+                if (JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
                     ((MethodCallInfoParsed4StaticField) methodCallInfoParsed).setFieldType(methodCallInfo.getTheValue());
                 }
             }
@@ -252,10 +252,10 @@ public class MethodCallInfoHandler extends BaseHandler {
                 if (methodCallInfo.getSeq() != seq) {
                     continue;
                 }
-                if (JavaCGMethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType().equals(methodCallInfo.getType())) {
+                if (JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType().equals(methodCallInfo.getType())) {
                     methodCallInfoParsed4MethodArg.setMethodArgName(methodCallInfo.getTheValue());
                 }
-                if (JavaCGMethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
+                if (JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(methodCallInfo.getType())) {
                     methodCallInfoParsed4MethodArg.setMethodArgType(methodCallInfo.getTheValue());
                 }
             }
@@ -267,10 +267,10 @@ public class MethodCallInfoHandler extends BaseHandler {
                 if (methodCallInfo.getSeq() != seq) {
                     continue;
                 }
-                if (JavaCGMethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType().equals(methodCallInfo.getType())) {
+                if (JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType().equals(methodCallInfo.getType())) {
                     methodCallInfoParsed4MCReturnCallId.setLocalVariableName(methodCallInfo.getTheValue());
                 }
-                if (JavaCGMethodCallInfoTypeEnum.MCIT_STATIC_FIELD_METHOD_CALL.getType().equals(methodCallInfo.getType())) {
+                if (JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD_METHOD_CALL.getType().equals(methodCallInfo.getType())) {
                     methodCallInfoParsed4MCReturnCallId.setStaticFieldFullMethod(methodCallInfo.getTheValue());
                 }
             }
@@ -322,10 +322,10 @@ public class MethodCallInfoHandler extends BaseHandler {
     public List<WriteDbData4MethodCallInfo> queryMethodCallInfo4CallerByMethodCallOrArg(String callerMethodHash, boolean byMethodCall, int methodCallIdOrArgSeq) {
         if (byMethodCall) {
             return queryMethodCallInfo4CallerByTypeValue(callerMethodHash, String.valueOf(methodCallIdOrArgSeq),
-                    JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType(), JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID_EQC.getType());
+                    JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType(), JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID_EQC.getType());
         }
-        return queryMethodCallInfo4CallerByTypeValue(callerMethodHash, String.valueOf(methodCallIdOrArgSeq), JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType(),
-                JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ_EQC.getType());
+        return queryMethodCallInfo4CallerByTypeValue(callerMethodHash, String.valueOf(methodCallIdOrArgSeq), JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType(),
+                JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ_EQC.getType());
     }
 
     /**
@@ -339,7 +339,7 @@ public class MethodCallInfoHandler extends BaseHandler {
     public List<WriteDbData4MethodCallInfo> queryMethodCallInfo4CallerByTypeValue(String callerMethodHash, String value, String... types) {
         if (ArrayUtils.isEmpty(types)) {
             logger.error("类型参数不允许为空");
-            throw new JavaCGRuntimeException("类型参数不允许为空");
+            throw new JavaCG2RuntimeException("类型参数不允许为空");
         }
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_4_CALLER_BY_TYPE_VALUE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum, types.length);

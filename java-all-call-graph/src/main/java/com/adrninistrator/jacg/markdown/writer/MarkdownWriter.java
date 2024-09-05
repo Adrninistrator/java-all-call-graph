@@ -2,9 +2,9 @@ package com.adrninistrator.jacg.markdown.writer;
 
 import com.adrninistrator.jacg.markdown.JACGMarkdownConstants;
 import com.adrninistrator.jacg.markdown.enums.MDCodeBlockTypeEnum;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class MarkdownWriter implements AutoCloseable {
      */
     public MarkdownWriter(String mdFilePath, boolean showTitleSeq) throws FileNotFoundException {
         this.showTitleSeq = showTitleSeq;
-        writer = JavaCGFileUtil.genBufferedWriter(mdFilePath);
+        writer = JavaCG2FileUtil.genBufferedWriter(mdFilePath);
         if (showTitleSeq) {
             titleLevelSeqMap = new HashMap<>();
         }
@@ -66,7 +66,7 @@ public class MarkdownWriter implements AutoCloseable {
      */
     public void addTitle(int level, String title) throws IOException {
         if (level <= 0) {
-            throw new JavaCGRuntimeException("标题级别需要大于0");
+            throw new JavaCG2RuntimeException("标题级别需要大于0");
         }
 
         StringBuilder data = new StringBuilder(StringUtils.repeat(JACGMarkdownConstants.FLAG_TITLE, level))
@@ -76,7 +76,7 @@ public class MarkdownWriter implements AutoCloseable {
             data.append(genTitleSeq(level)).append(JACGMarkdownConstants.FLAG_SPACE);
         }
 
-        data.append(title).append(JavaCGConstants.NEW_LINE).append(JavaCGConstants.NEW_LINE);
+        data.append(title).append(JavaCG2Constants.NEW_LINE).append(JavaCG2Constants.NEW_LINE);
         writer.write(data.toString());
     }
 
@@ -105,7 +105,7 @@ public class MarkdownWriter implements AutoCloseable {
 
         // 插入级别大于1的标题
         if (level > lastAddedTitleLevel + 1) {
-            throw new JavaCGRuntimeException("本次添加的标题级别 " + level + " 不能超过 " + (lastAddedTitleLevel + 1));
+            throw new JavaCG2RuntimeException("本次添加的标题级别 " + level + " 不能超过 " + (lastAddedTitleLevel + 1));
         }
 
         // 处理从1到当前插入的最大级别之前的标题
@@ -149,7 +149,7 @@ public class MarkdownWriter implements AutoCloseable {
      * @throws IOException
      */
     public void addLine(String line) throws IOException {
-        writer.write(line + JavaCGConstants.NEW_LINE);
+        writer.write(line + JavaCG2Constants.NEW_LINE);
     }
 
     /**
@@ -158,7 +158,7 @@ public class MarkdownWriter implements AutoCloseable {
      * @throws IOException
      */
     public void addEmptyLine() throws IOException {
-        writer.write(JavaCGConstants.NEW_LINE);
+        writer.write(JavaCG2Constants.NEW_LINE);
     }
 
     /**
@@ -168,7 +168,7 @@ public class MarkdownWriter implements AutoCloseable {
      * @throws IOException
      */
     public void addLineWithNewLine(String line) throws IOException {
-        writer.write(line + JavaCGConstants.NEW_LINE + JavaCGConstants.NEW_LINE);
+        writer.write(line + JavaCG2Constants.NEW_LINE + JavaCG2Constants.NEW_LINE);
     }
 
     /**
@@ -180,9 +180,9 @@ public class MarkdownWriter implements AutoCloseable {
     public void addCodeBlock(MDCodeBlockTypeEnum type) throws IOException {
         codeBlockFlagNum++;
         if (codeBlockFlagNum % 2 == 0) {
-            throw new JavaCGRuntimeException(codeBlockFlagNum + "为偶数，代码块标志不能指定类型");
+            throw new JavaCG2RuntimeException(codeBlockFlagNum + "为偶数，代码块标志不能指定类型");
         }
-        writer.write(JACGMarkdownConstants.FLAG_CODE + type.getType() + JavaCGConstants.NEW_LINE);
+        writer.write(JACGMarkdownConstants.FLAG_CODE + type.getType() + JavaCG2Constants.NEW_LINE);
     }
 
     /**
@@ -192,10 +192,10 @@ public class MarkdownWriter implements AutoCloseable {
      */
     public void addCodeBlock() throws IOException {
         codeBlockFlagNum++;
-        writer.write(JACGMarkdownConstants.FLAG_CODE + JavaCGConstants.NEW_LINE);
+        writer.write(JACGMarkdownConstants.FLAG_CODE + JavaCG2Constants.NEW_LINE);
         if (codeBlockFlagNum % 2 == 0) {
             // 若为结束的代码块标志，需要额外加一行
-            writer.write(JavaCGConstants.NEW_LINE);
+            writer.write(JavaCG2Constants.NEW_LINE);
         }
     }
 
@@ -206,7 +206,7 @@ public class MarkdownWriter implements AutoCloseable {
      * @throws IOException
      */
     public void addList(String data) throws IOException {
-        writer.write(JACGMarkdownConstants.FLAG_LIST + data + JavaCGConstants.NEW_LINE);
+        writer.write(JACGMarkdownConstants.FLAG_LIST + data + JavaCG2Constants.NEW_LINE);
     }
 
     /**
@@ -216,7 +216,7 @@ public class MarkdownWriter implements AutoCloseable {
      * @throws IOException
      */
     public void addListWithNewLine(String data) throws IOException {
-        writer.write(JACGMarkdownConstants.FLAG_LIST + data + JavaCGConstants.NEW_LINE + JavaCGConstants.NEW_LINE);
+        writer.write(JACGMarkdownConstants.FLAG_LIST + data + JavaCG2Constants.NEW_LINE + JavaCG2Constants.NEW_LINE);
     }
 
     /**
@@ -226,7 +226,7 @@ public class MarkdownWriter implements AutoCloseable {
      */
     public void addTableHead(String... columns) throws IOException {
         if (ArrayUtils.isEmpty(columns)) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
         tableColumnNum = columns.length;
@@ -246,11 +246,11 @@ public class MarkdownWriter implements AutoCloseable {
      */
     public void addTableBody(String... columns) throws IOException {
         if (ArrayUtils.isEmpty(columns)) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
         if (columns.length != tableColumnNum) {
-            throw new JavaCGRuntimeException("当前指定的列数量与表格头列数量不一致 " + columns.length + " " + tableColumnNum);
+            throw new JavaCG2RuntimeException("当前指定的列数量与表格头列数量不一致 " + columns.length + " " + tableColumnNum);
         }
 
         addLine(genTableContent(columns));
@@ -271,7 +271,7 @@ public class MarkdownWriter implements AutoCloseable {
         }
 
         if (codeBlockFlagNum % 2 != 0) {
-            throw new JavaCGRuntimeException("代码块标志数量不是偶数 " + codeBlockFlagNum);
+            throw new JavaCG2RuntimeException("代码块标志数量不是偶数 " + codeBlockFlagNum);
         }
     }
 

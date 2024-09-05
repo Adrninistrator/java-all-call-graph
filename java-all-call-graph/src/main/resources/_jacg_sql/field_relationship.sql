@@ -11,7 +11,7 @@ CREATE TABLE if not exists jacg_field_relationship_{appName} (
   set_method_name varchar(200) NOT NULL COMMENT 'set方法方法名',
   set_class_name varchar(255) NOT NULL COMMENT 'set方法完整类名',
   valid tinyint NOT NULL COMMENT '关联关系是否有效，1:是，0:否',
-  type varchar(10) NOT NULL COMMENT '关联关系类型，参考 java-callgraph2 项目 JavaCGFieldRelationshipTypeEnum 类',
+  type varchar(10) NOT NULL COMMENT '关联关系类型，参考 java-callgraph2 项目 JavaCG2FieldRelationshipTypeEnum 类',
   relationship_flags int NOT NULL COMMENT '字段关联关系标志',
   bean_util_call_id int NOT NULL COMMENT 'BeanUtil方法调用序号，从1开始',
   bean_util_method text NULL COMMENT 'BeanUtil属性拷贝方法',

@@ -17,8 +17,8 @@ import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +103,7 @@ public abstract class WriteBusinessData2DbHandler extends BaseHandler implements
         String calleeMethodName = JACGUtil.getArgAt(1, argsByPage);
         String calleeClassName = JACGUtil.getArgAt(2, argsByPage);
         String insertSql = JACGUtil.getArgAt(3, argsByPage);
-        JavaCGCounter handleTimes = JACGUtil.getArgAt(4, argsByPage);
+        JavaCG2Counter handleTimes = JACGUtil.getArgAt(4, argsByPage);
         List<String> currentCalleeMethodArgTypeList = JACGUtil.getArgAt(5, argsByPage);
         for (Integer methodCallId : dataList) {
             if (handleTimes.getCount() == 0) {
@@ -186,7 +186,7 @@ public abstract class WriteBusinessData2DbHandler extends BaseHandler implements
         // 处理指定的被调用方法信息
         String[] calleeMethodInfoArray = chooseCalleeMethodInfoArray();
         if (ArrayUtils.isEmpty(calleeMethodInfoArray)) {
-            throw new JavaCGRuntimeException("未指定需要处理的被调用方法信息");
+            throw new JavaCG2RuntimeException("未指定需要处理的被调用方法信息");
         }
 
         for (String calleeMethodInfo : calleeMethodInfoArray) {
@@ -244,7 +244,7 @@ public abstract class WriteBusinessData2DbHandler extends BaseHandler implements
 
         // 保存当前处理的被调用方法参数类型列表
         List<String> currentCalleeMethodArgTypeList = new ArrayList<>();
-        JavaCGCounter handleTimes = new JavaCGCounter(0);
+        JavaCG2Counter handleTimes = new JavaCG2Counter(0);
         // 分页查询并处理
         return QueryByPageHandler.queryAndHandle(this, minCallId - 1, calleeSimpleClassName, calleeMethodName, calleeClassName, insertSql, handleTimes,
                 currentCalleeMethodArgTypeList);

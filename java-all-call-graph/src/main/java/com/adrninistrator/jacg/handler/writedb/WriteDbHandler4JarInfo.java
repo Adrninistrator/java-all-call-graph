@@ -6,9 +6,9 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ import java.util.Date;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_JAR_INFO,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_JAR_INFO,
         minColumnNum = 3,
         maxColumnNum = 3,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_JAR_INFO
@@ -43,10 +43,10 @@ public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4J
         String lastModifiedTime = "";
         String jarFileHash = "";
 
-        if (JavaCGConstants.FILE_KEY_JAR_INFO_PREFIX.equals(jarType)) {
+        if (JavaCG2Constants.FILE_KEY_JAR_INFO_PREFIX.equals(jarType)) {
             if (!JACGFileUtil.isFileExists(jarFilePath)) {
                 logger.error("jar包文件不存在: {}", jarFilePath);
-                throw new JavaCGRuntimeException("jar包文件不存在");
+                throw new JavaCG2RuntimeException("jar包文件不存在");
             }
 
             // 为jar包时，获取文件修改时间及HASH

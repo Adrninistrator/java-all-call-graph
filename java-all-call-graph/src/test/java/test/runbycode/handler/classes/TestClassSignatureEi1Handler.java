@@ -1,7 +1,7 @@
 package test.runbycode.handler.classes;
 
 import com.adrninistrator.jacg.handler.classes.ClassSignatureEi1Handler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.callgraph.manualaddmethodcall.unfixed.AbstractUnFixedService1;
@@ -36,7 +36,7 @@ public class TestClassSignatureEi1Handler extends TestRunByCodeBase {
 
     private void doTestClassSignatureEi1(ClassSignatureEi1Handler classSignatureEi1Handler4Query, String className, String upperClassName) {
         List<String> list = classSignatureEi1Handler4Query.queryClassSignatureEi1InfoFull(className, upperClassName);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
         printListContent(list, className);
     }
 }

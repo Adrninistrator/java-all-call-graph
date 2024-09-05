@@ -3,8 +3,8 @@ package com.adrninistrator.jacg.handler.lambda;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class LambdaMethodHandlerByClassMethodName extends LambdaMethodHandlerByC
      */
     public List<String> queryCalleeFullMethodByLambdaCallee(String lambdaCalleeClassName, String lambdaCalleeMethodName) {
         List<LambdaMethodCallDetail> list = queryDetailByLambdaCallee(lambdaCalleeClassName, lambdaCalleeMethodName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
 
@@ -54,13 +54,13 @@ public class LambdaMethodHandlerByClassMethodName extends LambdaMethodHandlerByC
      */
     public List<LambdaMethodCallDetail> queryDetailByLambdaCallee(String lambdaCalleeClassName, String lambdaCalleeMethodName) {
         if (StringUtils.isAnyBlank(lambdaCalleeClassName, lambdaCalleeMethodName)) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
         logger.info("通过Lambda表达式被调用方类名、方法名，查询Lambda表达式方法调用信息 {} {}", lambdaCalleeClassName, lambdaCalleeMethodName);
         // 执行查询操作
         List<LambdaMethodCallDetail> list = queryByClassNamePrefixDetail(lambdaCalleeClassName, null);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
 
@@ -85,13 +85,13 @@ public class LambdaMethodHandlerByClassMethodName extends LambdaMethodHandlerByC
      */
     public List<LambdaMethodCallDetail> queryDetailByLambdaNext(String lambdaNextClassName, String lambdaNextMethodName) {
         if (StringUtils.isAnyBlank(lambdaNextClassName, lambdaNextMethodName)) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
         logger.info("通过Lambda表达式下一个被调用方类名、方法名，查询Lambda表达式方法调用信息 {} {}", lambdaNextClassName, lambdaNextMethodName);
         // 执行查询操作
         List<LambdaMethodCallDetail> list = queryByClassNamePrefixDetail(null, lambdaNextClassName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
 

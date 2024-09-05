@@ -2,9 +2,9 @@ package com.adrninistrator.jacg.unpacker.targz;
 
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import net.lingala.zip4j.io.outputstream.ZipOutputStream;
 import net.lingala.zip4j.model.LocalFileHeader;
@@ -93,7 +93,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
         this.unpackJarNamePrefixList = unpackJarNamePrefixList;
         this.unpackConfigFileTypeList = unpackConfigFileTypeList;
 
-        if (JavaCGUtil.isCollectionEmpty(unpackPackageList)) {
+        if (JavaCG2Util.isCollectionEmpty(unpackPackageList)) {
             unpackAllPackage = true;
             logger.info("所有的jar包无论包名是什么都尝试解压");
         } else {
@@ -107,7 +107,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
                 unpackPackageWithSeparatorList.add("/" + unpackPackageReplace + "/");
             }
 
-            if (!JavaCGUtil.isCollectionEmpty(noUnpackPackageList)) {
+            if (!JavaCG2Util.isCollectionEmpty(noUnpackPackageList)) {
                 for (String noUnpackPackage : noUnpackPackageList) {
                     if (!JACGUtil.checkPackageName(noUnpackPackage)) {
                         throw new IllegalArgumentException("noUnpackPackageList 中的包名不能以.或/结尾");
@@ -119,7 +119,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
             }
         }
 
-        if (!JavaCGUtil.isCollectionEmpty(unpackDirList)) {
+        if (!JavaCG2Util.isCollectionEmpty(unpackDirList)) {
             for (String unpackDir : unpackDirList) {
                 if (StringUtils.endsWithAny(unpackDir, "/", "\\")) {
                     throw new IllegalArgumentException("unpackDirList 中的目录名称不能以/或\\结尾");
@@ -133,14 +133,14 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
 
     @Override
     protected boolean beforeStart() {
-        if (!JavaCGFileUtil.isDirectoryExists(unpackDestDirPath, true)) {
+        if (!JavaCG2FileUtil.isDirectoryExists(unpackDestDirPath, true)) {
             logger.error("输出目录不存在且无法创建 {} {}", tarGzFileName, unpackDestDirPath);
             return false;
         }
         File[] files = new File(unpackDestDirPath).listFiles();
         if (!ArrayUtils.isEmpty(files)) {
             logger.error("保存解压后文件的目录非空，请先清空该目录 {}", unpackDestDirPath);
-            throw new JavaCGRuntimeException("保存解压后文件的目录非空，请先清空该目录 " + unpackDestDirPath);
+            throw new JavaCG2RuntimeException("保存解压后文件的目录非空，请先清空该目录 " + unpackDestDirPath);
         }
 
         // 记录.tar.gz中的jar包中的包名前缀信息
@@ -150,7 +150,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
 
         jarPackagePrefixFilePath = unpackDestDirPath + File.separator + "jar_package_prefix.md";
         try {
-            jarPackagePrefixWriter = JavaCGFileUtil.genBufferedWriter(jarPackagePrefixFilePath);
+            jarPackagePrefixWriter = JavaCG2FileUtil.genBufferedWriter(jarPackagePrefixFilePath);
         } catch (IOException e) {
             logger.error("生成文件失败 {} ", jarPackagePrefixFilePath, e);
             return false;
@@ -313,9 +313,9 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
         String filePath = unpackDestDirPath + File.separator + entryName;
         logger.info("保存文件 {} {} {}", tarGzFileName, entryName, filePath);
         File file = new File(filePath);
-        if (!JavaCGFileUtil.isDirectoryExists(file.getParent(), true)) {
+        if (!JavaCG2FileUtil.isDirectoryExists(file.getParent(), true)) {
             logger.error("创建文件所在目录失败 {}", file.getParent());
-            throw new JavaCGRuntimeException("创建文件所在目录失败 " + file.getParent());
+            throw new JavaCG2RuntimeException("创建文件所在目录失败 " + file.getParent());
         }
         return file;
     }
@@ -362,7 +362,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
      * @return
      */
     private boolean checkUnpackJarByDirName(String jarNameOfTarWarEntry) {
-        if (JavaCGUtil.isCollectionEmpty(unpackDirWithSeparatorList)) {
+        if (JavaCG2Util.isCollectionEmpty(unpackDirWithSeparatorList)) {
             // 未指定需要解压其中的.jar的.tar.gz目录名列表
             return true;
         }
@@ -384,7 +384,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
      * @return
      */
     private boolean checkUnpackJarByJarName(String jarNameOfTarWarEntry) {
-        if (JavaCGUtil.isCollectionEmpty(unpackJarNamePrefixList)) {
+        if (JavaCG2Util.isCollectionEmpty(unpackJarNamePrefixList)) {
             // 未指定需要解压.jar的文件名前缀
             return true;
         }
@@ -416,7 +416,7 @@ public class TarGzUnpacker extends BaseTarGzUnpacker {
         }
         try {
             for (String jarPackagePrefix : jarPackagePrefixList) {
-                JavaCGFileUtil.write2FileWithTab(jarPackagePrefixWriter, jarOnlyFileName, jarPackagePrefix, jarName);
+                JavaCG2FileUtil.write2FileWithTab(jarPackagePrefixWriter, jarOnlyFileName, jarPackagePrefix, jarName);
             }
         } catch (IOException e) {
             logger.error("写文件失败 {} ", jarPackagePrefixFilePath, e);

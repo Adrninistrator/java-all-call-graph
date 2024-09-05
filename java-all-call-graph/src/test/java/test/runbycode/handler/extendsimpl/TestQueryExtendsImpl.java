@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.handler.dto.classes.ClassNameAndType;
 import com.adrninistrator.jacg.handler.dto.extendsimpl.ExtendsImplInfo;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -56,23 +56,23 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
 
     private void doTestGetChildClassList(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
         List<String> list = jacgExtendsImplHandler.queryChildClassListByFull(className, true, true, true, true);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
         printListContent(list, className, "子接口+子类");
 
         list = jacgExtendsImplHandler.queryChildClassListByFull(className, true, false, false, false);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
         printListContent(list, className, "接口");
 
         list = jacgExtendsImplHandler.queryChildClassListByFull(className, false, true, true, true);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
         printListContent(list, className, "类");
 
         list = jacgExtendsImplHandler.queryChildClassListByFull(className, false, true, true, false);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
         printListContent(list, className, "抽象类");
 
         list = jacgExtendsImplHandler.queryChildClassListByFull(className, false, true, false, true);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(list));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
         printListContent(list, className, "非抽象类");
     }
 
@@ -87,7 +87,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
 
     private void doTestQueryUpwardByClassName(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
         List<ClassNameAndType> classNameAndTypeList = jacgExtendsImplHandler.queryUpwardByClassName(className);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(classNameAndTypeList));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(classNameAndTypeList));
         printListContent(classNameAndTypeList, className);
     }
 
@@ -101,7 +101,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
 
     private void doTestQueryDownwardByClassName(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
         List<ClassNameAndType> classNameAndTypeList = jacgExtendsImplHandler.queryDownwardByClassName(className);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(classNameAndTypeList));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(classNameAndTypeList));
         printListContent(classNameAndTypeList, className);
     }
 
@@ -115,7 +115,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
 
     private void doTestQueryAllSuperClassName(JACGExtendsImplHandler jacgExtendsImplHandler, String className, boolean empty) {
         List<String> allSuperClassNameList = jacgExtendsImplHandler.queryAllSuperClassName(className);
-        Assert.assertEquals(empty, JavaCGUtil.isCollectionEmpty(allSuperClassNameList));
+        Assert.assertEquals(empty, JavaCG2Util.isCollectionEmpty(allSuperClassNameList));
         printListContent(allSuperClassNameList, className);
     }
 
@@ -130,7 +130,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
 
     private void doTestQueryTopCLassList(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
         List<ClassNameAndType> classNameAndTypeList = jacgExtendsImplHandler.queryTopCLassList(className);
-        Assert.assertFalse(JavaCGUtil.isCollectionEmpty(classNameAndTypeList));
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(classNameAndTypeList));
         printListContent(classNameAndTypeList, className);
     }
 
@@ -144,7 +144,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
 
     private void doTestQueryExtendsImplInfoUpward(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
         Map<String, ExtendsImplInfo> extendsImplInfoMap = jacgExtendsImplHandler.queryExtendsImplInfoUpward(className);
-        Assert.assertFalse(JavaCGUtil.isMapEmpty(extendsImplInfoMap));
+        Assert.assertFalse(JavaCG2Util.isMapEmpty(extendsImplInfoMap));
         printMapContent(extendsImplInfoMap, className);
         logger.info("{}\n{}", PROMPT_CLASS_GRAPH_UPWARD, JACGJsonUtil.getJsonStrPretty(extendsImplInfoMap));
     }
@@ -159,7 +159,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
 
     private void doTestQueryExtendsImplInfoDownward(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
         Map<String, ExtendsImplInfo> extendsImplInfoMap = jacgExtendsImplHandler.queryExtendsImplInfoDownward(className);
-        Assert.assertFalse(JavaCGUtil.isMapEmpty(extendsImplInfoMap));
+        Assert.assertFalse(JavaCG2Util.isMapEmpty(extendsImplInfoMap));
         printMapContent(extendsImplInfoMap, className);
         logger.info("{}\n{}", PROMPT_CLASS_GRAPH_DOWNWARD, JACGJsonUtil.getJsonStrPretty(extendsImplInfoMap));
     }
@@ -174,7 +174,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
 
     private void doTestQueryExtendsImplInfoDownwardFromTop(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
         Map<String, ExtendsImplInfo> extendsImplInfoMap = jacgExtendsImplHandler.queryExtendsImplInfoDownwardFromTop(className);
-        Assert.assertFalse(JavaCGUtil.isMapEmpty(extendsImplInfoMap));
+        Assert.assertFalse(JavaCG2Util.isMapEmpty(extendsImplInfoMap));
         printMapContent(extendsImplInfoMap, className);
         logger.info("{}\n{}", PROMPT_CLASS_GRAPH_DOWNWARD, JACGJsonUtil.getJsonStrPretty(extendsImplInfoMap));
     }

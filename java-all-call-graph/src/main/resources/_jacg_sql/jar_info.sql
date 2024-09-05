@@ -10,6 +10,6 @@ CREATE TABLE if not exists jacg_jar_info_{appName} (
   jar_file_hash varchar(32) NOT NULL COMMENT 'Jar包文件HASH',
   import_time datetime(3) NOT NULL COMMENT '导入时间',
   PRIMARY KEY (jar_num),
-  UNIQUE INDEX idx_ji_jph_{appName}(jar_path_hash),
-  UNIQUE INDEX idx_ji_jfn_{appName}(jar_file_name)
+  INDEX idx_ji_jph_{appName}(jar_path_hash),
+  INDEX idx_ji_jfn_{appName}(jar_file_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='jar包信息表';

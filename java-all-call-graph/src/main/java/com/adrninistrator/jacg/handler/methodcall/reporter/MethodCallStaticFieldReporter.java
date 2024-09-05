@@ -9,8 +9,8 @@ import com.adrninistrator.jacg.handler.methodcall.MethodCallStaticFieldHandler;
 import com.adrninistrator.jacg.handler.reporter.AbstractReporter;
 import com.adrninistrator.jacg.util.JACGMethodCallInfoUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class MethodCallStaticFieldReporter extends AbstractReporter {
             "静态字段名称"
     };
 
-    public static final String FILE_HEADER_STATIC_FIELD = StringUtils.join(FILE_HEADER_STATIC_FIELD_ARRAY, JavaCGConstants.FLAG_TAB);
+    public static final String FILE_HEADER_STATIC_FIELD = StringUtils.join(FILE_HEADER_STATIC_FIELD_ARRAY, JavaCG2Constants.FLAG_TAB);
 
     public MethodCallStaticFieldReporter(ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile, boolean skipWriteDb) {
         super(configureWrapper, reportDirPath, appendReportFile, skipWriteDb);
@@ -82,7 +82,7 @@ public class MethodCallStaticFieldReporter extends AbstractReporter {
              WriterSupportHeader writerSupportHeader = new WriterSupportHeader(reportFilePath, chooseFileHeader(), appendReportFile)) {
             // 查询在方法调用中使用了指定类中的静态字段的信息，包含对应的方法调用
             List<MethodCallWithStaticField> methodCallWithStaticFieldList = methodCallStaticFieldHandler.queryMethodCallWithStaticFieldList(className, fieldNames);
-            if (JavaCGUtil.isCollectionEmpty(methodCallWithStaticFieldList)) {
+            if (JavaCG2Util.isCollectionEmpty(methodCallWithStaticFieldList)) {
                 logger.info("未查询到查询在方法调用中使用了指定类中的静态字段的信息 {} {}", className, StringUtils.join(fieldNames, " "));
                 return true;
             }

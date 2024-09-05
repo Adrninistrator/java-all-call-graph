@@ -6,7 +6,7 @@ import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.handler.methodcallargs.BaseMethodCallByArgsHandler;
-import com.adrninistrator.javacg.common.enums.JavaCGMethodCallInfoTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +27,8 @@ public class TypeMethodCallByArgsHandler extends BaseMethodCallByArgsHandler {
     }
 
     @Override
-    protected JavaCGMethodCallInfoTypeEnum[] chooseMethodCallInfoTypes() {
-        return new JavaCGMethodCallInfoTypeEnum[]{JavaCGMethodCallInfoTypeEnum.MCIT_TYPE};
+    protected JavaCG2MethodCallInfoTypeEnum[] chooseMethodCallInfoTypes() {
+        return new JavaCG2MethodCallInfoTypeEnum[]{JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE};
     }
 
     @Override

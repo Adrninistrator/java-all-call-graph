@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGXmlUtil;
-import com.adrninistrator.javacg.extensions.codeparser.SpringXmlBeanParserInterface;
+import com.adrninistrator.javacg2.extensions.codeparser.SpringXmlBeanParserInterface;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
 import org.slf4j.Logger;

@@ -24,14 +24,14 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.dto.stack.ListAsStack;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.dto.stack.ListAsStack;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -107,7 +107,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
     private boolean operate() {
         // 生成需要处理的任务信息
         Map<String, CalleeTaskInfo> calleeTaskInfoMap = genCalleeTaskInfo();
-        if (JavaCGUtil.isMapEmpty(calleeTaskInfoMap)) {
+        if (JavaCG2Util.isMapEmpty(calleeTaskInfoMap)) {
             logger.error("执行失败，请检查配置文件 {} 的内容", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE);
             return false;
         }
@@ -141,7 +141,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         Map<String, CalleeTaskInfo> calleeTaskInfoMap = new HashMap<>();
         // 生成需要处理的类名Set
         for (String task : taskSet) {
-            String[] taskArray = StringUtils.splitPreserveAllTokens(task, JavaCGConstants.FLAG_COLON);
+            String[] taskArray = StringUtils.splitPreserveAllTokens(task, JavaCG2Constants.FLAG_COLON);
             if (taskArray.length != 1 && taskArray.length != 2) {
                 logger.error("配置文件 {} 中指定的任务信息非法\n{}\n格式应为以下之一:\n" +
                                 "1. [类名] （代表生成指定类所有方法向上的调用链）\n" +
@@ -187,7 +187,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                   */
                 methodInfoMap.put(task, methodInfo);
 
-                if (!JavaCGUtil.isNumStr(methodInfo)) {
+                if (!JavaCG2Util.isNumStr(methodInfo)) {
                     // 当有指定通过方法名而不是代码行号获取方法时，设置对应标志 
                     calleeTaskInfo.setFindMethodByName(true);
                 }
@@ -227,7 +227,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         for (Map.Entry<String, String> methodInfoEntry : calleeTaskInfo.getMethodInfoMap().entrySet()) {
             String origTaskText = methodInfoEntry.getKey();
             String methodInfoInTask = methodInfoEntry.getValue();
-            if (!JavaCGUtil.isNumStr(methodInfoInTask)) {
+            if (!JavaCG2Util.isNumStr(methodInfoInTask)) {
                 // 通过方法名查找对应的方法并处理
                 if (!handleOneCalleeMethodByName(entryCalleeSimpleClassName, findMethodTaskElementList, origTaskText, methodInfoInTask)) {
                     return false;
@@ -257,7 +257,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         }
 
         List<WriteDbData4MethodCall> calleeMethodList = dbOperator.queryList(sql, WriteDbData4MethodCall.class, calleeSimpleClassName);
-        if (JavaCGUtil.isCollectionEmpty(calleeMethodList)) {
+        if (JavaCG2Util.isCollectionEmpty(calleeMethodList)) {
             logger.warn("从方法调用关系表未找到被调用类对应方法 [{}] [{}]", sql, calleeSimpleClassName);
             return Collections.emptyList();
         }
@@ -314,7 +314,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return true;
         }
 
-        try (BufferedWriter writer4Method = JavaCGFileUtil.genBufferedWriter(outputFilePath4Method)) {
+        try (BufferedWriter writer4Method = JavaCG2FileUtil.genBufferedWriter(outputFilePath4Method)) {
             // 判断配置文件中是否已指定忽略当前方法
             if (ignoreCurrentMethod(null, entryCalleeFullMethod)) {
                 logger.info("配置文件中已指定忽略当前方法，不处理 {}", entryCalleeFullMethod);
@@ -340,7 +340,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         StringBuilder calleeInfo = new StringBuilder();
 
         // 在文件第1行写入当前方法的完整信息
-        calleeInfo.append(entryCalleeFullMethod).append(JavaCGConstants.NEW_LINE);
+        calleeInfo.append(entryCalleeFullMethod).append(JavaCG2Constants.NEW_LINE);
 
         // 确定写入输出文件的当前调用方法信息
         String entryCalleeInfo = chooseEntryCalleeInfo(entryCalleeSimpleClassName, entryCalleeFullMethod, entryCalleeReturnType);
@@ -371,10 +371,10 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             }
         }
 
-        calleeInfo.append(JavaCGConstants.NEW_LINE);
+        calleeInfo.append(JavaCG2Constants.NEW_LINE);
 
         // 记录查找到的调用方法信息List
-        List<Pair<String, Boolean>> entryCallerMethodList = new ArrayList<>(JavaCGConstants.SIZE_100);
+        List<Pair<String, Boolean>> entryCallerMethodList = new ArrayList<>(JavaCG2Constants.SIZE_100);
 
         // 根据指定的调用方方法HASH，查找所有被调用的方法信息
         if (!genAllGraph4Callee(entryCalleeMethodHash, entryCallerMethodList, entryCalleeFullMethod)) {
@@ -388,7 +388,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                 // 对于入口方法，写入标志
                 calleeInfo.append(JACGConstants.CALLEE_FLAG_ENTRY);
             }
-            calleeInfo.append(JavaCGConstants.NEW_LINE);
+            calleeInfo.append(JavaCG2Constants.NEW_LINE);
         }
 
         writer4Method.write(calleeInfo.toString());
@@ -587,7 +587,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                                                    String callerFullMethod,
                                                    String callType,
                                                    String callerMethodHash) {
-        if (JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD.getType().equals(callType)) {
+        if (JavaCG2CallTypeEnum.CTE_SUPER_CALL_CHILD.getType().equals(callType)) {
             // 当前方法调用类型是父类调用子类方法，记录父类方法调用子类方法对应信息的栈入栈
             String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
             String calleeSimpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
@@ -621,7 +621,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         }
 
         String callerMethodWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(callerFullMethod);
-        if (callerMethodWithArgs.startsWith(JavaCGCommonNameConstants.METHOD_NAME_INIT)) {
+        if (callerMethodWithArgs.startsWith(JavaCG2CommonNameConstants.METHOD_NAME_INIT)) {
             // 调用方法为构造函数，使用原始调用方法
             return new ImmutablePair<>(Boolean.FALSE, null);
         }
@@ -653,7 +653,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                 continue;
             }
             // 父类方法调用子类方法对应信息的栈的调用类为当前被调用类的子类
-            String tmpSccChildFullMethod = JavaCGClassMethodUtil.formatFullMethodWithArgTypes(superCallChildSInfo.getChildCalleeClassName(), callerMethodWithArgs);
+            String tmpSccChildFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(superCallChildSInfo.getChildCalleeClassName(), callerMethodWithArgs);
 
             // 判断子类方法是否有被调用方法
             String methodHash = dbOperWrapper.queryMethodHashByPrefix(childCalleeSimpleClassName, tmpSccChildFullMethod);
@@ -702,12 +702,12 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         CallGraphNode4Callee callGraphNode4Callee = callGraphNode4CalleeStack.peek();
         if (callerMethodHash.equals(callGraphNode4Callee.getCalleeMethodHash()) ||
                 ignoreCurrentMethod(callType, callerFullMethod) ||
-                !JavaCGYesNoEnum.isYes(enabled)) {
+                !JavaCG2YesNoEnum.isYes(enabled)) {
             // 当前记录需要忽略
             // 更新当前处理节点的调用方方法HASH
             callGraphNode4Callee.setCallerMethodHash(callerMethodHash);
 
-            if (!JavaCGYesNoEnum.isYes(enabled)) {
+            if (!JavaCG2YesNoEnum.isYes(enabled)) {
                 // 记录被禁用的方法调用
                 recordDisabledMethodCall(methodCallId, callType);
             }
@@ -776,7 +776,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     // 将调用方法列表中最后一条记录设置为入口方法
     private void markMethodAsEntry(List<Pair<String, Boolean>> callerMethodList) {
-        if (!JavaCGUtil.isCollectionEmpty(callerMethodList)) {
+        if (!JavaCG2Util.isCollectionEmpty(callerMethodList)) {
             Pair<String, Boolean> pair = callerMethodList.get(callerMethodList.size() - 1);
             pair.setValue(Boolean.TRUE);
         }
@@ -856,13 +856,13 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             // # 2: 展示 完整类名+方法名
             String callerMethodName = JACGClassMethodUtil.getMethodNameFromFull(actualCallerFullMethod);
             callerInfo.append(callerClassName)
-                    .append(JavaCGConstants.FLAG_COLON)
+                    .append(JavaCG2Constants.FLAG_COLON)
                     .append(callerMethodName);
         } else {
             // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
             String callerMethodName = JACGClassMethodUtil.getMethodNameFromFull(actualCallerFullMethod);
             callerInfo.append(callerSimpleClassName)
-                    .append(JavaCGConstants.FLAG_COLON)
+                    .append(JavaCG2Constants.FLAG_COLON)
                     .append(callerMethodName);
         }
 
@@ -878,12 +878,12 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         }
 
         // 显示调用方代码行号
-        callerInfo.append(JavaCGConstants.FLAG_TAB)
-                .append(JavaCGConstants.FLAG_LEFT_BRACKET)
+        callerInfo.append(JavaCG2Constants.FLAG_TAB)
+                .append(JavaCG2Constants.FLAG_LEFT_BRACKET)
                 .append(callerSimpleClassName)
-                .append(JavaCGConstants.FLAG_COLON)
+                .append(JavaCG2Constants.FLAG_COLON)
                 .append(callerLineNum)
-                .append(JavaCGConstants.FLAG_RIGHT_BRACKET);
+                .append(JavaCG2Constants.FLAG_RIGHT_BRACKET);
 
         // 添加方法调用业务功能数据，调用方法HASH使用原始的
         if (!addBusinessData(methodCallId, callFlags, rawCallerMethodHash, callerInfo)) {
@@ -898,7 +898,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
         // 添加循环调用标志
         if (back2Level != JACGConstants.NO_CYCLE_CALL_FLAG) {
-            callerInfo.append(JavaCGConstants.FLAG_TAB).append(JACGCallGraphFileUtil.genCycleCallFlag(back2Level));
+            callerInfo.append(JavaCG2Constants.FLAG_TAB).append(JACGCallGraphFileUtil.genCycleCallFlag(back2Level));
         }
 
         return new MutablePair<>(callerInfo.toString(), Boolean.FALSE);

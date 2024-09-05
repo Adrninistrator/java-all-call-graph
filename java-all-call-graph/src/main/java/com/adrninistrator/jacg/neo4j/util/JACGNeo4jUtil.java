@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.neo4j.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +70,7 @@ public class JACGNeo4jUtil {
     public static Integer getIndexSeq(String indexName) {
         // 获得索引名称中最后一个下划线后的内容
         String indexNameTail = StringUtils.substringAfterLast(indexName, JACGConstants.FLAG_UNDER_LINE);
-        if (!JavaCGUtil.isNumStr(indexNameTail)) {
+        if (!JavaCG2Util.isNumStr(indexNameTail)) {
             return null;
         }
         return Integer.valueOf(indexNameTail);

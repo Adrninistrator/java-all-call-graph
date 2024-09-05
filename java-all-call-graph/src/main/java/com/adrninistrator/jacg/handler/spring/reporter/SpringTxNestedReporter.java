@@ -17,10 +17,10 @@ import com.adrninistrator.jacg.handler.dto.springtx.SpringTxNestedAnnotationRepo
 import com.adrninistrator.jacg.handler.dto.springtx.SpringTxNestedTplReport;
 import com.adrninistrator.jacg.handler.reporter.AbstractReporter;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,7 @@ public class SpringTxNestedReporter extends AbstractReporter {
         fileHeaderAnnotationList.add(JACGSpReportConstants.COLUMN_ANNOTATION_ENTRY_METHOD);
         fileHeaderAnnotationList.add(JACGSpReportConstants.COLUMN_ANNOTATION_METHOD_PROPAGATION);
         fileHeaderAnnotationList.addAll(fileHeaderCommonList);
-        FILE_HEADER_ANNOTATION = StringUtils.join(fileHeaderAnnotationList, JavaCGConstants.FLAG_TAB);
+        FILE_HEADER_ANNOTATION = StringUtils.join(fileHeaderAnnotationList, JavaCG2Constants.FLAG_TAB);
 
         List<String> fileHeaderTplList = new ArrayList<>();
         fileHeaderTplList.add(JACGSpReportConstants.COLUMN_TPL_TYPE);
@@ -71,7 +71,7 @@ public class SpringTxNestedReporter extends AbstractReporter {
         fileHeaderTplList.add(JACGSpReportConstants.COLUMN_TPL_CALLER_FULL_METHOD);
         fileHeaderTplList.add(JACGSpReportConstants.COLUMN_TPL_CALLER_LINE_NUMBER);
         fileHeaderTplList.addAll(fileHeaderCommonList);
-        FILE_HEADER_TPL = StringUtils.join(fileHeaderTplList, JavaCGConstants.FLAG_TAB);
+        FILE_HEADER_TPL = StringUtils.join(fileHeaderTplList, JavaCG2Constants.FLAG_TAB);
     }
 
     public SpringTxNestedReporter(ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile, boolean copyFileInSeparateDir) {
@@ -112,7 +112,7 @@ public class SpringTxNestedReporter extends AbstractReporter {
         String reportDirPathTxAnnotation = reportDirPath + File.separator + JACGSpReportConstants.DIR_NAME_SP_TX_USE_ANNOTATION;
         String reportDirPathTxTpl = reportDirPath + File.separator + JACGSpReportConstants.DIR_NAME_SP_TX_USE_TPL;
         // 尝试创建结果文件目录
-        if (!JavaCGFileUtil.isDirectoryExists(reportDirPathTxAnnotation) || !JavaCGFileUtil.isDirectoryExists(reportDirPathTxTpl)) {
+        if (!JavaCG2FileUtil.isDirectoryExists(reportDirPathTxAnnotation) || !JavaCG2FileUtil.isDirectoryExists(reportDirPathTxTpl)) {
             return false;
         }
 
@@ -148,7 +148,7 @@ public class SpringTxNestedReporter extends AbstractReporter {
 
     // 处理事务注解相关文件信息
     protected void handleTxAnnotationFileInfo(List<SpTxNestedByAnnotationFile> spTxNestedByAnnotationFileList, String reportDirPathTxAnnotation) {
-        if (JavaCGUtil.isCollectionEmpty(spTxNestedByAnnotationFileList)) {
+        if (JavaCG2Util.isCollectionEmpty(spTxNestedByAnnotationFileList)) {
             return;
         }
 
@@ -192,7 +192,7 @@ public class SpringTxNestedReporter extends AbstractReporter {
 
     // 处理事务模板相关文件信息
     protected void handleTxTplFileInfo(List<SpTxNestedByTplFile> spTxNestedByTplFileList, String reportDirPathTxTpl) {
-        if (JavaCGUtil.isCollectionEmpty(spTxNestedByTplFileList)) {
+        if (JavaCG2Util.isCollectionEmpty(spTxNestedByTplFileList)) {
             return;
         }
 
@@ -258,7 +258,7 @@ public class SpringTxNestedReporter extends AbstractReporter {
         } else {
             stringList.add("");
         }
-        stringList.add(JavaCGYesNoEnum.parseDesc(spTxCalleeInfo.isRunInOtherThread()));
+        stringList.add(JavaCG2YesNoEnum.parseDesc(spTxCalleeInfo.isRunInOtherThread()));
         stringList.add(String.valueOf(spTxCalleeInfo.getDataSeq()));
         stringList.add(String.valueOf(spTxCalleeInfo.getLineNumber()));
     }

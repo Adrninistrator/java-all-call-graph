@@ -10,10 +10,10 @@ import com.adrninistrator.jacg.dto.callgraph.CallGraphNode4Caller;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -222,7 +222,7 @@ public class DbOperWrapper {
         }
 
         for (String simpleClassName : list) {
-            String duplicateSimpleClassName = JavaCGClassMethodUtil.getSimpleClassNameFromFull(simpleClassName);
+            String duplicateSimpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(simpleClassName);
             usedDuplicateSimpleClassNameSet.add(duplicateSimpleClassName);
         }
         logger.info("找到类名相同但包名不同的类 {}", StringUtils.join(usedDuplicateSimpleClassNameSet, " "));
@@ -236,7 +236,7 @@ public class DbOperWrapper {
                 " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName(appName, tableSuffix) +
                 " where " + DC.CN_DUPLICATE_CLASS + " = ?";
         String finalSql = formatSql(sql);
-        return dbOperator.queryListOneColumn(finalSql, String.class, JavaCGYesNoEnum.YES.getIntValue());
+        return dbOperator.queryListOneColumn(finalSql, String.class, JavaCG2YesNoEnum.YES.getIntValue());
     }
 
     /**
@@ -293,7 +293,7 @@ public class DbOperWrapper {
 
         for (String duplicateClassName : duplicateSimpleClassNameSet) {
             // 将class_name_表的simple_name更新为full_name
-            if (dbOperator.update(sql, JavaCGYesNoEnum.YES.getIntValue(), duplicateClassName) == null) {
+            if (dbOperator.update(sql, JavaCG2YesNoEnum.YES.getIntValue(), duplicateClassName) == null) {
                 return false;
             }
         }
@@ -335,7 +335,7 @@ public class DbOperWrapper {
         if (usedDuplicateSimpleClassNameSet == null) {
             // 查找类名相同但包名不同的类
             if (!findDuplicateClass(tableSuffix)) {
-                throw new JavaCGRuntimeException("查询同名类失败");
+                throw new JavaCG2RuntimeException("查询同名类失败");
             }
             if (StringUtils.isBlank(tableSuffix)) {
                 usedDuplicateSimpleClassNameSet = duplicateSimpleClassNameSet;
@@ -344,7 +344,7 @@ public class DbOperWrapper {
             }
         }
 
-        String simpleClassName = JavaCGClassMethodUtil.getSimpleClassNameFromFull(className);
+        String simpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(className);
         if (usedDuplicateSimpleClassNameSet.contains(simpleClassName)) {
             return className;
         }
@@ -375,7 +375,7 @@ public class DbOperWrapper {
 
     // 执行根据任务中的简单类名或完整类名获取唯一类名
     private String doGetSimpleClassNameInTask(String className) {
-        if (className.contains(JavaCGConstants.FLAG_DOT)) {
+        if (className.contains(JavaCG2Constants.FLAG_DOT)) {
             // 当前指定的是完整类名，查找对应的简单类名
             String simpleClassName = querySimpleClassNameByFull(className);
             if (simpleClassName == null) {

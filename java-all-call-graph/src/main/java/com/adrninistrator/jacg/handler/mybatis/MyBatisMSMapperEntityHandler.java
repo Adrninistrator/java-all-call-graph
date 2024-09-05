@@ -28,8 +28,8 @@ import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.adrninistrator.mybatismysqltableparser.common.enums.MySqlStatementEnum;
 import com.adrninistrator.mybatismysqltableparser.util.MyBatisTableParserUtil;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOperator;
@@ -91,7 +91,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
         }
 
         List<WriteDbData4MyBatisMSTable> list = dbOperator.queryList(sql, WriteDbData4MyBatisMSTable.class, mapperSimpleClassName, mapperMethodName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             logger.error("未查询到MyBatis Mapper对应的数据库表信息 {} {}", mapperClassName, mapperMethodName);
             return null;
         }
@@ -180,7 +180,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
         }
         String entitySimpleClassName = dbOperWrapper.querySimpleClassName(entityClassName);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, entitySimpleClassName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return null;
         }
         if (list.size() > 1) {
@@ -209,7 +209,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
         }
         String entitySimpleClassName = dbOperWrapper.querySimpleClassName(entityClassName);
         List<String> list = dbOperator.queryListOneColumn(sql, String.class, entitySimpleClassName, entityFieldName);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return null;
         }
         if (list.size() > 1) {
@@ -233,7 +233,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
     public Map<String, List<WriteDbData4MybatisMSEntity>> queryEntityWithMultiTableMap() {
         // 查询在mybatis_ms_entity表中出现多于一次的Entity信息
         List<String> multiEntitySimpleClassNameList = queryMultiEntitySimpleClassNameList();
-        if (JavaCGUtil.isCollectionEmpty(multiEntitySimpleClassNameList)) {
+        if (JavaCG2Util.isCollectionEmpty(multiEntitySimpleClassNameList)) {
             // 未查询到
             return Collections.emptyMap();
         }
@@ -383,7 +383,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
             String argType = argTypeList.get(i);
             AbstractMyBatisMapperArg myBatisMapperArg;
             // 判断参数类型
-            if (JavaCGClassMethodUtil.isCustomType(argType)) {
+            if (JavaCG2ClassMethodUtil.isCustomType(argType)) {
                 myBatisMapperArg = new MyBatisMapperArgObject();
             } else {
                 myBatisMapperArg = new MyBatisMapperArgBasic();
@@ -464,7 +464,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
                                                                                List<MyBatisMapperArgAndParamDbInfo> myBatisMapperArgAndParamDbInfoList4Set) {
         // 解析MyBatis Mapper方法参数
         List<AbstractMyBatisMapperArg> myBatisMapperArgList = parseMyBatisMapperArg(mapperFullMethod);
-        if (JavaCGUtil.isCollectionEmpty(myBatisMapperArgList)) {
+        if (JavaCG2Util.isCollectionEmpty(myBatisMapperArgList)) {
             return null;
         }
 
@@ -566,7 +566,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
      */
     private void findParamDbInfo4MyBatisMapperArgs(List<AbstractMyBatisMapperArg> myBatisMapperArgList, List<MyBatisMSMapperParamDbInfo> myBatisMSMapperParamDbInfoList,
                                                    List<MyBatisMapperArgAndParamDbInfo> myBatisMapperArgAndParamDbInfoList) {
-        if (JavaCGUtil.isCollectionEmpty(myBatisMSMapperParamDbInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(myBatisMSMapperParamDbInfoList)) {
             return;
         }
 

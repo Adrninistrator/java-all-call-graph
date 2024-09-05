@@ -9,8 +9,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import test.callgraph.customflow.methodcallargs.dto.base.TestBaseCFMCARequestDto;
 import test.callgraph.customflow.methodcallargs.flow.TestCFMCAFlow;
@@ -42,7 +42,7 @@ public class CFMCAMethodCallHandler extends BaseHandler {
     public void addMethodCall() {
         // 根据被调用类名与方法名查询调用方信息
         List<WriteDbData4MethodCall> allerInfoList = methodCallHandler.queryCallerInfoByCallee(TestCFMCAFlow.class.getName(), "handle");
-        if (JavaCGUtil.isCollectionEmpty(allerInfoList)) {
+        if (JavaCG2Util.isCollectionEmpty(allerInfoList)) {
             return;
         }
 
@@ -55,7 +55,7 @@ public class CFMCAMethodCallHandler extends BaseHandler {
             ObjArgsInfoInMethodCall objArgsInfoInMethodCall = methodCallInfoHandler.queryObjArgsInfoInMethodCall(callerInfo.getCallId());
             // 获取第1个参数对应的参数信息
             List<MethodCallInfo> methodCallInfoList = objArgsInfoInMethodCall.getArgMethodCallInfo(1);
-            if (JavaCGUtil.isCollectionEmpty(methodCallInfoList)) {
+            if (JavaCG2Util.isCollectionEmpty(methodCallInfoList)) {
                 continue;
             }
             // 遍历数组类型参数的各个元素
@@ -66,7 +66,7 @@ public class CFMCAMethodCallHandler extends BaseHandler {
                     continue;
                 }
                 // 参数类型非空，添加方法调用关系
-                String calleeFullMethod = JavaCGClassMethodUtil.formatFullMethod(argType, "handle", TestBaseCFMCARequestDto.class);
+                String calleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethod(argType, "handle", TestBaseCFMCARequestDto.class);
                 methodCallHandler.manualAddMethodCall(callerInfo.getCallerFullMethod(), calleeFullMethod);
             }
         }

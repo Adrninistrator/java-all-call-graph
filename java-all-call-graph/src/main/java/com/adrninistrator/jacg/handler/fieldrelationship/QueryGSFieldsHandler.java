@@ -8,7 +8,7 @@ import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.field.JACGFieldInfo;
 import com.adrninistrator.jacg.handler.field.FieldInfoHandler;
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +83,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
             String jsonPropertyValue = annotationHandler.queryFieldJsonPropertyValue(className, fieldName);
             // 获取使用的字段的名称
             String fieldUsedName = StringUtils.isBlank(jsonPropertyValue) ? fieldName : jsonPropertyValue;
-            if (StringUtils.equalsAny(getSetMethod.getFieldCategory(), JavaCGConstants.FILE_KEY_CATEGORY_JDK, JavaCGConstants.FILE_KEY_CATEGORY_GENERICS_JDK)) {
+            if (StringUtils.equalsAny(getSetMethod.getFieldCategory(), JavaCG2Constants.FILE_KEY_CATEGORY_JDK, JavaCG2Constants.FILE_KEY_CATEGORY_GENERICS_JDK)) {
                 // 字段类型为JDK中的类，或集合的泛型类型为JDK中的类，直接添加
                 String fieldShowName = getFieldShowName(fieldUsedName, upperFieldUsedNameList);
                 allFieldInfoList.add(new JACGFieldInfo(fieldName, getSetMethod.getFieldType(), fieldShowName, jsonPropertyValue, className));
@@ -92,7 +92,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
 
             List<String> newUpperFieldUsedNameList = new ArrayList<>(upperFieldUsedNameList);
             newUpperFieldUsedNameList.add(fieldUsedName);
-            if (JavaCGConstants.FILE_KEY_CATEGORY_CUSTOM.equals(getSetMethod.getFieldCategory())) {
+            if (JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(getSetMethod.getFieldCategory())) {
                 // 字段类型为自定义类型，递归处理
                 doQueryAllFieldInfoList(allFieldInfoList, queryGetMethod, getSetMethod.getFieldType(), newUpperFieldUsedNameList, handledClassNameSet);
                 continue;
@@ -139,7 +139,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
         }
 
         for (BaseWriteDbData4GetSetMethod getSetMethod : getSetMethodList) {
-            if (JavaCGConstants.FILE_KEY_CATEGORY_CUSTOM.equals(getSetMethod.getFieldCategory())) {
+            if (JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(getSetMethod.getFieldCategory())) {
                 // 字段类型为自定义类型
                 customFieldTypeList.add(getSetMethod.getFieldType());
                 // 递归处理
@@ -148,7 +148,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
             }
 
             // 字段集合泛型类型为自定义类型，查询泛型中的类型
-            if (JavaCGConstants.FILE_KEY_CATEGORY_GENERICS_CUSTOM.equals(getSetMethod.getFieldCategory())) {
+            if (JavaCG2Constants.FILE_KEY_CATEGORY_GENERICS_CUSTOM.equals(getSetMethod.getFieldCategory())) {
                 List<WriteDbData4FieldGenericsType> fieldGenericsTypeList = fieldInfoHandler.queryFieldGenericsTypeByClassFieldName(className, getSetMethod.getFieldName());
                 if (fieldGenericsTypeList == null) {
                     return;
@@ -200,6 +200,6 @@ public class QueryGSFieldsHandler extends BaseHandler {
         }
         List<String> newList = new ArrayList<>(upperFieldUsedNameList);
         newList.add(fieldUsedName);
-        return StringUtils.join(newList, JavaCGConstants.FLAG_DOT);
+        return StringUtils.join(newList, JavaCG2Constants.FLAG_DOT);
     }
 }

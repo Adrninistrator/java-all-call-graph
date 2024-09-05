@@ -2,7 +2,7 @@ package test.runbycode.handler.methodcall;
 
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassName;
 import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.apache.bcel.generic.Type;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -29,7 +29,7 @@ public class TestCharset1MethodCallByERDetailHandler extends TestRunByCodeBase {
 
     @Test
     public void test() {
-        String callerFullMethod = JavaCGClassMethodUtil.formatFullMethod(TestCharset.class.getName(), "test", new Type[]{});
+        String callerFullMethod = JavaCG2ClassMethodUtil.formatFullMethod(TestCharset.class.getName(), "test", new Type[]{});
 
         try (ClassInfoHandler classInfoHandler = new ClassInfoHandler(configureWrapper);
              ShowAllMethodCallByERDetailHandler showAllMethodCallByERDetailHandler = new ShowAllMethodCallByERDetailHandler(configureWrapper)) {

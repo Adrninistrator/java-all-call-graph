@@ -8,7 +8,7 @@ import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.methodcall.BaseMethodCallByEEDetailHandler;
 import com.adrninistrator.jacg.util.JACGMethodCallInfoUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGConstantTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2ConstantTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class StringAppendCharMethodCallByEEDetailHandler extends BaseMethodCallB
     protected boolean chooseHandleMethod(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail) {
         if (StringBuilder.class.getName().equals(calleeMethodDetail.getClassName())
                 && "append".equals(calleeMethodDetail.getMethodName())
-                && !JavaCGConstantTypeEnum.CONSTTE_CHAR.getType().equals(calleeMethodDetail.getArgTypeStr())) {
+                && !JavaCG2ConstantTypeEnum.CONSTTE_CHAR.getType().equals(calleeMethodDetail.getArgTypeStr())) {
             return false;
         }
         return true;
@@ -50,7 +50,7 @@ public class StringAppendCharMethodCallByEEDetailHandler extends BaseMethodCallB
         List<String> argTypeList = Arrays.asList(
                 String.class.getName(),
                 CharSequence.class.getName(),
-                JavaCGConstantTypeEnum.CONSTTE_CHAR.getType(),
+                JavaCG2ConstantTypeEnum.CONSTTE_CHAR.getType(),
                 StringBuilder.class.getName()
         );
 

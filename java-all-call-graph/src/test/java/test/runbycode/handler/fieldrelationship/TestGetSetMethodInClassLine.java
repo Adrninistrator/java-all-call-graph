@@ -3,7 +3,7 @@ package test.runbycode.handler.fieldrelationship;
 import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData4GetSetMethod;
 import com.adrninistrator.jacg.handler.classes.ClassLineNumberHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.callgraph.fieldrelationships.frb.FRBClass1;
@@ -32,7 +32,7 @@ public class TestGetSetMethodInClassLine extends TestRunByCodeBase {
     private void doTestQueryGetSetMethodInClassLine(ClassLineNumberHandler classLineNumberHandler, String className, int lineNumber, boolean exists) {
         ListWithResult<BaseWriteDbData4GetSetMethod> getSetMethodList = classLineNumberHandler.queryGetSetMethodInClassLine(className, lineNumber);
         Assert.assertTrue(getSetMethodList.isSuccess());
-        Assert.assertEquals(exists, !JavaCGUtil.isCollectionEmpty(getSetMethodList.getList()));
+        Assert.assertEquals(exists, !JavaCG2Util.isCollectionEmpty(getSetMethodList.getList()));
         printListContent(getSetMethodList.getList(), className, String.valueOf(lineNumber));
     }
 }

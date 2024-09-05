@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.handler.fieldrelationship.filler;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
 /**
  * @author adrninistrator
@@ -14,11 +14,11 @@ public class MyBatisEntityFieldBehaviorCachedFiller extends DefaultFieldBehavior
 
     public MyBatisEntityFieldBehaviorCachedFiller(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
-        throw new JavaCGRuntimeException("当前类不能使用");
+        throw new JavaCG2RuntimeException("当前类不能使用");
     }
 
     public MyBatisEntityFieldBehaviorCachedFiller(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
-        throw new JavaCGRuntimeException("当前类不能使用");
+        throw new JavaCG2RuntimeException("当前类不能使用");
     }
 }

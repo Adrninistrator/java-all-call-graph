@@ -1,7 +1,7 @@
 package test.runbycode.reporter.exception;
 
 import com.adrninistrator.jacg.handler.exception.reporter.MethodCatchExceptionUsageReporter;
-import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
+import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import org.junit.Assert;
 import org.junit.Test;
 import test.runbycode.base.TestRunByCodeBase;
@@ -27,7 +27,7 @@ public class TestMethodCatchExceptionUsageReporter extends TestRunByCodeBase {
 
     @Test
     public void testSkipWriteDb() {
-        JavaCGCounter catchSeq = new JavaCGCounter(10000);
+        JavaCG2Counter catchSeq = new JavaCG2Counter(10000);
         MethodCatchExceptionUsageReporter methodCatchExceptionUsageReporter = new MethodCatchExceptionUsageReporter(configureWrapper, "build/catch_exception_report", false, true);
         methodCatchExceptionUsageReporter.setCatchSeq(catchSeq);
         Assert.assertTrue(methodCatchExceptionUsageReporter.genMethodCatchExceptionUsageReporter(LOGGER_METHOD_ARRAY));

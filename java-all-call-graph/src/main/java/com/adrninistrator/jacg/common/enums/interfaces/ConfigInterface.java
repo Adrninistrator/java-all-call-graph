@@ -6,6 +6,8 @@ package com.adrninistrator.jacg.common.enums.interfaces;
  * @description: 配置枚举继承的接口
  */
 public interface ConfigInterface {
+    String getEnumName();
+
     String getKey();
 
     String getDesc();

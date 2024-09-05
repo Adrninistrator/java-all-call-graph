@@ -7,8 +7,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +21,7 @@ import java.util.Set;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL,
         minColumnNum = 10,
         maxColumnNum = 10,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL
@@ -82,8 +82,8 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         String callerFullMethod = array[1];
         String tmpCalleeFullMethod = array[2];
 
-        int indexCalleeRightBracket = tmpCalleeFullMethod.indexOf(JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG2);
-        String calleeFullMethod = tmpCalleeFullMethod.substring(indexCalleeRightBracket + JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG2.length()).trim();
+        int indexCalleeRightBracket = tmpCalleeFullMethod.indexOf(JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG2);
+        String calleeFullMethod = tmpCalleeFullMethod.substring(indexCalleeRightBracket + JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG2.length()).trim();
 
         // 根据完整方法前缀判断是否需要处理
         if (!isAllowedClassPrefix(callerFullMethod) && !isAllowedClassPrefix(calleeFullMethod)) {
@@ -98,12 +98,12 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         String callerJarNumStr = array[8];
         String calleeJarNumStr = array[9];
 
-        int indexCalleeLeftBracket = tmpCalleeFullMethod.indexOf(JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG1);
-        String callType = tmpCalleeFullMethod.substring(indexCalleeLeftBracket + JavaCGConstants.FILE_KEY_CALL_TYPE_FLAG1.length(), indexCalleeRightBracket);
+        int indexCalleeLeftBracket = tmpCalleeFullMethod.indexOf(JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG1);
+        String callType = tmpCalleeFullMethod.substring(indexCalleeLeftBracket + JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG1.length(), indexCalleeRightBracket);
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
-        Integer callerJarNum = (JavaCGConstants.EMPTY_JAR_NUM.equals(callerJarNumStr) ? null : Integer.parseInt(callerJarNumStr));
-        Integer calleeJarNum = (JavaCGConstants.EMPTY_JAR_NUM.equals(calleeJarNumStr) ? null : Integer.parseInt(calleeJarNumStr));
+        Integer callerJarNum = (JavaCG2Constants.EMPTY_JAR_NUM.equals(callerJarNumStr) ? null : Integer.parseInt(callerJarNumStr));
+        Integer calleeJarNum = (JavaCG2Constants.EMPTY_JAR_NUM.equals(calleeJarNumStr) ? null : Integer.parseInt(calleeJarNumStr));
 
         WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(
                 callType,

@@ -2,8 +2,8 @@ package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGXmlUtil;
-import com.adrninistrator.javacg.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class SpringTaskXmlCodeParser extends AbstractSaveData2FileParser {
 
                     String beanName = element2.getAttributeValue("ref");
                     String methodName = element2.getAttributeValue("method");
-                    JavaCGFileUtil.write2FileWithTab(writer, beanName, methodName);
+                    JavaCG2FileUtil.write2FileWithTab(writer, beanName, methodName);
                 }
             }
         } catch (Exception e) {

@@ -14,7 +14,7 @@ import com.adrninistrator.jacg.neo4j.repository.JACGMethodLineNumberRepository;
 import com.adrninistrator.jacg.neo4j.util.JACGNeo4jUtil;
 import com.adrninistrator.jacg.spring.configuration.JACGSpringConfiguration;
 import com.adrninistrator.jacg.spring.context.SpringContextManager;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import org.neo4j.ogm.model.QueryStatistics;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.Session;
@@ -89,7 +89,7 @@ public class Neo4jDbOperWrapper extends DbOperWrapper {
     protected boolean doUpdateSimpleClassName() {
         return Boolean.TRUE.equals(transactionTemplate.execute(status -> {
             for (String duplicateSimpleClassName : duplicateSimpleClassNameSet) {
-                if (jacgClassNameRepository.updateSimpleClassName2Full(appName, duplicateSimpleClassName, JavaCGYesNoEnum.YES.getIntValue()) <= 0) {
+                if (jacgClassNameRepository.updateSimpleClassName2Full(appName, duplicateSimpleClassName, JavaCG2YesNoEnum.YES.getIntValue()) <= 0) {
                     return false;
                 }
             }
@@ -100,7 +100,7 @@ public class Neo4jDbOperWrapper extends DbOperWrapper {
     // 执行查找类名与唯一类名相同的唯一类名
     @Override
     protected List<String> doFindDuplicateClass(String tableSuffix) {
-        return jacgClassNameRepository.queryDupClassNameByFlag(appName, JavaCGYesNoEnum.YES.getIntValue());
+        return jacgClassNameRepository.queryDupClassNameByFlag(appName, JavaCG2YesNoEnum.YES.getIntValue());
     }
 
     // 根据完整类名查询对应的唯一类名

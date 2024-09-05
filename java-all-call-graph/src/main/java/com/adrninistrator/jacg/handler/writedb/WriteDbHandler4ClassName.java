@@ -5,8 +5,8 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassName;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassReference;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,8 +44,8 @@ public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData
             WriteDbData4ClassName writeDbData4ClassName = new WriteDbData4ClassName();
             writeDbData4ClassName.setRecordId(genNextRecordId());
             writeDbData4ClassName.setClassName(className);
-            writeDbData4ClassName.setSimpleClassName(JavaCGClassMethodUtil.getSimpleClassNameFromFull(className));
-            writeDbData4ClassName.setDuplicateClass(JavaCGYesNoEnum.NO.getIntValue());
+            writeDbData4ClassName.setSimpleClassName(JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(className));
+            writeDbData4ClassName.setDuplicateClass(JavaCG2YesNoEnum.NO.getIntValue());
             dataList.add(writeDbData4ClassName);
             tryInsertDb();
         }

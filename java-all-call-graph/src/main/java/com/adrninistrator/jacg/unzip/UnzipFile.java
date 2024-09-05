@@ -2,8 +2,8 @@ package com.adrninistrator.jacg.unzip;
 
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.util.JACGFileUtilNoLogger;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.stat.JCallGraph;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.entry.JavaCG2Entry;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,7 +22,7 @@ public class UnzipFile {
     public static void main(String[] args) {
         UnzipFile unzipFile = new UnzipFile();
         unzipFile.unzipJACG();
-        unzipFile.unzipJavaCG();
+        unzipFile.unzipJavaCG2();
     }
 
     private void unzipJACG() {
@@ -63,22 +63,22 @@ public class UnzipFile {
         });
     }
 
-    private void unzipJavaCG() {
-        String jarFilePath = JCallGraph.class.getProtectionDomain().getCodeSource().getLocation().getFile();
+    private void unzipJavaCG2() {
+        String jarFilePath = JavaCG2Entry.class.getProtectionDomain().getCodeSource().getLocation().getFile();
         System.out.println("java-callgraph2 jar包路径: " + jarFilePath);
         if (!new File(jarFilePath).exists()) {
             System.out.println("文件路径不正确: " + jarFilePath);
         }
 
         String rootDirName = chooseRootDirName();
-        if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + JavaCGConstants.DIR_CONFIG, true)) {
+        if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + JavaCG2Constants.DIR_CONFIG, true)) {
             return;
         }
 
         handleZipFile(jarFilePath, rootDirName, new AbstractZipEntryHandler() {
             @Override
             public void handleZipEntry(ZipEntry ze, String fileName, ZipInputStream zis, String rootDirName) {
-                if (fileName.startsWith(JavaCGConstants.DIR_CONFIG + "/")) {
+                if (fileName.startsWith(JavaCG2Constants.DIR_CONFIG + "/")) {
                     writeFile(ze, zis, rootDirName, UnzipFileConstants.DIR_RESOURCES, fileName);
                 }
             }

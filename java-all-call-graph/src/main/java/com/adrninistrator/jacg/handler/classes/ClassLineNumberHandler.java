@@ -12,7 +12,7 @@ import com.adrninistrator.jacg.handler.fieldrelationship.GetSetMethodHandler;
 import com.adrninistrator.jacg.handler.fieldrelationship.filler.FieldBehaviorFillerInterface;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +104,7 @@ public class ClassLineNumberHandler extends BaseHandler {
                 FieldRelationshipIdTypeEnum fieldRelationshipIdTypeEnum = getSetMethod.isGetOrSet() ? FieldRelationshipIdTypeEnum.FRITE_GET_METHOD_CALL_ID :
                         FieldRelationshipIdTypeEnum.FRITE_SET_METHOD_CALL_ID;
                 List<FieldBehavior> fieldBehaviorList = fieldBehaviorFiller.fillIn(fieldBehavior, fieldRelationshipIdTypeEnum, getSetMethod.getMethodCallId());
-                if (!JavaCGUtil.isCollectionEmpty(fieldBehaviorList)) {
+                if (!JavaCG2Util.isCollectionEmpty(fieldBehaviorList)) {
                     allFieldBehaviorList.addAll(fieldBehaviorList);
                 } else {
                     allFieldBehaviorList.add(fieldBehavior);

@@ -11,7 +11,7 @@ import com.adrninistrator.jacg.extractor.parser.StackFileParser;
 import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -72,7 +72,7 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor i
                     logger.info("处理调用堆栈文件失败 {}", stackFilePath);
                     return false;
                 }
-                if (JavaCGUtil.isCollectionEmpty(callerExtractedFile.getCallerExtractedLineList())) {
+                if (JavaCG2Util.isCollectionEmpty(callerExtractedFile.getCallerExtractedLineList())) {
                     logger.info("从调用堆栈文件获取信息为空 {}", stackFilePath);
                     continue;
                 }

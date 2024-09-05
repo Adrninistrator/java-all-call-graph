@@ -17,8 +17,8 @@ import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +64,7 @@ public class SpringHandler extends BaseHandler {
         }
 
         List<WriteDbData4SpringController> list = dbOperator.queryList(sql, WriteDbData4SpringController.class);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
         List<SpringControllerInfo> springControllerInfoList = new ArrayList<>(list.size());
@@ -91,12 +91,12 @@ public class SpringHandler extends BaseHandler {
         }
 
         List<WriteDbData4SpringTask> list = dbOperator.queryList(sql, WriteDbData4SpringTask.class);
-        if (JavaCGUtil.isCollectionEmpty(list)) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
             return Collections.emptyList();
         }
         List<String> springTaskMethodList = new ArrayList<>(list.size());
         for (WriteDbData4SpringTask springTask : list) {
-            String fullMethod = JavaCGClassMethodUtil.formatFullMethodStr(springTask.getClassName(), springTask.getMethodName());
+            String fullMethod = JavaCG2ClassMethodUtil.formatFullMethodStr(springTask.getClassName(), springTask.getMethodName());
             springTaskMethodList.add(fullMethod);
         }
         Collections.sort(springTaskMethodList);
@@ -132,7 +132,7 @@ public class SpringHandler extends BaseHandler {
      */
     public String queryControllerUri(String fullMethod) {
         List<String> uriList = queryControllerUriList(fullMethod);
-        if (JavaCGUtil.isCollectionEmpty(uriList)) {
+        if (JavaCG2Util.isCollectionEmpty(uriList)) {
             return null;
         }
         return uriList.get(0);

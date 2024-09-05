@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.dboper;
 
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,7 +35,7 @@ public class JdbcTemplateQuiet extends JdbcTemplate {
     }
 
     private <T> T getSingleResult(List<T> results) {
-        if (JavaCGUtil.isCollectionEmpty(results)) {
+        if (JavaCG2Util.isCollectionEmpty(results)) {
             return null;
         }
         if (results.size() > 1) {

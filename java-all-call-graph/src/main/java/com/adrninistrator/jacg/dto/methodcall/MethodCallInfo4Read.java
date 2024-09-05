@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.dto.methodcall;
 
-import com.adrninistrator.javacg.common.enums.JavaCGMethodCallInfoTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
 
 /**
  * @author adrninistrator
@@ -10,17 +10,17 @@ import com.adrninistrator.javacg.common.enums.JavaCGMethodCallInfoTypeEnum;
 public class MethodCallInfo4Read {
 
     // 方法调用信息的类型
-    private final JavaCGMethodCallInfoTypeEnum methodCallInfoTypeEnum;
+    private final JavaCG2MethodCallInfoTypeEnum methodCallInfoTypeEnum;
 
     // 方法调用信息的值
     private final String info;
 
-    public MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum methodCallInfoTypeEnum, String info) {
+    public MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum methodCallInfoTypeEnum, String info) {
         this.methodCallInfoTypeEnum = methodCallInfoTypeEnum;
         this.info = info;
     }
 
-    public JavaCGMethodCallInfoTypeEnum getMethodCallInfoTypeEnum() {
+    public JavaCG2MethodCallInfoTypeEnum getMethodCallInfoTypeEnum() {
         return methodCallInfoTypeEnum;
     }
 

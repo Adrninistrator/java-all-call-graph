@@ -2,7 +2,7 @@ package test.runbycode.handler.jarinfo;
 
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.handler.jarinfo.JarInfoHandler;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.runbycode.base.TestRunByCodeBase;
@@ -25,7 +25,7 @@ public class TestJarInfoHandler extends TestRunByCodeBase {
     public void test1() {
         try (JarInfoHandler jarInfoHandler = new JarInfoHandler(configureWrapper)) {
             List<WriteDbData4JarInfo> jarInfoList = jarInfoHandler.queryAllJarInfo();
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(jarInfoList));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(jarInfoList));
             printListContent(jarInfoList);
         }
     }

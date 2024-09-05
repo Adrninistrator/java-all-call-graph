@@ -4,12 +4,12 @@ import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGByteCodeUtil;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
+import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static String genFullMethodWithReturnType(String fullMethod, String returnType) {
-        return fullMethod + JavaCGConstants.FLAG_COLON + returnType;
+        return fullMethod + JavaCG2Constants.FLAG_COLON + returnType;
     }
 
     /**
@@ -41,7 +41,7 @@ public class JACGClassMethodUtil {
      * @return 完整类名
      */
     public static String getPackageNameFromFullClassName(String className) {
-        return StringUtils.substringBeforeLast(className, JavaCGConstants.FLAG_DOT);
+        return StringUtils.substringBeforeLast(className, JavaCG2Constants.FLAG_DOT);
     }
 
     /**
@@ -51,7 +51,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static String getClassNameFromMethod(String method) {
-        return StringUtils.substringBeforeLast(method, JavaCGConstants.FLAG_COLON);
+        return StringUtils.substringBeforeLast(method, JavaCG2Constants.FLAG_COLON);
     }
 
     /**
@@ -62,7 +62,7 @@ public class JACGClassMethodUtil {
      */
     public static String getSimpleClassNameFromMethod(String method) {
         String className = getClassNameFromMethod(method);
-        return JavaCGClassMethodUtil.getSimpleClassNameFromFull(className);
+        return JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(className);
     }
 
     /**
@@ -72,7 +72,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static String getMethodNameWithArgsFromFull(String fullMethod) {
-        return StringUtils.substringAfter(fullMethod, JavaCGConstants.FLAG_COLON);
+        return StringUtils.substringAfter(fullMethod, JavaCG2Constants.FLAG_COLON);
     }
 
     /**
@@ -82,7 +82,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static String getMethodArgTypes(String fullMethod) {
-        return StringUtils.substringBetween(fullMethod, JavaCGConstants.FLAG_LEFT_BRACKET, JavaCGConstants.FLAG_RIGHT_BRACKET);
+        return StringUtils.substringBetween(fullMethod, JavaCG2Constants.FLAG_LEFT_BRACKET, JavaCG2Constants.FLAG_RIGHT_BRACKET);
     }
 
     /**
@@ -92,7 +92,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static String getMethodNameFromFull(String fullMethod) {
-        return StringUtils.substringBetween(fullMethod, JavaCGConstants.FLAG_COLON, JavaCGConstants.FLAG_LEFT_BRACKET);
+        return StringUtils.substringBetween(fullMethod, JavaCG2Constants.FLAG_COLON, JavaCG2Constants.FLAG_LEFT_BRACKET);
     }
 
     /**
@@ -102,7 +102,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static String getClassMethodNameFromFull(String fullMethod) {
-        return StringUtils.substringBefore(fullMethod, JavaCGConstants.FLAG_LEFT_BRACKET);
+        return StringUtils.substringBefore(fullMethod, JavaCG2Constants.FLAG_LEFT_BRACKET);
     }
 
     /**
@@ -142,12 +142,12 @@ public class JACGClassMethodUtil {
      */
     public static MethodDetail genMethodDetail(String fullMethod) {
         String className = getClassNameFromMethod(fullMethod);
-        int indexColon = fullMethod.indexOf(JavaCGConstants.FLAG_COLON);
-        int indexLeftBrackets = fullMethod.indexOf(JavaCGConstants.FLAG_LEFT_BRACKET);
+        int indexColon = fullMethod.indexOf(JavaCG2Constants.FLAG_COLON);
+        int indexLeftBrackets = fullMethod.indexOf(JavaCG2Constants.FLAG_LEFT_BRACKET);
         String methodName = fullMethod.substring(indexColon + 1, indexLeftBrackets);
-        int indexRightBrackets = fullMethod.lastIndexOf(JavaCGConstants.FLAG_RIGHT_BRACKET);
+        int indexRightBrackets = fullMethod.lastIndexOf(JavaCG2Constants.FLAG_RIGHT_BRACKET);
         // 不包含括号的方法参数类型字符串
-        String argTypeStr = fullMethod.substring(indexLeftBrackets + JavaCGConstants.FLAG_LEFT_BRACKET.length(), indexRightBrackets);
+        String argTypeStr = fullMethod.substring(indexLeftBrackets + JavaCG2Constants.FLAG_LEFT_BRACKET.length(), indexRightBrackets);
         return new MethodDetail(fullMethod, className, methodName, argTypeStr, genMethodArgTypeList(fullMethod));
     }
 
@@ -158,7 +158,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static List<String> genMethodArgTypeList(String fullMethod) {
-        String[] argTypes = StringUtils.splitPreserveAllTokens(getMethodArgTypes(fullMethod), JavaCGConstants.FLAG_COMMA);
+        String[] argTypes = StringUtils.splitPreserveAllTokens(getMethodArgTypes(fullMethod), JavaCG2Constants.FLAG_COMMA);
         return Arrays.asList(argTypes);
     }
 
@@ -171,7 +171,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static String genClassAndMethodName(String className, String methodName) {
-        return className + JavaCGConstants.FLAG_COLON + methodName;
+        return className + JavaCG2Constants.FLAG_COLON + methodName;
     }
 
     /**
@@ -181,9 +181,9 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static ClassAndMethodName parseClassAndMethodName(String methodInfo) {
-        String[] array = StringUtils.splitPreserveAllTokens(methodInfo, JavaCGConstants.FLAG_COLON);
+        String[] array = StringUtils.splitPreserveAllTokens(methodInfo, JavaCG2Constants.FLAG_COLON);
         if (array == null || array.length != 2) {
-            throw new JavaCGRuntimeException("指定的字符串不满足[类名]:[方法名]格式 " + methodInfo);
+            throw new JavaCG2RuntimeException("指定的字符串不满足[类名]:[方法名]格式 " + methodInfo);
         }
         return new ClassAndMethodName(array[0], array[1]);
     }
@@ -215,9 +215,9 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static boolean calleeMatchesGetMethod(WriteDbData4MethodCall methodCall) {
-        if (!JavaCGClassMethodUtil.matchesGetMethod(methodCall.getCalleeMethodName()) ||
-                JavaCGCommonNameConstants.RETURN_TYPE_VOID.equals(methodCall.getRawReturnType()) ||
-                JavaCGCallTypeEnum.CTE_RAW_INVOKE_STATIC.getType().equals(methodCall.getCallType())) {
+        if (!JavaCG2ClassMethodUtil.matchesGetMethod(methodCall.getCalleeMethodName()) ||
+                JavaCG2CommonNameConstants.RETURN_TYPE_VOID.equals(methodCall.getRawReturnType()) ||
+                JavaCG2CallTypeEnum.CTE_RAW_INVOKE_STATIC.getType().equals(methodCall.getCallType())) {
             return false;
         }
         List<String> argTypeList = genMethodArgTypeList(methodCall.getCalleeFullMethod());
@@ -231,7 +231,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static boolean calleeMatchesSetMethod(WriteDbData4MethodCall methodCall) {
-        if (!JavaCGClassMethodUtil.matchesSetMethod(methodCall.getCalleeMethodName())) {
+        if (!JavaCG2ClassMethodUtil.matchesSetMethod(methodCall.getCalleeMethodName())) {
             return false;
         }
         // 在这里不判断方法返回类型，因为有的set方法返回类型非void
@@ -281,10 +281,10 @@ public class JACGClassMethodUtil {
      */
     public static ClassInterfaceEnum getClassInterfaceEnum(Integer accessFlags) {
         if (accessFlags != null) {
-            if (JavaCGByteCodeUtil.isInterfaceFlag(accessFlags)) {
+            if (JavaCG2ByteCodeUtil.isInterfaceFlag(accessFlags)) {
                 return ClassInterfaceEnum.CIE_INTERFACE;
             }
-            if (JavaCGByteCodeUtil.isAbstractFlag(accessFlags)) {
+            if (JavaCG2ByteCodeUtil.isAbstractFlag(accessFlags)) {
                 return ClassInterfaceEnum.CIE_ABSTRACT_CLASS;
             }
         }

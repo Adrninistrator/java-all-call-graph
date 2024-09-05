@@ -7,9 +7,9 @@ import com.adrninistrator.jacg.handler.dto.spring.SpringInvalidTxAnnotationMetho
 import com.adrninistrator.jacg.handler.reporter.AbstractReporter;
 import com.adrninistrator.jacg.handler.spring.SpringTxHandler;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
     public static final String FILE_HEADER_SP_INVALID_METHOD;
 
     static {
-        FILE_HEADER_SP_INVALID_METHOD_CALL = StringUtils.joinWith(JavaCGConstants.FLAG_TAB,
+        FILE_HEADER_SP_INVALID_METHOD_CALL = StringUtils.joinWith(JavaCG2Constants.FLAG_TAB,
                 JACGReportConstants.COLUMN_CALLER_FULL_METHOD,
                 JACGReportConstants.COLUMN_CALLER_LINE_NUMBER,
                 "调用方法是否存在事务注解",
@@ -42,7 +42,7 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
                 "被调用方法事务传播行为"
         );
 
-        FILE_HEADER_SP_INVALID_METHOD = StringUtils.joinWith(JavaCGConstants.FLAG_TAB,
+        FILE_HEADER_SP_INVALID_METHOD = StringUtils.joinWith(JavaCG2Constants.FLAG_TAB,
                 JACGReportConstants.COLUMN_FULL_METHOD,
                 JACGReportConstants.COLUMN_METHOD_FLAGS
         );
@@ -108,7 +108,7 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
         try (SpringTxHandler springTxHandler = new SpringTxHandler(configureWrapper);
              WriterSupportHeader writerSupportHeader = new WriterSupportHeader(reportFilePath, chooseFileHeader4InvalidMethodCall(), appendReportFile)) {
             List<SpringInvalidTxAnnotationMethodCall> springInvalidTxAnnotationMethodCallList = springTxHandler.querySpringInvalidTxAnnotationMethodCall();
-            if (JavaCGUtil.isCollectionEmpty(springInvalidTxAnnotationMethodCallList)) {
+            if (JavaCG2Util.isCollectionEmpty(springInvalidTxAnnotationMethodCallList)) {
                 return true;
             }
 
@@ -116,7 +116,7 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
                 List<String> stringList = new ArrayList<>();
                 stringList.add(springInvalidTxAnnotationMethodCall.getCallerFullMethod());
                 stringList.add(String.valueOf(springInvalidTxAnnotationMethodCall.getCallerLineNumber()));
-                stringList.add(JavaCGYesNoEnum.parseDesc(springInvalidTxAnnotationMethodCall.isCallerWithSpringTx()));
+                stringList.add(JavaCG2YesNoEnum.parseDesc(springInvalidTxAnnotationMethodCall.isCallerWithSpringTx()));
                 stringList.add(springInvalidTxAnnotationMethodCall.getCallerTxPropagation());
                 stringList.add(springInvalidTxAnnotationMethodCall.getCalleeFullMethod());
                 stringList.add(springInvalidTxAnnotationMethodCall.getCalleeTxPropagation());
@@ -146,7 +146,7 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
         try (SpringTxHandler springTxHandler = new SpringTxHandler(configureWrapper);
              WriterSupportHeader writerSupportHeader = new WriterSupportHeader(reportFilePath, chooseFileHeader4InvalidMethod(), appendReportFile)) {
             List<SpringInvalidTxAnnotationMethod> springInvalidTxAnnotationMethodList = springTxHandler.querySpringInvalidTxAnnotationMethod();
-            if (JavaCGUtil.isCollectionEmpty(springInvalidTxAnnotationMethodList)) {
+            if (JavaCG2Util.isCollectionEmpty(springInvalidTxAnnotationMethodList)) {
                 return true;
             }
 

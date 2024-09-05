@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.annotation.formatter;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.StringAnnotationAttribute;
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 
 import java.util.Map;
 
@@ -30,7 +30,7 @@ public class SpringTransactionalFormatter extends AbstractAnnotationFormatter {
         }
 
         // 返回注解类名(propagation=xxx)
-        return annotationName + JavaCGConstants.FLAG_LEFT_BRACKET + JACGCommonNameConstants.SPRING_TX_ATTRIBUTE_PROPAGATION + JavaCGConstants.FLAG_EQUAL
-                + stringAnnotationAttribute.getAttributeString() + JavaCGConstants.FLAG_RIGHT_BRACKET;
+        return annotationName + JavaCG2Constants.FLAG_LEFT_BRACKET + JACGCommonNameConstants.SPRING_TX_ATTRIBUTE_PROPAGATION + JavaCG2Constants.FLAG_EQUAL
+                + stringAnnotationAttribute.getAttributeString() + JavaCG2Constants.FLAG_RIGHT_BRACKET;
     }
 }

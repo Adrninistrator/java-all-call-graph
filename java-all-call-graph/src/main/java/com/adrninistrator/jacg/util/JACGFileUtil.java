@@ -1,8 +1,8 @@
 package com.adrninistrator.jacg.util;
 
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import net.lingala.zip4j.model.LocalFileHeader;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -48,7 +48,7 @@ public class JACGFileUtil {
     private static final Pattern JAR_VERSION_PATTERN = Pattern.compile("-[0-9]");
 
     public static String readFile2String(String filePath) {
-        try (InputStream inputStream = JavaCGFileUtil.getFileInputStream(filePath)) {
+        try (InputStream inputStream = JavaCG2FileUtil.getFileInputStream(filePath)) {
             return readInputStream2String(inputStream);
         } catch (Exception e) {
             logger.error("error {} ", filePath, e);
@@ -159,12 +159,12 @@ public class JACGFileUtil {
      * @return
      */
     public static boolean combineTextFile(String destFilePath, List<File> srcFileList, boolean append) {
-        if (JavaCGUtil.isCollectionEmpty(srcFileList)) {
+        if (JavaCG2Util.isCollectionEmpty(srcFileList)) {
             logger.error("指定的源文件列表为空");
             return false;
         }
 
-        try (BufferedWriter writer = JavaCGFileUtil.genBufferedWriter(destFilePath, append)) {
+        try (BufferedWriter writer = JavaCG2FileUtil.genBufferedWriter(destFilePath, append)) {
             for (File file : srcFileList) {
                 // 拷贝指定文件的内容
                 if (!copyFileContent(writer, file)) {
@@ -180,12 +180,12 @@ public class JACGFileUtil {
 
     // 拷贝指定文件的内容
     public static boolean copyFileContent(BufferedWriter writer, File file) {
-        try (BufferedReader br = JavaCGFileUtil.genBufferedReader(file)) {
+        try (BufferedReader br = JavaCG2FileUtil.genBufferedReader(file)) {
             String line;
             while ((line = br.readLine()) != null) {
-                writer.write(line + JavaCGConstants.NEW_LINE);
+                writer.write(line + JavaCG2Constants.NEW_LINE);
             }
-            writer.write(JavaCGConstants.NEW_LINE);
+            writer.write(JavaCG2Constants.NEW_LINE);
             return true;
         } catch (Exception e) {
             logger.error("error {} ", file.getAbsolutePath(), e);
@@ -241,7 +241,7 @@ public class JACGFileUtil {
         try {
             // 判断文件所在目录是否存在，若不存在则创建
             File dir = file.getParentFile();
-            if (!JavaCGFileUtil.isDirectoryExists(dir)) {
+            if (!JavaCG2FileUtil.isDirectoryExists(dir)) {
                 return false;
             }
 
@@ -338,7 +338,7 @@ public class JACGFileUtil {
      * @return
      */
     public static String getFileNameWithOutExt(String fileName) {
-        return getFileNameWithOutExt(fileName, JavaCGConstants.FLAG_DOT);
+        return getFileNameWithOutExt(fileName, JavaCG2Constants.FLAG_DOT);
     }
 
     /**
@@ -353,7 +353,7 @@ public class JACGFileUtil {
         }
 
         // 不使用StringUtils.substringBeforeLast，因为当没有指定字符串时结果为空
-        int lastDotIndex = fileName.lastIndexOf(JavaCGConstants.FLAG_DOT);
+        int lastDotIndex = fileName.lastIndexOf(JavaCG2Constants.FLAG_DOT);
         if (lastDotIndex == -1) {
             return "";
         }
@@ -463,7 +463,7 @@ public class JACGFileUtil {
 
         // 判断新文件所在目录是否存在，若不存在则创建
         File newDir = newFile.getParentFile();
-        if (!JavaCGFileUtil.isDirectoryExists(newDir)) {
+        if (!JavaCG2FileUtil.isDirectoryExists(newDir)) {
             return false;
         }
 
@@ -512,7 +512,7 @@ public class JACGFileUtil {
      */
     public static boolean saveInputToFileNoClose(InputStream inputStream, File file) {
         String dirPath = file.getParent();
-        if (!JavaCGFileUtil.isDirectoryExists(dirPath, true)) {
+        if (!JavaCG2FileUtil.isDirectoryExists(dirPath, true)) {
             return false;
         }
 

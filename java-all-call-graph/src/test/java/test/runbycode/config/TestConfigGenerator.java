@@ -6,8 +6,8 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import test.callgraph.annotation.CallMethodWithAnnotation;
 import test.callgraph.annotation.MethodWithAnnotation;
 import test.callgraph.argument.TestArgument1;
@@ -115,11 +115,11 @@ public class TestConfigGenerator {
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE,
                 JACGConstants.CALLEE_FLAG_ENTRY_NO_TAB,
-                JavaCGCommonNameConstants.METHOD_NAME_INIT
+                JavaCG2CommonNameConstants.METHOD_NAME_INIT
         );
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
-                System.class.getSimpleName() + JavaCGConstants.FLAG_COLON,
+                System.class.getSimpleName() + JavaCG2Constants.FLAG_COLON,
                 Deprecated.class.getName()
         );
 

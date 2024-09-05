@@ -1,10 +1,10 @@
 package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -106,11 +106,11 @@ public class JACGUtil {
     public static <T> T genClassObject(String className, Class<T> classType, Class<?>[] argTypes, Object[] argValues) {
         if (ArrayUtils.isEmpty(argTypes)) {
             logger.error("未指定参数类型");
-            throw new JavaCGRuntimeException("未指定参数类型");
+            throw new JavaCG2RuntimeException("未指定参数类型");
         }
         if (ArrayUtils.isEmpty(argValues)) {
             logger.error("未指定参数值");
-            throw new JavaCGRuntimeException("未指定参数值");
+            throw new JavaCG2RuntimeException("未指定参数值");
         }
         try {
             Class<?> clazz = Class.forName(className);
@@ -196,7 +196,7 @@ public class JACGUtil {
      */
     public static void addList2List(List<String> srcList, List<String> destList) {
         if (srcList == null || destList == null) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
         for (String src : srcList) {
             if (StringUtils.isBlank(src) || destList.contains(src)) {
@@ -214,7 +214,7 @@ public class JACGUtil {
      * @return 在字符串列表中找到的字符串
      */
     public static String findStringInList(List<String> stringList, String... strings) {
-        if (JavaCGUtil.isCollectionEmpty(stringList) || ArrayUtils.isEmpty(strings)) {
+        if (JavaCG2Util.isCollectionEmpty(stringList) || ArrayUtils.isEmpty(strings)) {
             return null;
         }
         for (String string : strings) {
@@ -237,11 +237,11 @@ public class JACGUtil {
     public static <T> T getArgAt(int index, Object... args) {
         if (ArrayUtils.isEmpty(args)) {
             logger.error("指定的参数为空");
-            throw new JavaCGRuntimeException("指定的参数为空");
+            throw new JavaCG2RuntimeException("指定的参数为空");
         }
         if (index >= args.length) {
             logger.error("指定下标的参数不存在 {} {}", index, args.length);
-            throw new JavaCGRuntimeException("指定下标的参数不存在");
+            throw new JavaCG2RuntimeException("指定下标的参数不存在");
         }
 
         return (T) args[index];
@@ -253,7 +253,7 @@ public class JACGUtil {
      * @return
      */
     public static String getInputRootPath() {
-        return JavaCGUtil.getDirPathInJvmOptions(JavaCGConstants.PROPERTY_INPUT_ROOT_PATH);
+        return JavaCG2Util.getDirPathInJvmOptions(JavaCG2Constants.PROPERTY_INPUT_ROOT_PATH);
     }
 
     /**
@@ -292,7 +292,7 @@ public class JACGUtil {
             return "";
         }
         StackTraceElement stackTraceElement = stackTraceElements[index];
-        return JavaCGClassMethodUtil.formatFullMethodWithArgTypes(stackTraceElement.getClassName(), stackTraceElement.getMethodName());
+        return JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(stackTraceElement.getClassName(), stackTraceElement.getMethodName());
     }
 
     /**

@@ -2,8 +2,8 @@ package test.runbycode.handler.spring;
 
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfo;
 import com.adrninistrator.jacg.handler.spring.SpringHandler;
-import com.adrninistrator.javacg.util.JavaCGClassMethodUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,7 +30,7 @@ public class TestSpringHandler extends TestRunByCodeBase {
     public void testQueryAllControllerMethod() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
             List<SpringControllerInfo> springControllerInfoList = springHandler.queryAllControllerMethod();
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(springControllerInfoList));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(springControllerInfoList));
             printListContent(springControllerInfoList);
         }
     }
@@ -39,7 +39,7 @@ public class TestSpringHandler extends TestRunByCodeBase {
     public void testQueryAllTaskMethod() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
             List<String> springTaskMethodList = springHandler.queryAllTaskMethod();
-            Assert.assertFalse(JavaCGUtil.isCollectionEmpty(springTaskMethodList));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(springTaskMethodList));
             printListContent(springTaskMethodList);
         }
     }
@@ -47,16 +47,16 @@ public class TestSpringHandler extends TestRunByCodeBase {
     @Test
     public void testQueryControllerUriList() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
-            doQueryControllerUriList(springHandler, JavaCGClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "<init>"), false);
-            doQueryControllerUriList(springHandler, JavaCGClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test1"), true);
-            doQueryControllerUriList(springHandler, JavaCGClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test2"), true);
-            doQueryControllerUriList(springHandler, JavaCGClassMethodUtil.formatFullMethodStr(TestSpringController2.class.getName(), "test1"), true);
+            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "<init>"), false);
+            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test1"), true);
+            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test2"), true);
+            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController2.class.getName(), "test1"), true);
         }
     }
 
     private void doQueryControllerUriList(SpringHandler springHandler, String fullMethod, boolean exists) {
         List<String> controllerUriList = springHandler.queryControllerUriList(fullMethod);
-        Assert.assertEquals(exists, !JavaCGUtil.isCollectionEmpty(controllerUriList));
+        Assert.assertEquals(exists, !JavaCG2Util.isCollectionEmpty(controllerUriList));
         printListContent(controllerUriList, fullMethod);
 
         String controllerUri = springHandler.queryControllerUri(fullMethod);
@@ -67,8 +67,8 @@ public class TestSpringHandler extends TestRunByCodeBase {
     @Test
     public void testCheckSpringTask() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
-            doCheckSpringTask(springHandler, JavaCGClassMethodUtil.formatFullMethodStr(SpringServiceImplA1.class.getName(), "test1"));
-            doCheckSpringTask(springHandler, JavaCGClassMethodUtil.formatFullMethodStr(SpringServiceImplA1.class.getName(), "test2"));
+            doCheckSpringTask(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(SpringServiceImplA1.class.getName(), "test1"));
+            doCheckSpringTask(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(SpringServiceImplA1.class.getName(), "test2"));
         }
     }
 

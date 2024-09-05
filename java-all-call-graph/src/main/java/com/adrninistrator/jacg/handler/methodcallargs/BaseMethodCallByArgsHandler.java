@@ -15,9 +15,9 @@ import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGMethodCallInfoUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGMethodCallInfoTypeEnum;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
      *
      * @return
      */
-    protected abstract JavaCGMethodCallInfoTypeEnum[] chooseMethodCallInfoTypes();
+    protected abstract JavaCG2MethodCallInfoTypeEnum[] chooseMethodCallInfoTypes();
 
     /**
      * 判断是否需要处理当前查询到的方法调用参数信息
@@ -96,7 +96,7 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql, methodCallInfoTypeList.size());
         }
         List<Object> argList = new ArrayList<>();
-        argList.add(JavaCGConstants.METHOD_CALL_OBJECT_SEQ);
+        argList.add(JavaCG2Constants.METHOD_CALL_OBJECT_SEQ);
         argList.addAll(methodCallInfoTypeList);
         argList.add(currentStartId);
         if (!lastQuery) {
@@ -135,15 +135,15 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
 
     // 初始化
     protected void init() {
-        JavaCGMethodCallInfoTypeEnum[] methodCallInfoTypes = chooseMethodCallInfoTypes();
+        JavaCG2MethodCallInfoTypeEnum[] methodCallInfoTypes = chooseMethodCallInfoTypes();
         if (ArrayUtils.isEmpty(methodCallInfoTypes)) {
-            throw new JavaCGRuntimeException("选择需要查询的方法调用信息表中的类型不允许为空");
+            throw new JavaCG2RuntimeException("选择需要查询的方法调用信息表中的类型不允许为空");
         }
 
         methodCallHandler = new MethodCallHandler(dbOperWrapper);
         methodCallInfoTypeList = new ArrayList<>(methodCallInfoTypes.length);
-        for (JavaCGMethodCallInfoTypeEnum javaCGMethodCallInfoTypeEnum : methodCallInfoTypes) {
-            methodCallInfoTypeList.add(javaCGMethodCallInfoTypeEnum.getType());
+        for (JavaCG2MethodCallInfoTypeEnum javaCG2MethodCallInfoTypeEnum : methodCallInfoTypes) {
+            methodCallInfoTypeList.add(javaCG2MethodCallInfoTypeEnum.getType());
         }
     }
 
@@ -154,6 +154,6 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
      */
     public boolean handleMethodCallByArgs() {
         // 分页查询并处理
-        return QueryByPageHandler.queryAndHandle(this, JavaCGConstants.RECORD_ID_MIN_BEFORE);
+        return QueryByPageHandler.queryAndHandle(this, JavaCG2Constants.RECORD_ID_MIN_BEFORE);
     }
 }

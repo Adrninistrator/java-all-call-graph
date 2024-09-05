@@ -10,7 +10,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallStaticField;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.methodcall.MethodCallWithStaticField;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public class MethodCallStaticFieldHandler extends BaseHandler {
 
         List<WriteDbData4MethodCallStaticField> methodCallStaticFieldList = dbOperator.queryList(sql, WriteDbData4MethodCallStaticField.class,
                 dbOperWrapper.querySimpleClassName(className), fieldName);
-        if (JavaCGUtil.isCollectionEmpty(methodCallStaticFieldList)) {
+        if (JavaCG2Util.isCollectionEmpty(methodCallStaticFieldList)) {
             return;
         }
 

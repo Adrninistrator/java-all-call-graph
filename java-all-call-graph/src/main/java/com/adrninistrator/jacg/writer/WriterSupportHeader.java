@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.writer;
 
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +61,7 @@ public class WriterSupportHeader implements Closeable {
                 }
             }
         }
-        this.writer = JavaCGFileUtil.genBufferedWriter(filePath, append);
+        this.writer = JavaCG2FileUtil.genBufferedWriter(filePath, append);
         this.header = header;
     }
 
@@ -75,10 +75,10 @@ public class WriterSupportHeader implements Closeable {
     public void writeLine(String data) throws IOException {
         if (firstTime) {
             // 向文件中写入文件头
-            writer.write(header + JavaCGConstants.NEW_LINE);
+            writer.write(header + JavaCG2Constants.NEW_LINE);
             firstTime = false;
         }
 
-        writer.write(data + JavaCGConstants.NEW_LINE);
+        writer.write(data + JavaCG2Constants.NEW_LINE);
     }
 }

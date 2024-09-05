@@ -6,8 +6,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4LambdaMethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGStreamUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 
 /**
  * @author adrninistrator
@@ -17,7 +17,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_LAMBDA_METHOD_INFO,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_LAMBDA_METHOD_INFO,
         minColumnNum = 2,
         maxColumnNum = 3,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_LAMBDA_METHOD_INFO
@@ -84,9 +84,9 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
                 data.getLambdaNextClassName(),
                 data.getLambdaNextMethodName(),
                 data.getLambdaNextFullMethod(),
-                JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsStream()),
-                JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsIntermediate()),
-                JavaCGYesNoEnum.parseIntValue(data.getLambdaNextIsTerminal())
+                JavaCG2YesNoEnum.parseIntValue(data.getLambdaNextIsStream()),
+                JavaCG2YesNoEnum.parseIntValue(data.getLambdaNextIsIntermediate()),
+                JavaCG2YesNoEnum.parseIntValue(data.getLambdaNextIsTerminal())
         };
     }
 

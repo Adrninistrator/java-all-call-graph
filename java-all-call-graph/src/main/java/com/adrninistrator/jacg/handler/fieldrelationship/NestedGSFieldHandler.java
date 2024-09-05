@@ -12,10 +12,10 @@ import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.field.CustomFieldType;
 import com.adrninistrator.jacg.handler.dto.field.NestedFieldTopClassInfo;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.dto.counter.JavaCGCounter;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class NestedGSFieldHandler extends BaseHandler {
      */
     public NestedFieldTopClassInfo queryUniqueNestedFieldTopClassInfo(String className, CustomFieldType uniqueCustomFieldType) {
         if (className == null || uniqueCustomFieldType == null) {
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
         // 判断仅在一个类中被使用的嵌套类型集合是否有被初始化
         if (!uniqueCustomFieldType.isInited()) {
@@ -72,7 +72,7 @@ public class NestedGSFieldHandler extends BaseHandler {
         String currentClassName = className;
         List<String> currentClassNestedFieldNameList = new ArrayList<>();
         List<String> currentClassNestedFieldNameJsonAliasList = new ArrayList<>();
-        JavaCGCounter jsonAliasCounter = new JavaCGCounter(0);
+        JavaCG2Counter jsonAliasCounter = new JavaCG2Counter(0);
         List<String> allClassNameList = new ArrayList<>();
         while (true) {
             if (allClassNameList.contains(currentClassName)) {
@@ -108,7 +108,7 @@ public class NestedGSFieldHandler extends BaseHandler {
     private String queryNestedFieldUpperClassName(String className,
                                                   List<String> currentClassNestedFieldNameList,
                                                   List<String> currentClassNestedFieldNameJsonAliasList,
-                                                  JavaCGCounter jsonAliasCounter) {
+                                                  JavaCG2Counter jsonAliasCounter) {
         // 记录指定类仅在一个类中被使用的嵌套类型的上层类的类型
         String nestedFieldUpperClassName = null;
         // 记录指定类在上层类中的字段名
@@ -124,8 +124,8 @@ public class NestedGSFieldHandler extends BaseHandler {
                     " and " + DC.GSM_SIMPLE_FIELD_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<WriteDbData4GetMethod> getMethodList = dbOperator.queryList(sql, WriteDbData4GetMethod.class, JavaCGConstants.FILE_KEY_CATEGORY_CUSTOM, simpleClassName);
-        if (!JavaCGUtil.isCollectionEmpty(getMethodList)) {
+        List<WriteDbData4GetMethod> getMethodList = dbOperator.queryList(sql, WriteDbData4GetMethod.class, JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM, simpleClassName);
+        if (!JavaCG2Util.isCollectionEmpty(getMethodList)) {
             if (getMethodList.size() > 1) {
                 // 指定类作为字段类型所在的上层类有多个
                 return null;
@@ -147,8 +147,8 @@ public class NestedGSFieldHandler extends BaseHandler {
                 sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
             }
             List<WriteDbData4FieldGenericsType> fieldGenericsTypeList = dbOperator.queryList(sql, WriteDbData4FieldGenericsType.class,
-                    JavaCGConstants.FILE_KEY_CATEGORY_GENERICS_CUSTOM, JavaCGConstants.FILE_KEY_CATEGORY_CUSTOM, simpleClassName);
-            if (!JavaCGUtil.isCollectionEmpty(fieldGenericsTypeList)) {
+                    JavaCG2Constants.FILE_KEY_CATEGORY_GENERICS_CUSTOM, JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM, simpleClassName);
+            if (!JavaCG2Util.isCollectionEmpty(fieldGenericsTypeList)) {
                 if (fieldGenericsTypeList.size() > 1) {
                     // 指定类作为字段类型所在的上层类有多个
                     return null;
@@ -200,7 +200,7 @@ public class NestedGSFieldHandler extends BaseHandler {
                     " having count(r." + DC.GSM_FIELD_TYPE + ") = 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryListOneColumn(sql, String.class, JavaCGConstants.FILE_KEY_CATEGORY_CUSTOM, JavaCGConstants.FILE_KEY_CATEGORY_GENERICS_CUSTOM,
-                JavaCGConstants.FILE_KEY_CATEGORY_CUSTOM);
+        return dbOperator.queryListOneColumn(sql, String.class, JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM, JavaCG2Constants.FILE_KEY_CATEGORY_GENERICS_CUSTOM,
+                JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM);
     }
 }

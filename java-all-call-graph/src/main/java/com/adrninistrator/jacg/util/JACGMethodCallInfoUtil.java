@@ -5,10 +5,10 @@ import com.adrninistrator.jacg.dto.methodcall.MethodCallInfo;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallInfo4Read;
 import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGConstantTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGMethodCallInfoTypeEnum;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2ConstantTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +33,8 @@ public class JACGMethodCallInfoUtil {
      * @param value
      */
     public static void addMethodCallInfo(MethodCallInfo methodCallInfo, String type, String valueType, String value) {
-        JavaCGMethodCallInfoTypeEnum javaCGMethodCallInfoTypeEnum = JavaCGMethodCallInfoTypeEnum.getFromType(type);
-        switch (javaCGMethodCallInfoTypeEnum) {
+        JavaCG2MethodCallInfoTypeEnum javaCG2MethodCallInfoTypeEnum = JavaCG2MethodCallInfoTypeEnum.getFromType(type);
+        switch (javaCG2MethodCallInfoTypeEnum) {
             case MCIT_TYPE:
                 methodCallInfo.setType(value);
                 break;
@@ -82,7 +82,7 @@ public class JACGMethodCallInfoUtil {
      * @return
      */
     public static void transferValue(WriteDbData4MethodCallInfo methodCallInfo) {
-        if (JavaCGConstantTypeEnum.CONSTTE_CHAR.getType().equals(methodCallInfo.getValueType())) {
+        if (JavaCG2ConstantTypeEnum.CONSTTE_CHAR.getType().equals(methodCallInfo.getValueType())) {
             // 将char类型的参数值转换为字符串
             String charValue = String.valueOf((char) Integer.parseInt(methodCallInfo.getTheValue()));
             methodCallInfo.setOrigValue(methodCallInfo.getTheValue());
@@ -98,31 +98,31 @@ public class JACGMethodCallInfoUtil {
      */
     public static MethodCallInfo4Read genMethodCallInfo4Read(MethodCallInfo methodCallInfo) {
         if (methodCallInfo.getValue() != null) {
-            return new MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum.MCIT_VALUE, methodCallInfo.getValue());
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE, methodCallInfo.getValue());
         }
         if (methodCallInfo.getStaticField() != null) {
-            return new MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum.MCIT_STATIC_FIELD, methodCallInfo.getStaticField());
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD, methodCallInfo.getStaticField());
         }
         if (methodCallInfo.getStaticFieldMethodCall() != null) {
-            return new MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum.MCIT_STATIC_FIELD_METHOD_CALL, methodCallInfo.getStaticFieldMethodCall());
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD_METHOD_CALL, methodCallInfo.getStaticFieldMethodCall());
         }
         if (methodCallInfo.getNameOfField() != null) {
-            return new MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum.MCIT_NAME_OF_FIELD, methodCallInfo.getNameOfField());
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_FIELD, methodCallInfo.getNameOfField());
         }
         if (methodCallInfo.getNameOfVariable() != null) {
-            return new MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE, methodCallInfo.getNameOfVariable());
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE, methodCallInfo.getNameOfVariable());
         }
         if (methodCallInfo.getMethodArgSeq() != null) {
-            return new MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ, String.valueOf(methodCallInfo.getMethodArgSeq()));
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ, String.valueOf(methodCallInfo.getMethodArgSeq()));
         }
         if (methodCallInfo.getMethodCallReturnId() != null) {
-            return new MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID, methodCallInfo.getMethodCallReturnId());
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID, methodCallInfo.getMethodCallReturnId());
         }
         if (methodCallInfo.getMethodArgSeqEQC() != null) {
-            return new MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ_EQC, String.valueOf(methodCallInfo.getMethodArgSeqEQC()));
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ_EQC, String.valueOf(methodCallInfo.getMethodArgSeqEQC()));
         }
         if (methodCallInfo.getMethodCallReturnIdEQC() != null) {
-            return new MethodCallInfo4Read(JavaCGMethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID_EQC, methodCallInfo.getMethodCallReturnIdEQC());
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID_EQC, methodCallInfo.getMethodCallReturnIdEQC());
         }
         return null;
     }
@@ -159,8 +159,8 @@ public class JACGMethodCallInfoUtil {
         if (expectedArgTypeList.contains(calleeMethodDetail.getClassName())) {
             // 被调用对象类型与需要处理的参数类型匹配，进行处理
             List<MethodCallInfo4Read> methodCallInfo4ReadList = genMethodCallInfo4ReadList(objArgsInfoInMethodCall.getObjInfo());
-            if (!JavaCGUtil.isCollectionEmpty(methodCallInfo4ReadList)) {
-                methodCallInfo4ReadMap.put(JavaCGConstants.METHOD_CALL_OBJECT_SEQ, methodCallInfo4ReadList);
+            if (!JavaCG2Util.isCollectionEmpty(methodCallInfo4ReadList)) {
+                methodCallInfo4ReadMap.put(JavaCG2Constants.METHOD_CALL_OBJECT_SEQ, methodCallInfo4ReadList);
             }
         }
 
@@ -175,7 +175,7 @@ public class JACGMethodCallInfoUtil {
             // 参数序号从1开始
             int argSeq = i + 1;
             List<MethodCallInfo4Read> methodCallInfo4ReadList = genMethodCallInfo4ReadList(objArgsInfoInMethodCall.getArgMethodCallInfo(argSeq));
-            if (!JavaCGUtil.isCollectionEmpty(methodCallInfo4ReadList)) {
+            if (!JavaCG2Util.isCollectionEmpty(methodCallInfo4ReadList)) {
                 methodCallInfo4ReadMap.put(argSeq, methodCallInfo4ReadList);
             }
         }

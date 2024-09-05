@@ -25,10 +25,10 @@ import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.util.JavaCGFileUtil;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -90,7 +90,7 @@ public class RunnerGenJarDiffCalleeGraph {
 
         if (!skipWriteDb) {
             List<String> jarDiffDirPathList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR, true);
-            if (JavaCGUtil.isCollectionEmpty(jarDiffDirPathList) || jarDiffDirPathList.size() != 2) {
+            if (JavaCG2Util.isCollectionEmpty(jarDiffDirPathList) || jarDiffDirPathList.size() != 2) {
                 logger.error("请修改配置文件，或通过代码指定对应的参数，在其中指定两行内容，第一行为旧目录的路径，第二行为新目录的路径 {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getConfigPrintInfo());
                 return false;
             }
@@ -109,7 +109,7 @@ public class RunnerGenJarDiffCalleeGraph {
         try {
             // 查询新的发生改变的jar包
             List<Pair<WriteDbData4JarInfo, WriteDbData4JarInfo>> modifiedJarInfoList = queryModifiedJarInfo();
-            if (JavaCGUtil.isCollectionEmpty(modifiedJarInfoList)) {
+            if (JavaCG2Util.isCollectionEmpty(modifiedJarInfoList)) {
                 return true;
             }
 
@@ -161,7 +161,7 @@ public class RunnerGenJarDiffCalleeGraph {
         List<WriteDbData4JarInfo> jarInfoListOld = queryJarInfo(true);
         // 查询新的jar包信息
         List<WriteDbData4JarInfo> jarInfoListNew = queryJarInfo(false);
-        if (JavaCGUtil.isCollectionEmpty(jarInfoListNew)) {
+        if (JavaCG2Util.isCollectionEmpty(jarInfoListNew)) {
             logger.info("从新的目录中未查询到jar包信息");
             return null;
         }
@@ -202,7 +202,7 @@ public class RunnerGenJarDiffCalleeGraph {
         boolean oldJarExists = jarInfoOld != null;
 
         List<WriteDbData4ClassInfo> classInfoListNew = queryClassInfoNew(jarInfoNew.getJarNum());
-        if (JavaCGUtil.isCollectionEmpty(classInfoListNew)) {
+        if (JavaCG2Util.isCollectionEmpty(classInfoListNew)) {
             logger.info("未找到jar包对应的class {}", jarInfoNew.getJarFileName());
             return;
         }
@@ -225,12 +225,12 @@ public class RunnerGenJarDiffCalleeGraph {
             modifiedClassJarMap.put(classInfoNew.getClassName(), jarInfoNew.getJarFileName());
             // 查询新的方法信息
             List<WriteDbData4MethodInfo> methodInfoListNew = queryMethodInfoNew(jarInfoNew.getJarNum(), classInfoNew.getClassName());
-            if (JavaCGUtil.isCollectionEmpty(methodInfoListNew)) {
+            if (JavaCG2Util.isCollectionEmpty(methodInfoListNew)) {
                 logger.debug("未找到class对应的method {} {}", jarInfoNew.getJarFileName(), classInfoNew.getClassName());
                 continue;
             }
             for (WriteDbData4MethodInfo methodInfoNew : methodInfoListNew) {
-                if (StringUtils.isBlank(methodInfoNew.getMethodInstructionsHash()) || JavaCGCommonNameConstants.METHOD_NAME_CLINIT.equals(methodInfoNew.getMethodName())) {
+                if (StringUtils.isBlank(methodInfoNew.getMethodInstructionsHash()) || JavaCG2CommonNameConstants.METHOD_NAME_CLINIT.equals(methodInfoNew.getMethodName())) {
                     // 新方法的方法指令HASH为空，或者方法名称为<clinit>（不会被直接调用），跳过
                     logger.debug("跳过当前方法的处理 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
                     continue;
@@ -301,14 +301,14 @@ public class RunnerGenJarDiffCalleeGraph {
         String separateStackDirRootPath = new File(separateStackDirPathList.get(0)).getParent();
         String modifiedMethodsBaseFilePath = separateStackDirRootPath + File.separator + JACGConstants.FILE_JAR_DIFF_MODIFIED_METHODS_BASE;
         String modifiedMethodsStackFilePath = separateStackDirRootPath + File.separator + JACGConstants.FILE_JAR_DIFF_MODIFIED_METHODS_STACK;
-        try (BufferedWriter modifiedMethodsBaseWriter = JavaCGFileUtil.genBufferedWriter(modifiedMethodsBaseFilePath);
-             BufferedWriter modifiedMethodsStackWriter = JavaCGFileUtil.genBufferedWriter(modifiedMethodsStackFilePath)) {
+        try (BufferedWriter modifiedMethodsBaseWriter = JavaCG2FileUtil.genBufferedWriter(modifiedMethodsBaseFilePath);
+             BufferedWriter modifiedMethodsStackWriter = JavaCG2FileUtil.genBufferedWriter(modifiedMethodsStackFilePath)) {
             // 生成jar包中发生变化的方法基本信息
             for (String jarFileNameNew : jarFileNameListNew) {
                 String jarFileNameOld = modifiedJarMap.get(jarFileNameNew);
                 List<ModifiedMethodInfo> modifiedMethodInfoList = jarModifiedMethodInfoMap.get(jarFileNameNew);
                 for (ModifiedMethodInfo modifiedMethodInfo : modifiedMethodInfoList) {
-                    JavaCGFileUtil.write2FileWithTab(modifiedMethodsBaseWriter, jarFileNameNew, jarFileNameOld, modifiedMethodInfo.getFullMethod(),
+                    JavaCG2FileUtil.write2FileWithTab(modifiedMethodsBaseWriter, jarFileNameNew, jarFileNameOld, modifiedMethodInfo.getFullMethod(),
                             modifiedMethodInfo.isOldMethodExists() ? JACGConstants.JAR_DIFF_METHOD_EXISTED : JACGConstants.JAR_DIFF_METHOD_NEW);
                 }
             }
@@ -329,10 +329,10 @@ public class RunnerGenJarDiffCalleeGraph {
     private void handleSeparateStackDir(BufferedWriter modifiedMethodsStackWriter, String separateStackDirPath, Map<String, String> modifiedClassJarMap,
                                         AbstractEntryMethodInfoFiller... entryMethodInfoFillers) throws IOException {
         String summaryFilePath = separateStackDirPath + File.separator + JACGConstants.FILE_STACK_SUMMARY_CALLEE_MD;
-        try (BufferedReader reader = JavaCGFileUtil.genBufferedReader(summaryFilePath)) {
+        try (BufferedReader reader = JavaCG2FileUtil.genBufferedReader(summaryFilePath)) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] array = StringUtils.split(line, JavaCGConstants.FLAG_TAB);
+                String[] array = StringUtils.split(line, JavaCG2Constants.FLAG_TAB);
                 String calleeMethod = array[0];
                 String stackSeq = array[1];
                 String callerMethod = array[2];
@@ -341,7 +341,7 @@ public class RunnerGenJarDiffCalleeGraph {
                 String jarName = modifiedClassJarMap.get(calleeClassName);
                 // 查询入口方法的信息
                 String entryMethodInfo = queryEntryMethodInfo(entryMethod, entryMethodInfoFillers);
-                JavaCGFileUtil.write2FileWithTab(modifiedMethodsStackWriter, jarName, calleeMethod, stackSeq, callerMethod, entryMethod, entryMethodInfo);
+                JavaCG2FileUtil.write2FileWithTab(modifiedMethodsStackWriter, jarName, calleeMethod, stackSeq, callerMethod, entryMethod, entryMethodInfo);
             }
         }
     }
@@ -428,17 +428,17 @@ public class RunnerGenJarDiffCalleeGraph {
                     " where " + DC.JI_JAR_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4JarInfo.class, JavaCGConstants.FILE_KEY_JAR_INFO_PREFIX);
+        return dbOperator.queryList(sql, WriteDbData4JarInfo.class, JavaCG2Constants.FILE_KEY_JAR_INFO_PREFIX);
     }
 
     // 解析新旧目录的jar包并写入数据库
     private boolean writeDb(String dirPathOld, String dirPathNew) {
-        if (!JavaCGFileUtil.isDirectoryExists(dirPathOld, false)) {
+        if (!JavaCG2FileUtil.isDirectoryExists(dirPathOld, false)) {
             logger.error("配置文件中指定的需要比较的旧目录不存在 {} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getConfigPrintInfo(), dirPathOld);
             return false;
         }
 
-        if (!JavaCGFileUtil.isDirectoryExists(dirPathNew, false)) {
+        if (!JavaCG2FileUtil.isDirectoryExists(dirPathNew, false)) {
             logger.error("配置文件中指定的需要比较的新目录不存在 {} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getConfigPrintInfo(), dirPathNew);
             return false;
         }

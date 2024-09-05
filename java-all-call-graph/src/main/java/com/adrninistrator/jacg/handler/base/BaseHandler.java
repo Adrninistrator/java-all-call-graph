@@ -10,7 +10,7 @@ import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.spring.context.SpringContextManager;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -71,7 +71,7 @@ public abstract class BaseHandler implements Closeable {
      */
     protected BaseHandler(ConfigureWrapper configureWrapper, String tableSuffix) {
         if (configureWrapper == null) {
-            throw new JavaCGRuntimeException("传入配置不允许为null");
+            throw new JavaCG2RuntimeException("传入配置不允许为null");
         }
 
         if (useNeo4j()) {
@@ -110,7 +110,7 @@ public abstract class BaseHandler implements Closeable {
     public BaseHandler(DbOperWrapper dbOperWrapper) {
         if (dbOperWrapper == null || (!useNeo4j() && dbOperWrapper.getDbOperator() == null)) {
             logger.error("{} 参数不允许为空", this.getClass().getName());
-            throw new JavaCGRuntimeException("参数不允许为空");
+            throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
         this.dbOperator = dbOperWrapper.getDbOperator();
@@ -191,15 +191,15 @@ public abstract class BaseHandler implements Closeable {
     protected int queryEndIdMultiColumns(int startRecordId, DbTableInfoEnum dbTableInfoEnum, String idColumnName, String[] queryColumnNames, Object[] queryValues) {
         if (ArrayUtils.isEmpty(queryColumnNames)) {
             logger.error("用于查询的字段名称数组为空");
-            throw new JavaCGRuntimeException("用于查询的字段名称数组为空");
+            throw new JavaCG2RuntimeException("用于查询的字段名称数组为空");
         }
         if (ArrayUtils.isEmpty(queryValues)) {
             logger.error("用于查询的字段对应的值数组为空");
-            throw new JavaCGRuntimeException("用于查询的字段对应的值数组为空");
+            throw new JavaCG2RuntimeException("用于查询的字段对应的值数组为空");
         }
         if (queryColumnNames.length != queryValues.length) {
             logger.error("用于查询的字段名称数组与用于查询的字段对应的值数组数量不同 {} {}", queryColumnNames.length, queryValues.length);
-            throw new JavaCGRuntimeException("用于查询的字段名称数组与用于查询的字段对应的值数组数量不同");
+            throw new JavaCG2RuntimeException("用于查询的字段名称数组与用于查询的字段对应的值数组数量不同");
         }
         String combinedColumnName = StringUtils.join(queryColumnNames, ",");
         logger.debug("从数据库表分页查询当前处理的结束ID，多字段 {} {} {} {}", dbTableInfoEnum.getTableName(), idColumnName, startRecordId, combinedColumnName);

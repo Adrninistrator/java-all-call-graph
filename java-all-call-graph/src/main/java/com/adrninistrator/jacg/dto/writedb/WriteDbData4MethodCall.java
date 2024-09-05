@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.dto.writedb;
 import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 
 /**
  * @author adrninistrator
@@ -69,7 +69,7 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
         writeDbData4MethodCall.setCallId(callId);
         writeDbData4MethodCall.setCallType(callType);
         writeDbData4MethodCall.setCalleeObjType(calleeObjType);
-        writeDbData4MethodCall.setEnabled(JavaCGYesNoEnum.YES.getIntValue());
+        writeDbData4MethodCall.setEnabled(JavaCG2YesNoEnum.YES.getIntValue());
         writeDbData4MethodCall.setCallerMethodHash(callerMethodHash);
         writeDbData4MethodCall.setCallerSimpleClassName(callerSimpleClassName);
         writeDbData4MethodCall.setCallerMethodName(callerMethodName);

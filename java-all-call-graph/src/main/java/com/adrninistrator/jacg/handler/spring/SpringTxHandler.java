@@ -13,9 +13,9 @@ import com.adrninistrator.jacg.handler.dto.spring.SpringInvalidTxAnnotationMetho
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGCalleeObjTypeEnum;
-import com.adrninistrator.javacg.dto.accessflag.JavaCGAccessFlags;
-import com.adrninistrator.javacg.util.JavaCGUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2CalleeObjTypeEnum;
+import com.adrninistrator.javacg2.dto.accessflag.JavaCG2AccessFlags;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class SpringTxHandler extends BaseHandler {
         AnnotationHandler annotationHandler = new AnnotationHandler(dbOperWrapper);
         MethodCallHandler methodCallHandler = new MethodCallHandler(dbOperWrapper);
         List<String> springTransactionalMethodList = annotationHandler.queryMethodsWithAnnotation(true, JACGCommonNameConstants.SPRING_TX_ANNOTATION);
-        if (JavaCGUtil.isCollectionEmpty(springTransactionalMethodList)) {
+        if (JavaCG2Util.isCollectionEmpty(springTransactionalMethodList)) {
             logger.info("未查询到@Transactional注解所在方法");
             return Collections.emptyList();
         }
@@ -57,8 +57,8 @@ public class SpringTxHandler extends BaseHandler {
         // 查找调用当前实例的@Transactional注解方法
         for (String springTransactionalMethod : springTransactionalMethodList) {
             String methodHash = JACGUtil.genHashWithLen(springTransactionalMethod);
-            List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryMethodCallByCalleeHashObjType(methodHash, JavaCGCalleeObjTypeEnum.COTE_THIS.getType());
-            if (JavaCGUtil.isCollectionEmpty(methodCallList)) {
+            List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryMethodCallByCalleeHashObjType(methodHash, JavaCG2CalleeObjTypeEnum.COTE_THIS.getType());
+            if (JavaCG2Util.isCollectionEmpty(methodCallList)) {
                 // 当前@Transactional注解方法不存在当前实例调用的情况
                 continue;
             }
@@ -75,7 +75,7 @@ public class SpringTxHandler extends BaseHandler {
                 // 查询调用方法的Spring事务注解信息
                 Map<String, BaseAnnotationAttribute> transactionalAnnotationAttributeMap = annotationHandler.queryMethodAnnotationAttributes(callerFullMethod,
                         JACGCommonNameConstants.SPRING_TX_ANNOTATION);
-                if (!JavaCGUtil.isMapEmpty(transactionalAnnotationAttributeMap)) {
+                if (!JavaCG2Util.isMapEmpty(transactionalAnnotationAttributeMap)) {
                     callerWithSpringTx = true;
                     BaseAnnotationAttribute txPropagationAttribute = transactionalAnnotationAttributeMap.get(JACGCommonNameConstants.SPRING_TX_ATTRIBUTE_PROPAGATION);
                     callerTxPropagation = AnnotationAttributesParseUtil.getSpringTxAnnotationPropagation(txPropagationAttribute);
@@ -98,7 +98,7 @@ public class SpringTxHandler extends BaseHandler {
         AnnotationHandler annotationHandler = new AnnotationHandler(dbOperWrapper);
         MethodInfoHandler methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
         List<String> springTransactionalMethodList = annotationHandler.queryMethodsWithAnnotation(true, JACGCommonNameConstants.SPRING_TX_ANNOTATION);
-        if (JavaCGUtil.isCollectionEmpty(springTransactionalMethodList)) {
+        if (JavaCG2Util.isCollectionEmpty(springTransactionalMethodList)) {
             logger.info("未查询到@Transactional注解所在方法");
             return Collections.emptyList();
         }
@@ -115,16 +115,16 @@ public class SpringTxHandler extends BaseHandler {
             }
 
             List<String> methodFlagList = new ArrayList<>();
-            JavaCGAccessFlags javaCGAccessFlags = new JavaCGAccessFlags(methodFlags);
-            if (javaCGAccessFlags.isPrivate()) {
+            JavaCG2AccessFlags javaCG2AccessFlags = new JavaCG2AccessFlags(methodFlags);
+            if (javaCG2AccessFlags.isPrivate()) {
                 methodFlagList.add("private");
-            } else if (javaCGAccessFlags.isProtected()) {
+            } else if (javaCG2AccessFlags.isProtected()) {
                 methodFlagList.add("protected");
             }
-            if (javaCGAccessFlags.isStatic()) {
+            if (javaCG2AccessFlags.isStatic()) {
                 methodFlagList.add("static");
             }
-            if (javaCGAccessFlags.isFinal()) {
+            if (javaCG2AccessFlags.isFinal()) {
                 methodFlagList.add("final");
             }
             if (!methodFlagList.isEmpty()) {

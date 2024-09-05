@@ -9,8 +9,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldGenericsType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldInfo;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
@@ -62,9 +62,9 @@ public class FieldInfoHandler extends BaseHandler {
         List<Object> argList = new ArrayList<>(excludedTypeNum + 2);
         argList.add(dbOperWrapper.querySimpleClassName(className));
         argList.add(typePackage);
-        argList.add(JavaCGCommonNameConstants.MODIFIERS_PUBLIC);
-        argList.add(JavaCGYesNoEnum.NO.getIntValue());
-        argList.add(JavaCGYesNoEnum.NO.getIntValue());
+        argList.add(JavaCG2CommonNameConstants.MODIFIERS_PUBLIC);
+        argList.add(JavaCG2YesNoEnum.NO.getIntValue());
+        argList.add(JavaCG2YesNoEnum.NO.getIntValue());
         if (excludedTypeNum > 0) {
             argList.addAll(Arrays.asList(excludedTypes));
         }
@@ -88,8 +88,8 @@ public class FieldInfoHandler extends BaseHandler {
                     " and " + DC.FI_PRIMITIVE_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4FieldInfo.class, dbOperWrapper.querySimpleClassName(className), JavaCGCommonNameConstants.PACKAGE_JAVA,
-                JavaCGYesNoEnum.NO.getIntValue());
+        return dbOperator.queryList(sql, WriteDbData4FieldInfo.class, dbOperWrapper.querySimpleClassName(className), JavaCG2CommonNameConstants.PACKAGE_JAVA,
+                JavaCG2YesNoEnum.NO.getIntValue());
     }
 
     /**

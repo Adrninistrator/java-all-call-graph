@@ -5,9 +5,9 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldRelationship;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ import java.util.Set;
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_FIELD_RELATIONSHIP,
+        mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_FIELD_RELATIONSHIP,
         minColumnNum = 11,
         maxColumnNum = 11,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_FIELD_RELATIONSHIP
@@ -91,14 +91,14 @@ public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<Wri
         if (!checkDtoGetSetMethod(true, getSimpleClassName, getMethodName, getMethodSimpleClassMap, extendsSimpleClassNameMap)) {
             logger.warn("与set方法存在关联关系的get方法不是dto的get方法，当前关联关系设置为无效，假如确实是dto的get方法，请检查对应类及超类所在的jar包是否有指定需要解析 {} {} {} {}",
                     callerFullMethod, callerLineNumber, getClassName, getMethodName);
-            valid = JavaCGYesNoEnum.NO.getIntValue();
+            valid = JavaCG2YesNoEnum.NO.getIntValue();
         }
 
         // 检查存在关联关系的set方法是否是dto的set方法
         if (!checkDtoGetSetMethod(false, setSimpleClassName, setMethodName, setMethodSimpleClassMap, extendsSimpleClassNameMap)) {
             logger.warn("与get方法存在关联关系的set方法不是dto的set方法，当前关联关系设置为无效，假如确实是dto的set方法，请检查对应类及超类所在的jar包是否有指定需要解析 {} {} {} {}",
                     callerFullMethod, callerLineNumber, setClassName, setMethodName);
-            valid = JavaCGYesNoEnum.NO.getIntValue();
+            valid = JavaCG2YesNoEnum.NO.getIntValue();
         }
 
         WriteDbData4FieldRelationship fieldRelationship = new WriteDbData4FieldRelationship();
@@ -116,7 +116,7 @@ public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<Wri
         fieldRelationship.setValid(valid);
         fieldRelationship.setType(type);
         fieldRelationship.setRelationshipFlags(0);
-        fieldRelationship.setBeanUtilCallId(JavaCGConstants.RECORD_ID_MIN_BEFORE);
+        fieldRelationship.setBeanUtilCallId(JavaCG2Constants.RECORD_ID_MIN_BEFORE);
         fieldRelationship.setBeanUtilMethod(null);
         return fieldRelationship;
     }
@@ -139,7 +139,7 @@ public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<Wri
                 "set方法完整类名",
                 "set方法方法名",
                 "关联关系是否有效，1:是，0:否",
-                "关联关系类型，参考 java-callgraph2 项目 JavaCGFieldRelationshipTypeEnum 类"
+                "关联关系类型，参考 java-callgraph2 项目 JavaCG2FieldRelationshipTypeEnum 类"
         };
     }
 
