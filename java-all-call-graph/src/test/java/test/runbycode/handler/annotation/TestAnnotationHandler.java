@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import test.callgraph.annotation.TestAnnotation1;
-import test.callgraph.argument.TestClassWithAnnotation2A;
-import test.callgraph.argument.TestClassWithAnnotation3A;
+import test.callgraph.methodargument.TestClassWithAnnotation2A;
+import test.callgraph.methodargument.TestClassWithAnnotation3A;
 import test.callgraph.spring.bean.define.impl.SpringServiceImplB2;
 import test.runbycode.base.TestRunByCodeBase;
 

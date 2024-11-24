@@ -64,7 +64,7 @@ public class TestQueryFieldsHandler extends TestRunByCodeBase {
     public void test3() {
         try (QueryGSFieldsHandler queryFieldsHandler = new QueryGSFieldsHandler(configureWrapper)) {
             List<String> list = queryFieldsHandler.queryClassesByFieldType(true, TestOutClass.class.getName());
-            Assert.assertTrue(JavaCG2Util.isCollectionEmpty(list));
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
             printListContent(list, TestOutClass.class.getName());
 
             list = queryFieldsHandler.queryClassesByFieldType(true, TestInClass.TestInInnerData.class.getName());

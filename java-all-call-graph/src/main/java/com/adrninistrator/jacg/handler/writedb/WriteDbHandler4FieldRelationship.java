@@ -25,7 +25,11 @@ import java.util.Set;
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_FIELD_RELATIONSHIP,
         minColumnNum = 11,
         maxColumnNum = 11,
-        dbTableInfoEnum = DbTableInfoEnum.DTIE_FIELD_RELATIONSHIP
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_FIELD_RELATIONSHIP,
+        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_CLASS_INFO,
+                DbTableInfoEnum.DTIE_GET_METHOD,
+                DbTableInfoEnum.DTIE_SET_METHOD,
+                DbTableInfoEnum.DTIE_EXTENDS_IMPL}
 )
 public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<WriteDbData4FieldRelationship> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4FieldRelationship.class);

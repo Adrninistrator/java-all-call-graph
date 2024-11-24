@@ -21,6 +21,7 @@ public class Neo4jWriteDbHandler4ExtendsImpl extends WriteDbHandler4ExtendsImpl 
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Class chooseNeo4jRepository() {
         return JACGExtendsImplRepository.class;

@@ -14,7 +14,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 @JACGWriteDbHandler(
         readFile = false,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_SET_METHOD_ASSIGN_INFO,
-        writeFileEnum = WriteDbHandlerWriteFileEnum.WDHWFE_SET_METHOD_ASSIGN_INFO
+        writeFileEnum = WriteDbHandlerWriteFileEnum.WDHWFE_SET_METHOD_ASSIGN_INFO,
+        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_FIELD_RELATIONSHIP}
 )
 public class WriteDbHandler4SetMethodAssignInfo extends AbstractWriteDbHandler<WriteDbData4SetMethodAssignInfo> {
 

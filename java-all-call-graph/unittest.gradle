@@ -2,7 +2,7 @@ apply plugin: 'jacoco'
 
 test {
     doFirst {
-        exclude('test/other', 'test/runbycode/targz', 'test/runlocal')
+        exclude('test/other', 'test/runbycode/targz', 'test/runlocal', 'test/runbycode/TestRBC*')
         minHeapSize = "256m"
         maxHeapSize = "1g"
 
@@ -79,18 +79,28 @@ compileTestJava.dependsOn(test_copy_example)
 
 // 将用于比较的测试代码生成jar包
 task test_gen_diff_jar(type: Jar) {
+    def exampleFlag = project.properties.get("example_flag")
+    def jarName = 'jar-diff-version-' + exampleFlag + '/jar-diff-' + exampleFlag + '.jar'
+    archiveFileName.set("${jarName}")
     doFirst {
-        def exampleFlag = project.properties.get("example_flag")
-        def jarName = 'jar-diff-version-' + exampleFlag + '/jar-diff-' + exampleFlag + '.jar'
         println 'example_flag: ' + exampleFlag + ' jarName: ' + jarName
         delete 'build/libs' + jarName
-
-        archiveFileName.set("${jarName}")
-        from(sourceSets.test.output) {
-            include 'test/callgraph/diffjar/**'
-            into '/'
-        }
     }
+    from(sourceSets.test.output) {
+        include 'test/callgraph/diffjar/**'
+        into '/'
+    }
+}
+
+// 将jar-diff-version-目录的文件生成tar.gz包
+task test_gen_diff_tar_gz(type: Tar) {
+    dependsOn test_gen_diff_jar
+    compression = Compression.GZIP
+    def exampleFlag = project.properties.get("example_flag")
+    // 若使用archiveBaseName，则生成的文件包中会包含“-当前版本号”
+    archiveFileName.set("jar-diff-version-" + exampleFlag + ".tar.gz")
+    destinationDirectory.set(file("${buildDir}/test_diff_tar_gz"))
+    from('build/libs/jar-diff-version-' + exampleFlag)
 }
 
 /*
@@ -100,4 +110,8 @@ task test_gen_diff_jar(type: Jar) {
     生成用于比较的示例jar包
     gradlew test_gen_diff_jar -Pexample_flag=1
     gradlew test_gen_diff_jar -Pexample_flag=2
+
+    生成用于比较的示例jar包的tar.gz包
+    gradlew test_gen_diff_tar_gz -Pexample_flag=1
+    gradlew test_gen_diff_tar_gz -Pexample_flag=2
  */

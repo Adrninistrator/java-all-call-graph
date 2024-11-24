@@ -1,5 +1,7 @@
 package test.runbycode;
 
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,5 +19,20 @@ public class TestRBCRunnerGenAllGraph4Callee extends TestRunByCodeBase {
     @Test
     public void test() {
         Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapper).run());
+    }
+
+    @Test
+    public void testAll() {
+        ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
+        configureWrapperCopy.setAllowAllClasses();
+        Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapperCopy).run());
+    }
+
+    @Test
+    public void testAllLimit() {
+        ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
+        configureWrapperCopy.setAllowAllClasses();
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.GEN_CALL_GRAPH_NUM_LIMIT, "10");
+        Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapperCopy).run());
     }
 }

@@ -8,26 +8,26 @@ import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
  * @description: 向上的调用堆栈文件处理后对应行的信息
  */
 public class CalleeExtractedLine extends BaseCallGraphExtractedLine {
-    // 下一行的完整内容
-    private String nextLineContent;
+    // 任务指定的被调用方法的直接调用方法对应行的完整内容
+    private String directlyCallerLineContent;
 
-    // 下一行解析后的内容
-    private CallGraphLineParsed nextLineParsed;
+    // 任务指定的被调用方法的直接调用方法对应行解析后的内容
+    private CallGraphLineParsed directlyCallerLineParsed;
 
-    public String getNextLineContent() {
-        return nextLineContent;
+    public String getDirectlyCallerLineContent() {
+        return directlyCallerLineContent;
     }
 
-    public void setNextLineContent(String nextLineContent) {
-        this.nextLineContent = nextLineContent;
+    public void setDirectlyCallerLineContent(String directlyCallerLineContent) {
+        this.directlyCallerLineContent = directlyCallerLineContent;
     }
 
-    public CallGraphLineParsed getNextLineParsed() {
-        return nextLineParsed;
+    public CallGraphLineParsed getDirectlyCallerLineParsed() {
+        return directlyCallerLineParsed;
     }
 
-    public void setNextLineParsed(CallGraphLineParsed nextLineParsed) {
-        this.nextLineParsed = nextLineParsed;
+    public void setDirectlyCallerLineParsed(CallGraphLineParsed directlyCallerLineParsed) {
+        this.directlyCallerLineParsed = directlyCallerLineParsed;
     }
 
     @Override

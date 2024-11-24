@@ -99,6 +99,24 @@ public class MethodInfoHandler extends BaseHandler {
     }
 
     /**
+     * 根据类名查询方法信息
+     *
+     * @param className
+     * @return
+     */
+    public List<WriteDbData4MethodInfo> queryMethodInfoByClass(String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_ALL_BY_CLASS_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
+                    " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodInfo.class, dbOperWrapper.querySimpleClassName(className));
+    }
+
+    /**
      * 根据类名与方法名，查找对应的完整方法，假如当前类没有查找到，则从实现的接口中查找
      *
      * @param className
@@ -224,7 +242,7 @@ public class MethodInfoHandler extends BaseHandler {
      * @return
      */
     public List<String> queryMethodByClassNamePrefix(String classNamePrefix) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_FULL_METHOD_BY_PREFIX;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_FULL_METHOD_BY_CN_PREFIX;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.MI_FULL_METHOD +
@@ -233,5 +251,23 @@ public class MethodInfoHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryListOneColumn(sql, String.class, classNamePrefix);
+    }
+
+    /**
+     * 根据类名查询相关的方法
+     *
+     * @param className
+     * @return
+     */
+    public List<String> queryMethodByClassName(String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_FULL_METHOD_BY_CLASS;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.MI_FULL_METHOD +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
+                    " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(className));
     }
 }

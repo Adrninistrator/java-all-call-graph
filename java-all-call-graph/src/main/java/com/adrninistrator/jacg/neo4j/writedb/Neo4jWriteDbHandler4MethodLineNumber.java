@@ -21,6 +21,7 @@ public class Neo4jWriteDbHandler4MethodLineNumber extends WriteDbHandler4MethodL
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Class chooseNeo4jRepository() {
         return JACGMethodLineNumberRepository.class;

@@ -19,7 +19,7 @@ import java.util.Collections;
 public class TestTarGz extends TestRunByCodeBase {
 
     public static final String TAR_GZ_DIR = "build/tar_gz";
-    public static final String TAR_GZ_FILE_NAME = "java-all-call-graph-2.0.1.tar.gz";
+    public static final String TAR_GZ_FILE_NAME = "java-all-call-graph-2.0.8.tar.gz";
     public static final String TAR_GZ_UNPACK_DIR = TAR_GZ_DIR + File.separator + "tar_gz@" + TAR_GZ_FILE_NAME;
 
     @Test

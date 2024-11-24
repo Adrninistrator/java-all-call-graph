@@ -24,8 +24,8 @@ import java.util.List;
 public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFileParsedCallback {
     private static final Logger logger = LoggerFactory.getLogger(CalleeGraphBaseExtractor.class);
 
-    // 是否需要解析调用堆栈文件中下一行的内容
-    private boolean parseNextLine;
+    // 是否需要解析任务指定的被调用方法的直接调用方法所在行的内容
+    private boolean parseDirectlyCallerLineP;
 
     /**
      * 生成向上的完整调用链，根据关键字进行查找，使用配置文件中的参数
@@ -43,7 +43,7 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
      * @return
      */
     public ListWithResult<CalleeExtractedFile> baseExtract(ConfigureWrapper configureWrapper) {
-        List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, true);
+        List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE);
         if (keywordList.isEmpty()) {
             logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE);
             return ListWithResult.genFail();
@@ -120,12 +120,12 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
         calleeExtractedLine.setDataSeq(dataSeq);
         calleeExtractedLine.setLineNumber(lineNumber);
         calleeExtractedLine.setLineContent(line);
-        if (lineList.size() > 1) {
+        if (lineList.size() >= 2) {
             // 假如当前调用堆栈中的行数超过1行，则处理下一行数据
-            String nextLine = lineList.get(1);
-            calleeExtractedLine.setNextLineContent(nextLine);
-            if (parseNextLine) {
-                calleeExtractedLine.setNextLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4ee(nextLine));
+            String nextLine = lineList.get(lineList.size() - 2);
+            calleeExtractedLine.setDirectlyCallerLineContent(nextLine);
+            if (parseDirectlyCallerLineP) {
+                calleeExtractedLine.setDirectlyCallerLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4ee(nextLine));
             }
         }
         // 方法调用文件中每行解析后的内容
@@ -136,7 +136,7 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
         calleeExtractedLineList.add(calleeExtractedLine);
     }
 
-    public void setParseNextLine(boolean parseNextLine) {
-        this.parseNextLine = parseNextLine;
+    public void setParseDirectlyCallerLine(boolean parseDirectlyCallerLineP) {
+        this.parseDirectlyCallerLineP = parseDirectlyCallerLineP;
     }
 }

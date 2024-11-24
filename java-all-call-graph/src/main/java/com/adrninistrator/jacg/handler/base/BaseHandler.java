@@ -76,7 +76,7 @@ public abstract class BaseHandler implements Closeable {
 
         if (useNeo4j()) {
             applicationContext = SpringContextManager.getApplicationContext();
-            appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME, true);
+            appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
             this.tableSuffix = null;
             // 完成需要使用的基础配置的初始化
             dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, true, this);

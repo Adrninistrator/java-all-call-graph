@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.dto.callgraph;
 
+import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
+
 /**
  * @author adrninistrator
  * @date 2021/6/18
@@ -16,10 +18,14 @@ public class CallGraphNode4Callee {
     // 当前被调用方法的完整方法
     private final String calleeFullMethod;
 
+    // 当前被调用方法的直接或间接的调用方法的数量
+    private final JavaCG2Counter callTimes;
+
     public CallGraphNode4Callee(String calleeMethodHash, String callerMethodHash, String calleeFullMethod) {
         this.calleeMethodHash = calleeMethodHash;
         this.callerMethodHash = callerMethodHash;
         this.calleeFullMethod = calleeFullMethod;
+        callTimes = new JavaCG2Counter();
     }
 
     @Override
@@ -27,7 +33,17 @@ public class CallGraphNode4Callee {
         return calleeFullMethod;
     }
 
-    // get
+    // 增加当前被调用方法的直接或间接的调用方法的数量
+    public void addCallTimes() {
+        callTimes.addAndGet();
+    }
+
+    // 获取当前被调用方法的直接或间接的调用方法的数量
+    public int getCallTimes() {
+        return callTimes.getCount();
+    }
+
+    //
     public String getCalleeMethodHash() {
         return calleeMethodHash;
     }
@@ -40,7 +56,6 @@ public class CallGraphNode4Callee {
         return calleeFullMethod;
     }
 
-    // set
     public void setCallerMethodHash(String callerMethodHash) {
         this.callerMethodHash = callerMethodHash;
     }

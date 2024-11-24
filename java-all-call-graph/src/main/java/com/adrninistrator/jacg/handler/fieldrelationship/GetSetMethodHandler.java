@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.fieldrelationship;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
-import com.adrninistrator.jacg.comparator.Comparator4GetSetMethod;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4GetMethod;
@@ -20,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -107,7 +107,7 @@ public class GetSetMethodHandler extends BaseHandler {
         }
         List<BaseWriteDbData4GetSetMethod> list = dbOperator.queryList(sql, BaseWriteDbData4GetSetMethod.class, simpleClassName);
         if (list != null) {
-            list.sort(Comparator4GetSetMethod.getInstance());
+            list.sort(Comparator.comparingInt(BaseWriteDbData4GetSetMethod::getRecordId));
             for (BaseWriteDbData4GetSetMethod getSetMethod : list) {
                 getSetMethod.setGetOrSet(queryGetMethod);
             }

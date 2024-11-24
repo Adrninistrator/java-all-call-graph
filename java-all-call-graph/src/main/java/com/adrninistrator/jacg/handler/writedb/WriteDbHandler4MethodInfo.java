@@ -17,8 +17,8 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_INFO,
-        minColumnNum = 5,
-        maxColumnNum = 5,
+        minColumnNum = 8,
+        maxColumnNum = 8,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_INFO
 )
 public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbData4MethodInfo> {
@@ -29,33 +29,39 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
 
     @Override
     protected WriteDbData4MethodInfo genData(String[] array) {
-        String fullMethod = array[0];
+        String fullMethod = readLineData();
         // 根据完整方法前缀判断是否需要处理
         if (!isAllowedClassPrefix(fullMethod)) {
             return null;
         }
 
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        String accessFlags = array[1];
+        String accessFlags = readLineData();
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
-        String returnType = array[2];
+        String returnType = readLineData();
+        int returnArrayDimensions = Integer.parseInt(readLineData());
+        String returnCategory = readLineData();
+        int returnExistsGenericsType = Integer.parseInt(readLineData());
         String simpleReturnType = dbOperWrapper.querySimpleClassName(returnType);
-        String methodInstructionsHash = array[3];
-        int jarNum = Integer.parseInt(array[4]);
+        String methodInstructionsHash = readLineData();
+        int jarNum = Integer.parseInt(readLineData());
 
         WriteDbData4MethodInfo methodInfo = new WriteDbData4MethodInfo();
         methodInfo.setMethodHash(methodHash);
         methodInfo.setSimpleClassName(simpleClassName);
         methodInfo.setAccessFlags(Integer.parseInt(accessFlags));
         methodInfo.setMethodName(methodName);
-        methodInfo.setFullMethod(fullMethod);
         methodInfo.setSimpleReturnType(simpleReturnType);
         methodInfo.setReturnType(returnType);
+        methodInfo.setReturnArrayDimensions(returnArrayDimensions);
+        methodInfo.setReturnCategory(returnCategory);
+        methodInfo.setReturnExistsGenericsType(returnExistsGenericsType);
+        methodInfo.setClassName(className);
+        methodInfo.setFullMethod(fullMethod);
         methodInfo.setMethodInstructionsHash(methodInstructionsHash);
         methodInfo.setJarNum(jarNum);
-        methodInfo.setClassName(className);
         return methodInfo;
     }
 
@@ -66,12 +72,15 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
                 data.getSimpleClassName(),
                 data.getAccessFlags(),
                 data.getMethodName(),
-                data.getFullMethod(),
                 data.getSimpleReturnType(),
                 data.getReturnType(),
+                data.getReturnArrayDimensions(),
+                data.getReturnCategory(),
+                data.getReturnExistsGenericsType(),
+                data.getClassName(),
+                data.getFullMethod(),
                 data.getMethodInstructionsHash(),
-                data.getJarNum(),
-                data.getClassName()
+                data.getJarNum()
         };
     }
 
@@ -81,11 +90,13 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
                 "完整方法（类名+方法名+参数）",
                 "方法的access_flags",
                 "返回类型类名",
+                "返回类型数组的维度，为0代表不是数组类型",
+                "返回类型分类，J:JDK中的类型，C:自定义类型",
+                "返回类型是否存在泛型类型，1:是，0:否",
                 "方法指令的HASH值（MD5），可能为空字符串",
                 "方法所在的Jar包序号"
         };
     }
-
 
     @Override
     public String[] chooseFileDetailInfo() {

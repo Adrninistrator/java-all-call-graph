@@ -19,8 +19,8 @@ import java.util.Set;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_RETURN_GENERICS_TYPE,
-        minColumnNum = 4,
-        maxColumnNum = 4,
+        minColumnNum = 9,
+        maxColumnNum = 9,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_RETURN_GENERICS_TYPE
 )
 public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHandler<WriteDbData4MethodReturnGenericsType> {
@@ -33,7 +33,7 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
 
     @Override
     protected WriteDbData4MethodReturnGenericsType genData(String[] array) {
-        String fullMethod = array[0];
+        String fullMethod = readLineData();
         // 根据完整方法前缀判断是否需要处理
         if (!isAllowedClassPrefix(fullMethod)) {
             return null;
@@ -42,9 +42,15 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        String type = array[1];
-        int typeSeq = Integer.parseInt(array[2]);
-        String genericsType = array[3];
+        String type = readLineData();
+        int typeSeq = Integer.parseInt(readLineData());
+        String genericsType = readLineData();
+        String simpleGenericsType = dbOperWrapper.querySimpleClassName(genericsType);
+        int genericsArrayDimensions = Integer.parseInt(readLineData());
+        String typeVariablesName = readLineData();
+        String wildcard = readLineData();
+        String referenceType = readLineData();
+        String genericsCategory = readLineData();
 
         withReturnGenericsTypeMethodHash.add(methodHash);
         WriteDbData4MethodReturnGenericsType writeDbData4MethodReturnGenericsType = new WriteDbData4MethodReturnGenericsType();
@@ -53,7 +59,12 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
         writeDbData4MethodReturnGenericsType.setSimpleClassName(simpleClassName);
         writeDbData4MethodReturnGenericsType.setType(type);
         writeDbData4MethodReturnGenericsType.setTypeSeq(typeSeq);
-        writeDbData4MethodReturnGenericsType.setSimpleGenericsType(dbOperWrapper.querySimpleClassName(genericsType));
+        writeDbData4MethodReturnGenericsType.setSimpleGenericsType(simpleGenericsType);
+        writeDbData4MethodReturnGenericsType.setGenericsArrayDimensions(genericsArrayDimensions);
+        writeDbData4MethodReturnGenericsType.setTypeVariablesName(typeVariablesName);
+        writeDbData4MethodReturnGenericsType.setWildcard(wildcard);
+        writeDbData4MethodReturnGenericsType.setReferenceType(referenceType);
+        writeDbData4MethodReturnGenericsType.setGenericsCategory(genericsCategory);
         writeDbData4MethodReturnGenericsType.setGenericsType(genericsType);
         writeDbData4MethodReturnGenericsType.setFullMethod(fullMethod);
         return writeDbData4MethodReturnGenericsType;
@@ -68,6 +79,11 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
                 data.getType(),
                 data.getTypeSeq(),
                 data.getSimpleGenericsType(),
+                data.getGenericsArrayDimensions(),
+                data.getTypeVariablesName(),
+                data.getWildcard(),
+                data.getReferenceType(),
+                data.getGenericsCategory(),
                 data.getGenericsType(),
                 data.getFullMethod()
         };
@@ -77,18 +93,23 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
-                "类型，t:参数类型，gt:参数泛型类型",
-                "类型序号，参数类型固定为0，参数泛型类型从0开始",
-                "泛型类型或参数类型类名"
+                "类型，t:方法返回类型，gt:方法返回类型中的泛型类型",
+                "类型序号，方法返回类型固定为0，方法返回类型中的泛型类型从0开始",
+                "方法返回类型或其中的泛型类型类名",
+                "方法返回类型中的泛型数组类型的维度，为0代表不是数组类型",
+                "方法返回类型中的泛型类型变量名称",
+                "方法返回类型中的泛型通配符",
+                "方法返回类型中的泛型通配符引用的类型",
+                "方法返回类型中的泛型类型分类，J:JDK中的类型，C:自定义类型",
         };
     }
 
     @Override
     public String[] chooseFileDetailInfo() {
         return new String[]{
-                "方法返回类型为集合时涉及的泛型类型",
+                "方法返回类型中涉及的泛型类型",
                 "示例：”Map<Integer, String> test2()“",
-                "对于以上示例，会记录对应的方法，以及方法返回的集合类型，和其中涉及的泛型类型 Map、Integer、String"
+                "对于以上示例，会记录对应的方法，以及方法返回的类型，和其中涉及的泛型类型 Map、Integer、String"
         };
     }
 

@@ -14,6 +14,7 @@ public class WriteDbData4SfFieldMethodCall implements BaseWriteDbData {
     private int seq;
     private int callId;
     private String fieldType;
+    private int arrayDimensions;
     private String className;
     private String calleeClassName;
     private String calleeMethodName;
@@ -64,6 +65,14 @@ public class WriteDbData4SfFieldMethodCall implements BaseWriteDbData {
 
     public void setFieldType(String fieldType) {
         this.fieldType = fieldType;
+    }
+
+    public int getArrayDimensions() {
+        return arrayDimensions;
+    }
+
+    public void setArrayDimensions(int arrayDimensions) {
+        this.arrayDimensions = arrayDimensions;
     }
 
     public String getClassName() {

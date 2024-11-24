@@ -5,17 +5,22 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
 /**
  * @author adrninistrator
  * @date 2023/8/9
- * @description: 用于写入数据库的数据，dto的非静态字段集合中涉及的泛型类型
+ * @description: 用于写入数据库的数据，非静态字段中涉及的泛型类型
  */
 public class WriteDbData4FieldGenericsType implements BaseWriteDbData {
-    public int recordId;
-    public String simpleClassName;
-    public String fieldName;
-    public int seq;
-    public String fieldCategory;
-    public String simpleFieldGenericsType;
-    public String fieldGenericsType;
-    public String className;
+    private int recordId;
+    private String simpleClassName;
+    private String fieldName;
+    private String type;
+    private int typeSeq;
+    private String simpleGenericsType;
+    private int genericsArrayDimensions;
+    private String typeVariablesName;
+    private String wildcard;
+    private String referenceType;
+    private String genericsCategory;
+    private String genericsType;
+    private String className;
 
     public int getRecordId() {
         return recordId;
@@ -41,36 +46,76 @@ public class WriteDbData4FieldGenericsType implements BaseWriteDbData {
         this.fieldName = fieldName;
     }
 
-    public int getSeq() {
-        return seq;
+    public String getType() {
+        return type;
     }
 
-    public void setSeq(int seq) {
-        this.seq = seq;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getFieldCategory() {
-        return fieldCategory;
+    public int getTypeSeq() {
+        return typeSeq;
     }
 
-    public void setFieldCategory(String fieldCategory) {
-        this.fieldCategory = fieldCategory;
+    public void setTypeSeq(int typeSeq) {
+        this.typeSeq = typeSeq;
     }
 
-    public String getSimpleFieldGenericsType() {
-        return simpleFieldGenericsType;
+    public String getSimpleGenericsType() {
+        return simpleGenericsType;
     }
 
-    public void setSimpleFieldGenericsType(String simpleFieldGenericsType) {
-        this.simpleFieldGenericsType = simpleFieldGenericsType;
+    public void setSimpleGenericsType(String simpleGenericsType) {
+        this.simpleGenericsType = simpleGenericsType;
     }
 
-    public String getFieldGenericsType() {
-        return fieldGenericsType;
+    public int getGenericsArrayDimensions() {
+        return genericsArrayDimensions;
     }
 
-    public void setFieldGenericsType(String fieldGenericsType) {
-        this.fieldGenericsType = fieldGenericsType;
+    public void setGenericsArrayDimensions(int genericsArrayDimensions) {
+        this.genericsArrayDimensions = genericsArrayDimensions;
+    }
+
+    public String getTypeVariablesName() {
+        return typeVariablesName;
+    }
+
+    public void setTypeVariablesName(String typeVariablesName) {
+        this.typeVariablesName = typeVariablesName;
+    }
+
+    public String getWildcard() {
+        return wildcard;
+    }
+
+    public void setWildcard(String wildcard) {
+        this.wildcard = wildcard;
+    }
+
+    public String getReferenceType() {
+        return referenceType;
+    }
+
+    public void setReferenceType(String referenceType) {
+        this.referenceType = referenceType;
+    }
+
+    public String getGenericsCategory() {
+        return genericsCategory;
+    }
+
+    public void setGenericsCategory(String genericsCategory) {
+        this.genericsCategory = genericsCategory;
+    }
+
+    public String getGenericsType() {
+        return genericsType;
+    }
+
+    public void setGenericsType(String genericsType) {
+        this.genericsType = genericsType;
     }
 
     public String getClassName() {
@@ -79,5 +124,24 @@ public class WriteDbData4FieldGenericsType implements BaseWriteDbData {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    @Override
+    public String toString() {
+        return "WriteDbData4FieldGenericsType{" +
+                "recordId=" + recordId +
+                ", simpleClassName='" + simpleClassName + '\'' +
+                ", fieldName='" + fieldName + '\'' +
+                ", type='" + type + '\'' +
+                ", typeSeq=" + typeSeq +
+                ", simpleGenericsType='" + simpleGenericsType + '\'' +
+                ", genericsArrayDimensions=" + genericsArrayDimensions +
+                ", typeVariablesName='" + typeVariablesName + '\'' +
+                ", wildcard='" + wildcard + '\'' +
+                ", referenceType='" + referenceType + '\'' +
+                ", genericsCategory='" + genericsCategory + '\'' +
+                ", genericsType='" + genericsType + '\'' +
+                ", className='" + className + '\'' +
+                '}';
     }
 }

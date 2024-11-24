@@ -24,7 +24,16 @@ import java.util.Set;
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL,
         minColumnNum = 10,
         maxColumnNum = 10,
-        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL,
+        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_METHOD_ANNOTATION,
+                DbTableInfoEnum.DTIE_METHOD_ARG_GENERICS_TYPE,
+                DbTableInfoEnum.DTIE_METHOD_RETURN_GENERICS_TYPE,
+                DbTableInfoEnum.DTIE_EXTENDS_IMPL,
+                DbTableInfoEnum.DTIE_METHOD_CALL_INFO,
+                DbTableInfoEnum.DTIE_MYBATIS_MS_TABLE,
+                DbTableInfoEnum.DTIE_MYBATIS_MS_WRITE_TABLE,
+                DbTableInfoEnum.DTIE_GET_METHOD,
+                DbTableInfoEnum.DTIE_SET_METHOD}
 )
 public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbData4MethodCall> {
 

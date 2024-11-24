@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
-import test.callgraph.argument.TestArgument1;
+import test.callgraph.methodargument.TestArgument1;
 import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.Set;

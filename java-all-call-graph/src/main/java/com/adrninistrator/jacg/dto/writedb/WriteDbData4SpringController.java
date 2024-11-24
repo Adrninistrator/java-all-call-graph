@@ -16,6 +16,8 @@ public class WriteDbData4SpringController implements BaseWriteDbData {
     private String annotationName;
     private String simpleClassName;
     private String fullMethod;
+    private int maybeFileUpload;
+    private int maybeFileDownload;
 
     public String getMethodHash() {
         return methodHash;
@@ -79,6 +81,22 @@ public class WriteDbData4SpringController implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public int getMaybeFileUpload() {
+        return maybeFileUpload;
+    }
+
+    public void setMaybeFileUpload(int maybeFileUpload) {
+        this.maybeFileUpload = maybeFileUpload;
+    }
+
+    public int getMaybeFileDownload() {
+        return maybeFileDownload;
+    }
+
+    public void setMaybeFileDownload(int maybeFileDownload) {
+        this.maybeFileDownload = maybeFileDownload;
     }
 
     //

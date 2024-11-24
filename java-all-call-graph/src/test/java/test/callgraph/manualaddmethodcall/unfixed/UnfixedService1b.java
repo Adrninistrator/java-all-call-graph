@@ -1,6 +1,6 @@
 package test.callgraph.manualaddmethodcall.unfixed;
 
-import test.callgraph.argument.TestArgument1;
+import test.callgraph.methodargument.TestArgument1;
 
 import java.util.LinkedList;
 

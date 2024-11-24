@@ -21,6 +21,7 @@ public class Neo4jWriteDbHandler4SetMethod extends WriteDbHandler4SetMethod {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Class chooseNeo4jRepository() {
         return JACGSetMethodRepository.class;
@@ -30,16 +31,7 @@ public class Neo4jWriteDbHandler4SetMethod extends WriteDbHandler4SetMethod {
     protected Object transferNeo4jDomain(WriteDbData4SetMethod data) {
         JACGSetMethod jacgSetMethod = new JACGSetMethod();
         jacgSetMethod.setAppName(appName);
-        jacgSetMethod.setRecordId(data.getRecordId());
-        jacgSetMethod.setSimpleClassName(data.getSimpleClassName());
-        jacgSetMethod.setMethodName(data.getMethodName());
-        jacgSetMethod.setFieldName(data.getFieldName());
-        jacgSetMethod.setFieldCategory(data.getFieldCategory());
-        jacgSetMethod.setSimpleFieldType(data.getSimpleFieldType());
-        jacgSetMethod.setFieldType(data.getFieldType());
-        jacgSetMethod.setClassName(data.getClassName());
-        jacgSetMethod.setMethodHash(data.getMethodHash());
-        jacgSetMethod.setFullMethod(data.getFullMethod());
+        copyWriteDbData(jacgSetMethod, data);
         return jacgSetMethod;
     }
 }

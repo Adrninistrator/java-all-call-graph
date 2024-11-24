@@ -20,6 +20,7 @@ import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
+import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,12 +180,28 @@ public abstract class AbstractRunner extends AbstractExecutor {
         }
     }
 
+    // 检查使用的组件版本
+    private void checkJarVersion() {
+        doCheckJarVersion(DruidDataSource.class, "druid-1.2.15.jar");
+    }
+
+    // 执行检查使用的组件版本
+    private void doCheckJarVersion(Class<?> clazz, String expectedJarName) {
+        String jarFilePath = clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
+        if (!StringUtils.endsWith(jarFilePath, expectedJarName)) {
+            logger.error("类对应的jar包名称与实际的不一致 {} {} {}", clazz.getName(), expectedJarName, jarFilePath);
+        }
+    }
+
     /**
      * 预检查
      *
      * @return true: 成功；false: 失败
      */
     protected boolean preCheck() {
+        // 检查使用的组件版本
+        checkJarVersion();
+
         if (handleDb()) {
             // 需要操作数据库时执行的操作
             if (dbOperator.isClosed()) {
@@ -222,7 +239,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
     // 获得需要处理的jar包列表
     protected List<String> getJarPathList() {
-        List<String> jarPathList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, true);
+        List<String> jarPathList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR);
         logger.info("{} 需要处理的jar包或目录\n{}", currentSimpleClassName, StringUtils.join(jarPathList, "\n"));
         return jarPathList;
     }
@@ -297,7 +314,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
         // 查询所有的jar包和目录信息
         List<WriteDbData4JarInfo> list = jarInfoHandler.queryAllJarInfo();
         if (JavaCG2Util.isCollectionEmpty(list)) {
-            logger.error("查询到jar包信息为空");
+            logger.warn("查询到jar包信息为空");
             return null;
         }
 

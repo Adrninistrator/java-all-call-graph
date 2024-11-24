@@ -4,7 +4,9 @@ import com.adrninistrator.jacg.handler.writedb.AbstractWriteDbHandler;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -25,6 +27,9 @@ public class WriteDbResult {
     // 记录写入数据库的类
     private final Map<String, AbstractWriteDbHandler<?>> writeDbHandlerMap = new HashMap<>();
 
+    // 记录已经写入的数据库表枚举名
+    private final Set<String> writtenDbTableEnumNameSet = new HashSet<>();
+
     public Map<String, JavaCG2Counter> getWriteDbNumMap() {
         return writeDbNumMap;
     }
@@ -39,5 +44,9 @@ public class WriteDbResult {
 
     public Map<String, AbstractWriteDbHandler<?>> getWriteDbHandlerMap() {
         return writeDbHandlerMap;
+    }
+
+    public Set<String> getWrittenDbTableEnumNameSet() {
+        return writtenDbTableEnumNameSet;
     }
 }

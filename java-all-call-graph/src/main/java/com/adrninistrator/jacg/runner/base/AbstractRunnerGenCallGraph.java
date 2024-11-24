@@ -48,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -148,6 +149,12 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 输出结果展示详细程度枚举
     protected OutputDetailEnum outputDetailEnum;
 
+    // 生成向上/向下的完整方法调用链时，每个方法允许生成的方法调用数量限制，默认不限制
+    protected int genCallGraphNumLimit;
+
+    // 生成向上/向下的完整方法调用链时，生成的方法调用数量超过限制的方法
+    protected final List<String> genCallGraphNumExceedMethodList = new ArrayList<>();
+
     public AbstractRunnerGenCallGraph() {
         super();
     }
@@ -208,6 +215,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         if (!initIgnoreInfo()) {
             return false;
         }
+        genCallGraphNumLimit = configureWrapper.getMainConfig(ConfigKeyEnum.GEN_CALL_GRAPH_NUM_LIMIT);
         return true;
     }
 
@@ -609,7 +617,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 添加用于添加对方法上的注解进行处理的类
     protected boolean addMethodAnnotationHandlerExtensions() {
-        List<String> methodAnnotationHandlerClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER, true);
+        List<String> methodAnnotationHandlerClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER);
         if (JavaCG2Util.isCollectionEmpty(methodAnnotationHandlerClassList)) {
             annotationFormatterList = Collections.emptyList();
             return true;
@@ -1097,7 +1105,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         MethodArgGenericsTypeInfo methodArgGenericsTypeInfo = methodArgReturnHandler.queryArgsGenericsTypeInfo(methodHash);
         if (methodArgGenericsTypeInfo == null) {
-            logger.error("未查询到方法参数的集合泛型信息 {}", methodHash);
+            logger.error("未查询到方法参数的泛型信息 {}", methodHash);
             return false;
         }
         addBusinessData2CallGraphInfo(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(), methodArgGenericsTypeInfo, callGraphInfo);
@@ -1134,9 +1142,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return true;
         }
 
-        GenericsTypeValue methodReturnGenericsTypeInfo = methodArgReturnHandler.queryReturnGenericsTypeInfo(methodHash);
+        GenericsTypeValue methodReturnGenericsTypeInfo = methodArgReturnHandler.queryReturnGenericsTypeInfoByMethodHash(methodHash);
         if (methodReturnGenericsTypeInfo == null) {
-            logger.error("未查询到方法返回的集合泛型信息 {}", methodHash);
+            logger.error("未查询到方法返回类型中的泛型信息 {}", methodHash);
             return false;
         }
         addBusinessData2CallGraphInfo(DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType(), methodReturnGenericsTypeInfo, callGraphInfo);
@@ -1168,5 +1176,46 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 .append(dataType)
                 .append(JACGConstants.FLAG_AT)
                 .append(dataValue);
+    }
+
+    /**
+     * 处理记录数已达到限制的方法
+     *
+     * @param entryMethod
+     * @param recordNum
+     * @param callGraphMethodList
+     * @param writer
+     * @throws IOException
+     */
+    protected void handleNumExceedMethod(String entryMethod, int recordNum, List<String> callGraphMethodList, BufferedWriter writer) throws IOException {
+        logger.warn("当前方法的记录数已达到限制，不再生成 {} {}", entryMethod, recordNum);
+        genCallGraphNumExceedMethodList.add(entryMethod);
+
+        if (JavaCG2Util.isCollectionEmpty(callGraphMethodList)) {
+            return;
+        }
+
+        // 将剩余的调用方法信息写入文件
+        StringBuilder callGraphInfo = new StringBuilder();
+        for (String callGraphMethod : callGraphMethodList) {
+            callGraphInfo.append(callGraphMethod);
+            callGraphInfo.append(JavaCG2Constants.NEW_LINE);
+        }
+        writer.write(callGraphInfo.toString());
+    }
+
+    // 结束前的处理
+    @Override
+    protected void beforeExit() {
+        super.beforeExit();
+
+        if (!genCallGraphNumExceedMethodList.isEmpty()) {
+            logger.warn("生成完整方法调用链时，生成的方法调用数量超过限制的方法 {} {}", genCallGraphNumLimit, StringUtils.join(genCallGraphNumExceedMethodList, " "));
+        }
+    }
+
+    // 获取生成向上/向下的完整方法调用链时，生成的方法调用数量超过限制的方法
+    public List<String> getGenCallGraphNumExceedMethodListReadOnly() {
+        return Collections.unmodifiableList(genCallGraphNumExceedMethodList);
     }
 }

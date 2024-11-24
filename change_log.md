@@ -616,3 +616,54 @@ java-callgraph2 使用 2.0.8 版本
 |类名前缀|JavaCG|JavaCG2|
 
 `当升级到该版本时，假如之前有对目录进行过分析，则相关目录中的“-javacg_merged.jar”文件需要删除`
+
+## 1.24. (2.0.9)临时说明
+
+### 1.24.1. java-callgraph2 组件版本
+
+java-callgraph2 组件升级版本为 2.0.8
+
+### 1.24.2. 增加参数
+
+_jacg_config/config.properties 配置文件增加参数
+
+- drop.or.truncate.table
+
+在插入数据库表前，对表执行 DROP(false) 还是 TRUNCATE(true) 操作
+
+- gen.call.graph.num.limit
+
+生成向上/向下的完整方法调用链时，每个方法允许生成的方法调用数量限制，默认为0，小于等于0代表不限制
+
+### 1.24.3. 增加数据库表
+
+```
+jacg_class_ext_impl_generics_type 类的继承或实现的泛型信息
+jacg_class_signature_generics_type 类的签名中的泛型信息
+jacg_javacg2_config java-callgraph2组件使用的配置参数信息表
+```
+
+### 1.24.4. 删除数据库表
+
+```
+jacg_class_sig_ext_impl_generics 类的签名中继承或实现的泛型关系
+jacg_class_signature_ei1 类的签名中涉及继承与实现的信息表1
+jacg_class_signature_generics 类的签名中的泛型信息
+```
+
+### 1.24.5. 增加字段的数据库表
+
+主要涉及内容：是否数组、泛型相关的数据、Spring Controller方法是否可能用于文件/上传下载
+
+```
+jacg_field_generics_type 非静态字段中涉及的泛型类型
+jacg_field_info 字段信息表
+jacg_get_method dto的get方法及字段
+jacg_method_arg_generics_type 方法参数泛型类型
+jacg_method_argument 方法参数类型
+jacg_method_info 方法的信息表
+jacg_method_return_generics_type 方法返回泛型类型
+jacg_set_method dto的set方法及字段
+jacg_sf_field_method_call static、final字段初始化方法信息表
+jacg_spring_controller Spring Controller信息表
+```

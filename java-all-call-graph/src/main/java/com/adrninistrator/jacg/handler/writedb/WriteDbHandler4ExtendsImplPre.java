@@ -21,7 +21,7 @@ import java.util.Set;
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_EXTENDS_IMPL,
         minColumnNum = 4,
         maxColumnNum = 4,
-        dbTableInfoEnum = DbTableInfoEnum.DTIE_ILLEGAL
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_EXTENDS_IMPL_PRE
 )
 public class WriteDbHandler4ExtendsImplPre extends AbstractWriteDbHandler<WriteDbData4ExtendsImpl> {
     // 父类或接口类名

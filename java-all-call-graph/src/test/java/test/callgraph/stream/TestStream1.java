@@ -19,8 +19,10 @@ public class TestStream1 {
 
     public static void main(String[] args) {
         TestStream1 testStream1 = new TestStream1();
-        System.out.println("\ntest1");
-        testStream1.test1();
+        System.out.println("\ntest1a");
+        testStream1.test1a();
+        System.out.println("\ntest1b");
+        testStream1.test1b();
         System.out.println("\ntest2");
         testStream1.test2();
         System.out.println("\ntest3");
@@ -29,11 +31,17 @@ public class TestStream1 {
         testStream1.test4();
     }
 
-    public void test1() {
-        String[] strArray = new String[]{"aaa1", "d", "aaa3", "ss"};
-        List<String> list = Arrays.asList(strArray);
+    public void test1a() {
+        String[] array = new String[]{"aaa1", "d", "aaa3", "ss"};
+        List<String> list = Arrays.asList(array);
         List<String> list2 = list.stream().map(this::map1).filter(this::filter1).collect(Collectors.toList());
         System.out.println(list2);
+    }
+
+    public void test1b() {
+        Integer[] array = new Integer[]{1, 2, 3, 4};
+        List<Integer> list = Arrays.asList(array);
+        System.out.println(list);
     }
 
     public boolean filter1(String str) {

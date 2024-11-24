@@ -192,7 +192,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
                 // 被调用类为TransactionTemplate，类型为事务模板
                 springTxTypeEnum = SpringTxTypeEnum.STTE_TEMPLATE;
                 // 处理被调用上一层方法
-                CallGraphLineParsed lastLineParsed = callerExtractedLine.getLastLineParsed();
+                CallGraphLineParsed lastLineParsed = callerExtractedLine.getDirectlyCalleeLineParsed();
                 if (lastLineParsed != null) {
                     calleeUpperFullMethod = lastLineParsed.getMethodDetail().getFullMethod();
                 }
@@ -224,7 +224,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         List<BaseCalleeExtractedMethod> calleeExtractedMethodList = new ArrayList<>(callerExtractedLineList.size());
         for (CallerExtractedLine callerExtractedLine : callerExtractedLineList) {
             String calleeUpperFullMethod = null;
-            CallGraphLineParsed lastLineParsed = callerExtractedLine.getLastLineParsed();
+            CallGraphLineParsed lastLineParsed = callerExtractedLine.getDirectlyCalleeLineParsed();
             if (lastLineParsed != null) {
                 calleeUpperFullMethod = lastLineParsed.getMethodDetail().getFullMethod();
             }
@@ -247,7 +247,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
 
     // 指定公共配置参数
     protected void setCommonConfig(ConfigureWrapper configureWrapper) {
-        // 指定方法注解处理类
+        // 添加方法注解处理类
         configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 SpringTransactionalFormatter.class.getName(),
                 DefaultAnnotationFormatter.class.getName()

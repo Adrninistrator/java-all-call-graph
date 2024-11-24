@@ -21,7 +21,8 @@ import java.util.Set;
  */
 @JACGWriteDbHandler(
         readFile = false,
-        dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_NAME
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_NAME,
+        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_CLASS_REFERENCE}
 )
 public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData4ClassName> {
     public WriteDbHandler4ClassName(WriteDbResult writeDbResult) {

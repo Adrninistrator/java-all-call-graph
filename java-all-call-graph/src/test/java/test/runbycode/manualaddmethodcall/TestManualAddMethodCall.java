@@ -10,7 +10,7 @@ import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import test.callgraph.actionlistener.TestActionListener;
+import test.callgraph.awt.TestActionListener;
 import test.callgraph.manualaddmethodcall.fixed.TestFixedManualAddMethodCall;
 import test.callgraph.manualaddmethodcall.unfixed.TestUnfixedManualAddMethodCall;
 import test.runbycode.base.TestRunByCodeBase;

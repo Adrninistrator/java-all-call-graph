@@ -14,7 +14,15 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 @JACGWriteDbHandler(
         readFile = false,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_MYBATIS_MS_GET_SET_DB,
-        writeFileEnum = WriteDbHandlerWriteFileEnum.WDHWFE_MYBATIS_MS_GET_SET
+        writeFileEnum = WriteDbHandlerWriteFileEnum.WDHWFE_MYBATIS_MS_GET_SET,
+        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_MYBATIS_MS_ENTITY,
+                DbTableInfoEnum.DTIE_METHOD_INFO,
+                DbTableInfoEnum.DTIE_METHOD_CALL,
+                DbTableInfoEnum.DTIE_METHOD_CALL_INFO,
+                DbTableInfoEnum.DTIE_FIELD_RELATIONSHIP,
+                DbTableInfoEnum.DTIE_GET_METHOD,
+                DbTableInfoEnum.DTIE_SET_METHOD,
+        }
 )
 public class WriteDbHandler4MybatisMSGetSetDb extends AbstractWriteDbHandler<WriteDbData4MybatisMSGetSetDb> {
 

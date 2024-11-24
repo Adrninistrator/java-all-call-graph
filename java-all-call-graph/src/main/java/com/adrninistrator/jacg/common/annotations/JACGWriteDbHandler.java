@@ -44,4 +44,7 @@ public @interface JACGWriteDbHandler {
 
     // 需要写到的数据库表信息
     DbTableInfoEnum dbTableInfoEnum();
+
+    // 依赖的需要先写入的数据库表枚举名
+    DbTableInfoEnum[] dependsWriteDbTableEnums() default {};
 }

@@ -93,8 +93,12 @@ public class JACGCommonNameConstants {
 
     public static final String SPRING_MULTI_PART_FILE_CLASS = "org.springframework.web.multipart.MultipartFile";
     public static final String SPRING_COMMONS_MULTI_PART_FILE_CLASS = "org.springframework.web.multipart.commons.CommonsMultipartFile";
+    public static final String SPRING_HTTP_ENTITY_CLASS = "org.springframework.http.HttpEntity";
+    public static final String SPRING_RESPONSE_ENTITY_CLASS = "org.springframework.http.ResponseEntity";
 
     public static final String SPRING_TASK_ANNOTATION = "org.springframework.scheduling.annotation.Scheduled";
+
+    public static final String JAVAX_HTTP_SERVLET_RESPONSE = "javax.servlet.http.HttpServletResponse";
 
     public static final String JSON_PROPERTY_ANNOTATION_NAME_ = JsonProperty.class.getName();
 

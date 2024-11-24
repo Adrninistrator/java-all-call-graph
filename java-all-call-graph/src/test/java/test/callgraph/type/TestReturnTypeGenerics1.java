@@ -1,8 +1,8 @@
 package test.callgraph.type;
 
-import test.callgraph.argument.TestArgument1;
-import test.callgraph.argument.TestArgument2;
 import test.callgraph.branch.TestBranch1;
+import test.callgraph.methodargument.TestArgument1;
+import test.callgraph.methodargument.TestArgument2;
 
 import java.util.List;
 import java.util.Map;

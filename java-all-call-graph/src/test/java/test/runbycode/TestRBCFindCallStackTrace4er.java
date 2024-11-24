@@ -1,5 +1,6 @@
 package test.runbycode;
 
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import org.junit.Test;
 import test.annotation.JACGExample;
@@ -16,5 +17,12 @@ public class TestRBCFindCallStackTrace4er extends TestRunByCodeBase {
     @Test
     public void test() {
         runFindCallStackTraceAndCheck(new FindCallStackTrace(false, configureWrapper));
+    }
+
+    @Test
+    public void testAll() {
+        ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
+        configureWrapperCopy.setAllowAllClasses();
+        runFindCallStackTraceAndCheck(new FindCallStackTrace(false, configureWrapperCopy));
     }
 }

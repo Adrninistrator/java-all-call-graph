@@ -26,7 +26,7 @@ jacg_business_data
 |字段名|字段类型|字段大小|字段注释|
 |---|---|---|---|
 |call_id|INT|10|方法调用序号，从1开始|
-|data_type|VARCHAR|30|数据类型，默认类型参考BusinessDataTypeEnum枚举类，也支持自定义类型|
+|data_type|VARCHAR|30|数据类型，默认类型参考 BusinessDataTypeEnum 枚举类，也支持自定义类型|
 |data_value|TEXT|65535|数据内容，JSON字符串格式|
 
 # 3. jacg_class_annotation 类上的注解信息表
@@ -49,7 +49,33 @@ jacg_class_annotation
 |attribute_value|TEXT|65535|注解属性值|
 |class_name|VARCHAR|255|完整类名|
 
-# 4. jacg_class_info 类的信息表
+# 4. jacg_class_ext_impl_generics_type 类的继承或实现的泛型信息
+
+- 表名前缀
+
+jacg_class_ext_impl_generics_type
+
+- 注释
+
+类的继承或实现的泛型信息
+
+|字段名|字段类型|字段大小|字段注释|
+|---|---|---|---|
+|record_id|INT|10|记录id，从1开始|
+|simple_class_name|VARCHAR|255|唯一类名|
+|ext_type|CHAR|1|继承或实现类型，e:继承，i:实现|
+|seq|INT|10|继承或实现的序号，从0开始|
+|super_itf_simple_class_name|VARCHAR|255|父类或接口的唯一类名|
+|generics_seq|TINYINT|3|类的继承或实现中的泛型类型序号，从0开始|
+|simple_generics_type|VARCHAR|255|类的继承或实现中的泛型类型唯一类名|
+|generics_array_dimensions|TINYINT|3|类的继承或实现中的泛型数组类型的维度，为0代表不是数组类型|
+|type_variables_name|VARCHAR|255|类的继承或实现中的泛型类型变量名称|
+|generics_category|VARCHAR|5|类的继承或实现中的泛型类型分类，J:JDK中的类型，C:自定义类型|
+|generics_type|VARCHAR|255|类的继承或实现中的泛型类型类名|
+|class_name|VARCHAR|255|完整类名|
+|super_itf_class_name|VARCHAR|255|父类或接口的类名|
+
+# 5. jacg_class_info 类的信息表
 
 - 表名前缀
 
@@ -68,7 +94,7 @@ jacg_class_info
 |class_file_hash|VARCHAR|32|类文件的HASH值（MD5）|
 |jar_num|INT|10|类所在的Jar包序号|
 
-# 5. jacg_class_name 类名信息表
+# 6. jacg_class_name 类名信息表
 
 - 表名前缀
 
@@ -85,7 +111,7 @@ jacg_class_name
 |simple_class_name|VARCHAR|255|唯一类名|
 |duplicate_class|TINYINT|3|是否存在同名类，1:是，0:否|
 
-# 6. jacg_class_reference 类的引用关系表
+# 7. jacg_class_reference 类的引用关系表
 
 - 表名前缀
 
@@ -103,55 +129,11 @@ jacg_class_reference
 |referenced_class_name|VARCHAR|255|被引用的完整类名|
 |referenced_simple_class_name|VARCHAR|255|被引用的唯一类名|
 
-# 7. jacg_class_sig_ext_impl_generics 类的签名中继承或实现的泛型关系
+# 8. jacg_class_signature_generics_type 类的签名中的泛型信息
 
 - 表名前缀
 
-jacg_class_sig_ext_impl_generics
-
-- 注释
-
-类的签名中继承或实现的泛型关系
-
-|字段名|字段类型|字段大小|字段注释|
-|---|---|---|---|
-|record_id|INT|10|记录id，从1开始|
-|simple_class_name|VARCHAR|255|唯一类名|
-|generics_name|VARCHAR|255|签名中的泛型名称|
-|seq|INT|10|签名中泛型的序号，从0开始|
-|ext_type|CHAR|1|继承或实现类型，e:继承，i:实现|
-|super_itf_simple_class_name|VARCHAR|255|父类或接口的唯一类名|
-|super_itf_generics_extends_class_name|VARCHAR|255|签名中的父类或接口的泛型继承的父类类名|
-|super_itf_seq|INT|10|父类或接口的签名中泛型的序号，从0开始|
-|class_name|VARCHAR|255|完整类名|
-|super_itf_class_name|VARCHAR|255|父类或接口的类名|
-
-# 8. jacg_class_signature_ei1 类的签名中涉及继承与实现的信息表1
-
-- 表名前缀
-
-jacg_class_signature_ei1
-
-- 注释
-
-类的签名中涉及继承与实现的信息表1
-
-|字段名|字段类型|字段大小|字段注释|
-|---|---|---|---|
-|record_id|INT|10|记录id，从1开始|
-|simple_class_name|VARCHAR|255|唯一类名|
-|type|CHAR|1|类型，e:继承，i:实现|
-|super_itf_class_name|VARCHAR|255|父类或接口的类名|
-|seq|INT|10|涉及继承或实现的签名信息的序号，从0开始|
-|sign_class_name|VARCHAR|255|签名中的完整类名|
-|sign_generics_name|VARCHAR|255|签名中的泛型名称|
-|class_name|VARCHAR|255|完整类名|
-
-# 9. jacg_class_signature_generics 类的签名中的泛型信息
-
-- 表名前缀
-
-jacg_class_signature_generics
+jacg_class_signature_generics_type
 
 - 注释
 
@@ -161,12 +143,12 @@ jacg_class_signature_generics
 |---|---|---|---|
 |record_id|INT|10|记录id，从1开始|
 |simple_class_name|VARCHAR|255|唯一类名|
-|seq|INT|10|签名中泛型的序号，从0开始|
-|generics_name|VARCHAR|255|签名中的泛型名称|
-|generics_extends_class_name|VARCHAR|255|签名中的泛型的父类类名|
+|seq|INT|10|类的签名中泛型的序号，从0开始|
+|type_variables_name|VARCHAR|255|类的签名中的泛型类型变量名称|
+|generics_extends_class_name|VARCHAR|255|类的签名中的泛型的父类类名|
 |class_name|VARCHAR|255|完整类名|
 
-# 10. jacg_extends_impl 继承与实现相关信息表
+# 9. jacg_extends_impl 继承与实现相关信息表
 
 - 表名前缀
 
@@ -188,7 +170,7 @@ jacg_extends_impl
 |upward_simple_class_name|VARCHAR|255|父类或接口的唯一类名|
 |upward_class_name|VARCHAR|255|父类或接口的完整类名|
 
-# 11. jacg_field_annotation 字段上的注解信息表
+# 10. jacg_field_annotation 字段上的注解信息表
 
 - 表名前缀
 
@@ -209,7 +191,7 @@ jacg_field_annotation
 |attribute_value|TEXT|65535|注解属性值|
 |class_name|VARCHAR|255|完整类名|
 
-# 12. jacg_field_generics_type dto的非静态字段集合中涉及的泛型类型
+# 11. jacg_field_generics_type 非静态字段中涉及的泛型类型
 
 - 表名前缀
 
@@ -217,20 +199,25 @@ jacg_field_generics_type
 
 - 注释
 
-dto的非静态字段集合中涉及的泛型类型
+非静态字段中涉及的泛型类型
 
 |字段名|字段类型|字段大小|字段注释|
 |---|---|---|---|
 |record_id|INT|10|记录id，从1开始|
 |simple_class_name|VARCHAR|255|唯一类名|
 |field_name|VARCHAR|200|字段名|
-|seq|INT|10|字段集合中的泛型类型序号，从0开始|
-|field_category|VARCHAR|5|字段集合中的泛型类型分类，J:JDK中的类型，C:自定义类型|
-|simple_field_generics_type|VARCHAR|255|字段集合中的泛型类型唯一类名|
-|field_generics_type|VARCHAR|255|字段集合中的泛型类型|
+|type|VARCHAR|5|类型，t:字段类型，gt:字段中的泛型类型|
+|type_seq|TINYINT|3|类型序号，字段类型固定为0，字段的泛型类型从0开始|
+|simple_generics_type|VARCHAR|255|非静态字段类型或其中的泛型类型唯一类名|
+|generics_array_dimensions|TINYINT|3|非静态字段中的泛型数组类型的维度，为0代表不是数组类型|
+|type_variables_name|VARCHAR|255|非静态字段中的泛型类型变量名称|
+|wildcard|VARCHAR|8|非静态字段中的泛型通配符|
+|reference_type|VARCHAR|255|非静态字段中的泛型通配符引用的类型|
+|generics_category|VARCHAR|5|非静态字段中的泛型类型分类，J:JDK中的类型，C:自定义类型|
+|generics_type|VARCHAR|255|非静态字段类型或其中的泛型类型类名|
 |class_name|VARCHAR|255|完整类名|
 
-# 13. jacg_field_info 字段信息表
+# 12. jacg_field_info 字段信息表
 
 - 表名前缀
 
@@ -246,13 +233,18 @@ jacg_field_info
 |simple_class_name|VARCHAR|255|唯一类名|
 |field_name|VARCHAR|200|字段名称|
 |field_type|VARCHAR|255|字段类型|
+|array_dimensions|TINYINT|3|字段数组类型的维度，为0代表不是数组类型|
+|field_category|VARCHAR|5|字段类型分类，J:JDK中的类型，C:自定义类型|
 |modifiers|VARCHAR|10|字段修饰符|
 |primitive_type|TINYINT|3|基本类型，1:是，0:否|
 |static_flag|TINYINT|3|static标志，1:是，0:否|
 |final_flag|TINYINT|3|final标志，1:是，0:否|
+|exists_get_method|TINYINT|3|是否存在对应的get方法，1:是，0:否|
+|exists_set_method|TINYINT|3|是否存在对应的set方法，1:是，0:否|
+|exists_generics_type|TINYINT|3|是否存在泛型类型，1:是，0:否|
 |class_name|VARCHAR|255|完整类名|
 
-# 14. jacg_field_relationship 通过get/set方法关联的字段关系
+# 13. jacg_field_relationship 通过get/set方法关联的字段关系
 
 - 表名前缀
 
@@ -281,7 +273,7 @@ jacg_field_relationship
 |bean_util_call_id|INT|10|BeanUtil方法调用序号，从1开始|
 |bean_util_method|TEXT|65535|BeanUtil属性拷贝方法|
 
-# 15. jacg_get_method dto的get方法及字段
+# 14. jacg_get_method dto的get方法及字段
 
 - 表名前缀
 
@@ -297,14 +289,15 @@ dto的get方法及字段
 |simple_class_name|VARCHAR|255|唯一类名|
 |method_name|VARCHAR|200|方法名|
 |field_name|VARCHAR|200|字段名|
-|field_category|VARCHAR|5|字段分类，J:JDK中的类型，C:自定义类型，GJ:集合的泛型类型，只涉及JDK中的类型，GC:集合的泛型类型，涉及自定义类型|
+|field_category|VARCHAR|5|字段分类，J:JDK中的类型，C:自定义类型，GJ:泛型类型，只涉及JDK中的类型，GC:泛型类型，涉及自定义类型|
 |simple_field_type|VARCHAR|255|字段类型唯一类名|
 |field_type|VARCHAR|255|字段类型|
+|array_dimensions|TINYINT|3|字段数组类型的维度，为0代表不是数组类型|
 |class_name|VARCHAR|255|完整类名|
 |method_hash|VARCHAR|30|方法hash+字节数|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 16. jacg_inner_class 内部类的信息表
+# 15. jacg_inner_class 内部类的信息表
 
 - 表名前缀
 
@@ -322,7 +315,7 @@ jacg_inner_class
 |outer_class_name|VARCHAR|255|外部类完整类名|
 |anonymous_class|TINYINT|3|是否为匿名内部类，1:是，0:否|
 
-# 17. jacg_jar_info jar包信息表
+# 16. jacg_jar_info jar包信息表
 
 - 表名前缀
 
@@ -344,6 +337,23 @@ jar包信息表
 |last_modified_time|VARCHAR|20|Jar包上次修改时间（精度到秒）|
 |jar_file_hash|VARCHAR|32|Jar包文件HASH|
 |import_time|DATETIME|23|导入时间|
+
+# 17. jacg_javacg2_config java-callgraph2组件使用的配置参数信息表
+
+- 表名前缀
+
+jacg_javacg2_config
+
+- 注释
+
+java-callgraph2组件使用的配置参数信息表
+
+|字段名|字段类型|字段大小|字段注释|
+|---|---|---|---|
+|config_file_name|VARCHAR|100|配置文件名|
+|config_key|VARCHAR|100|配置参数名，List/Set类型的参数代表序号|
+|config_value|VARCHAR|255|配置参数值|
+|config_type|VARCHAR|10|配置参数类型|
 
 # 18. jacg_lambda_method_info Lambda表达式方法信息表
 
@@ -426,11 +436,16 @@ jacg_method_arg_generics_type
 |record_id|INT|10|记录id，从1开始|
 |method_hash|VARCHAR|30|方法hash+字节数|
 |simple_class_name|VARCHAR|255|唯一类名|
-|arg_seq|INT|10|参数序号，从0开始|
-|type|VARCHAR|5|类型，t:参数类型，gt:参数泛型类型|
-|type_seq|TINYINT|3|类型序号，参数类型固定为0，参数泛型类型从0开始|
-|simple_generics_type|VARCHAR|255|泛型类型或参数类型唯一类名|
-|generics_type|VARCHAR|255|泛型类型或参数类型类名|
+|seq|INT|10|参数序号，从0开始|
+|type|VARCHAR|5|类型，t:参数类型，gt:参数中的泛型类型|
+|type_seq|TINYINT|3|类型序号，参数类型固定为0，参数中的泛型类型从0开始|
+|simple_generics_type|VARCHAR|255|方法参数类型或其中的泛型类型唯一类名|
+|generics_array_dimensions|TINYINT|3|方法参数中的泛型数组类型的维度，为0代表不是数组类型|
+|type_variables_name|VARCHAR|255|方法参数中的泛型类型变量名称|
+|wildcard|VARCHAR|8|方法参数中的泛型通配符|
+|reference_type|VARCHAR|255|方法参数中的泛型通配符引用的类型|
+|generics_category|VARCHAR|5|方法参数中的泛型类型分类，J:JDK中的类型，C:自定义类型|
+|generics_type|VARCHAR|255|方法参数类型或其中的泛型类型类名|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
 # 22. jacg_method_argument 方法参数类型
@@ -447,10 +462,13 @@ jacg_method_argument
 |---|---|---|---|
 |method_hash|VARCHAR|30|方法hash+字节数|
 |arg_seq|INT|10|参数序号，从0开始|
+|simple_class_name|VARCHAR|255|唯一类名|
 |simple_arg_type|VARCHAR|255|参数类型唯一类名|
 |arg_name|VARCHAR|255|参数名称|
+|array_dimensions|TINYINT|3|参数数组类型的维度，为0代表不是数组类型|
+|arg_category|VARCHAR|5|参数类型分类，J:JDK中的类型，C:自定义类型|
+|exists_generics_type|TINYINT|3|是否存在泛型类型，1:是，0:否|
 |arg_type|VARCHAR|255|参数类型类名|
-|simple_class_name|VARCHAR|255|唯一类名|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
 # 23. jacg_method_call_info 方法调用信息表
@@ -534,7 +552,7 @@ jacg_method_call
 |字段名|字段类型|字段大小|字段注释|
 |---|---|---|---|
 |call_id|INT|10|方法调用序号，从1开始|
-|call_type|VARCHAR|10|调用类型|
+|call_type|VARCHAR|10|调用类型，参考 JavaCG2CallTypeEnum 枚举类|
 |callee_obj_type|VARCHAR|10|被调用对象类型，t:调用当前实例的方法，sf:调用静态字段的方法，f:调用字段的方法，v:调用其他变量的方法|
 |enabled|TINYINT|3|是否启用，1:启用|
 |caller_method_hash|VARCHAR|30|调用方，方法hash+字节数|
@@ -623,12 +641,15 @@ jacg_method_info
 |simple_class_name|VARCHAR|255|唯一类名|
 |access_flags|INT|10|方法的access_flags|
 |method_name|VARCHAR|200|方法名|
-|full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 |simple_return_type|VARCHAR|255|返回类型唯一类名|
 |return_type|VARCHAR|255|返回类型类名|
+|return_array_dimensions|TINYINT|3|返回类型数组的维度，为0代表不是数组类型|
+|return_category|VARCHAR|5|返回类型分类，J:JDK中的类型，C:自定义类型|
+|return_exists_generics_type|TINYINT|3|返回类型是否存在泛型类型，1:是，0:否|
+|class_name|VARCHAR|255|完整类名|
+|full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 |method_instructions_hash|VARCHAR|32|方法指令的HASH值（MD5），可能为空字符串|
 |jar_num|INT|10|方法所在的Jar包序号|
-|class_name|VARCHAR|255|完整类名|
 
 # 30. jacg_method_line_number 方法代码行号信息表
 
@@ -698,10 +719,15 @@ jacg_method_return_generics_type
 |record_id|INT|10|记录id，从1开始|
 |method_hash|VARCHAR|30|方法hash+字节数|
 |simple_class_name|VARCHAR|255|唯一类名|
-|type|VARCHAR|5|类型，t:参数类型，gt:参数泛型类型|
-|type_seq|TINYINT|3|类型序号，参数类型固定为0，参数泛型类型从0开始|
-|simple_generics_type|VARCHAR|255|泛型类型或参数类型唯一类名|
-|generics_type|VARCHAR|255|泛型类型或参数类型类名|
+|type|VARCHAR|5|类型，t:方法返回类型，gt:方法返回类型中的泛型类型|
+|type_seq|TINYINT|3|类型序号，方法返回类型固定为0，方法返回类型中的泛型类型从0开始|
+|simple_generics_type|VARCHAR|255|方法返回类型或其中的泛型类型唯一类名|
+|generics_array_dimensions|TINYINT|3|方法返回类型中的泛型数组类型的维度，为0代表不是数组类型|
+|type_variables_name|VARCHAR|255|方法返回类型中的泛型类型变量名称|
+|wildcard|VARCHAR|8|方法返回类型中的泛型通配符|
+|reference_type|VARCHAR|255|方法返回类型中的泛型通配符引用的类型|
+|generics_category|VARCHAR|5|方法返回类型中的泛型类型分类，J:JDK中的类型，C:自定义类型|
+|generics_type|VARCHAR|255|方法返回类型或其中的泛型类型类名|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
 # 34. jacg_method_throw 方法中throw的异常信息
@@ -971,9 +997,10 @@ dto的set方法及字段
 |simple_class_name|VARCHAR|255|唯一类名|
 |method_name|VARCHAR|200|方法名|
 |field_name|VARCHAR|200|字段名|
-|field_category|VARCHAR|5|字段分类，J:JDK中的类型，C:自定义类型，GJ:集合的泛型类型，只涉及JDK中的类型，GC:集合的泛型类型，涉及自定义类型|
+|field_category|VARCHAR|5|字段分类，J:JDK中的类型，C:自定义类型，GJ:泛型类型，只涉及JDK中的类型，GC:泛型类型，涉及自定义类型|
 |simple_field_type|VARCHAR|255|字段类型唯一类名|
 |field_type|VARCHAR|255|字段类型|
+|array_dimensions|TINYINT|3|字段数组类型的维度，为0代表不是数组类型|
 |class_name|VARCHAR|255|完整类名|
 |method_hash|VARCHAR|30|方法hash+字节数|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
@@ -996,6 +1023,7 @@ static、final字段初始化方法信息表
 |seq|INT|10|序号，从0开始，大于0代表有多种可能|
 |call_id|INT|10|字段初始化对应的方法调用序号，从1开始|
 |field_type|VARCHAR|255|字段类型|
+|array_dimensions|TINYINT|3|字段数组类型的维度，为0代表不是数组类型|
 |class_name|VARCHAR|255|完整类名|
 |callee_class_name|VARCHAR|255|初始化方法被调类名|
 |callee_method_name|VARCHAR|200|初始化方法被调用方法名|
@@ -1018,7 +1046,7 @@ Spring Bean信息表
 |class_name|VARCHAR|255|完整类名|
 |bean_type|VARCHAR|2|Spring Bean的定义方式，j: 在Java代码中定义，x: 在XML文件中定义|
 
-# 48. jacg_spring_controller Spring Bean信息表
+# 48. jacg_spring_controller Spring Controller信息表
 
 - 表名前缀
 
@@ -1026,7 +1054,7 @@ jacg_spring_controller
 
 - 注释
 
-Spring Bean信息表
+Spring Controller信息表
 
 |字段名|字段类型|字段大小|字段注释|
 |---|---|---|---|
@@ -1037,6 +1065,8 @@ Spring Bean信息表
 |method_path|VARCHAR|250|方法上的注解path属性原始值|
 |annotation_name|VARCHAR|255|注解类名|
 |simple_class_name|VARCHAR|255|唯一类名|
+|maybe_file_upload|TINYINT|3|方法可能用于文件上传，1:是，0:否|
+|maybe_file_download|TINYINT|3|方法可能用于文件下载，1:是，0:否|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
 # 49. jacg_spring_task Spring定时任务信息表

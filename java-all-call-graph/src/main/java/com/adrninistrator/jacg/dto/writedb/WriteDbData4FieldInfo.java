@@ -8,15 +8,28 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，字段的信息
  */
 public class WriteDbData4FieldInfo implements BaseWriteDbData {
-    public int recordId;
-    public String simpleClassName;
-    public String fieldName;
-    public String fieldType;
-    public String modifiers;
-    public int primitiveType;
-    public int staticFlag;
-    public int finalFlag;
-    public String className;
+    private int recordId;
+    private String simpleClassName;
+    private String fieldName;
+    private String fieldType;
+    private int arrayDimensions;
+    private String fieldCategory;
+    private String modifiers;
+    private int primitiveType;
+    private int staticFlag;
+    private int finalFlag;
+    private int existsGetMethod;
+    private int existsSetMethod;
+    private int existsGenericsType;
+    private String className;
+
+    @Override
+    public String toString() {
+        return "recordId=" + recordId +
+                ", simpleClassName=" + simpleClassName +
+                ", fieldName=" + fieldName +
+                ", fieldType=" + fieldType;
+    }
 
     public int getRecordId() {
         return recordId;
@@ -50,6 +63,22 @@ public class WriteDbData4FieldInfo implements BaseWriteDbData {
         this.fieldType = fieldType;
     }
 
+    public int getArrayDimensions() {
+        return arrayDimensions;
+    }
+
+    public void setArrayDimensions(int arrayDimensions) {
+        this.arrayDimensions = arrayDimensions;
+    }
+
+    public String getFieldCategory() {
+        return fieldCategory;
+    }
+
+    public void setFieldCategory(String fieldCategory) {
+        this.fieldCategory = fieldCategory;
+    }
+
     public String getModifiers() {
         return modifiers;
     }
@@ -80,6 +109,30 @@ public class WriteDbData4FieldInfo implements BaseWriteDbData {
 
     public void setFinalFlag(int finalFlag) {
         this.finalFlag = finalFlag;
+    }
+
+    public int getExistsGetMethod() {
+        return existsGetMethod;
+    }
+
+    public void setExistsGetMethod(int existsGetMethod) {
+        this.existsGetMethod = existsGetMethod;
+    }
+
+    public int getExistsSetMethod() {
+        return existsSetMethod;
+    }
+
+    public void setExistsSetMethod(int existsSetMethod) {
+        this.existsSetMethod = existsSetMethod;
+    }
+
+    public int getExistsGenericsType() {
+        return existsGenericsType;
+    }
+
+    public void setExistsGenericsType(int existsGenericsType) {
+        this.existsGenericsType = existsGenericsType;
     }
 
     public String getClassName() {

@@ -212,10 +212,18 @@ public class TestMCCaller {
     }
 
     public void testFindEntryA2() {
+        testFindEntryA3();
+    }
+
+    public void testFindEntryA3() {
+        testFindEntryA4();
+    }
+
+    public void testFindEntryA4() {
         TestMCCallee.testFindEntry();
     }
 
-    public void testFindEntryB1() {
+    public void testFindEntryC1() {
         TestMCCallee.testFindEntry();
     }
 }

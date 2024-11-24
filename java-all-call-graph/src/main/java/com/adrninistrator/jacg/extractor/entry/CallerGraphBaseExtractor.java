@@ -51,7 +51,7 @@ public class CallerGraphBaseExtractor extends BaseExtractor implements StackFile
      * @return
      */
     protected ListWithResult<CallerExtractedFile> baseExtract(ConfigureWrapper configureWrapper, boolean needCloseDs) {
-        List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER, true);
+        List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER);
         if (keywordList.isEmpty()) {
             logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER);
             return ListWithResult.genFail();
@@ -119,8 +119,8 @@ public class CallerGraphBaseExtractor extends BaseExtractor implements StackFile
                                                          boolean runInOtherThread,
                                                          boolean runInTransaction) {
         CallerExtractedLine callerExtractedLine = new CallerExtractedLine();
-        callerExtractedLine.setLastLineContent(lastLine);
-        callerExtractedLine.setLastLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4er(lastLine));
+        callerExtractedLine.setDirectlyCallerLineContent(lastLine);
+        callerExtractedLine.setDirectlyCalleeLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4er(lastLine));
 
         callerExtractedLine.setDataSeq(dataSeq);
         callerExtractedLine.setLineNumber(lineNumber);
@@ -146,7 +146,7 @@ public class CallerGraphBaseExtractor extends BaseExtractor implements StackFile
         // 获取调用堆栈最后一条记录的下标
         int listMaxIndex = lineList.size() - 1;
         String lastLine = null;
-        if (lineList.size() > 1) {
+        if (lineList.size() >= 2) {
             // 调用堆栈数据大于1条，处理上一行的数据
             lastLine = lineList.get(listMaxIndex - 1);
         }

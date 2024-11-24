@@ -21,6 +21,7 @@ public class Neo4jWriteDbHandler4MethodInfo extends WriteDbHandler4MethodInfo {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Class chooseNeo4jRepository() {
         return JACGMethodInfoRepository.class;

@@ -15,8 +15,8 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_FIELD_INFO,
-        minColumnNum = 7,
-        maxColumnNum = 7,
+        minColumnNum = 12,
+        maxColumnNum = 12,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_FIELD_INFO
 )
 public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData4FieldInfo> {
@@ -27,28 +27,38 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
 
     @Override
     protected WriteDbData4FieldInfo genData(String[] array) {
-        String className = array[0];
+        String className = readLineData();
         // 根据类名前缀判断是否需要处理
         if (!isAllowedClassPrefix(className)) {
             return null;
         }
 
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        String fieldName = array[1];
-        String fieldType = array[2];
-        String modifiers = array[3];
-        int primitiveType = Integer.parseInt(array[4]);
-        int staticFlag = Integer.parseInt(array[5]);
-        int finalFlag = Integer.parseInt(array[6]);
+        String fieldName = readLineData();
+        String fieldType = readLineData();
+        int arrayDimensions = Integer.parseInt(readLineData());
+        String fieldCategory = readLineData();
+        String modifiers = readLineData();
+        int primitiveType = Integer.parseInt(readLineData());
+        int staticFlag = Integer.parseInt(readLineData());
+        int finalFlag = Integer.parseInt(readLineData());
+        int existsGetMethod = Integer.parseInt(readLineData());
+        int existsSetMethod = Integer.parseInt(readLineData());
+        int existsGenericsType = Integer.parseInt(readLineData());
         WriteDbData4FieldInfo writeDbData4FieldInfo = new WriteDbData4FieldInfo();
         writeDbData4FieldInfo.setRecordId(genNextRecordId());
         writeDbData4FieldInfo.setSimpleClassName(simpleClassName);
         writeDbData4FieldInfo.setFieldName(fieldName);
         writeDbData4FieldInfo.setFieldType(fieldType);
+        writeDbData4FieldInfo.setArrayDimensions(arrayDimensions);
+        writeDbData4FieldInfo.setFieldCategory(fieldCategory);
         writeDbData4FieldInfo.setModifiers(modifiers);
         writeDbData4FieldInfo.setPrimitiveType(primitiveType);
         writeDbData4FieldInfo.setStaticFlag(staticFlag);
         writeDbData4FieldInfo.setFinalFlag(finalFlag);
+        writeDbData4FieldInfo.setExistsGetMethod(existsGetMethod);
+        writeDbData4FieldInfo.setExistsSetMethod(existsSetMethod);
+        writeDbData4FieldInfo.setExistsGenericsType(existsGenericsType);
         writeDbData4FieldInfo.setClassName(className);
         return writeDbData4FieldInfo;
     }
@@ -60,10 +70,15 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
                 data.getSimpleClassName(),
                 data.getFieldName(),
                 data.getFieldType(),
+                data.getArrayDimensions(),
+                data.getFieldCategory(),
                 data.getModifiers(),
                 data.getPrimitiveType(),
                 data.getStaticFlag(),
                 data.getFinalFlag(),
+                data.getExistsGetMethod(),
+                data.getExistsSetMethod(),
+                data.getExistsGenericsType(),
                 data.getClassName()
         };
     }
@@ -74,17 +89,22 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
                 "完整类名",
                 "字段名称",
                 "字段类型",
+                "字段数组类型的维度，为0代表不是数组类型",
+                "字段中的泛型类型分类，J:JDK中的类型，C:自定义类型",
                 "字段修饰符",
                 "基本类型，1:是，0:否",
                 "static标志，1:是，0:否",
-                "final标志，1:是，0:否"
+                "final标志，1:是，0:否",
+                "是否存在对应的get方法，1:是，0:否",
+                "是否存在对应的set方法，1:是，0:否",
+                "是否存在泛型类型，1:是，0:否"
         };
     }
 
     @Override
     public String[] chooseFileDetailInfo() {
         return new String[]{
-                "字段的信息，包括字段名称、类型、修饰符等"
+                "字段的信息，包括字段名称、类型、修饰符、是否存在对应的get/set方法，是否存在泛型类型等"
         };
     }
 }

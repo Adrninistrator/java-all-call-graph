@@ -13,21 +13,11 @@ public class WriteDbData4MethodArgument implements BaseWriteDbData {
     private String simpleArgType;
     private String argName;
     private String argType;
+    private int arrayDimensions;
+    private String argCategory;
+    private int existsGenericsType;
     private String simpleClassName;
     private String fullMethod;
-
-    public WriteDbData4MethodArgument() {
-    }
-
-    public WriteDbData4MethodArgument(String methodHash, Integer argSeq, String simpleArgType, String argName, String argType, String simpleClassName, String fullMethod) {
-        this.methodHash = methodHash;
-        this.argSeq = argSeq;
-        this.simpleArgType = simpleArgType;
-        this.argName = argName;
-        this.argType = argType;
-        this.simpleClassName = simpleClassName;
-        this.fullMethod = fullMethod;
-    }
 
     public String getMethodHash() {
         return methodHash;
@@ -67,6 +57,30 @@ public class WriteDbData4MethodArgument implements BaseWriteDbData {
 
     public void setArgType(String argType) {
         this.argType = argType;
+    }
+
+    public int getArrayDimensions() {
+        return arrayDimensions;
+    }
+
+    public void setArrayDimensions(int arrayDimensions) {
+        this.arrayDimensions = arrayDimensions;
+    }
+
+    public String getArgCategory() {
+        return argCategory;
+    }
+
+    public void setArgCategory(String argCategory) {
+        this.argCategory = argCategory;
+    }
+
+    public int getExistsGenericsType() {
+        return existsGenericsType;
+    }
+
+    public void setExistsGenericsType(int existsGenericsType) {
+        this.existsGenericsType = existsGenericsType;
     }
 
     public String getSimpleClassName() {

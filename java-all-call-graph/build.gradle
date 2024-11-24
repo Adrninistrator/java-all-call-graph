@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "2.0.8"
+version = "2.0.9"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -53,7 +53,7 @@ sourceSets {
 List apache_ant = ["org.apache.ant:ant:1.10.9"]
 
 List apache_common = [
-        'org.apache.commons:commons-lang3:3.12.0',
+        'org.apache.commons:commons-lang3:3.17.0',
         'commons-io:commons-io:2.11.0',
         'org.apache.commons:commons-compress:1.19'
 ]
@@ -66,7 +66,7 @@ List h2database = ["com.h2database:h2:2.2.220"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:2.0.7']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:2.0.8']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.0']
 
@@ -102,19 +102,25 @@ List junit = [
 List spring_for_test = [
         "org.springframework:spring-beans:$spring_version",
         "org.springframework:spring-context:$spring_version",
-        "org.springframework:spring-web:$spring_version"
+        "org.springframework:spring-web:$spring_version",
+        "org.springframework:spring-webmvc:$spring_version"
 ]
 
 List javax_inject = ['javax.inject:javax.inject:1']
 
 List spring_test = ["org.springframework:spring-test:$spring_version"]
 
+List servlet = ['javax.servlet:javax.servlet-api:4.0.1']
+
 List commons_bean_utils = ['commons-beanutils:commons-beanutils:1.9.4']
+
+List lombok = ['org.projectlombok:lombok:1.18.24']
 
 dependencies {
     api apache_ant, apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc, spring
     compileOnly spring_data_neo4j
-    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, commons_bean_utils, spring_data_neo4j
+    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, servlet, commons_bean_utils, spring_data_neo4j, lombok
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
 compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -201,7 +207,10 @@ task gen_run_jar(type: Jar) {
                             || f.name.startsWith("spring-core-")
                             || f.name.startsWith("spring-jcl-")
                             || f.name.startsWith("spring-jdbc-")
-                            || f.name.startsWith("spring-tx-")) && !f.name.startsWith('hamcrest-core-'))
+                            || f.name.startsWith("spring-tx-"))
+                            && !f.name.startsWith('junit-')
+                            && !f.name.startsWith('hamcrest-core-')
+                            && !f.name.startsWith('lombok-'))
             }
             into "${jar_output_dir}/lib"
         }

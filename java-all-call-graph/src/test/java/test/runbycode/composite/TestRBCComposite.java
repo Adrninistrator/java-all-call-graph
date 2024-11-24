@@ -12,8 +12,8 @@ import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler;
 import com.adrninistrator.jacg.handler.spring.SpringHandler;
 import org.junit.Test;
-import test.callgraph.argument.TestArgument1;
-import test.callgraph.argument.TestArgument2;
+import test.callgraph.methodargument.TestArgument1;
+import test.callgraph.methodargument.TestArgument2;
 import test.runbycode.base.TestRunByCodeBase;
 
 /**

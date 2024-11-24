@@ -114,6 +114,10 @@ public class JACGUtil {
         }
         try {
             Class<?> clazz = Class.forName(className);
+            if (clazz.getSimpleName().startsWith("Abstract")) {
+                logger.info("跳过抽象类 {}", clazz.getSimpleName());
+                return null;
+            }
             Constructor<?> constructor = clazz.getConstructor(argTypes);
             Object obj = constructor.newInstance(argValues);
 

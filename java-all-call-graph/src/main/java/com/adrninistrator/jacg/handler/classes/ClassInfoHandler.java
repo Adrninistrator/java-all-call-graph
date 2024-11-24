@@ -88,6 +88,20 @@ public class ClassInfoHandler extends BaseHandler {
     }
 
     /**
+     * 根据简单类名查询对应的完整类名
+     *
+     * @param simpleClassName
+     * @return
+     */
+    public String queryClassNameBySimple(String simpleClassName) {
+        WriteDbData4ClassName writeDbData4ClassName = queryClassNameEquals(simpleClassName);
+        if (writeDbData4ClassName == null) {
+            return null;
+        }
+        return writeDbData4ClassName.getClassName();
+    }
+
+    /**
      * 根据完整类名查询类的JavaCG2AccessFlags对象，可调用方法判断类的属性
      *
      * @param className 完整类名
@@ -124,7 +138,7 @@ public class ClassInfoHandler extends BaseHandler {
         if (sql == null) {
             sql = "select " + DC.CI_ACCESS_FLAGS +
                     " from " + DbTableInfoEnum.DTIE_CLASS_INFO.getTableName() +
-                    " where " + DC.CSEI1_SIMPLE_CLASS_NAME + " = ?";
+                    " where " + DC.CI_SIMPLE_CLASS_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObjectOneColumn(sql, Integer.class, simpleClassName);

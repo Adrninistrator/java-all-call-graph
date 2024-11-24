@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.dto.callstack;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -11,6 +12,9 @@ public class CallStackFileResult {
 
     // 代表处理失败的静态字段
     public static CallStackFileResult FAIL = new CallStackFileResult(false, null, null);
+
+    // 代表处理成功但结果为空的静态字段
+    public static CallStackFileResult EMPTY = new CallStackFileResult(true, Collections.emptyList(), Collections.emptyList());
 
     // 处理是否成功
     private final boolean success;

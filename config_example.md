@@ -25,6 +25,7 @@ ConfigKeyEnum
 |check.jar.file.updated|CKE_CHECK_JAR_FILE_UPDATED|检查jar包文件是否有更新|true|
 |handle.get.set.field.relationship|CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP|处理通过get/set方法关联的字段关联关系|false|
 |call.graph.gen.json.caller|CKE_CALL_GRAPH_GEN_JSON_CALLER|生成向下的方法调用链时，是否需要输出JSON格式的内容|false|
+|drop.or.truncate.table|CKE_DROP_OR_TRUNCATE_TABLE|在插入数据库表前，对表执行 DROP(false) 还是 TRUNCATE(true) 操作|true|
 
 ## 2.2. _jacg_config/config_db.properties
 
@@ -38,7 +39,7 @@ ConfigDbKeyEnum
 |db.h2.file.path|CDKE_DB_H2_FILE_PATH|H2数据库文件路径（仅当使用H2数据库时需要指定）|./build/jacg_h2db_rbc|
 |db.driver.name|CDKE_DB_DRIVER_NAME|数据库配置（仅当使用非H2数据库时需要指定），驱动类名|com.mysql.cj.jdbc.Driver|
 |db.url|CDKE_DB_URL|数据库配置（仅当使用非H2数据库时需要指定），URL|jdbc:mysql://127.0.0.1:3306/xxx?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true|
-|db.username|CDKE_DB_USERNAME|数据库配置（仅当使用非H2数据库时需要指定），用户名|test|
+|db.username|CDKE_DB_USERNAME|数据库配置（仅当使用非H2数据库时需要指定），用户名|xxx|
 |db.password|CDKE_DB_PASSWORD|数据库配置（仅当使用非H2数据库时需要指定），密码|xxx|
 |db.table.suffix|CDKE_DB_TABLE_SUFFIX|数据库表后缀||
 

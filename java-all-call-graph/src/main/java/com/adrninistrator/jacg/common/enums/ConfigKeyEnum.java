@@ -16,9 +16,11 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_OUTPUT_DIR_FLAG("output.dir.flag", "生成调用链文件的目录名中的标志，完整目录名使用{app.name}{output.dir.flag}_{当前时间}，默认为空", String.class, false),
     CKE_OUTPUT_DIR_NAME("output.dir.name", "生成调用链文件的目录名，非空时目录名使用当前值，为空时使用上一个参数说明的格式", String.class, false),
     CKE_DB_INSERT_BATCH_SIZE("db.insert.batch.size", "批量写入数据库时每次插入的数量", Integer.class, true),
-    CKE_CHECK_JAR_FILE_UPDATED("check.jar.file.updated", "检查jar包文件是否有更新", Boolean.class, false),
+    CKE_CHECK_JAR_FILE_UPDATED("check.jar.file.updated", "生成调用链文件时是否检查jar包文件有更新，若发现jar包文件内容发生变化则不生成", Boolean.class, false),
     CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP("handle.get.set.field.relationship", "处理通过get/set方法关联的字段关联关系", Boolean.class, false),
     CKE_CALL_GRAPH_GEN_JSON_CALLER("call.graph.gen.json.caller", "生成向下的方法调用链时，是否需要输出JSON格式的内容", Boolean.class, false),
+    CKE_DROP_OR_TRUNCATE_TABLE("drop.or.truncate.table", "在插入数据库表前，对表执行 DROP(false) 还是 TRUNCATE(true) 操作", Boolean.class, false),
+    GEN_CALL_GRAPH_NUM_LIMIT("gen.call.graph.num.limit", "生成向上/向下的完整方法调用链时，每个方法允许生成的方法调用数量限制，默认为0，小于等于0代表不限制", Integer.class, false),
     ;
 
     // 参数key

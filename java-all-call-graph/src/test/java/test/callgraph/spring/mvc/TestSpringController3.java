@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import test.callgraph.field.TestField1;
+import test.callgraph.field.TestField2;
+import test.callgraph.field.TestFieldGet1;
 
 /**
  * @author adrninistrator
@@ -26,10 +29,12 @@ public class TestSpringController3 {
     }
 
     @RequestMapping(value = "test1", method = RequestMethod.GET)
-    public void test1() {
+    public TestField1 test1(TestFieldGet1 data) {
+        return null;
     }
 
     @RequestMapping(value = {"test2a", "test2b", "/test2c"}, method = RequestMethod.POST)
-    public void test2() {
+    public TestField2 test2(TestField2 testField2) {
+        return null;
     }
 }

@@ -15,6 +15,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MybatisMSEntity;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MybatisMSGetSetDb;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
 import com.adrninistrator.jacg.handler.dto.genericstype.GenericsTypeValue;
 import com.adrninistrator.jacg.handler.dto.genericstype.MethodArgGenericsTypeInfo;
 import com.adrninistrator.jacg.handler.dto.mybatis.MyBatisMSTableInfo;
@@ -54,19 +55,21 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
     private static final Logger logger = LoggerFactory.getLogger(MyBatisMSMapperEntityHandler.class);
 
     private final AnnotationHandler annotationHandler;
-
     private final MethodArgReturnHandler methodArgReturnHandler;
+    private final ClassInfoHandler classInfoHandler;
 
     public MyBatisMSMapperEntityHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
         annotationHandler = new AnnotationHandler(dbOperWrapper);
         methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
+        classInfoHandler = new ClassInfoHandler(dbOperWrapper);
     }
 
     public MyBatisMSMapperEntityHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
         annotationHandler = new AnnotationHandler(dbOperWrapper);
         methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
+        classInfoHandler = new ClassInfoHandler(dbOperWrapper);
     }
 
     /**
@@ -164,13 +167,64 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
     }
 
     /**
+     * 根据MyBatis Entity类名，查询对应的信息
+     *
+     * @param entityClassName
+     * @return
+     */
+    public List<WriteDbData4MybatisMSEntity> queryMybatisMSEntityByEntity(String entityClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MME_QUERY_BY_ENTITY;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_MYBATIS_MS_ENTITY) +
+                    " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_ENTITY.getTableName() +
+                    " where " + DC.MME_ENTITY_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MybatisMSEntity.class, dbOperWrapper.querySimpleClassName(entityClassName));
+    }
+
+    /**
+     * 查询所有的MyBatis Entity简单类名
+     *
+     * @return
+     */
+    public List<String> queryAllMybatisMSEntitySCN() {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MME_QUERY_ALL_ENTITY;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select distinct " + DC.MME_ENTITY_SIMPLE_CLASS_NAME +
+                    " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_ENTITY.getTableName();
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryListOneColumn(sql, String.class);
+    }
+
+    /**
+     * 查询所有的MyBatis Entity完整类名
+     *
+     * @return
+     */
+    public List<String> queryAllMybatisMSEntityClassName() {
+        List<String> list = queryAllMybatisMSEntitySCN();
+        List<String> classNameList = new ArrayList<>(list.size());
+        for (String simpleClassName : list) {
+            String className = classInfoHandler.queryClassNameBySimple(simpleClassName);
+            if (className != null) {
+                classNameList.add(className);
+            }
+        }
+        return classNameList;
+    }
+
+    /**
      * 根据MyBatis的Entity的类名查询对应的数据库表名
      *
      * @param entityClassName MyBatis的Entity的类名
      * @return
      */
     public String queryTableNameByMyBatisEntity(String entityClassName) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MME_QUERY_TABLE_NAME;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MME_QUERY_TABLE_NAME_BY_ENTITY;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select distinct " + DC.MME_TABLE_NAME +
@@ -374,7 +428,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
             if (methodArgGenericsTypeInfo != null) {
                 GenericsTypeValue methodArgGenericsTypeValue = methodArgGenericsTypeInfo.get(i);
                 if (methodArgGenericsTypeValue != null) {
-                    logger.error("MyBatis Mapper方法参数使用集合的泛型类型，暂不支持 {} {}", mapperFullMethod, i);
+                    logger.error("MyBatis Mapper方法参数使用泛型类型，暂不支持 {} {}", mapperFullMethod, i);
                     myBatisMapperArgList.add(new MyBatisMapperArgNotSupport());
                     continue;
                 }

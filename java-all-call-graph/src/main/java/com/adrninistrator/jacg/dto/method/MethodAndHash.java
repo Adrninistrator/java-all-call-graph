@@ -17,6 +17,14 @@ public class MethodAndHash {
         this.methodHash = methodHash;
     }
 
+    @Override
+    public String toString() {
+        return "MethodAndHash{" +
+                "fullMethod='" + fullMethod + '\'' +
+                ", methodHash='" + methodHash + '\'' +
+                '}';
+    }
+
     public String getFullMethod() {
         return fullMethod;
     }

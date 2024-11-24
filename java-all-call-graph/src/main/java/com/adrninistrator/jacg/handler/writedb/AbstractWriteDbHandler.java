@@ -47,6 +47,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
+    // 当前类上的 JACGWriteDbHandler 注解
+    private JACGWriteDbHandler jacgWriteDbHandler;
+
     // 需要读取的文件是属于主要的文件还是其他的文件
     private final boolean mainFile;
 
@@ -77,6 +80,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     // 初始化标记
     private boolean inited;
 
+    // 是否完成初始化检查标记
+    private boolean initChecked;
+
     // 当前需要读取的文件名称
     private String fileName;
 
@@ -91,6 +97,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     // 记录写文件记录的次数
     private JavaCG2Counter writeFileNum;
+
+    // 记录写数据库结果
+    private WriteDbResult writeDbResult;
 
     protected DbOperWrapper dbOperWrapper;
 
@@ -118,6 +127,12 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     // 用于统计序号的Map
     private Map<String, Integer> seqMap;
 
+    // 当前读取到的文件行数组
+    private String[] lineArray;
+
+    // 当前处理的文件行数组序号
+    private int lineArrayIndex = 0;
+
     // 若当前实例不是从文件读取，则将获取的信息写入对应文件
     protected Writer fileWriter;
 
@@ -126,8 +141,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     protected ApplicationContext applicationContext;
 
     public AbstractWriteDbHandler(WriteDbResult writeDbResult) {
-
-        JACGWriteDbHandler jacgWriteDbHandler = this.getClass().getAnnotation(JACGWriteDbHandler.class);
+        jacgWriteDbHandler = this.getClass().getAnnotation(JACGWriteDbHandler.class);
         if (jacgWriteDbHandler == null) {
             // 假如类上未获取到注解，则使用父类上的
             jacgWriteDbHandler = this.getClass().getSuperclass().getAnnotation(JACGWriteDbHandler.class);
@@ -170,7 +184,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
                 throw new JavaCG2RuntimeException("类不需要读取文件但配置错误");
             }
         }
-        if (DbTableInfoEnum.DTIE_ILLEGAL == dbTableInfoEnum) {
+        if (ArrayUtils.isEmpty(dbTableInfoEnum.getColumns())) {
             return;
         }
 
@@ -253,6 +267,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
      * 自定义初始化操作
      */
     public void init(WriteDbResult writeDbResult) {
+        this.writeDbResult = writeDbResult;
         dataList = new ArrayList<>(dbInsertBatchSize);
         inited = true;
 
@@ -274,6 +289,17 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
      */
     protected T genData(String[] lineArray) {
         throw new JavaCG2RuntimeException("不会调用当前方法");
+    }
+
+    /**
+     * 读取当前行文件数组内容
+     *
+     * @return
+     */
+    protected String readLineData() {
+        String data = lineArray[lineArrayIndex];
+        lineArrayIndex++;
+        return data;
     }
 
     /**
@@ -392,10 +418,27 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     }
 
     private void checkInited() {
+        if (initChecked) {
+            return;
+        }
         if (!inited) {
             logger.error("需要先调用 init 方法后再调用当前方法");
             throw new JavaCG2RuntimeException("需要先调用 init 方法后再调用当前方法");
         }
+        if (!useNeo4j()) {
+            // 检查依赖的其他数据库表有没有先写入
+            DbTableInfoEnum[] dependsWriteDbTableEnums = jacgWriteDbHandler.dependsWriteDbTableEnums();
+            if (ArrayUtils.isNotEmpty(dependsWriteDbTableEnums)) {
+                for (DbTableInfoEnum dbTableInfoEnum : dependsWriteDbTableEnums) {
+                    String enumName = dbTableInfoEnum.name();
+                    if (!writeDbResult.getWrittenDbTableEnumNameSet().contains(enumName)) {
+                        logger.error("当前类依赖的数据库表还未写入 {} {}", currentSimpleClassName, enumName);
+                        throw new JavaCG2RuntimeException("当前类依赖的数据库表还未写入 " + currentSimpleClassName + " " + enumName);
+                    }
+                }
+            }
+        }
+        initChecked = true;
     }
 
     /**
@@ -419,13 +462,13 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
                     continue;
                 }
 
-                String[] lineArray;
                 if (minColumnNum == maxColumnNum && !allowTabInLastColumn) {
                     lineArray = splitEquals(line, minColumnNum);
                 } else {
                     lineArray = splitBetween(line, minColumnNum, maxColumnNum);
                 }
 
+                lineArrayIndex = 0;
                 // 根据读取的文件内容生成对应对象
                 T data = genData(lineArray);
                 if (data == null) {
@@ -442,6 +485,8 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
             logger.error("出现异常 {} ", currentSimpleClassName, e);
             return false;
         } finally {
+            // 记录当前写入的数据库表枚举名
+            writeDbResult.getWrittenDbTableEnumNameSet().add(jacgWriteDbHandler.dbTableInfoEnum().name());
             // 执行完成之后的操作
             afterHandle();
         }
@@ -603,10 +648,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
      * @return false: 未失败 true: 失败
      */
     public boolean checkFailed() {
-        if (DbTableInfoEnum.DTIE_ILLEGAL == dbTableInfoEnum) {
-            return false;
-        }
-        return failNum.getCount() > 0;
+        return ArrayUtils.isNotEmpty(dbTableInfoEnum.getColumns()) && failNum.getCount() > 0;
     }
 
     /**

@@ -103,7 +103,7 @@ public class FindCallStackTrace extends AbstractExecutor {
 
     // 初始化根据关键字生成调用堆栈过滤器扩展类
     private boolean initFindKeywordFilters(ConfigureWrapper configureWrapper) {
-        List<String> findKeywordFilterClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_FIND_STACK_KEYWORD_FILTER, true);
+        List<String> findKeywordFilterClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_FIND_STACK_KEYWORD_FILTER);
         if (JavaCG2Util.isCollectionEmpty(findKeywordFilterClassList)) {
             return true;
         }
@@ -138,7 +138,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         List<String> usedKeywordList = null;
         if (JavaCG2Util.isCollectionEmpty(findStackKeywordFilterList)) {
             // 未指定根据关键字生成调用堆栈过滤器扩展类时，使用指定的关键字
-            configKeywordList = configureWrapper.getOtherConfigList(otherConfigFileUseListEnum, true);
+            configKeywordList = configureWrapper.getOtherConfigList(otherConfigFileUseListEnum);
             // 保存关键字的列表，这里需要新创建可写的List，从配置中获取的List可能是不可写的
             usedKeywordList = new ArrayList<>(configKeywordList.size());
         }
@@ -260,8 +260,8 @@ public class FindCallStackTrace extends AbstractExecutor {
         JACGFileUtil.searchDir(finalCallGraphDirPath, subDirPathSet, subFilePathList, JACGConstants.EXT_TXT);
 
         if (subFilePathList.isEmpty()) {
-            logger.error("{} 目录中未找到后缀为[{}]的文件", finalCallGraphDirPath, JACGConstants.EXT_TXT);
-            return CallStackFileResult.FAIL;
+            logger.warn("{} 目录中未找到后缀为[{}]的文件", finalCallGraphDirPath, JACGConstants.EXT_TXT);
+            return CallStackFileResult.EMPTY;
         }
 
         // 创建线程池

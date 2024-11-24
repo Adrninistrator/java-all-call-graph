@@ -376,6 +376,16 @@ public class ConfigureWrapper {
     }
 
     /**
+     * 获取其他配置文件中的参数，或通过代码添加的参数，实际使用配置参数
+     *
+     * @param otherConfigFileUseSetEnum
+     * @return
+     */
+    public Set<String> getOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum) {
+        return getOtherConfigSet(otherConfigFileUseSetEnum, true);
+    }
+
+    /**
      * 获取其他配置文件中的参数，或通过代码添加的参数
      *
      * @param otherConfigFileUseSetEnum
@@ -403,6 +413,16 @@ public class ConfigureWrapper {
             recordUsedOtherSetConfig(otherConfigFileUseSetEnum);
         }
         return configSet;
+    }
+
+    /**
+     * 获取其他配置文件中的参数，或通过代码添加的参数，实际使用配置参数
+     *
+     * @param otherConfigFileUseListEnum 参数key枚举
+     * @return
+     */
+    public List<String> getOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum) {
+        return getOtherConfigList(otherConfigFileUseListEnum, true);
     }
 
     /**
@@ -977,7 +997,7 @@ public class ConfigureWrapper {
         // 处理通过get/set方法关联的字段关联关系
         javaCG2ConfigureWrapper.setConfig(JavaCG2ConfigKeyEnum.CKE_ANALYSE_FIELD_RELATIONSHIP, getMainConfig(ConfigKeyEnum.CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP).toString());
         // 指定需要处理的jar包与目录
-        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, true));
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR));
         // 指定需要处理的包名
         javaCG2ConfigureWrapper.setOtherConfigSet(JavaCG2OtherConfigFileUseSetEnum.OCFUSE_PACKAGES, getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true));
         // 指定需要合并jar包或目录时，除了class文件外，还需要合并的文件类型，添加xml、properties

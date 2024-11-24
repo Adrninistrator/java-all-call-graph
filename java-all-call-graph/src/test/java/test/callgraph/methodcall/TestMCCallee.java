@@ -35,4 +35,8 @@ public class TestMCCallee {
     public static void testFindEntry() {
         System.out.println("ok");
     }
+
+    public static void notCalled() {
+        System.out.println("ok");
+    }
 }

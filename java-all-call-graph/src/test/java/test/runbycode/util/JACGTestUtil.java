@@ -20,7 +20,7 @@ public class JACGTestUtil {
     public static void useLocalConfig(ConfigureWrapper configureWrapper) {
         // 以下为本地调试时使用
         try {
-            Class<?> testRunLocalConfigClass = Class.forName("test.runlocal.TestRunLocalConfig");
+            Class<?> testRunLocalConfigClass = Class.forName("test.runlocal.config.TestRunLocalConfig");
             Method testRunLocalConfigSetMethod = testRunLocalConfigClass.getMethod("setConfig", ConfigureWrapper.class);
             testRunLocalConfigSetMethod.invoke(testRunLocalConfigClass, configureWrapper);
             logger.warn("!!!调用本地的修改配置参数方法!!!");

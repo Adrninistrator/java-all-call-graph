@@ -12,12 +12,20 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
     private String simpleClassName;
     private int accessFlags;
     private String methodName;
-    private String fullMethod;
     private String simpleReturnType;
     private String returnType;
+    private int returnArrayDimensions;
+    private String returnCategory;
+    private int returnExistsGenericsType;
+    private String className;
+    private String fullMethod;
     private String methodInstructionsHash;
     private int jarNum;
-    private String className;
+
+    @Override
+    public String toString() {
+        return fullMethod;
+    }
 
     public String getMethodHash() {
         return methodHash;
@@ -51,14 +59,6 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
         this.methodName = methodName;
     }
 
-    public String getFullMethod() {
-        return fullMethod;
-    }
-
-    public void setFullMethod(String fullMethod) {
-        this.fullMethod = fullMethod;
-    }
-
     public String getSimpleReturnType() {
         return simpleReturnType;
     }
@@ -75,6 +75,46 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
         this.returnType = returnType;
     }
 
+    public int getReturnArrayDimensions() {
+        return returnArrayDimensions;
+    }
+
+    public void setReturnArrayDimensions(int returnArrayDimensions) {
+        this.returnArrayDimensions = returnArrayDimensions;
+    }
+
+    public String getReturnCategory() {
+        return returnCategory;
+    }
+
+    public void setReturnCategory(String returnCategory) {
+        this.returnCategory = returnCategory;
+    }
+
+    public int getReturnExistsGenericsType() {
+        return returnExistsGenericsType;
+    }
+
+    public void setReturnExistsGenericsType(int returnExistsGenericsType) {
+        this.returnExistsGenericsType = returnExistsGenericsType;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getFullMethod() {
+        return fullMethod;
+    }
+
+    public void setFullMethod(String fullMethod) {
+        this.fullMethod = fullMethod;
+    }
+
     public String getMethodInstructionsHash() {
         return methodInstructionsHash;
     }
@@ -89,18 +129,5 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
 
     public void setJarNum(int jarNum) {
         this.jarNum = jarNum;
-    }
-
-    public String getClassName() {
-        return className;
-    }
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-    @Override
-    public String toString() {
-        return fullMethod;
     }
 }

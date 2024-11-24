@@ -8,11 +8,11 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，内部类信息
  */
 public class WriteDbData4InnerClass implements BaseWriteDbData {
-    public String innerSimpleClassName;
-    public String innerClassName;
-    public String outerSimpleClassName;
-    public String outerClassName;
-    public int anonymousClass;
+    private String innerSimpleClassName;
+    private String innerClassName;
+    private String outerSimpleClassName;
+    private String outerClassName;
+    private int anonymousClass;
 
     public WriteDbData4InnerClass() {
     }

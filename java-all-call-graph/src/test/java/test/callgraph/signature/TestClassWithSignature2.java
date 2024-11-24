@@ -1,7 +1,7 @@
 package test.callgraph.signature;
 
-import test.callgraph.argument.TestArgument1;
-import test.callgraph.argument.TestArgument2;
+import test.callgraph.methodargument.TestArgument1;
+import test.callgraph.methodargument.TestArgument2;
 
 import java.util.List;
 

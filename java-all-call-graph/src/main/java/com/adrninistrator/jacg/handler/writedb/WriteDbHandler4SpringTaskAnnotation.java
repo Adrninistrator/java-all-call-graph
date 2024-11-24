@@ -11,6 +11,7 @@ import com.adrninistrator.jacg.util.JACGSqlUtil;
  * @author adrninistrator
  * @date 2024/3/24
  * @description: 写入数据库，Spring定时任务信息，通过注解定义
+ * dependsWriteDbTableEnums 中不需要指定 DbTableInfoEnum.DTIE_METHOD_ANNOTATION ，因为这两个表的写入顺序不固定，检查是否写入可能不通过
  */
 @JACGWriteDbHandler(
         readFile = false,

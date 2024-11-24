@@ -9,7 +9,17 @@ import java.util.List;
  */
 public class TestFieldDto1 {
 
+    private String fileInfo;
+
     private List<String> strList1;
+
+    public String getFileInfo() {
+        return fileInfo;
+    }
+
+    public void setFileInfo(String fileInfo) {
+        this.fileInfo = fileInfo;
+    }
 
     public List<String> getStrList1() {
         return strList1;

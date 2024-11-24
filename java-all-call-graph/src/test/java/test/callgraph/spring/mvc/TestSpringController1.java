@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import test.callgraph.field.cycle.TestUseFieldGenericsCycle1;
 import test.callgraph.spring.bean.define.AbstractSpringServiceC;
 import test.callgraph.spring.bean.define.SpringInterfaceA;
 
@@ -33,7 +34,7 @@ public class TestSpringController1 {
         springInterfaceA.test1();
 
         springServiceC1.test1();
-
+        post(null);
         return "";
     }
 
@@ -50,7 +51,7 @@ public class TestSpringController1 {
     }
 
     @RequestMapping(value = {"/test2a", "test2b", "test2c"}, method = RequestMethod.POST)
-    public void test2() {
+    public void test2(TestUseFieldGenericsCycle1 testUseFieldGenericsCycle1) {
         System.out.println("");
     }
 }

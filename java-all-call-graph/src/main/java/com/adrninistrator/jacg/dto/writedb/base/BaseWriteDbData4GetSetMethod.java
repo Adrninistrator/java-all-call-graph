@@ -16,6 +16,7 @@ public class BaseWriteDbData4GetSetMethod implements BaseWriteDbData {
     private String fieldCategory;
     private String simpleFieldType;
     private String fieldType;
+    private int arrayDimensions;
     private String className;
     private String methodHash;
     private String fullMethod;
@@ -88,6 +89,14 @@ public class BaseWriteDbData4GetSetMethod implements BaseWriteDbData {
 
     public void setFieldType(String fieldType) {
         this.fieldType = fieldType;
+    }
+
+    public int getArrayDimensions() {
+        return arrayDimensions;
+    }
+
+    public void setArrayDimensions(int arrayDimensions) {
+        this.arrayDimensions = arrayDimensions;
     }
 
     public String getClassName() {

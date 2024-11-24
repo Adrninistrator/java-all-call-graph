@@ -17,6 +17,7 @@ import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,6 +233,28 @@ public class MethodCallHandler extends BaseHandler {
         return calleeFullMethod;
     }
 
+
+    /**
+     * 根据被调用方法类名与方法，查询对应的完整方法
+     * 不从method_info表查询，因为被调用方法所在的jar包可能没有解析
+     *
+     * @param className
+     * @param methodName
+     * @return
+     */
+    public List<String> queryCalleeFullMethodByClassMethod(String className, String methodName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLEE_FULL_METHOD_BY_CLASS_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select distinct " + DC.MC_CALLEE_FULL_METHOD +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.MC_CALLEE_METHOD_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(className), methodName);
+    }
+
     /**
      * 根据方法调用序号，从方法调用表获取对应的完整方法
      *
@@ -282,7 +305,6 @@ public class MethodCallHandler extends BaseHandler {
      * @return
      */
     public List<WriteDbData4MethodCall> queryMethodCallByCalleeFullMethod(String calleeFullMethod) {
-        String calleeMethodHash = JACGUtil.genHashWithLen(calleeFullMethod);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_METHOD_CALL_BY_CALLEE_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -291,7 +313,7 @@ public class MethodCallHandler extends BaseHandler {
                     " where " + DC.MC_CALLEE_METHOD_HASH + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, calleeMethodHash);
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, JACGUtil.genHashWithLen(calleeFullMethod));
     }
 
     /**
@@ -395,6 +417,7 @@ public class MethodCallHandler extends BaseHandler {
 
     /**
      * 查询方法调用中的调用方与被调用方，使用被调用方完整类名与方法（排除继承相关的方法调用）
+     * 被调用方法所在的jar包可能没有解析，因此不能从method_info表查询对应的方法
      *
      * @param calleeClassName  被调用方完整类名
      * @param calleeMethodName 被调用方方法
@@ -483,5 +506,28 @@ public class MethodCallHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObjectOneColumn(sql, Integer.class, calleeSimpleClassName);
+    }
+
+    /**
+     * 根据被调用类名与方法名查询对应的方法调用
+     *
+     * @param calleeMethodName
+     * @param methodName
+     * @return
+     */
+    public List<WriteDbData4MethodCall> queryMethodCallByCalleeClassMethod(String calleeMethodName, String methodName) {
+        List<WriteDbData4MethodCall> methodCallList = new ArrayList<>();
+        // 根据被调用类名与方法名查询对应的完整方法，不从method_info表查询
+        List<String> fullMethodList = queryCalleeFullMethodByClassMethod(calleeMethodName, methodName);
+        if (JavaCG2Util.isCollectionEmpty(fullMethodList)) {
+            return methodCallList;
+        }
+        for (String fullMethod : fullMethodList) {
+            List<WriteDbData4MethodCall> list = queryMethodCallByCalleeFullMethod(fullMethod);
+            if (!JavaCG2Util.isCollectionEmpty(list)) {
+                methodCallList.addAll(list);
+            }
+        }
+        return methodCallList;
     }
 }

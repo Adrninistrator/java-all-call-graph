@@ -23,6 +23,7 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2ConfigKeyEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OtherConfigFileUseListEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OtherConfigFileUseSetEnum;
 import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
+import com.adrninistrator.javacg2.dto.output.JavaCG2OtherRunResult;
 import com.adrninistrator.javacg2.dto.output.JavaCG2OutputInfo;
 import com.adrninistrator.javacg2.entry.JavaCG2Entry;
 import com.adrninistrator.javacg2.extensions.codeparser.CodeParserInterface;
@@ -157,7 +158,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
 
     // 添加代码解析扩展类
     private boolean addCodeParserExtensions() {
-        List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, true);
+        List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER);
         Set<String> codeParserExtensionClassSet = new HashSet<>(codeParserExtensionClassList);
         if (codeParserExtensionClassList.size() != codeParserExtensionClassSet.size()) {
             logger.info("指定的用于对代码进行解析的扩展类存在重复 {} {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.getConfigPrintInfo(),
@@ -240,7 +241,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         configureWrapper.addCommonDesc(markdownWriter);
         markdownWriter.addTitle(1, JACGConstants.MAIN_CONFIG);
         // 写入配置文件名
-        markdownWriter.addTitle(2, JavaCG2Constants.DIR_CONFIG + "/" + JavaCG2Constants.FILE_CONFIG);
+        markdownWriter.addTitle(2, JavaCG2Constants.FILE_PATH_CONFIG);
         markdownWriter.addListWithNewLine(JACGConstants.USED_CONFIG_FLAG_FILE_ENUM_CLASS);
         markdownWriter.addLineWithNewLine(JavaCG2ConfigKeyEnum.class.getSimpleName());
         markdownWriter.addTableHead(JACGConstants.USED_CONFIG_FLAG_CONF_KEY, JACGConstants.USED_CONFIG_FLAG_CONF_ENUM_NAME, JACGConstants.USED_CONFIG_FLAG_CONF_DESC,
@@ -303,5 +304,13 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
     protected boolean handleDb() {
         // 返回不需要操作数据库
         return false;
+    }
+
+    // 获取java-callgraph2其他执行结果
+    public JavaCG2OtherRunResult getJavaCG2OtherRunResult() {
+        if (javaCG2Entry == null) {
+            return new JavaCG2OtherRunResult();
+        }
+        return javaCG2Entry.getJavaCG2OtherRunResult();
     }
 }

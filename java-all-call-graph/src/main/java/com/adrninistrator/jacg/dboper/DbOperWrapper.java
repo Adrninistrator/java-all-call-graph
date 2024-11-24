@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -155,15 +156,28 @@ public class DbOperWrapper {
     }
 
     /**
-     * 格式化sql语句，适用于不需要缓存的sql语句
+     * 格式化sql语句，适用于不需要缓存的sql语句，打印sql语句
      *
      * @param sql 格式化前的sql语句
      * @return 格式化后的sql语句
      */
     public String formatSql(String sql) {
+        return formatSql(sql, true);
+    }
+
+    /**
+     * 格式化sql语句，适用于不需要缓存的sql语句
+     *
+     * @param sql     格式化前的sql语句
+     * @param showSql 是否打印sql语句
+     * @return 格式化后的sql语句
+     */
+    public String formatSql(String sql, boolean showSql) {
         // 替换sql语句中的appName
         String finalSql = JACGSqlUtil.replaceFlagInSql(sql, appName, tableSuffix);
-        logger.info("[{}] format sql: [{}]", objSeq, finalSql);
+        if (showSql) {
+            logger.info("[{}] format sql: [{}]", objSeq, finalSql);
+        }
         return finalSql;
     }
 
@@ -201,7 +215,7 @@ public class DbOperWrapper {
      * @return
      */
     public boolean findDuplicateClass(String tableSuffix) {
-        logger.info("查找类名相同但包名不同的类 {}", StringUtils.defaultString(tableSuffix, ""));
+        logger.info("查找类名相同但包名不同的类 {}", Objects.toString(tableSuffix, ""));
         Set<String> usedDuplicateSimpleClassNameSet;
 
         if (StringUtils.isBlank(tableSuffix)) {
@@ -379,7 +393,7 @@ public class DbOperWrapper {
             // 当前指定的是完整类名，查找对应的简单类名
             String simpleClassName = querySimpleClassNameByFull(className);
             if (simpleClassName == null) {
-                logger.error("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定", className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
+                logger.warn("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定", className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
             }
             return simpleClassName;
         }

@@ -29,6 +29,7 @@ import java.util.Set;
  * @author adrninistrator
  * @date 2023/9/27
  * @description: 嵌套的字段处理类
+ * 说明： 可修改为从field_info表查询，根据exists_get_method、exists_set_method字段判断是否存在get/set方法
  */
 public class NestedGSFieldHandler extends BaseHandler {
     private static final Logger logger = LoggerFactory.getLogger(NestedGSFieldHandler.class);
@@ -49,16 +50,16 @@ public class NestedGSFieldHandler extends BaseHandler {
      * 查询仅在一个类中被使用的嵌套类型的顶层类型信息
      *
      * @param className             被使用的嵌套类型
-     * @param uniqueCustomFieldType 仅在一个类中被使用的嵌套类型集合
+     * @param uniqueCustomFieldType 仅在一个类中被使用的嵌套类型
      * @return null: 当前类型不存在仅在一个类中被使用的嵌套类型的顶层类型 非null: 当前类型存在仅在一个类中被使用的嵌套类型的顶层类型
      */
     public NestedFieldTopClassInfo queryUniqueNestedFieldTopClassInfo(String className, CustomFieldType uniqueCustomFieldType) {
         if (className == null || uniqueCustomFieldType == null) {
             throw new JavaCG2RuntimeException("参数不允许为空");
         }
-        // 判断仅在一个类中被使用的嵌套类型集合是否有被初始化
+        // 判断仅在一个类中被使用的嵌套类型是否有被初始化
         if (!uniqueCustomFieldType.isInited()) {
-            // 仅在一个类中被使用的嵌套类型集合未被初始化
+            // 仅在一个类中被使用的嵌套类型未被初始化
             // 查询在get方法中，返回对象属于自定义类型，且仅在一个类中被使用的类型列表
             List<String> uniqueGetCustomFieldList = queryUniqueGetCustomFieldList();
             uniqueCustomFieldType.setCustomFieldTypeSet(new HashSet<>(uniqueGetCustomFieldList));
@@ -113,7 +114,7 @@ public class NestedGSFieldHandler extends BaseHandler {
         String nestedFieldUpperClassName = null;
         // 记录指定类在上层类中的字段名
         String fieldName = null;
-        // 首先从get方法表中查询指定类以非集合类型被嵌套使用的上层类的类型
+        // 首先从get方法表中查询指定类以非泛型类型被嵌套使用的上层类的类型
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.GM_QUERY_UPPER_NESTED_FIELD_TYPE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
@@ -133,7 +134,7 @@ public class NestedGSFieldHandler extends BaseHandler {
             nestedFieldUpperClassName = getMethodList.get(0).getClassName();
             fieldName = getMethodList.get(0).getFieldName();
         } else {
-            // 再从get方法表、非静态字段集合中涉及的泛型类型表中查询指定类以集合类型被嵌套使用的上层类的类型
+            // 再从get方法表、非静态字段中涉及的泛型类型表中查询指定类被嵌套使用的上层类的类型
             sqlKeyEnum = SqlKeyEnum.GM_FGT_QUERY_UPPER_NESTED_FIELD_TYPE;
             sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
             if (sql == null) {
@@ -142,8 +143,8 @@ public class NestedGSFieldHandler extends BaseHandler {
                         " where gm." + DC.GSM_SIMPLE_CLASS_NAME + " = fgt." + DC.FGT_SIMPLE_CLASS_NAME +
                         " and gm." + DC.GSM_FIELD_NAME + " = fgt." + DC.GSM_FIELD_NAME +
                         " and gm." + DC.GSM_FIELD_CATEGORY + " = ?" +
-                        " and fgt." + DC.FGT_FIELD_CATEGORY + " = ?" +
-                        " and fgt." + DC.FGT_SIMPLE_FIELD_GENERICS_TYPE + " = ?";
+                        " and fgt." + DC.FGT_GENERICS_CATEGORY + " = ?" +
+                        " and fgt." + DC.FGT_SIMPLE_GENERICS_TYPE + " = ?";
                 sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
             }
             List<WriteDbData4FieldGenericsType> fieldGenericsTypeList = dbOperator.queryList(sql, WriteDbData4FieldGenericsType.class,
@@ -189,12 +190,12 @@ public class NestedGSFieldHandler extends BaseHandler {
                     " from " + DbTableInfoEnum.DTIE_GET_METHOD.getTableName() +
                     " where " + DC.GSM_FIELD_CATEGORY + " = ?" +
                     " union all" +
-                    " select fgt." + DC.FGT_FIELD_GENERICS_TYPE + " as " + DC.GSM_FIELD_TYPE +
+                    " select fgt." + DC.FGT_GENERICS_TYPE + " as " + DC.GSM_FIELD_TYPE +
                     " from " + DbTableInfoEnum.DTIE_GET_METHOD.getTableName() + " as gm, " + DbTableInfoEnum.DTIE_FIELD_GENERICS_TYPE.getTableName() + " as fgt" +
                     " where gm." + DC.GSM_SIMPLE_CLASS_NAME + " = fgt." + DC.FGT_SIMPLE_CLASS_NAME +
                     " and gm." + DC.GSM_FIELD_NAME + " = fgt." + DC.FGT_FIELD_NAME +
                     " and gm." + DC.GSM_FIELD_CATEGORY + " = ?" +
-                    " and fgt." + DC.FGT_FIELD_CATEGORY + " = ?" +
+                    " and fgt." + DC.FGT_GENERICS_CATEGORY + " = ?" +
                     " ) as r" +
                     " group by r." + DC.GSM_FIELD_TYPE +
                     " having count(r." + DC.GSM_FIELD_TYPE + ") = 1";

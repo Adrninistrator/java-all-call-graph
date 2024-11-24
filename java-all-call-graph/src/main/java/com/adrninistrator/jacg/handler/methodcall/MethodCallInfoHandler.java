@@ -17,6 +17,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGMethodCallInfoUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
@@ -381,5 +382,39 @@ public class MethodCallInfoHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObject(sql, WriteDbData4MethodCallInfo.class, callId, objArgsSeq, seq, type);
+    }
+
+    /**
+     * 查询指定方法的参数的使用情况
+     *
+     * @param fullMethod 完整方法
+     * @param argSeq     参数序号，从1开始
+     * @return
+     */
+    public List<WriteDbData4MethodCallInfo> queryMethodArgUsage(String fullMethod, int argSeq) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_METHOD_ARG_USAGE;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName() +
+                    " where " + DC.MCI_CALLER_METHOD_HASH + " = ?" +
+                    " and " + DC.MCI_TYPE + " = ?" +
+                    " and " + DC.MCI_THE_VALUE + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        return dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, methodHash, JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType(), String.valueOf(argSeq));
+    }
+
+    /**
+     * 检查指定方法的参数是否有使用
+     *
+     * @param fullMethod 完整方法
+     * @param argSeq     参数序号，从1开始
+     * @return true: 有使用 false: 未使用
+     */
+    public boolean checkMethodArgUsed(String fullMethod, int argSeq) {
+        List<WriteDbData4MethodCallInfo> list = queryMethodArgUsage(fullMethod, argSeq);
+        return !JavaCG2Util.isCollectionEmpty(list);
     }
 }

@@ -89,7 +89,7 @@ public class RunnerGenJarDiffCalleeGraph {
         String dirPathNew = null;
 
         if (!skipWriteDb) {
-            List<String> jarDiffDirPathList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR, true);
+            List<String> jarDiffDirPathList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR);
             if (JavaCG2Util.isCollectionEmpty(jarDiffDirPathList) || jarDiffDirPathList.size() != 2) {
                 logger.error("请修改配置文件，或通过代码指定对应的参数，在其中指定两行内容，第一行为旧目录的路径，第二行为新目录的路径 {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getConfigPrintInfo());
                 return false;

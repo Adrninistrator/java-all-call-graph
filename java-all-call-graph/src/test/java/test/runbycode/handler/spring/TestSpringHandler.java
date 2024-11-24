@@ -1,5 +1,6 @@
 package test.runbycode.handler.spring;
 
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfo;
 import com.adrninistrator.jacg.handler.spring.SpringHandler;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
@@ -7,6 +8,8 @@ import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import test.callgraph.field.TestField1;
+import test.callgraph.field.cycle.TestUseFieldGenericsCycle1;
 import test.callgraph.spring.bean.define.impl.SpringServiceImplA1;
 import test.callgraph.spring.mvc.TestSpringController1;
 import test.callgraph.spring.mvc.TestSpringController2;
@@ -23,13 +26,13 @@ public class TestSpringHandler extends TestRunByCodeBase {
 
     @Test
     public void $test0WriteDb() {
-        commonWriteDb();
+        commonWriteDbForce();
     }
 
     @Test
-    public void testQueryAllControllerMethod() {
+    public void testQueryAllControllerInfo() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
-            List<SpringControllerInfo> springControllerInfoList = springHandler.queryAllControllerMethod();
+            List<SpringControllerInfo> springControllerInfoList = springHandler.queryAllControllerInfo();
             Assert.assertFalse(JavaCG2Util.isCollectionEmpty(springControllerInfoList));
             printListContent(springControllerInfoList);
         }
@@ -49,8 +52,9 @@ public class TestSpringHandler extends TestRunByCodeBase {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
             doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "<init>"), false);
             doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test1"), true);
-            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test2"), true);
-            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController2.class.getName(), "test1"), true);
+            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test2",
+                    TestUseFieldGenericsCycle1.class.getName()), true);
+            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController2.class.getName(), "test1", TestField1.class.getName()), true);
         }
     }
 
@@ -62,6 +66,18 @@ public class TestSpringHandler extends TestRunByCodeBase {
         String controllerUri = springHandler.queryControllerUri(fullMethod);
         Assert.assertEquals(exists, StringUtils.isNotBlank(controllerUri));
         printObjectContent(controllerUri, fullMethod);
+    }
+
+    @Test
+    public void testQueryControllerBySCN() {
+        try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
+            List<String> simpleClassNameList = springHandler.queryAllControllerSCN();
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(simpleClassNameList));
+            for (String simpleClassName : simpleClassNameList) {
+                List<WriteDbData4SpringController> list = springHandler.queryControllerBySCN(simpleClassName);
+                printListContent(list, simpleClassName);
+            }
+        }
     }
 
     @Test

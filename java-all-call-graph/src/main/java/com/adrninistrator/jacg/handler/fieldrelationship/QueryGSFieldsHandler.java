@@ -84,7 +84,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
             // 获取使用的字段的名称
             String fieldUsedName = StringUtils.isBlank(jsonPropertyValue) ? fieldName : jsonPropertyValue;
             if (StringUtils.equalsAny(getSetMethod.getFieldCategory(), JavaCG2Constants.FILE_KEY_CATEGORY_JDK, JavaCG2Constants.FILE_KEY_CATEGORY_GENERICS_JDK)) {
-                // 字段类型为JDK中的类，或集合的泛型类型为JDK中的类，直接添加
+                // 字段类型为JDK中的类，或字段的泛型类型为JDK中的类，直接添加
                 String fieldShowName = getFieldShowName(fieldUsedName, upperFieldUsedNameList);
                 allFieldInfoList.add(new JACGFieldInfo(fieldName, getSetMethod.getFieldType(), fieldShowName, jsonPropertyValue, className));
                 continue;
@@ -98,14 +98,14 @@ public class QueryGSFieldsHandler extends BaseHandler {
                 continue;
             }
 
-            // 字段集合泛型类型为自定义类型，查询泛型中的类型
+            // 字段泛型类型为自定义类型，查询泛型中的类型
             List<WriteDbData4FieldGenericsType> fieldGenericsTypeList = fieldInfoHandler.queryFieldGenericsTypeByClassFieldName(className, fieldName);
             if (fieldGenericsTypeList == null) {
                 continue;
             }
             for (WriteDbData4FieldGenericsType fieldGenericsType : fieldGenericsTypeList) {
                 // 递归处理
-                doQueryAllFieldInfoList(allFieldInfoList, queryGetMethod, fieldGenericsType.getFieldGenericsType(), newUpperFieldUsedNameList, handledClassNameSet);
+                doQueryAllFieldInfoList(allFieldInfoList, queryGetMethod, fieldGenericsType.getGenericsType(), newUpperFieldUsedNameList, handledClassNameSet);
             }
         }
     }
@@ -147,7 +147,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
                 continue;
             }
 
-            // 字段集合泛型类型为自定义类型，查询泛型中的类型
+            // 字段泛型类型为自定义类型，查询泛型中的类型
             if (JavaCG2Constants.FILE_KEY_CATEGORY_GENERICS_CUSTOM.equals(getSetMethod.getFieldCategory())) {
                 List<WriteDbData4FieldGenericsType> fieldGenericsTypeList = fieldInfoHandler.queryFieldGenericsTypeByClassFieldName(className, getSetMethod.getFieldName());
                 if (fieldGenericsTypeList == null) {
@@ -155,14 +155,14 @@ public class QueryGSFieldsHandler extends BaseHandler {
                 }
                 for (WriteDbData4FieldGenericsType fieldGenericsType : fieldGenericsTypeList) {
                     // 递归处理
-                    doQueryCustomFieldTypeList(customFieldTypeList, queryGetMethod, fieldGenericsType.getFieldGenericsType(), handledClassNameSet);
+                    doQueryCustomFieldTypeList(customFieldTypeList, queryGetMethod, fieldGenericsType.getGenericsType(), handledClassNameSet);
                 }
             }
         }
     }
 
     /**
-     * 查询使用了指定类型字段对应的类名，包含直接使用以及在集合的泛型类型中使用
+     * 查询使用了指定类型字段对应的类名，包含直接使用以及在泛型类型中使用
      *
      * @param queryGetMethod true: 查询get方法 false: 查询set方法
      * @param fieldType      字段类型
@@ -177,7 +177,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
             classNameSet.addAll(classNameList1);
         }
 
-        // 查询在集合的泛型类型中使用指定类型字段的类
+        // 查询在字段的泛型类型中使用指定类型的类
         List<String> classNameList2 = fieldInfoHandler.queryFieldGenericsTypeByType(fieldType);
         if (classNameList2 != null) {
             classNameSet.addAll(classNameList2);

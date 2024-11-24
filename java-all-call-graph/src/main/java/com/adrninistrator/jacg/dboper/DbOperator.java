@@ -252,6 +252,19 @@ public class DbOperator implements AutoCloseable {
     }
 
     /**
+     * 删除数据库表
+     *
+     * @param tableName
+     * @return
+     */
+    public boolean dropTable(String tableName) {
+        String sql = "drop table if exists " + tableName;
+        sql = JACGSqlUtil.replaceFlagInSql(sql, getAppName(), getTableSuffix());
+        logger.info("[{}] drop table sql: [{}]", objSeq, sql);
+        return executeDDLSql(sql);
+    }
+
+    /**
      * 清空数据库表
      *
      * @param tableName
@@ -310,12 +323,12 @@ public class DbOperator implements AutoCloseable {
             jdbcTemplate.batchUpdate(sql, argumentList);
             return true;
         } catch (Exception e) {
+            if (!handleSpecialException(e, sql)) {
+                logger.error("插入失败 sql: [{}] ", sql, e);
+            }
             // 打印插入失败的数据
             for (int i = 0; i < argumentList.size(); i++) {
                 logger.error("插入失败的数据 序号: [{}] 数据: [{}]", i, StringUtils.join(argumentList.get(i), JACGConstants.FLAG_COMMA_WITH_SPACE));
-            }
-            if (!handleSpecialException(e, sql)) {
-                logger.error("插入失败 sql: [{}] ", sql, e);
             }
             throw new JACGSQLException("插入失败");
         }

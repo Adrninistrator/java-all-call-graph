@@ -14,6 +14,11 @@ public class WriteDbData4MethodReturnGenericsType implements BaseWriteDbData {
     private String type;
     private int typeSeq;
     private String simpleGenericsType;
+    private int genericsArrayDimensions;
+    private String typeVariablesName;
+    private String wildcard;
+    private String referenceType;
+    private String genericsCategory;
     private String genericsType;
     private String fullMethod;
 
@@ -63,6 +68,46 @@ public class WriteDbData4MethodReturnGenericsType implements BaseWriteDbData {
 
     public void setSimpleGenericsType(String simpleGenericsType) {
         this.simpleGenericsType = simpleGenericsType;
+    }
+
+    public int getGenericsArrayDimensions() {
+        return genericsArrayDimensions;
+    }
+
+    public void setGenericsArrayDimensions(int genericsArrayDimensions) {
+        this.genericsArrayDimensions = genericsArrayDimensions;
+    }
+
+    public String getTypeVariablesName() {
+        return typeVariablesName;
+    }
+
+    public void setTypeVariablesName(String typeVariablesName) {
+        this.typeVariablesName = typeVariablesName;
+    }
+
+    public String getWildcard() {
+        return wildcard;
+    }
+
+    public void setWildcard(String wildcard) {
+        this.wildcard = wildcard;
+    }
+
+    public String getReferenceType() {
+        return referenceType;
+    }
+
+    public void setReferenceType(String referenceType) {
+        this.referenceType = referenceType;
+    }
+
+    public String getGenericsCategory() {
+        return genericsCategory;
+    }
+
+    public void setGenericsCategory(String genericsCategory) {
+        this.genericsCategory = genericsCategory;
     }
 
     public String getGenericsType() {

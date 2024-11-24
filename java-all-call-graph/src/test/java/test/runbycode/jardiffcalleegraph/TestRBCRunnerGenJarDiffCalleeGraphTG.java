@@ -19,10 +19,10 @@ import java.util.Collections;
 public class TestRBCRunnerGenJarDiffCalleeGraphTG extends TestAbstractRunnerGenJarDiffCalleeGraph {
 
     public static final String APP_NAME = "jar_diff_tg";
-    public static final String TAR_GZ_DIR = "build/tar_gz/";
+    public static final String TAR_GZ_DIR = "build/test_diff_tar_gz/";
 
-    public static final String TAR_GZ_FILE_NAME_OLD = "java-all-call-graph-1.0.15.tar.gz";
-    public static final String TAR_GZ_FILE_NAME_NEW = "java-all-call-graph-1.0.99.tar.gz";
+    public static final String TAR_GZ_FILE_NAME_OLD = "jar-diff-version-1.tar.gz";
+    public static final String TAR_GZ_FILE_NAME_NEW = "jar-diff-version-2.tar.gz";
 
     @Test
     public void test1UseLocalConfig() {
@@ -50,8 +50,8 @@ public class TestRBCRunnerGenJarDiffCalleeGraphTG extends TestAbstractRunnerGenJ
                 Collections.singletonList("jar"),
                 null,
                 Arrays.asList(".xml", "properties"),
-                Collections.singletonList("adrninistrator"),
-                Collections.singletonList("com/adrninistrator/mybatismysqltableparser"));
+                Collections.singletonList("diffjar"),
+                Collections.singletonList("test/callgraph/diffjar/task"));
     }
 
     private void testFull(boolean useLocalConfig) {

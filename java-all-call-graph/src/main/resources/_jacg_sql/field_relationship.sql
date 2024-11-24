@@ -14,7 +14,7 @@ CREATE TABLE if not exists jacg_field_relationship_{appName} (
   type varchar(10) NOT NULL COMMENT '关联关系类型，参考 java-callgraph2 项目 JavaCG2FieldRelationshipTypeEnum 类',
   relationship_flags int NOT NULL COMMENT '字段关联关系标志',
   bean_util_call_id int NOT NULL COMMENT 'BeanUtil方法调用序号，从1开始',
-  bean_util_method text NULL COMMENT 'BeanUtil属性拷贝方法',
+  bean_util_method text DEFAULT NULL COMMENT 'BeanUtil属性拷贝方法',
   PRIMARY KEY (fld_relationship_id),
   INDEX idx_gsr_gmci_{appName}(get_method_call_id),
   INDEX idx_gsr_smci_{appName}(set_method_call_id),

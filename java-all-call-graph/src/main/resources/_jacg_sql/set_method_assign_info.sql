@@ -3,7 +3,7 @@ CREATE TABLE if not exists jacg_set_method_assign_info_{appName} (
   set_method_call_id int NOT NULL COMMENT 'set方法被调用时的方法调用序号，从1开始',
   seq int NOT NULL COMMENT 'set方法当前被调用时被赋值情况的序号，从0开始',
   step int NOT NULL COMMENT 'set方法当前被调用时被赋值时通过方法调用传递的步骤，从0开始',
-  fld_relationship_id int NULL COMMENT '字段关联关系id，从1开始',
+  fld_relationship_id int DEFAULT NULL COMMENT '字段关联关系id，从1开始',
   curr_call_id int NOT NULL COMMENT '当前的方法调用序号，从1开始',
   caller_method_hash varchar(30) NOT NULL COMMENT '调用方，方法hash+字节数',
   caller_full_method text NOT NULL COMMENT '调用方，完整方法（类名+方法名+参数）',

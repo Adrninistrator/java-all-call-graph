@@ -24,7 +24,8 @@ import java.util.Map;
         otherFileName = SpringTaskXmlCodeParser.FILE_NAME,
         minColumnNum = 2,
         maxColumnNum = 2,
-        dbTableInfoEnum = DbTableInfoEnum.DTIE_SPRING_TASK
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_SPRING_TASK,
+        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_SPRING_BEAN}
 )
 public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDbData4SpringTask> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4SpringTaskXml.class);

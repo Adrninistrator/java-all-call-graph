@@ -1,6 +1,6 @@
 CREATE TABLE if not exists jacg_method_call_{appName} (
   call_id int NOT NULL COMMENT '方法调用序号，从1开始',
-  call_type varchar(10) NOT NULL COMMENT '调用类型',
+  call_type varchar(10) NOT NULL COMMENT '调用类型，参考 JavaCG2CallTypeEnum 枚举类',
   callee_obj_type varchar(10) NOT NULL COMMENT '被调用对象类型，t:调用当前实例的方法，sf:调用静态字段的方法，f:调用字段的方法，v:调用其他变量的方法',
   enabled tinyint NOT NULL COMMENT '是否启用，1:启用',
   caller_method_hash varchar(30) NOT NULL COMMENT '调用方，方法hash+字节数',
@@ -16,8 +16,8 @@ CREATE TABLE if not exists jacg_method_call_{appName} (
   call_flags int NOT NULL COMMENT '方法调用标志',
   raw_return_type varchar(255) NOT NULL COMMENT '被调用方法原始的返回类型',
   actual_return_type varchar(255) NOT NULL COMMENT '被调用方法实际的返回类型',
-  caller_jar_num int NULL COMMENT '调用方法Jar包序号',
-  callee_jar_num int NULL COMMENT '被调用方法Jar包序号',
+  caller_jar_num int DEFAULT NULL COMMENT '调用方法Jar包序号',
+  callee_jar_num int DEFAULT NULL COMMENT '被调用方法Jar包序号',
   PRIMARY KEY (call_id),
   INDEX idx_mc_rmh_{appName}(caller_method_hash),
   INDEX idx_mc_hash_{appName}(callee_method_hash, caller_method_hash),

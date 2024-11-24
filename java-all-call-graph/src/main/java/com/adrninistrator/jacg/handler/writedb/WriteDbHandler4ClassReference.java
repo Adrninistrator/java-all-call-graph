@@ -53,6 +53,7 @@ public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteD
         writeDbData4ClassReference.setReferencedSimpleClassName(referencedSimpleClassName);
 
         writeDbHandler4ClassName.addClassReference(writeDbData4ClassReference);
+        writeDbHandler4ClassName.tryInsertDb();
         return writeDbData4ClassReference;
     }
 

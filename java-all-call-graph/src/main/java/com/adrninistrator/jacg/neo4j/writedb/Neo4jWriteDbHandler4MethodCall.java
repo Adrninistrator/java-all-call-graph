@@ -48,6 +48,7 @@ public class Neo4jWriteDbHandler4MethodCall extends WriteDbHandler4MethodCall {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Class chooseNeo4jRepository() {
         return JACGMethodCallRepository.class;

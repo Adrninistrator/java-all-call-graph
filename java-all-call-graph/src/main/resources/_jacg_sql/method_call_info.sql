@@ -6,7 +6,7 @@ CREATE TABLE if not exists jacg_method_call_info_{appName} (
   caller_method_hash varchar(30) NOT NULL COMMENT '调用方，方法hash+字节数',
   type varchar(10) NOT NULL COMMENT '类型，含义参考 JavaCG2MethodCallInfoTypeEnum 类',
   array_flag int NOT NULL COMMENT '是否为数组格式，1:是，0:否',
-  value_type varchar(30) NULL COMMENT '值的类型，含义参考 JavaCG2ConstantTypeEnum 类',
+  value_type varchar(30) DEFAULT NULL COMMENT '值的类型，含义参考 JavaCG2ConstantTypeEnum 类',
   the_value text COLLATE utf8mb4_bin NOT NULL COMMENT '对应的值',
   PRIMARY KEY (record_id),
   INDEX idx_mci_cos_{appName}(call_id, obj_args_seq, seq),
