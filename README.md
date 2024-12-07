@@ -2,11 +2,15 @@
 
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-green.svg)](https://github.com/Adrninistrator/java-all-call-graph/blob/master/LICENSE)
 
-# 1. 加群讨论
+# 1. 使用案例
+
+[使用案例](use_cases.md)
+
+# 2. 加群讨论
 
 [加群讨论](group_discussions.md)
 
-# 2. 前言
+# 3. 前言
 
 在很多场景下，如果能够生成Java代码中方法之间的调用链，是很有帮助的，例如分析代码执行流程、确认被修改代码的影响范围、代码审计/漏洞分析等。
 
@@ -26,35 +30,35 @@ IDEA提供了显示调用指定Java方法向上的完整调用链的功能，可
 
 在github查看文档时，图片可能无法显示，影响使用说明文档的查看，可查看gitee中的当前项目[https://gitee.com/Adrninistrator/java-all-call-graph](https://gitee.com/Adrninistrator/java-all-call-graph)。
 
-# 3. 输出结果示例
+# 4. 输出结果示例
 
 [输出结果示例](output_example.md)
 
-# 4. 快速开始
+# 5. 快速开始
 
 [快速开始](quick_start.md)
 
-# 5. 更新说明
+# 6. 更新说明
 
 [更新说明](change_log.md)
 
-# 6. 配置参数示例
+# 7. 配置参数示例
 
 [配置参数示例](config_example.md)
 
-# 7. 使用说明
+# 8. 使用说明
 
 [使用说明](how_to_use.md)
 
-# 8. 通过源码执行
+# 9. 通过源码执行
 
 [通过源码执行](run_by_code.md)
 
-# 9. 数据库表说明
+# 10. 数据库表说明
 
 [数据库表说明](db_tables.md)
 
-# 10. 使用Neo4j图数据库
+# 11. 使用Neo4j图数据库
 
 [使用Neo4j图数据库](use_neo4j.md)
 
