@@ -469,7 +469,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     }
 
     // 创建数据库表
-    private boolean createTables(boolean dropOrTruncate) {
+    public boolean createTables(boolean dropOrTruncate) {
         logger.info("创建数据库表");
         for (DbTableInfoEnum dbTableInfoEnum : DbTableInfoEnum.values()) {
             if (ArrayUtils.isEmpty(dbTableInfoEnum.getColumns())) {
