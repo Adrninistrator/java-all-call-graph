@@ -9,7 +9,6 @@ import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,7 +59,7 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
                 }
                 JavaCG2FileUtil.write2FileWithTab(writer, jarEntryPath, useBase64.getStrValue(), key, value);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("error ", e);
         }
     }

@@ -7,7 +7,7 @@ import java.util.List;
  * @date 2022/12/7
  * @description:
  */
-public class TestClassWithSignature3 extends TestAbstractClassWithSignature<int[], String[]> {
+public class TestClassWithSignatureA2 extends TestAbstractClassWithSignatureA<int[], String[]> {
     @Override
     public void test() {
 

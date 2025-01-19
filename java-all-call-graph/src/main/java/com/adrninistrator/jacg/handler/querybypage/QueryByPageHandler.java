@@ -82,8 +82,8 @@ public class QueryByPageHandler {
                     }
                 }
             }
-            if (lastQuery) {
-                // 最后一次分页查询
+            if (lastQuery || (JavaCG2Util.isCollectionEmpty(dataList) && queryByPageCallBack.exitWhenQueryEmpty())) {
+                // 最后一次分页查询，或查询结果为空且需要结束
                 break;
             }
             currentStartId = currentEndId;

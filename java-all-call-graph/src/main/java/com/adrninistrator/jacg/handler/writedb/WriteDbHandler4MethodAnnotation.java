@@ -194,6 +194,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 String showUri = JACGSpringUtil.genSpringControllerShowUri(classRequestMappingPath, methodPath);
 
                 WriteDbData4SpringController writeDbData4SpringController = new WriteDbData4SpringController();
+                writeDbData4SpringController.setRecordId(writeDbHandler4SpringController.genNextRecordId());
                 writeDbData4SpringController.setMethodHash(methodHash);
                 writeDbData4SpringController.setSeq(seq);
                 writeDbData4SpringController.setShowUri(showUri);

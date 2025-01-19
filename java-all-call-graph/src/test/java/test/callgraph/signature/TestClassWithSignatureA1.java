@@ -10,7 +10,7 @@ import java.util.List;
  * @date 2022/12/7
  * @description:
  */
-public class TestClassWithSignature2 extends TestAbstractClassWithSignature<TestArgument1, TestArgument2> {
+public class TestClassWithSignatureA1 extends TestAbstractClassWithSignatureA<TestArgument1, TestArgument2> {
     @Override
     public void test() {
 

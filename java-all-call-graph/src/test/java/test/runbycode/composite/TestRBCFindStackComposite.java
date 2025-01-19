@@ -20,6 +20,10 @@ public class TestRBCFindStackComposite extends TestRunByCodeBase {
     @Before
     public void initTestRBCFindStackComposite() {
         configureWrapper.setAllowAllClasses();
+    }
+
+    @Test
+    public void $test0WriteDb() {
         commonWriteDb();
     }
 
@@ -34,6 +38,8 @@ public class TestRBCFindStackComposite extends TestRunByCodeBase {
             configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName
                     + JACGConstants.FLAG_AT + currentMethodName
                     + JACGConstants.FLAG_AT + outputDetailEnum.getDetail());
+            boolean outputDetail1 = OutputDetailEnum.ODE_1 == outputDetailEnum;
+            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_SEPARATE_STACK, String.valueOf(outputDetail1));
 
             FindCallStackTrace findCallStackTrace = new FindCallStackTrace(true, configureWrapper);
             runFindCallStackTraceAndCheck(findCallStackTrace);
@@ -55,6 +61,8 @@ public class TestRBCFindStackComposite extends TestRunByCodeBase {
                         + JACGConstants.FLAG_AT + outputDetailEnum.getDetail()
                         + JACGConstants.FLAG_AT + ignoreDup
                 );
+                boolean outputDetail1 = OutputDetailEnum.ODE_1 == outputDetailEnum;
+                configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_SEPARATE_STACK, String.valueOf(outputDetail1));
 
                 FindCallStackTrace findCallStackTrace = new FindCallStackTrace(false, configureWrapper);
                 runFindCallStackTraceAndCheck(findCallStackTrace);

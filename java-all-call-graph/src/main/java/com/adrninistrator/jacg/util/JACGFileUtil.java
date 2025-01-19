@@ -299,8 +299,8 @@ public class JACGFileUtil {
      */
     public static boolean checkFileExt(String filePath, String... fileExts) {
         if (fileExts == null) {
-            // 未指定文件后缀时认为不符合
-            return false;
+            // 未指定文件后缀时认为符合
+            return true;
         }
 
         for (String fileExt : fileExts) {

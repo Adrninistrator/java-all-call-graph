@@ -59,6 +59,8 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
 
             // 创建数据库相关对象
             genDbObject(configureWrapper);
+            // 自定义初始化操作
+            customInit();
 
             List<CalleeExtractedFile> calleeExtractedFileList = new ArrayList<>(stackFilePathList.getList().size());
             for (String stackFilePath : stackFilePathList.getList()) {
@@ -76,6 +78,22 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
             // 关闭数据源
             closeDs();
         }
+    }
+
+    /**
+     * 自定义初始化操作
+     */
+    protected void customInit() {
+
+    }
+
+    /**
+     * 对处理文件某行的数据进行自定义处理
+     *
+     * @param calleeExtractedLine
+     */
+    protected void customHandleCalleeExtractedLine(CalleeExtractedLine calleeExtractedLine) {
+
     }
 
     // 处理调用堆栈文件中包含指定关键字的方法信息
@@ -132,6 +150,9 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
         calleeExtractedLine.setCallGraphLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4ee(line));
         calleeExtractedLine.setRunInOtherThread(runInOtherThread);
         calleeExtractedLine.setRunInTransaction(runInTransaction);
+
+        // 对处理文件某行的数据进行自定义处理
+        customHandleCalleeExtractedLine(calleeExtractedLine);
 
         calleeExtractedLineList.add(calleeExtractedLine);
     }

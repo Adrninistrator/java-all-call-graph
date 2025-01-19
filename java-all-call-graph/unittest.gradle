@@ -29,17 +29,6 @@ jacocoTestReport {
     }
 }
 
-/*
-    使用Gradle执行单元测试时，假如需要将日志中的输出记录到文件，使用以下命令：
-    gradlew test -Dtest.flag.record.log.to.file=1
- */
-
-/*
-    执行单元测试及代码覆盖率统计
-    gradlew test jacocoTestReport
- */
-
-
 // 将测试代码生成jar包
 task test_gen_jar(type: Jar) {
     archiveFileName.set('test.jar')
@@ -114,4 +103,10 @@ task test_gen_diff_tar_gz(type: Tar) {
     生成用于比较的示例jar包的tar.gz包
     gradlew test_gen_diff_tar_gz -Pexample_flag=1
     gradlew test_gen_diff_tar_gz -Pexample_flag=2
+
+    使用Gradle执行单元测试时，假如需要将日志中的输出记录到文件，使用以下命令：
+    gradlew test -Dtest.flag.record.log.to.file=1
+
+    执行单元测试及代码覆盖率统计
+    gradlew test jacocoTestReport
  */

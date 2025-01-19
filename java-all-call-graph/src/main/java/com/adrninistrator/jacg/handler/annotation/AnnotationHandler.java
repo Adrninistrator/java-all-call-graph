@@ -135,7 +135,8 @@ public class AnnotationHandler extends BaseHandler {
                     " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName() +
                     " where " + DC.MA_METHOD_HASH + " = ?" +
                     " and " + DC.MA_ANNOTATION_NAME + " = ?" +
-                    " and " + DC.MA_ATTRIBUTE_NAME + " = ?";
+                    " and " + DC.MA_ATTRIBUTE_NAME + " = ?" +
+                    " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
@@ -459,7 +460,8 @@ public class AnnotationHandler extends BaseHandler {
                     " where " + DC.MAA_METHOD_HASH + " = ?" +
                     " and " + DC.MAA_ARG_SEQ + " = ?" +
                     " and " + DC.MAA_ANNOTATION_NAME + " = ?" +
-                    " and " + DC.MAA_ATTRIBUTE_NAME + " = ?";
+                    " and " + DC.MAA_ATTRIBUTE_NAME + " = ?" +
+                    " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 

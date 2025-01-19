@@ -55,7 +55,7 @@ public abstract class WriteBusinessData2DbHandler extends BaseHandler implements
 
     /**
      * 选择当前类需要处理的被调用方法信息
-     * 格式为：[类名]:[方法名]
+     * 格式为：{类名}:{方法名}
      * 不需要指定方法参数
      *
      * @return

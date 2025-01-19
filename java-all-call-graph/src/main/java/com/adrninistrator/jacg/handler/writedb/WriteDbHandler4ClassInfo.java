@@ -19,8 +19,8 @@ import java.util.Set;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_CLASS_INFO,
-        minColumnNum = 4,
-        maxColumnNum = 4,
+        minColumnNum = 5,
+        maxColumnNum = 5,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_INFO
 )
 public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData4ClassInfo> {
@@ -34,21 +34,22 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
 
     @Override
     protected WriteDbData4ClassInfo genData(String[] array) {
-        String className = array[0];
+        String className = readLineData();
         // 根据类名前缀判断是否需要处理
         if (!isAllowedClassPrefix(className)) {
             return null;
         }
 
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        int accessFlags = Integer.parseInt(array[1]);
-        if (JavaCG2ByteCodeUtil.isEnumFlag(accessFlags)) {
+        int accessFlags = Integer.parseInt(readLineData());
+        if (JavaCG2ByteCodeUtil.isEnumFlag(accessFlags) && enumSimpleClassNameSet != null) {
             // 记录枚举唯一类名
             enumSimpleClassNameSet.add(simpleClassName);
         }
 
-        String classFileHash = array[2];
-        int jarNum = Integer.parseInt(array[3]);
+        String classFileHash = readLineData();
+        int jarNum = Integer.parseInt(readLineData());
+        String classPathInJar = readLineData();
 
         WriteDbData4ClassInfo writeDbData4ClassInfo = new WriteDbData4ClassInfo();
         writeDbData4ClassInfo.setRecordId(genNextRecordId());
@@ -57,6 +58,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
         writeDbData4ClassInfo.setClassName(className);
         writeDbData4ClassInfo.setClassFileHash(classFileHash);
         writeDbData4ClassInfo.setJarNum(jarNum);
+        writeDbData4ClassInfo.setClassPathInJar(classPathInJar);
 
         return writeDbData4ClassInfo;
     }
@@ -69,7 +71,8 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
                 data.getAccessFlags(),
                 data.getClassName(),
                 data.getClassFileHash(),
-                data.getJarNum()
+                data.getJarNum(),
+                data.getClassPathInJar()
         };
     }
 
@@ -79,7 +82,8 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
                 "完整类名",
                 "类的access_flags",
                 "类文件的HASH值（MD5）",
-                "类所在的Jar包序号"
+                "类所在的Jar包序号",
+                "类在jar包中的路径"
         };
     }
 

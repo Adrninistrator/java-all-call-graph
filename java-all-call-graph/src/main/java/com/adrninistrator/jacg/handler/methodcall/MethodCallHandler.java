@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -148,19 +149,22 @@ public class MethodCallHandler extends BaseHandler {
         logger.info("人工向数据库方法调用表加入数据 {}\n{}\n{}", nextMaxCallId, callerFullMethod, calleeFullMethod);
         // 人工向方法调用表写入数据，行号使用0，jar包序号使用0
         WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(
+                nextMaxCallId,
+                true,
                 JavaCG2CallTypeEnum.CTE_MANUAL_ADDED.getType(),
-                "",
                 dbOperWrapper.querySimpleClassName(callerClassName),
                 callerFullMethod,
+                JavaCG2Constants.DEFAULT_LINE_NUMBER,
+                "",
                 dbOperWrapper.querySimpleClassName(calleeClassName),
                 calleeFullMethod,
-                nextMaxCallId,
-                JavaCG2Constants.DEFAULT_LINE_NUMBER,
+                0,
                 "",
                 "",
                 "",
                 null,
-                null
+                null,
+                "人工添加的方法调用记录"
         );
         String sql = dbOperWrapper.genAndCacheInsertSql(DbTableInfoEnum.DTIE_METHOD_CALL, DbInsertMode.DIME_INSERT);
         return dbOperator.insert(sql, JACGSqlUtil.genMethodCallObjectArray(writeDbData4MethodCall));
@@ -397,26 +401,26 @@ public class MethodCallHandler extends BaseHandler {
             throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
-        List<String> noInstructionExtendsImplList = JavaCG2CallTypeEnum.getNoInstructionExtendsImplList();
+        List<String> existsInstructionList = JavaCG2CallTypeEnum.getExistsInstructionList();
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CHECK_NORMAL_MC_BY_EE_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select count(" + DC.MC_CALLEE_METHOD_HASH + ")" +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
-                    " and " + DC.MC_CALL_TYPE + " not in " + JACGSqlUtil.genQuestionString(noInstructionExtendsImplList.size());
+                    " and " + DC.MC_CALL_TYPE + " in " + JACGSqlUtil.genQuestionString(existsInstructionList.size());
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<Object> argList = new ArrayList<>();
         argList.add(calleeMethodHash);
-        argList.addAll(noInstructionExtendsImplList);
+        argList.addAll(existsInstructionList);
         Long count = dbOperator.queryObjectOneColumn(sql, Long.class, argList.toArray());
         return count != null && count > 0;
     }
 
     /**
-     * 查询方法调用中的调用方与被调用方，使用被调用方完整类名与方法（排除继承相关的方法调用）
+     * 查询存在实际指令的方法调用中的调用方与被调用方，使用被调用方完整类名与方法（排除继承相关的方法调用）
      * 被调用方法所在的jar包可能没有解析，因此不能从method_info表查询对应的方法
      *
      * @param calleeClassName  被调用方完整类名
@@ -425,11 +429,7 @@ public class MethodCallHandler extends BaseHandler {
      * @return
      */
     public List<WriteDbData4MethodCall> queryNormalMethodCallByCalleeClassMethod(String calleeClassName, String calleeMethodName, boolean queryAllColumns) {
-        if (calleeClassName == null || calleeMethodName == null) {
-            throw new JavaCG2RuntimeException("参数不允许为空");
-        }
-
-        List<String> noInstructionExtendsImplList = JavaCG2CallTypeEnum.getNoInstructionExtendsImplList();
+        List<String> existsInstructionList = JavaCG2CallTypeEnum.getExistsInstructionList();
         SqlKeyEnum sqlKeyEnum = queryAllColumns ? SqlKeyEnum.MC_QUERY_NORMAL_MC_BY_EECM_ALL_COLUMNS : SqlKeyEnum.MC_QUERY_NORMAL_MC_BY_EECM;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -438,14 +438,38 @@ public class MethodCallHandler extends BaseHandler {
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MC_CALLEE_METHOD_NAME + " = ?" +
-                    " and " + DC.MC_CALL_TYPE + " not in " + JACGSqlUtil.genQuestionString(noInstructionExtendsImplList.size());
+                    " and " + DC.MC_CALL_TYPE + " in " + JACGSqlUtil.genQuestionString(existsInstructionList.size());
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         List<Object> argList = new ArrayList<>();
         argList.add(dbOperWrapper.querySimpleClassName(calleeClassName));
         argList.add(calleeMethodName);
-        argList.addAll(noInstructionExtendsImplList);
+        argList.addAll(existsInstructionList);
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, argList.toArray());
+    }
+
+    /**
+     * 查询存在实际指令的方法调用，使用被调用方法HASH查询
+     *
+     * @param calleeMethodHash
+     * @return
+     */
+    public List<WriteDbData4MethodCall> queryNormalMethodCallByCalleeMethodHash(String calleeMethodHash) {
+        List<String> existsInstructionList = JavaCG2CallTypeEnum.getExistsInstructionList();
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_NORMAL_MC_BY_EEMH;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
+                    " and " + DC.MC_CALL_TYPE + " in " + JACGSqlUtil.genQuestionString(existsInstructionList.size());
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        List<Object> argList = new ArrayList<>();
+        argList.add(calleeMethodHash);
+        argList.addAll(existsInstructionList);
         return dbOperator.queryList(sql, WriteDbData4MethodCall.class, argList.toArray());
     }
 
@@ -529,5 +553,81 @@ public class MethodCallHandler extends BaseHandler {
             }
         }
         return methodCallList;
+    }
+
+    /**
+     * 查找指定被调用类的被调用完整方法，使用简单类名
+     *
+     * @param calleeSimpleClassName
+     * @return
+     */
+    public List<String> queryNormalCalleeFullMethodBySCN(String calleeSimpleClassName) {
+        List<String> existsInstructionList = JavaCG2CallTypeEnum.getExistsInstructionList();
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_NORMAL_CALLEE_FULL_METHOD_BY_SCN;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select distinct(" + DC.MC_CALLEE_FULL_METHOD + ")" +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.MC_CALL_TYPE + " in " + JACGSqlUtil.genQuestionString(existsInstructionList.size());
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        List<Object> argList = new ArrayList<>();
+        argList.add(calleeSimpleClassName);
+        argList.addAll(existsInstructionList);
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, argList.toArray());
+        Collections.sort(list);
+        return list;
+    }
+
+    /**
+     * 根据被调用类的简单类名查询完整类名
+     *
+     * @param calleeSimpleClassName
+     * @return
+     */
+    public String queryCalleeClassNameBySimple(String calleeSimpleClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLEE_CLASS_NAME_BY_SIMPLE;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.MC_CALLEE_FULL_METHOD +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?" +
+                    " limit 1";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        String calleeFullMethod = dbOperator.queryObjectOneColumn(sql, String.class, calleeSimpleClassName);
+        if (calleeFullMethod == null) {
+            return null;
+        }
+        return JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
+    }
+
+    /**
+     * 检查指定的方法是否存在父类/接口调用子类/实现类的情况
+     *
+     * @param callerFullMethod
+     * @return
+     */
+    public boolean checkExistsSuperCallChild(String callerFullMethod) {
+        List<String> superCallChildList = JavaCG2CallTypeEnum.getSuperCallChildList();
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_CHECK_EXISTS_SUPER_CALL_CHILD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.MC_CALLEE_FULL_METHOD +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLER_METHOD_HASH + " = ?" +
+                    " and " + DC.MC_CALL_TYPE + " in " + JACGSqlUtil.genQuestionString(superCallChildList.size()) +
+                    " limit 1";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        List<Object> argList = new ArrayList<>();
+        argList.add(JACGUtil.genHashWithLen(callerFullMethod));
+        argList.addAll(superCallChildList);
+        String calleeFullMethod = dbOperator.queryObjectOneColumn(sql, String.class, argList.toArray());
+        return calleeFullMethod != null;
     }
 }

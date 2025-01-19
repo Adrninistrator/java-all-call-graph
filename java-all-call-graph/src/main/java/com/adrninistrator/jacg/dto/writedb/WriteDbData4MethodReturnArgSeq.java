@@ -9,27 +9,26 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  */
 public class WriteDbData4MethodReturnArgSeq implements BaseWriteDbData {
 
-    private String callerMethodHash;
+    private int recordId;
+    private String methodHash;
     private int returnArgSeq;
-    private String callerFullMethod;
+    private String fullMethod;
     private int equivalentConversion;
 
-    public WriteDbData4MethodReturnArgSeq() {
+    public int getRecordId() {
+        return recordId;
     }
 
-    public WriteDbData4MethodReturnArgSeq(String callerMethodHash, int returnArgSeq, String callerFullMethod, int equivalentConversion) {
-        this.callerMethodHash = callerMethodHash;
-        this.returnArgSeq = returnArgSeq;
-        this.callerFullMethod = callerFullMethod;
-        this.equivalentConversion = equivalentConversion;
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
     }
 
-    public String getCallerMethodHash() {
-        return callerMethodHash;
+    public String getMethodHash() {
+        return methodHash;
     }
 
-    public void setCallerMethodHash(String callerMethodHash) {
-        this.callerMethodHash = callerMethodHash;
+    public void setMethodHash(String methodHash) {
+        this.methodHash = methodHash;
     }
 
     public int getReturnArgSeq() {
@@ -40,12 +39,12 @@ public class WriteDbData4MethodReturnArgSeq implements BaseWriteDbData {
         this.returnArgSeq = returnArgSeq;
     }
 
-    public String getCallerFullMethod() {
-        return callerFullMethod;
+    public String getFullMethod() {
+        return fullMethod;
     }
 
-    public void setCallerFullMethod(String callerFullMethod) {
-        this.callerFullMethod = callerFullMethod;
+    public void setFullMethod(String fullMethod) {
+        this.fullMethod = fullMethod;
     }
 
     public int getEquivalentConversion() {

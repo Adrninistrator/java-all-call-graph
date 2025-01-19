@@ -14,6 +14,12 @@ public class WriteDbData4ClassInfo implements BaseWriteDbData {
     private String className;
     private String classFileHash;
     private int jarNum;
+    private String classPathInJar;
+
+    @Override
+    public String toString() {
+        return className;
+    }
 
     public int getRecordId() {
         return recordId;
@@ -63,8 +69,11 @@ public class WriteDbData4ClassInfo implements BaseWriteDbData {
         this.jarNum = jarNum;
     }
 
-    @Override
-    public String toString() {
-        return className;
+    public String getClassPathInJar() {
+        return classPathInJar;
+    }
+
+    public void setClassPathInJar(String classPathInJar) {
+        this.classPathInJar = classPathInJar;
     }
 }

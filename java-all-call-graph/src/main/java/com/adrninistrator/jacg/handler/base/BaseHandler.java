@@ -63,7 +63,7 @@ public abstract class BaseHandler implements Closeable {
     }
 
     /**
-     * 调用该构造函数时，[会]创建新的数据源，结束前[需要]手动关闭数据库操作对象
+     * 调用该构造函数时，【会】创建新的数据源，结束前【需要】手动关闭数据库操作对象
      * 建议使用try-with-resource方式创建当前类的子类实例，保证操作结束时关闭数据源
      *
      * @param configureWrapper 配置包装类对象，不允许为null，可以为new出来的ConfigureWrapper对象
@@ -102,7 +102,7 @@ public abstract class BaseHandler implements Closeable {
     }
 
     /**
-     * 调用该构造函数时，[不会]创建新的数据源，结束前[不需要]手动关闭数据库操作对象
+     * 调用该构造函数时，【不会】创建新的数据源，结束前【不需要】手动关闭数据库操作对象
      * 在BaseHandler子类构造函数中创建其他BaseHandler子类时，建议使用该方法
      *
      * @param dbOperWrapper 已完成初始化的数据库操作包装对象

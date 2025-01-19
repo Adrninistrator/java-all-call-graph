@@ -177,7 +177,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             if (task.contains(JACGConstants.FLAG_SPACE)) {
                 String[] array = StringUtils.splitPreserveAllTokens(task, JACGConstants.FLAG_SPACE);
                 if (array.length != 2) {
-                    logger.error("指定的类名+方法名非法，格式应为 [类名]:[方法名/方法中的代码行号] [起始代码行号]-[结束代码行号] {}", task);
+                    logger.error("指定的类名+方法名非法，格式应为 {类名}:{方法名/方法中的代码行号} {起始代码行号}-{结束代码行号} {}", task);
                     return null;
                 }
 
@@ -185,7 +185,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 String right = array[1];
                 String[] arrayRight = StringUtils.splitPreserveAllTokens(right, JACGConstants.FLAG_MINUS);
                 if (arrayRight.length != 2) {
-                    logger.error("指定的行号非法，格式应为 [起始代码行号]-[结束代码行号] {}", task);
+                    logger.error("指定的行号非法，格式应为 {起始代码行号}-{结束代码行号} {}", task);
                     return null;
                 }
 
@@ -210,8 +210,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             String[] arrayLeft = StringUtils.splitPreserveAllTokens(left, JavaCG2Constants.FLAG_COLON);
             if (arrayLeft.length != 2) {
                 logger.error("配置文件 {} 中指定的类名+方法名非法\n{}\n格式应为以下之一:\n" +
-                                "1. [类名]:[方法名] （代表生成指定类指定名称方法向下的调用链）\n" +
-                                "2. [类名]:[方法中的代码行号] （代表生成指定类指定代码行号对应方法向下的调用链）",
+                                "1. {类名}:{方法名} （代表生成指定类指定名称方法向下的调用链）\n" +
+                                "2. {类名}:{方法中的代码行号} （代表生成指定类指定代码行号对应方法向下的调用链）",
                         OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, task);
                 return null;
             }
@@ -220,7 +220,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             String arg2InTask = arrayLeft[1];
 
             if (StringUtils.isAnyBlank(callerClassName, arg2InTask)) {
-                logger.error("指定的类名+方法名存在空值，格式应为 [类名]:[方法名/方法中的代码行号] {}", task);
+                logger.error("指定的类名+方法名存在空值，格式应为 {类名}:{方法名/方法中的代码行号} {}", task);
                 return null;
             }
 
@@ -699,6 +699,10 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                                                    String callerFullMethod,
                                                    String callType,
                                                    String calleeMethodHash) {
+        if (useNeo4j()) {
+            return new MethodAndHash(calleeFullMethod, calleeMethodHash);
+        }
+
         if (JavaCG2CallTypeEnum.isChildCallSuperType(callType)) {
             // 当前方法调用类型是子类调用父类方法，记录子类方法调用父类方法对应信息的栈入栈
             String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);

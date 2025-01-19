@@ -14,7 +14,7 @@ public class CallStackFileResult {
     public static CallStackFileResult FAIL = new CallStackFileResult(false, null, null);
 
     // 代表处理成功但结果为空的静态字段
-    public static CallStackFileResult EMPTY = new CallStackFileResult(true, Collections.emptyList(), Collections.emptyList());
+    public static CallStackFileResult EMPTY = new CallStackFileResult(true, null, null);
 
     // 处理是否成功
     private final boolean success;

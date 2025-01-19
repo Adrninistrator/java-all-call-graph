@@ -8,6 +8,8 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，Spring Controller信息
  */
 public class WriteDbData4SpringController implements BaseWriteDbData {
+
+    private int recordId;
     private String methodHash;
     private int seq;
     private String showUri;
@@ -18,6 +20,14 @@ public class WriteDbData4SpringController implements BaseWriteDbData {
     private String fullMethod;
     private int maybeFileUpload;
     private int maybeFileDownload;
+
+    public int getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
+    }
 
     public String getMethodHash() {
         return methodHash;

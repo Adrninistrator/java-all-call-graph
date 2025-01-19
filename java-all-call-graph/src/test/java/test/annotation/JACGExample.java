@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * @date 2024/8/24
  * @description:
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JACGExample {
 

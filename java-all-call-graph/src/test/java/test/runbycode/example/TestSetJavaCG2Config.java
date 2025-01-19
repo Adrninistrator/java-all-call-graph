@@ -21,7 +21,6 @@ public class TestSetJavaCG2Config extends TestRunByCodeBase {
     public void test() {
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = configureWrapper.genJavaCG2ConfigureWrapper();
         javaCG2ConfigureWrapper.setConfig(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.FALSE.toString());
-        javaCG2ConfigureWrapper.setConfig(JavaCG2ConfigKeyEnum.CKE_FIRST_PARSE_INIT_METHOD_TYPE, Boolean.FALSE.toString());
 
         RunnerWriteDb runnerWriteDb = new RunnerWriteDb(configureWrapper);
         Assert.assertTrue(runnerWriteDb.run(javaCG2ConfigureWrapper));

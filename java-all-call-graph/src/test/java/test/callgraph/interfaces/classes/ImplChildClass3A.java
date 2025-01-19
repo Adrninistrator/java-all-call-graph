@@ -2,6 +2,9 @@ package test.callgraph.interfaces.classes;
 
 import test.callgraph.interfaces.interfaces.InterfaceChild3;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author adrninistrator
  * @date 2022/8/31
@@ -19,6 +22,11 @@ public class ImplChildClass3A implements InterfaceChild3 {
     }
 
     @Override
+    public List<String> testChild3List() {
+        return Collections.emptyList();
+    }
+
+    @Override
     public void testSuper2() {
         System.out.println("");
     }
@@ -28,7 +36,7 @@ public class ImplChildClass3A implements InterfaceChild3 {
         System.setProperty("", "");
     }
 
-    public void test1(){
+    public void test1() {
         testSuper1();
         testSuper2();
         testSuper2D();

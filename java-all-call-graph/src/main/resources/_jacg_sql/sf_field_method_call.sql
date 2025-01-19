@@ -11,4 +11,4 @@ CREATE TABLE if not exists jacg_sf_field_method_call_{appName} (
   callee_method_name varchar(200) NOT NULL COMMENT '初始化方法被调用方法名',
   PRIMARY KEY (record_id),
   INDEX idx_sffmc_scf_{appName}(simple_class_name, field_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='static、final字段初始化方法信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='static、final字段初始化方法信息表（含枚举）';

@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 
 import java.util.Map;
 import java.util.Set;
@@ -22,8 +23,8 @@ import java.util.Set;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL,
-        minColumnNum = 10,
-        maxColumnNum = 10,
+        minColumnNum = 13,
+        maxColumnNum = 13,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL,
         dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_METHOD_ANNOTATION,
                 DbTableInfoEnum.DTIE_METHOD_ARG_GENERICS_TYPE,
@@ -87,9 +88,10 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
     @Override
     protected WriteDbData4MethodCall genData(String[] array) {
-        int callId = Integer.parseInt(array[0]);
-        String callerFullMethod = array[1];
-        String tmpCalleeFullMethod = array[2];
+        int callId = Integer.parseInt(readLineData());
+        boolean enabled = JavaCG2YesNoEnum.isYes(readLineData());
+        String callerFullMethod = readLineData();
+        String tmpCalleeFullMethod = readLineData();
 
         int indexCalleeRightBracket = tmpCalleeFullMethod.indexOf(JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG2);
         String calleeFullMethod = tmpCalleeFullMethod.substring(indexCalleeRightBracket + JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG2.length()).trim();
@@ -99,13 +101,15 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
             return null;
         }
 
-        int callerLineNum = Integer.parseInt(array[3]);
-        String callerReturnType = array[4];
-        String calleeObjType = array[5];
-        String rawReturnType = array[6];
-        String actualReturnType = array[7];
-        String callerJarNumStr = array[8];
-        String calleeJarNumStr = array[9];
+        int callerLineNum = Integer.parseInt(readLineData());
+        String callerReturnType = readLineData();
+        int calleeArrayDimensions = Integer.parseInt(readLineData());
+        String calleeObjType = readLineData();
+        String rawReturnType = readLineData();
+        String actualReturnType = readLineData();
+        String callerJarNumStr = readLineData();
+        String calleeJarNumStr = readLineData();
+        String description = readLineData();
 
         int indexCalleeLeftBracket = tmpCalleeFullMethod.indexOf(JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG1);
         String callType = tmpCalleeFullMethod.substring(indexCalleeLeftBracket + JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG1.length(), indexCalleeRightBracket);
@@ -115,19 +119,22 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         Integer calleeJarNum = (JavaCG2Constants.EMPTY_JAR_NUM.equals(calleeJarNumStr) ? null : Integer.parseInt(calleeJarNumStr));
 
         WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(
+                callId,
+                enabled,
                 callType,
-                calleeObjType,
                 dbOperWrapper.querySimpleClassName(callerClassName),
                 callerFullMethod,
-                dbOperWrapper.querySimpleClassName(calleeClassName),
-                calleeFullMethod,
-                callId,
                 callerLineNum,
                 callerReturnType,
+                dbOperWrapper.querySimpleClassName(calleeClassName),
+                calleeFullMethod,
+                calleeArrayDimensions,
+                calleeObjType,
                 rawReturnType,
                 actualReturnType,
                 callerJarNum,
-                calleeJarNum
+                calleeJarNum,
+                description
         );
 
         // 对于递归调用，写入数据库，查询时有对死循环进行处理
@@ -145,15 +152,18 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "方法调用序号，从1开始",
+                "是否启用，1:启用，0:未启用",
                 "调用方，完整方法（类名+方法名+参数）",
                 "(方法调用类型)被调用方，完整方法（类名+方法名+参数）",
                 "调用方法源代码行号",
                 "调用方法返回类型",
+                "被调用方，对象数组的维度，为0代表不是数组类型",
                 "被调用对象类型，t:调用当前实例的方法，sf:调用静态字段的方法，f:调用字段的方法，v:调用其他变量的方法",
                 "被调用方法原始的返回类型",
                 "被调用方法实际的返回类型",
                 "调用方法Jar包序号",
-                "被调用方法Jar包序号"
+                "被调用方法Jar包序号",
+                "描述信息，默认为空"
         };
     }
 

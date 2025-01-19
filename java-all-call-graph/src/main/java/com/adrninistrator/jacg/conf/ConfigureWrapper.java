@@ -178,10 +178,17 @@ public class ConfigureWrapper {
         if (strValue == null) {
             throw new JavaCG2Error("配置参数不允许为null");
         }
-        // 生成并检查主要配置参数值
-        Object value = genMainConfigValue(mainConfig, strValue);
+        Object value;
+        try {
+            // 生成并检查主要配置参数值
+            value = genMainConfigValue(mainConfig, strValue);
+        } catch (Exception e) {
+            logger.error("处理参数出现异常 {} {} {} {}", mainConfig.getFileName(), mainConfig.getConfigPrintInfo(), mainConfig.getType().getName(), strValue);
+            throw new JavaCG2Error("处理参数出现异常");
+        }
+
         if (value == null) {
-            logger.error("配置参数非法 {} {} {}", mainConfig.getFileName(), mainConfig.getConfigPrintInfo(), mainConfig.getType().getName());
+            logger.error("配置参数非法 {} {} {} {}", mainConfig.getFileName(), mainConfig.getConfigPrintInfo(), mainConfig.getType().getName(), strValue);
             throw new JavaCG2Error("配置参数非法");
         }
 
@@ -311,7 +318,6 @@ public class ConfigureWrapper {
      * @param mainConfig
      * @return
      */
-    @SuppressWarnings("unchecked")
     public <T> T getMainConfig(MainConfigInterface mainConfig) {
         return getMainConfig(mainConfig, true);
     }
@@ -369,7 +375,7 @@ public class ConfigureWrapper {
 
         if (strValue == null) {
             // 获取默认的参数值
-            strValue = getDefaultConfig(mainConfig);
+            strValue = String.valueOf(getDefaultConfig(mainConfig));
         }
         // 设置参数值，仅当useConfig为true时，才需要缓存参数值
         return (T) setMainConfig(mainConfig, strValue, useConfig);
@@ -457,22 +463,6 @@ public class ConfigureWrapper {
 
     // 生成并检查主要配置参数值
     private Object genMainConfigValue(MainConfigInterface mainConfig, String strValue) {
-        if (StringUtils.isBlank(strValue)) {
-            if (ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH == mainConfig) {
-                // 当前参数允许为空，默认为""
-                return "";
-            }
-
-            if (ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER == mainConfig
-                    || ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED == mainConfig
-                    || ConfigKeyEnum.CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP == mainConfig
-                    || ConfigKeyEnum.CKE_CALL_GRAPH_GEN_JSON_CALLER == mainConfig
-            ) {
-                // 当前参数允许为空，默认为false
-                return Boolean.FALSE;
-            }
-        }
-
         if (ConfigKeyEnum.CKE_APP_NAME == mainConfig) {
             return handleAppName(strValue);
         }
@@ -532,13 +522,7 @@ public class ConfigureWrapper {
 
     // 处理线程数
     private Integer handleThreadNum(String strThreadNum) {
-        int threadNum;
-        try {
-            threadNum = Integer.parseInt(strThreadNum);
-        } catch (NumberFormatException e) {
-            logger.error("非法线程数 {} {} {}", ConfigKeyEnum.CKE_THREAD_NUM.getFileName(), ConfigKeyEnum.CKE_THREAD_NUM.getConfigPrintInfo(), strThreadNum);
-            return null;
-        }
+        int threadNum = Integer.parseInt(strThreadNum);
         if (threadNum <= 0 || threadNum > JACGConstants.MAX_THREAD_NUM) {
             logger.error("参数配置非法\n{} {}\n应在以下范围: (0,{}]", ConfigKeyEnum.CKE_THREAD_NUM.getFileName(), ConfigKeyEnum.CKE_THREAD_NUM.getConfigPrintInfo(),
                     JACGConstants.MAX_THREAD_NUM);
@@ -575,15 +559,7 @@ public class ConfigureWrapper {
 
     // 处理批量写入数据库时每次插入的数量
     private Integer handleBatchInsertSize(String strDbBatchInsertSize) {
-        int dbInsertBatchSize;
-        try {
-            dbInsertBatchSize = Integer.parseInt(strDbBatchInsertSize);
-        } catch (NumberFormatException e) {
-            logger.error("批量写入数据库时每次插入的数量非法 {} {} {}", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(), ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getConfigPrintInfo(),
-                    strDbBatchInsertSize);
-            return null;
-        }
-
+        int dbInsertBatchSize = Integer.parseInt(strDbBatchInsertSize);
         if (dbInsertBatchSize <= 0 || dbInsertBatchSize > JACGConstants.MAX_DB_INSERT_BATCH_SIZE) {
             logger.error("参数配置非法 {} {} 应在以下范围: (0,{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(), ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getConfigPrintInfo(),
                     JACGConstants.MAX_DB_INSERT_BATCH_SIZE);
@@ -649,22 +625,22 @@ public class ConfigureWrapper {
 
     // 清空指定的参数
     private void clearMainConfig(MainConfigInterface mainConfig) {
-        if (String.class == mainConfig.getType()) {
-            mainConfigMap.put(mainConfig.getKey(), "");
-        } else if (Boolean.class == mainConfig.getType()) {
-            mainConfigMap.put(mainConfig.getKey(), Boolean.FALSE);
-        } else if (Integer.class == mainConfig.getType()) {
-            mainConfigMap.put(mainConfig.getKey(), 0);
-        }
+        // 获取默认的参数值
+        Object value = getDefaultConfig(mainConfig);
+        mainConfigMap.put(mainConfig.getKey(), value);
     }
 
     // 获取默认的参数值
-    private String getDefaultConfig(MainConfigInterface mainConfig) {
+    private Object getDefaultConfig(MainConfigInterface mainConfig) {
+        if (ConfigKeyEnum.CKE_PARSE_OTHER_TYPE_FILE == mainConfig) {
+            // 当前参数允许为空，默认为true
+            return Boolean.TRUE;
+        }
         if (Boolean.class == mainConfig.getType()) {
-            return Boolean.FALSE.toString();
-        } else if (Integer.class == mainConfig.getType()) {
-            // int默认返回1，0认为是非法值
-            return "1";
+            return Boolean.FALSE;
+        }
+        if (Integer.class == mainConfig.getType()) {
+            return 0;
         }
         return "";
     }

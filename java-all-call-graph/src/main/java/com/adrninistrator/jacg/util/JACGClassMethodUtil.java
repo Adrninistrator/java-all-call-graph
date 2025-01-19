@@ -175,7 +175,7 @@ public class JACGClassMethodUtil {
     }
 
     /**
-     * 根据[类名]:[方法名]格式的字符串获取对应的类名与方法名对象
+     * 根据{类名}:{方法名}格式的字符串获取对应的类名与方法名对象
      *
      * @param methodInfo
      * @return
@@ -183,7 +183,7 @@ public class JACGClassMethodUtil {
     public static ClassAndMethodName parseClassAndMethodName(String methodInfo) {
         String[] array = StringUtils.splitPreserveAllTokens(methodInfo, JavaCG2Constants.FLAG_COLON);
         if (array == null || array.length != 2) {
-            throw new JavaCG2RuntimeException("指定的字符串不满足[类名]:[方法名]格式 " + methodInfo);
+            throw new JavaCG2RuntimeException("指定的字符串不满足{类名}:{方法名}格式 " + methodInfo);
         }
         return new ClassAndMethodName(array[0], array[1]);
     }
@@ -243,7 +243,7 @@ public class JACGClassMethodUtil {
      * 将字符串形式的类名与方法名数组转换为对象列表形式
      *
      * @param classMethodStringArray 类名与方法名数组
-     *                               格式：[类名]:[方法名]
+     *                               格式：{类名}:{方法名}
      *                               示例：org.slf4j.Logger:error org.slf4j.Logger:info org.slf4j.Logger:warn
      * @return
      */

@@ -12,9 +12,8 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
  */
 public class WriteDbData4MethodCall implements BaseWriteDbData {
     private int callId;
-    private String callType;
-    private String calleeObjType;
     private int enabled;
+    private String callType;
     private String callerMethodHash;
     private String callerSimpleClassName;
     private String callerMethodName;
@@ -25,51 +24,61 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
     private String calleeSimpleClassName;
     private String calleeMethodName;
     private String calleeFullMethod;
-    private int callFlags = 0;
+    private int calleeArrayDimensions;
+    private String calleeObjType;
     private String rawReturnType;
     private String actualReturnType;
+    private int callFlags = 0;
     private Integer callerJarNum;
     private Integer calleeJarNum;
+    private String description;
 
     /**
      * 创建方法调用对象
      *
+     * @param callId
+     * @param enabled
      * @param callType
-     * @param calleeObjType
      * @param callerSimpleClassName
      * @param callerFullMethod
+     * @param callerLineNum
+     * @param callerReturnType
      * @param calleeSimpleClassName
      * @param calleeFullMethod
-     * @param callId
-     * @param callerLineNum
+     * @param calleeArrayDimensions
+     * @param calleeObjType
      * @param rawReturnType
      * @param actualReturnType
      * @param callerJarNum
      * @param calleeJarNum
+     * @param desc
      * @return
      */
-    public static WriteDbData4MethodCall genInstance(String callType,
-                                                     String calleeObjType,
+    public static WriteDbData4MethodCall genInstance(int callId,
+                                                     boolean enabled,
+                                                     String callType,
                                                      String callerSimpleClassName,
                                                      String callerFullMethod,
-                                                     String calleeSimpleClassName,
-                                                     String calleeFullMethod,
-                                                     int callId,
                                                      int callerLineNum,
                                                      String callerReturnType,
+                                                     String calleeSimpleClassName,
+                                                     String calleeFullMethod,
+                                                     int calleeArrayDimensions,
+                                                     String calleeObjType,
                                                      String rawReturnType,
                                                      String actualReturnType,
                                                      Integer callerJarNum,
-                                                     Integer calleeJarNum
+                                                     Integer calleeJarNum,
+                                                     String desc
     ) {
         String callerMethodHash = JACGUtil.genHashWithLen(callerFullMethod);
         String callerMethodName = JACGClassMethodUtil.getMethodNameFromFull(callerFullMethod);
 
         WriteDbData4MethodCall writeDbData4MethodCall = new WriteDbData4MethodCall();
         writeDbData4MethodCall.setCallId(callId);
+        writeDbData4MethodCall.setEnabled(enabled ? JavaCG2YesNoEnum.YES.getIntValue() : JavaCG2YesNoEnum.NO.getIntValue());
         writeDbData4MethodCall.setCallType(callType);
         writeDbData4MethodCall.setCalleeObjType(calleeObjType);
-        writeDbData4MethodCall.setEnabled(JavaCG2YesNoEnum.YES.getIntValue());
         writeDbData4MethodCall.setCallerMethodHash(callerMethodHash);
         writeDbData4MethodCall.setCallerSimpleClassName(callerSimpleClassName);
         writeDbData4MethodCall.setCallerMethodName(callerMethodName);
@@ -83,11 +92,12 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
         writeDbData4MethodCall.setCalleeSimpleClassName(calleeSimpleClassName);
         writeDbData4MethodCall.setCalleeMethodName(calleeMethodName);
         writeDbData4MethodCall.setCalleeFullMethod(calleeFullMethod);
+        writeDbData4MethodCall.setCalleeArrayDimensions(calleeArrayDimensions);
         writeDbData4MethodCall.setRawReturnType(rawReturnType);
         writeDbData4MethodCall.setActualReturnType(actualReturnType);
         writeDbData4MethodCall.setCallerJarNum(callerJarNum);
         writeDbData4MethodCall.setCalleeJarNum(calleeJarNum);
-
+        writeDbData4MethodCall.setDescription(desc);
         return writeDbData4MethodCall;
     }
 
@@ -100,28 +110,20 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
         this.callId = callId;
     }
 
-    public String getCallType() {
-        return callType;
-    }
-
-    public void setCallType(String callType) {
-        this.callType = callType;
-    }
-
-    public String getCalleeObjType() {
-        return calleeObjType;
-    }
-
-    public void setCalleeObjType(String calleeObjType) {
-        this.calleeObjType = calleeObjType;
-    }
-
     public int getEnabled() {
         return enabled;
     }
 
     public void setEnabled(int enabled) {
         this.enabled = enabled;
+    }
+
+    public String getCallType() {
+        return callType;
+    }
+
+    public void setCallType(String callType) {
+        this.callType = callType;
     }
 
     public String getCallerMethodHash() {
@@ -204,12 +206,20 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
         this.calleeFullMethod = calleeFullMethod;
     }
 
-    public int getCallFlags() {
-        return callFlags;
+    public int getCalleeArrayDimensions() {
+        return calleeArrayDimensions;
     }
 
-    public void setCallFlags(int callFlags) {
-        this.callFlags = callFlags;
+    public void setCalleeArrayDimensions(int calleeArrayDimensions) {
+        this.calleeArrayDimensions = calleeArrayDimensions;
+    }
+
+    public String getCalleeObjType() {
+        return calleeObjType;
+    }
+
+    public void setCalleeObjType(String calleeObjType) {
+        this.calleeObjType = calleeObjType;
     }
 
     public String getRawReturnType() {
@@ -228,6 +238,14 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
         this.actualReturnType = actualReturnType;
     }
 
+    public int getCallFlags() {
+        return callFlags;
+    }
+
+    public void setCallFlags(int callFlags) {
+        this.callFlags = callFlags;
+    }
+
     public Integer getCallerJarNum() {
         return callerJarNum;
     }
@@ -242,6 +260,14 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
 
     public void setCalleeJarNum(Integer calleeJarNum) {
         this.calleeJarNum = calleeJarNum;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override

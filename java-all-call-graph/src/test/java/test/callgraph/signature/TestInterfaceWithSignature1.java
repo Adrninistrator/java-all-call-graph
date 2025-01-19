@@ -7,7 +7,7 @@ import java.util.List;
  * @date 2022/12/7
  * @description:
  */
-public interface TestInterfaceWithSignature<T1, T2> {
+public interface TestInterfaceWithSignature1<T1, T2> {
     void test();
 
     T2 test2(T1 t1);

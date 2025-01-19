@@ -509,8 +509,8 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
      * @param mapperClassName
      * @param mapperMethodName
      * @param mapperFullMethod
-     * @param myBatisMapperArgAndParamDbInfoList4Where 不允许为空，保存参数在where子句中对应的字段信息，下标与参数序号相同
-     * @param myBatisMapperArgAndParamDbInfoList4Set   允许为空，非空时保存参数在update set子句中对应的字段信息，下标与参数序号相同
+     * @param myBatisMapperArgAndParamDbInfoList4Where 不允许为空，保存参数在where子句中对应的字段信息，序号与参数序号相同
+     * @param myBatisMapperArgAndParamDbInfoList4Set   允许为空，非空时保存参数在update set子句中对应的字段信息，序号与参数序号相同
      * @return
      */
     public List<AbstractMyBatisMapperArg> queryParamDbInfo4MyBatisMapperMethod(String mapperClassName, String mapperMethodName, String mapperFullMethod,

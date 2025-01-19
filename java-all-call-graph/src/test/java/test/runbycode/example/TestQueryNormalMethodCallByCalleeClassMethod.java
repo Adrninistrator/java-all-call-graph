@@ -15,7 +15,7 @@ import java.util.List;
  * @description:
  */
 @JACGExample(title = "查询方法被直接调用的情况",
-        desc = {"对于指定的类名及方法名，查询这些方法在其他方法中被直接调用的情况",
+        desc = {"对于指定的类名及方法名，查询这些方法在其他方法中被直接调用的情况（字节码中存在对应的方法调用指令）",
                 "查询结果包含相关的调用方法与被调用方法的详情信息"}
 )
 public class TestQueryNormalMethodCallByCalleeClassMethod extends TestRunByCodeBase {

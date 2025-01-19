@@ -9,7 +9,7 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 /**
  * @author adrninistrator
  * @date 2023/8/4
- * @description: 写入数据库，static、final字段初始化方法信息
+ * @description: 写入数据库，static、final字段初始化方法信息（含枚举）
  */
 @JACGWriteDbHandler(
         readFile = true,

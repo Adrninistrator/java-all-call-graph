@@ -57,4 +57,8 @@ public class TestMethodReturnGenericsType1 {
     public List<char[]> test9() {
         return null;
     }
+
+    public Map<String, Map<String, List<Boolean>>> test10() {
+        return null;
+    }
 }

@@ -2,7 +2,7 @@ CREATE TABLE if not exists jacg_method_catch_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
   simple_class_name varchar(255) NOT NULL COMMENT '唯一类名',
-  method_name varchar(200) NOT NULL COMMENT '方法名称',
+  method_name varchar(300) NOT NULL COMMENT '方法名称',
   simple_catch_exception_type varchar(255) NOT NULL COMMENT 'catch捕获的异常类型唯一类名',
   catch_exception_type varchar(255) NOT NULL COMMENT 'catch捕获的异常类型',
   catch_flag varchar(20) NOT NULL COMMENT 'catch标志，switch: 编译器为switch生成的catch代码块，try-with-resource: 编译器为try-with-resource生成的catch代码块',

@@ -31,6 +31,7 @@ public class Neo4jWriteDbHandler4MethodInfo extends WriteDbHandler4MethodInfo {
     protected Object transferNeo4jDomain(WriteDbData4MethodInfo data) {
         JACGMethodInfo jacgMethodInfo = new JACGMethodInfo();
         jacgMethodInfo.setAppName(appName);
+        jacgMethodInfo.setRecordId(data.getRecordId());
         jacgMethodInfo.setMethodHash(data.getMethodHash());
         jacgMethodInfo.setSimpleClassName(data.getSimpleClassName());
         jacgMethodInfo.setAccessFlags(data.getAccessFlags());

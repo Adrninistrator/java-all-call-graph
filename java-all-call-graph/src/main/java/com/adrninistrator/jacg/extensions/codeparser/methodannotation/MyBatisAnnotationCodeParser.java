@@ -51,6 +51,7 @@ public class MyBatisAnnotationCodeParser implements MethodAnnotationParser {
             return;
         }
         MethodCall methodCall = new MethodCall();
+        methodCall.setEnabled(true);
         methodCall.setCallerClassName(callerClassName);
         methodCall.setCallerMethodName(callerMethodName);
         methodCall.setCallerMethodArgTypes(callerMethodArgs);

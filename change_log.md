@@ -4,25 +4,25 @@
 
 ### 1.1.1. 支持使用本地文件数据库
 
-支持使用本地文件形式的H2数据库，可不依赖外部的其他数据库，可在无法连接其他数据库（如MySQL）的环境中运行
+支持使用本地文件形式的 H2 数据库，可不依赖外部的其他数据库，可在无法连接其他数据库（如 MySQL）的环境中运行
 
-H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details/108029222](https://blog.csdn.net/a82514921/article/details/108029222)
+H2 数据库使用说明可参考 [https://blog.csdn.net/a82514921/article/details/108029222](https://blog.csdn.net/a82514921/article/details/108029222)
 
-本工具生成的H2数据库中，schema为“jacg”
+本工具生成的 H2 数据库中，schema 为“jacg”
 
 ### 1.1.2. 支持对目录进行处理
 
-除了支持对jar/war包进行处理外，也支持对目录中的class、jar/war文件进行处理
+除了支持对 jar/war 包进行处理外，也支持对目录中的 class、jar/war 文件进行处理
 
-支持指定一个或多个jar/war包，或一个或多个目录，或jar/war包与目录混合进行处理
+支持指定一个或多个 jar/war 包，或一个或多个目录，或 jar/war 包与目录混合进行处理
 
-该功能在java-callgraph2中实现，通过本工具的config.properties配置文件中的call.graph.jar.list参数进行配置
+该功能在 java-callgraph2 中实现，通过本工具的 config.properties 配置文件中的 call.graph.jar.list 参数进行配置
 
-可参考[https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)
+可参考 [https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)
 
 ### 1.1.3. 支持插件功能
 
-提供用于生成Java方法UML时序图的插件功能
+提供用于生成 Java 方法 UML 时序图的插件功能
 
 ## 1.2. (0.6.7)
 
@@ -36,28 +36,28 @@ H2数据库使用说明可参考[https://blog.csdn.net/a82514921/article/details
 
 ### 1.2.2. 提供处理方法上的注解信息的插件功能
 
-在method_annotation_handler.properties配置文件中，可以定义用于对方法上的注解进行处理的类完整类名，该文件每行指定一项配置，可指定多行
+在 method_annotation_handler.properties 配置文件中，可以定义用于对方法上的注解进行处理的类完整类名，该文件每行指定一项配置，可指定多行
 
-对方法上的注解进行处理的类需要继承自com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler，并实现以下方法
+对方法上的注解进行处理的类需要继承自 com.adrninistrator.jacg.extensions.annotation_handler.AbstractAnnotationHandler，并实现以下方法
 
 |方法名|方法作用|
 |---|---|
 |checkHandleAnnotation|判断当前类是否处理对应的注解|
 |handleAnnotation|返回方法上的注解处理后的结果|
 
-本工具在生成方法完整调用链时，会先遍历method_annotation_handler.properties配置文件中指定所有的AbstractAnnotationHandler子类，即对方法上的注解进行处理的类，调用checkHandleAnnotation判断当前类是否会处理的注解，若是则调用handleAnnotation方法获取处理后的注解信息。
+本工具在生成方法完整调用链时，会先遍历 method_annotation_handler.properties 配置文件中指定所有的 AbstractAnnotationHandler 子类，即对方法上的注解进行处理的类，调用 checkHandleAnnotation 判断当前类是否会处理的注解，若是则调用 handleAnnotation 方法获取处理后的注解信息。
 
-最后会调用默认的方法注解处理类com.adrninistrator.jacg.extensions.annotation_handler.DefaultAnnotationHandler进行处理，该类会处理所有的注解，生成的注解信息格式为“@注解类名”，例如“@org.aspectj.lang.annotation.Around”
+最后会调用默认的方法注解处理类 com.adrninistrator.jacg.extensions.annotation_handler.DefaultAnnotationHandler 进行处理，该类会处理所有的注解，生成的注解信息格式为“@注解类名”，例如“@org.aspectj.lang.annotation.Around”
 
 `假如一个方法上存在多个注解，则每个注解的信息会按照注解类名升序排序后，依次拼接在方法信息后`
 
-DefaultAnnotationHandler类不需要在method_annotation_handler.properties配置文件中指定
+DefaultAnnotationHandler 类不需要在 method_annotation_handler.properties 配置文件中指定
 
-### 1.2.3. 支持显示Spring MVC的@RequestMapping等注解中的路径信息
+### 1.2.3. 支持显示 Spring MVC 的@RequestMapping 等注解中的路径信息
 
-本工具提供了获取Spring MVC的@RequestMapping等注解中的路径信息的处理类，为com.adrninistrator.jacg.extensions.annotation_handler.SpringMvcRequestMappingHandler，该类已在method_annotation_handler.properties配置文件中指定
+本工具提供了获取 Spring MVC 的@RequestMapping 等注解中的路径信息的处理类，为 com.adrninistrator.jacg.extensions.annotation_handler.SpringMvcRequestMappingHandler，该类已在 method_annotation_handler.properties 配置文件中指定
 
-SpringMvcRequestMappingHandler类会获取类及方法上的@RequestMapping注解（或包含了该注解的其他注解）的路径信息，生成的注解信息格式为“@注解类名("/类注解中的path/方法注解中的path")”
+SpringMvcRequestMappingHandler 类会获取类及方法上的@RequestMapping 注解（或包含了该注解的其他注解）的路径信息，生成的注解信息格式为“@注解类名 ("/类注解中的 path/方法注解中的 path")”
 
 ```java
 @Controller
@@ -71,7 +71,7 @@ public class TestController {
 }
 ```
 
-例如存在以上方法，则在生成的向上方法完整调用链中，TestController.test1()方法及相关的注解信息输出内容如下：
+例如存在以上方法，则在生成的向上方法完整调用链中，TestController.test1() 方法及相关的注解信息输出内容如下：
 
 ```
 [0]#org.slf4j.Logger:info
@@ -91,7 +91,7 @@ public class TestRest2Controller {
 }
 ```
 
-例如存在以上方法，则在生成的向上方法完整调用链中，TestRest2Controller.post()方法及相关的注解信息输出内容如下：
+例如存在以上方法，则在生成的向上方法完整调用链中，TestRest2Controller.post() 方法及相关的注解信息输出内容如下：
 
 ```
 [0]#org.slf4j.Logger:info
@@ -100,7 +100,7 @@ public class TestRest2Controller {
 
 ## 1.3. (0.7.0)
 
-支持通过Java代码对参数配置进行设置，可覆盖配置文件中的参数（或仅使用Java代码中设置的参数，不使用配置文件中的参数）
+支持通过 Java 代码对参数配置进行设置，可覆盖配置文件中的参数（或仅使用 Java 代码中设置的参数，不使用配置文件中的参数）
 
 可通过以下类的方法对参数配置进行设置
 
@@ -108,21 +108,21 @@ public class TestRest2Controller {
 com.adrninistrator.jacg.conf.ConfigureWrapper
 ```
 
-在执行释放到项目中的test.jacg包中的入口类（如TestRunnerWriteDb），或执行jar包中com.adrninistrator.jacg.runner包中的入口类（如RunnerWriteDb）之前，需要先调用ConfigureWrapper类的方法设置参数配置
+在执行释放到项目中的 test.jacg 包中的入口类（如 TestRunnerWriteDb），或执行 jar 包中 com.adrninistrator.jacg.runner 包中的入口类（如 RunnerWriteDb）之前，需要先调用 ConfigureWrapper 类的方法设置参数配置
 
-以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中调用了ConfigureWrapper类的方法
+以下可参考`test.run_by_code`包中的测试代码，在`TestRunByCodeBase`类中调用了 ConfigureWrapper 类的方法
 
-### 1.3.1. 设置_jacg_config/config.properties配置文件参数
+### 1.3.1. 设置_jacg_config/config.properties 配置文件参数
 
 ```java
 ConfigureWrapper.addConfig(ConfigKeyEnum configKeyEnum, String value);
 ```
 
-`对于app.name参数，在以上方法中会将参数值中的-替换为_`
+`对于 app.name 参数，在以上方法中会将参数值中的-替换为_`
 
-ConfigKeyEnum枚举类中定义了_jacg_config/config.properties配置文件中的参数key
+ConfigKeyEnum 枚举类中定义了_jacg_config/config.properties 配置文件中的参数 key
 
-通过value参数指定需要设置的参数值
+通过 value 参数指定需要设置的参数值
 
 示例如下：
 
@@ -130,15 +130,15 @@ ConfigKeyEnum枚举类中定义了_jacg_config/config.properties配置文件中�
 ConfigureWrapper.addConfig(ConfigKeyEnum.CKE_APPNAME, "test_rbc");
 ```
 
-### 1.3.2. 设置_jacg_config、_jacg_extensions目录配置文件参数
+### 1.3.2. 设置_jacg_config、_jacg_extensions 目录配置文件参数
 
 ```java
 ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum otherConfigFileUseSetEnum, Set<String> configSet);
 ```
 
-OtherConfigFileUseSetEnum枚举类中定义了_jacg_config目录中其他配置文件的文件名，以及_jacg_extensions目录中的配置文件名
+OtherConfigFileUseSetEnum 枚举类中定义了_jacg_config 目录中其他配置文件的文件名，以及_jacg_extensions 目录中的配置文件名
 
-通过configSet参数指定需要设置的Set类型的参数值
+通过 configSet 参数指定需要设置的 Set 类型的参数值
 
 示例如下：
 
@@ -149,15 +149,15 @@ ConfigureWrapper.addOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IN_ALLOWED_C
         "java.")));
 ```
 
-### 1.3.3. 设置_jacg_find_keyword目录配置文件参数
+### 1.3.3. 设置_jacg_find_keyword 目录配置文件参数
 
 ```java
 ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum otherConfigFileUseListEnum, List<String> configList);
 ```
 
-OtherConfigFileUseListEnum枚举类中定义了_jacg_find_keyword目录中配置文件的文件名
+OtherConfigFileUseListEnum 枚举类中定义了_jacg_find_keyword 目录中配置文件的文件名
 
-通过configList参数指定需要设置的List类型的参数值
+通过 configList 参数指定需要设置的 List 类型的参数值
 
 示例如下：
 
@@ -169,7 +169,7 @@ ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWO
 
 - 支持人工添加缺失的方法调用关系（定制化代码开发）
 
-请查看[extensions.md](extensions.md)，搜索“人工添加缺失的方法调用关系（定制化代码开发）”
+请查看 [extensions.md](extensions.md)，搜索“人工添加缺失的方法调用关系（定制化代码开发）”
 
 ## 1.5. (0.7.3)
 
@@ -210,7 +210,7 @@ Test1:test(java.lang.String)
 [类名]:[代码行号]
 ```
 
-[代码行号]可指定某个方法对应的任意代码行号，如C:f1()方法代码起止行号范围为[100,203]，则可指定以上范围的任意数字代表需要处理C:f1()方法
+[代码行号] 可指定某个方法对应的任意代码行号，如 C:f1() 方法代码起止行号范围为 [100,203]，则可指定以上范围的任意数字代表需要处理 C:f1() 方法
 
 示例如下：
 
@@ -226,9 +226,9 @@ Test1:234
 
 ### 1.5.5. 生成配置文件中的任务信息与结果文件的映射关系
 
-每次生成方法调用链后，会在本次生成的目录中创建_mapping.txt文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
+每次生成方法调用链后，会在本次生成的目录中创建_mapping.txt 文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
 
-该文件内容包含两列，以“\t”进行分隔，第1列为配置文件中指定的任务信息，第2列为生成结果文件路径，内容如下所示：
+该文件内容包含两列，以“\t”进行分隔，第 1 列为配置文件中指定的任务信息，第 2 列为生成结果文件路径，内容如下所示：
 
 ```
 # 配置文件中指定的任务信息	生成结果文件路径
@@ -251,7 +251,7 @@ RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 ## 1.7. (0.7.5)
 
-修复处理类或方法上注解信息时的bug
+修复处理类或方法上注解信息时的 bug
 
 ## 1.8. (0.7.7)
 
@@ -261,7 +261,7 @@ RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 在配置文件`_jacg_config/o_g4caller_entry_method.properties`中增加了参数`ignore.dup.callee.in.one.caller`
 
-生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略，值为true/false
+生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含自定义数据），是否需要忽略，值为 true/false
 
 仅当开关为开时会忽略
 
@@ -269,41 +269,41 @@ RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 - 支持不释放配置文件
 
-尝试读取jar包中的配置文件，相关的配置文件可以不释放到项目中，可以通过Java代码对配置参数进行设置（进行二次开发时可能需要使用）。
+尝试读取 jar 包中的配置文件，相关的配置文件可以不释放到项目中，可以通过 Java 代码对配置参数进行设置（进行二次开发时可能需要使用）。
 
 - 支持指定存在多个实现类时是否当前文件中继续生成调用链
 
 在配置文件`_jacg_config/o_g4caller_entry_method.properties`中增加了参数`multi.impl.gen.in.current.file`
 
-生成向下的调用链时，若接口或父类存在多个实现类或子类，对于接口或父类方法调用多个实现类或子类方法的调用关系，是否需要在当前文件中继续生成，值为true/false
+生成向下的调用链时，若接口或父类存在多个实现类或子类，对于接口或父类方法调用多个实现类或子类方法的调用关系，是否需要在当前文件中继续生成，值为 true/false
 
 当开关为开时，以上调用关系会在当前文件中继续生成
 
-当开关为关时，以上调用关系会在单独的目录中生成，目录名格式为“[接口或父类名]@[方法名]@[完整方法名HASH+长度]”，文件名格式为“[实现类或子类名]@[方法名]@[完整方法名HASH+长度].txt”；原始方法调用链对应的文件中，会记录当前方法调用接口或父类方法的调用关系，使用特殊的标记，格式为“!ext_data!JUMP_MULTI_IMPL@[接口或父类名]@[方法名]@[完整方法名HASH+长度]”
+当开关为关时，以上调用关系会在单独的目录中生成，目录名格式为“[接口或父类名]@[方法名]@[完整方法名 HASH+长度]”，文件名格式为“[实现类或子类名]@[方法名]@[完整方法名 HASH+长度].txt”；原始方法调用链对应的文件中，会记录当前方法调用接口或父类方法的调用关系，使用特殊的标记，格式为“!ext_data!JUMP_MULTI_IMPL@[接口或父类名]@[方法名]@[完整方法名 HASH+长度]”
 
 默认值为开
 
-例如TestMulti.test1()方法中调用了Interface1接口的f1()方法，Interface1接口存在实现类ImplClass1、ImplClass2；
+例如 TestMulti.test1() 方法中调用了 Interface1 接口的 f1() 方法，Interface1 接口存在实现类 ImplClass1、ImplClass2；
 
-当以上开关为开时，Interface1.f1()方法调用ImplClass1.f1()、ImplClass2.f1()方法的调用关系会继续在TestMulti.test1()方法对应文件中生成；
+当以上开关为开时，Interface1.f1() 方法调用 ImplClass1.f1()、ImplClass2.f1() 方法的调用关系会继续在 TestMulti.test1() 方法对应文件中生成；
 
 当以上开关为关时，生成文件情况如下
 
-TestMulti.test1()方法对应文件中调用Interface1.f1()方法的信息如下：
+TestMulti.test1() 方法对应文件中调用 Interface1.f1() 方法的信息如下：
 
 ```
 [1]#  [TestMulti:22]	test.call_graph.implement.Interface1:f1	!ext_data!JUMP_MULTI_IMPL@Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029
 ```
 
-生成Interface1.f1()方法对应的目录，目录名为“Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029”
+生成 Interface1.f1() 方法对应的目录，目录名为“Interface1@f1@ix-_NHnAUilDstHxNyrtxQ#029”
 
-在以上目录中，分别生成ImplClass1.f1()、ImplClass2.f1()方法对应的保存调用链的文件，文件名为“ImplClass1@f1@28XJlqE5etyRh1WH_e_DLQ#029.txt”、“ImplClass2@f1@FixDUSOINEA0qji9Np3baA#029.txt”
+在以上目录中，分别生成 ImplClass1.f1()、ImplClass2.f1() 方法对应的保存调用链的文件，文件名为“ImplClass1@f1@28XJlqE5etyRh1WH_e_DLQ#029.txt”、“ImplClass2@f1@FixDUSOINEA0qji9Np3baA#029.txt”
 
 - 支持指定配置文件路径
 
-支持通过JVM参数"input.root.path"指定"_jacg_config"、"_jacg_extensions"、"_jacg_find_keyword"、"_jacg_sql"等配置文件目录所在的路径，参数结尾可不指定目录分隔符"/"或"\"
+支持通过 JVM 参数"input.root.path"指定"_jacg_config"、"_jacg_extensions"、"_jacg_find_keyword"、"_jacg_sql"等配置文件目录所在的路径，参数结尾可不指定目录分隔符"/"或"\"
 
-例如以上配置文件目录均在"C:/test"目录中，则可在JVM参数中通过以下方式指定
+例如以上配置文件目录均在"C:/test"目录中，则可在 JVM 参数中通过以下方式指定
 
 ```
 -Dinput.root.path=C:/test
@@ -313,23 +313,23 @@ TestMulti.test1()方法对应文件中调用Interface1.f1()方法的信息如下
 
 在以前的版本中，假如某个类的方法没有被其他类调用，则不支持为其生成向上或向下的方法完整调用链；在当前版本中进行了支持
 
-- 方法循环调用Bug处理
+- 方法循环调用 Bug 处理
 
 在以前的版本中，生成向上或向下的方法完整调用链时，假如出现方法循环调用，在方法循环调用之后的方法调用可能不会生成出来；在当前版本进行了处理
 
 - 支持指定指定批量写入数据库时每次插入的数量
 
-支持通过JVM参数"db.insert.batch.size"指定批量向数据库写入数据时，每次执行插入操作时的记录数量；可用于查找出现重复的注解信息
+支持通过 JVM 参数"db.insert.batch.size"指定批量向数据库写入数据时，每次执行插入操作时的记录数量；可用于查找出现重复的注解信息
 
 - 超长注解属性进行截取
 
-在向数据库注解信息表写入数据时，假如注解属性太长，会进行截止，最多保留3000字符，避免写入数据库失败
+在向数据库注解信息表写入数据时，假如注解属性太长，会进行截止，最多保留 3000 字符，避免写入数据库失败
 
-- 支持在MySQL中保留多个版本的表
+- 支持在 MySQL 中保留多个版本的表
 
-在创建数据库表的sql语句中，将索引名称修改为增加了`app.name`参数（需要重新释放相关文件到项目中）
+在创建数据库表的 sql 语句中，将索引名称修改为增加了`app.name`参数（需要重新释放相关文件到项目中）
 
-假如需要在MySQL中保留多个版本的数据库表，可在每次执行时使用不同的`app.name`参数，使创建的数据库表名不同，能够保留多个版本的表（以前的版本索引名称使用固定值，在MySQL中不能重复创建）
+假如需要在 MySQL 中保留多个版本的数据库表，可在每次执行时使用不同的`app.name`参数，使创建的数据库表名不同，能够保留多个版本的表（以前的版本索引名称使用固定值，在 MySQL 中不能重复创建）
 
 ## 1.9. (0.7.8)
 
@@ -367,7 +367,7 @@ GenSingleCallGraph
 
 - 修改目录开头的字符
 
-由于字符“\~”在Excel中会被显示为-，因此将目录开头的，以及其他配置文件中的字符从“\~”修改为“_”
+由于字符“\~”在 Excel 中会被显示为-，因此将目录开头的，以及其他配置文件中的字符从“\~”修改为“_”
 
 ## 1.10. (0.7.9)
 
@@ -379,17 +379,17 @@ GenSingleCallGraph
 
 - 支持每次执行任务使用独立的配置信息
 
-支持通过Java代码调用时，每次执行任务使用独立的配置信息（ConfigureWrapper类变成非静态方式使用），可支持多个任务并行执行（适用于在Web项目中使用java-all-call-graph的场景）
+支持通过 Java 代码调用时，每次执行任务使用独立的配置信息（ConfigureWrapper 类变成非静态方式使用），可支持多个任务并行执行（适用于在 Web 项目中使用 java-all-call-graph 的场景）
 
-## 1.12. (1.0.1)临时说明
+## 1.12. (1.0.1)
 
 ### 1.12.1. 支持获取方法调用中使用的参数值、被调用对象类型等
 
 参数信息在数据库表`method_call_info`
 
-假如需要使方法完整调用链文件中显示方法调用的参数信息，可修改配置文件`_jacg_config/config.properties`，指定`caller.show.raw.method.call.info`参数值为true
+假如需要使方法完整调用链文件中显示方法调用的参数信息，可修改配置文件`_jacg_config/config.properties`，指定`caller.show.raw.method.call.info`参数值为 true
 
-在方法完整调用链最后一列（使用"\t"分隔），为方法调用中使用的参数值、被调用对象类型等信息，以`!ext_data!method_call_info@`开头，为JSON字符串格式，各个key说明如下：
+在方法完整调用链最后一列（使用"\t"分隔），为方法调用中使用的参数值、被调用对象类型等信息，以`!ext_data!method_call_info@`开头，为 JSON 字符串格式，各个 key 说明如下：
 
 |key|含义|
 |---|---|
@@ -463,7 +463,7 @@ testString(s2);
 
 - 数据源修改
 
-使用的数据源由c3p0修改为druid
+使用的数据源由 c3p0 修改为 druid
 
 - 新增依赖组件
 
@@ -478,7 +478,7 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 
 删除配置文件`_jacg_config/config.properties`中的参数`call.graph.jar.list`，使用新的配置文件`i_jar_dir.properties`
 
-删除RunnerGenAllGraph4CallerSupportIgnore相关类，固定支持忽略特定的调用关系
+删除 RunnerGenAllGraph4CallerSupportIgnore 相关类，固定支持忽略特定的调用关系
 
 数据库相关配置文件拆分，`config_db.properties`
 
@@ -490,10 +490,10 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 |---|---|
 |output.root.path|生成文件的根目录|
 |db.insert.batch.size|批量写入数据库时每次插入的数量|
-|check.jar.file.updated|检查jar包文件是否有更新|
+|check.jar.file.updated|检查 jar 包文件是否有更新|
 |caller.show.raw.method.call.info|生成向下的方法完整调用链时，是否显示原始方法调用信息|
 
-删除参数PROPERTY_OUTPUT_ROOT_PATH，改到配置文件中
+删除参数 PROPERTY_OUTPUT_ROOT_PATH，改到配置文件中
 以上参数的说明需要删除
 
 删除参数`write.config.in.result`
@@ -512,9 +512,9 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 
 `ignore_class_keyword.properties`、`ignore_full_method_prefix.properties`、`ignore_method_prefix.properties`，这三个配置文件，支持在生成向上/向下的方法完整调用链时忽略指定的类或方法（以前的配置文件只支持生成向下的方法完整调用链时忽略）
 
-假如以依赖jar包形式使用java-all-call-graph，可不再执行UnzipFile类释放配置文件到项目中，会使用jar包中配置文件的默认参数值，可通过Java代码对配置参数进行修改
+假如以依赖 jar 包形式使用 java-all-call-graph，可不再执行 UnzipFile 类释放配置文件到项目中，会使用 jar 包中配置文件的默认参数值，可通过 Java 代码对配置参数进行修改
 
-释放java-callgraph2配置文件`_javacg_config/config.properties`
+释放 java-callgraph2 配置文件`_javacg_config/config.properties`
 
 #### 1.12.3.1. 生成当前使用的配置信息到单独的文件
 
@@ -532,7 +532,7 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 
 ### 1.12.4. 生成文件修改
 
-不再生成_mapping.txt文件（删除说明）
+不再生成_mapping.txt 文件（删除说明）
 
 ### 1.12.5. 数据库表
 
@@ -542,7 +542,7 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 
 数据库表加前缀"jacg_"
 
-### 1.12.6. 支持更准确地获取方法调用关系（支持Spring Bean）
+### 1.12.6. 支持更准确地获取方法调用关系（支持 Spring Bean）
 
 #### 1.12.6.1. 支持处理方法调用被调用对象及参数信息
 
@@ -558,51 +558,51 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 
 #### 1.12.8.2. 生成方法调用链文件耗时太长的辅助信息
 
-## 1.13. (1.0.14)临时说明
+## 1.13. (1.0.14)
 
 配置文件`_jacg_config/config.properties`参数`call.graph.output.detail`增加`0: 最详细 完整类名+方法名+方法参数+返回类型`，可以在生成的方法完整调用链结果文件中显示方法的返回类型
 
 配置文件`_jacg_business_data_type/business_data_type_show_4ee.properties`、`_jacg_business_data_type/business_data_type_show_4er.properties`增加可以使用的参数`method_return_generics_type`，指定以上参数时，在生成向上/向下的方法完整调用链结果文件时，显示方法返回类型中涉及集合的泛型类型
 
-## 1.14. (1.0.15)临时说明
+## 1.14. (1.0.15)
 
-支持Spring Controller类上只有@Controller类注解，没有@RequestMapping类注解情况的情况
+支持 Spring Controller 类上只有@Controller 类注解，没有@RequestMapping 类注解情况的情况
 
-## 1.15. (2.0.0)临时说明
+## 1.15. (2.0.0)
 
-支持识别通过dto的get/set方法关联的字段关联关系
+支持识别通过 dto 的 get/set 方法关联的字段关联关系
 
-## 1.16. (2.0.1)临时说明
+## 1.16. (2.0.1)
 
 支持处理类的签名中的泛型信息
 
-## 1.17. (2.0.2)临时说明
+## 1.17. (2.0.2)
 
 支持处理类的签名中继承或实现的泛型关系
 
-## 1.18. (2.0.3)临时说明
+## 1.18. (2.0.3)
 
-支持将java-callgraph2生成的文件的数据保存到Neo4j图数据库
+支持将 java-callgraph2 生成的文件的数据保存到 Neo4j 图数据库
 
-支持读取Neo4j保存的方法调用数据，生成向下的完整方法调用链
+支持读取 Neo4j 保存的方法调用数据，生成向下的完整方法调用链
 
-## 1.19. (2.0.4)临时说明
+## 1.19. (2.0.4)
 
 增加数据库表记录类之间的引用关系
 
-## 1.20. (2.0.5)临时说明
+## 1.20. (2.0.5)
 
 增加说明文档，增加示例
 
-## 1.21. (2.0.6)临时说明
+## 1.21. (2.0.6)
 
-支持将代码解析数据写入Neo4j时同时写入数据库中
+支持将代码解析数据写入 Neo4j 时同时写入数据库中
 
-## 1.22. (2.0.7)临时说明
+## 1.22. (2.0.7)
 
 同上
 
-## 1.23. (2.0.8)临时说明
+## 1.23. (2.0.8)
 
 java-callgraph2 使用 2.0.8 版本
 
@@ -617,7 +617,7 @@ java-callgraph2 使用 2.0.8 版本
 
 `当升级到该版本时，假如之前有对目录进行过分析，则相关目录中的“-javacg_merged.jar”文件需要删除`
 
-## 1.24. (2.0.9)临时说明
+## 1.24. (2.0.9)
 
 ### 1.24.1. java-callgraph2 组件版本
 
@@ -633,37 +633,82 @@ _jacg_config/config.properties 配置文件增加参数
 
 - gen.call.graph.num.limit
 
-生成向上/向下的完整方法调用链时，每个方法允许生成的方法调用数量限制，默认为0，小于等于0代表不限制
+生成向上/向下的完整方法调用链时，每个方法允许生成的方法调用数量限制，默认为 0，小于等于 0 代表不限制
 
 ### 1.24.3. 增加数据库表
 
 ```
 jacg_class_ext_impl_generics_type 类的继承或实现的泛型信息
 jacg_class_signature_generics_type 类的签名中的泛型信息
-jacg_javacg2_config java-callgraph2组件使用的配置参数信息表
+jacg_javacg2_config java-callgraph2 组件使用的配置参数信息表
 ```
 
 ### 1.24.4. 删除数据库表
 
 ```
 jacg_class_sig_ext_impl_generics 类的签名中继承或实现的泛型关系
-jacg_class_signature_ei1 类的签名中涉及继承与实现的信息表1
+jacg_class_signature_ei1 类的签名中涉及继承与实现的信息表 1
 jacg_class_signature_generics 类的签名中的泛型信息
 ```
 
 ### 1.24.5. 增加字段的数据库表
 
-主要涉及内容：是否数组、泛型相关的数据、Spring Controller方法是否可能用于文件/上传下载
+主要涉及内容：是否数组、泛型相关的数据、Spring Controller 方法是否可能用于文件/上传下载
 
 ```
 jacg_field_generics_type 非静态字段中涉及的泛型类型
 jacg_field_info 字段信息表
-jacg_get_method dto的get方法及字段
+jacg_get_method dto 的 get 方法及字段
 jacg_method_arg_generics_type 方法参数泛型类型
 jacg_method_argument 方法参数类型
 jacg_method_info 方法的信息表
 jacg_method_return_generics_type 方法返回泛型类型
-jacg_set_method dto的set方法及字段
-jacg_sf_field_method_call static、final字段初始化方法信息表
-jacg_spring_controller Spring Controller信息表
+jacg_set_method dto 的 set 方法及字段
+jacg_sf_field_method_call static、final 字段初始化方法信息表
+jacg_spring_controller Spring Controller 信息表
 ```
+
+## 1.25. （2.1.0）更新说明
+
+## 1.26. 增加功能
+
+### 1.26.1. 支持查询指定枚举的指定常量名称的指定字段在初始化时的值
+
+com.adrninistrator.jacg.handler.enums.EnumsHandler#queryEnumFieldValue
+
+### 1.26.2. _jacg_config\config.properties 配置文件增加参数
+
+#### 1.26.2.1. call.graph.gen.separate.stack
+
+生成方法调用链时，是否需要为每个调用堆栈生成独立的文件，仅当 call.graph.output.detail=1 时支持
+
+#### 1.26.2.2. parse.other.type.file
+
+解析 jar 包时，是否对。xml、.properties 等其他格式的文件进行解析，false: 不解析，true: 解析
+
+### 1.26.3. 增加数据库表
+
+```
+dup_class_info  重复同名类的信息表
+dup_method_info 重复同名类的方法的信息表
+enum_init_arg_field 枚举类构造函数参数与字段赋值关系表
+enum_init_assign_info   枚举类初始化赋值信息表
+method_return_const_value   方法返回的常量值（含 null）
+method_return_field_info    方法返回的字段（含枚举）
+```
+
+### 1.26.4. 修改数据库表
+
+|表名|操作|内容|
+|---|---|---|
+|class_info|增加字段|class_path_in_jar 类在 jar 包中的路径|
+|method_call|增加字段|callee_array_dimensions 被调用方，对象数组的维度，为 0 代表不是数组类型|
+|method_call|增加字段|description 描述信息，默认为空|
+|method_return_arg_seq|修改字段名|caller_method_hash 修改为 method_hash|
+|method_return_arg_seq|修改字段名|caller_full_method 修改为 full_method|
+|method_return_call_id|修改字段名|caller_method_hash 修改为 method_hash|
+|method_return_call_id|修改字段名|caller_full_method 修改为 full_method|
+
+### 1.26.5. 单元测试类修改
+
+原有的 test.runbycode 包名中的类名以 TestRBC 开头的单元测试类，修改到 test.runbycodemain 包中

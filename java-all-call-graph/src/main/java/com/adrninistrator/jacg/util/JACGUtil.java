@@ -134,7 +134,7 @@ public class JACGUtil {
     }
 
     /**
-     * 从字符串找到第1个非指定字符的下标，并生成子字符串
+     * 从字符串找到第1个非指定字符的序号，并生成子字符串
      *
      * @param data
      * @param flag
@@ -230,7 +230,7 @@ public class JACGUtil {
     }
 
     /**
-     * 获取变长参数中指定下标的参数，相关的参数都要使用包装类型，避免拆箱时产生空指针异常
+     * 获取变长参数中指定序号的参数，相关的参数都要使用包装类型，避免拆箱时产生空指针异常
      *
      * @param index
      * @param args
@@ -244,8 +244,8 @@ public class JACGUtil {
             throw new JavaCG2RuntimeException("指定的参数为空");
         }
         if (index >= args.length) {
-            logger.error("指定下标的参数不存在 {} {}", index, args.length);
-            throw new JavaCG2RuntimeException("指定下标的参数不存在");
+            logger.error("指定序号的参数不存在 {} {}", index, args.length);
+            throw new JavaCG2RuntimeException("指定序号的参数不存在");
         }
 
         return (T) args[index];
@@ -274,14 +274,14 @@ public class JACGUtil {
      * 获得对象的简单类名+对象HASH
      *
      * @param object
-     * @return [对象的简单类名]@[对象HASH]
+     * @return {对象的简单类名}@{对象HASH}
      */
     public static String getObjSimpleClassNameAndHash(Object object) {
         return object.getClass().getSimpleName() + JACGConstants.FLAG_AT + System.identityHashCode(object);
     }
 
     /**
-     * 获取指定的调用堆栈中指定下标的方法
+     * 获取指定的调用堆栈中指定序号的方法
      *
      * @param stackTraceElements
      * @param index

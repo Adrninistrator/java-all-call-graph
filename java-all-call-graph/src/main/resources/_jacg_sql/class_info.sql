@@ -5,6 +5,7 @@ CREATE TABLE if not exists jacg_class_info_{appName} (
   class_name varchar(255) NOT NULL COMMENT '完整类名',
   class_file_hash varchar(32) NOT NULL COMMENT '类文件的HASH值（MD5）',
   jar_num int NOT NULL COMMENT '类所在的Jar包序号',
+  class_path_in_jar varchar(300) NOT NULL COMMENT '类在jar包中的路径',
   PRIMARY KEY (record_id),
   INDEX idx_ci_scn_{appName}(simple_class_name),
   INDEX idx_ci_cn_{appName}(class_name),

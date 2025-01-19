@@ -23,6 +23,10 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassName;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassReference;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassSignatureGenericsType;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4DupClassInfo;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4DupMethodInfo;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4EnumInitArgField;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4EnumInitAssignInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ExtendsImpl;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ExtendsImplPre;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4FieldAnnotation;
@@ -48,6 +52,8 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodLineNumber;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodReturnArgSeq;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodReturnCallId;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodReturnConstValue;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodReturnFieldInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodReturnGenericsType;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodThrow;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MyBatisMSSelectColumn;
@@ -386,11 +392,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
-        if (!skipCallJavaCG2) {
-            // 打印重复的类名
-            printDuplicateClasses();
-        }
-
         if (useH2Db) {
             // 显示H2数据库JDBC URL
             printH2JdbcUrl();
@@ -670,6 +671,12 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
+        WriteDbHandler4DupMethodInfo writeDbHandler4DupMethodInfo = new WriteDbHandler4DupMethodInfo(writeDbResult);
+        initWriteDbHandler(writeDbHandler4DupMethodInfo);
+        if (!writeDbHandler4DupMethodInfo.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
         // 处理方法行号
         WriteDbHandler4MethodLineNumber writeDbHandler4MethodLineNumber = genWriteDbHandler4MethodLineNumber();
         initWriteDbHandler(writeDbHandler4MethodLineNumber);
@@ -740,6 +747,20 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
+        // 方法返回的常量值（含null）
+        WriteDbHandler4MethodReturnConstValue writeDbHandler4MethodReturnConstValue = new WriteDbHandler4MethodReturnConstValue(writeDbResult);
+        initWriteDbHandler(writeDbHandler4MethodReturnConstValue);
+        if (!writeDbHandler4MethodReturnConstValue.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        // 方法返回的字段（含枚举）
+        WriteDbHandler4MethodReturnFieldInfo writeDbHandler4MethodReturnFieldInfo = new WriteDbHandler4MethodReturnFieldInfo(writeDbResult);
+        initWriteDbHandler(writeDbHandler4MethodReturnFieldInfo);
+        if (!writeDbHandler4MethodReturnFieldInfo.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
         // 方法的catch信息
         WriteDbHandler4MethodCatch writeDbHandler4MethodTryCatchFinally = new WriteDbHandler4MethodCatch(writeDbResult);
         initWriteDbHandler(writeDbHandler4MethodTryCatchFinally);
@@ -772,6 +793,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         if (useNeo4j()) {
             return true;
         }
+
+        WriteDbHandler4DupClassInfo writeDbHandler4DupClassInfo = new WriteDbHandler4DupClassInfo(writeDbResult);
+        initWriteDbHandler(writeDbHandler4DupClassInfo);
+        if (!writeDbHandler4DupClassInfo.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
         WriteDbHandler4InnerClassInfo writeDbHandler4InnerClassInfo = new WriteDbHandler4InnerClassInfo(writeDbResult);
         initWriteDbHandler(writeDbHandler4InnerClassInfo);
         return writeDbHandler4InnerClassInfo.handle(javaCG2OutputInfo);
@@ -1040,7 +1068,19 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
         WriteDbHandler4FieldGenericsType writeDbHandler4FieldGenericsType = new WriteDbHandler4FieldGenericsType(writeDbResult);
         initWriteDbHandler(writeDbHandler4FieldGenericsType);
-        return writeDbHandler4FieldGenericsType.handle(javaCG2OutputInfo);
+        if (!writeDbHandler4FieldGenericsType.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        WriteDbHandler4EnumInitArgField writeDbHandler4EnumInitArgField = new WriteDbHandler4EnumInitArgField(writeDbResult);
+        initWriteDbHandler(writeDbHandler4EnumInitArgField);
+        if (!writeDbHandler4EnumInitArgField.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        WriteDbHandler4EnumInitAssignInfo writeDbHandler4EnumInitAssignInfo = new WriteDbHandler4EnumInitAssignInfo(writeDbResult);
+        initWriteDbHandler(writeDbHandler4EnumInitAssignInfo);
+        return writeDbHandler4EnumInitAssignInfo.handle(javaCG2OutputInfo);
     }
 
     // 人工添加方法调用关系（需要在方法调用关系文件处理完毕后执行）

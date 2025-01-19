@@ -215,7 +215,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         if (!initIgnoreInfo()) {
             return false;
         }
-        genCallGraphNumLimit = configureWrapper.getMainConfig(ConfigKeyEnum.GEN_CALL_GRAPH_NUM_LIMIT);
+        genCallGraphNumLimit = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_GEN_CALL_GRAPH_NUM_LIMIT);
         return true;
     }
 

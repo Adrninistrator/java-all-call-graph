@@ -24,13 +24,12 @@ public class TestTarGz extends TestRunByCodeBase {
 
     @Test
     public void test1Unpack() {
-        TarGzUnpacker tarGzUnpacker = new TarGzUnpacker(TAR_GZ_DIR + File.separator + TAR_GZ_FILE_NAME,
-                TAR_GZ_UNPACK_DIR,
-                Arrays.asList("jar", "lib"),
-                Arrays.asList("run_jacg", "java-callgraph2", "mybatis-mysql-table-parser", "log4j-"),
-                Arrays.asList(".xml", "properties"),
-                Arrays.asList("adrninistrator", "org.apache.logging.log4j.core"),
-                Collections.singletonList("com.adrninistrator.mybatismysqltableparser"));
+        TarGzUnpacker tarGzUnpacker = new TarGzUnpacker(TAR_GZ_DIR + File.separator + TAR_GZ_FILE_NAME, TAR_GZ_UNPACK_DIR);
+        tarGzUnpacker.setUnpackDirList(Arrays.asList("jar", "lib"));
+        tarGzUnpacker.setUnpackJarNamePrefixList(Arrays.asList("run_jacg", "java-callgraph2", "mybatis-mysql-table-parser", "log4j-"));
+        tarGzUnpacker.setUnpackConfigFileTypeList(Arrays.asList(".xml", "properties"));
+        tarGzUnpacker.setUnpackPackageList(Arrays.asList("adrninistrator", "org.apache.logging.log4j.core"));
+        tarGzUnpacker.setNoUnpackPackageList(Collections.singletonList("com.adrninistrator.mybatismysqltableparser"));
         Assert.assertTrue(tarGzUnpacker.unpack());
     }
 

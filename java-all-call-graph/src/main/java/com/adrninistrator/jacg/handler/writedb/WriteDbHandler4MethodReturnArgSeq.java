@@ -28,24 +28,31 @@ public class WriteDbHandler4MethodReturnArgSeq extends AbstractWriteDbHandler<Wr
 
     @Override
     protected WriteDbData4MethodReturnArgSeq genData(String[] array) {
-        String callerFullMethod = array[0];
+        String fullMethod = readLineData();
         // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(callerFullMethod)) {
+        if (!isAllowedClassPrefix(fullMethod)) {
             return null;
         }
 
-        int returnArgSeq = Integer.parseInt(array[1]);
-        String callerMethodHash = JACGUtil.genHashWithLen(callerFullMethod);
-        int equivalentConversion = Integer.parseInt(array[2]);
-        return new WriteDbData4MethodReturnArgSeq(callerMethodHash, returnArgSeq, callerFullMethod, equivalentConversion);
+        int returnArgSeq = Integer.parseInt(readLineData());
+        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        int equivalentConversion = Integer.parseInt(readLineData());
+        WriteDbData4MethodReturnArgSeq methodReturnArgSeq = new WriteDbData4MethodReturnArgSeq();
+        methodReturnArgSeq.setRecordId(genNextRecordId());
+        methodReturnArgSeq.setMethodHash(methodHash);
+        methodReturnArgSeq.setReturnArgSeq(returnArgSeq);
+        methodReturnArgSeq.setFullMethod(fullMethod);
+        methodReturnArgSeq.setEquivalentConversion(equivalentConversion);
+        return methodReturnArgSeq;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodReturnArgSeq data) {
         return new Object[]{
-                data.getCallerMethodHash(),
+                data.getRecordId(),
+                data.getMethodHash(),
                 data.getReturnArgSeq(),
-                data.getCallerFullMethod(),
+                data.getFullMethod(),
                 data.getEquivalentConversion()
         };
     }

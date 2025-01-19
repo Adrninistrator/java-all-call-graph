@@ -30,16 +30,16 @@ import java.util.Set;
 public abstract class BaseProtocolFieldHandler extends BaseHandler {
 
     protected final ClassInfoHandler classInfoHandler;
-    protected final MethodArgReturnHandler methodArgReturnHandler;
     protected final MethodInfoHandler methodInfoHandler;
+    protected final MethodArgReturnHandler methodArgReturnHandler;
     protected final FieldInfoHandler fieldInfoHandler;
     protected final SpringHandler springHandler;
 
     public BaseProtocolFieldHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
         classInfoHandler = new ClassInfoHandler(dbOperWrapper);
-        methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
         methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
+        methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
         fieldInfoHandler = new FieldInfoHandler(dbOperWrapper);
         springHandler = new SpringHandler(dbOperWrapper);
     }
@@ -47,8 +47,8 @@ public abstract class BaseProtocolFieldHandler extends BaseHandler {
     public BaseProtocolFieldHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
         classInfoHandler = new ClassInfoHandler(dbOperWrapper);
-        methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
         methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
+        methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
         fieldInfoHandler = new FieldInfoHandler(dbOperWrapper);
         springHandler = new SpringHandler(dbOperWrapper);
     }
@@ -183,8 +183,7 @@ public abstract class BaseProtocolFieldHandler extends BaseHandler {
 
             if (JavaCG2YesNoEnum.isYes(methodArgument.getExistsGenericsType())) {
                 // 查询指定方法指定的参数中的泛型类型
-                List<String> methodArgGenericsTypeList =
-                        methodArgReturnHandler.queryCustomTypeInMethodArgGenerics(springController.getFullMethod(), methodArgument.getArgSeq());
+                List<String> methodArgGenericsTypeList = methodArgReturnHandler.queryGenericsTypeInMethodArg(springController.getFullMethod(), methodArgument.getArgSeq(), true);
                 // 记录有处理过的自定义类型
                 customTypeSet.addAll(methodArgGenericsTypeList);
                 for (String methodArgGenericsType : methodArgGenericsTypeList) {
@@ -224,7 +223,7 @@ public abstract class BaseProtocolFieldHandler extends BaseHandler {
         if (JavaCG2YesNoEnum.isYes(methodInfo.getReturnExistsGenericsType())) {
             // 查询指定方法返回类型中泛型类型中出现的自定义类型
             List<String> methodReturnGenericsCustomTypeList =
-                    methodArgReturnHandler.queryCustomTypeInMethodReturnGenerics(springController.getFullMethod());
+                    methodArgReturnHandler.queryGenericsTypeInMethodReturn(springController.getFullMethod(), true);
             // 记录有处理过的自定义类型
             customTypeSet.addAll(methodReturnGenericsCustomTypeList);
             for (String methodReturnGenericsType : methodReturnGenericsCustomTypeList) {

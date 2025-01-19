@@ -321,7 +321,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private void handleInsertMapperMethod(WriteDbData4MybatisMSEntity mybatisMSEntity, String insertMapperMethodName) {
         logger.info("处理insert相关的MyBatis Mapper方法 {} {}", mybatisMSEntity.getMapperClassName(), insertMapperMethodName);
         // 查询Mapper方法信息
-        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMSuperInterface(mybatisMSEntity.getMapperClassName(), insertMapperMethodName);
+        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMInterface(mybatisMSEntity.getMapperClassName(), insertMapperMethodName);
         if (JavaCG2Util.isCollectionEmpty(mapperMethodInfoList)) {
             return;
         }
@@ -389,7 +389,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private void handleSelectMapperMethod(WriteDbData4MybatisMSEntity mybatisMSEntity, String selectMapperMethodName) {
         logger.info("处理select相关的MyBatis Mapper方法 {} {}", mybatisMSEntity.getMapperClassName(), selectMapperMethodName);
         // 查询Mapper方法信息
-        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMSuperInterface(mybatisMSEntity.getMapperClassName(), selectMapperMethodName);
+        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMInterface(mybatisMSEntity.getMapperClassName(), selectMapperMethodName);
         if (JavaCG2Util.isCollectionEmpty(mapperMethodInfoList)) {
             return;
         }
@@ -557,7 +557,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private void handleUpdateMapperMethod(WriteDbData4MybatisMSEntity mybatisMSEntity, String updateMapperMethodName) {
         logger.info("处理update相关的MyBatis Mapper方法 {} {}", mybatisMSEntity.getMapperClassName(), updateMapperMethodName);
         // 查询Mapper方法信息
-        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMSuperInterface(mybatisMSEntity.getMapperClassName(), updateMapperMethodName);
+        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMInterface(mybatisMSEntity.getMapperClassName(), updateMapperMethodName);
         if (JavaCG2Util.isCollectionEmpty(mapperMethodInfoList)) {
             return;
         }

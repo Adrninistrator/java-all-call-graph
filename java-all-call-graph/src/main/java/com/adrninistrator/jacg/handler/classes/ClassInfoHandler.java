@@ -61,7 +61,7 @@ public class ClassInfoHandler extends BaseHandler {
      */
     public String queryExactlySimpleClassName(String className) {
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        WriteDbData4ClassName writeDbData4ClassName = queryClassNameEquals(simpleClassName);
+        WriteDbData4ClassName writeDbData4ClassName = queryClassNameDataBySimple(simpleClassName);
         if (writeDbData4ClassName == null || !className.equals(writeDbData4ClassName.getClassName())) {
             logger.warn("指定的类名不存在 {}", className);
             return null;
@@ -75,7 +75,7 @@ public class ClassInfoHandler extends BaseHandler {
      * @param simpleClassName 完整类名或简单类名
      * @return
      */
-    public WriteDbData4ClassName queryClassNameEquals(String simpleClassName) {
+    public WriteDbData4ClassName queryClassNameDataBySimple(String simpleClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_CLASS_EQUALS;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -94,7 +94,7 @@ public class ClassInfoHandler extends BaseHandler {
      * @return
      */
     public String queryClassNameBySimple(String simpleClassName) {
-        WriteDbData4ClassName writeDbData4ClassName = queryClassNameEquals(simpleClassName);
+        WriteDbData4ClassName writeDbData4ClassName = queryClassNameDataBySimple(simpleClassName);
         if (writeDbData4ClassName == null) {
             return null;
         }
@@ -123,7 +123,7 @@ public class ClassInfoHandler extends BaseHandler {
      */
     public Integer queryClassAccessFlag(String className) {
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        return queryClassAccessFlagBySimple(simpleClassName);
+        return queryClassAccessFlagBySCN(simpleClassName);
     }
 
     /**
@@ -132,7 +132,7 @@ public class ClassInfoHandler extends BaseHandler {
      * @param simpleClassName 唯一类名
      * @return 可能为null
      */
-    public Integer queryClassAccessFlagBySimple(String simpleClassName) {
+    public Integer queryClassAccessFlagBySCN(String simpleClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CI_QUERY_ACCESS_FLAGS;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -145,13 +145,50 @@ public class ClassInfoHandler extends BaseHandler {
     }
 
     /**
+     * 根据唯一类名查询类的信息
+     *
+     * @param simpleClassName 唯一类名
+     * @return 可能为null
+     */
+    public WriteDbData4ClassInfo queryClassInfoBySCN(String simpleClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CI_QUERY_BY_SIMPLE_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_CLASS_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_INFO.getTableName() +
+                    " where " + DC.CI_SIMPLE_CLASS_NAME + " = ?" +
+                    " limit 1";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryObject(sql, WriteDbData4ClassInfo.class, simpleClassName);
+    }
+
+    /**
+     * 根据唯一类名查询重复类的信息
+     *
+     * @param simpleClassName 唯一类名
+     * @return 可能为null
+     */
+    public List<WriteDbData4ClassInfo> queryDupClassInfoBySCN(String simpleClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.DCI_QUERY_BY_SIMPLE_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_DUP_CLASS_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_DUP_CLASS_INFO.getTableName() +
+                    " where " + DC.CI_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4ClassInfo.class, simpleClassName);
+    }
+
+    /**
      * 根据唯一类名查询类的类型
      *
      * @param simpleClassName 唯一类名
      * @return
      */
     public ClassInterfaceEnum queryClassInterfaceEnumBySimple(String simpleClassName) {
-        Integer superClassAccessFlags = queryClassAccessFlagBySimple(simpleClassName);
+        Integer superClassAccessFlags = queryClassAccessFlagBySCN(simpleClassName);
         return JACGClassMethodUtil.getClassInterfaceEnum(superClassAccessFlags);
     }
 

@@ -264,7 +264,6 @@ public abstract class TestRunByCodeBase {
         ConfigureWrapper usedConfigureWrapper = findCallStackTrace.getConfigureWrapper();
         if (OutputDetailEnum.ODE_1.getDetail().equals(usedConfigureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, false))) {
             Assert.assertFalse(JavaCG2Util.isCollectionEmpty(callStackFileResult.getSeparateStackDirPathList()));
-            return;
         }
     }
 }

@@ -11,6 +11,7 @@ import test.callgraph.field.TestField2;
 import test.callgraph.field.cycle.TestUseFieldCycle1;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -32,6 +33,11 @@ public class TestSpringController2 {
 
     @PostMapping()
     public List<TestField2> post2(List<TestField1> list) {
+        return null;
+    }
+
+    @PostMapping()
+    public Map<String, Map<String, List<Boolean>>> post3(List<TestField1> list) {
         return null;
     }
 

@@ -66,6 +66,7 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
     @Override
     public String[] chooseFileColumnDesc() {
         return new String[]{
+                "记录id，从1开始",
                 "方法hash+字节数",
                 "序号，从0开始，大于0代表有多种可能",
                 "用于显示的URI",
@@ -99,6 +100,7 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
         JavaCG2YesNoEnum maybeFileDownload = checkMaybeFileDownload(data.getFullMethod());
 
         return new Object[]{
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getSeq(),
                 data.getShowUri(),

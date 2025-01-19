@@ -65,7 +65,9 @@ public class TestMethodArgReturnHandler extends TestRunByCodeBase {
                     List<WriteDbData4MethodArgGenericsType> methodArgGenericsTypeList = methodArgReturnHandler.queryMethodArgGenericsTypeByMethodArg(fullMethod,
                             methodArgument.getArgSeq());
                     printListContent(methodArgGenericsTypeList, "方法参数的泛型类型 " + fullMethod + " " + methodArgument.getArgSeq());
-                    List<String> customTypeList = methodArgReturnHandler.queryCustomTypeInMethodArgGenerics(fullMethod, methodArgument.getArgSeq());
+                    List<String> typeList = methodArgReturnHandler.queryGenericsTypeInMethodArg(fullMethod, methodArgument.getArgSeq(), false);
+                    printListContent(typeList, "方法参数的泛型类型中的类型 " + fullMethod + " " + methodArgument.getArgSeq());
+                    List<String> customTypeList = methodArgReturnHandler.queryGenericsTypeInMethodArg(fullMethod, methodArgument.getArgSeq(), true);
                     printListContent(customTypeList, "方法参数的泛型类型中的自定义类型 " + fullMethod + " " + methodArgument.getArgSeq());
                 } else {
                     logger.info("当前方法不存在泛型类型 {} {}", fullMethod, methodArgument.getArgSeq());
@@ -83,7 +85,9 @@ public class TestMethodArgReturnHandler extends TestRunByCodeBase {
             if (JavaCG2YesNoEnum.isYes(methodInfo.getReturnExistsGenericsType())) {
                 List<WriteDbData4MethodReturnGenericsType> methodArgGenericsTypeList = methodArgReturnHandler.queryReturnGenericsTypeByMethod(fullMethod);
                 printListContent(methodArgGenericsTypeList, "方法返回类型的泛型类型 " + fullMethod);
-                List<String> customTypeList = methodArgReturnHandler.queryCustomTypeInMethodReturnGenerics(fullMethod);
+                List<String> typeList = methodArgReturnHandler.queryGenericsTypeInMethodReturn(fullMethod, false);
+                printListContent(typeList, "方法返回类型的泛型类型中的类型 " + fullMethod);
+                List<String> customTypeList = methodArgReturnHandler.queryGenericsTypeInMethodReturn(fullMethod, true);
                 printListContent(customTypeList, "方法返回类型的泛型类型中的自定义类型 " + fullMethod);
             } else {
                 logger.info("当前方法返回类型不存在泛型类型 {}", fullMethod);

@@ -111,9 +111,8 @@ public class JACGSqlUtil {
     public static Object[] genMethodCallObjectArray(WriteDbData4MethodCall data) {
         return new Object[]{
                 data.getCallId(),
-                data.getCallType(),
-                data.getCalleeObjType(),
                 data.getEnabled(),
+                data.getCallType(),
                 data.getCallerMethodHash(),
                 data.getCallerSimpleClassName(),
                 data.getCallerMethodName(),
@@ -124,11 +123,14 @@ public class JACGSqlUtil {
                 data.getCalleeSimpleClassName(),
                 data.getCalleeMethodName(),
                 data.getCalleeFullMethod(),
-                data.getCallFlags(),
+                data.getCalleeArrayDimensions(),
+                data.getCalleeObjType(),
                 data.getRawReturnType(),
                 data.getActualReturnType(),
+                data.getCallFlags(),
                 data.getCallerJarNum(),
-                data.getCalleeJarNum()
+                data.getCalleeJarNum(),
+                data.getDescription()
         };
     }
 

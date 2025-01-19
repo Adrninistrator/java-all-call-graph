@@ -450,7 +450,19 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     public boolean handle(JavaCG2OutputInfo javaCG2OutputInfo) {
         checkInited();
 
-        String filePath = mainFile ? javaCG2OutputInfo.getMainFilePath(mainFileTypeEnum) : javaCG2OutputInfo.getOtherFilePath(otherFileName);
+        String filePath;
+        if (!mainFile) {
+            filePath = javaCG2OutputInfo.getOtherFilePath(otherFileName);
+            if (filePath == null) {
+                logger.info("{} 当前文件未生成，不处理 {}", currentSimpleClassName, otherFileName);
+                // 记录当前写入的数据库表枚举名
+                recordWrittenDbTableEnum();
+                return true;
+            }
+        } else {
+            filePath = javaCG2OutputInfo.getMainFilePath(mainFileTypeEnum);
+        }
+
         logger.info("{} 开始处理文件 {}", currentSimpleClassName, filePath);
         try (BufferedReader br = JavaCG2FileUtil.genBufferedReader(filePath)) {
             // 执行开始之前的操作
@@ -486,10 +498,15 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
             return false;
         } finally {
             // 记录当前写入的数据库表枚举名
-            writeDbResult.getWrittenDbTableEnumNameSet().add(jacgWriteDbHandler.dbTableInfoEnum().name());
+            recordWrittenDbTableEnum();
             // 执行完成之后的操作
             afterHandle();
         }
+    }
+
+    // 记录当前写入的数据库表枚举名
+    private void recordWrittenDbTableEnum() {
+        writeDbResult.getWrittenDbTableEnumNameSet().add(jacgWriteDbHandler.dbTableInfoEnum().name());
     }
 
     /**

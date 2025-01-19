@@ -12,11 +12,13 @@ import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
 import com.adrninistrator.jacg.handler.dto.classes.ClassNameAndAccessFlags;
 import com.adrninistrator.jacg.handler.dto.classes.ClassNameAndType;
 import com.adrninistrator.jacg.handler.dto.extendsimpl.ExtendsImplInfo;
+import com.adrninistrator.jacg.handler.dto.extendsimpl.ExtendsImplNode;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.dto.accessflag.JavaCG2AccessFlags;
+import com.adrninistrator.javacg2.dto.stack.ListAsStack;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
@@ -24,12 +26,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author adrninistrator
@@ -38,18 +39,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class JACGExtendsImplHandler extends BaseHandler {
     private static final Logger logger = LoggerFactory.getLogger(JACGExtendsImplHandler.class);
-
-    // 保存已加载过对应的子类/子接口/实现类的父类/接口唯一类名
-    private final Set<String> loadedDownwardSimpleClassNameSet = ConcurrentHashMap.newKeySet();
-
-    /*
-        保存的父类/接口对应的所有子类/子接口/实现类
-        key
-            父类/接口唯一类名
-        value
-            所有的子类/子接口/实现类名称及access_flags Set
-     */
-    private final Map<String, Set<ClassNameAndAccessFlags>> allDownwardClassInfoMap = new ConcurrentHashMap<>();
 
     protected ClassInfoHandler classInfoHandler;
 
@@ -66,14 +55,101 @@ public class JACGExtendsImplHandler extends BaseHandler {
     }
 
     /**
-     * 向下加载父类/接口对应的子类/子接口/实现类
+     * 获取 fromClassName 逐层向上继承或实现到 toClassName 中间经过的父类或接口类名，使用完整类名
+     *
+     * @param fromClassName
+     * @param toClassName
+     * @return
+     */
+    public List<String> getPathToSuperImplClassByFull(String fromClassName, String toClassName) {
+        return getPathToSuperImplClassBySimple(dbOperWrapper.querySimpleClassName(fromClassName), dbOperWrapper.querySimpleClassName(toClassName));
+    }
+
+    /**
+     * 获取 fromSimpleClassName 逐层向上继承或实现到 toSimpleClassName 中间经过的父类或接口类名，使用唯一类名
+     * 若 fromSimpleClassName 没有直接或间接继承或实现 toSimpleClassName ，则返回列表为空
+     * 若 fromSimpleClassName 有直接或间接继承或实现 toSimpleClassName ，则返回列表中序号最大的元素为toClassName，列表中不会包括fromClassName
+     *
+     * @param fromSimpleClassName
+     * @param toSimpleClassName
+     * @return
+     */
+    public List<String> getPathToSuperImplClassBySimple(String fromSimpleClassName, String toSimpleClassName) {
+        String upperClassName = querySuperClassNameBySimple(fromSimpleClassName);
+        if (upperClassName != null) {
+            String upperSimpleClassName = dbOperWrapper.querySimpleClassName(upperClassName);
+            if (upperSimpleClassName.equals(toSimpleClassName)) {
+                // toSimpleClassName 是 fromSimpleClassName 的父类或实现的接口
+                return Collections.singletonList(upperClassName);
+            }
+        }
+        // toSimpleClassName 不是 fromSimpleClassName 的父类或实现的接口，逐层向上找
+        // 查询 toSimpleClassName 父类及实现的接口类名列表
+        List<String> initUpwardClassNameList = queryUpwardClassNameBySimple(fromSimpleClassName);
+        if (JavaCG2Util.isCollectionEmpty(initUpwardClassNameList)) {
+            // 未查询到 toSimpleClassName 父类及实现的接口类名列表
+            return Collections.emptyList();
+        }
+
+        ListAsStack<ExtendsImplNode> stack = new ListAsStack<>();
+        // 栈初始加入 toSimpleClassName 父类及实现的接口类名
+        ExtendsImplNode initExtendsImplNode = new ExtendsImplNode();
+        initExtendsImplNode.setExtendsImplClassNameList(initUpwardClassNameList);
+        initExtendsImplNode.setListIndex(0);
+        stack.push(initExtendsImplNode);
+
+        // 通过栈进行循环处理
+        while (!stack.isEmpty()) {
+            ExtendsImplNode currentExtendsImplNode = stack.peek();
+            // 获取当前栈顶元素的当前父类或实现的接口类名
+            String currentUpwardClassName = currentExtendsImplNode.getCurrentClassName();
+            if (currentUpwardClassName == null) {
+                // 当前父类或实现的接口类名列表处理完毕，出栈
+                stack.pop();
+                if (!stack.isEmpty()) {
+                    // 出栈后若栈非空，则将栈顶元素的列表下标加1
+                    stack.peek().addListIndex();
+                }
+                continue;
+            }
+
+            // 当前父类或实现的接口类名列表未处理完毕
+            String currentUpwardSimpleClassName = dbOperWrapper.querySimpleClassName(currentUpwardClassName);
+            if (toSimpleClassName.equals(currentUpwardSimpleClassName)) {
+                // fromSimpleClassName 有直接或间接继承或实现 toSimpleClassName
+                List<String> classNameList = new ArrayList<>(stack.getHead() + 1);
+                for (int i = 0; i <= stack.getHead(); i++) {
+                    ExtendsImplNode extendsImplNode = stack.getElementAt(i);
+                    classNameList.add(extendsImplNode.getCurrentClassName());
+                }
+                return classNameList;
+            }
+
+            // 查询当前类的父类及实现的接口类名列表
+            List<String> currentUpwardClassNameList = queryUpwardClassNameBySimple(currentUpwardSimpleClassName);
+            if (JavaCG2Util.isCollectionEmpty(currentUpwardClassNameList)) {
+                // 未查询到当前类的父类及实现的接口类名列表，将列表的序号加1
+                currentExtendsImplNode.addListIndex();
+                continue;
+            }
+
+            // 向栈中加入当前类的父类及实现的接口类名
+            ExtendsImplNode nextExtendsImplNode = new ExtendsImplNode();
+            nextExtendsImplNode.setExtendsImplClassNameList(currentUpwardClassNameList);
+            nextExtendsImplNode.setListIndex(0);
+            stack.push(nextExtendsImplNode);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * 向下获取父类/接口对应的子类/子接口/实现类
      *
      * @param upwardSimpleClassName 父类/接口的唯一类名
+     * @return
      */
-    private void loadChildrenOrImplClassInfo(String upwardSimpleClassName) {
-        logger.debug("向下加载父类/接口对应的子类/子接口/实现类 {}", upwardSimpleClassName);
-
-        Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.computeIfAbsent(upwardSimpleClassName, k -> ConcurrentHashMap.newKeySet());
+    private Set<ClassNameAndAccessFlags> getChildrenOrImplClassInfo(String upwardSimpleClassName) {
+        Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = new HashSet<>();
 
         // 查询当前类的子类/子接口/实现类
         List<String> downwardSimpleClassNameList = doLoadChildrenOrImplClassInfo(upwardSimpleClassName, allClassNameAndAccessFlagsSet);
@@ -88,7 +164,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
             downwardSimpleClassNameList = allDownwardSimpleClassNameList;
         }
 
-        loadedDownwardSimpleClassNameSet.add(upwardSimpleClassName);
+        return allClassNameAndAccessFlagsSet;
     }
 
     /**
@@ -141,24 +217,8 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * @return false: 不存在继承或实现关系 true: 存在继承或实现关系
      */
     public boolean checkExtendsOrImplBySimple(String upwardSimpleClassName, String downwardSimpleClassName) {
-        if (!loadedDownwardSimpleClassNameSet.contains(upwardSimpleClassName)) {
-            // 向下加载父类/接口对应的子类/子接口/实现类
-            loadChildrenOrImplClassInfo(upwardSimpleClassName);
-        }
-
-        // 获取父类/接口对应的所有子类/子接口/实现类
-        Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.get(upwardSimpleClassName);
-        if (allClassNameAndAccessFlagsSet.isEmpty()) {
-            return false;
-        }
-
-        for (ClassNameAndAccessFlags classNameAndAccessFlags : allClassNameAndAccessFlagsSet) {
-            if (classNameAndAccessFlags.getSimpleClassName().equals(downwardSimpleClassName)) {
-                return true;
-            }
-        }
-
-        return false;
+        List<String> classNameList = getPathToSuperImplClassBySimple(downwardSimpleClassName, upwardSimpleClassName);
+        return !JavaCG2Util.isCollectionEmpty(classNameList);
     }
 
     /**
@@ -213,13 +273,9 @@ public class JACGExtendsImplHandler extends BaseHandler {
             throw new JavaCG2RuntimeException("参数指定包含非抽象类时，需要指定包含类");
         }
 
-        if (!loadedDownwardSimpleClassNameSet.contains(superSimpleClassName)) {
-            // 向下加载父类/接口对应的子类/子接口/实现类
-            loadChildrenOrImplClassInfo(superSimpleClassName);
-        }
+        // 向下加载父类/接口对应的子类/子接口/实现类
+        Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = getChildrenOrImplClassInfo(superSimpleClassName);
 
-        // 获取父类/接口对应的所有子类/子接口/实现类
-        Set<ClassNameAndAccessFlags> allClassNameAndAccessFlagsSet = allDownwardClassInfoMap.get(superSimpleClassName);
         if (allClassNameAndAccessFlagsSet.isEmpty()) {
             return Collections.emptyList();
         }
@@ -275,7 +331,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
     }
 
     /**
-     * 查询指定类的所有父类
+     * 查询指定类的所有父类类名
      *
      * @param className
      * @return
@@ -330,6 +386,25 @@ public class JACGExtendsImplHandler extends BaseHandler {
     }
 
     /**
+     * 查询指定类的父类及实现的接口类名列表，使用唯一类名查询
+     *
+     * @param simpleClassName
+     * @return
+     */
+    public List<String> queryUpwardClassNameBySimple(String simpleClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.EI_QUERY_UPWARD_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.EI_UPWARD_CLASS_NAME +
+                    " from " + DbTableInfoEnum.DTIE_EXTENDS_IMPL.getTableName() +
+                    " where " + DC.EI_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        return dbOperator.queryListOneColumn(sql, String.class, simpleClassName);
+    }
+
+    /**
      * 根据类名获取实现的接口名称
      *
      * @param className
@@ -350,13 +425,12 @@ public class JACGExtendsImplHandler extends BaseHandler {
     }
 
     /**
-     * 根据类名向上查询对应的父类、实现的接口信息
+     * 根据类名向上查询父类、实现的接口信息
      *
      * @param className
      * @return
      */
-    public List<ClassNameAndType> queryUpwardByClassName(String className) {
-        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
+    public List<WriteDbData4ExtendsImpl> queryUpwardInfoByClassName(String className) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.EI_QUERY_UPWARD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -365,7 +439,18 @@ public class JACGExtendsImplHandler extends BaseHandler {
                     " where " + DC.EI_SIMPLE_CLASS_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<WriteDbData4ExtendsImpl> writeDbData4ExtendsList = dbOperator.queryList(sql, WriteDbData4ExtendsImpl.class, simpleClassName);
+        return dbOperator.queryList(sql, WriteDbData4ExtendsImpl.class, dbOperWrapper.querySimpleClassName(className));
+    }
+
+    /**
+     * 根据类名向上查询父类、实现的接口的类名及类型
+     *
+     * @param className
+     * @return
+     */
+    public List<ClassNameAndType> queryUpwardClassNameAndTypeByClassName(String className) {
+        // 根据类名向上查询父类、实现的接口信息
+        List<WriteDbData4ExtendsImpl> writeDbData4ExtendsList = queryUpwardInfoByClassName(className);
         if (JavaCG2Util.isCollectionEmpty(writeDbData4ExtendsList)) {
             return Collections.emptyList();
         }
@@ -434,18 +519,38 @@ public class JACGExtendsImplHandler extends BaseHandler {
     }
 
     /**
-     * 从指定的类开始向上查询对应的继承与实现信息
+     * 从指定的类开始向上查询所有对应的继承与实现信息
      *
      * @param startClassName 指定的类名
      * @return key 子类类名 value 当前类/接口的类型，及父类与实现接口的信息
      */
-    public Map<String, ExtendsImplInfo> queryExtendsImplInfoUpward(String startClassName) {
-        return queryExtendsImplInfoUpDownward(startClassName, null, true);
+    public LinkedHashMap<String, ExtendsImplInfo> queryAllExtendsImplInfoUpward(String startClassName) {
+        return queryAllExtendsImplInfoUpDownward(startClassName, null, true);
     }
 
-    // 从指定的类开始向上或向下查询对应的继承与实现信息
-    private Map<String, ExtendsImplInfo> queryExtendsImplInfoUpDownward(String startClassName, List<ClassNameAndType> startClassNameAndTypeList, boolean upward) {
-        Map<String, ExtendsImplInfo> resultMap = new HashMap<>();
+    /**
+     * 从指定的类开始向上查询所有对应的超类与实现的接口
+     *
+     * @param startClassName 指定的类名
+     * @return key 子类类名 value 当前类/接口的类型，及父类与实现接口的信息
+     */
+    public List<ClassNameAndType> queryAllSuperClassesAndInterfaces(String startClassName) {
+        List<ClassNameAndType> superClassAndInterfaceList = new ArrayList<>();
+        LinkedHashMap<String, ExtendsImplInfo> resultMap = queryAllExtendsImplInfoUpDownward(startClassName, null, true);
+        for (Map.Entry<String, ExtendsImplInfo> entry : resultMap.entrySet()) {
+            ExtendsImplInfo extendsImplInfo = entry.getValue();
+            for (ClassNameAndType superClassOrInterface : extendsImplInfo.getExtendsImplClassInfoList()) {
+                if (!superClassAndInterfaceList.contains(superClassOrInterface)) {
+                    superClassAndInterfaceList.add(superClassOrInterface);
+                }
+            }
+        }
+        return superClassAndInterfaceList;
+    }
+
+    // 从指定的类开始向上或向下查询所有对应的继承与实现信息
+    private LinkedHashMap<String, ExtendsImplInfo> queryAllExtendsImplInfoUpDownward(String startClassName, List<ClassNameAndType> startClassNameAndTypeList, boolean upward) {
+        LinkedHashMap<String, ExtendsImplInfo> resultMap = new LinkedHashMap<>();
         Set<ClassNameAndType> classNameAndTypeSet = new HashSet<>();
         if (startClassName != null) {
             classNameAndTypeSet.add(new ClassNameAndType(startClassName, null));
@@ -455,7 +560,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
         while (true) {
             Set<ClassNameAndType> tmpClassNameAndTypeSet = new HashSet<>();
             for (ClassNameAndType classNameAndType : classNameAndTypeSet) {
-                Set<ClassNameAndType> returnClassNameAndTypeSet = queryExtendsImplInfoUpDownward(resultMap, classNameAndType, upward);
+                Set<ClassNameAndType> returnClassNameAndTypeSet = doQueryAllExtendsImplInfoUpDownward(resultMap, classNameAndType, upward);
                 tmpClassNameAndTypeSet.addAll(returnClassNameAndTypeSet);
             }
             if (JavaCG2Util.isCollectionEmpty(tmpClassNameAndTypeSet)) {
@@ -467,13 +572,14 @@ public class JACGExtendsImplHandler extends BaseHandler {
     }
 
     /**
-     * 执行从指定的类开始向上查询对应的继承与实现信息
+     * 从指定的类开始向上或向下查询对应的继承与实现信息
      *
      * @param resultMap
      * @param classNameAndType
+     * @param upward
      * @return 下一次需要查询的类名列表，若为空则不需要再查询
      */
-    private Set<ClassNameAndType> queryExtendsImplInfoUpDownward(Map<String, ExtendsImplInfo> resultMap, ClassNameAndType classNameAndType, boolean upward) {
+    private Set<ClassNameAndType> doQueryAllExtendsImplInfoUpDownward(LinkedHashMap<String, ExtendsImplInfo> resultMap, ClassNameAndType classNameAndType, boolean upward) {
         Set<ClassNameAndType> newClassNameAndTypeSet = new HashSet<>();
         String className = classNameAndType.getClassName();
         if (resultMap.containsKey(className)) {
@@ -483,7 +589,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
         // 根据类名查询对应的父类、实现的接口信息
         List<ClassNameAndType> upDownwardClassInfoList;
         if (upward) {
-            upDownwardClassInfoList = queryUpwardByClassName(className);
+            upDownwardClassInfoList = queryUpwardClassNameAndTypeByClassName(className);
         } else {
             upDownwardClassInfoList = queryDownwardByClassName(className);
         }
@@ -501,13 +607,13 @@ public class JACGExtendsImplHandler extends BaseHandler {
     }
 
     /**
-     * 从指定的类开始向下查询对应的继承与实现信息
+     * 从指定的类开始向下查询所有对应的继承与实现信息
      *
      * @param startClassName 指定的类名
      * @return key 父类/接口名称 value 当前类/接口的类型，及子类与实现类信息
      */
-    public Map<String, ExtendsImplInfo> queryExtendsImplInfoDownward(String startClassName) {
-        return queryExtendsImplInfoUpDownward(startClassName, null, false);
+    public LinkedHashMap<String, ExtendsImplInfo> queryAllExtendsImplInfoDownward(String startClassName) {
+        return queryAllExtendsImplInfoUpDownward(startClassName, null, false);
     }
 
     /**
@@ -518,13 +624,13 @@ public class JACGExtendsImplHandler extends BaseHandler {
      */
     public List<ClassNameAndType> queryTopCLassList(String className) {
         List<ClassNameAndType> classNameAndTypeList = new ArrayList<>();
-        Map<String, ExtendsImplInfo> resultMap = new HashMap<>();
+        LinkedHashMap<String, ExtendsImplInfo> resultMap = new LinkedHashMap<>();
         Set<ClassNameAndType> classNameAndTypeSet = new HashSet<>();
         classNameAndTypeSet.add(new ClassNameAndType(className, null));
         while (true) {
             Set<ClassNameAndType> tmpClassNameAndTypeSet = new HashSet<>();
             for (ClassNameAndType classNameAndType : classNameAndTypeSet) {
-                Set<ClassNameAndType> returnClassNameAndTypeSet = queryExtendsImplInfoUpDownward(resultMap, classNameAndType, true);
+                Set<ClassNameAndType> returnClassNameAndTypeSet = doQueryAllExtendsImplInfoUpDownward(resultMap, classNameAndType, true);
                 tmpClassNameAndTypeSet.addAll(returnClassNameAndTypeSet);
                 if (JavaCG2Util.isCollectionEmpty(returnClassNameAndTypeSet)) {
                     // 当前类向上未查询到父类或实现接口
@@ -540,16 +646,16 @@ public class JACGExtendsImplHandler extends BaseHandler {
     }
 
     /**
-     * 从指定的类的所有顶层父类/接口开始向下查询对应的继承与实现信息
+     * 从指定的类的所有顶层父类/接口开始向下查询所有对应的继承与实现信息
      *
      * @param startClassName 指定的类名
      * @return key 父类/接口名称 value 当前类/接口的类型，及子类与实现类信息
      */
-    public Map<String, ExtendsImplInfo> queryExtendsImplInfoDownwardFromTop(String startClassName) {
+    public LinkedHashMap<String, ExtendsImplInfo> queryAllExtendsImplInfoDownwardFromTop(String startClassName) {
         List<ClassNameAndType> topClassNameAndTypeList = queryTopCLassList(startClassName);
         if (JavaCG2Util.isCollectionEmpty(topClassNameAndTypeList)) {
-            return Collections.emptyMap();
+            return new LinkedHashMap<>();
         }
-        return queryExtendsImplInfoUpDownward(null, topClassNameAndTypeList, false);
+        return queryAllExtendsImplInfoUpDownward(null, topClassNameAndTypeList, false);
     }
 }

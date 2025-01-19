@@ -118,7 +118,7 @@ public class MethodCatchExceptionUsageReporter extends AbstractReporter {
      * 生成catch的异常对象信息的使用情况
      *
      * @param expectedMethods 预期会在参数中使用catch的异常对象的方法（例如在日志中打印异常堆栈）
-     *                        格式：[类名]:[方法名]
+     *                        格式：{类名}:{方法名}
      *                        示例：org.slf4j.Logger:error org.slf4j.Logger:info org.slf4j.Logger:warn
      * @return
      */

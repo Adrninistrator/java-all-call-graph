@@ -26,12 +26,12 @@ public class TestFieldInfoHandler extends TestRunByCodeBase {
     public void test1() {
         try (FieldInfoHandler fieldInfoHandler = new FieldInfoHandler(configureWrapper)) {
             List<WriteDbData4FieldInfo> fieldInfoList = fieldInfoHandler.queryClassFieldsByPackageExcludePSF(TestOutClass.class.getName(), "java.util.");
-            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(fieldInfoList));
             printListContent(fieldInfoList, "not_exclude");
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(fieldInfoList));
 
             List<WriteDbData4FieldInfo> fieldInfoList2 = fieldInfoHandler.queryClassFieldsByPackageExcludePSF(TestOutClass.class.getName(), "java.util.", List.class.getName());
-            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(fieldInfoList2));
             printListContent(fieldInfoList2, "exclude");
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(fieldInfoList2));
         }
     }
 
@@ -39,8 +39,8 @@ public class TestFieldInfoHandler extends TestRunByCodeBase {
     public void test2() {
         try (FieldInfoHandler fieldInfoHandler = new FieldInfoHandler(configureWrapper)) {
             List<WriteDbData4FieldInfo> fieldInfoList = fieldInfoHandler.queryClassCustomTypeFields(TestOutClass.class.getName());
-            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(fieldInfoList));
             printListContent(fieldInfoList, "custom_type");
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(fieldInfoList));
         }
     }
 }

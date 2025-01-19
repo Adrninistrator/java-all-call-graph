@@ -143,7 +143,7 @@ public class CallerGraphBaseExtractor extends BaseExtractor implements StackFile
     @Override
     public void handleCallStackData(int dataSeq, List<String> lineList, List<Integer> lineNumberList, boolean runInOtherThread, boolean runInTransaction, Object... args) {
         List<CallerExtractedLine> callerExtractedLineList = JACGUtil.getArgAt(0, args);
-        // 获取调用堆栈最后一条记录的下标
+        // 获取调用堆栈最后一条记录的序号
         int listMaxIndex = lineList.size() - 1;
         String lastLine = null;
         if (lineList.size() >= 2) {

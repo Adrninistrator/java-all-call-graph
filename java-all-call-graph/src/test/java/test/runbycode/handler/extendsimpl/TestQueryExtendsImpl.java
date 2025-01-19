@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.callgraph.extend.I3_1_1_2;
+import test.callgraph.field.TestField1;
 import test.callgraph.future.FutureImpl;
 import test.callgraph.interfaces.AbstractMapper;
 import test.callgraph.interfaces.classes.ExtendsClass1A;
@@ -18,10 +19,21 @@ import test.callgraph.interfaces.classes.SuperItfChild1;
 import test.callgraph.interfaces.interfaces.InterfaceChild3;
 import test.callgraph.interfaces.interfaces.InterfaceSuper1;
 import test.callgraph.interfaces.interfaces.InterfaceSuper2;
+import test.callgraph.signature.TestAbstractClassWithSignatureA;
+import test.callgraph.signature.TestAbstractClassWithSignatureB;
+import test.callgraph.signature.TestClassWithSignature1;
+import test.callgraph.signature.TestClassWithSignature2Multi;
+import test.callgraph.signature.TestClassWithSignature3Multi;
+import test.callgraph.signature.TestClassWithSignatureA1;
+import test.callgraph.signature.TestClassWithSignatureB1;
+import test.callgraph.signature.TestInterfaceWithSignature1;
+import test.callgraph.signature.TestInterfaceWithSignature2;
+import test.callgraph.signature.child.TestChildClassWithSignature1;
+import test.callgraph.signature.child.TestChildInterfaceWithSignature1;
 import test.runbycode.base.TestRunByCodeBase;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -86,7 +98,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
     }
 
     private void doTestQueryUpwardByClassName(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
-        List<ClassNameAndType> classNameAndTypeList = jacgExtendsImplHandler.queryUpwardByClassName(className);
+        List<ClassNameAndType> classNameAndTypeList = jacgExtendsImplHandler.queryUpwardClassNameAndTypeByClassName(className);
         Assert.assertFalse(JavaCG2Util.isCollectionEmpty(classNameAndTypeList));
         printListContent(classNameAndTypeList, className);
     }
@@ -108,8 +120,8 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
     @Test
     public void testQueryAllSuperClassName() {
         try (JACGExtendsImplHandler jacgExtendsImplHandler = new JACGExtendsImplHandler(configureWrapper)) {
-            doTestQueryAllSuperClassName(jacgExtendsImplHandler, I3_1_1_2.class.getName(),false);
-            doTestQueryAllSuperClassName(jacgExtendsImplHandler, FutureImpl.class.getName(),true);
+            doTestQueryAllSuperClassName(jacgExtendsImplHandler, I3_1_1_2.class.getName(), false);
+            doTestQueryAllSuperClassName(jacgExtendsImplHandler, FutureImpl.class.getName(), true);
         }
     }
 
@@ -143,7 +155,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
     }
 
     private void doTestQueryExtendsImplInfoUpward(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
-        Map<String, ExtendsImplInfo> extendsImplInfoMap = jacgExtendsImplHandler.queryExtendsImplInfoUpward(className);
+        LinkedHashMap<String, ExtendsImplInfo> extendsImplInfoMap = jacgExtendsImplHandler.queryAllExtendsImplInfoUpward(className);
         Assert.assertFalse(JavaCG2Util.isMapEmpty(extendsImplInfoMap));
         printMapContent(extendsImplInfoMap, className);
         logger.info("{}\n{}", PROMPT_CLASS_GRAPH_UPWARD, JACGJsonUtil.getJsonStrPretty(extendsImplInfoMap));
@@ -158,7 +170,7 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
     }
 
     private void doTestQueryExtendsImplInfoDownward(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
-        Map<String, ExtendsImplInfo> extendsImplInfoMap = jacgExtendsImplHandler.queryExtendsImplInfoDownward(className);
+        LinkedHashMap<String, ExtendsImplInfo> extendsImplInfoMap = jacgExtendsImplHandler.queryAllExtendsImplInfoDownward(className);
         Assert.assertFalse(JavaCG2Util.isMapEmpty(extendsImplInfoMap));
         printMapContent(extendsImplInfoMap, className);
         logger.info("{}\n{}", PROMPT_CLASS_GRAPH_DOWNWARD, JACGJsonUtil.getJsonStrPretty(extendsImplInfoMap));
@@ -173,9 +185,41 @@ public class TestQueryExtendsImpl extends TestRunByCodeBase {
     }
 
     private void doTestQueryExtendsImplInfoDownwardFromTop(JACGExtendsImplHandler jacgExtendsImplHandler, String className) {
-        Map<String, ExtendsImplInfo> extendsImplInfoMap = jacgExtendsImplHandler.queryExtendsImplInfoDownwardFromTop(className);
+        LinkedHashMap<String, ExtendsImplInfo> extendsImplInfoMap = jacgExtendsImplHandler.queryAllExtendsImplInfoDownwardFromTop(className);
         Assert.assertFalse(JavaCG2Util.isMapEmpty(extendsImplInfoMap));
         printMapContent(extendsImplInfoMap, className);
         logger.info("{}\n{}", PROMPT_CLASS_GRAPH_DOWNWARD, JACGJsonUtil.getJsonStrPretty(extendsImplInfoMap));
+    }
+
+    @Test
+    public void testGetPathToSuperImplClassByFull() {
+        try (JACGExtendsImplHandler jacgExtendsImplHandler = new JACGExtendsImplHandler(configureWrapper)) {
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignatureA1.class.getName(), TestAbstractClassWithSignatureA.class.getName(), true);
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignatureA1.class.getName(), TestInterfaceWithSignature1.class.getName(), true);
+
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignature1.class.getName(), TestInterfaceWithSignature1.class.getName(), true);
+
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestChildClassWithSignature1.class.getName(), String.class.getName(), false);
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestChildClassWithSignature1.class.getName(), TestChildInterfaceWithSignature1.class.getName(), true);
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestChildClassWithSignature1.class.getName(), TestInterfaceWithSignature1.class.getName(), true);
+
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignatureB1.class.getName(), TestAbstractClassWithSignatureB.class.getName(), true);
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignatureB1.class.getName(), TestInterfaceWithSignature1.class.getName(), true);
+
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignature2Multi.class.getName(), TestField1.class.getName(), true);
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignature2Multi.class.getName(), TestInterfaceWithSignature1.class.getName(), true);
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignature2Multi.class.getName(), TestInterfaceWithSignature2.class.getName(), true);
+
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignature3Multi.class.getName(), TestField1.class.getName(), true);
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignature3Multi.class.getName(), TestInterfaceWithSignature2.class.getName(), true);
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignature3Multi.class.getName(), TestChildInterfaceWithSignature1.class.getName(), true);
+            doTestGetPathToSuperImplClassByFull(jacgExtendsImplHandler, TestClassWithSignature3Multi.class.getName(), TestInterfaceWithSignature1.class.getName(), true);
+        }
+    }
+
+    private void doTestGetPathToSuperImplClassByFull(JACGExtendsImplHandler jacgExtendsImplHandler, String fromClassName, String toClassName, boolean expectedFound) {
+        List<String> classNameList = jacgExtendsImplHandler.getPathToSuperImplClassByFull(fromClassName, toClassName);
+        printListContent(classNameList, fromClassName, toClassName);
+        Assert.assertEquals(expectedFound, !JavaCG2Util.isCollectionEmpty(classNameList));
     }
 }

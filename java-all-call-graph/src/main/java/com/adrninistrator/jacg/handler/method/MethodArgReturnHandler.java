@@ -272,7 +272,8 @@ public class MethodArgReturnHandler extends BaseHandler {
             sql = "select " + DC.MARG_ARG_NAME +
                     " from " + DbTableInfoEnum.DTIE_METHOD_ARGUMENT.getTableName() +
                     " where " + DC.MARG_METHOD_HASH + " = ?" +
-                    " and " + DC.MARG_ARG_SEQ + " = ?";
+                    " and " + DC.MARG_ARG_SEQ + " = ?" +
+                    " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
@@ -291,7 +292,7 @@ public class MethodArgReturnHandler extends BaseHandler {
         if (sql == null) {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_RETURN_CALL_ID) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_RETURN_CALL_ID.getTableName() +
-                    " where " + DC.MRCI_CALLER_METHOD_HASH + " = ?" +
+                    " where " + DC.MRCI_METHOD_HASH + " = ?" +
                     " order by " + DC.MRCI_RETURN_CALL_ID;
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
@@ -311,7 +312,7 @@ public class MethodArgReturnHandler extends BaseHandler {
         if (sql == null) {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_RETURN_ARG_SEQ) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_RETURN_ARG_SEQ.getTableName() +
-                    " where " + DC.MRAS_CALLER_METHOD_HASH + " = ?" +
+                    " where " + DC.MRAS_METHOD_HASH + " = ?" +
                     " order by " + DC.MRAS_RETURN_ARG_SEQ;
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
@@ -342,7 +343,8 @@ public class MethodArgReturnHandler extends BaseHandler {
     /**
      * 查询指定方法指定的参数中的泛型类型
      *
-     * @param fullMethod
+     * @param fullMethod 完整方法
+     * @param argSeq     参数序号，从0开始
      * @return
      */
     public List<WriteDbData4MethodArgGenericsType> queryMethodArgGenericsTypeByMethodArg(String fullMethod, int argSeq) {
@@ -363,10 +365,11 @@ public class MethodArgReturnHandler extends BaseHandler {
     /**
      * 查询指定方法返回类型中泛型类型中出现的自定义类型
      *
-     * @param fullMethod
+     * @param fullMethod     完整方法
+     * @param onlyCustomType 是否只包含自定义类型
      * @return
      */
-    public List<String> queryCustomTypeInMethodReturnGenerics(String fullMethod) {
+    public List<String> queryGenericsTypeInMethodReturn(String fullMethod, boolean onlyCustomType) {
         List<String> returnList = new ArrayList<>();
         List<WriteDbData4MethodReturnGenericsType> list = queryReturnGenericsTypeByMethod(fullMethod);
         if (JavaCG2Util.isCollectionEmpty(list)) {
@@ -374,13 +377,11 @@ public class MethodArgReturnHandler extends BaseHandler {
         }
         for (WriteDbData4MethodReturnGenericsType methodReturnGenericsType : list) {
             if (!JavaCG2Constants.FILE_KEY_GENERICS_TYPE.equals(methodReturnGenericsType.getType()) ||
-                    !JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(methodReturnGenericsType.getGenericsCategory())) {
-                // 非泛型类型，或泛型类型非自定义类型，跳过
+                    (onlyCustomType && !JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(methodReturnGenericsType.getGenericsCategory()))) {
+                // 非泛型类型，或要求只包含自定义类型，跳过
                 continue;
             }
-            if (!returnList.contains(methodReturnGenericsType.getGenericsType())) {
-                returnList.add(methodReturnGenericsType.getGenericsType());
-            }
+            returnList.add(methodReturnGenericsType.getGenericsType());
         }
         return returnList;
     }
@@ -388,11 +389,12 @@ public class MethodArgReturnHandler extends BaseHandler {
     /**
      * 查询指定方法参数中泛型类型中出现的自定义类型
      *
-     * @param fullMethod
-     * @param argSeq
+     * @param fullMethod     完整方法
+     * @param argSeq         参数序号，从0开始
+     * @param onlyCustomType 是否只包含自定义类型
      * @return
      */
-    public List<String> queryCustomTypeInMethodArgGenerics(String fullMethod, int argSeq) {
+    public List<String> queryGenericsTypeInMethodArg(String fullMethod, int argSeq, boolean onlyCustomType) {
         List<String> returnList = new ArrayList<>();
         List<WriteDbData4MethodArgGenericsType> list = queryMethodArgGenericsTypeByMethodArg(fullMethod, argSeq);
         if (JavaCG2Util.isCollectionEmpty(list)) {
@@ -400,8 +402,8 @@ public class MethodArgReturnHandler extends BaseHandler {
         }
         for (WriteDbData4MethodArgGenericsType methodArgGenericsType : list) {
             if (!JavaCG2Constants.FILE_KEY_GENERICS_TYPE.equals(methodArgGenericsType.getType()) ||
-                    !JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(methodArgGenericsType.getGenericsCategory())) {
-                // 非泛型类型，或泛型类型非自定义类型，跳过
+                    (onlyCustomType && !JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(methodArgGenericsType.getGenericsCategory()))) {
+                // 非泛型类型，或要求只包含自定义类型，跳过
                 continue;
             }
             if (!returnList.contains(methodArgGenericsType.getGenericsType())) {
@@ -438,8 +440,8 @@ public class MethodArgReturnHandler extends BaseHandler {
             }
             // 添加方法当前自定义类型参数的泛型类型中的全部常用数据类型的字段信息
             if (JavaCG2YesNoEnum.isYes(methodArgument.getExistsGenericsType())) {
-                // 查询指定方法指定的参数中的泛型类型
-                List<String> methodArgGenericsTypeList = queryCustomTypeInMethodArgGenerics(fullMethod, methodArgument.getArgSeq());
+                // 查询指定方法指定的参数中的泛型自定义类型
+                List<String> methodArgGenericsTypeList = queryGenericsTypeInMethodArg(fullMethod, methodArgument.getArgSeq(), true);
                 for (String methodArgGenericsType : methodArgGenericsTypeList) {
                     // 查询Spring Controller某个方法的某个自定义类型参数中的全部常用数据类型的字段信息
                     List<CommonFieldInfoInClass> commonFieldInfoInClassListInArgGT = fieldInfoHandler.queryAllCommonFieldInfoInClass(methodArgGenericsType, true, true, true, null);

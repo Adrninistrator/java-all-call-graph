@@ -10,10 +10,10 @@ import java.util.Objects;
  * @description: 类名及类型
  */
 public class ClassNameAndType {
-    // 子类或实现类类名
+    // 类名
     private final String className;
 
-    // 子类或实现类类的类型
+    // 类的类型
     private final ClassInterfaceEnum classType;
 
     public ClassNameAndType(String className, ClassInterfaceEnum classType) {
@@ -32,6 +32,14 @@ public class ClassNameAndType {
     @Override
     public int hashCode() {
         return Objects.hash(className);
+    }
+
+    @Override
+    public String toString() {
+        return "ClassNameAndType{" +
+                "className='" + className + '\'' +
+                ", classType=" + classType +
+                '}';
     }
 
     public String getClassName() {

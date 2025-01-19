@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 public class TestArgument1 {
     private static final Logger logger = LoggerFactory.getLogger(TestArgument1.class);
 
-    public static void test() {
+    public static void test1() {
         logger.info("test\ra");
         System.out.println("test\ra");
         System.out.println("test\ra");
@@ -40,6 +40,9 @@ public class TestArgument1 {
         testStringMulti("1", "2", "3");
         testStringMulti("1", "2", "3");
         testStringMulti("a", "b", "c");
+    }
+
+    private void test2() {
         testStringArray("1", "2", "3");
         testStringArray("1", "2", "3");
         testStringArray("a", "b", "c");

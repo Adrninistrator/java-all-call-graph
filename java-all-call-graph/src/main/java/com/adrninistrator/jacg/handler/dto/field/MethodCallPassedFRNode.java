@@ -21,7 +21,7 @@ public class MethodCallPassedFRNode {
 
     /*
         当前处理的set方法对应的方法调用解析后信息列表索引
-        节点列表下标初始化为-1，因为在处理时需要加一
+        节点列表序号初始化为-1，因为在处理时需要加一
      */
     private int methodCallInfoParsedListIndex = -1;
 
@@ -65,7 +65,7 @@ public class MethodCallPassedFRNode {
     }
 
     /**
-     * 增加当前处理的set方法对应的方法调用解析后信息列表下标
+     * 增加当前处理的set方法对应的方法调用解析后信息列表序号
      *
      * @return true: 增加成功 false: 已处理到列表最后一个元素，增加失败
      */

@@ -26,7 +26,7 @@ public class TestArgument2 {
         testString(s1);
         testString(s2);
 
-        TestArgument1.test();
+        TestArgument1.test1();
     }
 
     private static void testString(String s) {

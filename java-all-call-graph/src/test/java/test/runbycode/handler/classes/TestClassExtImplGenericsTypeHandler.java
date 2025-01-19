@@ -4,13 +4,14 @@ import com.adrninistrator.jacg.handler.classes.ClassExtImplGenericsTypeHandler;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
-import test.callgraph.interfaces.AbstractMapper;
-import test.callgraph.interfaces.interfaces.extend.BaseMapper;
-import test.callgraph.manualaddmethodcall.unfixed.AbstractUnFixedService1;
-import test.callgraph.manualaddmethodcall.unfixed.UnfixedService1a;
-import test.callgraph.signature.TestClassWithSignature1;
-import test.callgraph.signature.TestClassWithSignature2;
-import test.callgraph.signature.TestInterfaceWithSignature;
+import test.callgraph.signature.TestAbstractClassWithSignatureA;
+import test.callgraph.signature.TestClassWithSignature4Empty;
+import test.callgraph.signature.TestClassWithSignatureA1;
+import test.callgraph.signature.TestInterfaceWithSignature1;
+import test.callgraph.signature.child.TestChildClassWithSignature1;
+import test.callgraph.signature.child.TestChildClassWithSignature2;
+import test.callgraph.signature.child.TestChildClassWithSignature3Empty;
+import test.callgraph.signature.child.TestChildInterfaceWithSignature1;
 import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.List;
@@ -28,18 +29,28 @@ public class TestClassExtImplGenericsTypeHandler extends TestRunByCodeBase {
     }
 
     @Test
-    public void testClassSignatureEi1() {
+    public void testGetExtImplGenericsType4ClassTo() {
         try (ClassExtImplGenericsTypeHandler classExtImplGenericsTypeHandler = new ClassExtImplGenericsTypeHandler(configureWrapper)) {
-            doTestClassSignatureEi1(classExtImplGenericsTypeHandler, UnfixedService1a.class.getName(), AbstractUnFixedService1.class.getName(), true);
-            doTestClassSignatureEi1(classExtImplGenericsTypeHandler, TestClassWithSignature1.class.getName(), TestInterfaceWithSignature.class.getName(), true);
-            doTestClassSignatureEi1(classExtImplGenericsTypeHandler, TestClassWithSignature2.class.getName(), TestInterfaceWithSignature.class.getName(), true);
-            doTestClassSignatureEi1(classExtImplGenericsTypeHandler, AbstractMapper.class.getName(), BaseMapper.class.getName(), false);
+            doTestGetExtImplGenericsType4ClassTo(classExtImplGenericsTypeHandler, TestClassWithSignatureA1.class.getName(), TestAbstractClassWithSignatureA.class.getName(), true);
+            doTestGetExtImplGenericsType4ClassTo(classExtImplGenericsTypeHandler, TestClassWithSignatureA1.class.getName(), TestInterfaceWithSignature1.class.getName(), true);
+
+            doTestGetExtImplGenericsType4ClassTo(classExtImplGenericsTypeHandler, TestChildClassWithSignature1.class.getName(), String.class.getName(), false);
+            doTestGetExtImplGenericsType4ClassTo(classExtImplGenericsTypeHandler, TestChildClassWithSignature1.class.getName(), TestChildInterfaceWithSignature1.class.getName(),
+                    true);
+            doTestGetExtImplGenericsType4ClassTo(classExtImplGenericsTypeHandler, TestChildClassWithSignature1.class.getName(), TestInterfaceWithSignature1.class.getName(), true);
+
+            doTestGetExtImplGenericsType4ClassTo(classExtImplGenericsTypeHandler, TestChildClassWithSignature3Empty.class.getName(), TestInterfaceWithSignature1.class.getName(),
+                    false);
+
+            doTestGetExtImplGenericsType4ClassTo(classExtImplGenericsTypeHandler, TestClassWithSignature4Empty.class.getName(), TestInterfaceWithSignature1.class.getName(), false);
+
+            doTestGetExtImplGenericsType4ClassTo(classExtImplGenericsTypeHandler, TestChildClassWithSignature2.class.getName(), TestInterfaceWithSignature1.class.getName(), true);
         }
     }
 
-    private void doTestClassSignatureEi1(ClassExtImplGenericsTypeHandler classSignatureEi1Handler4Query, String className, String upperClassName, boolean exists) {
-        List<String> list = classSignatureEi1Handler4Query.queryClassExtImplGenericsTypeListByFull(className, upperClassName);
-        printListContent(list, className, upperClassName);
+    private void doTestGetExtImplGenericsType4ClassTo(ClassExtImplGenericsTypeHandler classSignatureEi1Handler4Query, String fromClassName, String toClassName, boolean exists) {
+        List<String> list = classSignatureEi1Handler4Query.getExtImplGenericsType4ClassTo(fromClassName, toClassName);
+        printListContent(list, fromClassName, toClassName);
         Assert.assertEquals(!exists, JavaCG2Util.isCollectionEmpty(list));
     }
 }

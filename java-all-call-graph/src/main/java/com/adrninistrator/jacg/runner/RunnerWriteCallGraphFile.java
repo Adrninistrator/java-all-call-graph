@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.annotation.attributes.AnnotationAttributesFormatter;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlColumnInfoCodeParser;
@@ -34,11 +35,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -90,9 +88,6 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
             // 记录执行失败
             recordTaskFail();
         }
-
-        // 打印重复的类名
-        printDuplicateClasses();
     }
 
     @Override
@@ -171,34 +166,36 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
             return false;
         }
 
-        // 添加默认的代码解析扩展类
-        MyBatisMySqlSqlInfoCodeParser myBatisMySqlSqlInfoCodeParser = new MyBatisMySqlSqlInfoCodeParser();
+        if (configureWrapper.getMainConfig(ConfigKeyEnum.CKE_PARSE_OTHER_TYPE_FILE)) {
+            // 添加默认的代码解析扩展类
+            MyBatisMySqlSqlInfoCodeParser myBatisMySqlSqlInfoCodeParser = new MyBatisMySqlSqlInfoCodeParser();
 
-        MyBatisMySqlColumnInfoCodeParser myBatisMySqlColumnInfoCodeParser = new MyBatisMySqlColumnInfoCodeParser();
-        MyBatisMySqlEntityInfoCodeParser myBatisMySqlEntityInfoCodeParser = new MyBatisMySqlEntityInfoCodeParser();
-        MyBatisMySqlWriteSqlInfoCodeParser myBatisMySqlWriteSqlInfoCodeParser = new MyBatisMySqlWriteSqlInfoCodeParser();
-        MyBatisMySqlSetColumnCodeParser myBatisMySqlSetColumnCodeParser = new MyBatisMySqlSetColumnCodeParser();
-        MyBatisMySqlSelectColumnCodeParser myBatisMySqlSelectColumnCodeParser = new MyBatisMySqlSelectColumnCodeParser();
-        MyBatisMySqlWhereColumnCodeParser myBatisMySqlWhereColumnCodeParser = new MyBatisMySqlWhereColumnCodeParser();
+            MyBatisMySqlColumnInfoCodeParser myBatisMySqlColumnInfoCodeParser = new MyBatisMySqlColumnInfoCodeParser();
+            MyBatisMySqlEntityInfoCodeParser myBatisMySqlEntityInfoCodeParser = new MyBatisMySqlEntityInfoCodeParser();
+            MyBatisMySqlWriteSqlInfoCodeParser myBatisMySqlWriteSqlInfoCodeParser = new MyBatisMySqlWriteSqlInfoCodeParser();
+            MyBatisMySqlSetColumnCodeParser myBatisMySqlSetColumnCodeParser = new MyBatisMySqlSetColumnCodeParser();
+            MyBatisMySqlSelectColumnCodeParser myBatisMySqlSelectColumnCodeParser = new MyBatisMySqlSelectColumnCodeParser();
+            MyBatisMySqlWhereColumnCodeParser myBatisMySqlWhereColumnCodeParser = new MyBatisMySqlWhereColumnCodeParser();
 
-        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlColumnInfoCodeParser(myBatisMySqlColumnInfoCodeParser);
-        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlEntityInfoCodeParser(myBatisMySqlEntityInfoCodeParser);
-        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWriteSqlInfoCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
-        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSetColumnCodeParser(myBatisMySqlSetColumnCodeParser);
-        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSelectColumnCodeParser(myBatisMySqlSelectColumnCodeParser);
-        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWhereColumnCodeParser(myBatisMySqlWhereColumnCodeParser);
+            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlColumnInfoCodeParser(myBatisMySqlColumnInfoCodeParser);
+            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlEntityInfoCodeParser(myBatisMySqlEntityInfoCodeParser);
+            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWriteSqlInfoCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
+            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSetColumnCodeParser(myBatisMySqlSetColumnCodeParser);
+            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSelectColumnCodeParser(myBatisMySqlSelectColumnCodeParser);
+            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWhereColumnCodeParser(myBatisMySqlWhereColumnCodeParser);
 
-        javaCG2Entry.addCodeParser(myBatisMySqlSqlInfoCodeParser);
-        javaCG2Entry.addCodeParser(myBatisMySqlColumnInfoCodeParser);
-        javaCG2Entry.addCodeParser(myBatisMySqlEntityInfoCodeParser);
-        javaCG2Entry.addCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
-        javaCG2Entry.addCodeParser(myBatisMySqlSetColumnCodeParser);
-        javaCG2Entry.addCodeParser(myBatisMySqlSelectColumnCodeParser);
-        javaCG2Entry.addCodeParser(myBatisMySqlWhereColumnCodeParser);
-        javaCG2Entry.addCodeParser(new SpringTaskXmlCodeParser());
-        javaCG2Entry.addCodeParser(new MyBatisAnnotationCodeParser());
-        javaCG2Entry.addCodeParser(new PropertiesConfCodeParser());
-        javaCG2Entry.addCodeParser(new SpringXmlBeanParser());
+            javaCG2Entry.addCodeParser(myBatisMySqlSqlInfoCodeParser);
+            javaCG2Entry.addCodeParser(myBatisMySqlColumnInfoCodeParser);
+            javaCG2Entry.addCodeParser(myBatisMySqlEntityInfoCodeParser);
+            javaCG2Entry.addCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
+            javaCG2Entry.addCodeParser(myBatisMySqlSetColumnCodeParser);
+            javaCG2Entry.addCodeParser(myBatisMySqlSelectColumnCodeParser);
+            javaCG2Entry.addCodeParser(myBatisMySqlWhereColumnCodeParser);
+            javaCG2Entry.addCodeParser(new SpringTaskXmlCodeParser());
+            javaCG2Entry.addCodeParser(new MyBatisAnnotationCodeParser());
+            javaCG2Entry.addCodeParser(new PropertiesConfCodeParser());
+            javaCG2Entry.addCodeParser(new SpringXmlBeanParser());
+        }
 
         // 添加参数配置中的代码解析扩展类
         if (!JavaCG2Util.isCollectionEmpty(codeParserExtensionClassList)) {
@@ -277,26 +274,6 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
             JavaCG2OtherConfigFileUseSetEnum currentConfig = configs[i];
             configureWrapper.doPrintSetConfigInfo(markdownWriter, i, currentConfig.getFileName(), currentConfig.getClass().getSimpleName(), currentConfig.name(),
                     currentConfig.getDesc(), javaCG2ConfigureWrapper.getOtherConfigSet(currentConfig, false));
-        }
-    }
-
-    // 打印重复的类名
-    protected void printDuplicateClasses() {
-        Map<String, List<String>> duplicateClassNameMap = javaCG2Entry.getDuplicateClassNameMap();
-        if (duplicateClassNameMap.isEmpty()) {
-            logger.info("不存在重复的类名");
-            return;
-        }
-
-        List<String> duplicateClassNameList = new ArrayList<>(duplicateClassNameMap.keySet());
-        Collections.sort(duplicateClassNameList);
-
-        for (String duplicateClassName : duplicateClassNameList) {
-            List<String> classFilePathList = duplicateClassNameMap.get(duplicateClassName);
-            logger.info("重复的类名 {} 使用的class文件 {}", duplicateClassName, classFilePathList.get(0));
-            for (int i = 1; i < classFilePathList.size(); i++) {
-                logger.info("重复的类名 {} 跳过的class文件 {}", duplicateClassName, classFilePathList.get(i));
-            }
         }
     }
 

@@ -15,17 +15,20 @@ ConfigKeyEnum
 |参数名称|参数枚举名|参数说明|参数值|
 |---|---|---|---|
 |app.name|CKE_APP_NAME|当前应用的调用关系写入数据库里的表名后缀|test_rbc|
-|call.graph.output.detail|CKE_CALL_GRAPH_OUTPUT_DETAIL|生成调用链时的详细程度，参考 OutputDetailEnum 枚举，0: 最详细，1: 详细，2: 中等，3: 最简单|2|
 |thread.num|CKE_THREAD_NUM|并发处理线程数量/数据源连接池数量|20|
-|ignore.dup.callee.in.one.caller|CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER|生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否需要忽略|false|
+|db.insert.batch.size|CKE_DB_INSERT_BATCH_SIZE|批量写入数据库时每次插入的数量|1000|
+|drop.or.truncate.table|CKE_DROP_OR_TRUNCATE_TABLE|在插入数据库表前，对表执行 DROP(false) 还是 TRUNCATE(true) 操作|false|
+|parse.other.type.file|CKE_PARSE_OTHER_TYPE_FILE|解析jar包时，是否对.xml、.properties等其他格式的文件进行解析，false:不解析，true:解析|true|
+|handle.get.set.field.relationship|CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP|解析jar包时，是否处理通过get/set方法关联的字段关联关系|false|
 |output.root.path|CKE_OUTPUT_ROOT_PATH|生成调用链文件的根目录路径，以"/"或"\\"作为分隔符，末尾是否为分隔符不影响（默认为当前目录）||
 |output.dir.flag|CKE_OUTPUT_DIR_FLAG|生成调用链文件的目录名中的标志，完整目录名使用{app.name}{output.dir.flag}_{当前时间}，默认为空||
 |output.dir.name|CKE_OUTPUT_DIR_NAME|生成调用链文件的目录名，非空时目录名使用当前值，为空时使用上一个参数说明的格式||
-|db.insert.batch.size|CKE_DB_INSERT_BATCH_SIZE|批量写入数据库时每次插入的数量|1000|
-|check.jar.file.updated|CKE_CHECK_JAR_FILE_UPDATED|检查jar包文件是否有更新|true|
-|handle.get.set.field.relationship|CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP|处理通过get/set方法关联的字段关联关系|false|
+|check.jar.file.updated|CKE_CHECK_JAR_FILE_UPDATED|生成调用链文件时，是否检查jar包文件有更新，若发现jar包文件内容发生变化则不生成，false:不检查，true:检查|true|
+|call.graph.output.detail|CKE_CALL_GRAPH_OUTPUT_DETAIL|生成调用链时的详细程度，参考 OutputDetailEnum 枚举，0: 最详细，1: 详细，2: 中等，3: 最简单|1|
+|ignore.dup.callee.in.one.caller|CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER|生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否需要忽略|false|
+|call.graph.gen.separate.stack|CKE_CALL_GRAPH_GEN_SEPARATE_STACK|生成方法调用链时，是否需要为每个调用堆栈生成独立的文件，仅当 call.graph.output.detail=1 时支持|true|
 |call.graph.gen.json.caller|CKE_CALL_GRAPH_GEN_JSON_CALLER|生成向下的方法调用链时，是否需要输出JSON格式的内容|false|
-|drop.or.truncate.table|CKE_DROP_OR_TRUNCATE_TABLE|在插入数据库表前，对表执行 DROP(false) 还是 TRUNCATE(true) 操作|true|
+|gen.call.graph.num.limit|CKE_GEN_CALL_GRAPH_NUM_LIMIT|生成调用链文件时，每个方法允许生成的方法调用数量限制，默认为0，小于等于0代表不限制|0|
 
 ## 2.2. _jacg_config/config_db.properties
 
@@ -58,6 +61,8 @@ OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX
 - 参数值
 
 ```
+java.
+test.callgraph.
 ```
 
 ## 3.2. _jacg_config/method_class_4callee.properties
@@ -75,10 +80,10 @@ OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE
 ```
 java.lang.System
 test.callgraph.annotation.MethodWithAnnotation
-test.callgraph.argument.TestArgument1
-test.callgraph.argument.TestArgument2:testNoCaller(
-test.callgraph.argument.TestArgument2:testNotExist(
 test.callgraph.cyclecall.TestCycleCall1
+test.callgraph.methodargument.TestArgument1
+test.callgraph.methodargument.TestArgument2:testNoCaller(
+test.callgraph.methodargument.TestArgument2:testNotExist(
 test.callgraph.methodcall.TestMCCallee:20
 test.callgraph.methodcall.TestMCCallee:run(
 test.callgraph.methodcall.TestMCCallee:test
@@ -100,11 +105,6 @@ OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER
 ```
 test.callgraph.annotation.CallMethodWithAnnotation:test1(
 test.callgraph.annotation.MethodWithAnnotation
-test.callgraph.argument.TestArgument1:test
-test.callgraph.argument.TestArgument2:test(
-test.callgraph.argument.TestArgument2:testNoCallee(
-test.callgraph.argument.TestArgument2:testNotExist(
-test.callgraph.argument.TestArgumentGenerics1
 test.callgraph.cyclecall.TestCycleCall1
 test.callgraph.extendcomplex.ChildClassA1
 test.callgraph.extendcomplex.ChildClassA2
@@ -114,8 +114,14 @@ test.callgraph.extendcomplex.TestExtendComplex
 test.callgraph.future.CallableImpl:call(
 test.callgraph.interfaces.interfaces.InterfaceSuper1:testSuper1(
 test.callgraph.interfaces.interfaces.InterfaceSuper2:testSuper2(
+test.callgraph.interfacesdefault.TestUseInterfaceDefault1
 test.callgraph.interfacesgeneric.TestInterfacesGeneric1
 test.callgraph.lambda.TestLambda
+test.callgraph.methodargument.TestArgument1:test
+test.callgraph.methodargument.TestArgument2:test(
+test.callgraph.methodargument.TestArgument2:testNoCallee(
+test.callgraph.methodargument.TestArgument2:testNotExist(
+test.callgraph.methodargument.TestArgumentGenerics1
 test.callgraph.methodcall.TestMCCaller:20
 test.callgraph.spring.bean.use.complex.TestUseComplexService
 test.callgraph.spring.mvc.TestSpringController1

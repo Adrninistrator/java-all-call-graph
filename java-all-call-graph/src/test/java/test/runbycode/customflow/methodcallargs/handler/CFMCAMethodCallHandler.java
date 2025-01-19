@@ -41,12 +41,12 @@ public class CFMCAMethodCallHandler extends BaseHandler {
 
     public void addMethodCall() {
         // 根据被调用类名与方法名查询调用方信息
-        List<WriteDbData4MethodCall> allerInfoList = methodCallHandler.queryCallerInfoByCallee(TestCFMCAFlow.class.getName(), "handle");
-        if (JavaCG2Util.isCollectionEmpty(allerInfoList)) {
+        List<WriteDbData4MethodCall> callerInfoList = methodCallHandler.queryCallerInfoByCallee(TestCFMCAFlow.class.getName(), "handle");
+        if (JavaCG2Util.isCollectionEmpty(callerInfoList)) {
             return;
         }
 
-        for (WriteDbData4MethodCall callerInfo : allerInfoList) {
+        for (WriteDbData4MethodCall callerInfo : callerInfoList) {
             if (!MethodCallFlagsEnum.MCFE_METHOD_CALL_INFO.checkFlag(callerInfo.getCallFlags())) {
                 // 当前方法调用没有方法调用信息，跳过
                 continue;

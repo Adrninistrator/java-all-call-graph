@@ -8,6 +8,8 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  * @description: 用于写入数据库的数据，方法行号
  */
 public class WriteDbData4MethodLineNumber implements BaseWriteDbData {
+
+    private int recordId;
     private String methodHash;
     private String simpleClassName;
     private String methodName;
@@ -15,16 +17,12 @@ public class WriteDbData4MethodLineNumber implements BaseWriteDbData {
     private int maxLineNumber;
     private String fullMethod;
 
-    public WriteDbData4MethodLineNumber() {
+    public int getRecordId() {
+        return recordId;
     }
 
-    public WriteDbData4MethodLineNumber(String methodHash, String simpleClassName, String methodName, int minLineNumber, int maxLineNumber, String fullMethod) {
-        this.methodHash = methodHash;
-        this.simpleClassName = simpleClassName;
-        this.methodName = methodName;
-        this.minLineNumber = minLineNumber;
-        this.maxLineNumber = maxLineNumber;
-        this.fullMethod = fullMethod;
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
     }
 
     public String getMethodHash() {

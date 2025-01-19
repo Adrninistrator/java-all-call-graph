@@ -7,7 +7,7 @@ CREATE TABLE if not exists jacg_method_call_method_call_return_{appName} (
   use_return_call_id int NOT NULL COMMENT '返回值被使用的方法调用序号，从1开始',
   callee_method_hash varchar(30) COLLATE utf8_bin NOT NULL COMMENT '被调用方，方法hash+字节数',
   callee_simple_class_name varchar(255) COLLATE utf8_bin NOT NULL COMMENT '被调用方，唯一类名（完整类名或简单类名），需要有单列索引',
-  callee_method_name varchar(200) COLLATE utf8_bin NOT NULL COMMENT '被调用方，方法名',
+  callee_method_name varchar(300) COLLATE utf8_bin NOT NULL COMMENT '被调用方，方法名',
   callee_full_method text COLLATE utf8_bin NOT NULL COMMENT '被调用方，完整方法（类名+方法名+参数）',
   PRIMARY KEY (record_id),
   INDEX idx_mcmcr_eemh_{appName}(callee_method_hash),

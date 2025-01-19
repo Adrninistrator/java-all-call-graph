@@ -39,4 +39,12 @@ public class TestMCCallee {
     public static void notCalled() {
         System.out.println("ok");
     }
+
+    private void testA() {
+        System.out.println("a\rb\nc\td");
+    }
+
+    private String testB() {
+        return "a\rb\nc\td";
+    }
 }

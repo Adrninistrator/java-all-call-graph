@@ -45,13 +45,12 @@ public class TestRBCRunnerGenJarDiffCalleeGraphTG extends TestAbstractRunnerGenJ
     }
 
     private TarGzUnpacker genTarGzUnpacker(String tarGzFilePath, String tarGzUnpackDirPath) {
-        return new TarGzUnpacker(tarGzFilePath,
-                tarGzUnpackDirPath,
-                Collections.singletonList("jar"),
-                null,
-                Arrays.asList(".xml", "properties"),
-                Collections.singletonList("diffjar"),
-                Collections.singletonList("test/callgraph/diffjar/task"));
+        TarGzUnpacker tarGzUnpacker = new TarGzUnpacker(tarGzFilePath, tarGzUnpackDirPath);
+        tarGzUnpacker.setUnpackDirList(Collections.singletonList("jar"));
+        tarGzUnpacker.setUnpackConfigFileTypeList(Arrays.asList(".xml", "properties"));
+        tarGzUnpacker.setUnpackPackageList(Collections.singletonList("diffjar"));
+        tarGzUnpacker.setNoUnpackPackageList(Collections.singletonList("test/callgraph/diffjar/task"));
+        return tarGzUnpacker;
     }
 
     private void testFull(boolean useLocalConfig) {

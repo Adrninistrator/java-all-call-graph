@@ -37,6 +37,7 @@ public class Neo4jWriteDbHandler4ClassInfo extends WriteDbHandler4ClassInfo {
         jacgClassInfo.setClassName(data.getClassName());
         jacgClassInfo.setClassFileHash(data.getClassFileHash());
         jacgClassInfo.setJarNum(data.getJarNum());
+        jacgClassInfo.setClassPathInJar(data.getClassPathInJar());
         return jacgClassInfo;
     }
 }

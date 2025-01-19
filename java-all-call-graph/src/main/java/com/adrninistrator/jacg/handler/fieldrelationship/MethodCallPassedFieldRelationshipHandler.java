@@ -199,8 +199,8 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
         ListAsStack<MethodCallPassedFRNode> methodCallPassedFRStack = new ListAsStack<>();
         /*
             添加初始数据
-            当前处理的set方法对应的方法调用列表下标，设置为0
-            当前处理的set方法对应的方法调用解析后信息列表下标，设置为-1，以下每次循环中都需要加1
+            当前处理的set方法对应的方法调用列表序号，设置为0
+            当前处理的set方法对应的方法调用解析后信息列表序号，设置为-1，以下每次循环中都需要加1
          */
         methodCallPassedFRStack.push(new MethodCallPassedFRNode(setMethodCall, methodCallInfoParsedList));
         // 代表当前处理的路径序号，初始为0
@@ -214,7 +214,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
         // 开始循环处理
         while (!methodCallPassedFRStack.isEmpty()) {
             MethodCallPassedFRNode currentNode = methodCallPassedFRStack.peek();
-            // 增加节点当前处理的set方法对应的方法调用解析后信息列表下标
+            // 增加节点当前处理的set方法对应的方法调用解析后信息列表序号
             if (!currentNode.addMethodCallInfoParsedListIndex()) {
                 // 当前节点处理的set方法对应的方法调用解析后信息列表已处理完毕
                 // 序号加1

@@ -78,7 +78,7 @@ public class GetSetMethodHandler extends BaseHandler {
                     returnList.add(getSetMethod);
                 }
             }
-            // 当前类未查询到对应的字段，再查询父类的
+            // 当前类未查询到对应的get/set方法，再查询父类的
             String superClassName = extendsImplHandler.querySuperClassNameByFull(currentClassName);
             if (superClassName == null) {
                 break;
@@ -132,7 +132,7 @@ public class GetSetMethodHandler extends BaseHandler {
                 checkClassName(className, getSetMethod);
                 return getSetMethod;
             }
-            // 当前类未查询到对应的字段，再查询父类的
+            // 当前类未查询到对应的get/set方法，再查询父类的
             String superClassName = extendsImplHandler.querySuperClassNameByFull(currentClassName);
             if (superClassName == null) {
                 return null;

@@ -293,7 +293,7 @@ public class RunnerGenJarDiffCalleeGraph {
         }
 
         List<String> separateStackDirPathList = callStackFileResult.getSeparateStackDirPathList();
-        if (separateStackDirPathList.isEmpty()) {
+        if (JavaCG2Util.isCollectionEmpty(separateStackDirPathList)) {
             logger.warn("生成发生变化方法到入口方法的调用堆栈文件为空");
             return true;
         }
@@ -412,7 +412,8 @@ public class RunnerGenJarDiffCalleeGraph {
         if (sql == null) {
             sql = "select " + DC.MI_METHOD_INSTRUCTIONS_HASH +
                     " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName(appName, chooseTableSuffixOld()) +
-                    " where " + DC.MI_METHOD_HASH + " = ?";
+                    " where " + DC.MI_METHOD_HASH + " = ?" +
+                    " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObjectOneColumn(sql, String.class, methodHash);

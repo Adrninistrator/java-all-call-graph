@@ -157,6 +157,33 @@ public class FieldInfoHandler extends BaseHandler {
     }
 
     /**
+     * 查询类的字段信息，包含超类中的字段，根据类名查询
+     *
+     * @param className
+     * @return
+     */
+    public List<WriteDbData4FieldInfo> queryFieldInfoByClassNameIncludeSuper(String className) {
+        List<WriteDbData4FieldInfo> fieldInfoList = new ArrayList<>();
+
+        String currentClassName = className;
+        while (true) {
+            // 查询类的字段信息，根据类名查询
+            List<WriteDbData4FieldInfo> tmpList = queryFieldInfoByClassName(currentClassName);
+            if (!JavaCG2Util.isCollectionEmpty(tmpList)) {
+                fieldInfoList.addAll(tmpList);
+            }
+
+            // 需要查询父类中的字段
+            currentClassName = jacgExtendsImplHandler.querySuperClassNameByFull(currentClassName);
+            if (currentClassName == null) {
+                // 未查询到父类
+                break;
+            }
+        }
+        return fieldInfoList;
+    }
+
+    /**
      * 查询类的字段信息，根据类名查询
      *
      * @param className
@@ -195,7 +222,7 @@ public class FieldInfoHandler extends BaseHandler {
     }
 
     /**
-     * 根据简单类名查询DTO的字段信息
+     * 根据类名查询DTO的字段信息
      * 查询非static、非final，且有get或set方法的字段
      *
      * @param className

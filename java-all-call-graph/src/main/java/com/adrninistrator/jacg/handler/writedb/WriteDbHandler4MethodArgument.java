@@ -45,6 +45,7 @@ public class WriteDbHandler4MethodArgument extends AbstractWriteDbHandler<WriteD
         int existsGenericsType = Integer.parseInt(readLineData());
 
         WriteDbData4MethodArgument writeDbData4MethodArgument = new WriteDbData4MethodArgument();
+        writeDbData4MethodArgument.setRecordId(genNextRecordId());
         writeDbData4MethodArgument.setMethodHash(methodHash);
         writeDbData4MethodArgument.setArgSeq(argSeq);
         writeDbData4MethodArgument.setSimpleArgType(dbOperWrapper.querySimpleClassName(argType));
@@ -61,6 +62,7 @@ public class WriteDbHandler4MethodArgument extends AbstractWriteDbHandler<WriteD
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodArgument data) {
         return new Object[]{
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getArgSeq(),
                 data.getSimpleArgType(),

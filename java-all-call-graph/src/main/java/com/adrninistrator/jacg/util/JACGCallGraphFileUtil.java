@@ -359,7 +359,7 @@ public class JACGCallGraphFileUtil {
      * @param methodLevel               方法级别
      * @param fullMethodWithAnnotations 完整方法及注解
      * @param lineColumns               行内容分隔后的列
-     * @param nextStartIndex            后续内容起始下标
+     * @param nextStartIndex            后续内容起始序号
      * @return
      */
     private static CallGraphLineParsed parseCallGraphLine(String line, int methodLevel, String fullMethodWithAnnotations, String[] lineColumns, int nextStartIndex) {

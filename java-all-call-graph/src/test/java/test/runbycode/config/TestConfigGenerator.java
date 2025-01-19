@@ -18,6 +18,7 @@ import test.callgraph.extendcomplex.ChildClassB2;
 import test.callgraph.extendcomplex.TestExtendComplex;
 import test.callgraph.interfaces.interfaces.InterfaceSuper1;
 import test.callgraph.interfaces.interfaces.InterfaceSuper2;
+import test.callgraph.interfacesdefault.TestUseInterfaceDefault1;
 import test.callgraph.interfacesgeneric.TestInterfacesGeneric1;
 import test.callgraph.lambda.TestLambda;
 import test.callgraph.methodargument.TestArgument1;
@@ -44,7 +45,8 @@ public class TestConfigGenerator {
         // java-all-call-graph的配置
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, RUN_BY_CODE_APP_NAME);
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_2.getDetail());
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_1.getDetail());
+//        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_2.getDetail());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM, "20");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE, "1000");
@@ -110,7 +112,8 @@ public class TestConfigGenerator {
                 TestSpringController1.class.getName(),
                 TestUseComplexService.class.getName(),
                 TestLambda.class.getName(),
-                TestInterfacesGeneric1.class.getName()
+                TestInterfacesGeneric1.class.getName(),
+                TestUseInterfaceDefault1.class.getName()
         );
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE,
@@ -122,6 +125,9 @@ public class TestConfigGenerator {
                 System.class.getSimpleName() + JavaCG2Constants.FLAG_COLON,
                 Deprecated.class.getName()
         );
+
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_SEPARATE_STACK, Boolean.TRUE.toString());
+//        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_SEPARATE_STACK, Boolean.FALSE.toString());
 
         return configureWrapper;
     }

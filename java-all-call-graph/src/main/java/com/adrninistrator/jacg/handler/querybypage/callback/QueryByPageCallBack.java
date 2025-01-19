@@ -16,7 +16,9 @@ public interface QueryByPageCallBack<T> {
      * @param argsByPage     自定义参数
      * @return 查询失败时返回: JACGConstants.PAGE_QUERY_FAIL 查询结束时返回: JACGConstants.PAGE_QUERY_LAST 其他情况返回实际的结束ID
      */
-    int queryCurrentEndId(int currentStartId, Object... argsByPage);
+    default int queryCurrentEndId(int currentStartId, Object... argsByPage) {
+        return 0;
+    }
 
     /**
      * 根据当前开始及结束ID，分页查询需要的数据
@@ -38,5 +40,14 @@ public interface QueryByPageCallBack<T> {
      */
     default boolean handleDataList(List<T> dataList, Object... argsByPage) throws Exception {
         return true;
+    }
+
+    /**
+     * 当查询结果为空时是否结束循环查询
+     *
+     * @return true: 结束 false: 不结束
+     */
+    default boolean exitWhenQueryEmpty() {
+        return false;
     }
 }

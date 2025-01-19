@@ -29,24 +29,33 @@ public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<Writ
 
     @Override
     protected WriteDbData4MethodLineNumber genData(String[] array) {
-        String fullMethod = array[0];
+        String fullMethod = readLineData();
         // 根据完整方法前缀判断是否需要处理
         if (!isAllowedClassPrefix(fullMethod)) {
             return null;
         }
 
-        String minLineNumber = array[1];
-        String maxLineNumber = array[2];
+        String minLineNumber = readLineData();
+        String maxLineNumber = readLineData();
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
-        return new WriteDbData4MethodLineNumber(methodHash, simpleClassName, methodName, Integer.parseInt(minLineNumber), Integer.parseInt(maxLineNumber), fullMethod);
+        WriteDbData4MethodLineNumber methodLineNumber = new WriteDbData4MethodLineNumber();
+        methodLineNumber.setRecordId(genNextRecordId());
+        methodLineNumber.setMethodHash(methodHash);
+        methodLineNumber.setSimpleClassName(simpleClassName);
+        methodLineNumber.setMethodName(methodName);
+        methodLineNumber.setMinLineNumber(Integer.parseInt(minLineNumber));
+        methodLineNumber.setMaxLineNumber(Integer.parseInt(maxLineNumber));
+        methodLineNumber.setFullMethod(fullMethod);
+        return methodLineNumber;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodLineNumber data) {
         return new Object[]{
+                data.getRecordId(),
                 data.getMethodHash(),
                 data.getSimpleClassName(),
                 data.getMethodName(),
