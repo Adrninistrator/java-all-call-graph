@@ -2,7 +2,7 @@
 
 当前文件中的配置文件只有基本的说明，各配置文件的详细说明请打开对应的配置文件查看
 
-每个配置参数可以通过配置文件或对应的枚举进行修改，效果相同。通过枚举修改配置参数的方式可参考[https://github.com/Adrninistrator/java-all-call-graph/blob/main/config_example.md](https://github.com/Adrninistrator/java-all-call-graph/blob/main/config_example.md)
+每个配置参数可以通过配置文件或对应的枚举进行修改，效果相同。通过枚举修改配置参数的方式可参考[https://github.com/Adrninistrator/java-all-call-graph/blob/main/run_by_code.md](https://github.com/Adrninistrator/java-all-call-graph/blob/main/run_by_code.md)
 
 # 2. 主要的配置信息
 
