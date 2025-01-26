@@ -6,6 +6,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4EnumInitAssignInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 /**
  * @author adrninistrator
@@ -16,8 +18,8 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_ENUM_INIT_ASSIGN_INFO,
-        minColumnNum = 6,
-        maxColumnNum = 6,
+        minColumnNum = 7,
+        maxColumnNum = 7,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_ENUM_INIT_ASSIGN_INFO
 )
 public class WriteDbHandler4EnumInitAssignInfo extends AbstractWriteDbHandler<WriteDbData4EnumInitAssignInfo> {
@@ -38,8 +40,11 @@ public class WriteDbHandler4EnumInitAssignInfo extends AbstractWriteDbHandler<Wr
         int ordinal = Integer.parseInt(readLineData());
         int argSeq = Integer.parseInt(readLineData());
         String fieldType = readLineData();
-        String fieldName = readLineData();
-
+        boolean isBase64Value = JavaCG2YesNoEnum.isYes(readLineData());
+        String fieldValue = readLineData();
+        if (isBase64Value) {
+            fieldValue = JavaCG2Util.base64Decode(fieldValue);
+        }
 
         WriteDbData4EnumInitAssignInfo enumInitAssignInfo = new WriteDbData4EnumInitAssignInfo();
         enumInitAssignInfo.setRecordId(genNextRecordId());
@@ -48,7 +53,7 @@ public class WriteDbHandler4EnumInitAssignInfo extends AbstractWriteDbHandler<Wr
         enumInitAssignInfo.setOrdinal(ordinal);
         enumInitAssignInfo.setArgSeq(argSeq);
         enumInitAssignInfo.setFieldType(fieldType);
-        enumInitAssignInfo.setFieldValue(fieldName);
+        enumInitAssignInfo.setFieldValue(fieldValue);
         enumInitAssignInfo.setClassName(className);
         enumInitAssignInfo.setFullMethod(fullMethod);
         return enumInitAssignInfo;
@@ -77,7 +82,8 @@ public class WriteDbHandler4EnumInitAssignInfo extends AbstractWriteDbHandler<Wr
                 "枚举字段序号",
                 "通过枚举类构造函数被赋值的参数序号（从1开始，最小为3）",
                 "通过枚举类构造函数被赋值的字段类型",
-                "通过枚举类构造函数被赋值的字段名"
+                "通过枚举类构造函数被赋值的字段值是否有进行BASE64编码，1:是，0:否",
+                "通过枚举类构造函数被赋值的字段值"
         };
     }
 

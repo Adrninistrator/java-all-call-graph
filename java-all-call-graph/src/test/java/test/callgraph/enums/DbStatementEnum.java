@@ -12,6 +12,7 @@ public enum DbStatementEnum {
     DSE_REPLACE("replace", "替换"),
     DSE_UPDATE("update", "更新"),
     DSE_DELETE("delete", "删除"),
+    DSE_TEST("test", "测试\ta\r\nb"),
     DSE_ILLEGAL("-", "-");
 
     private final String statement;
