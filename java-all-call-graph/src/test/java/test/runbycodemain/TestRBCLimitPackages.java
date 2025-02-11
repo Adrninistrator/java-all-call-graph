@@ -27,6 +27,13 @@ public class TestRBCLimitPackages extends TestRBCBase {
         super.testRunnerSimpleWriteDb();
     }
 
+    @JACGExample(title = "解析代码并将结果写入文件，不写入数据库",
+            desc = {})
+    @Test
+    public void testRunnerWriteFile() {
+        super.testRunnerWriteFile();
+    }
+
     @JACGExample(title = "获得方法向上到包含关键字的调用堆栈",
             desc = {"首先会生成指定方法向上的完整方法调用链"})
     @Test

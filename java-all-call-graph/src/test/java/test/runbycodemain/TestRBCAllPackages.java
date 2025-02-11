@@ -23,6 +23,11 @@ public class TestRBCAllPackages extends TestRBCBase {
     }
 
     @Test
+    public void testRunnerWriteFile() {
+        super.testRunnerWriteFile();
+    }
+
+    @Test
     public void testFindCallStackTrace4ee() {
         super.testFindCallStackTrace4ee();
     }

@@ -35,6 +35,16 @@ public abstract class TestRBCBase extends TestRunByCodeBase {
         Assert.assertTrue(new RunnerWriteDb(configureWrapperCopy).run(javaCG2ConfigureWrapper));
     }
 
+    public void testRunnerWriteFile() {
+        JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = configureWrapper.genJavaCG2ConfigureWrapper();
+        javaCG2ConfigureWrapper.setConfig(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.TRUE.toString());
+
+        ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
+        configureWrapperCopy.setMainConfig(ConfigKeyEnum.CKE_PARSE_OTHER_TYPE_FILE, Boolean.TRUE.toString());
+
+        Assert.assertTrue(new RunnerWriteCallGraphFile(configureWrapperCopy).run(javaCG2ConfigureWrapper));
+    }
+
     public void testFindCallStackTrace4ee() {
         runFindCallStackTraceAndCheck(new FindCallStackTrace(true, configureWrapper));
     }
