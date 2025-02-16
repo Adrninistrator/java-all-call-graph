@@ -1,9 +1,9 @@
 package com.adrninistrator.jacg.dto.writedb;
 
 import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 /**
  * @author adrninistrator
@@ -72,7 +72,7 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
                                                      String desc
     ) {
         String callerMethodHash = JACGUtil.genHashWithLen(callerFullMethod);
-        String callerMethodName = JACGClassMethodUtil.getMethodNameFromFull(callerFullMethod);
+        String callerMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(callerFullMethod);
 
         WriteDbData4MethodCall writeDbData4MethodCall = new WriteDbData4MethodCall();
         writeDbData4MethodCall.setCallId(callId);
@@ -87,7 +87,7 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
         writeDbData4MethodCall.setCallerReturnType(callerReturnType);
 
         String calleeMethodHash = JACGUtil.genHashWithLen(calleeFullMethod);
-        String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
+        String calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
         writeDbData4MethodCall.setCalleeMethodHash(calleeMethodHash);
         writeDbData4MethodCall.setCalleeSimpleClassName(calleeSimpleClassName);
         writeDbData4MethodCall.setCalleeMethodName(calleeMethodName);

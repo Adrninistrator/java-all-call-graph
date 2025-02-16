@@ -1,7 +1,7 @@
 package test.runbycode.tablesuffix;
 
-import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
@@ -54,7 +54,7 @@ public class TestTableSuffix extends TestRunByCodeBase {
         for (int i = 0; i < 3; i++) {
             ConfigureWrapper configureWrapperCopy = configureWrapper.copy();
             configureWrapperCopy.setMainConfig(ConfigDbKeyEnum.CDKE_DB_TABLE_SUFFIX, String.valueOf(i));
-            Assert.assertTrue(new RunnerWriteDb(configureWrapperCopy).run());
+            Assert.assertTrue(new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapperCopy).run());
             Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapperCopy).run());
             Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapperCopy).run());
         }

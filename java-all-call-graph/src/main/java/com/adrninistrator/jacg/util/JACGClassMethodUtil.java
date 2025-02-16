@@ -35,37 +35,6 @@ public class JACGClassMethodUtil {
     }
 
     /**
-     * 从完整类名中获取包名
-     *
-     * @param className
-     * @return 完整类名
-     */
-    public static String getPackageNameFromFullClassName(String className) {
-        return StringUtils.substringBeforeLast(className, JavaCG2Constants.FLAG_DOT);
-    }
-
-    /**
-     * 从完整方法信息中获取完整类名
-     *
-     * @param method 完整方法信息
-     * @return
-     */
-    public static String getClassNameFromMethod(String method) {
-        return StringUtils.substringBeforeLast(method, JavaCG2Constants.FLAG_COLON);
-    }
-
-    /**
-     * 从完整方法信息中获取简单类名（去掉包名）
-     *
-     * @param method 完整方法信息
-     * @return
-     */
-    public static String getSimpleClassNameFromMethod(String method) {
-        String className = getClassNameFromMethod(method);
-        return JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(className);
-    }
-
-    /**
      * 从完整方法信息中获取方法名+参数（去掉类名）
      *
      * @param fullMethod 完整方法信息
@@ -73,26 +42,6 @@ public class JACGClassMethodUtil {
      */
     public static String getMethodNameWithArgsFromFull(String fullMethod) {
         return StringUtils.substringAfter(fullMethod, JavaCG2Constants.FLAG_COLON);
-    }
-
-    /**
-     * 从完整方法信息中获取方法参数类型，不包含括号
-     *
-     * @param fullMethod 完整方法信息
-     * @return
-     */
-    public static String getMethodArgTypes(String fullMethod) {
-        return StringUtils.substringBetween(fullMethod, JavaCG2Constants.FLAG_LEFT_BRACKET, JavaCG2Constants.FLAG_RIGHT_BRACKET);
-    }
-
-    /**
-     * 从完整方法信息中获取方法名
-     *
-     * @param fullMethod 完整方法信息
-     * @return
-     */
-    public static String getMethodNameFromFull(String fullMethod) {
-        return StringUtils.substringBetween(fullMethod, JavaCG2Constants.FLAG_COLON, JavaCG2Constants.FLAG_LEFT_BRACKET);
     }
 
     /**
@@ -141,7 +90,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static MethodDetail genMethodDetail(String fullMethod) {
-        String className = getClassNameFromMethod(fullMethod);
+        String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         int indexColon = fullMethod.indexOf(JavaCG2Constants.FLAG_COLON);
         int indexLeftBrackets = fullMethod.indexOf(JavaCG2Constants.FLAG_LEFT_BRACKET);
         String methodName = fullMethod.substring(indexColon + 1, indexLeftBrackets);
@@ -158,7 +107,7 @@ public class JACGClassMethodUtil {
      * @return
      */
     public static List<String> genMethodArgTypeList(String fullMethod) {
-        String[] argTypes = StringUtils.splitPreserveAllTokens(getMethodArgTypes(fullMethod), JavaCG2Constants.FLAG_COMMA);
+        String[] argTypes = StringUtils.splitPreserveAllTokens(JavaCG2ClassMethodUtil.getMethodArgTypes(fullMethod), JavaCG2Constants.FLAG_COMMA);
         return Arrays.asList(argTypes);
     }
 
@@ -263,8 +212,8 @@ public class JACGClassMethodUtil {
      * @return true: 在 false: 不在
      */
     public static boolean checkMethodInList(String fullMethod, List<ClassAndMethodName> classAndMethodNameList) {
-        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
+        String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
+        String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);
         for (ClassAndMethodName classAndMethodName : classAndMethodNameList) {
             if (className.equals(classAndMethodName.getClassName()) && methodName.equals(classAndMethodName.getMethodName())) {
                 return true;

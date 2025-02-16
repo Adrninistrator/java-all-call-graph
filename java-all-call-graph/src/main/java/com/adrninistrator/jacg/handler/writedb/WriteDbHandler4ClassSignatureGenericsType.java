@@ -28,10 +28,6 @@ public class WriteDbHandler4ClassSignatureGenericsType extends AbstractWriteDbHa
     @Override
     protected WriteDbData4ClassSignatureGenericsType genData(String[] array) {
         String className = readLineData();
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(className)) {
-            return null;
-        }
         int seq = Integer.parseInt(readLineData());
         String typeVariablesName = readLineData();
         String genericsExtendsClassName = readLineData();

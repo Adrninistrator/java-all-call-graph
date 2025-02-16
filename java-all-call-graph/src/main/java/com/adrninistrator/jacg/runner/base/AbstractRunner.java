@@ -1,13 +1,9 @@
 package com.adrninistrator.jacg.runner.base;
 
-import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
-import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
@@ -18,6 +14,7 @@ import com.adrninistrator.jacg.neo4j.handler.extendsimpl.Neo4jExtendsImplHandler
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -31,11 +28,9 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -117,7 +112,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
      */
     protected void printAllConfigInfo() {
         // 打印所有的配置参数信息
-        configureWrapper.printAllConfigInfo(currentSimpleClassName, currentOutputDirPath);
+        configureWrapper.printAllConfigInfo(currentSimpleClassName, currentOutputDirPath, JACGConstants.FILE_JACG_ALL_CONFIG_MD);
     }
 
     /**
@@ -165,11 +160,11 @@ public abstract class AbstractRunner extends AbstractExecutor {
             }
             // 执行完毕时尝试打印当前使用的配置信息
             if (currentOutputDirPath != null) {
-                configureWrapper.printUsedConfigInfo(currentSimpleClassName, currentOutputDirPath);
+                configureWrapper.printUsedConfigInfo(currentSimpleClassName, currentOutputDirPath, JACGConstants.FILE_JACG_USED_CONFIG_MD);
             } else {
                 logger.info("没有执行生成文件的操作，不打印当前使用的配置信息");
             }
-            logger.info("{} 执行完毕，耗时: {} 秒", currentSimpleClassName, JACGUtil.getSpendSeconds(startTime));
+            logger.info("{} 执行完毕，耗时: {} 秒", currentSimpleClassName, JavaCG2Util.getSpendSeconds(startTime));
             return true;
         } catch (Exception e) {
             logger.error("出现异常 {} ", currentSimpleClassName, e);
@@ -235,13 +230,6 @@ public abstract class AbstractRunner extends AbstractExecutor {
     // 获取H2数据库文件对象
     protected File getH2DbFile() {
         return new File(dbOperator.getDbConfInfo().getDbH2FilePath() + JACGConstants.H2_FILE_EXT);
-    }
-
-    // 获得需要处理的jar包列表
-    protected List<String> getJarPathList() {
-        List<String> jarPathList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR);
-        logger.info("{} 需要处理的jar包或目录\n{}", currentSimpleClassName, StringUtils.join(jarPathList, "\n"));
-        return jarPathList;
     }
 
     /**
@@ -363,7 +351,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
                 return true;
             }
         }
-        logger.info("配置文件 {} 中指定的jar包都在 {} 表中且未发生变化", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo(), DbTableInfoEnum.DTIE_JAR_INFO.getTableNameKeyword());
+        logger.info("配置文件 {} 中指定的jar包都在 {} 表中且未发生变化", JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo(), DbTableInfoEnum.DTIE_JAR_INFO.getTableNameKeyword());
         return false;
     }
 
@@ -389,48 +377,6 @@ public abstract class AbstractRunner extends AbstractExecutor {
         }
         logger.info("文件HASH发生变化 {} {}->{}", jarFilePath, jarInfo.getJarFileHash(), jarFileHash);
         return true;
-    }
-
-    /**
-     * 检查允许处理的类名或包名前缀是否有变化
-     *
-     * @return true: 有变化，false: 没有变化
-     */
-    protected boolean checkAllowedClassPrefixModified() {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.ACP_QUERY;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select " + DC.ACP_CLASS_PREFIX +
-                    " from " + DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX.getTableName() +
-                    " order by " + DC.ACP_RECORD_ID;
-            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
-        // 查询数据库中的配置
-        List<String> allowedClassPrefixListInDb = dbOperator.queryListOneColumn(sql, String.class);
-        // 获取当前指定的配置
-        Set<String> allowedClassPrefixSetInConfig = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true);
-        if (JavaCG2Util.isCollectionEmpty(allowedClassPrefixListInDb) && allowedClassPrefixSetInConfig.isEmpty()) {
-            return false;
-        }
-
-        List<String> allowedClassPrefixListInConfig = new ArrayList<>(allowedClassPrefixSetInConfig);
-        Collections.sort(allowedClassPrefixListInConfig);
-
-        if (allowedClassPrefixListInDb.size() != allowedClassPrefixListInConfig.size()) {
-            logger.error("解析jar包时指定的允许的类包或包名前缀与当前配置中指定的数量不相同\n解析jar包时指定的:\n[\n{}\n]\n当前配置中指定的:\n[\n{}\n]",
-                    StringUtils.join(allowedClassPrefixListInDb, "\n"), StringUtils.join(allowedClassPrefixListInConfig, "\n"));
-            return true;
-        }
-
-        for (int i = 0; i < allowedClassPrefixListInDb.size(); i++) {
-            if (!StringUtils.equals(allowedClassPrefixListInDb.get(i), allowedClassPrefixListInConfig.get(i))) {
-                logger.error("解析jar包时指定的允许的类包或包名前缀与当前配置中指定的内容不相同\n解析jar包时指定的:\n[\n{}\n]\n当前配置中指定的:\n[\n{}\n]",
-                        StringUtils.join(allowedClassPrefixListInDb, "\n"), StringUtils.join(allowedClassPrefixListInConfig, "\n"));
-                return true;
-            }
-        }
-        logger.info("解析jar包时指定的允许的类包或包名前缀与当前配置中指定的内容相同");
-        return false;
     }
 
     public boolean isSomeTaskFail() {

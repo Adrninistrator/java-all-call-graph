@@ -17,8 +17,7 @@ public class TestManualAddFieldRelationshipHandler extends TestRunByCodeBase {
 
     @Test
     public void $test0WriteDb() {
-        configureWrapper.setAllowAllClasses();
-        writeDbSupportField(configureWrapper);
+        writeDbSupportField();
     }
 
     @Test
@@ -33,8 +32,7 @@ public class TestManualAddFieldRelationshipHandler extends TestRunByCodeBase {
 
     @Test
     public void testInsertDbAndAdd1() {
-        configureWrapper.setAllowAllClasses();
-        writeDbSupportField(configureWrapper);
+        writeDbSupportField();
 
         try (ManualAddFieldRelationshipHandler manualAddFieldRelationshipHandler = new ManualAddFieldRelationshipHandler(configureWrapper)) {
             Assert.assertTrue(manualAddFieldRelationshipHandler.beforeAdd());

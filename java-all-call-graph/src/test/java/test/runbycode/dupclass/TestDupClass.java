@@ -1,8 +1,6 @@
 package test.runbycode.dupclass;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.runner.RunnerWriteDb;
-import org.junit.Assert;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import org.junit.Test;
 import test.annotation.JACGExample;
 import test.runbycode.base.TestRunByCodeBase;
@@ -18,10 +16,9 @@ public class TestDupClass extends TestRunByCodeBase {
 
     @Test
     public void test() {
-        configureWrapper.setAllowAllClasses();
-        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
                 "build/libs/jar-diff-version-1/jar-diff-1.jar",
                 "build/libs/jar-diff-version-2/jar-diff-2.jar");
-        Assert.assertTrue(new RunnerWriteDb(configureWrapper).run());
+        commonWriteDb();
     }
 }

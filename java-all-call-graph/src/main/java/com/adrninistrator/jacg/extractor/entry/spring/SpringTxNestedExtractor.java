@@ -1,10 +1,10 @@
 package com.adrninistrator.jacg.extractor.entry.spring;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.dto.infowithhash.AbstractInfoWithMethodHash;
 import com.adrninistrator.jacg.extensions.findstackfilter.SpringTxMethodCallFilter;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGraphExtractedFile;

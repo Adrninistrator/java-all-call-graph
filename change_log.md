@@ -45,7 +45,7 @@ H2 数据库使用说明可参考 [https://blog.csdn.net/a82514921/article/detai
 |checkHandleAnnotation|判断当前类是否处理对应的注解|
 |handleAnnotation|返回方法上的注解处理后的结果|
 
-本工具在生成方法完整调用链时，会先遍历 method_annotation_handler.properties 配置文件中指定所有的 AbstractAnnotationHandler 子类，即对方法上的注解进行处理的类，调用 checkHandleAnnotation 判断当前类是否会处理的注解，若是则调用 handleAnnotation 方法获取处理后的注解信息。
+本工具在生成方法完整调用链时，会先遍历 method_annotation_handler.properties 配置文件中指定所有的 AbstractAnnotationHandler 子类，即对方法上的注解进行处理的类，调用 checkHandleAnnotation 判断当前类是否会处理的注解，若是则调用 handleAnnotation 方法获取处理后的注解信息
 
 最后会调用默认的方法注解处理类 com.adrninistrator.jacg.extensions.annotation_handler.DefaultAnnotationHandler 进行处理，该类会处理所有的注解，生成的注解信息格式为“@注解类名”，例如“@org.aspectj.lang.annotation.Around”
 
@@ -269,7 +269,7 @@ RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 - 支持不释放配置文件
 
-尝试读取 jar 包中的配置文件，相关的配置文件可以不释放到项目中，可以通过 Java 代码对配置参数进行设置（进行二次开发时可能需要使用）。
+尝试读取 jar 包中的配置文件，相关的配置文件可以不释放到项目中，可以通过 Java 代码对配置参数进行设置（进行二次开发时可能需要使用）
 
 - 支持指定存在多个实现类时是否当前文件中继续生成调用链
 
@@ -684,7 +684,7 @@ com.adrninistrator.jacg.handler.enums.EnumsHandler#queryEnumFieldValue
 
 #### 1.26.2.2. parse.other.type.file
 
-解析 jar 包时，是否对。xml、.properties 等其他格式的文件进行解析，false: 不解析，true: 解析
+解析 jar 包时，是否对 .xml、.properties 等其他格式的文件进行解析，false: 不解析，true: 解析
 
 ### 1.26.3. 增加数据库表
 
@@ -712,3 +712,67 @@ method_return_field_info    方法返回的字段（含枚举）
 ### 1.26.5. 单元测试类修改
 
 原有的 test.runbycode 包名中的类名以 TestRBC 开头的单元测试类，修改到 test.runbycodemain 包中
+
+## 1.27. （3.0.0）更新说明
+
+文档暂未全部完成，主要修改了配置参数指定方式，其他功能差别不大，可继续使用上一个版本
+
+### 1.27.1. 删除配置文件
+
+- _jacg_config/allowed_class_prefix.properties
+
+用于指定 java-callgraph2 解析类时需要处理的类名或包名前缀，以及 java-all-call-graph 在写入数据库时需要写入的类名或包名前缀
+
+### 1.27.2. 增加配置文件
+
+- _jacg_extensions/javacg2_method_call_extensions.properties
+
+用于指定 java-callgraph2 组件在处理方法调用时的扩展类
+
+- _jacg_extensions/jacg_method_call_extensions.properties
+
+用于指定 java-all-call-graph 组件在处理方法调用时的扩展类
+
+### 1.27.3. 删除数据库表
+
+- allowed_class_prefix
+
+允许处理的类名或包名前缀
+
+### 1.27.4. com.adrninistrator.jacg.runner.RunnerWriteDb 类修改
+
+使用当前类的有参数构造函数时，增加参数 1 com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper ，需要指定 java-callgraph2 组件使用的配置包装类
+
+修改后的构造函数参数如下：
+
+```java
+(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper)
+```
+
+删除包含参数的 run 方法 run(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper)
+
+### 1.27.5. com.adrninistrator.jacg.runner.RunnerWriteCallGraphFile 类修改
+
+同上
+
+### 1.27.6. 支持识别通过反射调用的方法（被调用对象+被调用方法名称）
+
+如下所示的 TestReflectionUtil1.runByReflection() 方法用于通过反射执行被调用对象 obj 被调用方法 methodName，被调用参数使用 args
+
+```java
+public class TestReflectionUtil1 {
+    public static void runByReflection(Object obj, String methodName, Object... args) {
+        ...
+```
+
+例如以下代码，代表通过反射执行 FRCDtoA 类的 testStrFRCDtoA 方法，使用的参数为"test2DMethodCallReturn"
+
+```java
+  TestReflectionUtil1.runByReflection(new FRCDtoA(), "testStrFRCDtoA", "test2DMethodCallReturn");
+```
+
+在示例代码 test.runbycode.extensions.methodcall.TestAddMethodCall4Reflection1 中展示了怎样识别以上通过反射调用的方法，用于补充进调用链中
+
+在调用 com.adrninistrator.jacg.runner.RunnerWriteDb 类前，需要在 java-all-call-graph 项目的配置包装类 com.adrninistrator.jacg.conf.ConfigureWrapper 对象中使用以上新增的配置文件
+
+参考对应扩展类：test.runbycode.extensions.methodcall.JavaCG2Reflection1MethodCallExtension、test.runbycode.extensions.methodcall.JACGReflection1MethodCallExtension

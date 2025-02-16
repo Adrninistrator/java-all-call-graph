@@ -1,8 +1,8 @@
 package test.runbycode.concurrent;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import org.junit.Assert;
 import org.junit.Test;

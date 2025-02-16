@@ -1,9 +1,9 @@
 package test.runbycode.composite;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
 import com.adrninistrator.jacg.handler.classes.ClassLineNumberHandler;

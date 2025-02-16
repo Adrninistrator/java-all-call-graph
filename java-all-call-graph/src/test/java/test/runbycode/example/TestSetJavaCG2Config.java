@@ -1,8 +1,7 @@
 package test.runbycode.example;
 
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
-import com.adrninistrator.javacg2.common.enums.JavaCG2ConfigKeyEnum;
-import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
@@ -19,10 +18,9 @@ public class TestSetJavaCG2Config extends TestRunByCodeBase {
 
     @Test
     public void test() {
-        JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = configureWrapper.genJavaCG2ConfigureWrapper();
-        javaCG2ConfigureWrapper.setConfig(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.FALSE.toString());
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.FALSE.toString());
 
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(configureWrapper);
-        Assert.assertTrue(runnerWriteDb.run(javaCG2ConfigureWrapper));
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
+        Assert.assertTrue(runnerWriteDb.run());
     }
 }

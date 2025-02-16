@@ -1,7 +1,24 @@
 apply plugin: 'jacoco'
 
+void deleteDirsByPrefix(String dirName, String subDirPrefix) {
+    File dir = file(dirName)
+    if (dir.exists()) {
+        files(dir.listFiles()).each { file ->
+            if (file.isDirectory()) {
+                if (file.name.startsWith(subDirPrefix)) {
+                    println "删除目录 " + file.getAbsolutePath()
+                    file.deleteDir()
+                }
+            }
+        }
+    }
+}
+
 test {
     doFirst {
+        deleteDirsByPrefix("_jacg_o_ee", "test.runbycode.")
+        deleteDirsByPrefix("_jacg_o_er", "test.runbycode.")
+        delete "_unittest_output"
         exclude('test/other', 'test/runbycode/targz', 'test/runlocal', 'test/runbycode/TestRBC*')
         minHeapSize = "256m"
         maxHeapSize = "1g"

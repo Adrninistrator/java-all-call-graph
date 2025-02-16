@@ -48,12 +48,6 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
         int accessFlags = Integer.parseInt(array[1]);
         String type = array[2];
         String upwardClassName = array[3];
-
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(className) && !isAllowedClassPrefix(upwardClassName)) {
-            return null;
-        }
-
         // 生成下一个序号，从0开始
         Integer seq = genNextSeq(className + JavaCG2Constants.FLAG_COLON + type);
         // 判断当前类是否存在子类或子接口

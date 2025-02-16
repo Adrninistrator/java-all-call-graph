@@ -1,8 +1,8 @@
 package test.runbycode.extractor;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.list.ListWithResult;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedFile;
 import com.adrninistrator.jacg.extractor.entry.CallerGraphBaseExtractor;
 import org.junit.Assert;

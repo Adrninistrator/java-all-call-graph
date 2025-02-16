@@ -1,15 +1,15 @@
 package com.adrninistrator.jacg.extractor.entry;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.extractor.callback.StackFileParsedCallback;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CalleeExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CalleeExtractedFile;
 import com.adrninistrator.jacg.extractor.parser.StackFileParser;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +117,7 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
         String callerFullMethod = methodCallHandler.queryCalleeFullMethodByHash(calleeExtractedFile.getMethodHash());
         calleeExtractedFile.setFullMethod(callerFullMethod);
         if (callerFullMethod != null) {
-            calleeExtractedFile.setClassName(JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod));
+            calleeExtractedFile.setClassName(JavaCG2ClassMethodUtil.getClassNameFromMethod(callerFullMethod));
         }
         return calleeExtractedFile;
     }

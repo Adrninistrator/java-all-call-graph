@@ -28,10 +28,6 @@ public class WriteDbHandler4ClassExtImplGenericsType extends AbstractWriteDbHand
     @Override
     protected WriteDbData4ClassExtImplGenericsType genData(String[] array) {
         String className = readLineData();
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(className)) {
-            return null;
-        }
         String extType = readLineData();
         int seq = Integer.parseInt(readLineData());
         String superItfClassName = readLineData();

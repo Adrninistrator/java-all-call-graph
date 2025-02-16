@@ -35,11 +35,6 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
     @Override
     protected WriteDbData4MethodCallInfo genData(String[] array) {
         String callerFullMethod = array[7];
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(callerFullMethod)) {
-            return null;
-        }
-
         int callId = Integer.parseInt(array[0]);
         String objArgsSeq = array[1];
         String seq = array[2];

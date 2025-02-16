@@ -4,9 +4,9 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallMethodCallReturn;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 /**
  * @author adrninistrator
@@ -30,18 +30,13 @@ public class WriteDbHandler4MethodCallMethodCallReturn extends AbstractWriteDbHa
     @Override
     protected WriteDbData4MethodCallMethodCallReturn genData(String[] array) {
         String calleeFullMethod = array[5];
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(calleeFullMethod)) {
-            return null;
-        }
-
         int callId = Integer.parseInt(array[0]);
         String objArgsSeq = array[1];
         String seq = array[2];
         int arrayFlag = Integer.parseInt(array[3]);
         int useReturnCallId = Integer.parseInt(array[4]);
-        String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
-        String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
+        String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
+        String calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
 
         WriteDbData4MethodCallMethodCallReturn writeDbData4MethodCallMethodCallReturn = new WriteDbData4MethodCallMethodCallReturn();
         writeDbData4MethodCallMethodCallReturn.setRecordId(genNextRecordId());

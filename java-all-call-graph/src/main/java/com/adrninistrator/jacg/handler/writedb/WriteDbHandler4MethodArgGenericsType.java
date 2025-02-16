@@ -4,9 +4,9 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgGenericsType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 import java.util.Set;
 
@@ -34,12 +34,7 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
     @Override
     protected WriteDbData4MethodArgGenericsType genData(String[] array) {
         String fullMethod = readLineData();
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(fullMethod)) {
-            return null;
-        }
-
-        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+        String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         int seq = Integer.parseInt(readLineData());

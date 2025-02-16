@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.util;
 
+import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -81,7 +81,7 @@ public class JACGUtil {
             Object obj = clazz.newInstance();
 
             if (!classType.isAssignableFrom(clazz)) {
-                logger.error("指定的类 {} 不是 {} 的实现类", className, classType.getName());
+                logger.error("指定的类 {} 不是 {} 的子类或实现类", className, classType.getName());
                 return null;
             }
 
@@ -122,7 +122,7 @@ public class JACGUtil {
             Object obj = constructor.newInstance(argValues);
 
             if (!classType.isAssignableFrom(clazz)) {
-                logger.error("指定的类 {} 不是 {} 的实现类", className, classType.getName());
+                logger.error("指定的类 {} 不是 {} 的子类或实现类", className, classType.getName());
                 return null;
             }
 
@@ -192,25 +192,6 @@ public class JACGUtil {
     }
 
     /**
-     * 将源列表中的元素添加到目标列表中
-     * 忽略空的元素，忽略重复的元素
-     *
-     * @param srcList
-     * @param destList
-     */
-    public static void addList2List(List<String> srcList, List<String> destList) {
-        if (srcList == null || destList == null) {
-            throw new JavaCG2RuntimeException("参数不允许为空");
-        }
-        for (String src : srcList) {
-            if (StringUtils.isBlank(src) || destList.contains(src)) {
-                continue;
-            }
-            destList.add(src);
-        }
-    }
-
-    /**
      * 在字符串列表中查找字符串
      *
      * @param stringList 字符串列表
@@ -249,15 +230,6 @@ public class JACGUtil {
         }
 
         return (T) args[index];
-    }
-
-    /**
-     * 获取配置文件的根目录
-     *
-     * @return
-     */
-    public static String getInputRootPath() {
-        return JavaCG2Util.getDirPathInJvmOptions(JavaCG2Constants.PROPERTY_INPUT_ROOT_PATH);
     }
 
     /**
@@ -300,42 +272,18 @@ public class JACGUtil {
     }
 
     /**
-     * 检查包名，若以.或/开头或结尾则检查不通过
+     * 检查是否为Java基本类型包装类型，含String
      *
-     * @param packageName
+     * @param clazz
      * @return
      */
-    public static boolean checkPackageName(String packageName) {
-        return !StringUtils.startsWithAny(packageName, ".", "/") && !StringUtils.endsWithAny(packageName, ".", "/");
-    }
-
-    /**
-     * 将包名替换为目录路径
-     *
-     * @param packageName
-     */
-    public static String replacePackage2DirPath(String packageName) {
-        return packageName.replace('.', '/');
-    }
-
-    /**
-     * 获得经过的时间秒数
-     *
-     * @param startTime
-     * @return
-     */
-    public static double getSpendSeconds(long startTime) {
-        return getSecondsFromMilli(System.currentTimeMillis() - startTime);
-    }
-
-    /**
-     * 将耗时的毫秒数改为秒
-     *
-     * @param spendTime
-     * @return
-     */
-    public static double getSecondsFromMilli(long spendTime) {
-        return spendTime / 1000.0D;
+    public static boolean checkJavaBasicWrapperType(Class<?> clazz) {
+        for (Class<?> tmpClass : JACGCommonNameConstants.JAVA_BASIC_WRAPPER_TYPES) {
+            if (tmpClass == clazz) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private JACGUtil() {

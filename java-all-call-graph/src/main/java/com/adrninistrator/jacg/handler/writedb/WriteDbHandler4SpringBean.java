@@ -40,10 +40,6 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
         String springBeanName = array[0];
         String seq = array[1];
         String className = array[2];
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(className)) {
-            return null;
-        }
         String beanType = array[3];
         springBeanMap.put(springBeanName, className);
         WriteDbData4SpringBean writeDbData4SpringBean = new WriteDbData4SpringBean();

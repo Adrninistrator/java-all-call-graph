@@ -18,7 +18,7 @@ public class TestGetSetMethodInClassLine extends TestRunByCodeBase {
 
     @Test
     public void $test0WriteDb() {
-        writeDbSupportField(configureWrapper);
+        writeDbSupportField();
     }
 
     @Test

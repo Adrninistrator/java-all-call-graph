@@ -21,7 +21,6 @@ public class JACGConstants {
     public static final String FILE_JACG_ALL_CONFIG_MD = "_jacg_all_config.md";
     // 保存当前有使用的配置参数信息文件
     public static final String FILE_JACG_USED_CONFIG_MD = "_jacg_used_config.md";
-    public static final String FILE_JAVACG2_ALL_CONFIG_MD = "_javacg2_all_config.md";
     public static final String FILE_STACK_CALLEE_MD = "_stack_callee.md";
     public static final String FILE_STACK_CALLER_MD = "_stack_caller.md";
     public static final String FILE_STACK_SUMMARY_CALLEE_MD = "_summary_callee.md";
@@ -32,18 +31,6 @@ public class JACGConstants {
 
     public static final String JAR_DIFF_METHOD_EXISTED = "existed";
     public static final String JAR_DIFF_METHOD_NEW = "new";
-
-    public static final String MAIN_CONFIG = "主要的配置信息";
-    public static final String USED_CONFIG_FLAG_FILE_KEY = "配置文件名称";
-    public static final String USED_CONFIG_FLAG_FILE_ENUM_CLASS = "配置文件枚举类名";
-    public static final String USED_CONFIG_FLAG_FILE_ENUM_CLASS_AND_NAME = "配置文件枚举类名与枚举名";
-    public static final String USED_CONFIG_FLAG_FILE_DESC = "配置文件说明";
-    public static final String USED_CONFIG_FLAG_CONF_KEY = "参数名称";
-    public static final String USED_CONFIG_FLAG_CONF_ENUM_NAME = "参数枚举名";
-    public static final String USED_CONFIG_FLAG_CONF_DESC = "参数说明";
-    public static final String USED_CONFIG_FLAG_CONF_VALUE = "参数值";
-    public static final String USED_CONFIG_FLAG_CONF_LIST = "区分顺序的其他配置信息";
-    public static final String USED_CONFIG_FLAG_CONF_SET = "不区分顺序的其他配置信息";
 
     public static final String TABLE_PREFIX = "jacg_";
 
@@ -71,10 +58,8 @@ public class JACGConstants {
 
     public static final String FLAG_EMPTY = "-empty";
 
-    public static final String EXT_TXT = ".txt";
-    public static final String EXT_EMPTY_TXT = FLAG_EMPTY + EXT_TXT;
-    public static final String EXT_MD = ".md";
-    public static final String EXT_EMPTY_MD = FLAG_EMPTY + EXT_MD;
+    public static final String EXT_EMPTY_TXT = FLAG_EMPTY + JavaCG2Constants.EXT_TXT;
+    public static final String EXT_EMPTY_MD = FLAG_EMPTY + JavaCG2Constants.EXT_MD;
     public static final String EXT_SQL = ".sql";
     public static final String EXT_CLASS = ".class";
     public static final String EXT_XML = ".xml";
@@ -183,6 +168,11 @@ public class JACGConstants {
     public static final String TABLE_SUFFIX_OLD = "_1";
     // 数据库表后缀，代表新的
     public static final String TABLE_SUFFIX_NEW = "_2";
+
+    // 类名占位符
+    public static final String CLASS_PLACE_HOLDER = "@class_place_holder@";
+    // 方法名占位符
+    public static final String METHOD_PLACE_HOLDER = "@method_place_holder@";
 
     private JACGConstants() {
         throw new IllegalStateException("illegal");

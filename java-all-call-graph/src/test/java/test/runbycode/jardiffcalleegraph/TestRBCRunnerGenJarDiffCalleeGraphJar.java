@@ -1,7 +1,7 @@
 package test.runbycode.jardiffcalleegraph;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import org.junit.Test;
 import test.runbycode.util.JACGTestUtil;
 

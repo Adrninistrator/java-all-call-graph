@@ -19,6 +19,8 @@ public class WriteDbData4JarInfo implements BaseWriteDbData {
     private String jarFileNameExt;
     private String lastModifiedTime;
     private String jarFileHash;
+    private String innerJarPath;
+    private String innerJarFileName;
     private Date importTime;
 
     public int getJarNum() {
@@ -91,6 +93,22 @@ public class WriteDbData4JarInfo implements BaseWriteDbData {
 
     public void setJarFileHash(String jarFileHash) {
         this.jarFileHash = jarFileHash;
+    }
+
+    public String getInnerJarPath() {
+        return innerJarPath;
+    }
+
+    public void setInnerJarPath(String innerJarPath) {
+        this.innerJarPath = innerJarPath;
+    }
+
+    public String getInnerJarFileName() {
+        return innerJarFileName;
+    }
+
+    public void setInnerJarFileName(String innerJarFileName) {
+        this.innerJarFileName = innerJarFileName;
     }
 
     public Date getImportTime() {

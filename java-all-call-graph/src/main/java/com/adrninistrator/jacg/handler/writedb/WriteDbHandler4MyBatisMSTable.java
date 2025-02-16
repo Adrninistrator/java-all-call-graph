@@ -34,11 +34,6 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
     @Override
     protected WriteDbData4MyBatisMSTable genData(String[] array) {
         String mapperClassName = array[0];
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(mapperClassName)) {
-            return null;
-        }
-
         String mapperMethodName = array[1];
         String sqlStatement = array[2];
         int tableSeq = Integer.parseInt(array[3]);

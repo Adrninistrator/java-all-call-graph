@@ -417,4 +417,48 @@ public class MethodCallInfoHandler extends BaseHandler {
         List<WriteDbData4MethodCallInfo> list = queryMethodArgUsage(fullMethod, argSeq);
         return !JavaCG2Util.isCollectionEmpty(list);
     }
+
+    /**
+     * 查询指定方法调用的被调用对象，或参数可能的类型
+     *
+     * @param callId     方法调用ID
+     * @param objArgsSeq 0代表被调用对象，1开始为参数
+     * @return
+     */
+    public List<String> queryMethodCallObjArgTypes(int callId, int objArgsSeq) {
+        return queryMethodCallObjArgInfoByType(callId, objArgsSeq, JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType());
+    }
+
+    /**
+     * 查询指定方法调用的被调用对象，或参数可能的值
+     *
+     * @param callId     方法调用ID
+     * @param objArgsSeq 0代表被调用对象，1开始为参数
+     * @return
+     */
+    public List<String> queryMethodCallObjArgValues(int callId, int objArgsSeq) {
+        return queryMethodCallObjArgInfoByType(callId, objArgsSeq, JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE.getType());
+    }
+
+    /**
+     * 查询指定方法调用的被调用对象，或参数的指定类型的信息
+     *
+     * @param callId     方法调用ID
+     * @param objArgsSeq 0代表被调用对象，1开始为参数
+     * @param type       类型
+     * @return
+     */
+    private List<String> queryMethodCallObjArgInfoByType(int callId, int objArgsSeq, String type) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_OBJ_ARG_INFO_BY_TYPE;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select distinct " + DC.MCI_THE_VALUE +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName() +
+                    " where " + DC.MCI_CALL_ID + " = ?" +
+                    " and " + DC.MCI_OBJ_ARGS_SEQ + " = ?" +
+                    " and " + DC.MCI_TYPE + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryListOneColumn(sql, String.class, callId, objArgsSeq, type);
+    }
 }

@@ -16,6 +16,11 @@ public class FRCDtoB extends FRCDtoA {
 
     private String str1;
 
+    // 有使用，不要改名
+    public void testStrFRCDtoB(String str) {
+        System.setProperty(str, str);
+    }
+
     @Override
     public int getiField1() {
         return iField1;

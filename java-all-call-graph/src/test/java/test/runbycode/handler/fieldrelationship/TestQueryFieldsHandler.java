@@ -22,8 +22,7 @@ public class TestQueryFieldsHandler extends TestRunByCodeBase {
 
     @Test
     public void $test0WriteDb() {
-        configureWrapper.setAllowAllClasses();
-        writeDbSupportField(configureWrapper);
+        writeDbSupportField();
     }
 
     @Test

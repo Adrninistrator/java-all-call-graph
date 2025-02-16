@@ -6,8 +6,7 @@ import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
-import com.adrninistrator.javacg2.common.JavaCG2Constants;
-import com.adrninistrator.javacg2.common.enums.JavaCG2ConfigKeyEnum;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +52,8 @@ public class JavaCG2ConfigHandler extends BaseHandler {
      * @return true: 解析 false: 不解析
      */
     public boolean checkParseMethodCallTypeValue() {
-        String parseMethodCallTypeValue = queryConfigValue(JavaCG2Constants.FILE_PATH_CONFIG, JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getKey());
+        String parseMethodCallTypeValue = queryConfigValue(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getFileName(),
+                JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getKey());
         if (Boolean.parseBoolean(parseMethodCallTypeValue)) {
             logger.info("使用 java-callgraph2 组件处理方法调用时有解析被调用对象和参数可能的类型与值");
             return true;

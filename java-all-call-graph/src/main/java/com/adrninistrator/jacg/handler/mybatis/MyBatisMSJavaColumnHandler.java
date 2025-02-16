@@ -134,7 +134,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             writeDbHandler4MybatisMSGetSetDb.afterHandle();
             // 人工增加get/set方法字段关联关系后的处理
             manualAddFieldRelationshipHandler.afterAdd();
-            logger.info("MyBatis XML文件中sql脚本的字段与Java代码的关联关系（使用MySQL）-处理完毕，耗时: {} 秒", JACGUtil.getSpendSeconds(startTime));
+            logger.info("MyBatis XML文件中sql脚本的字段与Java代码的关联关系（使用MySQL）-处理完毕，耗时: {} 秒", JavaCG2Util.getSpendSeconds(startTime));
         }
     }
 
@@ -321,7 +321,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private void handleInsertMapperMethod(WriteDbData4MybatisMSEntity mybatisMSEntity, String insertMapperMethodName) {
         logger.info("处理insert相关的MyBatis Mapper方法 {} {}", mybatisMSEntity.getMapperClassName(), insertMapperMethodName);
         // 查询Mapper方法信息
-        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMInterface(mybatisMSEntity.getMapperClassName(), insertMapperMethodName);
+        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodByClassMethodUpper(mybatisMSEntity.getMapperClassName(), insertMapperMethodName);
         if (JavaCG2Util.isCollectionEmpty(mapperMethodInfoList)) {
             return;
         }
@@ -389,7 +389,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private void handleSelectMapperMethod(WriteDbData4MybatisMSEntity mybatisMSEntity, String selectMapperMethodName) {
         logger.info("处理select相关的MyBatis Mapper方法 {} {}", mybatisMSEntity.getMapperClassName(), selectMapperMethodName);
         // 查询Mapper方法信息
-        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMInterface(mybatisMSEntity.getMapperClassName(), selectMapperMethodName);
+        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodByClassMethodUpper(mybatisMSEntity.getMapperClassName(), selectMapperMethodName);
         if (JavaCG2Util.isCollectionEmpty(mapperMethodInfoList)) {
             return;
         }
@@ -457,8 +457,8 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
 
     // 处理MyBatis select对象操作相关的方法调用
     private void handleSelectObjectMethodCall(WriteDbData4MethodInfo mapperMethodInfo, WriteDbData4MethodCall selectMethodCall) {
-        String mapperClassName = JACGClassMethodUtil.getClassNameFromMethod(mapperMethodInfo.getFullMethod());
-        String mapperMethodName = JACGClassMethodUtil.getMethodNameFromFull(mapperMethodInfo.getFullMethod());
+        String mapperClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(mapperMethodInfo.getFullMethod());
+        String mapperMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(mapperMethodInfo.getFullMethod());
         List<WriteDbData4MyBatisMSSelectColumn> selectColumnList = myBatisMSMapperEntityHandler.queryMybatisMSSelectDbInfo(mapperClassName, mapperMethodName);
         if (JavaCG2Util.isCollectionEmpty(selectColumnList)) {
             logger.info("未查询到Mapper方法select返回的字段信息 {} {}", mapperClassName, mapperMethodName);
@@ -477,7 +477,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
                 // 被调用方法不满足get方法，不处理
                 continue;
             }
-            String selectReturnAsObjCalleeClassName = JACGClassMethodUtil.getClassNameFromMethod(selectReturnAsObjMethodCall.getCalleeFullMethod());
+            String selectReturnAsObjCalleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(selectReturnAsObjMethodCall.getCalleeFullMethod());
             // 查询Mapper接口的select方法返回值对应的get方法
             BaseWriteDbData4GetSetMethod getMethod = getSetMethodHandler.queryGetSetMethodByClassMethodSuper(true, selectReturnAsObjCalleeClassName,
                     selectReturnAsObjMethodCall.getCalleeMethodName());
@@ -557,7 +557,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
     private void handleUpdateMapperMethod(WriteDbData4MybatisMSEntity mybatisMSEntity, String updateMapperMethodName) {
         logger.info("处理update相关的MyBatis Mapper方法 {} {}", mybatisMSEntity.getMapperClassName(), updateMapperMethodName);
         // 查询Mapper方法信息
-        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodInfoByCMInterface(mybatisMSEntity.getMapperClassName(), updateMapperMethodName);
+        List<WriteDbData4MethodInfo> mapperMethodInfoList = methodInfoHandler.queryMethodByClassMethodUpper(mybatisMSEntity.getMapperClassName(), updateMapperMethodName);
         if (JavaCG2Util.isCollectionEmpty(mapperMethodInfoList)) {
             return;
         }
@@ -660,7 +660,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
                 // 当前方法调用不符合set方法，跳过
                 continue;
             }
-            String mapperArgCalleeClassName = JACGClassMethodUtil.getClassNameFromMethod(mapperArgMethodCall.getCalleeFullMethod());
+            String mapperArgCalleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(mapperArgMethodCall.getCalleeFullMethod());
             // 查询当前set方法对应的字段
             BaseWriteDbData4GetSetMethod setMethod = getSetMethodHandler.queryGetSetMethodByClassMethodSuper(false, mapperArgCalleeClassName,
                     mapperArgMethodCall.getCalleeMethodName());
@@ -724,7 +724,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         if (!JACGClassMethodUtil.calleeMatchesGetMethod(methodCallReturnAsMapperArg)) {
             return;
         }
-        String returnAsMapperArgClassName = JACGClassMethodUtil.getClassNameFromMethod(methodCallReturnAsMapperArg.getCalleeFullMethod());
+        String returnAsMapperArgClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(methodCallReturnAsMapperArg.getCalleeFullMethod());
         // 被调用方法满足get方法形式，查询对应的dto的get方法
         BaseWriteDbData4GetSetMethod getMethod = getSetMethodHandler.queryGetSetMethodByClassMethodSuper(true, returnAsMapperArgClassName,
                 methodCallReturnAsMapperArg.getCalleeMethodName());

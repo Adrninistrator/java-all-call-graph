@@ -28,11 +28,6 @@ public class WriteDbHandler4MybatisMSColumn extends AbstractWriteDbHandler<Write
     @Override
     protected WriteDbData4MybatisMSColumn genData(String[] array) {
         String entityClassName = array[0];
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(entityClassName)) {
-            return null;
-        }
-
         String entityColumnName = array[1];
         String columnName = array[2];
         String xmlFilePath = array[3];

@@ -44,10 +44,10 @@ public class MyBatisAnnotationCodeParser implements MethodAnnotationParser {
                                       String annotationClassName,
                                       AnnotationEntry annotationEntry,
                                       MethodCallList methodCallList) {
-        String type = JavaCG2AnnotationUtil.getAnnotationAttributeStringValue(annotationEntry, ATTRIBUTE_NAME_TYPE);
-        String method = JavaCG2AnnotationUtil.getAnnotationAttributeStringValue(annotationEntry, ATTRIBUTE_NAME_METHOD);
-        if (StringUtils.isAnyBlank(type, method)) {
-            logger.error("获取MyBatis注解属性为空 {} {} {} {} {}", callerClassName, callerMethodName, annotationClassName, type, method);
+        String className = JavaCG2AnnotationUtil.getAnnotationAttributeStringValue(annotationEntry, ATTRIBUTE_NAME_TYPE);
+        String methodName = JavaCG2AnnotationUtil.getAnnotationAttributeStringValue(annotationEntry, ATTRIBUTE_NAME_METHOD);
+        if (StringUtils.isAnyBlank(className, methodName)) {
+            logger.error("获取MyBatis注解属性为空 {} {} {} {} {}", callerClassName, callerMethodName, annotationClassName, className, methodName);
             return;
         }
         MethodCall methodCall = new MethodCall();
@@ -57,9 +57,9 @@ public class MyBatisAnnotationCodeParser implements MethodAnnotationParser {
         methodCall.setCallerMethodArgTypes(callerMethodArgs);
         methodCall.setCallerSourceLine(JavaCG2Constants.DEFAULT_LINE_NUMBER);
         methodCall.setCallerReturnType(callerReturnType);
-        methodCall.setMethodCallType(JavaCG2CallTypeEnum.CTE_METHOD_ANNOTATION_ADDED);
-        methodCall.setCalleeClassName(type);
-        methodCall.setCalleeMethodName(method);
+        methodCall.setMethodCallType(JavaCG2CallTypeEnum.CTE_METHOD_ANNOTATION_ADDED.getType());
+        methodCall.setCalleeClassName(className);
+        methodCall.setCalleeMethodName(methodName);
         methodCall.setCalleeMethodArgTypes(JavaCG2Constants.EMPTY_METHOD_ARGS);
         methodCall.setRawReturnType("");
         methodCall.setActualReturnType("");

@@ -7,10 +7,10 @@ package com.adrninistrator.jacg.common.enums;
  */
 public enum DefaultBusinessDataTypeEnum {
     BDTE_METHOD_CALL_INFO("method_call_info", "方法调用信息，被调用对象、参数的类型、值", true, true),
-    BDTE_MYBATIS_MYSQL_TABLE("mybatis_mysql_table", "MyBatis的XML文件中对应的数据库表名（支持MySQL数据库）", false, true),
-    BDTE_MYBATIS_MYSQL_WRITE_TABLE("mybatis_mysql_write_table", "MyBatis的XML文件中对应的写数据库表名（支持MySQL数据库）", false, true),
     BDTE_METHOD_ARG_GENERICS_TYPE("method_arg_generics_type", "方法参数泛型类型", true, true),
     BDTE_METHOD_RETURN_GENERICS_TYPE("method_return_generics_type", "方法返回泛型类型", true, true),
+    BDTE_MYBATIS_MYSQL_TABLE("mybatis_mysql_table", "MyBatis的XML文件中对应的数据库表名（支持MySQL数据库）", false, true),
+    BDTE_MYBATIS_MYSQL_WRITE_TABLE("mybatis_mysql_write_table", "MyBatis的XML文件中对应的写数据库表名（支持MySQL数据库）", false, true),
     ;
 
     // 类型

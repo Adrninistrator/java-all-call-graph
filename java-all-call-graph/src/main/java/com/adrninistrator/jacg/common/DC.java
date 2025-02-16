@@ -110,6 +110,8 @@ public class DC {
     public static final String JI_JAR_FILE_NAME_EXT = "jar_file_name_ext";
     public static final String JI_LAST_MODIFIED_TIME = "last_modified_time";
     public static final String JI_JAR_FILE_HASH = "jar_file_hash";
+    public static final String JI_INNER_JAR_PATH = "inner_jar_path";
+    public static final String JI_INNER_JAR_FILE_NAME = "inner_jar_file_name";
     public static final String JI_IMPORT_TIME = "import_time";
 
     public static final String BD_CALL_ID = "call_id";
@@ -120,6 +122,8 @@ public class DC {
     public static final String CI_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String CI_ACCESS_FLAGS = "access_flags";
     public static final String CI_CLASS_NAME = "class_name";
+    public static final String CI_PACKAGE_NAME = "package_name";
+    public static final String CI_PACKAGE_LEVEL = "package_level";
     public static final String CI_CLASS_FILE_HASH = "class_file_hash";
     public static final String CI_JAR_NUM = "jar_num";
     public static final String CI_CLASS_PATH_IN_JAR = "class_path_in_jar";
@@ -129,6 +133,8 @@ public class DC {
             CI_SIMPLE_CLASS_NAME,
             CI_ACCESS_FLAGS,
             CI_CLASS_NAME,
+            CI_PACKAGE_NAME,
+            CI_PACKAGE_LEVEL,
             CI_CLASS_FILE_HASH,
             CI_JAR_NUM,
             CI_CLASS_PATH_IN_JAR
@@ -271,9 +277,6 @@ public class DC {
     public static final String MMWT_MAPPER_CLASS_NAME = "mapper_class_name";
     public static final String MMWT_XML_FILE_NAME = "xml_file_name";
     public static final String MMWT_XML_FILE_PATH = "xml_file_path";
-
-    public static final String ACP_RECORD_ID = "record_id";
-    public static final String ACP_CLASS_PREFIX = "class_prefix";
 
     public static final String MAGT_RECORD_ID = "record_id";
     public static final String MAGT_METHOD_HASH = "method_hash";

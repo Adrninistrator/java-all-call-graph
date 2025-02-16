@@ -58,11 +58,6 @@ public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDb
             return null;
         }
 
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(springBeanClassName)) {
-            return null;
-        }
-
         String methodName = array[1];
         String fullMethod = JavaCG2ClassMethodUtil.formatFullMethodNoArgs(springBeanClassName, methodName);
 

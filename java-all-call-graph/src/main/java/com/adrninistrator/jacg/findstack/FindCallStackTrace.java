@@ -1,15 +1,14 @@
 package com.adrninistrator.jacg.findstack;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
 import com.adrninistrator.jacg.dto.keyword.FileContentNode;
 import com.adrninistrator.jacg.extensions.findstackfilter.FindStackKeywordFilterInterface;
-import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import com.adrninistrator.jacg.runner.base.AbstractExecutor;
@@ -20,6 +19,7 @@ import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.markdown.writer.MarkdownWriter;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.io.IOUtils;
@@ -180,7 +180,8 @@ public class FindCallStackTrace extends AbstractExecutor {
         CallStackFileResult callStackFileResult = handleDir(usedKeywordList);
 
         // 执行完毕时尝试打印当前使用的配置信息
-        configureWrapper.printUsedConfigInfo(currentSimpleClassName, callGraphOutputDirPath);
+        // todo 检查效果
+        configureWrapper.printUsedConfigInfo(currentSimpleClassName, callGraphOutputDirPath, JACGConstants.FILE_JACG_USED_CONFIG_MD);
         return callStackFileResult;
     }
 
@@ -255,7 +256,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         }
 
         // 未搜索到关键字的文件保存目录
-        keyWordsNotFoundDirPath = JACGFileUtil.replaceFilePathSeparator(stackOutputDirPath + File.separator + JACGConstants.DIR_KEYWORDS_NOT_FOUND + File.separator);
+        keyWordsNotFoundDirPath = JavaCG2FileUtil.replaceFilePath2Slash(stackOutputDirPath + File.separator + JACGConstants.DIR_KEYWORDS_NOT_FOUND + File.separator);
 
         if (genSeparateStack) {
             // 创建保存单独的调用堆栈文件的目录
@@ -266,10 +267,10 @@ public class FindCallStackTrace extends AbstractExecutor {
         List<String> subFilePathList = new ArrayList<>();
 
         // 从目录中查找需要处理的文件
-        JACGFileUtil.searchDir(finalCallGraphDirPath, subDirPathSet, subFilePathList, JACGConstants.EXT_TXT);
+        JACGFileUtil.searchDir(finalCallGraphDirPath, subDirPathSet, subFilePathList, JavaCG2Constants.EXT_TXT);
 
         if (subFilePathList.isEmpty()) {
-            logger.warn("{} 目录中未找到后缀为[{}]的文件", finalCallGraphDirPath, JACGConstants.EXT_TXT);
+            logger.warn("{} 目录中未找到后缀为[{}]的文件", finalCallGraphDirPath, JavaCG2Constants.EXT_TXT);
             return CallStackFileResult.EMPTY;
         }
 
@@ -295,7 +296,7 @@ public class FindCallStackTrace extends AbstractExecutor {
             wait4TPEDone();
 
             // 在生成调用堆栈文件的目录中搜索结果文件路径列表
-            List<String> stackFilePathList = JACGFileUtil.findFilePathInCurrentDir(stackOutputDirPath, JACGConstants.EXT_MD);
+            List<String> stackFilePathList = JACGFileUtil.findFilePathInCurrentDir(stackOutputDirPath, JavaCG2Constants.EXT_MD);
             List<String> separateStackFilePathList = null;
             if (genSeparateStack) {
                 separateStackFilePathList = JACGFileUtil.findDirPathInCurrentDir(separateStackDirPath);
@@ -315,7 +316,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         // 获取txt文件去掉所在目录之后的文件名，可能包含中间的目录名
         String txtFileName = txtFilePath.substring(srcDirPathLength);
         String txtFileNameWithOutExt = JACGFileUtil.getFileNameWithOutExt(txtFileName);
-        String stackFilePath = stackOutputDirPath + File.separator + txtFileNameWithOutExt + JACGConstants.EXT_MD;
+        String stackFilePath = stackOutputDirPath + File.separator + txtFileNameWithOutExt + JavaCG2Constants.EXT_MD;
         String separateDirPath = null;
 
         if (genSeparateStack) {
@@ -372,7 +373,7 @@ public class FindCallStackTrace extends AbstractExecutor {
                     return false;
                 }
                 // 未写入文件内容，将当前md文件移动到代表空文件的目录中
-                JACGFileUtil.renameFile(stackFilePath, keyWordsNotFoundDirPath + txtFileNameWithOutExt + JACGConstants.EXT_MD);
+                JACGFileUtil.renameFile(stackFilePath, keyWordsNotFoundDirPath + txtFileNameWithOutExt + JavaCG2Constants.EXT_MD);
             }
 
             return true;

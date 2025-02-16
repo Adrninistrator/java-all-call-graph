@@ -91,6 +91,8 @@ jacg_class_info
 |simple_class_name|VARCHAR|255|唯一类名|
 |access_flags|INT|10|类的access_flags|
 |class_name|VARCHAR|255|完整类名|
+|package_name|VARCHAR|255|包名|
+|package_level|INT|10|包名层级，等于包名中的.数量+1|
 |class_file_hash|VARCHAR|32|类文件的HASH值（MD5）|
 |jar_num|INT|10|类所在的Jar包序号|
 |class_path_in_jar|VARCHAR|300|类在jar包中的路径|
@@ -165,6 +167,8 @@ jacg_dup_class_info
 |simple_class_name|VARCHAR|255|唯一类名|
 |access_flags|INT|10|类的access_flags|
 |class_name|VARCHAR|255|完整类名|
+|package_name|VARCHAR|255|包名|
+|package_level|INT|10|包名层级，等于包名中的.数量+1|
 |class_file_hash|VARCHAR|32|类文件的HASH值（MD5）|
 |jar_num|INT|10|类所在的Jar包序号|
 |class_path_in_jar|VARCHAR|300|类在jar包中的路径|
@@ -405,7 +409,7 @@ jacg_inner_class
 |outer_class_name|VARCHAR|255|外部类完整类名|
 |anonymous_class|TINYINT|3|是否为匿名内部类，1:是，0:否|
 
-# 20. jacg_jar_info jar包信息表
+# 20. jacg_jar_info jar文件信息表
 
 - 表名前缀
 
@@ -413,19 +417,21 @@ jacg_jar_info
 
 - 注释
 
-jar包信息表
+jar文件信息表
 
 |字段名|字段类型|字段大小|字段注释|
 |---|---|---|---|
-|jar_num|INT|10|Jar包序号|
-|jar_type|VARCHAR|5|Jar包类型，J: jar包，D: 目录，R: 解析结果文件保存目录|
-|jar_path_hash|VARCHAR|30|Jar包路径HASH+字节数|
-|jar_full_path|TEXT|65535|Jar包完整路径|
-|jar_file_name|VARCHAR|255|Jar包文件名|
-|jar_file_name_head|VARCHAR|255|Jar包文件名，不包含版本号及文件后缀名|
-|jar_file_name_ext|VARCHAR|255|Jar包文件名的后缀名|
-|last_modified_time|VARCHAR|20|Jar包上次修改时间（精度到秒）|
-|jar_file_hash|VARCHAR|32|Jar包文件HASH|
+|jar_num|INT|10|jar文件序号|
+|jar_type|VARCHAR|5|jar文件类型，J: jar/war文件，D: 目录，JIJ: jar/war文件中的jar，R: 解析结果文件保存目录|
+|jar_path_hash|VARCHAR|30|外层jar文件路径HASH+字节数|
+|jar_full_path|TEXT|65535|外层jar文件完整路径|
+|jar_file_name|VARCHAR|255|外层jar文件名|
+|jar_file_name_head|VARCHAR|255|外层jar文件名，不包含版本号及文件后缀名|
+|jar_file_name_ext|VARCHAR|255|外层jar文件名的后缀名，以.开头|
+|last_modified_time|VARCHAR|20|外层jar文件上次修改时间（精度到秒）|
+|jar_file_hash|VARCHAR|32|外层jar文件HASH|
+|inner_jar_path|TEXT|65535|jar/war文件中的jar文件路径|
+|inner_jar_file_name|VARCHAR|255|jar/war文件中的jar文件名|
 |import_time|DATETIME|23|导入时间|
 
 # 21. jacg_javacg2_config java-callgraph2组件使用的配置参数信息表

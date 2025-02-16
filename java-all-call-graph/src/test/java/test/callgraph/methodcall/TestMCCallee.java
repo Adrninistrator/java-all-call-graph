@@ -15,6 +15,7 @@ public class TestMCCallee {
     public static void test1(String str1) {
     }
 
+    // 有使用，不要改名
     public void test2(String str1, String str2) {
         int a;
         int b = 3;

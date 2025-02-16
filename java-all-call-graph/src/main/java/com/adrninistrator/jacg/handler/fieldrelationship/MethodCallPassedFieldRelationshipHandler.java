@@ -29,7 +29,6 @@ import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SetMethodAssignInfo;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2FieldRelationshipTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
@@ -37,6 +36,7 @@ import com.adrninistrator.javacg2.dto.accessflag.JavaCG2AccessFlags;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.dto.stack.ListAsStack;
 import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +130,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             writeDbHandler4SetMethodAssignInfo.afterHandle();
             // 人工增加get/set方法字段关联关系后的处理
             manualAddFieldRelationshipHandler.afterAdd();
-            logger.info("处理通过方法调用传递的get/set方法关联关系-处理完毕，耗时: {} 秒", JACGUtil.getSpendSeconds(startTime));
+            logger.info("处理通过方法调用传递的get/set方法关联关系-处理完毕，耗时: {} 秒", JavaCG2Util.getSpendSeconds(startTime));
         }
     }
 
@@ -345,7 +345,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
                                                      JavaCG2Counter seq, int step) {
         // 查询当前的方法调用
         WriteDbData4MethodCall currentMethodCall = methodCallHandler.queryMethodCallByCallId(methodCallInfoParsed4MCReturnCallId.getMethodCallId());
-        String currentCalleeClassName = JACGClassMethodUtil.getClassNameFromMethod(currentMethodCall.getCalleeFullMethod());
+        String currentCalleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(currentMethodCall.getCalleeFullMethod());
 
         if (JACGClassMethodUtil.calleeMatchesGetMethod(currentMethodCall)) {
             // 被调用方法符合get方法

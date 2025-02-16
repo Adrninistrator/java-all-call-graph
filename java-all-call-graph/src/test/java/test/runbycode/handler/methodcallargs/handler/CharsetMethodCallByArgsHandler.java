@@ -6,7 +6,6 @@ import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.handler.methodcallargs.BaseMethodCallByArgsHandler;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -64,7 +63,7 @@ public class CharsetMethodCallByArgsHandler extends BaseMethodCallByArgsHandler 
     protected void handleMethodCallWithInfo(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail,
                                             WriteDbData4MethodCallInfo methodCallInfo) {
         logger.info("### {} {} {} {}", methodCall.getCallerFullMethod(), methodCall.getCalleeFullMethod(), methodCallInfo.getType(), methodCallInfo.getTheValue());
-        String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(methodCall.getCalleeFullMethod());
+        String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(methodCall.getCalleeFullMethod());
         if (CLASS_NAME_CHARSET.equals(calleeClassName) && METHOD_NAME_FOR_NAME.equals(methodCall.getCalleeMethodName())) {
             // 被调用方法为Charset.forName()，查询下一个被调用的方法
             WriteDbData4MethodCall nextMethodCall = methodCallHandler.queryMethodCallByCallId(methodCall.getCallId() + 1);

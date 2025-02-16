@@ -11,7 +11,7 @@ import com.adrninistrator.jacg.handler.dto.field.FieldBehavior;
 import com.adrninistrator.jacg.handler.fieldrelationship.GetSetMethodHandler;
 import com.adrninistrator.jacg.handler.fieldrelationship.filler.FieldBehaviorFillerInterface;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class ClassLineNumberHandler extends BaseHandler {
 
         List<BaseWriteDbData4GetSetMethod> getSetMethodList = new ArrayList<>();
         for (WriteDbData4MethodCall methodCall : methodCallList) {
-            String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(methodCall.getCalleeFullMethod());
+            String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(methodCall.getCalleeFullMethod());
             // 判断被调用方法是否为get方法
             BaseWriteDbData4GetSetMethod getMethod = getSetMethodHandler.queryGetSetMethodByClassMethodSuper(true, calleeClassName, methodCall.getCalleeMethodName());
             if (getMethod != null) {

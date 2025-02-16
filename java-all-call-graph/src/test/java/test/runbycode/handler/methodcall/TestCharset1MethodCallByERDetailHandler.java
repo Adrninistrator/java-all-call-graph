@@ -23,7 +23,6 @@ public class TestCharset1MethodCallByERDetailHandler extends TestRunByCodeBase {
 
     @Test
     public void $test0WriteDb() {
-        configureWrapper.setAllowAllClasses();
         commonWriteDb();
     }
 

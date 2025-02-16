@@ -28,11 +28,6 @@ public class WriteDbHandler4SfFieldMethodCall extends AbstractWriteDbHandler<Wri
     @Override
     protected WriteDbData4SfFieldMethodCall genData(String[] array) {
         String className = array[0];
-        // 根据完整类名判断是否需要处理
-        if (!isAllowedClassPrefix(className)) {
-            return null;
-        }
-
         String fieldName = array[1];
         int seq = Integer.parseInt(array[2]);
         int callId = Integer.parseInt(array[3]);

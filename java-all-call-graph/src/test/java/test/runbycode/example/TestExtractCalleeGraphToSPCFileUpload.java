@@ -1,11 +1,10 @@
 package test.runbycode.example;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.list.ListWithResult;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CalleeExtractedFile;
 import com.adrninistrator.jacg.extractor.entry.CalleeGraphSPCFileUploadExtractor;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import test.annotation.JACGExample;
 import test.runbycode.base.TestRunByCodeBase;
@@ -18,11 +17,6 @@ import test.runbycode.base.TestRunByCodeBase;
 @JACGExample(title = "获取直接或间接调用指定方法的Spring Controller文件上传方法",
         desc = {"首先生成指定方法向上的完整方法链，即获取指定方法的被调用情况", "再从这些完整方法调用链向上找到（可能的）Spring Controller文件上传方法"})
 public class TestExtractCalleeGraphToSPCFileUpload extends TestRunByCodeBase {
-
-    @Before
-    public void init() {
-        configureWrapper.setAllowAllClasses();
-    }
 
     @Test
     public void $test0WriteDb() {

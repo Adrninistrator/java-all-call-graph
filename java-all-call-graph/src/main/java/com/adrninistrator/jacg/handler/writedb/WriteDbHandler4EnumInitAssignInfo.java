@@ -4,9 +4,9 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4EnumInitAssignInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 /**
@@ -31,11 +31,7 @@ public class WriteDbHandler4EnumInitAssignInfo extends AbstractWriteDbHandler<Wr
     @Override
     protected WriteDbData4EnumInitAssignInfo genData(String[] array) {
         String fullMethod = readLineData();
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(fullMethod)) {
-            return null;
-        }
-        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+        String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String constName = readLineData();
         int ordinal = Integer.parseInt(readLineData());
         int argSeq = Integer.parseInt(readLineData());

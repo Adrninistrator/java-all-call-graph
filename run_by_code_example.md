@@ -162,84 +162,12 @@ test.runbycode.example.TestSetJavaCG2Config
 
 调用 RunnerWriteDb.run() 方法时指定 JavaCG2ConfigureWrapper 参数
 
-# 14. 通过代码指定配置参数的主要功能示例
+# 14. 解析代码并将结果写入数据库，简单模式
 
 - 示例类名
 
 ```
-test.runbycodemain.TestRBCAllPackages
-```
-
-- 示例说明
-
-处理所有包下的类
-
-# 15. 通过代码指定配置参数的主要功能示例
-
-- 示例类名
-
-```
-test.runbycodemain.TestRBCLimitPackages
-```
-
-- 示例说明
-
-仅处理指定包下的类
-
-## 15.1. 生成指定方法向下的完整方法调用链
-
-- 示例方法名
-
-```
-testRunnerGenAllGraph4CallerEmptyClass
-```
-
-- 示例说明
-
-生成结果为空
-
-## 15.2. 生成指定方法向上的完整方法调用链
-
-- 示例方法名
-
-```
-testRunnerGenAllGraph4CalleeLimit
-```
-
-- 示例说明
-
-限制每个方法允许生成的方法调用数量限制
-
-## 15.3. 生成指定方法向上的完整方法调用链
-
-- 示例方法名
-
-```
-testRunnerGenAllGraph4CalleeEmptyClass
-```
-
-- 示例说明
-
-生成结果为空
-
-## 15.4. 生成指定方法向下的完整方法调用链
-
-- 示例方法名
-
-```
-testRunnerGenAllGraph4CallerLimit
-```
-
-- 示例说明
-
-限制每个方法允许生成的方法调用数量限制
-
-## 15.5. 解析代码并将结果写入数据库，简单模式
-
-- 示例方法名
-
-```
-testRunnerSimpleWriteDb
+test.runbycodemain.Test0RunnerSimpleWriteDb
 ```
 
 - 示例说明
@@ -248,63 +176,111 @@ testRunnerSimpleWriteDb
 
 仅解析.class文件，不解析.xml、.properties等其他类型的文件
 
-## 15.6. 获得方法向上到包含关键字的调用堆栈
+# 15. 解析代码并将结果写入数据库
 
-- 示例方法名
+- 示例类名
 
 ```
-testFindCallStackTrace4ee
+test.runbycodemain.Test1RunnerWriteDb
+```
+
+# 16. 获得方法向上到包含关键字的调用堆栈
+
+- 示例类名
+
+```
+test.runbycodemain.TestFindCallStackTrace4ee
 ```
 
 - 示例说明
 
 首先会生成指定方法向上的完整方法调用链
 
-## 15.7. 获得方法向下到包含关键字的调用堆栈
+# 17. 获得方法向下到包含关键字的调用堆栈
 
-- 示例方法名
+- 示例类名
 
 ```
-testFindCallStackTrace4er
+test.runbycodemain.TestFindCallStackTrace4er
 ```
 
 - 示例说明
 
 首先会生成指定方法向下的完整方法调用链
 
-## 15.8. 生成指定方法向上的完整方法调用链
+# 18. 生成指定方法向上的完整方法调用链
 
-- 示例方法名
-
-```
-testRunnerGenAllGraph4Callee
-```
-
-## 15.9. 生成指定方法向下的完整方法调用链
-
-- 示例方法名
+- 示例类名
 
 ```
-testRunnerGenAllGraph4Caller
+test.runbycodemain.TestRunnerGenAllGraph4Callee
 ```
 
-## 15.10. 解析代码并将结果写入文件
+# 19. 生成指定方法向上的完整方法调用链
 
-- 示例方法名
+- 示例类名
 
 ```
-testRunnerWriteCallGraphFile
+test.runbycodemain.TestRunnerGenAllGraph4CalleeEmptyClass
+```
+
+- 示例说明
+
+生成结果为空
+
+# 20. 生成指定方法向上的完整方法调用链
+
+- 示例类名
+
+```
+test.runbycodemain.TestRunnerGenAllGraph4CalleeLimit
+```
+
+- 示例说明
+
+限制每个方法允许生成的方法调用数量限制
+
+# 21. 生成指定方法向下的完整方法调用链
+
+- 示例类名
+
+```
+test.runbycodemain.TestRunnerGenAllGraph4Caller
+```
+
+# 22. 生成指定方法向下的完整方法调用链
+
+- 示例类名
+
+```
+test.runbycodemain.TestRunnerGenAllGraph4CallerEmptyClass
+```
+
+- 示例说明
+
+生成结果为空
+
+# 23. 生成指定方法向下的完整方法调用链
+
+- 示例类名
+
+```
+test.runbycodemain.TestRunnerGenAllGraph4CallerLimit
+```
+
+- 示例说明
+
+限制每个方法允许生成的方法调用数量限制
+
+# 24. 解析代码并将结果写入文件
+
+- 示例类名
+
+```
+test.runbycodemain.TestRunnerWriteCallGraphFile
 ```
 
 - 示例说明
 
 生成的数据不写入数据库
-
-## 15.11. 解析代码并将结果写入数据库
-
-- 示例方法名
-
-```
-$test0RunnerWriteDb
-```
 

@@ -110,9 +110,6 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     protected String appName;
 
-    // 需要处理的包名/类名前缀
-    private Set<String> allowedClassPrefixSet;
-
     protected ThreadPoolExecutor threadPoolExecutor;
 
     // 任务最大队列数
@@ -641,25 +638,6 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     }
 
     /**
-     * 判断是否为需要处理的包名/类名前缀
-     *
-     * @param className 类名，或完整方法（类名+方法名+参数）
-     * @return true: 需要处理，false: 忽略
-     */
-    protected boolean isAllowedClassPrefix(String className) {
-        if (allowedClassPrefixSet.isEmpty()) {
-            return true;
-        }
-
-        for (String allowedClassPrefix : allowedClassPrefixSet) {
-            if (className.startsWith(allowedClassPrefix)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * 返回读文件写数据库是否失败
      *
      * @return false: 未失败 true: 失败
@@ -763,10 +741,6 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     public void setAppName(String appName) {
         this.appName = appName;
-    }
-
-    public void setAllowedClassPrefixSet(Set<String> allowedClassPrefixSet) {
-        this.allowedClassPrefixSet = allowedClassPrefixSet;
     }
 
     public void setThreadPoolExecutor(ThreadPoolExecutor threadPoolExecutor) {

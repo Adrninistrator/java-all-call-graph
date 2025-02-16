@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.extensions.manualaddmethodcall;
 
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallPair;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
@@ -20,15 +19,12 @@ import java.util.List;
 public abstract class AbstractManualAddMethodCall1 {
     private static final Logger logger = LoggerFactory.getLogger(AbstractManualAddMethodCall1.class);
 
-    protected final DbOperator dbOperator;
-
     protected final DbOperWrapper dbOperWrapper;
 
     protected final MethodCallHandler methodCallHandler;
     protected final JACGExtendsImplHandler jacgExtendsImplHandler;
 
-    public AbstractManualAddMethodCall1(DbOperator dbOperator, DbOperWrapper dbOperWrapper) {
-        this.dbOperator = dbOperator;
+    public AbstractManualAddMethodCall1(DbOperWrapper dbOperWrapper) {
         this.dbOperWrapper = dbOperWrapper;
         methodCallHandler = new MethodCallHandler(dbOperWrapper);
         jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);

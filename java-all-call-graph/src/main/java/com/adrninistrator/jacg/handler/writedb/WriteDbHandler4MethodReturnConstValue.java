@@ -31,11 +31,6 @@ public class WriteDbHandler4MethodReturnConstValue extends AbstractWriteDbHandle
     @Override
     protected WriteDbData4MethodReturnConstValue genData(String[] array) {
         String fullMethod = readLineData();
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(fullMethod)) {
-            return null;
-        }
-
         WriteDbData4MethodReturnConstValue methodReturnConstValue = new WriteDbData4MethodReturnConstValue();
         methodReturnConstValue.setRecordId(genNextRecordId());
         methodReturnConstValue.setMethodHash(JACGUtil.genHashWithLen(fullMethod));

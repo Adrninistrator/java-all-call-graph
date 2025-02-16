@@ -19,7 +19,6 @@ public class TestString1MethodCallByEEDetailHandler extends TestRunByCodeBase {
 
     @Test
     public void $test0WriteDb() {
-        configureWrapper.setAllowAllClasses();
         commonWriteDb();
     }
 

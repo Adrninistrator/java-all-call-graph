@@ -21,14 +21,16 @@ public class TestMethodCatchExceptionUsageReporter extends TestRunByCodeBase {
 
     @Test
     public void test1() {
-        MethodCatchExceptionUsageReporter methodCatchExceptionUsageReporter = new MethodCatchExceptionUsageReporter(configureWrapper, "build/catch_exception_report", false, false);
+        MethodCatchExceptionUsageReporter methodCatchExceptionUsageReporter = new MethodCatchExceptionUsageReporter(javaCG2ConfigureWrapper, configureWrapper, "build" +
+                "/catch_exception_report", false, false);
         Assert.assertTrue(methodCatchExceptionUsageReporter.genMethodCatchExceptionUsageReporter(LOGGER_METHOD_ARRAY));
     }
 
     @Test
     public void testSkipWriteDb() {
         JavaCG2Counter catchSeq = new JavaCG2Counter(10000);
-        MethodCatchExceptionUsageReporter methodCatchExceptionUsageReporter = new MethodCatchExceptionUsageReporter(configureWrapper, "build/catch_exception_report", false, true);
+        MethodCatchExceptionUsageReporter methodCatchExceptionUsageReporter = new MethodCatchExceptionUsageReporter(javaCG2ConfigureWrapper, configureWrapper, "build" +
+                "/catch_exception_report", false, true);
         methodCatchExceptionUsageReporter.setCatchSeq(catchSeq);
         Assert.assertTrue(methodCatchExceptionUsageReporter.genMethodCatchExceptionUsageReporter(LOGGER_METHOD_ARRAY));
     }

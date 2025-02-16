@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.util;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,13 +63,15 @@ public class JACGFindClassUtil {
                     /D:/java-callgraph-dir/java-all-call-graph/out/production/classes/com/adrninistrator/jacg/util/
                  */
                 File classDir = new File(classDirPathRaw);
-                String classDirPath = classDir.getAbsolutePath().replace('\\', '/');
-                String rootPath = StringUtils.substringBeforeLast(classDirPath, classDirPathTail);
+                String classDirPath = JavaCG2FileUtil.getCanonicalPath(classDir);
+                String newClassDirPath = JavaCG2FileUtil.replaceFilePath2Slash(classDirPath);
+                String rootPath = StringUtils.substringBeforeLast(newClassDirPath, classDirPathTail);
                 List<String> filePathList = new ArrayList<>();
                 // 在对应目录查找class文件
                 JACGFileUtil.searchDir(classDirPathRaw, null, filePathList, JACGConstants.EXT_CLASS);
                 for (String filePath : filePathList) {
-                    String filePathTail = StringUtils.substringAfter(filePath.replace('\\', '/'), rootPath);
+                    String newFilePath = JavaCG2FileUtil.replaceFilePath2Slash(filePath);
+                    String filePathTail = StringUtils.substringAfter(newFilePath, rootPath);
                     classNameList.add(StringUtils.substringBeforeLast(filePathTail, JACGConstants.EXT_CLASS).replace('/', '.'));
                 }
                 return classNameList;

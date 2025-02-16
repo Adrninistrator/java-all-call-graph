@@ -1,9 +1,9 @@
 package com.adrninistrator.jacg.extractor.entry;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CalleeExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CalleeExtractedFile;

@@ -21,6 +21,11 @@ public class FRFDtoC {
 
     private FRFDtoE frfDtoE;
 
+    // 有使用，不要改名
+    public void testString(String str) {
+        System.getProperty(str);
+    }
+
     public String getString1() {
         return string1;
     }

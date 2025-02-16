@@ -1,1 +1,0 @@
-cat \~all-4callee.txt | grep '!entry!' | awk -F '#' '{print $2}' | awk -F '\t' '{print $1}' | sed 's# ##g' | sort | uniq | sort

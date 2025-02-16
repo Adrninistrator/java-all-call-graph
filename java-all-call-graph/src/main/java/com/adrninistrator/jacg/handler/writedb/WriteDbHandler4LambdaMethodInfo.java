@@ -4,10 +4,10 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4LambdaMethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGStreamUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 /**
  * @author adrninistrator
@@ -32,8 +32,8 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
     protected WriteDbData4LambdaMethodInfo genData(String[] array) {
         int callId = Integer.parseInt(array[0]);
         String lambdaCalleeFullMethod = array[1];
-        String lambdaCalleeClassName = JACGClassMethodUtil.getClassNameFromMethod(lambdaCalleeFullMethod);
-        String lambdaCalleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(lambdaCalleeFullMethod);
+        String lambdaCalleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(lambdaCalleeFullMethod);
+        String lambdaCalleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(lambdaCalleeFullMethod);
 
         WriteDbData4LambdaMethodInfo writeDbData4LambdaMethodInfo = new WriteDbData4LambdaMethodInfo();
         writeDbData4LambdaMethodInfo.setCallId(callId);
@@ -46,8 +46,8 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
         }
 
         String lambdaNextFullMethod = array[2];
-        String lambdaNextClassName = JACGClassMethodUtil.getClassNameFromMethod(lambdaNextFullMethod);
-        String lambdaNextMethodName = JACGClassMethodUtil.getMethodNameFromFull(lambdaNextFullMethod);
+        String lambdaNextClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(lambdaNextFullMethod);
+        String lambdaNextMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(lambdaNextFullMethod);
 
         writeDbData4LambdaMethodInfo.setLambdaNextClassName(lambdaNextClassName);
         writeDbData4LambdaMethodInfo.setLambdaNextMethodName(lambdaNextMethodName);

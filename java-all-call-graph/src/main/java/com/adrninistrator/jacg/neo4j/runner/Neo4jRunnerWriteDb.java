@@ -26,6 +26,7 @@ import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4MethodLineNumbe
 import com.adrninistrator.jacg.neo4j.writedb.Neo4jWriteDbHandler4SetMethod;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGFindClassUtil;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -53,8 +54,14 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
     // 写数据库的标志，为true时在将数据写入Neo4j后，还会写入数据库中（默认不写入数据库）
     private boolean writeDbFlag = false;
 
-    public Neo4jRunnerWriteDb(ConfigureWrapper configureWrapper) {
-        super(configureWrapper);
+    /**
+     * 构造函数，使用代码中指定的参数
+     *
+     * @param javaCG2ConfigureWrapper
+     * @param configureWrapper
+     */
+    public Neo4jRunnerWriteDb(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper) {
+        super(javaCG2ConfigureWrapper, configureWrapper);
         neo4jDbOperWrapper = (Neo4jDbOperWrapper) dbOperWrapper;
 
         nodeClassNameList = JACGFindClassUtil.getOrdinaryClassNameListFromDirOrJar(AbstractJACGNeo4jNode.class);
@@ -203,8 +210,8 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
         if (!writeDbFlag || javaCG2OutputInfo == null) {
             return;
         }
-        // 将数据写入数据库
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(configureWrapper);
+        // 将数据写入数据库，需要再创建一个对象，否则以下run方法会因执行两次被拒绝
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
         runnerWriteDb.configSkipCallJavaCG2(javaCG2OutputInfo, currentOutputDirPath);
         if (!runnerWriteDb.run()) {
             this.setSomeTaskFail(true);

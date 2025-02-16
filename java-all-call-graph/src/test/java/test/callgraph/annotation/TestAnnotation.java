@@ -1,6 +1,6 @@
 package test.callgraph.annotation;
 
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

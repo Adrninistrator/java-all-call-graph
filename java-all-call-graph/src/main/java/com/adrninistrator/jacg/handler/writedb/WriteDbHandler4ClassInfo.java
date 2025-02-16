@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 import java.util.Set;
 
@@ -35,11 +36,6 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
     @Override
     protected WriteDbData4ClassInfo genData(String[] array) {
         String className = readLineData();
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(className)) {
-            return null;
-        }
-
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         int accessFlags = Integer.parseInt(readLineData());
         if (JavaCG2ByteCodeUtil.isEnumFlag(accessFlags) && enumSimpleClassNameSet != null) {
@@ -47,6 +43,8 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
             enumSimpleClassNameSet.add(simpleClassName);
         }
 
+        String packageName = JavaCG2ClassMethodUtil.getPackageName(className);
+        int packageLevel = JavaCG2ClassMethodUtil.getPackageLevel(packageName);
         String classFileHash = readLineData();
         int jarNum = Integer.parseInt(readLineData());
         String classPathInJar = readLineData();
@@ -56,10 +54,11 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
         writeDbData4ClassInfo.setSimpleClassName(simpleClassName);
         writeDbData4ClassInfo.setAccessFlags(accessFlags);
         writeDbData4ClassInfo.setClassName(className);
+        writeDbData4ClassInfo.setPackageName(packageName);
+        writeDbData4ClassInfo.setPackageLevel(packageLevel);
         writeDbData4ClassInfo.setClassFileHash(classFileHash);
         writeDbData4ClassInfo.setJarNum(jarNum);
         writeDbData4ClassInfo.setClassPathInJar(classPathInJar);
-
         return writeDbData4ClassInfo;
     }
 
@@ -70,6 +69,8 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
                 data.getSimpleClassName(),
                 data.getAccessFlags(),
                 data.getClassName(),
+                data.getPackageName(),
+                data.getPackageLevel(),
                 data.getClassFileHash(),
                 data.getJarNum(),
                 data.getClassPathInJar()

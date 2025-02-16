@@ -28,11 +28,6 @@ public class WriteDbHandler4FieldGenericsType extends AbstractWriteDbHandler<Wri
     @Override
     protected WriteDbData4FieldGenericsType genData(String[] array) {
         String className = readLineData();
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(className)) {
-            return null;
-        }
-
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String fieldName = readLineData();
         String type = readLineData();

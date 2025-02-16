@@ -15,7 +15,7 @@ public class TestFieldRelationshipRawReportHandler extends TestRunByCodeBase {
 
     @Test
     public void $test0WriteDb() {
-        writeDbSupportField(configureWrapper);
+        writeDbSupportField();
     }
 
     @Test
@@ -28,7 +28,7 @@ public class TestFieldRelationshipRawReportHandler extends TestRunByCodeBase {
 
     @Test
     public void testWriteDbAndGen1() {
-        writeDbSupportField(configureWrapper);
+        writeDbSupportField();
 
         try (FieldRelationshipRawReportHandler fieldRawRelationshipReportHandler = new FieldRelationshipRawReportHandler(configureWrapper);
              MyBatisEntityFieldBehaviorFiller myBatisEntityFieldBehaviorFiller = new MyBatisEntityFieldBehaviorFiller(configureWrapper)) {
@@ -40,7 +40,7 @@ public class TestFieldRelationshipRawReportHandler extends TestRunByCodeBase {
     public void testWriteDbAndGen2() {
         try (FieldRelationshipRawReportHandler fieldRawRelationshipReportHandler = new FieldRelationshipRawReportHandler(configureWrapper);
              MyBatisEntityFieldBehaviorFiller myBatisEntityFieldBehaviorFiller = new MyBatisEntityFieldBehaviorFiller(configureWrapper)) {
-            writeDbSupportField(configureWrapper);
+            writeDbSupportField();
             Assert.assertTrue(fieldRawRelationshipReportHandler.genRawFieldsReport("build/raw_field_relationship1.md", myBatisEntityFieldBehaviorFiller));
         }
     }

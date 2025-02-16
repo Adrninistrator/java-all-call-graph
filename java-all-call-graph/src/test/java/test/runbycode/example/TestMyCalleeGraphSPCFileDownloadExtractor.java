@@ -1,10 +1,9 @@
 package test.runbycode.example;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.list.ListWithResult;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CalleeExtractedFile;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import test.annotation.JACGExample;
 import test.runbycode.base.TestRunByCodeBase;
@@ -20,11 +19,6 @@ import test.runbycode.extractor.MyCalleeGraphSPCFileDownloadExtractor;
                 "再从这些完整方法调用链向上找到（可能的）Spring Controller文件下载方法",
                 "对于需要查找的（可能的）Spring Controller文件下载方法，支持通过自定义处理进行筛选等操作"})
 public class TestMyCalleeGraphSPCFileDownloadExtractor extends TestRunByCodeBase {
-
-    @Before
-    public void init() {
-        configureWrapper.setAllowAllClasses();
-    }
 
     @Test
     public void $test0WriteDb() {

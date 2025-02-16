@@ -4,15 +4,15 @@ import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.multiple.MultiCallInfo;
@@ -29,8 +29,6 @@ import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMSMapperEntityHandler;
-import com.adrninistrator.jacg.markdown.enums.MDCodeBlockTypeEnum;
-import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
@@ -42,6 +40,10 @@ import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
+import com.adrninistrator.javacg2.markdown.enums.MDCodeBlockTypeEnum;
+import com.adrninistrator.javacg2.markdown.writer.MarkdownWriter;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
@@ -182,24 +184,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             methodCallHandler = new MethodCallHandler(dbOperWrapper);
             lambdaMethodHandler = new LambdaMethodHandler(dbOperWrapper);
 
-            if (!Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED))) {
-                logger.info("不检查jar包文件是否有变化");
-            } else {
-                // 检查jar包文件是否有变化
-                List<String> jarPathList = getJarPathList();
-                if (checkSomeJarModified(jarPathList)) {
-                    logger.error("请先执行 {} 类导入数据库\n假如不需要检查jar包文件是否有变化，可修改配置文件 {} 参数值 {} 为 {}",
-                            RunnerWriteDb.class.getSimpleName(), ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED.getFileName(),
-                            ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED.getConfigPrintInfo(), Boolean.FALSE);
-                    return false;
-                }
-            }
-
-            // 检查允许处理的类名或包名前缀是否有变化
-            if (checkAllowedClassPrefixModified()) {
-                return false;
-            }
-
             // 添加用于添加对方法上的注解进行处理的类
             if (!addMethodAnnotationHandlerExtensions()) {
                 return false;
@@ -330,7 +314,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 记录可能出现一对多的方法调用
     protected boolean recordMethodCallMayBeMulti(int currentMethodCallId, String callType) {
         JavaCG2CallTypeEnum callTypeEnum = JavaCG2CallTypeEnum.getFromType(callType);
-        if (callTypeEnum != JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS && callTypeEnum != JavaCG2CallTypeEnum.CTE_SUPER_CALL_CHILD) {
+        if (JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS != callTypeEnum && JavaCG2CallTypeEnum.CTE_SUPER_CALL_CHILD != callTypeEnum) {
             // 对于接口调用实现类、父类调用子类之外的情况，不判断是否出现出现一对多的方法调用
             return true;
         }
@@ -373,7 +357,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 记录被禁用的方法调用
     protected boolean recordDisabledMethodCall(int callId, String callType) {
         JavaCG2CallTypeEnum callTypeEnum = JavaCG2CallTypeEnum.getFromType(callType);
-        if (callTypeEnum != JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS && callTypeEnum != JavaCG2CallTypeEnum.CTE_SUPER_CALL_CHILD) {
+        if (JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS != callTypeEnum && JavaCG2CallTypeEnum.CTE_SUPER_CALL_CHILD != callTypeEnum) {
             // 对于被禁用的方法调用，仅对接口调用实现类，及父类调用子类的情况提示
             return true;
         }
@@ -729,7 +713,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                     continue;
                 }
 
-                String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+                String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
                 // 找到能够处理的类进行处理
                 String annotationInfo = annotationFormatter.handleAnnotation(fullMethod, className, annotationName, methodAnnotationMapEntry.getValue());
                 if (annotationInfo != null) {
@@ -765,7 +749,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                     "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
                     "2. 指定的方法是接口中未实现的方法\n" +
                     "3. 指定的方法是抽象方法\n" +
-                    "{} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo(), simpleClassName, methodLineNum);
+                    "{} {}", JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo(), simpleClassName, methodLineNum);
             return FindMethodTaskInfo.genFindMethodInfoGenEmptyFile();
         }
 
@@ -895,7 +879,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         // 检查当前方法是否需要包含
         if (!isIncludeFullMethodWithPrefixByFullMethod(fullMethod)) {
-            String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+            String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
             // 根据关键字判断类名是否需要忽略
             if (isIgnoredClassWithKeywordByClass(className)) {
                 return true;

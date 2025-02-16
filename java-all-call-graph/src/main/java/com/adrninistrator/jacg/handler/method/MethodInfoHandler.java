@@ -124,7 +124,7 @@ public class MethodInfoHandler extends BaseHandler {
      * @param methodName
      * @return 包含字段： fullMethod returnType
      */
-    public List<WriteDbData4MethodInfo> queryMethodInfoByCMInterface(String className, String methodName) {
+    public List<WriteDbData4MethodInfo> queryMethodByClassMethodUpper(String className, String methodName) {
         // 当前需要处理的类名列表
         ListAsStack<String> currentClassNameStack = new ListAsStack<>();
         // 已经处理过的类名集合
@@ -137,17 +137,22 @@ public class MethodInfoHandler extends BaseHandler {
             handledClassNameSet.add(currentClassName);
 
             // 根据类名与方法名，查找对应的完整方法，假如当前类没有查找到，则从实现的接口中查找，执行查询操作
-            doQueryMethodInfoByCMInterface(className, currentClassName, methodName, allMethodInfoList, allFullMethodList);
+            doQueryMethodInfoByClassMethodUpper(className, currentClassName, methodName, allMethodInfoList, allFullMethodList);
 
             // 查询当前处理的类的接口
             List<String> interfaceNameList = jacgExtendsImplHandler.queryImplInterfaceNameByClassName(currentClassName);
-            if (JavaCG2Util.isCollectionEmpty(interfaceNameList)) {
-                continue;
-            }
-            for (String interfaceName : interfaceNameList) {
-                if (!handledClassNameSet.contains(interfaceName)) {
-                    currentClassNameStack.push(interfaceName);
+            if (!JavaCG2Util.isCollectionEmpty(interfaceNameList)) {
+                for (String interfaceName : interfaceNameList) {
+                    if (!handledClassNameSet.contains(interfaceName)) {
+                        currentClassNameStack.push(interfaceName);
+                    }
                 }
+            }
+
+            // 查询当前处理的类的接口
+            String superName = jacgExtendsImplHandler.querySuperClassNameByFull(currentClassName);
+            if (superName != null) {
+                currentClassNameStack.push(superName);
             }
         }
         if (logger.isDebugEnabled()) {
@@ -188,7 +193,7 @@ public class MethodInfoHandler extends BaseHandler {
             return true;
         }
         // 指定的方法在当前类中不存在，从超类及实现的接口中查找
-        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+        String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         // 根据类名向上查询对应的父类、实现的接口信息
         List<ClassNameAndType> superClassNameAndTypeList = jacgExtendsImplHandler.queryAllSuperClassesAndInterfaces(className);
         if (JavaCG2Util.isCollectionEmpty(superClassNameAndTypeList)) {
@@ -207,9 +212,9 @@ public class MethodInfoHandler extends BaseHandler {
     }
 
     // 根据类名与方法名，查找对应的完整方法，假如当前类没有查找到，则从实现的接口中查找，执行查询操作
-    private void doQueryMethodInfoByCMInterface(String className, String currentClassName, String methodName, List<WriteDbData4MethodInfo> allMethodInfoList,
-                                                List<String> allFullMethodList) {
-        // 使用当前处理的Mapper接口类名查询对应的方法信息
+    private void doQueryMethodInfoByClassMethodUpper(String className, String currentClassName, String methodName, List<WriteDbData4MethodInfo> allMethodInfoList,
+                                                     List<String> allFullMethodList) {
+        // 使用当前处理的类名查询对应的方法信息
         String currentSimpleClassName = dbOperWrapper.querySimpleClassName(currentClassName);
         List<WriteDbData4MethodInfo> methodInfoList = queryMethodInfoBySimpleClassMethod(currentSimpleClassName, methodName);
         if (JavaCG2Util.isCollectionEmpty(methodInfoList)) {
@@ -226,6 +231,7 @@ public class MethodInfoHandler extends BaseHandler {
                 returnWriteDbData4MethodInfo.setFullMethod(JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(className, methodNameWithArgs));
             }
             returnWriteDbData4MethodInfo.setReturnType(methodInfo.getReturnType());
+            returnWriteDbData4MethodInfo.setMethodHash(JACGUtil.genHashWithLen(returnWriteDbData4MethodInfo.getFullMethod()));
             allMethodInfoList.add(returnWriteDbData4MethodInfo);
             allFullMethodList.add(returnWriteDbData4MethodInfo.getFullMethod());
         }

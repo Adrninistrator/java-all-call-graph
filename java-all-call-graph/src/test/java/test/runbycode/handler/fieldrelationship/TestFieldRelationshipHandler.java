@@ -20,7 +20,7 @@ public class TestFieldRelationshipHandler extends TestRunByCodeBase {
 
     @Test
     public void $test0WriteDb() {
-        writeDbSupportField(configureWrapper);
+        writeDbSupportField();
     }
 
     @Test

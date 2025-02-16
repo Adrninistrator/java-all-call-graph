@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "2.1.1"
+version = "3.0.0"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -50,11 +50,13 @@ sourceSets {
     }
 }
 
+// todo
 List apache_ant = ["org.apache.ant:ant:1.10.9"]
 
 List apache_common = [
         'org.apache.commons:commons-lang3:3.17.0',
         'commons-io:commons-io:2.14.0',
+        // todo
         'org.apache.commons:commons-compress:1.26.0'
 ]
 
@@ -66,7 +68,7 @@ List h2database = ["com.h2database:h2:2.2.220"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:2.1.1']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:3.0.0']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.0']
 
@@ -171,6 +173,7 @@ task gen_run_jar(type: Jar) {
             into "${jar_output_dir}/jar/"
         }
         // 拷贝配置文件目录
+        // el
         jacgConfigDirs.each { jacgConfigDir ->
             def dirName = jacgConfigDir.getName()
 

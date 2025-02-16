@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.handler.reporter;
 
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGFileUtil;
@@ -25,6 +25,8 @@ import java.util.List;
 public abstract class AbstractReporter {
     private static final Logger logger = LoggerFactory.getLogger(AbstractReporter.class);
 
+    protected final JavaCG2ConfigureWrapper javaCG2ConfigureWrapper;
+
     protected final ConfigureWrapper configureWrapper;
 
     // 保存结果文件的目录路径
@@ -36,8 +38,6 @@ public abstract class AbstractReporter {
     // 是否需要将调用堆栈文件拷贝到单独的目录
     protected final boolean copyStackFileInSeparateDir;
 
-    protected JavaCG2ConfigureWrapper javaCG2ConfigureWrapper;
-
     protected String appName;
 
     /**
@@ -47,8 +47,8 @@ public abstract class AbstractReporter {
      * @param reportDirPath    保存结果文件的目录路径
      * @param appendReportFile 是否对生成的报告文件进行追加，true: 对报告文件进行追加（处理多个jar包时可生成到一个报告文件中）， false: 对报告文件覆盖
      */
-    public AbstractReporter(ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile) {
-        this(configureWrapper, reportDirPath, appendReportFile, false);
+    public AbstractReporter(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile) {
+        this(javaCG2ConfigureWrapper, configureWrapper, reportDirPath, appendReportFile, false);
     }
 
     /**
@@ -59,7 +59,9 @@ public abstract class AbstractReporter {
      * @param appendReportFile           是否对生成的报告文件进行追加，true: 对报告文件进行追加（处理多个jar包时可生成到一个报告文件中）， false: 对报告文件覆盖
      * @param copyStackFileInSeparateDir 是否需要将调用堆栈文件拷贝到单独的目录
      */
-    public AbstractReporter(ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile, boolean copyStackFileInSeparateDir) {
+    public AbstractReporter(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile,
+                            boolean copyStackFileInSeparateDir) {
+        this.javaCG2ConfigureWrapper = javaCG2ConfigureWrapper;
         this.configureWrapper = configureWrapper;
         this.reportDirPath = reportDirPath;
         this.appendReportFile = appendReportFile;
@@ -115,10 +117,7 @@ public abstract class AbstractReporter {
         }
 
         logger.info("执行写数据库步骤");
-        if (javaCG2ConfigureWrapper != null) {
-            return new RunnerWriteDb(configureWrapper).run(javaCG2ConfigureWrapper);
-        }
-        return new RunnerWriteDb(configureWrapper).run();
+        return new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper).run();
     }
 
     /**
@@ -130,9 +129,5 @@ public abstract class AbstractReporter {
      */
     protected void commonWriteData(WriterSupportHeader writerSupportHeader, List<String> stringList) throws IOException {
         writerSupportHeader.writeLine(StringUtils.join(stringList, JavaCG2Constants.FLAG_TAB));
-    }
-
-    public void setJavaCG2ConfigureWrapper(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper) {
-        this.javaCG2ConfigureWrapper = javaCG2ConfigureWrapper;
     }
 }

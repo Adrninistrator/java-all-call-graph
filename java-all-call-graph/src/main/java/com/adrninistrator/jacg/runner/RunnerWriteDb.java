@@ -1,19 +1,17 @@
 package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.DbConfInfo;
+import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddMethodCall1;
+import com.adrninistrator.jacg.extensions.methodcall.AbstractJACGMethodCallExtension;
 import com.adrninistrator.jacg.handler.fieldrelationship.MethodCallPassedFieldRelationshipHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMSJavaColumnHandler;
 import com.adrninistrator.jacg.handler.writedb.AbstractWriteDbHandler;
@@ -77,6 +75,8 @@ import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.dto.output.JavaCG2OutputInfo;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
@@ -110,11 +110,11 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     // jar包及允许处理的类名或包名前缀没有变化时是否跳过写数据库操作
     private boolean skipWhenNotModified = false;
 
-    // 需要处理的包名/类名前缀
-    private Set<String> allowedClassPrefixSet;
-
     // 人工添加方法调用关系类列表
     private List<AbstractManualAddMethodCall1> manualAddMethodCall1List;
+
+    // 方法调用处理扩展类列表
+    private List<AbstractJACGMethodCallExtension> jacgMethodCallExtensionList;
 
     // 是否使用H2数据库
     private boolean useH2Db;
@@ -125,24 +125,26 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     // 跳过调用java-callgraph2的步骤
     private boolean skipCallJavaCG2 = false;
 
+    /**
+     * 构造函数，使用配置文件中的参数
+     */
     public RunnerWriteDb() {
         super();
     }
 
-    public RunnerWriteDb(ConfigureWrapper configureWrapper) {
-        super(configureWrapper);
+    /**
+     * 构造函数，使用代码中指定的参数
+     *
+     * @param javaCG2ConfigureWrapper
+     * @param configureWrapper
+     */
+    public RunnerWriteDb(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper) {
+        super(javaCG2ConfigureWrapper, configureWrapper);
     }
 
     @Override
     public boolean preHandle() {
         // 读取其他配置文件
-        allowedClassPrefixSet = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true);
-        if (allowedClassPrefixSet.isEmpty()) {
-            logger.info("所有包中的class文件都需要处理");
-        } else {
-            logger.info("仅处理以下包中的class文件\n{}", StringUtils.join(allowedClassPrefixSet, "\n"));
-        }
-
         if (!useNeo4j()) {
             return initDb();
         }
@@ -188,9 +190,16 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         return true;
     }
 
+    // 获得需要处理的jar包列表
+    private List<String> getJarPathList() {
+        List<String> jarPathList = javaCG2ConfigureWrapper.getOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR);
+        logger.info("{} 需要处理的jar包或目录\n{}", currentSimpleClassName, StringUtils.join(jarPathList, "\n"));
+        return jarPathList;
+    }
+
     // 执行实际处理
     private boolean operate() {
-        List<String> jarPathList = null;
+        List<String> jarPathList;
 
         // 判断jar包及允许处理的类名或包名前缀没有变化时是否跳过写数据库操作
         if (skipWhenNotModified) {
@@ -200,8 +209,8 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
                 检查配置文件中指定的jar包是否都在jar_info表中且未发生变化（用于判断是否可以跳过写数据库步骤）
                 检查允许处理的类名或包名前缀是否有变化
              */
-            if (checkAllJarExistsNotModified(jarPathList) && !checkAllowedClassPrefixModified()) {
-                logger.info("有通过参数指定，且jar包及允许处理的类名或包名前缀没有变化，跳过写数据库操作");
+            if (checkAllJarExistsNotModified(jarPathList)) {
+                logger.info("有通过参数指定，且jar包没有变化，跳过写数据库操作");
                 return true;
             }
         }
@@ -230,8 +239,8 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
                 return false;
             }
 
-            // 在数据库中写入允许处理的类名前缀
-            if (!writeAllowedClassPrefix()) {
+            // 添加 java-all-call-graph 组件处理方法调用的扩展类
+            if (!addJACGMethodCallExtensions()) {
                 return false;
             }
         }
@@ -240,7 +249,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             logger.info("已配置不调用java-callgraph2生成jar包的方法调用关系");
         } else {
             // 调用java-callgraph2生成jar包的方法调用关系
-            if (!callJavaCallGraph2(jarPathList)) {
+            if (!callJavaCallGraph2()) {
                 return false;
             }
         }
@@ -410,34 +419,45 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
         logger.info("指定用于人工添加方法调用关系的处理类\n{}", StringUtils.join(manualAddMethodCallClassList, "\n"));
         manualAddMethodCall1List = new ArrayList<>(manualAddMethodCallClassList.size());
-        try {
-            for (String manualAddMethodCallClassName : manualAddMethodCallClassList) {
+
+        for (String manualAddMethodCallClassName : manualAddMethodCallClassList) {
+            try {
                 AbstractManualAddMethodCall1 manualAddMethodCall1 = JACGUtil.genClassObject(manualAddMethodCallClassName, AbstractManualAddMethodCall1.class,
-                        new Class<?>[]{DbOperator.class, DbOperWrapper.class}, new Object[]{dbOperator, dbOperWrapper});
+                        new Class<?>[]{DbOperWrapper.class}, new Object[]{dbOperWrapper});
                 if (manualAddMethodCall1 == null) {
                     return false;
                 }
                 manualAddMethodCall1List.add(manualAddMethodCall1);
+            } catch (Exception e) {
+                logger.error("处理人工添加方法调用关系的处理类异常 {} ", manualAddMethodCallClassName, e);
+                return false;
             }
-        } catch (Exception e) {
-            logger.error("error ", e);
-            return false;
         }
         return true;
     }
 
-    // 在数据库中写入允许处理的类名前缀
-    private boolean writeAllowedClassPrefix() {
-        if (allowedClassPrefixSet.isEmpty()) {
+    // 添加 java-all-call-graph 组件处理方法调用的扩展类
+    private boolean addJACGMethodCallExtensions() {
+        List<String> jacgMethodCallExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL);
+        if (JavaCG2Util.isCollectionEmpty(jacgMethodCallExtensionClassList)) {
+            logger.info("未指定 java-all-call-graph 组件处理方法调用的扩展类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL.getConfigPrintInfo());
+            jacgMethodCallExtensionList = Collections.emptyList();
             return true;
         }
 
-        // 生成用于插入数据的sql语句
-        String sql = dbOperWrapper.genAndCacheInsertSql(DbTableInfoEnum.DTIE_ALLOWED_CLASS_PREFIX, DbInsertMode.DIME_INSERT);
-        List<String> allowedClassPrefixList = new ArrayList<>(allowedClassPrefixSet);
-        Collections.sort(allowedClassPrefixList);
-        for (int i = 0; i < allowedClassPrefixList.size(); i++) {
-            if (!dbOperator.insert(sql, i, allowedClassPrefixList.get(i))) {
+        logger.info("指定 java-all-call-graph 组件处理方法调用的扩展类\n{}", StringUtils.join(jacgMethodCallExtensionClassList, "\n"));
+        jacgMethodCallExtensionList = new ArrayList<>(jacgMethodCallExtensionClassList.size());
+
+        for (String jacgMethodCallExtensionClassName : jacgMethodCallExtensionClassList) {
+            try {
+                AbstractJACGMethodCallExtension jacgMethodCallExtension = JACGUtil.genClassObject(jacgMethodCallExtensionClassName, AbstractJACGMethodCallExtension.class,
+                        new Class<?>[]{DbOperWrapper.class}, new Object[]{dbOperWrapper});
+                if (jacgMethodCallExtension == null) {
+                    return false;
+                }
+                jacgMethodCallExtensionList.add(jacgMethodCallExtension);
+            } catch (Exception e) {
+                logger.error("处理 java-all-call-graph 组件处理方法调用的扩展类异常 {} ", jacgMethodCallExtensionClassName, e);
                 return false;
             }
         }
@@ -499,7 +519,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
     // 读取建表sql语句
     private String readCreateTableSql(String sqlFileName) {
-        String sqlFilePath = JACGUtil.getInputRootPath() + InputDirEnum.IDE_SQL.getDirName() + "/" + sqlFileName;
+        String sqlFilePath = JavaCG2Util.getInputRootPath() + InputDirEnum.IDE_SQL.getDirName() + "/" + sqlFileName;
         List<String> sqlList = JavaCG2FileUtil.readFile2List(sqlFilePath);
         if (JavaCG2Util.isCollectionEmpty(sqlList)) {
             logger.error("文件内容为空 {}", sqlFilePath);
@@ -560,7 +580,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         writeDbHandler.setDbOperWrapper(dbOperWrapper);
         writeDbHandler.setDbInsertBatchSize(dbOperWrapper.getDbInsertBatchSize());
         writeDbHandler.setAppName(appName);
-        writeDbHandler.setAllowedClassPrefixSet(allowedClassPrefixSet);
         writeDbHandler.setThreadPoolExecutor(threadPoolExecutor);
         writeDbHandler.setTaskQueueMaxSize(taskQueueMaxSize);
         writeDbHandler.init(writeDbResult);
@@ -1036,6 +1055,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         writeDbHandler4MethodCall.setMyBatisMapperMethodWriteSet(myBatisMapperMethodWriteSet);
         writeDbHandler4MethodCall.setGetMethodSimpleClassMap(getMethodSimpleClassMap);
         writeDbHandler4MethodCall.setSetMethodSimpleClassMap(setMethodSimpleClassMap);
+        writeDbHandler4MethodCall.recordJacgMethodCallExtensionList(jacgMethodCallExtensionList);
         return writeDbHandler4MethodCall.handle(javaCG2OutputInfo);
     }
 
@@ -1130,8 +1150,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             int writeDbNum = writeDbNumMap.get(writeDbName).getCount();
             logger.info("{} 写入数据库表记录数 {}", writeDbName, writeDbNum);
             if (DbTableInfoEnum.DTIE_CLASS_NAME.getTableNameKeyword().equals(writeDbName) && writeDbNum == 0) {
-                logger.warn("未向数据库写入数据，请检查方法调用文件是否为空\n{}\n以及写入数据库时需要处理的类名前缀配置 {}", javaCG2OutputInfo.getMainFilePath(JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL),
-                        OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX.getConfigPrintInfo());
+                logger.warn("未向数据库写入数据，请检查方法调用文件是否为空\n{}", javaCG2OutputInfo.getMainFilePath(JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL));
             }
         }
 

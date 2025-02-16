@@ -1,9 +1,9 @@
 package com.adrninistrator.jacg.dboper;
 
-import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.DbConfInfo;
+import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.neo4j.dboper.Neo4jDbOperWrapper;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;

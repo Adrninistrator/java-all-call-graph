@@ -1,7 +1,6 @@
 package test.runbycode.manualaddmethodcall.extensions;
 
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallPair;
 import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddMethodCall1;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
@@ -17,8 +16,8 @@ import java.util.List;
  */
 public class MAMCExt4FixedService1 extends AbstractManualAddMethodCall1 {
 
-    public MAMCExt4FixedService1(DbOperator dbOperator, DbOperWrapper dbOperWrapper) {
-        super(dbOperator, dbOperWrapper);
+    public MAMCExt4FixedService1(DbOperWrapper dbOperWrapper) {
+        super(dbOperWrapper);
     }
 
     @Override

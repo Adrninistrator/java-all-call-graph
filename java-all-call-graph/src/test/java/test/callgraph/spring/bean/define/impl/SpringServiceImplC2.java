@@ -19,4 +19,9 @@ public class SpringServiceImplC2 extends AbstractSpringServiceC {
     public String test2() {
         return null;
     }
+
+    // 有使用，不要改名
+    public void test3(String data) {
+        System.getProperty(data);
+    }
 }

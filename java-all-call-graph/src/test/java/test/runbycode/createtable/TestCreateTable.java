@@ -16,7 +16,7 @@ public class TestCreateTable extends TestRunByCodeBase {
 
     @Test
     public void test() {
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(configureWrapper);
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
         runnerWriteDb.createTables(false);
     }
 }

@@ -30,11 +30,6 @@ public class WriteDbHandler4MethodReturnFieldInfo extends AbstractWriteDbHandler
     @Override
     protected WriteDbData4MethodReturnFieldInfo genData(String[] array) {
         String fullMethod = readLineData();
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(fullMethod)) {
-            return null;
-        }
-
         WriteDbData4MethodReturnFieldInfo methodReturnFieldInfo = new WriteDbData4MethodReturnFieldInfo();
         methodReturnFieldInfo.setRecordId(genNextRecordId());
         methodReturnFieldInfo.setMethodHash(JACGUtil.genHashWithLen(fullMethod));

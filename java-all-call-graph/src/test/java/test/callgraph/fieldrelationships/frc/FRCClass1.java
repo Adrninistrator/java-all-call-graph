@@ -48,7 +48,7 @@ public class FRCClass1 {
         System.out.println(frcDtoB);
     }
 
-    private FRCDtoA genFRCDtoA() {
+    public static FRCDtoA genFRCDtoA() {
         return new FRCDtoB();
     }
 

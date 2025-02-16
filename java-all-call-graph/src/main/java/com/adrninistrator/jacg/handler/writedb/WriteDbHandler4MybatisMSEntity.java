@@ -29,11 +29,6 @@ public class WriteDbHandler4MybatisMSEntity extends AbstractWriteDbHandler<Write
     protected WriteDbData4MybatisMSEntity genData(String[] array) {
         String mapperInterfaceName = array[0];
         String entityClassName = array[1];
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(mapperInterfaceName) || !isAllowedClassPrefix(entityClassName)) {
-            return null;
-        }
-
         String tableName = array[2];
         String xmlFilePath = array[3];
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);

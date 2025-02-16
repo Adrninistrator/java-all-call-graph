@@ -1,13 +1,16 @@
 package test.runbycode.config;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import test.callgraph.annotation.CallMethodWithAnnotation;
 import test.callgraph.annotation.MethodWithAnnotation;
 import test.callgraph.cyclecall.TestCycleCall1;
@@ -64,19 +67,6 @@ public class TestConfigGenerator {
 //        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME, "username");
 //        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD, "password");
 
-        /*
-            test.jar通过执行以下命令生成：
-            gradlew test_jar
-         */
-        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
-                "build/libs/test.jar"
-        );
-
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,
-                "test.callgraph.",
-                "java."
-        );
-
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
                 TestMCCallee.class.getName() + ":20",
                 TestMCCallee.class.getName() + ":run(",
@@ -130,5 +120,25 @@ public class TestConfigGenerator {
 //        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_SEPARATE_STACK, Boolean.FALSE.toString());
 
         return configureWrapper;
+    }
+
+
+    public static JavaCG2ConfigureWrapper genJavaCG2ConfigureWrapper() {
+        JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = new JavaCG2ConfigureWrapper();
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.TRUE.toString());
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_FIRST_PARSE_INIT_METHOD_TYPE, Boolean.TRUE.toString());
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_ANALYSE_FIELD_RELATIONSHIP, Boolean.TRUE.toString());
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_LOG_METHOD_SPEND_TIME, Boolean.TRUE.toString());
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_CONTINUE_WHEN_ERROR, Boolean.FALSE.toString());
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_OUTPUT_FILE_EXT, JavaCG2Constants.EXT_MD);
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_ANALYSE_FIELD_RELATIONSHIP, Boolean.TRUE.toString());
+
+        /*
+            test.jar通过执行以下命令生成：
+            gradlew test_jar
+         */
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
+                "build/libs/test.jar");
+        return javaCG2ConfigureWrapper;
     }
 }

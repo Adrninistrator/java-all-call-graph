@@ -1,6 +1,6 @@
 package test.runbycode.example;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;

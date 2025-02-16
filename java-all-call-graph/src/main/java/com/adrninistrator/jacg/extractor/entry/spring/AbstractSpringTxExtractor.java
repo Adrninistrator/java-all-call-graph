@@ -3,11 +3,11 @@ package com.adrninistrator.jacg.extractor.entry.spring;
 import com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter;
 import com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.SpecialCallTypeEnum;
 import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
@@ -259,9 +259,9 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
 
     // 在需要处理的类名前缀中增加Spring事务模板类
     public void setAllowedClassNamePrefix(ConfigureWrapper configureWrapper) {
-        configureWrapper.addAllowedClassNamePrefixes(JACGCommonNameConstants.SPRING_TRANSACTION_TEMPLATE_CLASS,
-                JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK_WITHOUT_RESULT,
-                JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK
-        );
+//    todo    configureWrapper.addAllowedClassNamePrefixes(JACGCommonNameConstants.SPRING_TRANSACTION_TEMPLATE_CLASS,
+//                JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK_WITHOUT_RESULT,
+//                JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK
+//        );
     }
 }

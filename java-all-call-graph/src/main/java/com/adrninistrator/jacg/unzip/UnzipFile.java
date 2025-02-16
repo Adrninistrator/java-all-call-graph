@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.unzip;
 
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.util.JACGFileUtilNoLogger;
-import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.common.enums.JavaCG2DirEnum;
 import com.adrninistrator.javacg2.entry.JavaCG2Entry;
 
 import java.io.File;
@@ -71,15 +71,25 @@ public class UnzipFile {
         }
 
         String rootDirName = chooseRootDirName();
-        if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + JavaCG2Constants.DIR_CONFIG, true)) {
-            return;
+        for (JavaCG2DirEnum javaCG2DirEnum : JavaCG2DirEnum.values()) {
+            if (!javaCG2DirEnum.isInput()) {
+                continue;
+            }
+            if (!JACGFileUtilNoLogger.isDirectoryExists(rootDirName + "/" + UnzipFileConstants.DIR_RESOURCES + "/" + javaCG2DirEnum.getDirName(), true)) {
+                return;
+            }
         }
 
         handleZipFile(jarFilePath, rootDirName, new AbstractZipEntryHandler() {
             @Override
             public void handleZipEntry(ZipEntry ze, String fileName, ZipInputStream zis, String rootDirName) {
-                if (fileName.startsWith(JavaCG2Constants.DIR_CONFIG + "/")) {
-                    writeFile(ze, zis, rootDirName, UnzipFileConstants.DIR_RESOURCES, fileName);
+                for (JavaCG2DirEnum javaCG2DirEnum : JavaCG2DirEnum.values()) {
+                    if (!javaCG2DirEnum.isInput()) {
+                        continue;
+                    }
+                    if (fileName.startsWith(javaCG2DirEnum.getDirName() + "/")) {
+                        writeFile(ze, zis, rootDirName, UnzipFileConstants.DIR_RESOURCES, fileName);
+                    }
                 }
             }
         });

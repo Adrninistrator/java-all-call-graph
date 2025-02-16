@@ -17,6 +17,6 @@ public class Test0WriteData2Neo4j extends TestNeo4jBase {
 
     @Test
     public void test() {
-        Assert.assertTrue(new Neo4jRunnerWriteDb(configureWrapper).run());
+        Assert.assertTrue(new Neo4jRunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper).run());
     }
 }

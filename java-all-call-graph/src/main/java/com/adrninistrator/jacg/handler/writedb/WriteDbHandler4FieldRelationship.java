@@ -79,11 +79,6 @@ public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<Wri
         String setMethodName = array[8];
         int valid = Integer.parseInt(array[9]);
         String type = array[10];
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(callerFullMethod) || !isAllowedClassPrefix(getClassName) || !isAllowedClassPrefix(setClassName)) {
-            return null;
-        }
-
         String getSimpleClassName = dbOperWrapper.querySimpleClassName(getClassName);
         String setSimpleClassName = dbOperWrapper.querySimpleClassName(setClassName);
         if (enumSimpleClassNameSet.contains(setSimpleClassName) || enumSimpleClassNameSet.contains(getSimpleClassName)) {

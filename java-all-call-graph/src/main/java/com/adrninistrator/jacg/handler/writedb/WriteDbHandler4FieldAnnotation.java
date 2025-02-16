@@ -31,11 +31,6 @@ public class WriteDbHandler4FieldAnnotation extends AbstractWriteDbHandler<Write
     protected WriteDbData4FieldAnnotation genData(String[] array) {
         // 拆分时限制列数，最后一列注解属性中可能出现空格
         String className = array[0];
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(className)) {
-            return null;
-        }
-
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String fieldName = array[1];
         String annotationName = array[2];

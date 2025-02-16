@@ -15,9 +15,8 @@ import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfoDetail;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg2.common.JavaCG2Constants;
-import com.adrninistrator.javacg2.common.enums.JavaCG2ConfigKeyEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -193,7 +192,7 @@ public class SpringHandler extends BaseHandler {
     private void checkParseMethodCallTypeValue() {
         if (!javaCG2ConfigHandler.checkParseMethodCallTypeValue()) {
             logger.error("使用 java-callgraph2 组件处理方法调用时未解析被调用对象和参数可能的类型与值，无法判断 Spring Controller 方法参数是否有被使用" +
-                            "需要将配置文件 {} 的参数 {} 值指定为 true，可参考 test.runbycode.example.TestSetJavaCG2Config 类", JavaCG2Constants.FILE_PATH_CONFIG,
+                            "需要将配置文件 {} 的参数 {} 值指定为 true，可参考 test.runbycode.example.TestSetJavaCG2Config 类", JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getFileName(),
                     JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getKey());
             throw new JavaCG2RuntimeException("使用 java-callgraph2 组件处理方法调用时未解析被调用对象和参数可能的类型与值，无法判断 Spring Controller 方法参数是否有被使用，请按照日志提示处理");
         }

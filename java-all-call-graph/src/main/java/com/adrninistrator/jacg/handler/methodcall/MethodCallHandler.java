@@ -10,13 +10,13 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -143,8 +143,8 @@ public class MethodCallHandler extends BaseHandler {
             return false;
         }
 
-        String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
-        String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
+        String callerClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(callerFullMethod);
+        String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
         int nextMaxCallId = maxCallId + 1;
         logger.info("人工向数据库方法调用表加入数据 {}\n{}\n{}", nextMaxCallId, callerFullMethod, calleeFullMethod);
         // 人工向方法调用表写入数据，行号使用0，jar包序号使用0
@@ -602,7 +602,7 @@ public class MethodCallHandler extends BaseHandler {
         if (calleeFullMethod == null) {
             return null;
         }
-        return JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
+        return JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
     }
 
     /**

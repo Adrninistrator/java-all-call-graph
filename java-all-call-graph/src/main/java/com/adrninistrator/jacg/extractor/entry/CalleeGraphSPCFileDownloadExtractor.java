@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.extractor.entry;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.handler.spring.SpringHandler;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 

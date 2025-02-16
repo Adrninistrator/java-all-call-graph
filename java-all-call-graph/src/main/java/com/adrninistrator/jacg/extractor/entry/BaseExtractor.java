@@ -1,9 +1,10 @@
 package com.adrninistrator.jacg.extractor.entry;
 
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
@@ -13,8 +14,8 @@ import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGrap
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.jacg.util.JACGFileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,8 @@ public abstract class BaseExtractor {
         List<String> callStackFilePathList = callStackFileResult.getStackFilePathList();
 
         // 执行完毕时尝试打印当前使用的配置信息
-        configureWrapper.printUsedConfigInfo(currentSimpleClassName, findCallStackTrace.getCallGraphOutputDirPath());
+        // todo 检查效果
+        configureWrapper.printUsedConfigInfo(currentSimpleClassName, findCallStackTrace.getCallGraphOutputDirPath(), JACGConstants.FILE_JACG_USED_CONFIG_MD);
         return new ListWithResult<>(callStackFilePathList);
     }
 
@@ -107,7 +109,7 @@ public abstract class BaseExtractor {
     private void fillExtractedFileInfo(String stackFilePath, AbstractCallGraphExtractedFile callGraphExtractedFile, boolean order4ee) {
         callGraphExtractedFile.setStackFilePath(stackFilePath);
 
-        String fileName = JACGFileUtil.getFileNameFromPath(stackFilePath);
+        String fileName = JavaCG2FileUtil.getFileNameFromPath(stackFilePath);
         callGraphExtractedFile.setStackFileName(fileName);
 
         if (JACGCallGraphFileUtil.isEmptyCallGraphFileName(fileName)) {
@@ -139,7 +141,7 @@ public abstract class BaseExtractor {
         }
         callGraphExtractedFile.setFullMethod(fullMethod);
         if (fullMethod != null) {
-            callGraphExtractedFile.setClassName(JACGClassMethodUtil.getClassNameFromMethod(fullMethod));
+            callGraphExtractedFile.setClassName(JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod));
         }
     }
 

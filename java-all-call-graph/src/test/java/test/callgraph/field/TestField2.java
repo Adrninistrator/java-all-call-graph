@@ -1,6 +1,6 @@
 package test.callgraph.field;
 
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import test.callgraph.enums.DbStatementEnum;
 import test.callgraph.field.dto.TestFieldDto1;

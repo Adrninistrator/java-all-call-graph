@@ -17,7 +17,7 @@ public class TestRBCRunner0WriteDbMultiTimes extends TestRunByCodeBase {
 
     @Test
     public void test() {
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(configureWrapper);
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
         Assert.assertTrue(runnerWriteDb.run());
         logger.error("以下出现ERROR日志是符合预期的，同一个类执行多次会出现以下提示");
         Assert.assertFalse(runnerWriteDb.run());

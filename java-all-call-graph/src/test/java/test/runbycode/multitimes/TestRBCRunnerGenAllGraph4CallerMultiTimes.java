@@ -1,6 +1,6 @@
 package test.runbycode.multitimes;
 
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import org.junit.Assert;
 import org.junit.Test;

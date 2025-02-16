@@ -19,6 +19,7 @@ import com.adrninistrator.jacg.handler.reporter.AbstractReporter;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
@@ -74,8 +75,9 @@ public class SpringTxNestedReporter extends AbstractReporter {
         FILE_HEADER_TPL = StringUtils.join(fileHeaderTplList, JavaCG2Constants.FLAG_TAB);
     }
 
-    public SpringTxNestedReporter(ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile, boolean copyFileInSeparateDir) {
-        super(configureWrapper, reportDirPath, appendReportFile, copyFileInSeparateDir);
+    public SpringTxNestedReporter(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile,
+                                  boolean copyFileInSeparateDir) {
+        super(javaCG2ConfigureWrapper, configureWrapper, reportDirPath, appendReportFile, copyFileInSeparateDir);
     }
 
     /**

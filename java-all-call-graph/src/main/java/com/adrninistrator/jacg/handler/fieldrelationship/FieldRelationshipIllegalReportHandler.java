@@ -5,7 +5,7 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MybatisMSEntity;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMSMapperEntityHandler;
-import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
+import com.adrninistrator.javacg2.markdown.writer.MarkdownWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

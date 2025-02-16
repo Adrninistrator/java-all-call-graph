@@ -13,15 +13,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -312,26 +309,6 @@ public class JACGFileUtil {
     }
 
     /**
-     * 根据文件路径获取文件名
-     *
-     * @param filePath
-     * @return
-     */
-    public static String getFileNameFromPath(String filePath) {
-        if (filePath == null) {
-            return null;
-        }
-
-        String tmpFilePath = replaceFilePathSeparator(filePath);
-        // 不使用StringUtils.substringAfterLast，因为当没有/时结果为空
-        int lastSeparatorIndex = tmpFilePath.lastIndexOf("/");
-        if (lastSeparatorIndex == -1) {
-            return filePath;
-        }
-        return tmpFilePath.substring(lastSeparatorIndex + 1);
-    }
-
-    /**
      * 获取不包含后缀的文件名
      *
      * @param fileName 文件名
@@ -339,25 +316,6 @@ public class JACGFileUtil {
      */
     public static String getFileNameWithOutExt(String fileName) {
         return getFileNameWithOutExt(fileName, JavaCG2Constants.FLAG_DOT);
-    }
-
-    /**
-     * 获取文件名后缀
-     *
-     * @param fileName 文件名
-     * @return
-     */
-    public static String getFileNameExt(String fileName) {
-        if (fileName == null) {
-            return null;
-        }
-
-        // 不使用StringUtils.substringBeforeLast，因为当没有指定字符串时结果为空
-        int lastDotIndex = fileName.lastIndexOf(JavaCG2Constants.FLAG_DOT);
-        if (lastDotIndex == -1) {
-            return "";
-        }
-        return fileName.substring(lastDotIndex);
     }
 
     /**
@@ -372,7 +330,7 @@ public class JACGFileUtil {
             return null;
         }
 
-        // 不使用StringUtils.substringBeforeLast，因为当没有指定字符串时结果为空
+        // 不使用StringUtils.substringBeforeLast，因为当源字符串没有标记字符串时结果为空
         int lastDotIndex = fileName.lastIndexOf(fileExtFlag);
         if (lastDotIndex == -1) {
             return fileName;
@@ -401,26 +359,6 @@ public class JACGFileUtil {
     }
 
     /**
-     * 将文件路径中的\替换为/
-     *
-     * @param filePath
-     * @return
-     */
-    public static String replaceFilePathSeparator(String filePath) {
-        return StringUtils.replace(filePath, "\\", "/");
-    }
-
-    /**
-     * 判断文件路径中是否包含目录分隔符\、/
-     *
-     * @param filePath
-     * @return
-     */
-    public static boolean checkFilePathContainsSeparator(String filePath) {
-        return StringUtils.containsAny(filePath, "\\", "/");
-    }
-
-    /**
      * 获取文件所在目录名
      *
      * @param filePath
@@ -431,7 +369,7 @@ public class JACGFileUtil {
             return null;
         }
 
-        String tmpFilePath = replaceFilePathSeparator(filePath);
+        String tmpFilePath = JavaCG2FileUtil.replaceFilePath2Slash(filePath);
         String[] array = StringUtils.splitPreserveAllTokens(tmpFilePath, "/");
         if (array.length < 2) {
             return null;
@@ -501,32 +439,6 @@ public class JACGFileUtil {
      */
     public static String getFileNameFromPathInJar(String filePath) {
         return StringUtils.substringAfterLast(filePath, "/");
-    }
-
-    /**
-     * 将输入流内容保存到文件，不关闭输入流（避免jar/war包无法再遍历）
-     *
-     * @param inputStream
-     * @param file
-     * @return
-     */
-    public static boolean saveInputToFileNoClose(InputStream inputStream, File file) {
-        String dirPath = file.getParent();
-        if (!JavaCG2FileUtil.isDirectoryExists(dirPath, true)) {
-            return false;
-        }
-
-        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
-            byte[] data = new byte[8192];
-            int len;
-            while ((len = inputStream.read(data)) > 0) {
-                out.write(data, 0, len);
-            }
-            return true;
-        } catch (Exception e) {
-            logger.error("error ", e);
-            return false;
-        }
     }
 
     /**

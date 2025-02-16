@@ -22,7 +22,6 @@ public class TestFindIndexOfAndSubstring extends TestRunByCodeBase {
 
     @Test
     public void $test0WriteDb() {
-        configureWrapper.setAllowAllClasses();
         commonWriteDb();
     }
 

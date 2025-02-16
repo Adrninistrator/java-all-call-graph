@@ -15,6 +15,13 @@ public class FRCDtoA {
     @JsonProperty("l_field1")
     private Long lFieldA;
 
+    private String strData1;
+
+    // 有使用，不要改名
+    public void testStrFRCDtoA(String str) {
+        System.getenv(str);
+    }
+
     public int getiField1() {
         return iField1;
     }
@@ -29,5 +36,13 @@ public class FRCDtoA {
 
     public void setlFieldA(Long lFieldA) {
         this.lFieldA = lFieldA;
+    }
+
+    public String getStrData1() {
+        return strData1;
+    }
+
+    public void setStrData1(String strData1) {
+        this.strData1 = strData1;
     }
 }

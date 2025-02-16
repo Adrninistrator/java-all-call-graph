@@ -37,12 +37,6 @@ public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteD
     protected WriteDbData4ClassReference genData(String[] array) {
         String className = array[0];
         String referenceClassName = array[1];
-
-        if (!isAllowedClassPrefix(className) || !isAllowedClassPrefix(referenceClassName)) {
-            // 根据类名前缀判断不需要处理
-            return null;
-        }
-
         String simpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(className);
         String referencedSimpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(referenceClassName);
         WriteDbData4ClassReference writeDbData4ClassReference = new WriteDbData4ClassReference();

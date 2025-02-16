@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.alibaba.druid.pool.DataSourceClosedException;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -360,6 +361,9 @@ public class DbOperator implements AutoCloseable {
      * @return
      */
     public <T> List<T> queryListOneColumn(String sql, Class<T> type, Object... arguments) {
+        if (!JACGUtil.checkJavaBasicWrapperType(type)) {
+            throw new JavaCG2RuntimeException("查询返回类型需要使用Java基本类型 " + type.getName());
+        }
         try {
             return jdbcTemplate.queryForList(sql, type, arguments);
         } catch (Exception e) {
@@ -380,6 +384,9 @@ public class DbOperator implements AutoCloseable {
      */
     @SuppressWarnings("unchecked")
     public <T> List<T> queryList(String sql, Class<T> type, Object... arguments) {
+        if (JACGUtil.checkJavaBasicWrapperType(type)) {
+            throw new JavaCG2RuntimeException("查询返回类型不允许使用Java基本类型 " + type.getName());
+        }
         try {
             BeanPropertyRowMapper<?> beanPropertyRowMapper = beanPropertyRowMapperMap.computeIfAbsent(type.getName(),
                     k -> new BeanPropertyRowMapper<>(type));
@@ -401,6 +408,9 @@ public class DbOperator implements AutoCloseable {
      * @return
      */
     public <T> T queryObjectOneColumn(String sql, Class<T> type, Object... arguments) {
+        if (!JACGUtil.checkJavaBasicWrapperType(type)) {
+            throw new JavaCG2RuntimeException("查询返回类型需要使用Java基本类型 " + type.getName());
+        }
         try {
             return jdbcTemplate.queryForObject(sql, type, arguments);
         } catch (Exception e) {
@@ -421,6 +431,9 @@ public class DbOperator implements AutoCloseable {
      */
     @SuppressWarnings("unchecked")
     public <T> T queryObject(String sql, Class<T> type, Object... arguments) {
+        if (JACGUtil.checkJavaBasicWrapperType(type)) {
+            throw new JavaCG2RuntimeException("查询返回类型不允许使用Java基本类型 " + type.getName());
+        }
         try {
             BeanPropertyRowMapper<?> beanPropertyRowMapper = beanPropertyRowMapperMap.computeIfAbsent(type.getName(),
                     k -> new BeanPropertyRowMapper<>(type));

@@ -32,12 +32,8 @@ public class WriteDbHandler4InnerClassInfo extends AbstractWriteDbHandler<WriteD
     @Override
     protected WriteDbData4InnerClass genData(String[] array) {
         String innerClassName = array[0];
-        if (!isAllowedClassPrefix(innerClassName) ||
-                !handledClassNameSet.add(innerClassName)) {
-            /*
-                根据类名前缀判断不需要处理时则不处理
-                或者已处理过则不处理
-             */
+        if (!handledClassNameSet.add(innerClassName)) {
+            // 根据类名判断者已处理过则不处理
             return null;
         }
 

@@ -1,13 +1,13 @@
 package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
 import com.adrninistrator.jacg.common.enums.JACGMethodTypeEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphJson;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphJsonMethod;
@@ -353,7 +353,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         logger.info("找到入口方法 {} {}", entryCallerMethodHash, entryCallerFullMethod);
 
         // 获取当前实际的方法名，而不是使用文件中指定的方法名，文件中指定的方法名可能包含参数，会很长，不可控
-        String entryCallerMethodName = JACGClassMethodUtil.getMethodNameFromFull(entryCallerFullMethod);
+        String entryCallerMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(entryCallerFullMethod);
 
         // 确定当前方法对应输出文件路径，格式: 配置文件中指定的类名（简单类名或完整类名）+方法名+方法名hash.txt
         StringBuilder outputFilePathTail = new StringBuilder();
@@ -371,7 +371,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             // 假如有指定行号时，再加上：@[起始行号]-[结束行号]
             outputFilePathTail.append(JACGConstants.FLAG_AT).append(entryLineNumStart).append(JACGConstants.FLAG_MINUS).append(entryLineNumEnd);
         }
-        String outputFilePath = currentOutputDirPath + File.separator + outputFilePathTail + JACGConstants.EXT_TXT;
+        String outputFilePath = currentOutputDirPath + File.separator + outputFilePathTail + JavaCG2Constants.EXT_TXT;
         logger.info("当前输出的调用链文件名 {} {}", outputFilePath, entryCallerFullMethod);
 
         // 判断文件是否生成过
@@ -705,7 +705,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         if (JavaCG2CallTypeEnum.isChildCallSuperType(callType)) {
             // 当前方法调用类型是子类调用父类方法，记录子类方法调用父类方法对应信息的栈入栈
-            String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
+            String callerClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(callerFullMethod);
             String callerSimpleClassName = dbOperWrapper.querySimpleClassName(callerClassName);
             ChildCallSuperInfo childCallSuperInfo = new ChildCallSuperInfo(nodeLevel, callerSimpleClassName, callerClassName, callerFullMethod);
             childCallSuperInfoStack.push(childCallSuperInfo);
@@ -742,7 +742,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return new ImmutablePair<>(Boolean.FALSE, null);
         }
 
-        String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
+        String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
         String calleeSimpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
 
         String ccsChildFullMethod = null;
@@ -986,26 +986,26 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             calleeInfo.append(actualCalleeFullMethod);
         } else if (OutputDetailEnum.ODE_2 == outputDetailEnum) {
             // # 2: 展示 完整类名+方法名
-            calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(actualCalleeFullMethod);
-            calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(actualCalleeFullMethod);
+            calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(actualCalleeFullMethod);
+            calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(actualCalleeFullMethod);
             calleeInfo.append(calleeClassName)
                     .append(JavaCG2Constants.FLAG_COLON)
                     .append(calleeMethodName);
         } else {
             // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
-            calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(actualCalleeFullMethod);
+            calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(actualCalleeFullMethod);
             String calleeSimpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
-            calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(actualCalleeFullMethod);
+            calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(actualCalleeFullMethod);
             calleeInfo.append(calleeSimpleClassName)
                     .append(JavaCG2Constants.FLAG_COLON)
                     .append(calleeMethodName);
         }
 
         if (calleeClassName == null) {
-            calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(actualCalleeFullMethod);
+            calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(actualCalleeFullMethod);
         }
         if (calleeMethodName == null) {
-            calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(actualCalleeFullMethod);
+            calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(actualCalleeFullMethod);
         }
 
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = null;
@@ -1078,7 +1078,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         // 写入前缀：    "[2]#    "
         calleeLineData.append(prefix);
 
-        String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
+        String callerClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(callerFullMethod);
         String callerSimpleClassName = dbOperWrapper.querySimpleClassName(callerClassName);
 
         // 写入调用方行号信息：   "[Service1Impl:29]	"
@@ -1149,7 +1149,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             return null;
         }
 
-        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+        String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         simpleAndClassNameMap.putIfAbsent(callerSimpleClassName, className);
         return className;
     }

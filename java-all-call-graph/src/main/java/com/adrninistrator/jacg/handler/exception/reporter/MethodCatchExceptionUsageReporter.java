@@ -12,6 +12,7 @@ import com.adrninistrator.jacg.handler.reporter.AbstractReporter;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
@@ -70,8 +71,9 @@ public class MethodCatchExceptionUsageReporter extends AbstractReporter {
     // 方法catch信息序号
     private JavaCG2Counter catchSeq;
 
-    public MethodCatchExceptionUsageReporter(ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile, boolean skipWriteDb) {
-        super(configureWrapper, reportDirPath, appendReportFile, skipWriteDb);
+    public MethodCatchExceptionUsageReporter(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile,
+                                             boolean skipWriteDb) {
+        super(javaCG2ConfigureWrapper, configureWrapper, reportDirPath, appendReportFile, skipWriteDb);
     }
 
     /**
@@ -127,9 +129,6 @@ public class MethodCatchExceptionUsageReporter extends AbstractReporter {
             logger.error("预期会使用catch的异常对象的方法未在参数中指定");
             return false;
         }
-
-        // 设置所有的类都需要处理（否则 throw new Exception() 不会被处理）
-        configureWrapper.setAllowAllClasses();
 
         // 公共预处理，包含写数据库步骤
         if (!commonPreHandle()) {

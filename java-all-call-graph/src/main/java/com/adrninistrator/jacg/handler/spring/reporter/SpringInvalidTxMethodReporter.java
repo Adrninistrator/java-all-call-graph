@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.handler.spring.SpringTxHandler;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -48,8 +49,9 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
         );
     }
 
-    public SpringInvalidTxMethodReporter(ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile, boolean copyFileInSeparateDir) {
-        super(configureWrapper, reportDirPath, appendReportFile, copyFileInSeparateDir);
+    public SpringInvalidTxMethodReporter(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile,
+                                         boolean copyFileInSeparateDir) {
+        super(javaCG2ConfigureWrapper, configureWrapper, reportDirPath, appendReportFile, copyFileInSeparateDir);
     }
 
     /**

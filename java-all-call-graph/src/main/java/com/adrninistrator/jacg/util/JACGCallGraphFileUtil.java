@@ -5,9 +5,9 @@ import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
 import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
-import com.adrninistrator.jacg.markdown.JACGMarkdownConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.markdown.MarkdownConstants;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class JACGCallGraphFileUtil {
      * @return
      */
     public static boolean isDataSeqLine(String line) {
-        return StringUtils.startsWith(line, JACGMarkdownConstants.FLAG_TITLE) && StringUtils.contains(line, JACGConstants.FLAG_MD_LINE_NUMBER);
+        return StringUtils.startsWith(line, MarkdownConstants.FLAG_TITLE) && StringUtils.contains(line, JACGConstants.FLAG_MD_LINE_NUMBER);
     }
 
     /**
@@ -48,7 +48,7 @@ public class JACGCallGraphFileUtil {
      * @return
      */
     public static int getDataSeqFromLine(String line) {
-        String dataSeq = StringUtils.substringBetween(line, JACGMarkdownConstants.FLAG_SPACE, JACGMarkdownConstants.FLAG_DOT);
+        String dataSeq = StringUtils.substringBetween(line, MarkdownConstants.FLAG_SPACE, MarkdownConstants.FLAG_DOT);
         if (!JavaCG2Util.isNumStr(dataSeq)) {
             throw new JavaCG2RuntimeException("方法调用行内容非法 " + line);
         }
@@ -73,7 +73,7 @@ public class JACGCallGraphFileUtil {
      * @return
      */
     public static boolean isMarkdownCodeLine(String line) {
-        return StringUtils.startsWith(line, JACGMarkdownConstants.FLAG_CODE);
+        return StringUtils.startsWith(line, MarkdownConstants.FLAG_CODE);
     }
 
     /**

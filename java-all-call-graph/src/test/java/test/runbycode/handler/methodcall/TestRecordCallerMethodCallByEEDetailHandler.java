@@ -18,7 +18,6 @@ public class TestRecordCallerMethodCallByEEDetailHandler extends TestRunByCodeBa
 
     @Test
     public void $test0WriteDb() {
-        configureWrapper.setAllowAllClasses();
         commonWriteDb();
     }
 

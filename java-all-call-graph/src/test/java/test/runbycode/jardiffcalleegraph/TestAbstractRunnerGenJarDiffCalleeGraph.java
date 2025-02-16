@@ -1,8 +1,8 @@
 package test.runbycode.jardiffcalleegraph;
 
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCalleeGraph;
 import com.adrninistrator.jacg.handler.entrymethodinfo.EntryMethodInfoFiller4Spring;
 import org.junit.Assert;
@@ -33,7 +33,7 @@ public abstract class TestAbstractRunnerGenJarDiffCalleeGraph extends TestRunByC
 
     protected void testGenJarDiffCalleeGraph(ConfigureWrapper configureWrapper, boolean skipWriteDb) {
         try (EntryMethodInfoFiller4Spring entryMethodInfoFiller4Spring = new EntryMethodInfoFiller4Spring(configureWrapper)) {
-            RunnerGenJarDiffCalleeGraph genJarDiffCalleeGraph = new RunnerGenJarDiffCalleeGraph(configureWrapper);
+            RunnerGenJarDiffCalleeGraph genJarDiffCalleeGraph = new RunnerGenJarDiffCalleeGraph(javaCG2ConfigureWrapper, configureWrapper);
             if (skipWriteDb) {
                 genJarDiffCalleeGraph.setSkipWriteDb(true);
             }

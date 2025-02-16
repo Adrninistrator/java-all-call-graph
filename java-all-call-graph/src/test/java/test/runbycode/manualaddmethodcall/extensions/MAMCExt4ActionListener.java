@@ -1,7 +1,6 @@
 package test.runbycode.manualaddmethodcall.extensions;
 
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallPair;
 import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
@@ -25,8 +24,8 @@ public class MAMCExt4ActionListener extends AbstractManualAddMethodCall1 {
 
     private final MethodInfoHandler methodInfoHandler;
 
-    public MAMCExt4ActionListener(DbOperator dbOperator, DbOperWrapper dbOperWrapper) {
-        super(dbOperator, dbOperWrapper);
+    public MAMCExt4ActionListener(DbOperWrapper dbOperWrapper) {
+        super(dbOperWrapper);
         methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
     }
 

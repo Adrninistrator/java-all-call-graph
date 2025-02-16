@@ -29,11 +29,6 @@ public class WriteDbHandler4MethodReturnCallId extends AbstractWriteDbHandler<Wr
     @Override
     protected WriteDbData4MethodReturnCallId genData(String[] array) {
         String fullMethod = readLineData();
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(fullMethod)) {
-            return null;
-        }
-
         int returnCallId = Integer.parseInt(readLineData());
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         int equivalentConversion = Integer.parseInt(readLineData());

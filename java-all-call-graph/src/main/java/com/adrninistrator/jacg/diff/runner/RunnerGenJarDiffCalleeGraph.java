@@ -2,14 +2,14 @@ package com.adrninistrator.jacg.diff.runner;
 
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
@@ -22,11 +22,13 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.jacg.handler.entrymethodinfo.AbstractEntryMethodInfoFiller;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
@@ -57,6 +59,8 @@ public class RunnerGenJarDiffCalleeGraph {
 
     private static final Logger logger = LoggerFactory.getLogger(RunnerGenJarDiffCalleeGraph.class);
 
+    private final JavaCG2ConfigureWrapper javaCG2ConfigureWrapper;
+
     private final ConfigureWrapper configureWrapper;
 
     // 是否跳过写入数据库的步骤
@@ -69,10 +73,11 @@ public class RunnerGenJarDiffCalleeGraph {
     private final String appName;
 
     public RunnerGenJarDiffCalleeGraph() {
-        this(new ConfigureWrapper(false));
+        this(new JavaCG2ConfigureWrapper(false), new ConfigureWrapper(false));
     }
 
-    public RunnerGenJarDiffCalleeGraph(ConfigureWrapper configureWrapper) {
+    public RunnerGenJarDiffCalleeGraph(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper) {
+        this.javaCG2ConfigureWrapper = javaCG2ConfigureWrapper;
         this.configureWrapper = configureWrapper;
         dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, this);
         dbOperator = dbOperWrapper.getDbOperator();
@@ -279,11 +284,6 @@ public class RunnerGenJarDiffCalleeGraph {
         configureWrapperNew.setMainConfig(ConfigDbKeyEnum.CDKE_DB_TABLE_SUFFIX, JACGConstants.TABLE_SUFFIX_NEW);
         configureWrapperNew.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_1.getDetail());
         configureWrapperNew.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, modifiedMethodSet);
-        if (skipWriteDb) {
-            configureWrapperNew.setMainConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED, Boolean.FALSE.toString());
-        } else {
-            configureWrapperNew.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, dirPathNew);
-        }
         configureWrapperNew.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, JACGConstants.CALLEE_FLAG_ENTRY);
         FindCallStackTrace findCallStackTrace = new FindCallStackTrace(true, configureWrapperNew);
         // 生成发生变化方法到入口方法的调用堆栈文件
@@ -337,7 +337,7 @@ public class RunnerGenJarDiffCalleeGraph {
                 String stackSeq = array[1];
                 String callerMethod = array[2];
                 String entryMethod = array[3];
-                String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeMethod);
+                String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeMethod);
                 String jarName = modifiedClassJarMap.get(calleeClassName);
                 // 查询入口方法的信息
                 String entryMethodInfo = queryEntryMethodInfo(entryMethod, entryMethodInfoFillers);
@@ -429,7 +429,7 @@ public class RunnerGenJarDiffCalleeGraph {
                     " where " + DC.JI_JAR_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4JarInfo.class, JavaCG2Constants.FILE_KEY_JAR_INFO_PREFIX);
+        return dbOperator.queryList(sql, WriteDbData4JarInfo.class, JavaCG2Constants.FILE_KEY_JAR);
     }
 
     // 解析新旧目录的jar包并写入数据库
@@ -446,19 +446,21 @@ public class RunnerGenJarDiffCalleeGraph {
 
         logger.info("解析旧目录中的jar包并写入数据库 {}", dirPathOld);
         ConfigureWrapper configureWrapperOld = configureWrapper.copy();
+        JavaCG2ConfigureWrapper javaCG2ConfigureWrapperOld = javaCG2ConfigureWrapper.copy();
         // 指定数据库表名后缀使用代表旧的
         configureWrapperOld.setMainConfig(ConfigDbKeyEnum.CDKE_DB_TABLE_SUFFIX, JACGConstants.TABLE_SUFFIX_OLD);
-        configureWrapperOld.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, dirPathOld);
-        if (!new RunnerWriteDb(configureWrapperOld).run()) {
+        javaCG2ConfigureWrapperOld.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, dirPathOld);
+        if (!new RunnerWriteDb(javaCG2ConfigureWrapperOld, configureWrapperOld).run()) {
             return false;
         }
 
         logger.info("解析新目录中的jar包并写入数据库 {}", dirPathNew);
         ConfigureWrapper configureWrapperNew = configureWrapper.copy();
+        JavaCG2ConfigureWrapper javaCG2ConfigureWrapperNew = javaCG2ConfigureWrapper.copy();
         // 指定数据库表名后缀使用代表新的
         configureWrapperNew.setMainConfig(ConfigDbKeyEnum.CDKE_DB_TABLE_SUFFIX, JACGConstants.TABLE_SUFFIX_NEW);
-        configureWrapperNew.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR, dirPathNew);
-        return new RunnerWriteDb(configureWrapperNew).run();
+        javaCG2ConfigureWrapperNew.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, dirPathNew);
+        return new RunnerWriteDb(javaCG2ConfigureWrapperNew, configureWrapperNew).run();
     }
 
     // 获取当前使用的数据库表名后缀

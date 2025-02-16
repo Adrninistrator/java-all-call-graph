@@ -9,15 +9,12 @@ import com.adrninistrator.jacg.common.JACGConstants;
  * @description: 数据库表信息枚举
  */
 public enum DbTableInfoEnum {
+    // todo el
     DTIE_JAVACG2_CONFIG("javacg2_config", new String[]{
             DC.JAVACG2C_CONFIG_FILE_NAME,
             DC.JAVACG2C_CONFIG_KEY,
             DC.JAVACG2C_CONFIG_VALUE,
             DC.JAVACG2C_CONFIG_TYPE,
-    }),
-    DTIE_ALLOWED_CLASS_PREFIX("allowed_class_prefix", new String[]{
-            DC.ACP_RECORD_ID,
-            DC.ACP_CLASS_PREFIX,
     }),
     DTIE_BUSINESS_DATA("business_data", new String[]{
             DC.BD_CALL_ID,
@@ -120,6 +117,8 @@ public enum DbTableInfoEnum {
             DC.JI_JAR_FILE_NAME_EXT,
             DC.JI_LAST_MODIFIED_TIME,
             DC.JI_JAR_FILE_HASH,
+            DC.JI_INNER_JAR_PATH,
+            DC.JI_INNER_JAR_FILE_NAME,
             DC.JI_IMPORT_TIME,
     }),
     DTIE_LAMBDA_METHOD_INFO("lambda_method_info", new String[]{

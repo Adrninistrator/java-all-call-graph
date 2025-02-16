@@ -1,8 +1,8 @@
 package test.neo4j.runner;
 
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.neo4j.runner.Neo4jRunnerGenAllGraph4Caller;
 import org.junit.Assert;
 import org.junit.Test;

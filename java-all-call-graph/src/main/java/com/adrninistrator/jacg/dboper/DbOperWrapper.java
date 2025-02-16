@@ -4,7 +4,6 @@ import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphNode4Caller;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
@@ -12,6 +11,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -393,7 +393,7 @@ public class DbOperWrapper {
             // 当前指定的是完整类名，查找对应的简单类名
             String simpleClassName = querySimpleClassNameByFull(className);
             if (simpleClassName == null) {
-                logger.warn("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定", className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
+                logger.warn("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定", className, JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
             }
             return simpleClassName;
         }
@@ -401,10 +401,10 @@ public class DbOperWrapper {
         // 当前指定的是简单类名
         String simpleClassName = querySimpleClassNameBySimple(className);
         if (simpleClassName == null) {
-            logger.error("指定的简单类名 {} 不存在，请检查，可能因为以下原因\n" +
+            logger.warn("指定的简单类名 {} 不存在，请检查，可能因为以下原因\n" +
                             "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
                             "2. 指定的类存在同名类，需要使用完整类名形式",
-                    className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
+                    className, JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
         }
         return simpleClassName;
     }

@@ -73,7 +73,7 @@ public class FRDClass1 {
         frdDtoB.setString1(frdDtoC.getString1() + "a");
     }
 
-    public FRFDtoC test6b(String s1) {
+    public static FRFDtoC test6b(String s1) {
         return new FRFDtoC();
     }
 

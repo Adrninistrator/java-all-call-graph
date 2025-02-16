@@ -1,7 +1,7 @@
 package test.runbycode.util;
 
-import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

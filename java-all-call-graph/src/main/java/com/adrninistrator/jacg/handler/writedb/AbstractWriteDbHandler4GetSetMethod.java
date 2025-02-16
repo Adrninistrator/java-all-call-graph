@@ -29,11 +29,6 @@ public abstract class AbstractWriteDbHandler4GetSetMethod<T extends BaseWriteDbD
      */
     protected boolean fillInBaseWriteDbData4GetSetMethod(BaseWriteDbData4GetSetMethod baseWriteDbData4GetSetMethod, Map<String, Set<String>> getSetMethodSimpleClassMap) {
         String className = readLineData();
-        // 根据类名前缀判断是否需要处理
-        if (!isAllowedClassPrefix(className)) {
-            return false;
-        }
-
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = readLineData();
         String fieldName = readLineData();

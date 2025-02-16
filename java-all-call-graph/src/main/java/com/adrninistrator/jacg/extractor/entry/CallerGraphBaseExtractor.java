@@ -1,8 +1,8 @@
 package com.adrninistrator.jacg.extractor.entry;
 
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 import com.adrninistrator.jacg.extractor.callback.StackFileParsedCallback;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;

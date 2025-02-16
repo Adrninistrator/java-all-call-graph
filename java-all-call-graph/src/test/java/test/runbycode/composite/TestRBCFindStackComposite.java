@@ -1,10 +1,9 @@
 package test.runbycode.composite;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
-import org.junit.Before;
 import org.junit.Test;
 import test.runbycode.base.TestRunByCodeBase;
 
@@ -16,11 +15,6 @@ import test.runbycode.base.TestRunByCodeBase;
 
 public class TestRBCFindStackComposite extends TestRunByCodeBase {
     public static final Boolean[] BOOLEAN_ARRAY = new Boolean[]{Boolean.FALSE, Boolean.TRUE};
-
-    @Before
-    public void initTestRBCFindStackComposite() {
-        configureWrapper.setAllowAllClasses();
-    }
 
     @Test
     public void $test0WriteDb() {

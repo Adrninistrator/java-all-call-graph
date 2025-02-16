@@ -12,7 +12,7 @@ public class CalleeExtractedLine extends BaseCallGraphExtractedLine {
     private boolean entryMethodExistsSuperCallChild = false;
 
     // 入口方法是否定义在父类或接口中（不在当前对应的类中）
-    private boolean entryMethodDefineInSuperInterface =false;
+    private boolean entryMethodDefineInSuperInterface = false;
 
     // 任务指定的被调用方法的直接调用方法对应行的完整内容
     private String directlyCallerLineContent;

@@ -5,12 +5,16 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
+import com.adrninistrator.jacg.extensions.methodcall.AbstractJACGMethodCallExtension;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +31,7 @@ import java.util.Set;
         maxColumnNum = 13,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL,
         dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_METHOD_ANNOTATION,
+                DbTableInfoEnum.DTIE_METHOD_INFO,
                 DbTableInfoEnum.DTIE_METHOD_ARG_GENERICS_TYPE,
                 DbTableInfoEnum.DTIE_METHOD_RETURN_GENERICS_TYPE,
                 DbTableInfoEnum.DTIE_EXTENDS_IMPL,
@@ -82,6 +87,12 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
      */
     private Map<String, Set<String>> setMethodSimpleClassMap;
 
+    // 是否使用方法调用处理扩展类
+    private boolean useJACGMethodCallExtension;
+
+    // 方法调用处理扩展类
+    private List<AbstractJACGMethodCallExtension> jacgMethodCallExtensionList;
+
     public WriteDbHandler4MethodCall(WriteDbResult writeDbResult) {
         super(writeDbResult);
     }
@@ -95,12 +106,6 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
         int indexCalleeRightBracket = tmpCalleeFullMethod.indexOf(JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG2);
         String calleeFullMethod = tmpCalleeFullMethod.substring(indexCalleeRightBracket + JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG2.length()).trim();
-
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(callerFullMethod) && !isAllowedClassPrefix(calleeFullMethod)) {
-            return null;
-        }
-
         int callerLineNum = Integer.parseInt(readLineData());
         String callerReturnType = readLineData();
         int calleeArrayDimensions = Integer.parseInt(readLineData());
@@ -113,8 +118,8 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
         int indexCalleeLeftBracket = tmpCalleeFullMethod.indexOf(JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG1);
         String callType = tmpCalleeFullMethod.substring(indexCalleeLeftBracket + JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG1.length(), indexCalleeRightBracket);
-        String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
-        String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
+        String callerClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(callerFullMethod);
+        String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
         Integer callerJarNum = (JavaCG2Constants.EMPTY_JAR_NUM.equals(callerJarNumStr) ? null : Integer.parseInt(callerJarNumStr));
         Integer calleeJarNum = (JavaCG2Constants.EMPTY_JAR_NUM.equals(calleeJarNumStr) ? null : Integer.parseInt(calleeJarNumStr));
 
@@ -138,8 +143,21 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         );
 
         // 对于递归调用，写入数据库，查询时有对死循环进行处理
-        // 生成方法调用标志
-        genCallFlags(callId, writeDbData4MethodCall);
+
+        int modifyTimes = 0;
+        // 使用扩展类对方法调用进行处理
+        if (useJACGMethodCallExtension) {
+            for (AbstractJACGMethodCallExtension jacgMethodCallExtension : jacgMethodCallExtensionList) {
+                if (jacgMethodCallExtension.handle(writeDbData4MethodCall)) {
+                    modifyTimes++;
+                }
+            }
+        }
+
+        if (modifyTimes == 0) {
+            // 生成方法调用标志
+            genCallFlags(callId, writeDbData4MethodCall);
+        }
         return writeDbData4MethodCall;
     }
 
@@ -185,9 +203,9 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     private void genCallFlags(int callId, WriteDbData4MethodCall writeDbData4MethodCall) {
         String callerMethodHash = writeDbData4MethodCall.getCallerMethodHash();
         String calleeMethodHash = writeDbData4MethodCall.getCalleeMethodHash();
-        String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(writeDbData4MethodCall.getCalleeFullMethod());
+        String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(writeDbData4MethodCall.getCalleeFullMethod());
         String calleeSimpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
-        String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(writeDbData4MethodCall.getCalleeFullMethod());
+        String calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(writeDbData4MethodCall.getCalleeFullMethod());
         int callFlags = 0;
 
         if (withAnnotationMethodHashSet.contains(callerMethodHash)) {
@@ -233,6 +251,11 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
             callFlags = MethodCallFlagsEnum.MCFE_EE_DTO_GET_SET_METHOD.setFlag(callFlags);
         }
         writeDbData4MethodCall.setCallFlags(callFlags);
+    }
+
+    public void recordJacgMethodCallExtensionList(List<AbstractJACGMethodCallExtension> jacgMethodCallExtensionList) {
+        this.jacgMethodCallExtensionList = jacgMethodCallExtensionList;
+        useJACGMethodCallExtension = !JavaCG2Util.isCollectionEmpty(jacgMethodCallExtensionList);
     }
 
     //

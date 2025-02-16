@@ -15,6 +15,19 @@ import java.util.stream.Stream;
  * @description: 常用类常量
  */
 public class JACGCommonNameConstants {
+
+    public static final Class<?>[] JAVA_BASIC_WRAPPER_TYPES = new Class[]{
+            Integer.class,
+            Long.class,
+            Float.class,
+            Double.class,
+            Byte.class,
+            Character.class,
+            Short.class,
+            String.class,
+            Boolean.class
+    };
+
     public static final String[] SPRING_MVC_CONTROLLER_ANNOTATIONS = new String[]{
             "org.springframework.stereotype.Controller",
             "org.springframework.web.bind.annotation.RestController"

@@ -10,6 +10,7 @@ import com.adrninistrator.jacg.handler.reporter.AbstractReporter;
 import com.adrninistrator.jacg.util.JACGMethodCallInfoUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,8 +41,9 @@ public class MethodCallStaticFieldReporter extends AbstractReporter {
 
     public static final String FILE_HEADER_STATIC_FIELD = StringUtils.join(FILE_HEADER_STATIC_FIELD_ARRAY, JavaCG2Constants.FLAG_TAB);
 
-    public MethodCallStaticFieldReporter(ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile, boolean skipWriteDb) {
-        super(configureWrapper, reportDirPath, appendReportFile, skipWriteDb);
+    public MethodCallStaticFieldReporter(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper, String reportDirPath, boolean appendReportFile,
+                                         boolean skipWriteDb) {
+        super(javaCG2ConfigureWrapper, configureWrapper, reportDirPath, appendReportFile, skipWriteDb);
     }
 
     /**

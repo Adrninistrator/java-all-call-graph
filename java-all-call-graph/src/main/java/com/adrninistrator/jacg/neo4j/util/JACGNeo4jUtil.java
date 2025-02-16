@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.neo4j.util;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,7 +34,7 @@ public class JACGNeo4jUtil {
         Iterable<?> result = repository.saveAll(list);
         long spendTime = System.currentTimeMillis() - startTime;
         if (spendTime > SAVE_ALL_LOG_TIME) {
-            logger.info("{} 写入数据数量 {} 耗时 {} 秒", list.get(0).getClass().getSimpleName(), list.size(), JACGUtil.getSecondsFromMilli(spendTime));
+            logger.info("{} 写入数据数量 {} 耗时 {} 秒", list.get(0).getClass().getSimpleName(), list.size(), JavaCG2Util.getSecondsFromMilli(spendTime));
         }
         return result;
     }

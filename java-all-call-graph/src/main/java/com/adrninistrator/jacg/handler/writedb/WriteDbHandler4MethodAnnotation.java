@@ -8,10 +8,10 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodAnnotation;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSpringUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,12 +74,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     protected WriteDbData4MethodAnnotation genData(String[] array) {
         // 拆分时限制列数，最后一列注解属性中可能出现空格
         String fullMethod = readLineData();
-        // 根据完整方法前缀判断是否需要处理
-        if (!isAllowedClassPrefix(fullMethod)) {
-            return null;
-        }
-
-        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+        String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
         String annotationName = readLineData();
@@ -220,8 +215,8 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
             return;
         }
 
-        String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
+        String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
+        String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);
         WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
         writeDbData4SpringTask.setRecordId(writeDbHandler4SpringTaskAnnotation.genNextRecordId());
         writeDbData4SpringTask.setMethodHash(JACGUtil.genHashWithLen(fullMethod));

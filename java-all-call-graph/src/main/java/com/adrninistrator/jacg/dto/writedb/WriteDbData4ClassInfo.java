@@ -12,6 +12,8 @@ public class WriteDbData4ClassInfo implements BaseWriteDbData {
     private String simpleClassName;
     private int accessFlags;
     private String className;
+    private String packageName;
+    private int packageLevel;
     private String classFileHash;
     private int jarNum;
     private String classPathInJar;
@@ -51,6 +53,22 @@ public class WriteDbData4ClassInfo implements BaseWriteDbData {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public int getPackageLevel() {
+        return packageLevel;
+    }
+
+    public void setPackageLevel(int packageLevel) {
+        this.packageLevel = packageLevel;
     }
 
     public String getClassFileHash() {
