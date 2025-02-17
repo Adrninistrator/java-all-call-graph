@@ -32,35 +32,41 @@ public abstract class JavaCG2ObjInstanceMethodNameMCE implements JavaCG2MethodCa
 
     @Override
     public void handle(MethodCall methodCall, JavaCG2Counter javaCG2Counter, MethodCallList methodCallList) {
-        if (!methodCall.getCalleeClassName().equals(chooseCalleeClassName()) ||
-                !methodCall.getCalleeMethodName().equals(chooseCalleeMethodName())) {
+        if (!checkHandleCalleeMethod(methodCall.getCalleeClassName(), methodCall.getCalleeMethodName(), methodCall.getCalleeMethodArgTypes())) {
             // 被调用方法不需要处理
             return;
         }
 
-        MethodCall newmethodCall = new MethodCall();
-        newmethodCall.setEnabled(true);
-        newmethodCall.setCallerClassName(methodCall.getCallerClassName());
-        newmethodCall.setCallerMethodName(methodCall.getCallerMethodName());
-        newmethodCall.setCallerMethodArgTypes(methodCall.getCallerMethodArgTypes());
-        newmethodCall.setCallerSourceLine(methodCall.getCallerSourceLine());
-        newmethodCall.setCallerReturnType(methodCall.getCallerReturnType());
-        newmethodCall.setMethodCallType(chooseMethodCallType());
-        newmethodCall.setCalleeClassName(JACGConstants.CLASS_PLACE_HOLDER);
-        newmethodCall.setCalleeMethodName(JACGConstants.METHOD_PLACE_HOLDER);
-        newmethodCall.setCalleeMethodArgTypes(JavaCG2Constants.EMPTY_METHOD_ARGS);
-        newmethodCall.setRawReturnType("");
-        newmethodCall.setActualReturnType("");
-        newmethodCall.setDescription(String.valueOf(methodCall.getCallId()));
-        methodCallList.addMethodCallAutoCallId(newmethodCall);
+        MethodCall newMethodCall = new MethodCall();
+        newMethodCall.setEnabled(true);
+        newMethodCall.setCallerClassName(methodCall.getCallerClassName());
+        newMethodCall.setCallerMethodName(methodCall.getCallerMethodName());
+        newMethodCall.setCallerMethodArgTypes(methodCall.getCallerMethodArgTypes());
+        newMethodCall.setCallerSourceLine(methodCall.getCallerSourceLine());
+        newMethodCall.setCallerReturnType(methodCall.getCallerReturnType());
+        newMethodCall.setMethodCallType(chooseMethodCallType());
+        newMethodCall.setCalleeClassName(JACGConstants.CLASS_PLACE_HOLDER);
+        newMethodCall.setCalleeMethodName(JACGConstants.METHOD_PLACE_HOLDER);
+        newMethodCall.setCalleeMethodArgTypes(JavaCG2Constants.EMPTY_METHOD_ARGS);
+        newMethodCall.setRawReturnType("");
+        newMethodCall.setActualReturnType("");
+        newMethodCall.setDescription(String.valueOf(methodCall.getCallId()));
+        methodCallList.addMethodCallAutoCallId(newMethodCall);
     }
 
-    // 选择需要处理的被调用类名
-    protected abstract String chooseCalleeClassName();
+    /**
+     * 判断当前被调用方法是否需要处理
+     *
+     * @param calleeClassName      被调用类名
+     * @param calleeMethodName     被调用方法名
+     * @param calleeMethodArgTypes 被调用方法参数类型，含括号，参数类型以半角逗号分隔，不含空格，如：()、(int)、(java.lang.String,int)
+     * @return
+     */
+    protected abstract boolean checkHandleCalleeMethod(String calleeClassName, String calleeMethodName, String calleeMethodArgTypes);
 
-    // 选择需要处理的被调用方法名
-    protected abstract String chooseCalleeMethodName();
-
-    // 选择需要替换的方法调用类型
+    /**
+     * 选择需要替换的方法调用类型，需要唯一
+     * @return
+     */
     protected abstract String chooseMethodCallType();
 }

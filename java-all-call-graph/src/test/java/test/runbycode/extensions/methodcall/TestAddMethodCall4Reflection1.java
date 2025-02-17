@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import org.junit.Assert;
 import org.junit.Test;
 import test.callgraph.reflection1.methodcall.TestRunByReflection1;
+import test.callgraph.reflection1.methodcall.TestRunByReflection2;
 import test.runbycode.base.TestRunByCodeBase;
 
 /**
@@ -22,16 +23,19 @@ public class TestAddMethodCall4Reflection1 extends TestRunByCodeBase {
     @Test
     public void $test0RunnerWriteDb() {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JAVACG2_METHOD_CALL,
-                JavaCG2Reflection1MethodCallExtension.class.getName());
+                JavaCG2Reflection1MethodCallExtension.class.getName(),
+                JavaCG2Reflection2MethodCallExtension.class.getName());
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL,
-                JACGReflection1MethodCallExtension.class.getName());
+                JACGReflection1MethodCallExtension.class.getName(),
+                JACGReflection2MethodCallExtension.class.getName());
         Assert.assertTrue(new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper).run());
     }
 
     @Test
     public void testRunnerGenAllGraph4Caller() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
-                TestRunByReflection1.class.getName());
+                TestRunByReflection1.class.getName(),
+                TestRunByReflection2.class.getName());
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
     }
 

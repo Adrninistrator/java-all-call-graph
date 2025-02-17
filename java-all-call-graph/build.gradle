@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "3.0.0"
+version = "3.0.1"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8

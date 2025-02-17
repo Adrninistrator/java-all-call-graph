@@ -776,3 +776,9 @@ public class TestReflectionUtil1 {
 在调用 com.adrninistrator.jacg.runner.RunnerWriteDb 类前，需要在 java-all-call-graph 项目的配置包装类 com.adrninistrator.jacg.conf.ConfigureWrapper 对象中使用以上新增的配置文件
 
 参考对应扩展类：test.runbycode.extensions.methodcall.JavaCG2Reflection1MethodCallExtension、test.runbycode.extensions.methodcall.JACGReflection1MethodCallExtension
+
+## 1.28. （3.0.1）更新说明
+
+### 1.28.6. 支持识别通过反射调用的方法（被调用对象+被调用方法名称+被调用方法参数类型）
+
+支持区分被调用方法参数类型

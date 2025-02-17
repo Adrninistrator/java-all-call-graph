@@ -91,6 +91,10 @@ public abstract class JACGObjInstanceMethodNameMCE extends AbstractJACGMethodCal
     // 选择被调用方法名称对应的参数序号，从1开始
     protected abstract int chooseCalleeMethodNameArgSeq();
 
-    // 选择需要替换的方法调用类型
+    /**
+     * 选择需要替换的方法调用类型
+     * 需要与 com.adrninistrator.jacg.extensions.methodcall.JavaCG2ObjInstanceMethodNameMCE#chooseMethodCallType() 返回配套
+     * @return
+     */
     protected abstract String chooseMethodCallType();
 }
