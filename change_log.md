@@ -668,7 +668,7 @@ jacg_sf_field_method_call static、final 字段初始化方法信息表
 jacg_spring_controller Spring Controller 信息表
 ```
 
-## 1.25. （2.1.0）更新说明
+## 1.25. （2.1.0）
 
 ## 1.26. 增加功能
 
@@ -713,15 +713,29 @@ method_return_field_info    方法返回的字段（含枚举）
 
 原有的 test.runbycode 包名中的类名以 TestRBC 开头的单元测试类，修改到 test.runbycodemain 包中
 
-## 1.27. （3.0.0）更新说明
+## 1.27. （3.0.0）
 
 文档暂未全部完成，主要修改了配置参数指定方式，其他功能差别不大，可继续使用上一个版本
 
 ### 1.27.1. 删除配置文件
 
+- _jacg_config/jar_dir.properties
+
+用于指定需要处理的 jar 包路径，或保存 class、jar 文件的目录路径
+
+删除当前配置文件后，需要使用 java-callgraph2 组件的同名配置文件
+
 - _jacg_config/allowed_class_prefix.properties
 
 用于指定 java-callgraph2 解析类时需要处理的类名或包名前缀，以及 java-all-call-graph 在写入数据库时需要写入的类名或包名前缀
+
+删除当前配置文件后，可以通过 java-callgraph2 组件提供的配置达到相同的控制效果
+
+- _jacg_field_relationship/fr_eq_conversion_method.properties
+
+当前配置文件在处理通过 get/set 方法的字段关联关系时使用，指定方法返回值与被调用对象或参数认为是等值转换的方法，在 java-callgraph2 中使用
+
+删除当前配置文件后，需要使用 java-callgraph2 组件的同名配置文件
 
 ### 1.27.2. 增加配置文件
 
@@ -777,8 +791,8 @@ public class TestReflectionUtil1 {
 
 参考对应扩展类：test.runbycode.extensions.methodcall.JavaCG2Reflection1MethodCallExtension、test.runbycode.extensions.methodcall.JACGReflection1MethodCallExtension
 
-## 1.28. （3.0.1）更新说明
+## 1.28. （3.0.1）
 
-### 1.28.6. 支持识别通过反射调用的方法（被调用对象+被调用方法名称+被调用方法参数类型）
+### 1.28.1. 支持识别通过反射调用的方法（被调用对象+被调用方法名称+被调用方法参数类型）
 
 支持区分被调用方法参数类型
