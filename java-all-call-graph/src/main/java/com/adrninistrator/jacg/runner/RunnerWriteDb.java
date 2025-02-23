@@ -107,7 +107,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     // 写数据库的结果信息
     protected final WriteDbResult writeDbResult = new WriteDbResult();
 
-    // jar包及允许处理的类名或包名前缀没有变化时是否跳过写数据库操作
+    // jar包及允许处理的类名或包名前缀没有变化时是否跳过写数据库操作，默认false，即不跳过
     private boolean skipWhenNotModified = false;
 
     // 人工添加方法调用关系类列表

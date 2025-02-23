@@ -1,11 +1,15 @@
 package com.adrninistrator.jacg.handler.enums;
 
 import com.adrninistrator.jacg.common.DC;
+import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author adrninistrator
@@ -14,23 +18,27 @@ import com.adrninistrator.jacg.handler.base.BaseHandler;
  */
 public class EnumsHandler extends BaseHandler {
 
+    private final MethodInfoHandler methodInfoHandler;
+
     public EnumsHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
+        methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
     }
 
     public EnumsHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
+        methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
     }
 
     /**
-     * 查询指定枚举的指定常量名称的指定字段在初始化时的值
+     * 查询枚举常量字段在初始化时的值
      *
      * @param enumClassName 枚举类名
      * @param enumConstName 枚举常量名称
      * @param fieldName     字段名称
      * @return
      */
-    public String queryEnumFieldValue(String enumClassName, String enumConstName, String fieldName) {
+    public String queryEnumConstantFieldValue(String enumClassName, String enumConstName, String fieldName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.ENUM_QUERY_FIELD_VALUE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -46,5 +54,26 @@ public class EnumsHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObjectOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(enumClassName), enumConstName, fieldName);
+    }
+
+    /**
+     * 查询枚举常量方法返回值
+     *
+     * @param enumClassName
+     * @param enumConstName
+     * @param enumFullMethod
+     * @return
+     */
+    public String queryEnumConstantFieldMethodReturnValue(String enumClassName, String enumConstName, String enumFullMethod) {
+        // 判断是否返回了枚举的name()方法
+        if (enumFullMethod.endsWith(JACGCommonNameConstants.ENUM_METHOD_NAME)) {
+            return JavaCG2ClassMethodUtil.formatClassAndField(enumClassName, enumConstName);
+        }
+
+        String methodReturnFieldName = methodInfoHandler.queryMethodReturnFieldName(enumFullMethod);
+        if (StringUtils.isBlank(methodReturnFieldName)) {
+            return null;
+        }
+        return queryEnumConstantFieldValue(enumClassName, enumConstName, methodReturnFieldName);
     }
 }

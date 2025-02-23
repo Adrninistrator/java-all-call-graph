@@ -79,7 +79,7 @@ public class FieldBehavior {
      */
     @JsonIgnore
     public String genClassAndFieldName() {
-        return JavaCG2ClassMethodUtil.genClassAndField(className, fieldName);
+        return JavaCG2ClassMethodUtil.formatClassAndField(className, fieldName);
     }
 
     /**

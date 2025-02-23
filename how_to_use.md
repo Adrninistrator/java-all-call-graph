@@ -21,7 +21,7 @@
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:3.0.0'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:3.0.2'
 ```
 
 - Maven
@@ -30,7 +30,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:3.0.0'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.2</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -40,8 +40,8 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:3.0.0'
 `由于 Maven 间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定 java-all-call-graph 依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过 java-all-call-graph 与 java-callgraph2 的 pom 文件的 dependencies 元素查看依赖组件版本`
 
 ```
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/3.0.0/java-all-call-graph-3.0.0.pom
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/3.0.0/java-callgraph2-3.0.0.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/3.0.2/java-all-call-graph-3.0.2.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/3.0.4/java-callgraph2-3.0.43.pom
 ```
 
 以上版本号可能需要替换为最新版本
@@ -538,13 +538,20 @@ func1(java.lang.String)
 
 在项目根目录执行`gradlew gen_run_jar`命令，生成可以直接执行的 jar 包，并拷贝相关文件。
 
-在生成的`output_dir`目录中，包含了当前项目生成的 jar 包、依赖 jar 包，以及资源文件、启动脚本等，如下所示：
+在生成的`jar_output_dir`目录中，包含了当前项目生成的 jar 包、依赖 jar 包，以及 java-all-call-graph 及 java-callgraph2 项目使用的配置文件、执行脚本等，如下所示：
 
 ```
+_jacg_business_data_type
 _jacg_config
 _jacg_extensions
-_jacg_find_keyword
+_jacg_find_stack_keyword
+_jacg_jar_diff_callee_graph
+_jacg_o_ee
 _jacg_sql
+_javacg2_config
+_javacg2_merge_file_switch
+_javacg2_parse_class_method_switch
+_javacg2_parse_method_call_switch
 config
 jar
 lib

@@ -24,7 +24,7 @@ public class TestMethodInfoHandler extends TestRunByCodeBase {
         try (MethodInfoHandler methodInfoHandler = new MethodInfoHandler(configureWrapper)) {
             getFullMethodByClassLine(methodInfoHandler, TestMCCallee.class.getName(), 0, false);
             getFullMethodByClassLine(methodInfoHandler, TestMCCallee.class.getName(), 15, false);
-            getFullMethodByClassLine(methodInfoHandler, TestMCCallee.class.getName(), 20, true);
+            getFullMethodByClassLine(methodInfoHandler, TestMCCallee.class.getName(), 22, true);
         }
     }
 

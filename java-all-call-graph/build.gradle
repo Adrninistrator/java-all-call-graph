@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "3.0.1"
+version = "3.0.2"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -50,14 +50,12 @@ sourceSets {
     }
 }
 
-// todo
-List apache_ant = ["org.apache.ant:ant:1.10.9"]
+List apache_ant = ["org.apache.ant:ant:1.10.15"]
 
 List apache_common = [
         'org.apache.commons:commons-lang3:3.17.0',
         'commons-io:commons-io:2.14.0',
-        // todo
-        'org.apache.commons:commons-compress:1.26.0'
+        'org.apache.commons:commons-compress:1.27.1'
 ]
 
 List druid = ['com.alibaba:druid:1.2.15']
@@ -68,7 +66,7 @@ List h2database = ["com.h2database:h2:2.2.220"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:3.0.0']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:3.0.4']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.0']
 
@@ -118,10 +116,12 @@ List commons_bean_utils = ['commons-beanutils:commons-beanutils:1.9.4']
 
 List lombok = ['org.projectlombok:lombok:1.18.24']
 
+List commons_chain = ['commons-chain:commons-chain:1.2']
+
 dependencies {
     api apache_ant, apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc, spring
     compileOnly spring_data_neo4j
-    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, servlet, commons_bean_utils, spring_data_neo4j, lombok
+    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, servlet, commons_bean_utils, spring_data_neo4j, lombok, commons_chain
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
@@ -191,31 +191,42 @@ task gen_run_jar(type: Jar) {
             into "${jar_output_dir}/"
         }
         copy {
-            from new File('src/test/resources').listFiles().findAll { File f -> (f.name.startsWith('log4j2') && f.name.endsWith('.xml')) }
-            into "${jar_output_dir}/config/"
+            from 'src/test/resources/log4j2.xml'
+            into new File("${jar_output_dir}/config/")
+            rename { "log4j2_console.xml" }
+        }
+        copy {
+            from 'src/test/resources/log4j2_file.xml'
+            into new File("${jar_output_dir}/config/")
+            rename { "log4j2.xml" }
+        }
+        copy {
+            from configurations.runtimeClasspath.getFiles()
+            into "${jar_output_dir}/lib"
         }
         copy {
             from configurations.testRuntimeClasspath.getFiles().findAll {
                     /*
-                        需要使用以下Spring相关的组件：
-                        spring-beans
-                        spring-core
-                        spring-jcl
-                        spring-jdbc
-                        spring-tx
-                     */
+                    需要使用以下日志相关的组件：
+                    log4j
+                    disruptor
+                 */
                 File f ->
-                    ((!f.name.startsWith('spring-')
-                            || f.name.startsWith("spring-beans-")
-                            || f.name.startsWith("spring-core-")
-                            || f.name.startsWith("spring-jcl-")
-                            || f.name.startsWith("spring-jdbc-")
-                            || f.name.startsWith("spring-tx-"))
-                            && !f.name.startsWith('junit-')
-                            && !f.name.startsWith('hamcrest-core-')
-                            && !f.name.startsWith('lombok-'))
+                    (f.name.startsWith('log4j-')
+                            || f.name.startsWith("disruptor-"))
             }
             into "${jar_output_dir}/lib"
+        }
+        // 复制 java-callgraph2 组件中的配置文件
+        configurations.runtimeClasspath.each { File file ->
+            if (file.name.startsWith('java-callgraph2-')) {
+                copy {
+                    from zipTree(file).matching {
+                        include '_javacg2_*/*'
+                    }
+                    into "${jar_output_dir}/"
+                }
+            }
         }
     }
 }

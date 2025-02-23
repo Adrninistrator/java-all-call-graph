@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.common;
 
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -118,6 +119,8 @@ public class JACGCommonNameConstants {
     public static final String MYBATIS_PARAM_ANNOTATION_NAME = "org.apache.ibatis.annotations.Param";
 
     public static final String ANNOTATION_ATTRIBUTE_NAME_VALUE = "value";
+
+    public static final String ENUM_METHOD_NAME = JavaCG2Constants.FLAG_COLON + "name()";
 
     private JACGCommonNameConstants() {
         throw new IllegalStateException("illegal");

@@ -34,7 +34,7 @@ public class JACGNeo4jUtil {
         Iterable<?> result = repository.saveAll(list);
         long spendTime = System.currentTimeMillis() - startTime;
         if (spendTime > SAVE_ALL_LOG_TIME) {
-            logger.info("{} 写入数据数量 {} 耗时 {} 秒", list.get(0).getClass().getSimpleName(), list.size(), JavaCG2Util.getSecondsFromMilli(spendTime));
+            logger.info("{} 写入数据数量 {} 耗时: {} 秒", list.get(0).getClass().getSimpleName(), list.size(), JavaCG2Util.getSecondsFromMilli(spendTime));
         }
         return result;
     }

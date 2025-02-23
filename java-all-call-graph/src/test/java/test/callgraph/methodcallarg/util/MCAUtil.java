@@ -7,7 +7,7 @@ package test.callgraph.methodcallarg.util;
  */
 public class MCAUtil {
 
-    public static void run(String str1, int int1) {
+    public static void run(String str1, int int1, Object... args) {
     }
 
     public static String getFlag() {

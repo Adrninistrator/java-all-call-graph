@@ -771,6 +771,8 @@ method_return_field_info    方法返回的字段（含枚举）
 
 ### 1.27.6. 支持识别通过反射调用的方法（被调用对象+被调用方法名称）
 
+- 通过反射调用方法的工具类方法
+
 如下所示的 TestReflectionUtil1.runByReflection() 方法用于通过反射执行被调用对象 obj 被调用方法 methodName，被调用参数使用 args
 
 ```java
@@ -785,9 +787,11 @@ public class TestReflectionUtil1 {
   TestReflectionUtil1.runByReflection(new FRCDtoA(), "testStrFRCDtoA", "test2DMethodCallReturn");
 ```
 
-在示例代码 test.runbycode.extensions.methodcall.TestAddMethodCall4Reflection1 中展示了怎样识别以上通过反射调用的方法，用于补充进调用链中
+- 支持识别以上方法调用的示例代码
 
-在调用 com.adrninistrator.jacg.runner.RunnerWriteDb 类前，需要在 java-all-call-graph 项目的配置包装类 com.adrninistrator.jacg.conf.ConfigureWrapper 对象中使用以上新增的配置文件
+在示例代码 test.runbycode.extensions.methodcall.TestAddMethodCall4Reflection1 中展示了怎样识别以上通过反射调用的方法，并补充对应的调用关系
+
+需要在 java-all-call-graph 组件的配置文件 _jacg_extensions/javacg2_method_call_extensions.properties 中指定扩展类，并在配置文件 _jacg_extensions/jacg_method_call_extensions.properties 中指定扩展类，在调用 com.adrninistrator.jacg.runner.RunnerWriteDb 类解析 jar 文件并写入数据库前指定
 
 参考对应扩展类：test.runbycode.extensions.methodcall.JavaCG2Reflection1MethodCallExtension、test.runbycode.extensions.methodcall.JACGReflection1MethodCallExtension
 
@@ -795,4 +799,61 @@ public class TestReflectionUtil1 {
 
 ### 1.28.1. 支持识别通过反射调用的方法（被调用对象+被调用方法名称+被调用方法参数类型）
 
-支持区分被调用方法参数类型
+支持区分被调用方法参数类型，示例类同上
+
+## 1.29. (3.0.2)
+
+### 1.29.1. 支持为通过 Apache Commons Chain 调用的方法补充方法调用
+
+- 通过 Apache Commons Chain 调用方法的示例
+
+支持为 org.apache.commons.chain.impl.ChainBase:addCommand(org.apache.commons.chain.Command) 方法补充被调用方法
+
+例如在测试类 test.callgraph.chain.use.TestUseChain1 中，通过以下方式调用了以上方法：
+
+```java
+    @Resource(name = TestChainCommandService1.SERVICE_NAME)
+    private Command commandService1;
+
+    @Autowired
+    @Qualifier(TestChainCommandService2.SERVICE_NAME)
+    private Command commandService2;
+
+    @Test
+    public void run() throws Exception {
+        ChainBase chain = new ChainBase();
+        chain.addCommand(new TestChainCommand1());
+        chain.addCommand(commandService1);
+        chain.addCommand(commandService2);
+        Context context = new ContextBase();
+        chain.execute(context);
+    }
+```
+
+- 支持识别以上方法调用的实现方式
+
+增加一条方法调用，调用者方法为 org.apache.commons.chain.impl.ChainBase:addCommand(org.apache.commons.chain.Command) ，被调用者方法为以上方法参数 1 对应的参数类型，即 org.apache.commons.chain.Command 接口的实现类类型
+
+- 支持识别以上方法调用的示例代码
+
+在示例代码 test.runbycode.extensions.methodcall.apachecommonschain.TestAddMethodCall4ApacheCommonsChain 中展示了怎样识别以上通过 Apache Commons Chain 调用的方法，并补充对应的调用关系
+
+需要在 java-all-call-graph 组件的配置文件 _jacg_extensions/javacg2_method_call_extensions.properties 中指定扩展类 com.adrninistrator.jacg.extensions.methodcall.JavaCG2ApacheCommonsChainMethodCallExtension ，并在配置文件 _jacg_extensions/jacg_method_call_extensions.properties 中指定扩展类 com.adrninistrator.jacg.extensions.methodcall.JACGApacheCommonsChainMethodCallExtension ，在调用 com.adrninistrator.jacg.runner.RunnerWriteDb 类解析 jar 文件并写入数据库前指定
+
+- 忽略 org.apache.commons.chain.Command:execute() 方法调用实现类方法的调用
+
+假如在解析 jar 文件时指定了 Apache Commons Chain 的 commons-chain-xx.jar，则需要通过 java-callgraph2 组件的表达式配置文件 _javacg2_parse_method_call_switch/parse_ignore_method_call_er.av 指定忽略 org.apache.commons.chain.Command:execute() 方法调用实现类方法的调用，以避免以上方法调用出现在生成的完整方法调用链中
+
+### 1.29.2. 支持识别方法调用中被调用对象与参数使用的值（支持枚举）
+
+支持识别方法调用中被调用对象与参数使用的值，包括指定常量、枚举常量、枚举常量的方法调用返回值
+
+增加方法 com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler:queryMethodCallWithValueSupportEnum(java.lang.String, java.lang.String, int...) 用于实现以上功能
+
+示例代码参考 test.runbycode.handler.methodcallargs.TestMethodCallArgValue
+
+### 1.29.3. 完善 gradle 任务 gen_run_jar
+
+复制 java-callgraph2 组件中的配置文件
+
+复制 test 模块依赖组件的 jar 文件更准确

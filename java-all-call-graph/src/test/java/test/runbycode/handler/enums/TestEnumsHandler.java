@@ -31,7 +31,7 @@ public class TestEnumsHandler extends TestRunByCodeBase {
     }
 
     private void doTest(EnumsHandler enumsHandler, String enumClassName, String enumConstName, String fieldName, String expectedValue) {
-        String enumFieldValue = enumsHandler.queryEnumFieldValue(enumClassName, enumConstName, fieldName);
+        String enumFieldValue = enumsHandler.queryEnumConstantFieldValue(enumClassName, enumConstName, fieldName);
         printObjectContent(enumFieldValue, enumClassName, enumConstName, fieldName);
         if (StringUtils.isNotEmpty(expectedValue)) {
             Assert.assertEquals(expectedValue, enumFieldValue);

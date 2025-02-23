@@ -1,7 +1,7 @@
 package test.jacg;
 
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
-import org.junit.Assert;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
 /**
  * @author adrninistrator
@@ -12,6 +12,9 @@ import org.junit.Assert;
 public class TestRunnerGenAllGraph4Caller {
 
     public static void main(String[] args) {
-        Assert.assertTrue(new RunnerGenAllGraph4Caller().run());
+        boolean success = new RunnerGenAllGraph4Caller().run();
+        if (!success) {
+            throw new JavaCG2RuntimeException("执行失败");
+        }
     }
 }

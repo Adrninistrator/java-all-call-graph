@@ -12,6 +12,7 @@ import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.dto.stack.ListAsStack;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -311,5 +312,35 @@ public class MethodInfoHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(className));
+    }
+
+    /**
+     * 查询方法返回的字段名称
+     *
+     * @param fullMethod
+     * @return null: 方法未返回字段，或返回了多个字段
+     */
+    public String queryMethodReturnFieldName(String fullMethod) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MRFI_QUERY_METHOD_RETURN_FIELD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select distinct " + DC.MRFI_FIELD_NAME +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_RETURN_FIELD_INFO.getTableName() +
+                    " where " + DC.MRFI_METHOD_HASH + " = ?" +
+                    " and " + DC.MRFI_STATIC_FIELD + " = ?" +
+                    " and " + DC.MRFI_FIELD_OF_THIS + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, JACGUtil.genHashWithLen(fullMethod), JavaCG2YesNoEnum.NO.getIntValue(),
+                JavaCG2YesNoEnum.YES.getIntValue());
+        if (JavaCG2Util.isCollectionEmpty(list)) {
+            logger.debug("未查询到方法返回的字段名称 {}", fullMethod);
+            return null;
+        }
+        if (list.size() > 1) {
+            logger.warn("查询到多个方法返回的字段名称 {} {}", fullMethod, StringUtils.join(list, " "));
+            return null;
+        }
+        return list.get(0);
     }
 }

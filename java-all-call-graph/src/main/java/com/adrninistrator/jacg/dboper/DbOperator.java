@@ -80,11 +80,6 @@ public class DbOperator implements AutoCloseable {
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
 
         // 在JVM关闭时检查当前数据库操作对象是否有关闭
-        addShutdownHook();
-    }
-
-    // 在JVM关闭时检查当前数据库操作对象是否有关闭
-    private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (!closed) {
                 logger.error("[{}] 数据库操作对象未关闭\n当前类目前被引用的次数为 {}\n引用过当前类的对象类名及HASH为\n{}\n释放过当前类的对象类名及HASH为\n{}", objSeq, referenceCounter.getCount(),

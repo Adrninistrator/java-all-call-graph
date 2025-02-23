@@ -3,8 +3,8 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.javacg2.thread.ThreadFactory4TPE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -29,12 +29,12 @@ public class CharsetMethodCallByArgsHandler extends BaseMethodCallByArgsHandler 
     public static final String METHOD_NAME_FOR_NAME = "forName";
 
     public static final String[] STANDARD_CHARSETS_ALL = new String[]{
-            JavaCG2ClassMethodUtil.genClassAndField(CLASS_NAME_STANDARD_CHARSETS, "US_ASCII"),
-            JavaCG2ClassMethodUtil.genClassAndField(CLASS_NAME_STANDARD_CHARSETS, "ISO_8859_1"),
-            JavaCG2ClassMethodUtil.genClassAndField(CLASS_NAME_STANDARD_CHARSETS, "UTF_8"),
-            JavaCG2ClassMethodUtil.genClassAndField(CLASS_NAME_STANDARD_CHARSETS, "UTF_16BE"),
-            JavaCG2ClassMethodUtil.genClassAndField(CLASS_NAME_STANDARD_CHARSETS, "UTF_16LE"),
-            JavaCG2ClassMethodUtil.genClassAndField(CLASS_NAME_STANDARD_CHARSETS, "UTF_16")
+            JavaCG2ClassMethodUtil.formatClassAndField(CLASS_NAME_STANDARD_CHARSETS, "US_ASCII"),
+            JavaCG2ClassMethodUtil.formatClassAndField(CLASS_NAME_STANDARD_CHARSETS, "ISO_8859_1"),
+            JavaCG2ClassMethodUtil.formatClassAndField(CLASS_NAME_STANDARD_CHARSETS, "UTF_8"),
+            JavaCG2ClassMethodUtil.formatClassAndField(CLASS_NAME_STANDARD_CHARSETS, "UTF_16BE"),
+            JavaCG2ClassMethodUtil.formatClassAndField(CLASS_NAME_STANDARD_CHARSETS, "UTF_16LE"),
+            JavaCG2ClassMethodUtil.formatClassAndField(CLASS_NAME_STANDARD_CHARSETS, "UTF_16")
     };
 
     public CharsetMethodCallByArgsHandler(ConfigureWrapper configureWrapper) {

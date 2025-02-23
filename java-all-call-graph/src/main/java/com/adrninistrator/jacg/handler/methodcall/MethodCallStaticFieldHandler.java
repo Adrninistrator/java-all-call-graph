@@ -40,7 +40,7 @@ public class MethodCallStaticFieldHandler extends BaseHandler {
      * 可用于获取枚举的使用情况
      *
      * @param className  类名/枚举类名
-     * @param fieldNames 字段名/枚举字段名
+     * @param fieldNames 字段名/枚举常量名
      * @return
      */
     public List<MethodCallWithStaticField> queryMethodCallWithStaticFieldList(String className, String... fieldNames) {

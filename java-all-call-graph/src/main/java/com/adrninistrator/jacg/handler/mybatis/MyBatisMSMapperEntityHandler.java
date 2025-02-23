@@ -95,7 +95,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
 
         List<WriteDbData4MyBatisMSTable> list = dbOperator.queryList(sql, WriteDbData4MyBatisMSTable.class, mapperSimpleClassName, mapperMethodName);
         if (JavaCG2Util.isCollectionEmpty(list)) {
-            logger.error("未查询到MyBatis Mapper对应的数据库表信息 {} {}", mapperClassName, mapperMethodName);
+            logger.warn("未查询到MyBatis Mapper对应的数据库表信息 {} {}", mapperClassName, mapperMethodName);
             return null;
         }
 
@@ -161,7 +161,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
         WriteDbData4MyBatisMSWriteTable writeDbData4MyBatisMSWriteTable = dbOperator.queryObject(sql, WriteDbData4MyBatisMSWriteTable.class, mapperSimpleClassName,
                 mapperMethodName);
         if (writeDbData4MyBatisMSWriteTable == null) {
-            logger.error("未查询到MyBatis Mapper对应的写数据库表信息 {} {}", mapperClassName, mapperMethodName);
+            logger.warn("未查询到MyBatis Mapper对应的写数据库表信息 {} {}", mapperClassName, mapperMethodName);
         }
         return writeDbData4MyBatisMSWriteTable;
     }
@@ -239,7 +239,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
         }
         if (list.size() > 1) {
             Collections.sort(list);
-            logger.error("根据MyBatis的Entity的类名查询到多个数据库表名 {} {}", entityClassName, StringUtils.join(list, " "));
+            logger.warn("根据MyBatis的Entity的类名查询到多个数据库表名 {} {}", entityClassName, StringUtils.join(list, " "));
         }
         return list.get(0);
     }
@@ -273,7 +273,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
                 lowerColumnNameSet.add(columnName.toLowerCase());
             }
             if (lowerColumnNameSet.size() > 1) {
-                logger.error("根据MyBatis的Entity的类名及字段名查询到多个数据库列名 {} {} [{}]", entityClassName, entityFieldName, StringUtils.join(lowerColumnNameSet, ","));
+                logger.warn("根据MyBatis的Entity的类名及字段名查询到多个数据库列名 {} {} [{}]", entityClassName, entityFieldName, StringUtils.join(lowerColumnNameSet, ","));
             }
         }
         return list.get(0);
@@ -428,7 +428,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
             if (methodArgGenericsTypeInfo != null) {
                 GenericsTypeValue methodArgGenericsTypeValue = methodArgGenericsTypeInfo.get(i);
                 if (methodArgGenericsTypeValue != null) {
-                    logger.error("MyBatis Mapper方法参数使用泛型类型，暂不支持 {} {}", mapperFullMethod, i);
+                    logger.warn("MyBatis Mapper方法参数使用泛型类型，暂不支持 {} {}", mapperFullMethod, i);
                     myBatisMapperArgList.add(new MyBatisMapperArgNotSupport());
                     continue;
                 }

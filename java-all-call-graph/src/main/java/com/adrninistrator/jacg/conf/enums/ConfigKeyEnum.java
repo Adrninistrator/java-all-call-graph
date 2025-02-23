@@ -11,7 +11,7 @@ import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
  */
 public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_APP_NAME("app.name", new String[]{"当前应用的调用关系写入数据库里的表名后缀，分隔符不能使用-，需要使用_"},
-            String.class, true, ""),
+            String.class, true, "test"),
     CKE_THREAD_NUM("thread.num", new String[]{"并发处理线程数量/数据源连接池数量（若超过了需要处理的任务数量，会使用任务数量作为线程数量）"},
             Integer.class, true, "20"),
     CKE_DB_INSERT_BATCH_SIZE("db.insert.batch.size", new String[]{"批量写入数据库时每次插入的数量"},

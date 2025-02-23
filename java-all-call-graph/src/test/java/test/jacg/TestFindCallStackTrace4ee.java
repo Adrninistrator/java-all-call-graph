@@ -1,6 +1,8 @@
 package test.jacg;
 
+import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
 /**
  * @author adrninistrator
@@ -11,6 +13,9 @@ import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 public class TestFindCallStackTrace4ee {
 
     public static void main(String[] args) {
-        new FindCallStackTrace(true).find();
+        CallStackFileResult result = new FindCallStackTrace(true).find();
+        if (!result.isSuccess()) {
+            throw new JavaCG2RuntimeException("执行失败");
+        }
     }
 }

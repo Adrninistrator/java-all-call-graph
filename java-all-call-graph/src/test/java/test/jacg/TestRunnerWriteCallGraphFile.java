@@ -1,7 +1,7 @@
 package test.jacg;
 
 import com.adrninistrator.jacg.runner.RunnerWriteCallGraphFile;
-import org.junit.Assert;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
 /**
  * @author adrninistrator
@@ -11,6 +11,9 @@ import org.junit.Assert;
 public class TestRunnerWriteCallGraphFile {
 
     public static void main(String[] args) {
-        Assert.assertTrue(new RunnerWriteCallGraphFile().run());
+        boolean success = new RunnerWriteCallGraphFile().run();
+        if (!success) {
+            throw new JavaCG2RuntimeException("执行失败");
+        }
     }
 }

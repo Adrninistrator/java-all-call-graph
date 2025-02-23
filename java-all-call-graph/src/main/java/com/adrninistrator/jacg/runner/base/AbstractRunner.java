@@ -41,6 +41,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class AbstractRunner extends AbstractExecutor {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunner.class);
 
+    public static final String ERROR_LOG_NOTICE = "请在日志中搜索“ ERROR ”查看对应失败原因";
+
+    private final AtomicBoolean runFlag = new AtomicBoolean(false);
+
     // 当前的输出目录
     protected String currentOutputDirPath;
 
@@ -63,8 +67,6 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
     // 对解析的jar包及目录信息处理的类
     protected JarInfoHandler jarInfoHandler;
-
-    private final AtomicBoolean runFlag = new AtomicBoolean(false);
 
     public AbstractRunner() {
         this(new ConfigureWrapper(false));
@@ -133,13 +135,13 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
             // 预检查
             if (!preCheck()) {
-                logger.error("{} 预检查失败", currentSimpleClassName);
+                logger.error("{} 预检查失败 {}", currentSimpleClassName, ERROR_LOG_NOTICE);
                 return false;
             }
 
             // 预处理
             if (!preHandle()) {
-                logger.error("{} 预处理失败", currentSimpleClassName);
+                logger.error("{} 预处理失败 {}", currentSimpleClassName, ERROR_LOG_NOTICE);
                 return false;
             }
 
@@ -155,7 +157,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
             }
 
             if (someTaskFail) {
-                logger.error("{} 执行失败", currentSimpleClassName);
+                logger.error("{} 执行失败 {}", currentSimpleClassName, ERROR_LOG_NOTICE);
                 return false;
             }
             // 执行完毕时尝试打印当前使用的配置信息
@@ -164,10 +166,10 @@ public abstract class AbstractRunner extends AbstractExecutor {
             } else {
                 logger.info("没有执行生成文件的操作，不打印当前使用的配置信息");
             }
-            logger.info("{} 执行完毕，耗时: {} 秒", currentSimpleClassName, JavaCG2Util.getSpendSeconds(startTime));
+            logger.info("{} 执行完毕，当前生成文件所在目录 {} ，耗时: {} 秒", currentSimpleClassName, currentOutputDirPath, JavaCG2Util.getSpendSeconds(startTime));
             return true;
         } catch (Exception e) {
-            logger.error("出现异常 {} ", currentSimpleClassName, e);
+            logger.error("出现异常 {} {} ", currentSimpleClassName, ERROR_LOG_NOTICE, e);
             return false;
         } finally {
             // 结束前的处理，需要确保能执行到，在其中会关闭数据源
@@ -182,7 +184,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
     // 执行检查使用的组件版本
     private void doCheckJarVersion(Class<?> clazz, String expectedJarName) {
-        String jarFilePath = clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
+        String jarFilePath = JACGFileUtil.getJarFilePathOfClass(clazz);
         if (!StringUtils.endsWith(jarFilePath, expectedJarName)) {
             logger.error("类对应的jar包名称与实际的不一致 {} {} {}", clazz.getName(), expectedJarName, jarFilePath);
         }

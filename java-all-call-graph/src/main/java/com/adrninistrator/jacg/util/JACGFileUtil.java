@@ -479,6 +479,16 @@ public class JACGFileUtil {
         }
     }
 
+    /**
+     * 获得类所在的jar文件路径
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getJarFilePathOfClass(Class<?> clazz) {
+        return clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
+    }
+
     private JACGFileUtil() {
         throw new IllegalStateException("illegal");
     }

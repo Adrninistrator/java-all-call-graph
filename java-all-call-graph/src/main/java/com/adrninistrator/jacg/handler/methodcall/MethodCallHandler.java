@@ -452,10 +452,10 @@ public class MethodCallHandler extends BaseHandler {
     /**
      * 查询存在实际指令的方法调用，使用被调用方法HASH查询
      *
-     * @param calleeMethodHash
+     * @param calleeFullMethod
      * @return
      */
-    public List<WriteDbData4MethodCall> queryNormalMethodCallByCalleeMethodHash(String calleeMethodHash) {
+    public List<WriteDbData4MethodCall> queryNormalMethodCallByCalleeFullMethod(String calleeFullMethod) {
         List<String> existsInstructionList = JavaCG2CallTypeEnum.getExistsInstructionList();
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_NORMAL_MC_BY_EEMH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
@@ -468,7 +468,7 @@ public class MethodCallHandler extends BaseHandler {
         }
 
         List<Object> argList = new ArrayList<>();
-        argList.add(calleeMethodHash);
+        argList.add(JACGUtil.genHashWithLen(calleeFullMethod));
         argList.addAll(existsInstructionList);
         return dbOperator.queryList(sql, WriteDbData4MethodCall.class, argList.toArray());
     }

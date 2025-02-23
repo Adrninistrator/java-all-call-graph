@@ -13,23 +13,23 @@ import test.callgraph.methodcallarg.util.MCAUtil;
 public class MCACaller {
 
     public void testString1() {
-        MCAUtil.run("ok", 1);
+        MCAUtil.run("ok", 1, "a");
     }
 
     public void testString2() {
-        MCAUtil.run(MCAConstants1.FLAG1, 1);
+        MCAUtil.run(MCAConstants1.FLAG1, 1, 2, 3);
     }
 
     public void testString3() {
-        MCAUtil.run("ok" + MCAConstants1.FLAG1, 1);
+        MCAUtil.run("ok" + MCAConstants1.FLAG1, 1, new Object[]{1, "a"});
     }
 
     public void testString4() {
-        MCAUtil.run(MCAConstants2.FLAG_COMBINED, 1);
+        MCAUtil.run(MCAConstants2.FLAG_COMBINED, 1, "a", "b", "c");
     }
 
     public void testString5() {
-        MCAUtil.run("ok" + MCAConstants2.FLAG_COMBINED, 1);
+        MCAUtil.run("ok" + MCAConstants2.FLAG_COMBINED, 1, "a", 1, "b");
     }
 
     public void testEnumName() {
