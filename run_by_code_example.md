@@ -48,7 +48,7 @@ test.runbycode.dupclass.TestDupClass
 
 - 示例说明
 
-需要先执行 unittest.gradle 中的命令，生成用于比较的示例jar包
+需要先执行 unittest.gradle 中的命令，生成用于比较的示例jar包： gradlew test_gen_diff_jar
 
 # 6. 获取直接或间接调用指定方法的入口方法
 
@@ -176,6 +176,10 @@ test.runbycodemain.Test0RunnerSimpleWriteDb
 
 仅解析.class文件，不解析.xml、.properties等其他类型的文件
 
+需要先执行 unittest.gradle 中的命令，生成示例jar包： gradlew test_gen_jar
+
+通过代码指定配置参数的主要功能示例
+
 # 15. 解析代码并将结果写入数据库
 
 - 示例类名
@@ -183,6 +187,12 @@ test.runbycodemain.Test0RunnerSimpleWriteDb
 ```
 test.runbycodemain.Test1RunnerWriteDb
 ```
+
+- 示例说明
+
+需要先执行 unittest.gradle 中的命令，生成示例jar包： gradlew test_gen_jar
+
+通过代码指定配置参数的主要功能示例
 
 # 16. 获得方法向上到包含关键字的调用堆栈
 
@@ -196,6 +206,8 @@ test.runbycodemain.TestFindCallStackTrace4ee
 
 首先会生成指定方法向上的完整方法调用链
 
+通过代码指定配置参数的主要功能示例
+
 # 17. 获得方法向下到包含关键字的调用堆栈
 
 - 示例类名
@@ -208,6 +220,8 @@ test.runbycodemain.TestFindCallStackTrace4er
 
 首先会生成指定方法向下的完整方法调用链
 
+通过代码指定配置参数的主要功能示例
+
 # 18. 生成指定方法向上的完整方法调用链
 
 - 示例类名
@@ -215,6 +229,10 @@ test.runbycodemain.TestFindCallStackTrace4er
 ```
 test.runbycodemain.TestRunnerGenAllGraph4Callee
 ```
+
+- 示例说明
+
+通过代码指定配置参数的主要功能示例
 
 # 19. 生成指定方法向上的完整方法调用链
 
@@ -228,6 +246,8 @@ test.runbycodemain.TestRunnerGenAllGraph4CalleeEmptyClass
 
 生成结果为空
 
+通过代码指定配置参数的主要功能示例
+
 # 20. 生成指定方法向上的完整方法调用链
 
 - 示例类名
@@ -240,6 +260,8 @@ test.runbycodemain.TestRunnerGenAllGraph4CalleeLimit
 
 限制每个方法允许生成的方法调用数量限制
 
+通过代码指定配置参数的主要功能示例
+
 # 21. 生成指定方法向下的完整方法调用链
 
 - 示例类名
@@ -247,6 +269,10 @@ test.runbycodemain.TestRunnerGenAllGraph4CalleeLimit
 ```
 test.runbycodemain.TestRunnerGenAllGraph4Caller
 ```
+
+- 示例说明
+
+通过代码指定配置参数的主要功能示例
 
 # 22. 生成指定方法向下的完整方法调用链
 
@@ -260,6 +286,8 @@ test.runbycodemain.TestRunnerGenAllGraph4CallerEmptyClass
 
 生成结果为空
 
+通过代码指定配置参数的主要功能示例
+
 # 23. 生成指定方法向下的完整方法调用链
 
 - 示例类名
@@ -272,6 +300,8 @@ test.runbycodemain.TestRunnerGenAllGraph4CallerLimit
 
 限制每个方法允许生成的方法调用数量限制
 
+通过代码指定配置参数的主要功能示例
+
 # 24. 解析代码并将结果写入文件
 
 - 示例类名
@@ -283,4 +313,6 @@ test.runbycodemain.TestRunnerWriteCallGraphFile
 - 示例说明
 
 生成的数据不写入数据库
+
+通过代码指定配置参数的主要功能示例
 
