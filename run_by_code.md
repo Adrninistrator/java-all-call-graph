@@ -47,10 +47,13 @@ com.adrninistrator.jacg.conf.ConfigureWrapper
 
 |类|方法|作用|
 |---|---|---|
+|RunnerWriteCallGraphFile|run()|生成 Java 方法调用关系并写入文件，不写入数据库|
 |RunnerWriteDb|run()|生成 Java 方法调用关系并写入数据库|
 |RunnerGenAllGraph4Callee|run()|生成调用指定类方法向上的完整调用链|
 |RunnerGenAllGraph4Caller|run()|生成指定方法向下完整调用链|
 |FindCallStackTrace|find(boolean order4ee)|生成包含关键字的所有方法到起始方法之间的调用链|
+
+RunnerWriteCallGraphFile、RunnerWriteDb 类的带参数构造函数，除了需要指定 ConfigureWrapper 外，还需要指定 java-callgraph2 组件中的配置参数包装类 JavaCG2ConfigureWrapper，使用方式可参考 java-callgraph2 组件文档
 
 ## 2.4. 示例
 
