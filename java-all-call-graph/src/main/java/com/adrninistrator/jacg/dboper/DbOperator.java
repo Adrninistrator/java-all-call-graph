@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.exceptions.JACGSQLException;
 import com.adrninistrator.jacg.conf.DbConfInfo;
 import com.adrninistrator.jacg.druidfilter.DruidMonitorFilter;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
@@ -148,7 +149,7 @@ public class DbOperator implements AutoCloseable {
             String closeDbOperSimpleCLassNameAndHash = JACGUtil.getObjSimpleClassNameAndHash(callerObject);
             if (DbOperator.class == callerObject.getClass()) {
                 // 调用当前方法的类为当前类，说明使用了try-with-resource方式，获取调用当前方法的方法
-                String callerMethod = JACGUtil.getMethodInStackTrace(Thread.currentThread().getStackTrace(), 3);
+                String callerMethod = JACGClassMethodUtil.getMethodInStackTrace(Thread.currentThread().getStackTrace(), 3);
                 closeDbOperSimpleCLassNameAndHash += (JACGConstants.FLAG_AT + callerMethod);
             }
             // 处理释放当前对象的信息

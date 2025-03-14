@@ -7,6 +7,7 @@ package test.callgraph.cyclecall;
  */
 public class TestCycleCall1 {
     public void test1() {
+        System.getProperty("");
         test2();
     }
 

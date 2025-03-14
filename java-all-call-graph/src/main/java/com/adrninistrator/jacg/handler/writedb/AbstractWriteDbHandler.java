@@ -11,7 +11,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
 import com.adrninistrator.jacg.neo4j.util.JACGNeo4jUtil;
 import com.adrninistrator.jacg.spring.context.SpringContextManager;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGThreadUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author adrninistrator
@@ -110,7 +111,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     protected String appName;
 
-    protected ThreadPoolExecutor threadPoolExecutor;
+    private ThreadPoolExecutor threadPoolExecutor;
+
+    private AtomicInteger runningTaskNum;
 
     // 任务最大队列数
     private int taskQueueMaxSize;
@@ -396,6 +399,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         // 结束前将剩余数据写入数据库
         insertDb();
 
+        // 记录当前写入的数据库表枚举名
+        recordWrittenDbTableEnum();
+
         if (writeFile && fileWriter != null) {
             IOUtils.closeQuietly(fileWriter);
         }
@@ -494,8 +500,6 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
             logger.error("出现异常 {} ", currentSimpleClassName, e);
             return false;
         } finally {
-            // 记录当前写入的数据库表枚举名
-            recordWrittenDbTableEnum();
             // 执行完成之后的操作
             afterHandle();
         }
@@ -549,7 +553,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         }
 
         // 等待直到允许任务执行
-        JACGUtil.wait4TPEExecute(threadPoolExecutor, taskQueueMaxSize);
+        JACGThreadUtil.wait4TPEAllowExecute(currentSimpleClassName, threadPoolExecutor, taskQueueMaxSize);
 
         if (!useNeo4j() || writeFile) {
             // 不使用neo4j，或需要写文件时，处理相关数据
@@ -588,7 +592,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         // 生成用于插入数据的sql语句
         String sql = dbOperWrapper.genAndCacheInsertSql(dbTableInfoEnum, DbInsertMode.DIME_INSERT);
 
-        threadPoolExecutor.execute(() -> {
+        JACGThreadUtil.executeByTPE(currentSimpleClassName, threadPoolExecutor, runningTaskNum, () -> {
             // 批量写入数据库
             try {
                 if (!dbOperator.batchInsert(sql, objectList)) {
@@ -606,7 +610,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         List<T> usedDataList = new ArrayList<>(dataList);
 
         // 在线程池中执行插入neo4j数据操作
-        threadPoolExecutor.execute(() -> {
+        JACGThreadUtil.executeByTPE(currentSimpleClassName, threadPoolExecutor, runningTaskNum, () -> {
             try {
                 if (handleNeo4jDataList(usedDataList)) {
                     // 写入neo4j的数据的自定义处理
@@ -691,7 +695,8 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
         String currentSimpleClassName = simpleClassName;
         while (true) {
-            // 当前当前类的get/set方法是否是dto的get/set方法
+            // 判断当前类的get/set方法是否是dto的get/set方法
+            logger.debug("判断当前类的get/set方法是否是dto的get/set方法 {}", currentSimpleClassName);
             Set<String> methodSet = getSetMethodSimpleClassMap.get(currentSimpleClassName);
             if (methodSet != null && methodSet.contains(getSetMethodName)) {
                 return true;
@@ -699,7 +704,12 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
             // 获取当前类的父类
             String superSimpleClassName = extendsSimpleClassNameMap.get(currentSimpleClassName);
             if (superSimpleClassName == null) {
+                // 当前类未找到父类
                 return false;
+            }
+            if (superSimpleClassName.equals(currentSimpleClassName)) {
+                logger.error("当前类找到的父类唯一类名相同 {}", currentSimpleClassName);
+                throw new JavaCG2RuntimeException("当前类找到的父类唯一类名相同 " + currentSimpleClassName);
             }
             currentSimpleClassName = superSimpleClassName;
         }
@@ -745,6 +755,10 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     public void setThreadPoolExecutor(ThreadPoolExecutor threadPoolExecutor) {
         this.threadPoolExecutor = threadPoolExecutor;
+    }
+
+    public void setRunningTaskNum(AtomicInteger runningTaskNum) {
+        this.runningTaskNum = runningTaskNum;
     }
 
     public void setTaskQueueMaxSize(int taskQueueMaxSize) {

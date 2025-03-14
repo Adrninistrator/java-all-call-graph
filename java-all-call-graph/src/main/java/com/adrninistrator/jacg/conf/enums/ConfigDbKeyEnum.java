@@ -20,9 +20,9 @@ public enum ConfigDbKeyEnum implements MainConfigInterface {
             "使用MySQL时，url需要指定rewriteBatchedStatements=true，开启批量插入，提高效率，默认未开启"},
             String.class, true, "jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true"),
     CDKE_DB_USERNAME("db.username", new String[]{"数据库配置（仅当使用非H2数据库时需要指定），用户名"},
-            String.class, true, "test_username"),
+            String.class, true, ""),
     CDKE_DB_PASSWORD("db.password", new String[]{"数据库配置（仅当使用非H2数据库时需要指定），密码"},
-            String.class, true, "test_password"),
+            String.class, true, ""),
     CDKE_DB_TABLE_SUFFIX("db.table.suffix", new String[]{"数据库表后缀，默认使用空不需要指定"},
             String.class, false, ""),
     ;

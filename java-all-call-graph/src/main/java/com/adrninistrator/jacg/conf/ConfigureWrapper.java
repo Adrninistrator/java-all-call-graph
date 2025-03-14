@@ -54,6 +54,11 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     }
 
     @Override
+    protected void customCheckWhenUseConfig() {
+        checkInWorkThread();
+    }
+
+    @Override
     protected Object customGenMainConfigValue(MainConfigInterface mainConfig, String strValue) {
         if (ConfigKeyEnum.CKE_APP_NAME == mainConfig) {
             return handleAppName(strValue);
@@ -191,7 +196,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
 
     @Override
     protected Object customGetDefaultConfig(MainConfigInterface mainConfig) {
-        if (ConfigKeyEnum.CKE_PARSE_OTHER_TYPE_FILE == mainConfig) {
+        if (ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE == mainConfig) {
             return Boolean.TRUE;
         }
         return null;
@@ -212,7 +217,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     // 获取主要配置的简单类名
     @Override
     protected String getMainConfigSCNFromFile(String mainConfigFile) {
-        if (ConfigKeyEnum.CKE_APP_NAME.getFileName().equals(mainConfigFile)) {
+        if (ConfigKeyEnum.values()[0].getFileName().equals(mainConfigFile)) {
             return ConfigKeyEnum.class.getSimpleName();
         }
         return ConfigDbKeyEnum.class.getSimpleName();

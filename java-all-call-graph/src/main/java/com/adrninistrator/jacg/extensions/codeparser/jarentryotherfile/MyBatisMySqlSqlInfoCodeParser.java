@@ -40,6 +40,9 @@ public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
     // 从MyBatis的XML文件获取Entity与Mapper、表名
     private MyBatisMySqlEntityInfoCodeParser myBatisMySqlEntityInfoCodeParser;
 
+    // 从MyBatis的XML文件获取格式化后的sql文本
+    private MyBatisMySqlFormatedSqlCodeParser myBatisMySqlFormatedSqlCodeParser;
+
     // 从MyBatis的XML文件获取update set子句的字段信息
     private MyBatisMySqlSetColumnCodeParser myBatisMySqlSetColumnCodeParser;
 
@@ -77,6 +80,8 @@ public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
 
             // 处理Entity与Mapper、表名
             myBatisMySqlEntityInfoCodeParser.handleMyBatisMySqlInfo(myBatisMySqlInfo, jarEntryPath);
+            // 处理格式化后的sql文本
+            myBatisMySqlFormatedSqlCodeParser.handleMyBatisMySqlInfo(myBatisMySqlInfo, jarEntryPath);
             // 处理Entity与数据库字段名
             myBatisMySqlColumnInfoCodeParser.handleMyBatisMySqlInfo(myBatisMySqlInfo, jarEntryPath);
             // 处理update set子句的字段信息
@@ -135,6 +140,10 @@ public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
 
     public void setMyBatisMySqlEntityInfoCodeParser(MyBatisMySqlEntityInfoCodeParser myBatisMySqlEntityInfoCodeParser) {
         this.myBatisMySqlEntityInfoCodeParser = myBatisMySqlEntityInfoCodeParser;
+    }
+
+    public void setMyBatisMySqlFormatedSqlCodeParser(MyBatisMySqlFormatedSqlCodeParser myBatisMySqlFormatedSqlCodeParser) {
+        this.myBatisMySqlFormatedSqlCodeParser = myBatisMySqlFormatedSqlCodeParser;
     }
 
     public void setMyBatisMySqlSetColumnCodeParser(MyBatisMySqlSetColumnCodeParser myBatisMySqlSetColumnCodeParser) {

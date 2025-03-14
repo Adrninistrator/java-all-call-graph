@@ -31,6 +31,7 @@ public class TestMethodReturnGenericsType1 {
     }
 
     public Map<Integer, TestArgument1> test3() {
+        System.getProperty("");
         return null;
     }
 

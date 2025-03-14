@@ -33,12 +33,12 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
 
     @Override
     protected WriteDbData4MyBatisMSTable genData(String[] array) {
-        String mapperClassName = array[0];
-        String mapperMethodName = array[1];
-        String sqlStatement = array[2];
-        int tableSeq = Integer.parseInt(array[3]);
-        String tableName = array[4];
-        String xmlFilePath = array[5];
+        String mapperClassName = readLineData();
+        String mapperMethodName = readLineData();
+        String sqlStatement = readLineData();
+        int tableSeq = Integer.parseInt(readLineData());
+        String tableName = readLineData();
+        String xmlFilePath = readLineData();
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
         String mapperSimpleClassName = dbOperWrapper.querySimpleClassName(mapperClassName);
         // 记录MyBatis Mapper方法

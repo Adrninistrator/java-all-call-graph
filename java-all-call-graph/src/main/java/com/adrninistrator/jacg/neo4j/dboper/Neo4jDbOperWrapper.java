@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphNode4Caller;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.neo4j.common.Neo4jColumnConstants;
 import com.adrninistrator.jacg.neo4j.repository.JACGClassNameRepository;
@@ -115,13 +116,19 @@ public class Neo4jDbOperWrapper extends DbOperWrapper {
         return jacgClassNameRepository.querySimpleClassNameBySimple(appName, simpleCassName);
     }
 
-    // 从方法调用表中查询调用方类对应的完整方法
+    // 根据类名查询相关的方法
     @Override
-    public List<String> queryCallerFullMethodOfClass(String simpleClassName) {
-        return jacgMethodInMCRepository.queryDupClassNameByFlag(appName, simpleClassName);
+    public List<String> queryMethodByClassName(String className) {
+        return jacgMethodInfoRepository.queryFullMethodWithAppName(appName, className);
     }
 
-    // 根据调用方简单类名，查找1个对应的完整方法
+    // 根据类名及完整方法前缀查询方法信息
+    @Override
+    public List<WriteDbData4MethodInfo> queryMethodInfoByClassFullMethodPrefix(String className, String fullMethodPrefix) {
+        return jacgMethodInfoRepository.queryMethodInfoByClassFullMethodPrefix(appName, className,fullMethodPrefix);
+    }
+
+        // 根据调用方简单类名，查找1个对应的完整方法
     @Override
     public String queryOneFullMethodByCallerSCN(String callerSimpleClassName) {
         return jacgMethodInMCRepository.queryOneFullMethodByCallerSCN(appName, callerSimpleClassName);

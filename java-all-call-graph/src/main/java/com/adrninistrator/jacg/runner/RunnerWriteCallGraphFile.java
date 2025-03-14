@@ -2,10 +2,10 @@ package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.annotation.attributes.AnnotationAttributesFormatter;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
-import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlColumnInfoCodeParser;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlEntityInfoCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlFormatedSqlCodeParser;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlSelectColumnCodeParser;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlSetColumnCodeParser;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlSqlInfoCodeParser;
@@ -16,7 +16,7 @@ import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.SpringTas
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.SpringXmlBeanParser;
 import com.adrninistrator.jacg.extensions.codeparser.methodannotation.MyBatisAnnotationCodeParser;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.dto.output.JavaCG2OtherRunResult;
 import com.adrninistrator.javacg2.dto.output.JavaCG2OutputInfo;
@@ -138,42 +138,43 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
             return false;
         }
 
-        if (configureWrapper.getMainConfig(ConfigKeyEnum.CKE_PARSE_OTHER_TYPE_FILE)) {
-            // 添加默认的代码解析扩展类
-            MyBatisMySqlSqlInfoCodeParser myBatisMySqlSqlInfoCodeParser = new MyBatisMySqlSqlInfoCodeParser();
+        // 添加默认的代码解析扩展类
+        MyBatisMySqlSqlInfoCodeParser myBatisMySqlSqlInfoCodeParser = new MyBatisMySqlSqlInfoCodeParser();
 
-            MyBatisMySqlColumnInfoCodeParser myBatisMySqlColumnInfoCodeParser = new MyBatisMySqlColumnInfoCodeParser();
-            MyBatisMySqlEntityInfoCodeParser myBatisMySqlEntityInfoCodeParser = new MyBatisMySqlEntityInfoCodeParser();
-            MyBatisMySqlWriteSqlInfoCodeParser myBatisMySqlWriteSqlInfoCodeParser = new MyBatisMySqlWriteSqlInfoCodeParser();
-            MyBatisMySqlSetColumnCodeParser myBatisMySqlSetColumnCodeParser = new MyBatisMySqlSetColumnCodeParser();
-            MyBatisMySqlSelectColumnCodeParser myBatisMySqlSelectColumnCodeParser = new MyBatisMySqlSelectColumnCodeParser();
-            MyBatisMySqlWhereColumnCodeParser myBatisMySqlWhereColumnCodeParser = new MyBatisMySqlWhereColumnCodeParser();
+        MyBatisMySqlColumnInfoCodeParser myBatisMySqlColumnInfoCodeParser = new MyBatisMySqlColumnInfoCodeParser();
+        MyBatisMySqlEntityInfoCodeParser myBatisMySqlEntityInfoCodeParser = new MyBatisMySqlEntityInfoCodeParser();
+        MyBatisMySqlFormatedSqlCodeParser myBatisMySqlFormatedSqlCodeParser = new MyBatisMySqlFormatedSqlCodeParser();
+        MyBatisMySqlWriteSqlInfoCodeParser myBatisMySqlWriteSqlInfoCodeParser = new MyBatisMySqlWriteSqlInfoCodeParser();
+        MyBatisMySqlSetColumnCodeParser myBatisMySqlSetColumnCodeParser = new MyBatisMySqlSetColumnCodeParser();
+        MyBatisMySqlSelectColumnCodeParser myBatisMySqlSelectColumnCodeParser = new MyBatisMySqlSelectColumnCodeParser();
+        MyBatisMySqlWhereColumnCodeParser myBatisMySqlWhereColumnCodeParser = new MyBatisMySqlWhereColumnCodeParser();
 
-            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlColumnInfoCodeParser(myBatisMySqlColumnInfoCodeParser);
-            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlEntityInfoCodeParser(myBatisMySqlEntityInfoCodeParser);
-            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWriteSqlInfoCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
-            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSetColumnCodeParser(myBatisMySqlSetColumnCodeParser);
-            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSelectColumnCodeParser(myBatisMySqlSelectColumnCodeParser);
-            myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWhereColumnCodeParser(myBatisMySqlWhereColumnCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlColumnInfoCodeParser(myBatisMySqlColumnInfoCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlEntityInfoCodeParser(myBatisMySqlEntityInfoCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlFormatedSqlCodeParser(myBatisMySqlFormatedSqlCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWriteSqlInfoCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSetColumnCodeParser(myBatisMySqlSetColumnCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlSelectColumnCodeParser(myBatisMySqlSelectColumnCodeParser);
+        myBatisMySqlSqlInfoCodeParser.setMyBatisMySqlWhereColumnCodeParser(myBatisMySqlWhereColumnCodeParser);
 
-            extensionsManager.addCodeParser(myBatisMySqlSqlInfoCodeParser);
-            extensionsManager.addCodeParser(myBatisMySqlColumnInfoCodeParser);
-            extensionsManager.addCodeParser(myBatisMySqlEntityInfoCodeParser);
-            extensionsManager.addCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
-            extensionsManager.addCodeParser(myBatisMySqlSetColumnCodeParser);
-            extensionsManager.addCodeParser(myBatisMySqlSelectColumnCodeParser);
-            extensionsManager.addCodeParser(myBatisMySqlWhereColumnCodeParser);
-            extensionsManager.addCodeParser(new SpringTaskXmlCodeParser());
-            extensionsManager.addCodeParser(new MyBatisAnnotationCodeParser());
-            extensionsManager.addCodeParser(new PropertiesConfCodeParser());
-            extensionsManager.setSpringXmlBeanParser(new SpringXmlBeanParser());
-        }
+        extensionsManager.addCodeParser(myBatisMySqlSqlInfoCodeParser);
+        extensionsManager.addCodeParser(myBatisMySqlColumnInfoCodeParser);
+        extensionsManager.addCodeParser(myBatisMySqlEntityInfoCodeParser);
+        extensionsManager.addCodeParser(myBatisMySqlFormatedSqlCodeParser);
+        extensionsManager.addCodeParser(myBatisMySqlWriteSqlInfoCodeParser);
+        extensionsManager.addCodeParser(myBatisMySqlSetColumnCodeParser);
+        extensionsManager.addCodeParser(myBatisMySqlSelectColumnCodeParser);
+        extensionsManager.addCodeParser(myBatisMySqlWhereColumnCodeParser);
+        extensionsManager.addCodeParser(new SpringTaskXmlCodeParser());
+        extensionsManager.addCodeParser(new MyBatisAnnotationCodeParser());
+        extensionsManager.addCodeParser(new PropertiesConfCodeParser());
+        extensionsManager.setSpringXmlBeanParser(new SpringXmlBeanParser());
 
         // 添加参数配置中的代码解析扩展类
         if (!JavaCG2Util.isCollectionEmpty(codeParserExtensionClassList)) {
             logger.info("添加参数配置中的代码解析扩展类\n{}", StringUtils.join(codeParserExtensionClassList, "\n"));
             for (String extensionClass : codeParserExtensionClassList) {
-                CodeParserInterface codeParser = JACGUtil.genClassObject(extensionClass, CodeParserInterface.class);
+                CodeParserInterface codeParser = JACGClassMethodUtil.genClassObject(extensionClass, CodeParserInterface.class);
                 if (codeParser == null) {
                     return false;
                 }
@@ -196,7 +197,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         if (!JavaCG2Util.isCollectionEmpty(methodCallExtensionClassList)) {
             logger.info("添加 java-callgraph2 组件方法调用处理扩展类\n{}", StringUtils.join(methodCallExtensionClassList, "\n"));
             for (String extensionClass : methodCallExtensionClassList) {
-                JavaCG2MethodCallExtensionInterface methodCallExtension = JACGUtil.genClassObject(extensionClass, JavaCG2MethodCallExtensionInterface.class);
+                JavaCG2MethodCallExtensionInterface methodCallExtension = JACGClassMethodUtil.genClassObject(extensionClass, JavaCG2MethodCallExtensionInterface.class);
                 if (methodCallExtension == null) {
                     return false;
                 }

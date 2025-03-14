@@ -1,5 +1,7 @@
 package test.runbycode.handler.method;
 
+import com.adrninistrator.jacg.dboper.DbInitializer;
+import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method.MethodArgAndCommonFieldInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgGenericsType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgument;
@@ -36,9 +38,8 @@ public class TestMethodArgReturnHandler extends TestRunByCodeBase {
 
     @Test
     public void testQueryMethodArgAndGenericsType() {
-        try (MethodInfoHandler methodInfoHandler = new MethodInfoHandler(configureWrapper);
-             MethodArgReturnHandler methodArgReturnHandler = new MethodArgReturnHandler(configureWrapper)) {
-            doQueryMethodArgAndGenericsType(methodInfoHandler, methodArgReturnHandler, TestArgumentGenerics1.class.getName());
+        try (MethodArgReturnHandler methodArgReturnHandler = new MethodArgReturnHandler(configureWrapper)) {
+            doQueryMethodArgAndGenericsType(methodArgReturnHandler, TestArgumentGenerics1.class.getName());
         }
     }
 
@@ -50,8 +51,9 @@ public class TestMethodArgReturnHandler extends TestRunByCodeBase {
         }
     }
 
-    private void doQueryMethodArgAndGenericsType(MethodInfoHandler methodInfoHandler, MethodArgReturnHandler methodArgReturnHandler, String className) {
-        List<String> fullMethodList = methodInfoHandler.queryMethodByClassName(className);
+    private void doQueryMethodArgAndGenericsType(MethodArgReturnHandler methodArgReturnHandler, String className) {
+        DbOperWrapper dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, this);
+        List<String> fullMethodList = dbOperWrapper.queryMethodByClassName(className);
         Assert.assertFalse(JavaCG2Util.isCollectionEmpty(fullMethodList));
         for (String fullMethod : fullMethodList) {
             List<WriteDbData4MethodArgument> methodArgumentList = methodArgReturnHandler.queryMethodArgumentByMethod(fullMethod);
@@ -97,15 +99,15 @@ public class TestMethodArgReturnHandler extends TestRunByCodeBase {
 
     @Test
     public void queryMethodArgAndCommonFieldInfo() {
-        try (MethodInfoHandler methodInfoHandler = new MethodInfoHandler(configureWrapper);
-             MethodArgReturnHandler methodArgReturnHandler = new MethodArgReturnHandler(configureWrapper)) {
-            doQueryMethodArgAndCommonFieldInfo(methodInfoHandler, methodArgReturnHandler, TestFieldCycle1.class);
-            doQueryMethodArgAndCommonFieldInfo(methodInfoHandler, methodArgReturnHandler, TestFieldGenericsCycle1.class);
+        try (MethodArgReturnHandler methodArgReturnHandler = new MethodArgReturnHandler(configureWrapper)) {
+            doQueryMethodArgAndCommonFieldInfo(methodArgReturnHandler, TestFieldCycle1.class);
+            doQueryMethodArgAndCommonFieldInfo(methodArgReturnHandler, TestFieldGenericsCycle1.class);
         }
     }
 
-    private void doQueryMethodArgAndCommonFieldInfo(MethodInfoHandler methodInfoHandler, MethodArgReturnHandler methodArgReturnHandler, Class<?> clazz) {
-        List<String> fullMethodList = methodInfoHandler.queryMethodByClassName(clazz.getName());
+    private void doQueryMethodArgAndCommonFieldInfo(MethodArgReturnHandler methodArgReturnHandler, Class<?> clazz) {
+        DbOperWrapper dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, this);
+        List<String> fullMethodList = dbOperWrapper.queryMethodByClassName(clazz.getName());
         for (String fullMethod : fullMethodList) {
             List<MethodArgAndCommonFieldInfo> methodArgAndCommonFieldInfoList = methodArgReturnHandler.queryMethodArgAndCommonFieldInfo(fullMethod);
             printListContent(methodArgAndCommonFieldInfoList, fullMethod);

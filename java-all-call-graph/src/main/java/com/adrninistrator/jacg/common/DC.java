@@ -602,6 +602,16 @@ public class DC {
     public static final String MCMCR_CALLEE_METHOD_NAME = "callee_method_name";
     public static final String MCMCR_CALLEE_FULL_METHOD = "callee_full_method";
 
+    public static final String MMFS_RECORD_ID = "record_id";
+    public static final String MMFS_XML_FILE_NAME = "xml_file_name";
+    public static final String MMFS_SQL_ID = "sql_id";
+    public static final String MMFS_SQL_SEQ = "sql_seq";
+    public static final String MMFS_XML_ELEMENT_NAME = "xml_element_name";
+    public static final String MMFS_FORMATED_SQL = "formated_sql";
+    public static final String MMFS_MAPPER_SIMPLE_CLASS_NAME = "mapper_simple_class_name";
+    public static final String MMFS_MAPPER_CLASS_NAME = "mapper_class_name";
+    public static final String MMFS_XML_FILE_PATH = "xml_file_path";
+
     private DC() {
         throw new IllegalStateException("illegal");
     }

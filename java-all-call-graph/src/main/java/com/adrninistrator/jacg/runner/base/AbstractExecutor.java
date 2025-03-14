@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGThreadUtil;
 import com.adrninistrator.javacg2.thread.ThreadFactory4TPE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +11,12 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author adrninistrator
  * @date 2024/7/12
- * @description: 任务线程池执行任务的基类
+ * @description: 通过线程池执行任务的基类
  */
 public abstract class AbstractExecutor {
     private static final Logger logger = LoggerFactory.getLogger(AbstractExecutor.class);
@@ -31,6 +32,9 @@ public abstract class AbstractExecutor {
 
     // 任务队列最大长度
     protected int taskQueueMaxSize;
+
+    // 正在执行的任务数量
+    protected AtomicInteger runningTaskNum;
 
     /**
      * 创建线程池
@@ -50,23 +54,37 @@ public abstract class AbstractExecutor {
         threadFactory4TPE = new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER);
         threadPoolExecutor = new ThreadPoolExecutor(threadNum, threadNum, 10L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(taskQueueMaxSize), threadFactory4TPE);
+        runningTaskNum = new AtomicInteger(0);
     }
 
     // 等待直到任务执行完毕
     protected void wait4TPEDone() {
-        while (true) {
-            if (threadPoolExecutor.getActiveCount() == 0 && threadPoolExecutor.getQueue().isEmpty()) {
-                return;
-            }
-            logger.debug("{} wait4TPEDone ...", currentSimpleClassName);
-            JACGUtil.sleep(100L);
-        }
+        JACGThreadUtil.wait4TPEDone(currentSimpleClassName, threadPoolExecutor, runningTaskNum);
     }
 
     /**
-     * 等待直到允许任务执行
+     * 使用线程池执行任务
+     *
+     * @param runnable
      */
-    protected void wait4TPEExecute() {
-        JACGUtil.wait4TPEExecute(threadPoolExecutor, taskQueueMaxSize);
+    public void executeByTPE(Runnable runnable) {
+        JACGThreadUtil.executeByTPE(currentSimpleClassName, threadPoolExecutor, runningTaskNum, runnable);
+    }
+
+    // 等待直到允许任务执行
+    protected void wait4TPEAllowExecute() {
+        JACGThreadUtil.wait4TPEAllowExecute(currentSimpleClassName, threadPoolExecutor, taskQueueMaxSize);
+    }
+
+    // 关闭并等待线程池
+    protected void shutdownAndWaitTPE() {
+        threadPoolExecutor.shutdown();
+        try {
+            boolean result = threadPoolExecutor.awaitTermination(30, TimeUnit.SECONDS);
+            logger.info("{} 等待线程池结束结果 {}", currentSimpleClassName, result);
+        } catch (InterruptedException e) {
+            logger.error("error ", e);
+            Thread.currentThread().interrupt();
+        }
     }
 }

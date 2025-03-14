@@ -11,6 +11,7 @@ public enum DefaultBusinessDataTypeEnum {
     BDTE_METHOD_RETURN_GENERICS_TYPE("method_return_generics_type", "方法返回泛型类型", true, true),
     BDTE_MYBATIS_MYSQL_TABLE("mybatis_mysql_table", "MyBatis的XML文件中对应的数据库表名（支持MySQL数据库）", false, true),
     BDTE_MYBATIS_MYSQL_WRITE_TABLE("mybatis_mysql_write_table", "MyBatis的XML文件中对应的写数据库表名（支持MySQL数据库）", false, true),
+    BDTE_ILLEGAL("!illegal!", "非法值", false, false),
     ;
 
     // 类型
@@ -35,7 +36,7 @@ public enum DefaultBusinessDataTypeEnum {
                 return businessDataTypeEnum;
             }
         }
-        return null;
+        return DefaultBusinessDataTypeEnum.BDTE_ILLEGAL;
     }
 
     public String getType() {

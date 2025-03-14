@@ -167,7 +167,7 @@ test.runbycode.example.TestSetJavaCG2Config
 - 示例类名
 
 ```
-test.runbycodemain.Test0RunnerSimpleWriteDb
+test.runbycodemain.TestRBC0RunnerSimpleWriteDb
 ```
 
 - 示例说明
@@ -185,7 +185,7 @@ test.runbycodemain.Test0RunnerSimpleWriteDb
 - 示例类名
 
 ```
-test.runbycodemain.Test1RunnerWriteDb
+test.runbycodemain.TestRBC1RunnerWriteDb
 ```
 
 - 示例说明
@@ -199,7 +199,7 @@ test.runbycodemain.Test1RunnerWriteDb
 - 示例类名
 
 ```
-test.runbycodemain.TestFindCallStackTrace4ee
+test.runbycodemain.TestRBCFindCallStackTrace4ee
 ```
 
 - 示例说明
@@ -213,7 +213,7 @@ test.runbycodemain.TestFindCallStackTrace4ee
 - 示例类名
 
 ```
-test.runbycodemain.TestFindCallStackTrace4er
+test.runbycodemain.TestRBCFindCallStackTrace4er
 ```
 
 - 示例说明
@@ -227,7 +227,7 @@ test.runbycodemain.TestFindCallStackTrace4er
 - 示例类名
 
 ```
-test.runbycodemain.TestRunnerGenAllGraph4Callee
+test.runbycodemain.TestRBCRunnerGenAllGraph4Callee
 ```
 
 - 示例说明
@@ -239,7 +239,7 @@ test.runbycodemain.TestRunnerGenAllGraph4Callee
 - 示例类名
 
 ```
-test.runbycodemain.TestRunnerGenAllGraph4CalleeEmptyClass
+test.runbycodemain.TestRBCRunnerGenAllGraph4CalleeEmptyClass
 ```
 
 - 示例说明
@@ -253,7 +253,7 @@ test.runbycodemain.TestRunnerGenAllGraph4CalleeEmptyClass
 - 示例类名
 
 ```
-test.runbycodemain.TestRunnerGenAllGraph4CalleeLimit
+test.runbycodemain.TestRBCRunnerGenAllGraph4CalleeLimit
 ```
 
 - 示例说明
@@ -267,19 +267,51 @@ test.runbycodemain.TestRunnerGenAllGraph4CalleeLimit
 - 示例类名
 
 ```
-test.runbycodemain.TestRunnerGenAllGraph4Caller
+test.runbycodemain.TestRBCRunnerGenAllGraph4Caller
 ```
 
 - 示例说明
 
 通过代码指定配置参数的主要功能示例
 
+## 21.1. 方法调用链数据仅在内存中返回
+
+- 示例方法名
+
+```
+testReturnInMemory
+```
+
+- 示例说明
+
+方法调用链数据不写入文件
+
+## 21.2. 方法调用链数据仅写入文件
+
+- 示例方法名
+
+```
+testWriteToFile
+```
+
+- 示例说明
+
+方法调用链数据不在内存中返回
+
+## 21.3. 方法调用链数据写入文件，也在内存中返回
+
+- 示例方法名
+
+```
+testBoth
+```
+
 # 22. 生成指定方法向下的完整方法调用链
 
 - 示例类名
 
 ```
-test.runbycodemain.TestRunnerGenAllGraph4CallerEmptyClass
+test.runbycodemain.TestRBCRunnerGenAllGraph4CallerEmptyClass
 ```
 
 - 示例说明
@@ -293,7 +325,7 @@ test.runbycodemain.TestRunnerGenAllGraph4CallerEmptyClass
 - 示例类名
 
 ```
-test.runbycodemain.TestRunnerGenAllGraph4CallerLimit
+test.runbycodemain.TestRBCRunnerGenAllGraph4CallerLimit
 ```
 
 - 示例说明
@@ -307,7 +339,7 @@ test.runbycodemain.TestRunnerGenAllGraph4CallerLimit
 - 示例类名
 
 ```
-test.runbycodemain.TestRunnerWriteCallGraphFile
+test.runbycodemain.TestRBCRunnerWriteCallGraphFile
 ```
 
 - 示例说明

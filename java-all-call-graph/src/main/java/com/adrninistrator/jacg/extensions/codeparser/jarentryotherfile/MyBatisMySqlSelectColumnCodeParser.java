@@ -40,7 +40,6 @@ public class MyBatisMySqlSelectColumnCodeParser extends AbstractSaveData2FilePar
     public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
     }
 
-    // 处理update set子句的字段信息
     public void handleMyBatisMySqlInfo(MyBatisMySqlInfo myBatisMySqlInfo, String mybatisXmlFilePath) {
         try {
             String mapperInterfaceName = myBatisMySqlInfo.getMapperInterfaceName();

@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.util;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
-import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -11,10 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
 import java.util.Base64;
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author adrninistrator
@@ -67,73 +64,6 @@ public class JACGUtil {
     }
 
     /**
-     * 根据类名获取对应实例，构造函数无参数
-     *
-     * @param className
-     * @param classType
-     * @param <T>
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T genClassObject(String className, Class<T> classType) {
-        try {
-            Class<?> clazz = Class.forName(className);
-            Object obj = clazz.newInstance();
-
-            if (!classType.isAssignableFrom(clazz)) {
-                logger.error("指定的类 {} 不是 {} 的子类或实现类", className, classType.getName());
-                return null;
-            }
-
-            return (T) obj;
-        } catch (Exception e) {
-            logger.error("根据指定类名 {} 获得 {} 类的实例异常 ", className, classType.getName(), e);
-            return null;
-        }
-    }
-
-    /**
-     * 根据类名获取对应实例，构造函数有参数
-     *
-     * @param className
-     * @param classType
-     * @param argTypes
-     * @param argValues
-     * @param <T>
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T genClassObject(String className, Class<T> classType, Class<?>[] argTypes, Object[] argValues) {
-        if (ArrayUtils.isEmpty(argTypes)) {
-            logger.error("未指定参数类型");
-            throw new JavaCG2RuntimeException("未指定参数类型");
-        }
-        if (ArrayUtils.isEmpty(argValues)) {
-            logger.error("未指定参数值");
-            throw new JavaCG2RuntimeException("未指定参数值");
-        }
-        try {
-            Class<?> clazz = Class.forName(className);
-            if (clazz.getSimpleName().startsWith("Abstract")) {
-                logger.info("跳过抽象类 {}", clazz.getSimpleName());
-                return null;
-            }
-            Constructor<?> constructor = clazz.getConstructor(argTypes);
-            Object obj = constructor.newInstance(argValues);
-
-            if (!classType.isAssignableFrom(clazz)) {
-                logger.error("指定的类 {} 不是 {} 的子类或实现类", className, classType.getName());
-                return null;
-            }
-
-            return (T) obj;
-        } catch (Exception e) {
-            logger.error("根据指定类名 {} 获得 {} 类的实例异常 ", className, classType.getName(), e);
-            return null;
-        }
-    }
-
-    /**
      * 从字符串找到第1个非指定字符的序号，并生成子字符串
      *
      * @param data
@@ -173,22 +103,6 @@ public class JACGUtil {
         }
 
         return firstLetterLower + simpleClassName.substring(1);
-    }
-
-    /**
-     * 等待直到允许任务执行
-     *
-     * @param threadPoolExecutor
-     * @param taskQueueMaxSize
-     */
-    public static void wait4TPEExecute(ThreadPoolExecutor threadPoolExecutor, int taskQueueMaxSize) {
-        while (true) {
-            if (threadPoolExecutor.getQueue().size() < taskQueueMaxSize) {
-                return;
-            }
-            logger.debug("wait4TPEExecute ...");
-            JACGUtil.sleep(100L);
-        }
     }
 
     /**
@@ -250,25 +164,6 @@ public class JACGUtil {
      */
     public static String getObjSimpleClassNameAndHash(Object object) {
         return object.getClass().getSimpleName() + JACGConstants.FLAG_AT + System.identityHashCode(object);
-    }
-
-    /**
-     * 获取指定的调用堆栈中指定序号的方法
-     *
-     * @param stackTraceElements
-     * @param index
-     * @return
-     */
-    public static String getMethodInStackTrace(StackTraceElement[] stackTraceElements, int index) {
-        if (ArrayUtils.isEmpty(stackTraceElements)) {
-            return "";
-        }
-
-        if (stackTraceElements.length < index) {
-            return "";
-        }
-        StackTraceElement stackTraceElement = stackTraceElements[index];
-        return JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(stackTraceElement.getClassName(), stackTraceElement.getMethodName());
     }
 
     /**

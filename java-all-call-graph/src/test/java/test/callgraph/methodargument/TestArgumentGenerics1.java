@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class TestArgumentGenerics1 {
 
-    public void testAll(int i, List<TestArgument1> list) {
+    public static void testAll(int i, List<TestArgument1> list) {
         TestArgumentGenerics1 testArgumentGenerics1 = new TestArgumentGenerics1();
         testArgumentGenerics1.test1(null);
         testArgumentGenerics1.test2(null);
@@ -24,6 +24,7 @@ public class TestArgumentGenerics1 {
     }
 
     public void test1(List list) {
+        System.getProperty("");
         System.out.println("");
     }
 

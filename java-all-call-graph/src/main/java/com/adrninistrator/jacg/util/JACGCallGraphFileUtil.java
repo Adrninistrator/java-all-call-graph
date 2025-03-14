@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.util;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
-import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
 import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
@@ -78,49 +77,81 @@ public class JACGCallGraphFileUtil {
 
     /**
      * 生成方法对应的调用链文件名
-     * 格式： [完整或简单类名]@[方法名]@[方法HASH+长度]
+     * 格式： {完整或简单类名}@{方法名}@{方法HASH+长度}
      *
      * @param simpleClassName 完整或简单类名
      * @param methodName      方法名
      * @param methodHash      方法HASH+长度
      * @return
      */
-    public static String getCallGraphMethodFileName(String simpleClassName, String methodName, String methodHash) {
+    public static String genCallGraphMethodFileName(String simpleClassName, String methodName, String methodHash) {
         return simpleClassName + JACGConstants.FLAG_AT +
-                JACGClassMethodUtil.getSafeMethodName(methodName) + JACGConstants.FLAG_AT +
+                JACGClassMethodUtil.genSafeMethodName(methodName) + JACGConstants.FLAG_AT +
                 methodHash;
     }
 
     /**
      * 生成内容为空的调用链文件名
-     * 格式： [完整或简单类名]@[方法名]@[方法HASH+长度]
+     * 格式： {完整或简单类名}@{方法名}
      *
      * @param simpleClassName 完整或简单类名
      * @param methodName      方法名
      * @return
      */
-    public static String getEmptyCallGraphFileName(String simpleClassName, String methodName) {
-        return simpleClassName + JACGConstants.FLAG_AT + JACGClassMethodUtil.getSafeMethodName(methodName) + JACGConstants.EXT_EMPTY_TXT;
+    public static String genEmptyCallGraphFileName(String simpleClassName, String methodName) {
+        return simpleClassName + JACGConstants.FLAG_AT + JACGClassMethodUtil.genSafeMethodName(methodName) + JACGConstants.EMPTY_TXT;
     }
 
     /**
-     * 判断文件中是否代表空的调用链文件
+     * 生成代表任务中指定的类或方法不存在的文件
+     * 格式： {完整或简单类名}@{任务中指定的方法名}
+     *
+     * @param simpleClassName 完整或简单类名
+     * @param methodName      方法名
+     * @return
+     */
+    public static String genNotFoundGraphFileName(String simpleClassName, String methodName) {
+        return simpleClassName + JACGConstants.FLAG_AT + JACGClassMethodUtil.genSafeMethodName(methodName) + JACGConstants.NOT_FOUND_TXT;
+    }
+
+    /**
+     * 生成代表任务中指定的类或方法不存在的文件
+     * 格式： {完整或简单类名}@{任务中指定的方法名}
+     *
+     * @param taskInfo 任务中指定的类或方法信息
+     * @return
+     */
+    public static String genNotFoundGraphFileName(String taskInfo) {
+        return JACGClassMethodUtil.genSafeMethodName(taskInfo) + JACGConstants.NOT_FOUND_TXT;
+    }
+
+    /**
+     * 判断是否代表空的调用链文件
      *
      * @param fileName 文件名
      * @return
      */
     public static boolean isEmptyCallGraphFileName(String fileName) {
-        return StringUtils.endsWith(fileName, JACGConstants.EXT_EMPTY_MD);
+        return StringUtils.endsWith(fileName, JACGConstants.EMPTY_MD);
     }
 
     /**
-     * 从方法对应的调用链文件路径，获取方法相关的信息
-     * 文件名格式见以上getCallGraphMethodFileName方法
+     * 判断是否代表方法不存在的调用链文件
+     *
+     * @param fileName 文件名
+     * @return
+     */
+    public static boolean isNotFoundCallGraphFileName(String fileName) {
+        return StringUtils.endsWith(fileName, JACGConstants.NOT_FOUND_MD);
+    }
+
+    /**
+     * 从方法对应的调用链文件路径，获取方法HASH+长度
      *
      * @param fileName
      * @return
      */
-    public static MethodInfoInFileName getMethodInfoFromFileName(String fileName) {
+    public static String getMethodHashFromFileName(String fileName) {
         if (fileName == null) {
             return null;
         }
@@ -128,13 +159,14 @@ public class JACGCallGraphFileUtil {
         String fileNameWithOutExt = JACGFileUtil.getFileNameWithOutExt(fileName);
         // 以下文件名的格式，见RunnerGenAllGraph4Caller.handleOneTask()方法
         String[] array = StringUtils.splitPreserveAllTokens(fileNameWithOutExt, JACGConstants.FLAG_AT);
-        if (array.length < JACGConstants.CALLER_FILE_NAME_SPLIT_BY_AT_MIN_COLUMNS) {
-            // 因为文件名中可能包括代码行号，会多一个使用@分隔的数据，因此分隔后的列长度可能会更多，但不能更少
-            logger.error("文件名使用{}分隔后，列数小于 {} {}", JACGConstants.FLAG_AT, JACGConstants.CALLER_FILE_NAME_SPLIT_BY_AT_MIN_COLUMNS, fileName);
-            return null;
+        if (array.length == JACGConstants.CALL_GRAPH_FILE_NAME_COLUMNS_1) {
+            return fileNameWithOutExt;
         }
-
-        return new MethodInfoInFileName(array[0], JACGClassMethodUtil.recoveryMethodName(array[1]), array[2]);
+        if (array.length == JACGConstants.CALL_GRAPH_FILE_NAME_COLUMNS_3) {
+            return array[2];
+        }
+        logger.error("调用堆栈文件名使用{}分隔后，列数不符合预期 {} {}", JACGConstants.FLAG_AT, array.length, fileName);
+        return null;
     }
 
     /**
@@ -191,11 +223,11 @@ public class JACGCallGraphFileUtil {
     /**
      * 生成循环调用标志
      *
-     * @param back2Level
+     * @param cycleCallLevel
      * @return
      */
-    public static String genCycleCallFlag(int back2Level) {
-        return String.format(JACGConstants.CALL_FLAG_CYCLE, back2Level);
+    public static String genCycleCallFlag(int cycleCallLevel) {
+        return String.format(JACGConstants.CALL_FLAG_CYCLE, cycleCallLevel);
     }
 
     /**
@@ -393,12 +425,11 @@ public class JACGCallGraphFileUtil {
                 businessDataList.add(businessData);
             } else if (column.startsWith(JACGConstants.CALL_FLAG_CYCLE_START) && column.endsWith(JACGConstants.CALL_FLAG_CYCLE_END)) {
                 // 出现循环调用
-                callGraphLineParsed.setCycleCall(true);
                 String level = StringUtils.substringBetween(column, JACGConstants.FLAG_LEFT_PARENTHESES, JACGConstants.FLAG_RIGHT_PARENTHESES);
                 if (level == null) {
                     throw new JavaCG2RuntimeException("方法调用行内容非法 " + line);
                 }
-                callGraphLineParsed.setCycleCallLevel(Integer.parseInt(level));
+                callGraphLineParsed.setCycleCallLevel(Integer.valueOf(level));
             } else if (JACGConstants.CALLEE_FLAG_ENTRY_NO_TAB.equals(column)) {
                 // 入口方法
                 callGraphLineParsed.setEntryMethod(true);

@@ -27,11 +27,8 @@ public class CallGraphLineParsed {
     // 方法调用业务功能数据列表
     private List<BaseBusinessData> businessDataList;
 
-    // 是否出现循环调用
-    private boolean cycleCall;
-
-    // 循环调用对应的方法级别
-    private int cycleCallLevel;
+    // 循环调用对应的方法级别，非空时代表出现循环调用
+    private Integer cycleCallLevel;
 
     // 是否入口方法（向上的完整方法调用链有效）
     private boolean entryMethod;
@@ -89,19 +86,11 @@ public class CallGraphLineParsed {
         this.businessDataList = businessDataList;
     }
 
-    public boolean isCycleCall() {
-        return cycleCall;
-    }
-
-    public void setCycleCall(boolean cycleCall) {
-        this.cycleCall = cycleCall;
-    }
-
-    public int getCycleCallLevel() {
+    public Integer getCycleCallLevel() {
         return cycleCallLevel;
     }
 
-    public void setCycleCallLevel(int cycleCallLevel) {
+    public void setCycleCallLevel(Integer cycleCallLevel) {
         this.cycleCallLevel = cycleCallLevel;
     }
 

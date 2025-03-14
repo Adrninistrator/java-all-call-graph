@@ -10,11 +10,19 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -22,6 +30,7 @@ import java.util.List;
  * @description: 类名与方法处理工具类
  */
 public class JACGClassMethodUtil {
+    private static final Logger logger = LoggerFactory.getLogger(JACGClassMethodUtil.class);
 
     /**
      * 将完整方法与返回类型拼接
@@ -61,12 +70,13 @@ public class JACGClassMethodUtil {
      * @param methodName
      * @return
      */
-    public static String getSafeMethodName(String methodName) {
+    public static String genSafeMethodName(String methodName) {
         if (methodName == null) {
             return null;
         }
-        return methodName.replace("<", "(")
-                .replace(">", ")");
+        return methodName.replace('<', '(')
+                .replace('>', ')')
+                .replace(':', '@');
     }
 
     /**
@@ -84,12 +94,23 @@ public class JACGClassMethodUtil {
     }
 
     /**
-     * 生成方法详细信息
+     * 根据完整方法生成方法详细信息
      *
      * @param fullMethod
      * @return
      */
     public static MethodDetail genMethodDetail(String fullMethod) {
+        return genMethodDetail(fullMethod, null);
+    }
+
+    /**
+     * 根据完整方法生成方法详细信息
+     *
+     * @param fullMethod
+     * @param methodDetail
+     * @return
+     */
+    public static MethodDetail genMethodDetail(String fullMethod, MethodDetail methodDetail) {
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         int indexColon = fullMethod.indexOf(JavaCG2Constants.FLAG_COLON);
         int indexLeftBrackets = fullMethod.indexOf(JavaCG2Constants.FLAG_LEFT_BRACKET);
@@ -97,7 +118,13 @@ public class JACGClassMethodUtil {
         int indexRightBrackets = fullMethod.lastIndexOf(JavaCG2Constants.FLAG_RIGHT_BRACKET);
         // 不包含括号的方法参数类型字符串
         String argTypeStr = fullMethod.substring(indexLeftBrackets + JavaCG2Constants.FLAG_LEFT_BRACKET.length(), indexRightBrackets);
-        return new MethodDetail(fullMethod, className, methodName, argTypeStr, genMethodArgTypeList(fullMethod));
+        MethodDetail usedMethodDetail = methodDetail != null ? methodDetail : new MethodDetail();
+        usedMethodDetail.setFullMethod(fullMethod);
+        usedMethodDetail.setClassName(className);
+        usedMethodDetail.setMethodName(methodName);
+        usedMethodDetail.setArgTypeStr(argTypeStr);
+        usedMethodDetail.setArgTypeList(genMethodArgTypeList(fullMethod));
+        return usedMethodDetail;
     }
 
     /**
@@ -199,7 +226,7 @@ public class JACGClassMethodUtil {
     public static List<ClassAndMethodName> genClassAndMethodNameListFromString(String[] classMethodStringArray) {
         List<ClassAndMethodName> classAndMethodNameList = new ArrayList<>(classMethodStringArray.length);
         for (String expectedMethod : classMethodStringArray) {
-            classAndMethodNameList.add(JACGClassMethodUtil.parseClassAndMethodName(expectedMethod));
+            classAndMethodNameList.add(parseClassAndMethodName(expectedMethod));
         }
         return classAndMethodNameList;
     }
@@ -238,6 +265,147 @@ public class JACGClassMethodUtil {
             }
         }
         return ClassInterfaceEnum.CIE_CLASS;
+    }
+
+    /**
+     * 获取指定的调用堆栈中指定序号的方法
+     *
+     * @param stackTraceElements
+     * @param index
+     * @return
+     */
+    public static String getMethodInStackTrace(StackTraceElement[] stackTraceElements, int index) {
+        if (ArrayUtils.isEmpty(stackTraceElements)) {
+            return "";
+        }
+
+        if (stackTraceElements.length < index) {
+            return "";
+        }
+        StackTraceElement stackTraceElement = stackTraceElements[index];
+        return JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(stackTraceElement.getClassName(), stackTraceElement.getMethodName());
+    }
+
+    /**
+     * 根据类名获取对应实例，构造函数无参数
+     *
+     * @param className
+     * @param classType
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T genClassObject(String className, Class<T> classType) {
+        try {
+            Class<?> clazz = Class.forName(className);
+            Object obj = clazz.newInstance();
+
+            if (!classType.isAssignableFrom(clazz)) {
+                logger.error("指定的类 {} 不是 {} 的子类或实现类", className, classType.getName());
+                return null;
+            }
+
+            return (T) obj;
+        } catch (Exception e) {
+            logger.error("根据指定类名 {} 获得 {} 类的实例异常 ", className, classType.getName(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 根据类名获取对应实例，构造函数有参数
+     *
+     * @param className
+     * @param classType
+     * @param argTypes
+     * @param argValues
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T genClassObject(String className, Class<T> classType, Class<?>[] argTypes, Object[] argValues) {
+        if (ArrayUtils.isEmpty(argTypes)) {
+            logger.error("未指定参数类型");
+            throw new JavaCG2RuntimeException("未指定参数类型");
+        }
+        if (ArrayUtils.isEmpty(argValues)) {
+            logger.error("未指定参数值");
+            throw new JavaCG2RuntimeException("未指定参数值");
+        }
+        try {
+            Class<?> clazz = Class.forName(className);
+            if (clazz.getSimpleName().startsWith("Abstract")) {
+                logger.info("跳过抽象类 {}", clazz.getSimpleName());
+                return null;
+            }
+            Constructor<?> constructor = clazz.getConstructor(argTypes);
+            Object obj = constructor.newInstance(argValues);
+
+            if (!classType.isAssignableFrom(clazz)) {
+                logger.error("指定的类 {} 不是 {} 的子类或实现类", className, classType.getName());
+                return null;
+            }
+
+            return (T) obj;
+        } catch (Exception e) {
+            logger.error("根据指定类名 {} 获得 {} 类的实例异常 ", className, classType.getName(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 获得类中非静态字段的名称，包含父类中的字段
+     *
+     * @param clazz
+     * @return
+     */
+    public static Set<String> getNonStaticFieldNameSet(Class<?> clazz) {
+        Set<String> fieldNameSet = new HashSet<>();
+        Class<?> currentClass = clazz;
+
+        while (currentClass != null && !JavaCG2ClassMethodUtil.isClassInJdk(currentClass.getName())) {
+            Field[] fields = currentClass.getDeclaredFields();
+            for (Field field : fields) {
+                if (!Modifier.isStatic(field.getModifiers())) {
+                    fieldNameSet.add(field.getName());
+                }
+            }
+            currentClass = currentClass.getSuperclass();
+        }
+        return fieldNameSet;
+    }
+
+    /**
+     * 获得类中值非空的非静态字段的名称，包含父类中的字段
+     *
+     * @param object
+     * @return
+     */
+    public static Set<String> getNonStaticNotNullFieldNameSet(Object object) {
+        Set<String> fieldNameSet = new HashSet<>();
+        Class<?> clazz = object.getClass();
+
+        while (clazz != null && !JavaCG2ClassMethodUtil.isClassInJdk(clazz.getName())) {
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+
+                try {
+                    field.setAccessible(true);
+                    Object value = field.get(object);
+                    if (value != null) {
+                        fieldNameSet.add(field.getName());
+                    }
+                } catch (IllegalAccessException e) {
+                    logger.warn("获取字段值失败 {} {}", clazz.getName(), field.getName());
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+
+        return fieldNameSet;
     }
 
     private JACGClassMethodUtil() {

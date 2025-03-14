@@ -30,7 +30,9 @@ import java.util.Set;
         minColumnNum = 13,
         maxColumnNum = 13,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL,
-        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_METHOD_ANNOTATION,
+        dependsWriteDbTableEnums = {
+                DbTableInfoEnum.DTIE_CLASS_NAME,
+                DbTableInfoEnum.DTIE_METHOD_ANNOTATION,
                 DbTableInfoEnum.DTIE_METHOD_INFO,
                 DbTableInfoEnum.DTIE_METHOD_ARG_GENERICS_TYPE,
                 DbTableInfoEnum.DTIE_METHOD_RETURN_GENERICS_TYPE,

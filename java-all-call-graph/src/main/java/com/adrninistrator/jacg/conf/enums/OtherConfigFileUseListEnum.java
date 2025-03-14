@@ -11,6 +11,7 @@ import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddM
 import com.adrninistrator.jacg.extensions.methodcall.AbstractJACGMethodCallExtension;
 import com.adrninistrator.javacg2.conf.enums.interfaces.OtherConfigInterface;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.extensions.codeparser.CodeParserInterface;
 import com.adrninistrator.javacg2.extensions.methodcall.JavaCG2MethodCallExtensionInterface;
 
 /**
@@ -26,13 +27,14 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
             new String[]{"生成向下的方法完整调用链文件后，再查找从起始方法开始的调用堆栈时，使用的关键字（每行指定一项配置，可指定多行）"}
             , null),
     OCFULE_EXTENSIONS_CODE_PARSER(InputDirEnum.IDE_EXTENSIONS.getDirName() + "/code_parser.properties",
-            new String[]{"在此定义用于对代码进行解析的扩展类完整类名（每行指定一项配置，可指定多行）"}
+            new String[]{"在此定义用于对代码进行解析的扩展类完整类名（每行指定一项配置，可指定多行）",
+                    "需要是 " + CodeParserInterface.class.getName() + " 接口的实现类"}
             , null),
     OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER(InputDirEnum.IDE_EXTENSIONS.getDirName() + "/method_annotation_formatter.properties",
             new String[]{"在此定义处理方法上的注解生成用于显示信息的扩展类完整类名（每行指定一项配置，可指定多行）",
                     "需要是 " + AbstractAnnotationFormatter.class.getName() + " 类的子类",
-                    "假如需要显示方法上的注解，请将默认的方法注解处理类 DefaultAnnotationFormatter 在最后指定",
-                    "假如不需要显示方法上的注解，请只指定不显示方法注解的处理类 HideAnnotationFormatter",
+                    "假如需要显示方法上的注解，请将默认的方法注解处理类 " + DefaultAnnotationFormatter.class.getSimpleName() + " 在最后指定",
+                    "假如不需要显示方法上的注解，请只指定不显示方法注解的处理类 " + HideAnnotationFormatter.class.getSimpleName(),
                     HideAnnotationFormatter.class.getName()}
             , new String[]{
             SpringMvcRequestMappingFormatter.class.getName(),

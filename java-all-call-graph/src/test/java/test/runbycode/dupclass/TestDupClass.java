@@ -11,7 +11,9 @@ import test.runbycode.base.TestRunByCodeBase;
  * @description:
  */
 @JACGExample(title = "解析包含重复同名类的代码并将结果写入数据库",
-        desc = {"需要先执行 unittest.gradle 中的命令，生成用于比较的示例jar包"})
+        desc = {"需要先执行 gradle 命令，生成用于比较的示例jar包",
+                "gradlew test_gen_diff_jar -Pexample_flag=1",
+                "gradlew test_gen_diff_jar -Pexample_flag=2"})
 public class TestDupClass extends TestRunByCodeBase {
 
     @Test

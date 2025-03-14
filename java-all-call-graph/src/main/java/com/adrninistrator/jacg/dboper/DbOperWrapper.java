@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphNode4Caller;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
@@ -379,10 +380,6 @@ public class DbOperWrapper {
 
         // 执行根据任务中的简单类名或完整类名获取唯一类名
         simpleClassName = doGetSimpleClassNameInTask(className);
-        if (simpleClassName == null) {
-            return null;
-        }
-
         simpleClassNameInTaskMap.put(className, simpleClassName);
         return simpleClassName;
     }
@@ -405,6 +402,7 @@ public class DbOperWrapper {
                             "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
                             "2. 指定的类存在同名类，需要使用完整类名形式",
                     className, JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
+            return className;
         }
         return simpleClassName;
     }
@@ -435,19 +433,6 @@ public class DbOperWrapper {
         return dbOperator.queryObjectOneColumn(sql, String.class, simpleCassName);
     }
 
-    // 从方法调用表中查询调用方类对应的完整方法
-    public List<String> queryCallerFullMethodOfClass(String simpleClassName) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLER_ALL_METHODS;
-        String sql = getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select distinct(" + DC.MC_CALLER_FULL_METHOD + ")" +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
-                    " where " + DC.MC_CALLER_SIMPLE_CLASS_NAME + " = ?";
-            sql = cacheSql(sqlKeyEnum, sql);
-        }
-        return dbOperator.queryListOneColumn(sql, String.class, simpleClassName);
-    }
-
     // 根据调用方简单类名，查找1个对应的完整方法
     public String queryOneFullMethodByCallerSCN(String callerSimpleClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLER_FULL_METHOD;
@@ -467,7 +452,7 @@ public class DbOperWrapper {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_TOP_METHOD;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select distinct " + JACGSqlUtil.joinColumns(DC.MC_CALLER_METHOD_HASH, DC.MC_CALLER_FULL_METHOD, DC.MC_CALLER_RETURN_TYPE, DC.MC_CALL_FLAGS) +
+            sql = "select distinct " + JACGSqlUtil.joinColumns(DC.MC_CALLER_METHOD_HASH, DC.MC_CALLER_FULL_METHOD, DC.MC_CALLER_RETURN_TYPE) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLER_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MC_CALLER_FULL_METHOD + " like concat(?, '%')";
@@ -490,6 +475,7 @@ public class DbOperWrapper {
                     DC.MC_ENABLED,
                     DC.MC_CALLEE_FULL_METHOD,
                     DC.MC_CALLEE_METHOD_HASH,
+                    DC.MC_CALLER_SIMPLE_CLASS_NAME,
                     DC.MC_CALLER_LINE_NUMBER,
                     DC.MC_CALL_FLAGS,
                     DC.MC_RAW_RETURN_TYPE) + " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
@@ -570,13 +556,51 @@ public class DbOperWrapper {
         String whereColumnName = isCallee ? DC.MC_CALLEE_METHOD_HASH : DC.MC_CALLER_METHOD_HASH;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_RETURN_TYPE, DC.MC_CALL_FLAGS, DC.MC_RAW_RETURN_TYPE) +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_RETURN_TYPE, DC.MC_RAW_RETURN_TYPE) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + whereColumnName + " = ?" +
                     " limit 1";
             sql = cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObject(sql, WriteDbData4MethodCall.class, methodHash);
+    }
+
+    /**
+     * 根据类名查询相关的方法
+     *
+     * @param className
+     * @return
+     */
+    public List<String> queryMethodByClassName(String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_FULL_METHOD_BY_CLASS;
+        String sql = getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.MI_FULL_METHOD +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
+                    " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?";
+            sql = cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryListOneColumn(sql, String.class, querySimpleClassName(className));
+    }
+
+    /**
+     * 根据类名及完整方法前缀查询方法信息
+     *
+     * @param className
+     * @param fullMethodPrefix
+     * @return
+     */
+    public List<WriteDbData4MethodInfo> queryMethodInfoByClassFullMethodPrefix(String className, String fullMethodPrefix) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_ALL_BY_CLASS_FULL_METHOD_PREFIX;
+        String sql = getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
+                    " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.MI_FULL_METHOD + " like concat(?, '%')";
+            sql = cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodInfo.class, querySimpleClassName(className), fullMethodPrefix);
     }
 
     //

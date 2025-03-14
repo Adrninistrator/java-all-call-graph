@@ -29,7 +29,7 @@ test {
 
         def TEST_FLAG_RECORD_LOG_TO_FILE = "test.flag.record.log.to.file"
         def testFlagRecordLogToFile = System.getProperty(TEST_FLAG_RECORD_LOG_TO_FILE)
-        jvmArgs "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=256m", "-D" + TEST_FLAG_RECORD_LOG_TO_FILE + "=" + testFlagRecordLogToFile
+        jvmArgs "-Dfile.encoding=UTF-8", "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=256m", "-D" + TEST_FLAG_RECORD_LOG_TO_FILE + "=" + testFlagRecordLogToFile
 
         testLogging {
             events "PASSED", "STARTED", "FAILED", "SKIPPED"

@@ -23,7 +23,7 @@ import java.util.List;
  * @description: 方法调用使用静态字段信息处理类，可用于获取枚举的使用情况
  */
 public class MethodCallStaticFieldHandler extends BaseHandler {
-    private MethodCallHandler methodCallHandler;
+    private final MethodCallHandler methodCallHandler;
 
     public MethodCallStaticFieldHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
@@ -85,7 +85,7 @@ public class MethodCallStaticFieldHandler extends BaseHandler {
     }
 
     // 查询方法调用中有使用的指定类中的静态字段名称列表（去重）
-    private List<String> queryClassStaticFieldNameList(String className) {
+    public List<String> queryClassStaticFieldNameList(String className) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCSF_QUERY_CLASS_ALL_FIELD_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {

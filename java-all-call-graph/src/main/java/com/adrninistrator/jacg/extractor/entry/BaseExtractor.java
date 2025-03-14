@@ -9,7 +9,6 @@ import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
-import com.adrninistrator.jacg.dto.method.MethodInfoInFileName;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
@@ -64,7 +63,7 @@ public abstract class BaseExtractor {
         }
         List<String> callStackFilePathList = callStackFileResult.getStackFilePathList();
 
-        // 执行完毕时尝试打印当前使用的配置信息
+        // 执行完毕时打印当前使用的配置信息
         // todo 检查效果
         configureWrapper.printUsedConfigInfo(currentSimpleClassName, findCallStackTrace.getCallGraphOutputDirPath(), JACGConstants.FILE_JACG_USED_CONFIG_MD);
         return new ListWithResult<>(callStackFilePathList);
@@ -112,26 +111,19 @@ public abstract class BaseExtractor {
         String fileName = JavaCG2FileUtil.getFileNameFromPath(stackFilePath);
         callGraphExtractedFile.setStackFileName(fileName);
 
-        if (JACGCallGraphFileUtil.isEmptyCallGraphFileName(fileName)) {
+        if (JACGCallGraphFileUtil.isEmptyCallGraphFileName(fileName) || JACGCallGraphFileUtil.isNotFoundCallGraphFileName(fileName)) {
             // 文件内容为空
             callGraphExtractedFile.setEmptyStackFile(true);
             return;
         }
 
         // 文件内容非空
-        MethodInfoInFileName methodInfoInFileName = JACGCallGraphFileUtil.getMethodInfoFromFileName(fileName);
-        if (methodInfoInFileName == null) {
+        String methodHashInFileName = JACGCallGraphFileUtil.getMethodHashFromFileName(fileName);
+        if (methodHashInFileName == null) {
             return;
         }
 
-        callGraphExtractedFile.setSimpleClassName(methodInfoInFileName.getSimpleClassName());
-        callGraphExtractedFile.setMethodName(methodInfoInFileName.getMethodName());
-        callGraphExtractedFile.setMethodHash(methodInfoInFileName.getMethodHash());
-
-        if (callGraphExtractedFile.isEmptyStackFile()) {
-            return;
-        }
-
+        callGraphExtractedFile.setMethodHash(methodHashInFileName);
         // 根据调用方完整方法HASH+长度，从方法调用表获取对应的完整方法
         String fullMethod;
         if (order4ee) {
@@ -141,8 +133,12 @@ public abstract class BaseExtractor {
         }
         callGraphExtractedFile.setFullMethod(fullMethod);
         if (fullMethod != null) {
-            callGraphExtractedFile.setClassName(JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod));
+            String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
+            String simpleClassName = dbOperWrapper.querySimpleClassName(className);
+            String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);
+            callGraphExtractedFile.setClassName(className);
+            callGraphExtractedFile.setSimpleClassName(simpleClassName);
+            callGraphExtractedFile.setMethodName(methodName);
         }
     }
-
 }

@@ -14,6 +14,8 @@ import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import test.callgraph.annotation.CallMethodWithAnnotation;
 import test.callgraph.annotation.MethodWithAnnotation;
 import test.callgraph.cyclecall.TestCycleCall1;
+import test.callgraph.empty.TestEmptyClass1;
+import test.callgraph.empty.TestNoMethodClass1;
 import test.callgraph.extendcomplex.ChildClassA1;
 import test.callgraph.extendcomplex.ChildClassA2;
 import test.callgraph.extendcomplex.ChildClassB1;
@@ -77,7 +79,9 @@ public class TestConfigGenerator {
                 TestArgument2.class.getName() + ":testNoCaller(",
                 TestArgument2.class.getName() + ":testNotExist(",
                 TestCycleCall1.class.getName(),
-                TestSpringController1.class.getName() + ":get("
+                TestSpringController1.class.getName() + ":get(",
+                TestEmptyClass1.class.getName(),
+                TestNoMethodClass1.class.getName()
         );
 
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
@@ -103,7 +107,9 @@ public class TestConfigGenerator {
                 TestUseComplexService.class.getName(),
                 TestLambda.class.getName(),
                 TestInterfacesGeneric1.class.getName(),
-                TestUseInterfaceDefault1.class.getName()
+                TestUseInterfaceDefault1.class.getName(),
+                TestEmptyClass1.class.getName(),
+                TestNoMethodClass1.class.getName()
         );
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE,

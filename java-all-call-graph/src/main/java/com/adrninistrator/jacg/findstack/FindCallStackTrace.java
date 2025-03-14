@@ -14,8 +14,8 @@ import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import com.adrninistrator.jacg.runner.base.AbstractExecutor;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
@@ -114,7 +114,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         findStackKeywordFilterList = new ArrayList<>(findKeywordFilterClassList.size());
         try {
             for (String extensionClass : findKeywordFilterClassList) {
-                FindStackKeywordFilterInterface findStackKeywordFilter = JACGUtil.genClassObject(extensionClass, FindStackKeywordFilterInterface.class);
+                FindStackKeywordFilterInterface findStackKeywordFilter = JACGClassMethodUtil.genClassObject(extensionClass, FindStackKeywordFilterInterface.class);
                 if (findStackKeywordFilter == null) {
                     return false;
                 }
@@ -143,6 +143,15 @@ public class FindCallStackTrace extends AbstractExecutor {
             genSeparateStack = true;
         } else {
             logger.info("后续不会为每个调用堆栈生成独立的文件");
+        }
+
+        if (!Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE))) {
+            logger.error("{} 需要设置为 {}", ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE.getKey(), Boolean.TRUE);
+            return CallStackFileResult.FAIL;
+        }
+        if (!Boolean.FALSE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY))) {
+            logger.error("{} 需要设置为 {}", ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY.getKey(), Boolean.FALSE);
+            return CallStackFileResult.FAIL;
         }
 
         // 读取指定的关键字
@@ -179,7 +188,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         // 处理目录
         CallStackFileResult callStackFileResult = handleDir(usedKeywordList);
 
-        // 执行完毕时尝试打印当前使用的配置信息
+        // 执行完毕时打印当前使用的配置信息
         // todo 检查效果
         configureWrapper.printUsedConfigInfo(currentSimpleClassName, callGraphOutputDirPath, JACGConstants.FILE_JACG_USED_CONFIG_MD);
         return callStackFileResult;
@@ -284,8 +293,8 @@ public class FindCallStackTrace extends AbstractExecutor {
             JavaCG2Counter failCounter = new JavaCG2Counter(0);
             for (String subFilePath : subFilePathList) {
                 // 等待直到允许任务执行
-                wait4TPEExecute();
-                threadPoolExecutor.execute(() -> {
+                wait4TPEAllowExecute();
+                executeByTPE(() -> {
                     if (!handleOneFile(finalSrcDirPathLength, subFilePath, keywordList)) {
                         logger.error("处理文件失败 {}", subFilePath);
                         failCounter.addAndGet();
@@ -307,7 +316,8 @@ public class FindCallStackTrace extends AbstractExecutor {
             }
             return new CallStackFileResult(stackFilePathList, separateStackFilePathList);
         } finally {
-            threadPoolExecutor.shutdown();
+            // 关闭并等待线程池
+            shutdownAndWaitTPE();
         }
     }
 

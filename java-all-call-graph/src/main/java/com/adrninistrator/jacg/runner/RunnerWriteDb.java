@@ -54,6 +54,7 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodReturnConstV
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodReturnFieldInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodReturnGenericsType;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodThrow;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MyBatisMSFormatedSql;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MyBatisMSSelectColumn;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MyBatisMSSetColumn;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MyBatisMSTable;
@@ -70,9 +71,9 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringBean;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringController;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringTaskAnnotation;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringTaskXml;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
@@ -396,6 +397,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
+        // 等待所有写入数据完成
+        wait4TPEDone();
+
         // 检查执行结果
         if (!checkResult()) {
             return false;
@@ -422,7 +426,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
         for (String manualAddMethodCallClassName : manualAddMethodCallClassList) {
             try {
-                AbstractManualAddMethodCall1 manualAddMethodCall1 = JACGUtil.genClassObject(manualAddMethodCallClassName, AbstractManualAddMethodCall1.class,
+                AbstractManualAddMethodCall1 manualAddMethodCall1 = JACGClassMethodUtil.genClassObject(manualAddMethodCallClassName, AbstractManualAddMethodCall1.class,
                         new Class<?>[]{DbOperWrapper.class}, new Object[]{dbOperWrapper});
                 if (manualAddMethodCall1 == null) {
                     return false;
@@ -450,7 +454,8 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
         for (String jacgMethodCallExtensionClassName : jacgMethodCallExtensionClassList) {
             try {
-                AbstractJACGMethodCallExtension jacgMethodCallExtension = JACGUtil.genClassObject(jacgMethodCallExtensionClassName, AbstractJACGMethodCallExtension.class,
+                AbstractJACGMethodCallExtension jacgMethodCallExtension = JACGClassMethodUtil.genClassObject(jacgMethodCallExtensionClassName,
+                        AbstractJACGMethodCallExtension.class,
                         new Class<?>[]{DbOperWrapper.class}, new Object[]{dbOperWrapper});
                 if (jacgMethodCallExtension == null) {
                     return false;
@@ -581,6 +586,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         writeDbHandler.setDbInsertBatchSize(dbOperWrapper.getDbInsertBatchSize());
         writeDbHandler.setAppName(appName);
         writeDbHandler.setThreadPoolExecutor(threadPoolExecutor);
+        writeDbHandler.setRunningTaskNum(runningTaskNum);
         writeDbHandler.setTaskQueueMaxSize(taskQueueMaxSize);
         writeDbHandler.init(writeDbResult);
     }
@@ -918,6 +924,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
+        // 处理MyBatis的格式化后的sql文本
+        WriteDbHandler4MyBatisMSFormatedSql writeDbHandler4MyBatisMSFormatedSql = new WriteDbHandler4MyBatisMSFormatedSql(writeDbResult);
+        initWriteDbHandler(writeDbHandler4MyBatisMSFormatedSql);
+        if (!writeDbHandler4MyBatisMSFormatedSql.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
         // 处理MyBatis的update set子句的字段信息
         WriteDbHandler4MyBatisMSSetColumn writeDbHandler4MyBatisMSSetColumn = new WriteDbHandler4MyBatisMSSetColumn(writeDbResult);
         initWriteDbHandler(writeDbHandler4MyBatisMSSetColumn);
@@ -1005,10 +1018,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     // 处理通过方法调用传递的get/set方法关联关系（需要在处理方法调用关系后面执行）
     private boolean handleMethodCallPassedGetSet() {
         if (useNeo4j()) {
-            return true;
-        }
-        if (!Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP))) {
-            logger.info("不处理通过get/set方法关联的字段关联关系");
             return true;
         }
 

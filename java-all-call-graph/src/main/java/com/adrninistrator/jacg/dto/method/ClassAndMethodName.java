@@ -10,10 +10,13 @@ import java.util.Objects;
 public class ClassAndMethodName {
 
     // 完整类名
-    protected final String className;
+    protected String className;
 
     // 方法名
-    protected final String methodName;
+    protected String methodName;
+
+    public ClassAndMethodName() {
+    }
 
     public ClassAndMethodName(String className, String methodName) {
         this.className = className;
@@ -24,8 +27,16 @@ public class ClassAndMethodName {
         return className;
     }
 
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
     public String getMethodName() {
         return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 
     @Override

@@ -13,16 +13,12 @@ public class FindMethodTaskElement {
     // 完整方法信息
     private final String fullMethod;
 
-    // 方法调用的标志
-    private final int callFlags;
-
     // 方法返回类型
     private final String returnType;
 
-    public FindMethodTaskElement(String methodHash, String fullMethod, int callFlags, String returnType) {
+    public FindMethodTaskElement(String methodHash, String fullMethod, String returnType) {
         this.methodHash = methodHash;
         this.fullMethod = fullMethod;
-        this.callFlags = callFlags;
         this.returnType = returnType;
     }
 
@@ -32,10 +28,6 @@ public class FindMethodTaskElement {
 
     public String getFullMethod() {
         return fullMethod;
-    }
-
-    public int getCallFlags() {
-        return callFlags;
     }
 
     public String getReturnType() {

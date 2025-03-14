@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.common.enums.WriteDbHandlerWriteFileEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -16,6 +17,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Inherited
 public @interface JACGWriteDbHandler {
 
     // 是否需要读取文件

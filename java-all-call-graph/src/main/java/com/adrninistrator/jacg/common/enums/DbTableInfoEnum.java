@@ -566,7 +566,19 @@ public enum DbTableInfoEnum {
             DC.MCMCR_CALLEE_SIMPLE_CLASS_NAME,
             DC.MCMCR_CALLEE_METHOD_NAME,
             DC.MCMCR_CALLEE_FULL_METHOD,
-    });
+    }),
+    DTIE_MYBATIS_MS_FORMATED_SQL("mybatis_ms_formated_sql", new String[]{
+            DC.MMFS_RECORD_ID,
+            DC.MMFS_XML_FILE_NAME,
+            DC.MMFS_SQL_ID,
+            DC.MMFS_SQL_SEQ,
+            DC.MMFS_XML_ELEMENT_NAME,
+            DC.MMFS_FORMATED_SQL,
+            DC.MMFS_MAPPER_SIMPLE_CLASS_NAME,
+            DC.MMFS_MAPPER_CLASS_NAME,
+            DC.MMFS_XML_FILE_PATH,
+    }),
+    ;
 
     private final String tableNameKeyword;
 

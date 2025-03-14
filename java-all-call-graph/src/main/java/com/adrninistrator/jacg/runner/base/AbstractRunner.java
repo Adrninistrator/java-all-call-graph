@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author adrninistrator
  * @date 2021/6/17
- * @description:
+ * @description: 执行类基类
  */
 public abstract class AbstractRunner extends AbstractExecutor {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunner.class);
@@ -160,7 +160,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
                 logger.error("{} 执行失败 {}", currentSimpleClassName, ERROR_LOG_NOTICE);
                 return false;
             }
-            // 执行完毕时尝试打印当前使用的配置信息
+            // 执行完毕时打印当前使用的配置信息
             if (currentOutputDirPath != null) {
                 configureWrapper.printUsedConfigInfo(currentSimpleClassName, currentOutputDirPath, JACGConstants.FILE_JACG_USED_CONFIG_MD);
             } else {
@@ -219,7 +219,8 @@ public abstract class AbstractRunner extends AbstractExecutor {
         }
 
         if (threadPoolExecutor != null) {
-            threadPoolExecutor.shutdown();
+            // 关闭并等待线程池
+            shutdownAndWaitTPE();
         }
 
         if (someTaskFail) {

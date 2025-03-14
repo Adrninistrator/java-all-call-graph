@@ -3,6 +3,9 @@ package test.callgraph.annotation;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
+import test.callgraph.cyclecall.TestCycleCall1;
+import test.callgraph.methodargument.TestArgumentGenerics1;
+import test.callgraph.methodreturn.TestMethodReturnGenericsType1;
 
 /**
  * @author adrninistrator
@@ -63,6 +66,9 @@ public class MethodWithAnnotation {
         System.out.println("");
         test2();
         clone();
+        TestArgumentGenerics1.testAll(0, null);
+        new TestCycleCall1().test1();
+        new TestMethodReturnGenericsType1().test3();
     }
 
     @TestAnnotationOuter(value = "aaa", annotations = {})

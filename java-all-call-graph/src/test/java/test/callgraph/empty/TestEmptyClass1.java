@@ -10,4 +10,7 @@ public class TestEmptyClass1 {
     public String test1() {
         return "1";
     }
+
+    public void testEmpty() {
+    }
 }

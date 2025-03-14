@@ -21,7 +21,7 @@
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:3.0.2'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:3.0.3'
 ```
 
 - Maven
@@ -30,7 +30,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:3.0.2'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>3.0.2</version>
+  <version>3.0.3</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -40,8 +40,8 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:3.0.2'
 `由于 Maven 间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定 java-all-call-graph 依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过 java-all-call-graph 与 java-callgraph2 的 pom 文件的 dependencies 元素查看依赖组件版本`
 
 ```
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/3.0.2/java-all-call-graph-3.0.2.pom
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/3.0.4/java-callgraph2-3.0.43.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/3.0.3/java-all-call-graph-3.0.3.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/3.0.6/java-callgraph2-3.0.6.pom
 ```
 
 以上版本号可能需要替换为最新版本
@@ -49,6 +49,10 @@ https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/3.0.4/j
 java-all-call-graph 最新版本号可查看 [https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph](https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph)。
 
 java-all-call-graph 对应代码地址为 [https://github.com/Adrninistrator/java-all-call-graph](https://github.com/Adrninistrator/java-all-call-graph)。
+
+# 指定需要解析的文件/目录信息
+
+参考 java-callgraph2 组件说明 [https://github.com/Adrninistrator/java-callgraph2]([java-callgraph2](https://github.com/Adrninistrator/java-callgraph2))
 
 # 4. 执行步骤
 
@@ -131,7 +135,7 @@ H2 数据库使用说明可参考 [https://blog.csdn.net/a82514921/article/detai
 
 支持指定一个或多个 jar/war 包，或一个或多个目录，或 jar/war 包与目录混合进行处理
 
-以上参数的处理依赖 java-callgraph2 中实现，可参考 [https://github.com/Adrninistrator/java-callgraph2](https://github.com/Adrninistrator/java-callgraph2)
+以上参数的处理依赖 java-callgraph2 中实现，可参考 [https://github.com/Adrninistrator/java-callgraph2)
 
 设置 JVM 参数“merge.class.in.jar.package”值为`_jacg_config/i_allowed_class_prefix.properties`配置文件中指定的信息，并以“#”作为多行数据的分隔符；
 

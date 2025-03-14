@@ -1,19 +1,4 @@
-# 1. jacg_allowed_class_prefix 允许处理的类名或包名前缀
-
-- 表名前缀
-
-jacg_allowed_class_prefix
-
-- 注释
-
-允许处理的类名或包名前缀
-
-|字段名|字段类型|字段大小|字段注释|
-|---|---|---|---|
-|record_id|INT|10|记录id，从1开始|
-|class_prefix|VARCHAR|255|类名或包名前缀|
-
-# 2. jacg_business_data 方法调用业务功能数据表
+# 1. jacg_business_data 方法调用业务功能数据表
 
 - 表名前缀
 
@@ -29,7 +14,7 @@ jacg_business_data
 |data_type|VARCHAR|30|数据类型，默认类型参考 BusinessDataTypeEnum 枚举类，也支持自定义类型|
 |data_value|TEXT|65535|数据内容，JSON字符串格式|
 
-# 3. jacg_class_annotation 类上的注解信息表
+# 2. jacg_class_annotation 类上的注解信息表
 
 - 表名前缀
 
@@ -49,7 +34,7 @@ jacg_class_annotation
 |attribute_value|TEXT|65535|注解属性值|
 |class_name|VARCHAR|255|完整类名|
 
-# 4. jacg_class_ext_impl_generics_type 类的继承或实现的泛型信息
+# 3. jacg_class_ext_impl_generics_type 类的继承或实现的泛型信息
 
 - 表名前缀
 
@@ -75,7 +60,7 @@ jacg_class_ext_impl_generics_type
 |class_name|VARCHAR|255|完整类名|
 |super_itf_class_name|VARCHAR|255|父类或接口的类名|
 
-# 5. jacg_class_info 类的信息表
+# 4. jacg_class_info 类的信息表
 
 - 表名前缀
 
@@ -97,7 +82,7 @@ jacg_class_info
 |jar_num|INT|10|类所在的Jar包序号|
 |class_path_in_jar|VARCHAR|300|类在jar包中的路径|
 
-# 6. jacg_class_name 类名信息表
+# 5. jacg_class_name 类名信息表
 
 - 表名前缀
 
@@ -114,7 +99,7 @@ jacg_class_name
 |simple_class_name|VARCHAR|255|唯一类名|
 |duplicate_class|TINYINT|3|是否存在同名类，1:是，0:否|
 
-# 7. jacg_class_reference 类的引用关系表
+# 6. jacg_class_reference 类的引用关系表
 
 - 表名前缀
 
@@ -132,7 +117,7 @@ jacg_class_reference
 |referenced_class_name|VARCHAR|255|被引用的完整类名|
 |referenced_simple_class_name|VARCHAR|255|被引用的唯一类名|
 
-# 8. jacg_class_signature_generics_type 类的签名中的泛型信息
+# 7. jacg_class_signature_generics_type 类的签名中的泛型信息
 
 - 表名前缀
 
@@ -151,7 +136,7 @@ jacg_class_signature_generics_type
 |generics_extends_class_name|VARCHAR|255|类的签名中的泛型的父类类名|
 |class_name|VARCHAR|255|完整类名|
 
-# 9. jacg_dup_class_info 重复同名类的信息表
+# 8. jacg_dup_class_info 重复同名类的信息表
 
 - 表名前缀
 
@@ -173,7 +158,7 @@ jacg_dup_class_info
 |jar_num|INT|10|类所在的Jar包序号|
 |class_path_in_jar|VARCHAR|300|类在jar包中的路径|
 
-# 10. jacg_dup_method_info 重复同名类的方法的信息表
+# 9. jacg_dup_method_info 重复同名类的方法的信息表
 
 - 表名前缀
 
@@ -200,7 +185,7 @@ jacg_dup_method_info
 |method_instructions_hash|VARCHAR|32|方法指令的HASH值（MD5），可能为空字符串|
 |jar_num|INT|10|方法所在的Jar包序号|
 
-# 11. jacg_enum_init_arg_field 枚举类构造函数参数与字段赋值关系表
+# 10. jacg_enum_init_arg_field 枚举类构造函数参数与字段赋值关系表
 
 - 表名前缀
 
@@ -220,7 +205,7 @@ jacg_enum_init_arg_field
 |class_name|VARCHAR|255|枚举类完整类名|
 |full_method|TEXT|65535|枚举类构造函数完整方法（类名+方法名+参数）|
 
-# 12. jacg_enum_init_assign_info 枚举类初始化赋值信息表
+# 11. jacg_enum_init_assign_info 枚举类初始化赋值信息表
 
 - 表名前缀
 
@@ -242,7 +227,7 @@ jacg_enum_init_assign_info
 |class_name|VARCHAR|255|枚举完整类名|
 |full_method|TEXT|65535|枚举类构造函数完整方法（类名+方法名+参数）|
 
-# 13. jacg_extends_impl 继承与实现相关信息表
+# 12. jacg_extends_impl 继承与实现相关信息表
 
 - 表名前缀
 
@@ -264,7 +249,7 @@ jacg_extends_impl
 |upward_simple_class_name|VARCHAR|255|父类或接口的唯一类名|
 |upward_class_name|VARCHAR|255|父类或接口的完整类名|
 
-# 14. jacg_field_annotation 字段上的注解信息表
+# 13. jacg_field_annotation 字段上的注解信息表
 
 - 表名前缀
 
@@ -285,7 +270,7 @@ jacg_field_annotation
 |attribute_value|TEXT|65535|注解属性值|
 |class_name|VARCHAR|255|完整类名|
 
-# 15. jacg_field_generics_type 非静态字段中涉及的泛型类型
+# 14. jacg_field_generics_type 非静态字段中涉及的泛型类型
 
 - 表名前缀
 
@@ -311,7 +296,7 @@ jacg_field_generics_type
 |generics_type|VARCHAR|255|非静态字段类型或其中的泛型类型类名|
 |class_name|VARCHAR|255|完整类名|
 
-# 16. jacg_field_info 字段信息表
+# 15. jacg_field_info 字段信息表
 
 - 表名前缀
 
@@ -338,7 +323,7 @@ jacg_field_info
 |exists_generics_type|TINYINT|3|是否存在泛型类型，1:是，0:否|
 |class_name|VARCHAR|255|完整类名|
 
-# 17. jacg_field_relationship 通过get/set方法关联的字段关系
+# 16. jacg_field_relationship 通过get/set方法关联的字段关系
 
 - 表名前缀
 
@@ -367,7 +352,7 @@ jacg_field_relationship
 |bean_util_call_id|INT|10|BeanUtil方法调用序号，从1开始|
 |bean_util_method|TEXT|65535|BeanUtil属性拷贝方法|
 
-# 18. jacg_get_method dto的get方法及字段
+# 17. jacg_get_method dto的get方法及字段
 
 - 表名前缀
 
@@ -391,7 +376,7 @@ dto的get方法及字段
 |method_hash|VARCHAR|30|方法hash+字节数|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 19. jacg_inner_class 内部类的信息表
+# 18. jacg_inner_class 内部类的信息表
 
 - 表名前缀
 
@@ -409,7 +394,7 @@ jacg_inner_class
 |outer_class_name|VARCHAR|255|外部类完整类名|
 |anonymous_class|TINYINT|3|是否为匿名内部类，1:是，0:否|
 
-# 20. jacg_jar_info jar文件信息表
+# 19. jacg_jar_info jar文件信息表
 
 - 表名前缀
 
@@ -434,7 +419,7 @@ jar文件信息表
 |inner_jar_file_name|VARCHAR|255|jar/war文件中的jar文件名|
 |import_time|DATETIME|23|导入时间|
 
-# 21. jacg_javacg2_config java-callgraph2组件使用的配置参数信息表
+# 20. jacg_javacg2_config java-callgraph2组件使用的配置参数信息表
 
 - 表名前缀
 
@@ -451,7 +436,7 @@ java-callgraph2组件使用的配置参数信息表
 |config_value|VARCHAR|255|配置参数值|
 |config_type|VARCHAR|10|配置参数类型|
 
-# 22. jacg_lambda_method_info Lambda表达式方法信息表
+# 21. jacg_lambda_method_info Lambda表达式方法信息表
 
 - 表名前缀
 
@@ -474,7 +459,7 @@ Lambda表达式方法信息表
 |lambda_next_is_intermediate|TINYINT|3|下一个被调用方法是否为Stream的intermediate（中间）操作，1:是，0:否|
 |lambda_next_is_terminal|TINYINT|3|下一个被调用方法是否为Stream的terminal（终端）操作，1:是，0:否|
 
-# 23. jacg_method_annotation 方法上的注解信息表
+# 22. jacg_method_annotation 方法上的注解信息表
 
 - 表名前缀
 
@@ -495,7 +480,7 @@ jacg_method_annotation
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 |simple_class_name|VARCHAR|255|唯一类名|
 
-# 24. jacg_method_arg_annotation 方法参数上的注解信息表
+# 23. jacg_method_arg_annotation 方法参数上的注解信息表
 
 - 表名前缀
 
@@ -517,7 +502,7 @@ jacg_method_arg_annotation
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 |simple_class_name|VARCHAR|255|唯一类名|
 
-# 25. jacg_method_arg_generics_type 方法参数泛型类型
+# 24. jacg_method_arg_generics_type 方法参数泛型类型
 
 - 表名前缀
 
@@ -544,7 +529,7 @@ jacg_method_arg_generics_type
 |generics_type|VARCHAR|255|方法参数类型或其中的泛型类型类名|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 26. jacg_method_argument 方法参数类型
+# 25. jacg_method_argument 方法参数类型
 
 - 表名前缀
 
@@ -568,7 +553,7 @@ jacg_method_argument
 |arg_type|VARCHAR|255|参数类型类名|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 27. jacg_method_call_info 方法调用信息表
+# 26. jacg_method_call_info 方法调用信息表
 
 - 表名前缀
 
@@ -590,7 +575,7 @@ jacg_method_call_info
 |value_type|VARCHAR|30|值的类型，含义参考 JavaCG2ConstantTypeEnum 类|
 |the_value|TEXT|65535|对应的值|
 
-# 28. jacg_method_call_method_call_return 方法调用使用方法调用返回值信息表
+# 27. jacg_method_call_method_call_return 方法调用使用方法调用返回值信息表
 
 - 表名前缀
 
@@ -613,7 +598,7 @@ jacg_method_call_method_call_return
 |callee_method_name|VARCHAR|300|被调用方，方法名|
 |callee_full_method|TEXT|65535|被调用方，完整方法（类名+方法名+参数）|
 
-# 29. jacg_method_call_static_field 方法调用使用静态字段信息表
+# 28. jacg_method_call_static_field 方法调用使用静态字段信息表
 
 - 表名前缀
 
@@ -636,7 +621,7 @@ jacg_method_call_static_field
 |class_name|VARCHAR|255|静态字段所在类完整类名|
 |field_type|VARCHAR|255|静态字段类型|
 
-# 30. jacg_method_call 方法调用关系表
+# 29. jacg_method_call 方法调用关系表
 
 - 表名前缀
 
@@ -670,7 +655,7 @@ jacg_method_call
 |callee_jar_num|INT|10|被调用方法Jar包序号|
 |description|VARCHAR|255|描述信息，默认为空|
 
-# 31. jacg_method_catch 方法的catch信息
+# 30. jacg_method_catch 方法的catch信息
 
 - 表名前缀
 
@@ -701,7 +686,7 @@ jacg_method_catch
 |catch_max_call_id|INT|10|catch代码块最大方法调用ID|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 32. jacg_method_finally 方法的finally信息
+# 31. jacg_method_finally 方法的finally信息
 
 - 表名前缀
 
@@ -724,7 +709,7 @@ jacg_method_finally
 |finally_start_line_number|INT|10|finally代码块开始代码行号|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 33. jacg_method_info 方法的信息表
+# 32. jacg_method_info 方法的信息表
 
 - 表名前缀
 
@@ -751,7 +736,7 @@ jacg_method_info
 |method_instructions_hash|VARCHAR|32|方法指令的HASH值（MD5），可能为空字符串|
 |jar_num|INT|10|方法所在的Jar包序号|
 
-# 34. jacg_method_line_number 方法代码行号信息表
+# 33. jacg_method_line_number 方法代码行号信息表
 
 - 表名前缀
 
@@ -771,7 +756,7 @@ jacg_method_line_number
 |max_line_number|INT|10|结束代码行号|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 35. jacg_method_return_arg_seq 方法返回值对应的方法参数序号信息表
+# 34. jacg_method_return_arg_seq 方法返回值对应的方法参数序号信息表
 
 - 表名前缀
 
@@ -789,7 +774,7 @@ jacg_method_return_arg_seq
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 |equivalent_conversion|TINYINT|3|是否返回等值转换前的方法参数，1:是，0:否|
 
-# 36. jacg_method_return_call_id 方法返回值对应的方法调用序号信息表
+# 35. jacg_method_return_call_id 方法返回值对应的方法调用序号信息表
 
 - 表名前缀
 
@@ -807,7 +792,7 @@ jacg_method_return_call_id
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 |equivalent_conversion|TINYINT|3|是否返回等值转换前的方法调用，1:是，0:否|
 
-# 37. jacg_method_return_const_value 方法返回的常量值（含null）
+# 36. jacg_method_return_const_value 方法返回的常量值（含null）
 
 - 表名前缀
 
@@ -826,7 +811,7 @@ jacg_method_return_const_value
 |const_value|TEXT|65535|常量的值|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 38. jacg_method_return_field_info 方法返回的字段（含枚举）
+# 37. jacg_method_return_field_info 方法返回的字段（含枚举）
 
 - 表名前缀
 
@@ -851,7 +836,7 @@ jacg_method_return_field_info
 |field_type|VARCHAR|255|方法返回的字段类型完整类名|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 39. jacg_method_return_generics_type 方法返回泛型类型
+# 38. jacg_method_return_generics_type 方法返回泛型类型
 
 - 表名前缀
 
@@ -877,7 +862,7 @@ jacg_method_return_generics_type
 |generics_type|VARCHAR|255|方法返回类型或其中的泛型类型类名|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 40. jacg_method_throw 方法中throw的异常信息
+# 39. jacg_method_throw 方法中throw的异常信息
 
 - 表名前缀
 
@@ -902,7 +887,7 @@ jacg_method_throw
 |call_id|INT|10|抛出异常属于方法调用返回值时，对应的方法调用ID|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 
-# 41. jacg_mybatis_ms_column MyBatis的Entity与数据库字段名信息（使用MySQL）
+# 40. jacg_mybatis_ms_column MyBatis的Entity与数据库字段名信息（使用MySQL）
 
 - 表名前缀
 
@@ -922,7 +907,7 @@ MyBatis的Entity与数据库字段名信息（使用MySQL）
 |xml_file_name|VARCHAR|255|MyBatis XML文件名|
 |xml_file_path|VARCHAR|500|MyBatis XML文件路径|
 
-# 42. jacg_mybatis_ms_entity MyBatis的Entity与Mapper、表名（使用MySQL）
+# 41. jacg_mybatis_ms_entity MyBatis的Entity与Mapper、表名（使用MySQL）
 
 - 表名前缀
 
@@ -941,6 +926,28 @@ MyBatis的Entity与Mapper、表名（使用MySQL）
 |mapper_class_name|VARCHAR|255|MyBatis Mapper完整类名|
 |entity_class_name|VARCHAR|255|MyBatis Entity类完整类名|
 |xml_file_name|VARCHAR|255|MyBatis XML文件名|
+|xml_file_path|VARCHAR|500|MyBatis XML文件路径|
+
+# 42. jacg_mybatis_ms_formated_sql MyBatis XML中格式化后的sql文本（使用MySQL）
+
+- 表名前缀
+
+jacg_mybatis_ms_formated_sql
+
+- 注释
+
+MyBatis XML中格式化后的sql文本（使用MySQL）
+
+|字段名|字段类型|字段大小|字段注释|
+|---|---|---|---|
+|record_id|INT|10|记录id，从1开始|
+|xml_file_name|VARCHAR|255|MyBatis XML文件名|
+|sql_id|VARCHAR|200|MyBatis XML中的sql id|
+|sql_seq|TINYINT|3|sql文本序号，从0开始|
+|xml_element_name|VARCHAR|15|XML元素名称，如select、insert、update等|
+|formated_sql|TEXT|65535|格式化后的sql文本|
+|mapper_simple_class_name|VARCHAR|255|MyBatis Mapper唯一类名|
+|mapper_class_name|VARCHAR|255|MyBatis Mapper完整类名|
 |xml_file_path|VARCHAR|500|MyBatis XML文件路径|
 
 # 43. jacg_mybatis_ms_get_set_db 使用MyBatis时get/set方法所关联的数据库信息（使用MySQL）

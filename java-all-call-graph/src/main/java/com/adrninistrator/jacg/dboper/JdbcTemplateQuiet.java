@@ -23,14 +23,14 @@ public class JdbcTemplateQuiet extends JdbcTemplate {
 
     @Override
     public <T> T queryForObject(String sql, Class<T> requiredType, @Nullable Object... args) throws DataAccessException {
-        List<T> results = query(sql, args, new RowMapperResultSetExtractor<>(getSingleColumnRowMapper(requiredType), 1));
+        List<T> results = query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(getSingleColumnRowMapper(requiredType), 1));
         return getSingleResult(results);
     }
 
     @Override
     @Nullable
     public <T> T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object... args) throws DataAccessException {
-        List<T> results = query(sql, args, new RowMapperResultSetExtractor<>(rowMapper, 1));
+        List<T> results = query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 1));
         return getSingleResult(results);
     }
 

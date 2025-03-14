@@ -12,6 +12,8 @@ import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
+import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
@@ -39,6 +41,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,7 +131,6 @@ public abstract class TestRunByCodeBase {
     }
 
     protected void writeDbSupportField() {
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_HANDLE_GET_SET_FIELD_RELATIONSHIP, Boolean.TRUE.toString());
         DbOperWrapper dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, this);
         try (DbOperator dbOperator = dbOperWrapper.getDbOperator()) {
             if (dbOperator.checkTableExists(DbTableInfoEnum.DTIE_GET_METHOD)) {
@@ -268,5 +270,54 @@ public abstract class TestRunByCodeBase {
         if (OutputDetailEnum.ODE_1.getDetail().equals(usedConfigureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, false))) {
             Assert.assertFalse(JavaCG2Util.isCollectionEmpty(callStackFileResult.getSeparateStackDirPathList()));
         }
+    }
+
+    /**
+     * 获取保存向下的方法调用链目录中的直接子目录数量
+     *
+     * @return
+     */
+    protected int getCallGraphDirNum4Er() {
+        return JACGFileUtil.findDirInCurrentDir(JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER).size();
+    }
+
+    /**
+     * 获取保存向上的方法调用链目录中的直接子目录数量
+     *
+     * @return
+     */
+    protected int getCallGraphDirNum4Ee() {
+        return JACGFileUtil.findDirInCurrentDir(JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLEE).size();
+    }
+
+    /**
+     * 检查指定列表中的元素的每个字段是否都有赋值
+     *
+     * @param list
+     * @return
+     */
+    protected boolean checkListDataAllFieldFilled(List<?> list) {
+        if (JavaCG2Util.isCollectionEmpty(list)) {
+            logger.error("列表为空");
+            return false;
+        }
+        Object firstObject = list.get(0);
+        Set<String> fieldNameSet = JACGClassMethodUtil.getNonStaticFieldNameSet(firstObject.getClass());
+        Set<String> notNullFieldNameSet = new HashSet<>();
+        for (Object object : list) {
+            Set<String> tmpNotNullFieldNameSet = JACGClassMethodUtil.getNonStaticNotNullFieldNameSet(object);
+            notNullFieldNameSet.addAll(tmpNotNullFieldNameSet);
+        }
+        if (fieldNameSet.size() == notNullFieldNameSet.size()) {
+            logger.info("每个字段都有赋值 {} {}", firstObject.getClass().getName(), fieldNameSet.size());
+            return true;
+        }
+        logger.error("不是每个字段都有赋值 {} {} {}", firstObject.getClass().getName(), fieldNameSet.size(), notNullFieldNameSet.size());
+        for (String fieldName : fieldNameSet) {
+            if (!notNullFieldNameSet.contains(fieldName)) {
+                logger.error("未被赋值的字段 {}", fieldName);
+            }
+        }
+        return false;
     }
 }

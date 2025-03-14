@@ -34,7 +34,6 @@ public class MyBatisMySqlWriteSqlInfoCodeParser extends AbstractSaveData2FilePar
     public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
     }
 
-    // 处理写操作语句及数据库表名
     public void handleMySQLWriteTableInfo(String mapperInterfaceName, String methodName, MySqlWriteTableInfo mySqlWriteTableInfo, String mybatisXmlFilePath) {
         try {
             JavaCG2FileUtil.write2FileWithTab(writer, mapperInterfaceName, methodName, mySqlWriteTableInfo.getMySqlStatementEnum().getInitials(),

@@ -56,10 +56,14 @@ public class JACGConstants {
 
     public static final String FLAG_MD_LINE_NUMBER = "调用链文件行号: ";
 
-    public static final String FLAG_EMPTY = "-empty";
+    public static final String FLAG_EMPTY = "!empty";
+    public static final String FLAG_NOT_FOUND = "!not_found";
 
-    public static final String EXT_EMPTY_TXT = FLAG_EMPTY + JavaCG2Constants.EXT_TXT;
-    public static final String EXT_EMPTY_MD = FLAG_EMPTY + JavaCG2Constants.EXT_MD;
+    public static final String EMPTY_TXT = FLAG_EMPTY + JavaCG2Constants.EXT_TXT;
+    public static final String EMPTY_MD = FLAG_EMPTY + JavaCG2Constants.EXT_MD;
+    public static final String NOT_FOUND_TXT = FLAG_NOT_FOUND + JavaCG2Constants.EXT_TXT;
+    public static final String NOT_FOUND_MD = FLAG_NOT_FOUND + JavaCG2Constants.EXT_MD;
+
     public static final String EXT_SQL = ".sql";
     public static final String EXT_CLASS = ".class";
     public static final String EXT_XML = ".xml";
@@ -84,9 +88,6 @@ public class JACGConstants {
 
     public static final String MYSQL_FLAG = "mysql";
     public static final String MYSQL_REWRITEBATCHEDSTATEMENTS = "rewriteBatchedStatements=true";
-
-    // 代表不存在循环的方法调用的值
-    public static final int NO_CYCLE_CALL_FLAG = -1;
 
     // 允许使用的最大线程数
     public static final int MAX_THREAD_NUM = 1000;
@@ -114,8 +115,10 @@ public class JACGConstants {
     // 调用链搜索文件文件中，代表未处理数据序号值
     public static final int DATA_SEQ_NONE = -1;
 
-    // 向下的方法完整调用链文件名，使用"@"进行分隔后最小的列数
-    public static final int CALLER_FILE_NAME_SPLIT_BY_AT_MIN_COLUMNS = 3;
+    // 向下的方法完整调用链文件名，使用"@"进行分隔后的列数，1列
+    public static final int CALL_GRAPH_FILE_NAME_COLUMNS_1 = 1;
+    // 向下的方法完整调用链文件名，使用"@"进行分隔后的列数，3列
+    public static final int CALL_GRAPH_FILE_NAME_COLUMNS_3 = 3;
 
     // 方法调用表序号，代表非法的值
     public static final int METHOD_CALL_ID_ILLEGAL = -1;

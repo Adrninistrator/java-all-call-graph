@@ -9,31 +9,36 @@ import java.util.List;
  */
 public class MethodDetail extends ClassAndMethodName {
     // 完整方法
-    private final String fullMethod;
+    private String fullMethod;
 
     // 参数类型字符串（不包含括号）
-    private final String argTypeStr;
+    private String argTypeStr;
 
     // 参数类型数组（不可修改）
-    private final List<String> argTypeList;
-
-    public MethodDetail(String fullMethod, String className, String methodName, String argTypeStr, List<String> argTypeList) {
-        super(className, methodName);
-        this.fullMethod = fullMethod;
-        this.argTypeStr = argTypeStr;
-        this.argTypeList = argTypeList;
-    }
+    private List<String> argTypeList;
 
     public String getFullMethod() {
         return fullMethod;
+    }
+
+    public void setFullMethod(String fullMethod) {
+        this.fullMethod = fullMethod;
     }
 
     public String getArgTypeStr() {
         return argTypeStr;
     }
 
+    public void setArgTypeStr(String argTypeStr) {
+        this.argTypeStr = argTypeStr;
+    }
+
     public List<String> getArgTypeList() {
         return argTypeList;
+    }
+
+    public void setArgTypeList(List<String> argTypeList) {
+        this.argTypeList = argTypeList;
     }
 
     @Override

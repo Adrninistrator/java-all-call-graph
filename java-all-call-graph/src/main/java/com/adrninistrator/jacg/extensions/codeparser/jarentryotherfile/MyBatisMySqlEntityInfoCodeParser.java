@@ -34,7 +34,6 @@ public class MyBatisMySqlEntityInfoCodeParser extends AbstractSaveData2FileParse
     public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
     }
 
-    // 处理Entity与Mapper、表名
     public void handleMyBatisMySqlInfo(MyBatisMySqlInfo myBatisMySqlInfo, String mybatisXmlFilePath) {
         try {
             String mapperInterfaceName = myBatisMySqlInfo.getMapperInterfaceName();

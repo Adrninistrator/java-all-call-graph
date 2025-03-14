@@ -39,7 +39,6 @@ public class MyBatisMySqlColumnInfoCodeParser extends AbstractSaveData2FileParse
     public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
     }
 
-    // 处理Entity与数据库字段名
     public void handleMyBatisMySqlInfo(MyBatisMySqlInfo myBatisMySqlInfo, String mybatisXmlFilePath) {
         try {
             String entityClassName = myBatisMySqlInfo.getEntityClassName();

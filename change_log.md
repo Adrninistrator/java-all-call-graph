@@ -857,3 +857,69 @@ public class TestReflectionUtil1 {
 复制 java-callgraph2 组件中的配置文件
 
 复制 test 模块依赖组件的 jar 文件更准确
+
+## 1.30. (3.0.3)
+
+### 1.30.1. 删除配置参数
+
+#### 1.30.1.1. _jacg_config/config.properties
+
+```
+# 解析 jar 包时，是否对。xml、.properties 等其他格式的文件进行解析，false: 不解析，true: 解析
+parse.other.type.file=true
+
+# 解析 jar 包时，是否处理通过 get/set 方法关联的字段关联关系，false: 不处理，true: 处理
+handle.get.set.field.relationship=false
+```
+
+java-callgraph2 相关的配置参数改为直接在 java-callgraph2 中指定
+
+### 1.30.2. 增加配置参数
+
+```
+# 生成调用链时，是否需要将调用链数据写入文件
+call.graph.write.to.file=true
+
+# 生成调用链时，是否需要在内存中返回调用链数据
+# 不能与 call.graph.write.to.file 开关同时设置为 false
+# _jacg_config/method_class_4caller.properties 或 _jacg_config/method_class_4callee.properties 配置文件中只能一个需要处理的方法
+# 设置为 true 时，可通过 gen.call.graph.num.limit 开关设置允许生成的方法调用数量限制
+call.graph.return.in.memory=false
+
+# 生成调用链时，文件名是否使用更短的模式，以避免超过 Windows 文件系统支持的长度
+# 若是，则文件名仅包含对应方法的 HASH+长度；若否，则文件名还会包含方法的唯一类名及方法名
+call.graph.file.short.mode=false
+```
+
+### 1.30.3. 增加功能
+
+- 生成调用链时，支持在内存中返回调用链数据
+
+参考以下方法
+
+```
+test.runbycodemain.TestRBCRunnerGenAllGraph4Callee#testReturnInMemory
+test.runbycodemain.TestRBCRunnerGenAllGraph4Caller#testReturnInMemory
+```
+
+配置参数如上
+
+- 生成调用链时，文件名支持使用更短的模式
+
+生成的调用链文件名为 {方法 HASH+长度}.txt
+
+配置参数如上
+
+### 1.30.4. 生成调用链优化
+
+生成方法完整调用链时，假如指定的类或方法不存在，也不会报错
+
+当生成的方法调用链为空（向下或向上没有被调用方法或调用方法）时，调用链文件（排除文件后缀）以“!empty”结尾
+
+当指定的类或方法不存在时，调用链文件（排除文件后缀）以“!not_found”结尾
+
+### 1.30.5. 增加数据库表
+
+#### 1.30.5.1. jacg_mybatis_ms_formated_sql
+
+MyBatis XML 中格式化后的 sql 文本（使用 MySQL）
