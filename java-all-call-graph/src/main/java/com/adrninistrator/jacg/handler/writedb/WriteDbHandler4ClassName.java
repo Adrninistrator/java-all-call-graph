@@ -18,9 +18,9 @@ import java.util.Set;
  */
 @JACGWriteDbHandler(
         readFile = false,
-        dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_NAME,
-        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_CLASS_REFERENCE}
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_NAME
 )
+// dependsWriteDbTableEnums 不能指定 DbTableInfoEnum.DTIE_CLASS_REFERENCE ，因为两个表不是先后写入
 public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData4ClassName> {
     public WriteDbHandler4ClassName(WriteDbResult writeDbResult) {
         super(writeDbResult);

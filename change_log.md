@@ -923,3 +923,12 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4Caller#testReturnInMemory
 #### 1.30.5.1. jacg_mybatis_ms_formated_sql
 
 MyBatis XML 中格式化后的 sql 文本（使用 MySQL）
+
+## 1.31. (3.0.4)
+
+修复bug
+
+```log
+ERROR AbstractWriteDbHandler.handle(500) - 出现异常 WriteDbHandler4ClassReference 
+com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException: 当前类依赖的数据库表还未写入 WriteDbHandler4ClassName DTIE_CLASS_REFERENCE
+```
