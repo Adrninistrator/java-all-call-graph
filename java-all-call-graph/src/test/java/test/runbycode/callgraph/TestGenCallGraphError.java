@@ -14,7 +14,7 @@ import test.runbycode.base.TestRunByCodeBase;
  * @date 2025/3/2
  * @description:
  */
-public class TestGenCallGraph extends TestRunByCodeBase {
+public class TestGenCallGraphError extends TestRunByCodeBase {
 
     @Test
     public void testError1() {

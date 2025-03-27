@@ -43,6 +43,10 @@ public class TestRBCRunnerGenAllGraph4Callee extends TestRunByCodeBase {
             desc = {"方法调用链数据不写入文件"})
     @Test
     public void testReturnInMemory() {
+        doTestReturnInMemory();
+    }
+
+    public List<MethodCallLineData4Ee> doTestReturnInMemory() {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE, Boolean.FALSE.toString());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY, Boolean.TRUE.toString());
 
@@ -57,12 +61,17 @@ public class TestRBCRunnerGenAllGraph4Callee extends TestRunByCodeBase {
         List<MethodCallLineData4Ee> allMethodCallLineData4EeList = runnerGenAllGraph4Callee.getAllMethodCallLineData4EeList();
         printListContent(allMethodCallLineData4EeList);
         Assert.assertFalse(JavaCG2Util.isCollectionEmpty(allMethodCallLineData4EeList));
+        return allMethodCallLineData4EeList;
     }
 
     @JACGExample(title = "方法调用链数据写入文件，也在内存中返回",
             desc = {})
     @Test
     public void testBoth() {
+        doTestBoth();
+    }
+
+    public List<MethodCallLineData4Ee> doTestBoth() {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE, Boolean.TRUE.toString());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY, Boolean.TRUE.toString());
 
@@ -77,5 +86,6 @@ public class TestRBCRunnerGenAllGraph4Callee extends TestRunByCodeBase {
         List<MethodCallLineData4Ee> allMethodCallLineData4EeList = runnerGenAllGraph4Callee.getAllMethodCallLineData4EeList();
         printListContent(allMethodCallLineData4EeList);
         Assert.assertFalse(JavaCG2Util.isCollectionEmpty(allMethodCallLineData4EeList));
+        return allMethodCallLineData4EeList;
     }
 }

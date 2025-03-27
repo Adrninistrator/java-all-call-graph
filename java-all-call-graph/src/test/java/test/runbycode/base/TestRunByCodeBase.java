@@ -320,4 +320,12 @@ public abstract class TestRunByCodeBase {
         }
         return false;
     }
+
+    public void setJavaCG2ConfigureWrapper(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper) {
+        this.javaCG2ConfigureWrapper = javaCG2ConfigureWrapper;
+    }
+
+    public void setConfigureWrapper(ConfigureWrapper configureWrapper) {
+        this.configureWrapper = configureWrapper;
+    }
 }

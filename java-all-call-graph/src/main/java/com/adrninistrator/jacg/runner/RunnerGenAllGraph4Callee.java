@@ -417,8 +417,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         }
 
         // 生成方法调用链每行数据字符串
-        methodCallLineStr.append(genMethodCallLineStr(methodCallLineData4Ee));
-        methodCallLineStr.append(JavaCG2Constants.NEW_LINE);
+        methodCallLineStr.append(genMethodCallLineStr(methodCallLineData4Ee)).append(JavaCG2Constants.NEW_LINE);
         if (callGraphWriter != null) {
             callGraphWriter.write(methodCallLineStr.toString());
         }
@@ -569,10 +568,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             methodCallLineData4Ee.setCycleCallLevel(cycleCallLevel);
 
             // 生成调用方法信息（包含方法注解信息等）
-            if (callGraphWriteToFile) {
-                // 方法调用链当前行的数据记录到列表
-                methodCallLineData4EeList.add(methodCallLineData4Ee);
-            }
+            // 无论方法调用链是否写文件，都需要添加
+            methodCallLineData4EeList.add(methodCallLineData4Ee);
             if (callGraphReturnInMemory) {
                 // 方法调用链当前行的数据记录到用于返回的列表
                 allMethodCallLineData4EeList.add(methodCallLineData4Ee);
@@ -874,7 +871,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             return;
         }
 
-        StringBuilder callGraphInfo = new StringBuilder();
+        StringBuilder callGraphInfo = callGraphWriteToFile ? new StringBuilder() : null;
         // 记录所有的调用方法
         int callerMethodListSize = methodCallLineData4EeList.size();
         for (int i = 0; i < callerMethodListSize; i++) {
@@ -883,12 +880,16 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                 // 对入口方法设置标志
                 methodCallLineData4Ee.setEntryMethod(true);
             }
-            // 生成方法调用链每行数据字符串
-            callGraphInfo.append(genMethodCallLineStr(methodCallLineData4Ee));
-            callGraphInfo.append(JavaCG2Constants.NEW_LINE);
+            String lineData = genMethodCallLineStr(methodCallLineData4Ee);
+            if (callGraphInfo != null) {
+                // 生成方法调用链每行数据字符串
+                callGraphInfo.append(lineData).append(JavaCG2Constants.NEW_LINE);
+            }
+        }
+        if (callGraphInfo != null) {
+            callGraphWriter.write(callGraphInfo.toString());
         }
         methodCallLineData4EeList.clear();
-        callGraphWriter.write(callGraphInfo.toString());
     }
 
     // 查询当前节点的一个上层调用方法
@@ -1049,7 +1050,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         markdownWriter.addCodeBlock();
     }
 
-    // 生成方法调用链每行数据字符串，生成向上的方法调用链时使用
+    // 生成方法调用链每行数据字符串
     @Override
     protected String genMethodCallLineStr(MethodCallLineData methodCallLineData) {
         MethodCallLineData4Ee methodCallLineData4Ee = (MethodCallLineData4Ee) methodCallLineData;

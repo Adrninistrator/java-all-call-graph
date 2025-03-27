@@ -434,8 +434,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             }
 
             // 生成方法调用链每行数据字符串
-            methodCallLineStr.append(genMethodCallLineStr(methodCallLineData4Er));
-            methodCallLineStr.append(JavaCG2Constants.NEW_LINE);
+            methodCallLineStr.append(genMethodCallLineStr(methodCallLineData4Er)).append(JavaCG2Constants.NEW_LINE);
             if (callGraphWriter != null) {
                 callGraphWriter.write(methodCallLineStr.toString());
             }
@@ -638,10 +637,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 continue;
             }
 
-            if (callGraphWriteToFile) {
-                // 方法调用链当前行的数据记录到列表
-                methodCallLineData4ErList.add(methodCallLineData4Er);
-            }
+            // 无论方法调用链是否写文件，都需要添加
+            methodCallLineData4ErList.add(methodCallLineData4Er);
             if (callGraphReturnInMemory) {
                 // 方法调用链当前行的数据记录到用于返回的列表
                 allMethodCallLineData4ErList.add(methodCallLineData4Er);
@@ -936,9 +933,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     private boolean handleCalleeEmptyResult(ListAsStack<CallGraphNode4Caller> callGraphNode4CallerStack, ListAsStack<ChildCallSuperInfo> childCallSuperInfoStack,
                                             ListAsStack<Set<String>> recordedCalleeStack, int calleeMethodNum, BufferedWriter callGraphWriter,
                                             List<MethodCallLineData4Er> methodCallLineData4ErList) throws IOException {
-        if (callGraphWriteToFile && calleeMethodNum == 0 && !methodCallLineData4ErList.isEmpty()) {
-            // 调用链数据需要生成文件，且当前方法向下没有调用其他方法
-            StringBuilder callGraphInfo = new StringBuilder();
+        if (calleeMethodNum == 0 && !methodCallLineData4ErList.isEmpty()) {
+            // 当前方法向下没有调用其他方法
+            StringBuilder callGraphInfo = callGraphWriteToFile ? new StringBuilder() : null;
             int calleeMethodListSize = methodCallLineData4ErList.size();
             for (int i = 0; i < calleeMethodListSize; i++) {
                 MethodCallLineData4Er methodCallLineData4Er = methodCallLineData4ErList.get(i);
@@ -947,11 +944,15 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                     methodCallLineData4Er.setNoDownwardCallee(true);
                 }
                 // 生成方法调用链每行数据字符串
-                callGraphInfo.append(genMethodCallLineStr(methodCallLineData4Er));
-                callGraphInfo.append(JavaCG2Constants.NEW_LINE);
+                String lineData = genMethodCallLineStr(methodCallLineData4Er);
+                if (callGraphInfo != null) {
+                    callGraphInfo.append(lineData).append(JavaCG2Constants.NEW_LINE);
+                }
             }
-            // 将方法调用内容写入文件
-            callGraphWriter.write(callGraphInfo.toString());
+            if (callGraphInfo != null) {
+                // 将方法调用内容写入文件
+                callGraphWriter.write(callGraphInfo.toString());
+            }
             methodCallLineData4ErList.clear();
         }
 

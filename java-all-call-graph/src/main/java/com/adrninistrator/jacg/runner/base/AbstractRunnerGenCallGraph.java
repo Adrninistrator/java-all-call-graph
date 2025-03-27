@@ -180,7 +180,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     /**
-     * 根据方法调用链每行的数据生成对应字符串
+     * 根据方法调用链每行的数据生成对应字符串，调用链不写入文件时也需要调用，否则内存中的相关数据也不会被写入
      *
      * @param methodCallLineData 方法调用链当前行的数据
      * @return
@@ -322,8 +322,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             }
         }
 
-        // 打印当前使用的配置信息
-        printAllConfigInfo();
+        if (callGraphWriteToFile) {
+            // 打印当前使用的配置信息
+            printAllConfigInfo();
+        }
         return true;
     }
 
@@ -1230,19 +1232,23 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                                          List<? extends MethodCallLineData> methodCallLineDataList) throws IOException {
         logger.warn("当前方法的记录数已达到限制，不再生成 {} {}", entryMethod, recordNum);
         genCallGraphNumExceedMethodList.add(entryMethod);
-        if (!callGraphWriteToFile || JavaCG2Util.isCollectionEmpty(methodCallLineDataList)) {
-            // 调用链数据不需要生成文件，或列表为空时，不需要写入文件
+        if (JavaCG2Util.isCollectionEmpty(methodCallLineDataList)) {
+            // 列表为空时，不需要写入文件
             return;
         }
 
-        // 将剩余的调用方法信息写入文件
-        StringBuilder callGraphInfo = new StringBuilder();
+        StringBuilder callGraphInfo = callGraphWriteToFile ? new StringBuilder() : null;
         for (MethodCallLineData methodCallLineData : methodCallLineDataList) {
             // 生成方法调用链每行数据字符串
-            callGraphInfo.append(genMethodCallLineStr(methodCallLineData));
-            callGraphInfo.append(JavaCG2Constants.NEW_LINE);
+            String lineData = genMethodCallLineStr(methodCallLineData);
+            if (callGraphInfo != null) {
+                callGraphInfo.append(lineData).append(JavaCG2Constants.NEW_LINE);
+            }
         }
-        writer.write(callGraphInfo.toString());
+        if (callGraphInfo != null) {
+            // 将剩余的调用方法信息写入文件
+            writer.write(callGraphInfo.toString());
+        }
     }
 
     // 结束前的处理

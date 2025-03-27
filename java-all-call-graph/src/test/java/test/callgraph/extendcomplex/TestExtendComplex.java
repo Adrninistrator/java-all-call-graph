@@ -1,5 +1,7 @@
 package test.callgraph.extendcomplex;
 
+import test.callgraph.annotation.MethodWithAnnotation;
+
 /**
  * @author adrninistrator
  * @date 2022/9/11
@@ -46,6 +48,8 @@ public class TestExtendComplex {
         for (AbstractSuperClassB superClassB22 : superClassB22Array) {
             superClassB22.entryA();
         }
+
+        new MethodWithAnnotation().test1();
     }
 
     public void test2() {

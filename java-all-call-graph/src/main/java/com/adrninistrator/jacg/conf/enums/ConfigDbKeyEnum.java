@@ -72,7 +72,7 @@ public enum ConfigDbKeyEnum implements MainConfigInterface {
     }
 
     @Override
-    public boolean notBlank() {
+    public boolean isNotBlank() {
         return notBlank;
     }
 

@@ -113,7 +113,7 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     }
 
     @Override
-    public boolean notBlank() {
+    public boolean isNotBlank() {
         return notBlank;
     }
 

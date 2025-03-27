@@ -926,9 +926,13 @@ MyBatis XML 中格式化后的 sql 文本（使用 MySQL）
 
 ## 1.31. (3.0.4)
 
-修复bug
+修复 bug
 
 ```log
 ERROR AbstractWriteDbHandler.handle(500) - 出现异常 WriteDbHandler4ClassReference 
 com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException: 当前类依赖的数据库表还未写入 WriteDbHandler4ClassName DTIE_CLASS_REFERENCE
 ```
+
+## 1.32. (3.0.5)
+
+优化 _jacg_config/config.properties 配置文件参数 call.graph.write.to.file=false，call.graph.return.in.memory=true 时返回的内存中的方法调用链不包含方法注解的问题

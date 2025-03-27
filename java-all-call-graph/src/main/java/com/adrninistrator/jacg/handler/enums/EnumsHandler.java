@@ -8,7 +8,6 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
-import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -67,7 +66,7 @@ public class EnumsHandler extends BaseHandler {
     public String queryEnumConstantFieldMethodReturnValue(String enumClassName, String enumConstName, String enumFullMethod) {
         // 判断是否返回了枚举的name()方法
         if (enumFullMethod.endsWith(JACGCommonNameConstants.ENUM_METHOD_NAME)) {
-            return JavaCG2ClassMethodUtil.formatClassAndField(enumClassName, enumConstName);
+            return enumConstName;
         }
 
         String methodReturnFieldName = methodInfoHandler.queryMethodReturnFieldName(enumFullMethod);
