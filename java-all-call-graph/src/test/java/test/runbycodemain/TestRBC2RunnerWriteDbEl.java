@@ -68,18 +68,38 @@ public class TestRBC2RunnerWriteDbEl extends TestRunByCodeBase {
         Assert.assertTrue(runnerWriteDb.run());
     }
 
-    @JACGExample(title = "仅解析指定路径下的jar文件",
+    @JACGExample(title = "仅解析jar文件中指定路径下的jar文件",
             desc = {"通过表达式实现，当jar文件的目录名称为'lib'时跳过",
                     "需要先执行以下命令生成包含jar文件的jar文件",
                     "gradlew gen_run_jar",
                     "gradlew gen_jar_in_jar"})
     @Test
-    public void testElOnlyParseSomeJar() {
+    public void testElOnlyParseSomeJarInJar() {
         javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, "build/jar_output_dir.jar");
         // java-callgraph2表达式开启调试
         javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_EL_DEBUG_MODE, Boolean.TRUE.toString());
         javaCG2ConfigureWrapper.setElConfigText(JavaCG2ElConfigEnum.ECE_MERGE_FILE_IGNORE_JAR_IN_JAR_WAR,
                 JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_DIR_PATH_IN_JAR_WAR.getVariableName() + "=='lib'"
+        );
+
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
+        // jar文件未发生变化时也强制重新解析后写入数据库
+        runnerWriteDb.setSkipWhenNotModified(false);
+        Assert.assertTrue(runnerWriteDb.run());
+    }
+
+    @JACGExample(title = "仅解析war文件中指定路径下的jar文件",
+            desc = {"通过表达式实现，当jar文件的目录名称为'WEB-INF/lib'时跳过",
+                    "需要先执行以下命令生成包含jar文件的war文件",
+                    "gradlew gen_run_jar",
+                    "gradlew gen_jar_in_war"})
+    @Test
+    public void testElOnlyParseSomeJarInWar() {
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, "build/jar_output_dir.war");
+        // java-callgraph2表达式开启调试
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_EL_DEBUG_MODE, Boolean.TRUE.toString());
+        javaCG2ConfigureWrapper.setElConfigText(JavaCG2ElConfigEnum.ECE_MERGE_FILE_IGNORE_JAR_IN_JAR_WAR,
+                JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_DIR_PATH_IN_JAR_WAR.getVariableName() + "=='WEB-INF/lib'"
         );
 
         RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);

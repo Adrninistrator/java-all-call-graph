@@ -110,6 +110,50 @@ task test_gen_diff_tar_gz(type: Tar) {
 }
 
 /*
+    生成包含jar文件的jar文件
+    需要先执行 gradlew gen_run_jar 命令
+ */
+tasks.register('gen_jar_in_jar', Jar) {
+    archiveFileName = 'jar_output_dir.jar'
+    destinationDirectory = file('build')
+
+    from(sourceSets.test.output) {
+        include 'test/**'
+        into '/'
+    }
+
+    from(fileTree('jar_output_dir/jar')) {
+        into 'jar'
+    }
+
+    from(fileTree('jar_output_dir/lib')) {
+        into 'lib'
+    }
+}
+
+/*
+    生成包含jar文件的war文件
+    需要先执行 gradlew gen_run_jar 命令
+ */
+tasks.register('gen_jar_in_war', Jar) {
+    archiveFileName = 'jar_output_dir.war'
+    destinationDirectory = file('build')
+
+    from(sourceSets.test.output) {
+        include 'test/**'
+        into '/'
+    }
+
+    from(fileTree('jar_output_dir/jar')) {
+        into 'jar'
+    }
+
+    from(fileTree('jar_output_dir/lib')) {
+        into 'WEB-INF/lib'
+    }
+}
+
+/*
     测试代码生成jar包
     gradlew test_gen_jar
 
@@ -120,6 +164,14 @@ task test_gen_diff_tar_gz(type: Tar) {
     生成用于比较的示例jar包的tar.gz包
     gradlew test_gen_diff_tar_gz -Pexample_flag=1
     gradlew test_gen_diff_tar_gz -Pexample_flag=2
+
+    生成包含jar文件的jar文件
+    gradlew gen_run_jar
+    gradlew gen_jar_in_jar
+
+    生成包含jar文件的war文件
+    gradlew gen_run_jar
+    gradlew gen_jar_in_war
 
     使用Gradle执行单元测试时，假如需要将日志中的输出记录到文件，使用以下命令：
     gradlew test -Dtest.flag.record.log.to.file=1
