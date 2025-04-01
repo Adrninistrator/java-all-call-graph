@@ -141,11 +141,7 @@ tasks.register('gen_jar_in_war', Jar) {
 
     from(sourceSets.test.output) {
         include 'test/**'
-        into '/'
-    }
-
-    from(fileTree('jar_output_dir/jar')) {
-        into 'jar'
+        into 'WEB-INF/classes'
     }
 
     from(fileTree('jar_output_dir/lib')) {
