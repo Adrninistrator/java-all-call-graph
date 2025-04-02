@@ -5,8 +5,8 @@ import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
-import test.callgraph.diffjar.controller.TestController1;
 import test.callgraph.empty.TestNoMethodClass1;
+import test.callgraph.spring.mvc.TestSpringController1;
 import test.runbycode.base.TestRunByCodeBase;
 
 /**
@@ -22,7 +22,7 @@ public class TestRBCRunnerGenAllGraph4CalleeEmpty extends TestRunByCodeBase {
     @Test
     public void test() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                TestController1.class.getName() + ":get1()",
+                TestSpringController1.class.getName() + ":get1()",
                 TestNoMethodClass1.class.getName()
         );
         Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapper).run());

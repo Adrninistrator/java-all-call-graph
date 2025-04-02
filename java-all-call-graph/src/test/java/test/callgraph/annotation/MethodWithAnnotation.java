@@ -20,7 +20,7 @@ import test.callgraph.methodreturn.TestMethodReturnGenericsType1;
         clazz1 = DbOperator.class,
         enum1 = ConfigKeyEnum.CKE_APP_NAME,
         annotation1 = @TestAnnotationInner(valueA = "Cva1", valueB = "Cvb1"))
-public class MethodWithAnnotation {
+public class MethodWithAnnotation extends TestParentClass1 {
 
     @TestAnnotation(
             strValue = "bbb\r\n",
@@ -75,5 +75,15 @@ public class MethodWithAnnotation {
     @Override
     public MethodWithAnnotation clone() {
         return new MethodWithAnnotation();
+    }
+
+    private void useClone() {
+        Object object1 = this.clone();
+        TestParentClass1 testParentClass1 = this.clone();
+        MethodWithAnnotation methodWithAnnotation1 = this.clone();
+
+        System.out.println(object1.hashCode());
+        System.out.println(testParentClass1.hashCode());
+        System.out.println(methodWithAnnotation1.hashCode());
     }
 }

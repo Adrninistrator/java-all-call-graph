@@ -47,8 +47,9 @@ jacocoTestReport {
 }
 
 // 将测试代码生成jar包
-task test_gen_jar(type: Jar) {
+tasks.register('test_gen_jar', Jar) {
     archiveFileName.set('test.jar')
+    destinationDirectory = file("${buildDir}")
     from(sourceSets.test.output) {
         include 'test/callgraph/**'
         exclude 'test/callgraph/otherjar/**'
@@ -58,15 +59,25 @@ task test_gen_jar(type: Jar) {
         include 'applicationContext.xml'
         into 'resources/'
     }
+    doLast {
+        copy {
+            from "${buildDir}/test.jar"
+            into "${buildDir}/test_jar_1/"
+        }
+        copy {
+            from "${buildDir}/test.jar"
+            into "${buildDir}/test_jar_2/"
+        }
+    }
 }
 
 // 拷贝对应的java代码
-task test_copy_example() {
+tasks.register('test_copy_example') {
     doFirst {
         def exampleFlag = project.properties.get("example_flag")
         if (exampleFlag != null) {
             println 'example_flag: ' + exampleFlag
-            delete 'src/test/java/test/callgraph/diffjar'
+            delete 'src/test/java/test/diffjar'
             def exampleDir = 'src/test/resources/java_example/example_' + exampleFlag + '/diffjar'
             def javaExampleDirs = new File("${exampleDir}").listFiles().findAll { File f -> (f.isDirectory()) }
             javaExampleDirs.each { javaExampleDir ->
@@ -74,7 +85,7 @@ task test_copy_example() {
                 println 'dir_name: ' + dirName
                 copy {
                     from "${exampleDir}/" + dirName
-                    into 'src/test/java/test/callgraph/diffjar/' + dirName
+                    into 'src/test/java/test/diffjar/' + dirName
                 }
             }
         }
@@ -84,29 +95,51 @@ task test_copy_example() {
 compileTestJava.dependsOn(test_copy_example)
 
 // 将用于比较的测试代码生成jar包
-task test_gen_diff_jar(type: Jar) {
+tasks.register('test_gen_diff_jar', Jar) {
     def exampleFlag = project.properties.get("example_flag")
-    def jarName = 'jar-diff-version-' + exampleFlag + '/jar-diff-' + exampleFlag + '.jar'
+    def jarName = 'jar-diff-version-' + exampleFlag + '/jar-diff.jar'
     archiveFileName.set("${jarName}")
+    destinationDirectory = file("${buildDir}")
     doFirst {
         println 'example_flag: ' + exampleFlag + ' jarName: ' + jarName
-        delete 'build/libs' + jarName
+        delete "${buildDir}/" + jarName
     }
     from(sourceSets.test.output) {
-        include 'test/callgraph/diffjar/**'
+        include 'test/diffjar/**'
         into '/'
     }
 }
 
+// 将用于比较的测试代码生成jar包，包含一个相同的jar包
+tasks.register('test_gen_diff_jar_with_same', Jar) {
+    def exampleFlag = project.properties.get("example_flag")
+    def jarName = 'jar-diff-with-same-' + exampleFlag + '/jar-diff.jar'
+    archiveFileName.set("${jarName}")
+    destinationDirectory = file("${buildDir}")
+    doFirst {
+        println 'example_flag: ' + exampleFlag + ' jarName: ' + jarName
+        delete "${buildDir}/" + jarName
+    }
+    from(sourceSets.test.output) {
+        include 'test/diffjar/**'
+        into '/'
+    }
+    copy {
+        from "${buildDir}/test.jar"
+        into "${buildDir}/jar-diff-with-same-" + exampleFlag + "/"
+    }
+}
+
 // 将jar-diff-version-目录的文件生成tar.gz包
-task test_gen_diff_tar_gz(type: Tar) {
+tasks.register('test_gen_diff_tar_gz', Tar) {
     dependsOn test_gen_diff_jar
     compression = Compression.GZIP
+    destinationDirectory = layout.buildDirectory.dir("${buildDir}")
     def exampleFlag = project.properties.get("example_flag")
     // 若使用archiveBaseName，则生成的文件包中会包含“-当前版本号”
     archiveFileName.set("jar-diff-version-" + exampleFlag + ".tar.gz")
     destinationDirectory.set(file("${buildDir}/test_diff_tar_gz"))
-    from('build/libs/jar-diff-version-' + exampleFlag)
+    from("${buildDir}/jar-diff-version-" + exampleFlag)
 }
 
 /*
@@ -115,7 +148,7 @@ task test_gen_diff_tar_gz(type: Tar) {
  */
 tasks.register('gen_jar_in_jar', Jar) {
     archiveFileName = 'jar_output_dir.jar'
-    destinationDirectory = file('build')
+    destinationDirectory = file("${buildDir}")
 
     from(sourceSets.test.output) {
         include 'test/**'
@@ -137,7 +170,7 @@ tasks.register('gen_jar_in_jar', Jar) {
  */
 tasks.register('gen_jar_in_war', Jar) {
     archiveFileName = 'jar_output_dir.war'
-    destinationDirectory = file('build')
+    destinationDirectory = file("${buildDir}")
 
     from(sourceSets.test.output) {
         include 'test/**'
@@ -160,6 +193,10 @@ tasks.register('gen_jar_in_war', Jar) {
     生成用于比较的示例jar包的tar.gz包
     gradlew test_gen_diff_tar_gz -Pexample_flag=1
     gradlew test_gen_diff_tar_gz -Pexample_flag=2
+
+    生成用于比较的示例jar包的tar.gz包，包含一个相同的jar包
+    gradlew test_gen_diff_jar_with_same -Pexample_flag=1
+    gradlew test_gen_diff_jar_with_same -Pexample_flag=2
 
     生成包含jar文件的jar文件
     gradlew gen_run_jar

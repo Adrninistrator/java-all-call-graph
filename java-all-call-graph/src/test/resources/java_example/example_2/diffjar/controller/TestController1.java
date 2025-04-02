@@ -1,4 +1,4 @@
-package test.callgraph.diffjar.controller;
+package test.diffjar.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import test.callgraph.diffjar.service.TestService1;
+import test.diffjar.service.TestService1;
 
 /**
  * @author adrninistrator
@@ -19,7 +19,7 @@ import test.callgraph.diffjar.service.TestService1;
 @RequestMapping("test1")
 public class TestController1 {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestController1.class);
+    private static final Logger logger = LoggerFactory.getLogger(test.diffjar.controller.TestController1.class);
 
     @Autowired
     private TestService1 testService1;

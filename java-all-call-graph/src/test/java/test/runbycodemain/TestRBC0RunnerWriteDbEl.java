@@ -18,7 +18,7 @@ import test.runbycode.base.TestRunByCodeBase;
 @JACGExample(title = "解析代码并将结果写入数据库，使用表达式忽略特定内容",
         desc = {"需要先执行 unittest.gradle 中的命令，生成示例jar包： gradlew test_gen_jar",
                 "通过代码指定配置参数的主要功能示例"})
-public class TestRBC2RunnerWriteDbEl extends TestRunByCodeBase {
+public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
 
     @JACGExample(title = "所有的内容都不解析",
             desc = {"通过表达式实现"})

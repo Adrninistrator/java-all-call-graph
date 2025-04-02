@@ -182,6 +182,7 @@ public class RunnerGenJarDiffCalleeGraph {
                 if (jarFileNameHeadNew.equals(jarInfoOld.getJarFileNameHead()) && jarFileNameExtNew.equals(jarInfoOld.getJarFileNameExt())) {
                     if (jarInfoNew.getJarFileHash().equals(jarInfoOld.getJarFileHash())) {
                         logger.info("找到对应的旧jar包，内容未发生变化 {} {}", jarInfoNew.getJarFileName(), jarInfoOld.getJarFileName());
+                        findOldJar = true;
                         continue;
                     }
                     logger.info("找到对应的旧jar包，内容发生变化 {} {}", jarInfoNew.getJarFileName(), jarInfoOld.getJarFileName());

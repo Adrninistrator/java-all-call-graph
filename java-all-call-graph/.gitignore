@@ -16,4 +16,5 @@ log/*.gz
 src/test/resources/_jacg_*
 src/test/resources/_javacg2_*
 src/test/resources/ogm.properties
+src/test/java/test/diffjar/
 runlocal/

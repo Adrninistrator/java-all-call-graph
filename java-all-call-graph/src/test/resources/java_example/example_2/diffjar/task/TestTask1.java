@@ -1,10 +1,10 @@
-package test.callgraph.diffjar.task;
+package test.diffjar.task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import test.callgraph.diffjar.service.TestService1;
+import test.diffjar.service.TestService1;
 
 /**
  * @author adrninistrator
@@ -13,7 +13,7 @@ import test.callgraph.diffjar.service.TestService1;
  */
 public class TestTask1 {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestTask1.class);
+    private static final Logger logger = LoggerFactory.getLogger(test.diffjar.task.TestTask1.class);
 
     @Autowired
     private TestService1 testService1;

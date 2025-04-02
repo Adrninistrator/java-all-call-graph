@@ -211,7 +211,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
                 检查允许处理的类名或包名前缀是否有变化
              */
             if (checkAllJarExistsNotModified(jarPathList)) {
-                logger.info("有通过参数指定，且jar包没有变化，跳过写数据库操作");
+                logger.warn("有通过参数指定，且jar包没有变化，跳过写数据库操作");
                 return true;
             }
         }

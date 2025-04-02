@@ -143,7 +143,7 @@ public class TestConfigGenerator {
             gradlew test_jar
          */
         javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
-                "build/libs/test.jar");
+                "build/test.jar");
         return javaCG2ConfigureWrapper;
     }
 }

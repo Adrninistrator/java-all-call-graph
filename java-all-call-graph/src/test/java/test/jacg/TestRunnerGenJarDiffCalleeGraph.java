@@ -11,7 +11,7 @@ import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 public class TestRunnerGenJarDiffCalleeGraph {
 
     public static void main(String[] args) {
-        boolean success =  new RunnerGenJarDiffCalleeGraph().generate();
+        boolean success = new RunnerGenJarDiffCalleeGraph().generate();
         if (!success) {
             throw new JavaCG2RuntimeException("执行失败");
         }

@@ -60,10 +60,10 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
     OCFULE_JAR_DIFF_DIR(InputDirEnum.IDE_JAR_DIFF_CALLEE_GRAPH.getDirName() + "/jar_diff_dir.properties",
             new String[]{"(作用) 指定新旧两个目录，比较其中的不同版本jar包的方法修改情况，以及新目录中修改方法的影响范围",
                     "(内容) 第1行指定旧目录路径，第2行指定新目录路径",
-                    "(示例) build/libs1",
-                    "(示例) build/libs2",
-                    "(示例) D:/test/build/libs1",
-                    "(示例) D:/test/build/libs2"}
+                    "(示例) build/jar-diff-version-1",
+                    "(示例) build/jar-diff-version-2",
+                    "(示例) D:/test/build/jar-diff-version-1",
+                    "(示例) D:/test/build/jar-diff-version-2"}
             , null),
     ;
 

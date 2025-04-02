@@ -49,7 +49,7 @@
 //        tarGzUnpacker.setUnpackDirList(Collections.singletonList("jar"));
 //        tarGzUnpacker.setUnpackOtherFileTypeList(Arrays.asList(".xml", "properties"));
 //        tarGzUnpacker.setUnpackPackageList(Collections.singletonList("diffjar"));
-//        tarGzUnpacker.setNoUnpackPackageList(Collections.singletonList("test/callgraph/diffjar/task"));
+//        tarGzUnpacker.setNoUnpackPackageList(Collections.singletonList("test/diffjar/task"));
 //        return tarGzUnpacker;
 //    }
 //

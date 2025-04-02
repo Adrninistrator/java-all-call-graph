@@ -1,4 +1,4 @@
-package test.callgraph.diffjar.service;
+package test.diffjar.service;
 
 import org.springframework.stereotype.Service;
 

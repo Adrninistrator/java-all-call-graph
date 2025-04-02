@@ -3,6 +3,7 @@ package test.runbycode.jardiffcalleegraph;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCalleeGraph;
 import com.adrninistrator.jacg.handler.entrymethodinfo.EntryMethodInfoFiller4Spring;
 import org.junit.Assert;
@@ -40,4 +41,23 @@ public abstract class TestAbstractRunnerGenJarDiffCalleeGraph extends TestRunByC
             Assert.assertTrue(genJarDiffCalleeGraph.generate(entryMethodInfoFiller4Spring));
         }
     }
+
+    protected void testDiff(boolean useLocalConfig) {
+        ConfigureWrapper configureWrapper = genConfigureWrapper(chooseAppName());
+        if (useLocalConfig) {
+            JACGTestUtil.useLocalConfig(configureWrapper);
+        }
+
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR, chooseRootJarDir() + chooseDirNameOld(), chooseRootJarDir() + chooseDirNameNew());
+
+        testGenJarDiffCalleeGraph(configureWrapper, false);
+    }
+
+    protected abstract String chooseAppName();
+
+    protected abstract String chooseRootJarDir();
+
+    protected abstract String chooseDirNameOld();
+
+    protected abstract String chooseDirNameNew();
 }
