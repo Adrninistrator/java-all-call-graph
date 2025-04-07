@@ -68,6 +68,26 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
         Assert.assertTrue(runnerWriteDb.run());
     }
 
+    @JACGExample(title = "仅解析目录中指定路径下指定名称的jar文件",
+            desc = {"通过表达式实现，仅处理lib中文件名以commons-开头的jar文件",
+                    "需要先执行以下命令生成包含jar文件的jar文件",
+                    "gradlew gen_run_jar"})
+    @Test
+    public void testElOnlyParseSomeJarInDir() {
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, "jar_output_dir");
+        // java-callgraph2表达式开启调试
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_EL_DEBUG_MODE, Boolean.TRUE.toString());
+        javaCG2ConfigureWrapper.setElConfigText(JavaCG2ElConfigEnum.ECE_MERGE_FILE_IGNORE_JAR_IN_DIR,
+                "!string.endsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_MF_ABSOLUTE_FILE_DIR_PATH_IN_DIR.getVariableName() + ", '/lib')" +
+                        " || !string.startsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_NAME.getVariableName() + ", 'commons-')"
+        );
+
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
+        // jar文件未发生变化时也强制重新解析后写入数据库
+        runnerWriteDb.setSkipWhenNotModified(false);
+        Assert.assertTrue(runnerWriteDb.run());
+    }
+
     @JACGExample(title = "仅解析jar文件中指定路径下的jar文件",
             desc = {"通过表达式实现，当jar文件的目录名称为'lib'时跳过",
                     "需要先执行以下命令生成包含jar文件的jar文件",
