@@ -12,10 +12,12 @@ import org.junit.Before;
 import org.junit.Test;
 import test.callgraph.awt.TestActionListener;
 import test.callgraph.manualaddmethodcall.fixed.TestFixedManualAddMethodCall;
+import test.callgraph.manualaddmethodcall.issue74.TestManualAddMethodCallIssue74;
 import test.callgraph.manualaddmethodcall.unfixed.TestUnfixedManualAddMethodCall;
 import test.runbycode.base.TestRunByCodeBase;
 import test.runbycode.manualaddmethodcall.extensions.MAMCExt4ActionListener;
 import test.runbycode.manualaddmethodcall.extensions.MAMCExt4FixedService1;
+import test.runbycode.manualaddmethodcall.extensions.MAMCExt4Issue74;
 import test.runbycode.manualaddmethodcall.extensions.MAMCExt4UnfixedService1;
 
 /**
@@ -34,7 +36,8 @@ public class TestManualAddMethodCall extends TestRunByCodeBase {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 TestActionListener.class.getName(),
                 TestFixedManualAddMethodCall.class.getName(),
-                TestUnfixedManualAddMethodCall.class.getName()
+                TestUnfixedManualAddMethodCall.class.getName(),
+                TestManualAddMethodCallIssue74.class.getName()
         );
     }
 
@@ -43,7 +46,8 @@ public class TestManualAddMethodCall extends TestRunByCodeBase {
         // 指定扩展类为空
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1);
 
-        commonWriteDb();
+        // 需要强制重新写入数据库
+        commonWriteDbForce();
 
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 RunnerGenAllGraph4Callee.class.getSimpleName());
@@ -60,10 +64,12 @@ public class TestManualAddMethodCall extends TestRunByCodeBase {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1,
                 MAMCExt4ActionListener.class.getName(),
                 MAMCExt4FixedService1.class.getName(),
-                MAMCExt4UnfixedService1.class.getName()
+                MAMCExt4UnfixedService1.class.getName(),
+                MAMCExt4Issue74.class.getName()
         );
 
-        commonWriteDb();
+        // 需要强制重新写入数据库
+        commonWriteDbForce();
 
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName + JACGConstants.FLAG_AT +
                 RunnerGenAllGraph4Callee.class.getSimpleName());
