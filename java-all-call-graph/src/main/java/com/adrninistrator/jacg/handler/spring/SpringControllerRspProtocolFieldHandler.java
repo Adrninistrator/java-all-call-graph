@@ -51,7 +51,8 @@ public class SpringControllerRspProtocolFieldHandler extends BaseHandler {
             list.add(springControllerReturnTypeWithGenerics);
             springControllerReturnTypeWithGenerics.setSpringControllerInfo(springControllerInfo);
             // 查询Spring Controller方法的返回类型，包含泛型类型
-            MethodReturnTypeWithGenerics methodReturnTypeWithGenerics = queryRspProtocolFieldHandler.queryMethodReturnTypeWithGenerics(springControllerInfo.getFullMethod());
+            MethodReturnTypeWithGenerics methodReturnTypeWithGenerics = queryRspProtocolFieldHandler.queryMethodReturnTypeWithGenerics(springControllerInfo.getFullMethod(),
+                    springControllerInfo.getReturnType());
             springControllerReturnTypeWithGenerics.setMethodReturnTypeWithGenerics(methodReturnTypeWithGenerics);
         }
         return list;

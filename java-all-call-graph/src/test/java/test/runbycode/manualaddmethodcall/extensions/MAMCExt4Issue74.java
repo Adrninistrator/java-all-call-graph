@@ -28,6 +28,6 @@ public class MAMCExt4Issue74 extends AbstractManualAddMethodCall1 {
     @Override
     protected List<MethodCallPair> chooseAddMethodCallPairList(String className) {
         // 当 test.callgraph.manualaddmethodcall.issue74.NotFoundCallBack 子类的 <init>() 方法被调用时，添加调用 execute() 方法
-        return Collections.singletonList(new MethodCallPair("<init>()", "execute()"));
+        return Collections.singletonList(new MethodCallPair("<init>()", "void", "execute()", "void"));
     }
 }

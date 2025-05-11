@@ -26,7 +26,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
     }
 
     @Override
-    public String handleAnnotation(String fullMethod, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
+    public String handleAnnotation(String fullMethod, String returnType, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
         String path = getPath(className, attributesMap);
 
         // 返回：注解类名(path)

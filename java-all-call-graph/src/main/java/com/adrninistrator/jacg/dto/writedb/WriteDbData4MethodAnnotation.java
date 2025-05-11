@@ -15,6 +15,7 @@ public class WriteDbData4MethodAnnotation implements BaseWriteDbData {
     private String annotationType;
     private String attributeValue;
     private String fullMethod;
+    private String returnType;
     private String simpleClassName;
 
     public int getRecordId() {
@@ -73,6 +74,13 @@ public class WriteDbData4MethodAnnotation implements BaseWriteDbData {
         this.fullMethod = fullMethod;
     }
 
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
     public String getSimpleClassName() {
         return simpleClassName;
     }

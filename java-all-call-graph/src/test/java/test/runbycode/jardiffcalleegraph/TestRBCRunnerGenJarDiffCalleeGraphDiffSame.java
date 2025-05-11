@@ -36,11 +36,16 @@ public class TestRBCRunnerGenJarDiffCalleeGraphDiffSame extends TestAbstractRunn
 
     @Override
     protected String chooseDirNameOld() {
-        return "test_jar_1";
+        return "jar-diff-with-same-1";
     }
 
     @Override
     protected String chooseDirNameNew() {
-        return "test_jar_2";
+        return "jar-diff-with-same-2";
+    }
+
+    @Override
+    protected boolean isResultEmpty() {
+        return false;
     }
 }

@@ -164,8 +164,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     private String handleOutputDetail(String outputDetail) {
         if (OutputDetailEnum.ODE_ILLEGAL == OutputDetailEnum.getFromDetail(outputDetail)) {
             logger.error("参数配置非法\n{} {} {}\n可选值如下: {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getFileName(), ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getConfigPrintInfo()
-                    , outputDetail,
-                    OutputDetailEnum.getValidValues());
+                    , outputDetail, OutputDetailEnum.getValidValues(true));
             return null;
         }
         return outputDetail;

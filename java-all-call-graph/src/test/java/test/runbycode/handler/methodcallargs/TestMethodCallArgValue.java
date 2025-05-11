@@ -24,7 +24,7 @@ public class TestMethodCallArgValue extends TestRunByCodeBase {
     @Test
     public void test1() {
         try (MethodCallInfoHandler methodCallInfoHandler = new MethodCallInfoHandler(configureWrapper)) {
-            List<MethodCallWithValueSupportEnum> list = methodCallInfoHandler.queryMethodCallWithValueSupportEnum(MCAUtil.class.getName(), "run");
+            List<MethodCallWithValueSupportEnum> list = methodCallInfoHandler.queryMethodCallWithValueByClassMethodSupportEnum(MCAUtil.class.getName(), "run");
             printListContent(list);
         }
     }
@@ -33,7 +33,7 @@ public class TestMethodCallArgValue extends TestRunByCodeBase {
     public void test2() {
         try (MethodCallInfoHandler methodCallInfoHandler = new MethodCallInfoHandler(configureWrapper)) {
             String fullMethod = JavaCG2ClassMethodUtil.formatFullMethod(MCAUtil.class.getName(), "run", String.class, int.class, Object[].class);
-            List<MethodCallWithValueSupportEnum> list = methodCallInfoHandler.queryMethodCallWithValueSupportEnum(fullMethod);
+            List<MethodCallWithValueSupportEnum> list = methodCallInfoHandler.queryMethodCallWithValueByMethodSupportEnum(fullMethod, null);
             printListContent(list);
         }
     }
@@ -41,7 +41,7 @@ public class TestMethodCallArgValue extends TestRunByCodeBase {
     @Test
     public void test3() {
         try (MethodCallInfoHandler methodCallInfoHandler = new MethodCallInfoHandler(configureWrapper)) {
-            List<MethodCallWithValueSupportEnum> list = methodCallInfoHandler.queryMethodCallWithValueSupportEnum(MCAUtil.class.getName(), "run", 1);
+            List<MethodCallWithValueSupportEnum> list = methodCallInfoHandler.queryMethodCallWithValueByClassMethodSupportEnum(MCAUtil.class.getName(), "run", 1);
             printListContent(list);
         }
     }
@@ -50,7 +50,7 @@ public class TestMethodCallArgValue extends TestRunByCodeBase {
     public void test4() {
         try (MethodCallInfoHandler methodCallInfoHandler = new MethodCallInfoHandler(configureWrapper)) {
             String fullMethod = JavaCG2ClassMethodUtil.formatFullMethod(MCAUtil.class.getName(), "run", String.class, int.class, Object[].class);
-            List<MethodCallWithValueSupportEnum> list = methodCallInfoHandler.queryMethodCallWithValueSupportEnum(fullMethod, 1);
+            List<MethodCallWithValueSupportEnum> list = methodCallInfoHandler.queryMethodCallWithValueByMethodSupportEnum(fullMethod, null, 1);
             printListContent(list);
         }
     }

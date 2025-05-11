@@ -5,7 +5,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
 import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
@@ -52,14 +52,14 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
     /**
      * 处理方法调用及对应的调用对象与参数信息
      *
-     * @param methodCall              方法调用
-     * @param callerMethodDetail      调用方法详细信息，包含了方法名称、方法参数等
-     * @param calleeMethodDetail      被调用方法详细信息，包含了方法名称、方法参数等
-     * @param objArgsInfoInMethodCall 方法调用中被调用对象与参数使用的信息
-     * @param args                    传递其他参数，若不需要使用则不指定
+     * @param methodCall                     方法调用
+     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名称、方法参数等
+     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名称、方法参数等
+     * @param objArgsInfoInMethodCall        方法调用中被调用对象与参数使用的信息
+     * @param args                           传递其他参数，若不需要使用则不指定
      */
-    protected abstract void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail,
-                                                 ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args);
+    protected abstract void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
+                                                 MethodDetailNoReturnType calleeMethodDetailNoReturnType, ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args);
 
     @Override
     public int queryCurrentEndId(int currentStartId, Object... argsByPage) {
@@ -78,10 +78,10 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
     public boolean handleDataList(List<WriteDbData4MethodCall> dataList, Object... argsByPage) throws Exception {
         Object[] args = JACGUtil.getArgAt(0, argsByPage);
         for (WriteDbData4MethodCall methodCall : dataList) {
-            MethodDetail callerMethodDetail = JACGClassMethodUtil.genMethodDetail(methodCall.getCallerFullMethod());
-            MethodDetail calleeMethodDetail = JACGClassMethodUtil.genMethodDetail(methodCall.getCalleeFullMethod());
+            MethodDetailNoReturnType callerMethodDetailNoReturnType = JACGClassMethodUtil.genMethodDetailNoReturnType(methodCall.getCallerFullMethod());
+            MethodDetailNoReturnType calleeMethodDetailNoReturnType = JACGClassMethodUtil.genMethodDetailNoReturnType(methodCall.getCalleeFullMethod());
             // 选择是否需要处理当前方法调用
-            if (!chooseHandleMethod(methodCall, callerMethodDetail, calleeMethodDetail)) {
+            if (!chooseHandleMethod(methodCall, callerMethodDetailNoReturnType, calleeMethodDetailNoReturnType)) {
                 continue;
             }
 
@@ -92,7 +92,7 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
                 objArgsInfoInMethodCall = methodCallInfoHandler.queryObjArgsInfoInMethodCall(methodCall.getCallId());
             }
             // 处理方法调用及对应的调用对象与参数信息
-            handleMethodWithArgs(methodCall, callerMethodDetail, calleeMethodDetail, objArgsInfoInMethodCall, args);
+            handleMethodWithArgs(methodCall, callerMethodDetailNoReturnType, calleeMethodDetailNoReturnType, objArgsInfoInMethodCall, args);
         }
         return true;
     }
@@ -100,12 +100,13 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
     /**
      * 选择是否需要处理当前方法调用
      *
-     * @param methodCall         方法调用
-     * @param callerMethodDetail 调用方法详细信息，包含了方法名称、方法参数等
-     * @param calleeMethodDetail 被调用方法详细信息，包含了方法名称、方法参数等
+     * @param methodCall                     方法调用
+     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名称、方法参数等
+     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名称、方法参数等
      * @return true: 需要处理 false: 不需要处理
      */
-    protected boolean chooseHandleMethod(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail) {
+    protected boolean chooseHandleMethod(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
+                                         MethodDetailNoReturnType calleeMethodDetailNoReturnType) {
         // 默认都需要处理
         return true;
     }

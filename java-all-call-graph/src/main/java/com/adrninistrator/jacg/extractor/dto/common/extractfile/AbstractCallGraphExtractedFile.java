@@ -30,20 +30,23 @@ public abstract class AbstractCallGraphExtractedFile {
     // 当前处理的调用堆栈文件对应的完整方法
     protected String fullMethod;
 
+    // 当前处理的调用堆栈文件对应的方法返回类型
+    protected String returnType;
+
     /**
      * 拷贝基础数据
      *
-     * @param src  原始对象
-     * @param dest 目标对象
+     * @param src 原始对象
      */
-    public static void copy(AbstractCallGraphExtractedFile src, AbstractCallGraphExtractedFile dest) {
-        dest.setStackFilePath(src.getStackFilePath());
-        dest.setStackFileName(src.getStackFileName());
-        dest.setSimpleClassName(src.getSimpleClassName());
-        dest.setClassName(src.getClassName());
-        dest.setMethodName(src.getMethodName());
-        dest.setMethodHash(src.getMethodHash());
-        dest.setFullMethod(src.getFullMethod());
+    public void copy(AbstractCallGraphExtractedFile src) {
+        this.setStackFilePath(src.getStackFilePath());
+        this.setStackFileName(src.getStackFileName());
+        this.setSimpleClassName(src.getSimpleClassName());
+        this.setClassName(src.getClassName());
+        this.setMethodName(src.getMethodName());
+        this.setMethodHash(src.getMethodHash());
+        this.setFullMethod(src.getFullMethod());
+        this.setReturnType(src.getReturnType());
     }
 
     public String getStackFilePath() {
@@ -108,6 +111,14 @@ public abstract class AbstractCallGraphExtractedFile {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 
     @Override

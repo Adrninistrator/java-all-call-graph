@@ -48,6 +48,7 @@ public class DC {
     public static final String MA_ATTRIBUTE_TYPE = COMMON_ANNOTATION_ATTRIBUTE_TYPE;
     public static final String MA_ATTRIBUTE_VALUE = COMMON_ANNOTATION_ATTRIBUTE_VALUE;
     public static final String MA_FULL_METHOD = "full_method";
+    public static final String MA_RETURN_TYPE = "return_type";
     public static final String MA_SIMPLE_CLASS_NAME = "simple_class_name";
 
     public static final String MAA_RECORD_ID = "record_id";
@@ -58,6 +59,7 @@ public class DC {
     public static final String MAA_ATTRIBUTE_TYPE = COMMON_ANNOTATION_ATTRIBUTE_TYPE;
     public static final String MAA_ATTRIBUTE_VALUE = COMMON_ANNOTATION_ATTRIBUTE_VALUE;
     public static final String MAA_FULL_METHOD = "full_method";
+    public static final String MAA_RETURN_TYPE = "return_type";
     public static final String MAA_SIMPLE_CLASS_NAME = "simple_class_name";
 
     public static final String MC_CALL_ID = "call_id";
@@ -100,6 +102,7 @@ public class DC {
     public static final String MLN_MIN_LINE_NUMBER = "min_line_number";
     public static final String MLN_MAX_LINE_NUMBER = "max_line_number";
     public static final String MLN_FULL_METHOD = "full_method";
+    public static final String MLN_RETURN_TYPE = "return_type";
 
     public static final String JI_JAR_NUM = "jar_num";
     public static final String JI_JAR_TYPE = "jar_type";
@@ -145,9 +148,10 @@ public class DC {
     public static final String MI_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String MI_ACCESS_FLAGS = "access_flags";
     public static final String MI_METHOD_NAME = "method_name";
-    public static final String MI_SIMPLE_RETURN_TYPE = "simple_return_type";
-    public static final String MI_RETURN_TYPE = "return_type";
+    public static final String MI_SIMPLE_RETURN_TYPE_NAD = "simple_return_type_nad";
+    public static final String MI_RETURN_TYPE_NAD = "return_type_nad";
     public static final String MI_RETURN_ARRAY_DIMENSIONS = "return_array_dimensions";
+    public static final String MI_RETURN_TYPE = "return_type";
     public static final String MI_RETURN_CATEGORY = "return_category";
     public static final String MI_RETURN_EXISTS_GENERICS_TYPE = "return_exists_generics_type";
     public static final String MI_METHOD_INSTRUCTIONS_HASH = "method_instructions_hash";
@@ -161,9 +165,10 @@ public class DC {
             MI_SIMPLE_CLASS_NAME,
             MI_ACCESS_FLAGS,
             MI_METHOD_NAME,
-            MI_SIMPLE_RETURN_TYPE,
-            MI_RETURN_TYPE,
+            MI_SIMPLE_RETURN_TYPE_NAD,
+            MI_RETURN_TYPE_NAD,
             MI_RETURN_ARRAY_DIMENSIONS,
+            MI_RETURN_TYPE,
             MI_RETURN_CATEGORY,
             MI_RETURN_EXISTS_GENERICS_TYPE,
             MI_CLASS_NAME,
@@ -229,6 +234,7 @@ public class DC {
     public static final String SPC_MAYBE_FILE_UPLOAD = "maybe_file_upload";
     public static final String SPC_MAYBE_FILE_DOWNLOAD = "maybe_file_download";
     public static final String SPC_FULL_METHOD = "full_method";
+    public static final String SPC_RETURN_TYPE = "return_type";
 
     public static final String SPT_RECORD_ID = "record_id";
     public static final String SPT_METHOD_HASH = "method_hash";
@@ -237,6 +243,7 @@ public class DC {
     public static final String SPT_METHOD_NAME = "method_name";
     public static final String SPT_TYPE = "type";
     public static final String SPT_FULL_METHOD = "full_method";
+    public static final String SPT_RETURN_TYPE = "return_type";
 
     public static final String CEIGT_RECORD_ID = "record_id";
     public static final String CEIGT_SIMPLE_CLASS_NAME = "simple_class_name";
@@ -244,11 +251,11 @@ public class DC {
     public static final String CEIGT_SEQ = "seq";
     public static final String CEIGT_SUPER_ITF_SIMPLE_CLASS_NAME = "super_itf_simple_class_name";
     public static final String CEIGT_GENERICS_SEQ = "generics_seq";
-    public static final String CEIGT_SIMPLE_GENERICS_TYPE = "simple_generics_type";
+    public static final String CEIGT_SIMPLE_GENERICS_TYPE_NAD = "simple_generics_type_nad";
     public static final String CEIGT_GENERICS_ARRAY_DIMENSIONS = "generics_array_dimensions";
     public static final String CEIGT_TYPE_VARIABLES_NAME = "type_variables_name";
     public static final String CEIGT_GENERICS_CATEGORY = "generics_category";
-    public static final String CEIGT_GENERICS_TYPE = "generics_type";
+    public static final String CEIGT_GENERICS_TYPE_NAD = "generics_type_nad";
     public static final String CEIGT_CLASS_NAME = "class_name";
     public static final String CEIGT_SUPER_ITF_CLASS_NAME = "super_itf_class_name";
 
@@ -284,40 +291,43 @@ public class DC {
     public static final String MAGT_SEQ = "seq";
     public static final String MAGT_TYPE = "type";
     public static final String MAGT_TYPE_SEQ = "type_seq";
-    public static final String MAGT_SIMPLE_GENERICS_TYPE = "simple_generics_type";
+    public static final String MAGT_SIMPLE_GENERICS_TYPE_NAD = "simple_generics_type_nad";
     public static final String MAGT_GENERICS_ARRAY_DIMENSIONS = "generics_array_dimensions";
     public static final String MAGT_TYPE_VARIABLES_NAME = "type_variables_name";
     public static final String MAGT_WILDCARD = "wildcard";
     public static final String MAGT_REFERENCE_TYPE = "reference_type";
     public static final String MAGT_GENERICS_CATEGORY = "generics_category";
-    public static final String MAGT_GENERICS_TYPE = "generics_type";
+    public static final String MAGT_GENERICS_TYPE_NAD = "generics_type_nad";
     public static final String MAGT_FULL_METHOD = "full_method";
+    public static final String MAGT_RETURN_TYPE = "return_type";
 
     public static final String MARG_RECORD_ID = "record_id";
     public static final String MARG_METHOD_HASH = "method_hash";
     public static final String MARG_ARG_SEQ = "arg_seq";
-    public static final String MARG_SIMPLE_ARG_TYPE = "simple_arg_type";
+    public static final String MARG_SIMPLE_ARG_TYPE_NAD = "simple_arg_type_nad";
     public static final String MARG_ARG_NAME = "arg_name";
-    public static final String MARG_ARG_TYPE = "arg_type";
+    public static final String MARG_ARG_TYPE_NAD = "arg_type_nad";
     public static final String MARG_ARRAY_DIMENSIONS = "array_dimensions";
     public static final String MARG_ARG_CATEGORY = "arg_category";
     public static final String MARG_EXISTS_GENERICS_TYPE = "exists_generics_type";
     public static final String MARG_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String MARG_FULL_METHOD = "full_method";
+    public static final String MARG_RETURN_TYPE = "return_type";
 
     public static final String MRGT_RECORD_ID = "record_id";
     public static final String MRGT_METHOD_HASH = "method_hash";
     public static final String MRGT_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String MRGT_TYPE = "type";
     public static final String MRGT_TYPE_SEQ = "type_seq";
-    public static final String MRGT_SIMPLE_GENERICS_TYPE = "simple_generics_type";
+    public static final String MRGT_SIMPLE_GENERICS_TYPE_NAD = "simple_generics_type_nad";
     public static final String MRGT_GENERICS_ARRAY_DIMENSIONS = "generics_array_dimensions";
     public static final String MRGT_TYPE_VARIABLES_NAME = "type_variables_name";
     public static final String MRGT_WILDCARD = "wildcard";
     public static final String MRGT_REFERENCE_TYPE = "reference_type";
     public static final String MRGT_GENERICS_CATEGORY = "generics_category";
-    public static final String MRGT_GENERICS_TYPE = "generics_type";
+    public static final String MRGT_GENERICS_TYPE_NAD = "generics_type_nad";
     public static final String MRGT_FULL_METHOD = "full_method";
+    public static final String MRGT_RETURN_TYPE = "return_type";
 
     public static final String IC_INNER_SIMPLE_CLASS_NAME = "inner_simple_class_name";
     public static final String IC_INNER_CLASS_NAME = "inner_class_name";
@@ -337,7 +347,7 @@ public class DC {
     public static final String FI_RECORD_ID = "record_id";
     public static final String FI_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String FI_FIELD_NAME = "field_name";
-    public static final String FI_FIELD_TYPE = "field_type";
+    public static final String FI_FIELD_TYPE_NAD = "field_type_nad";
     public static final String FI_ARRAY_DIMENSIONS = "array_dimensions";
     public static final String FI_FIELD_CATEGORY = "field_category";
     public static final String FI_MODIFIERS = "modifiers";
@@ -354,12 +364,13 @@ public class DC {
     public static final String GSM_METHOD_NAME = "method_name";
     public static final String GSM_FIELD_NAME = "field_name";
     public static final String GSM_FIELD_CATEGORY = "field_category";
-    public static final String GSM_SIMPLE_FIELD_TYPE = "simple_field_type";
-    public static final String GSM_FIELD_TYPE = "field_type";
+    public static final String GSM_SIMPLE_FIELD_TYPE_NAD = "simple_field_type_nad";
+    public static final String GSM_FIELD_TYPE_NAD = "field_type_nad";
     public static final String GSM_ARRAY_DIMENSIONS = "array_dimensions";
     public static final String GSM_CLASS_NAME = "class_name";
     public static final String GSM_METHOD_HASH = "method_hash";
     public static final String GSM_FULL_METHOD = "full_method";
+    public static final String GSM_RETURN_TYPE = "return_type";
 
     // get/set方法信息表的字段
     public static final String[] GET_SET_METHOD_COLUMNS = new String[]{
@@ -368,12 +379,13 @@ public class DC {
             GSM_METHOD_NAME,
             GSM_FIELD_NAME,
             GSM_FIELD_CATEGORY,
-            GSM_SIMPLE_FIELD_TYPE,
-            GSM_FIELD_TYPE,
+            GSM_SIMPLE_FIELD_TYPE_NAD,
+            GSM_FIELD_TYPE_NAD,
             GSM_ARRAY_DIMENSIONS,
             GSM_CLASS_NAME,
             GSM_METHOD_HASH,
-            GSM_FULL_METHOD
+            GSM_FULL_METHOD,
+            GSM_RETURN_TYPE
     };
 
     public static final String FR_FLD_RELATIONSHIP_ID = "fld_relationship_id";
@@ -415,7 +427,7 @@ public class DC {
     public static final String SFFMC_FIELD_NAME = "field_name";
     public static final String SFFMC_SEQ = "seq";
     public static final String SFFMC_CALL_ID = "call_id";
-    public static final String SFFMC_FIELD_TYPE = "field_type";
+    public static final String SFFMC_FIELD_TYPE_NAD = "field_type_nad";
     public static final String SFFMC_ARRAY_DIMENSIONS = "array_dimensions";
     public static final String SFFMC_CLASS_NAME = "class_name";
     public static final String SFFMC_CALLEE_CLASS_NAME = "callee_class_name";
@@ -426,13 +438,13 @@ public class DC {
     public static final String FGT_FIELD_NAME = "field_name";
     public static final String FGT_TYPE = "type";
     public static final String FGT_TYPE_SEQ = "type_seq";
-    public static final String FGT_SIMPLE_GENERICS_TYPE = "simple_generics_type";
+    public static final String FGT_SIMPLE_GENERICS_TYPE_NAD = "simple_generics_type_nad";
     public static final String FGT_GENERICS_ARRAY_DIMENSIONS = "generics_array_dimensions";
     public static final String FGT_TYPE_VARIABLES_NAME = "type_variables_name";
     public static final String FGT_WILDCARD = "wildcard";
     public static final String FGT_REFERENCE_TYPE = "reference_type";
     public static final String FGT_GENERICS_CATEGORY = "generics_category";
-    public static final String FGT_GENERICS_TYPE = "generics_type";
+    public static final String FGT_GENERICS_TYPE_NAD = "generics_type_nad";
     public static final String FGT_CLASS_NAME = "class_name";
 
     public static final String PC_RECORD_ID = "record_id";
@@ -481,12 +493,14 @@ public class DC {
     public static final String MRAS_METHOD_HASH = "method_hash";
     public static final String MRAS_RETURN_ARG_SEQ = "return_arg_seq";
     public static final String MRAS_FULL_METHOD = "full_method";
+    public static final String MRAS_RETURN_TYPE = "return_type";
     public static final String MRAS_EQUIVALENT_CONVERSION = "equivalent_conversion";
 
     public static final String MRCI_RECORD_ID = "record_id";
     public static final String MRCI_METHOD_HASH = "method_hash";
     public static final String MRCI_RETURN_CALL_ID = "return_call_id";
     public static final String MRCI_FULL_METHOD = "full_method";
+    public static final String MRCI_RETURN_TYPE = "return_type";
     public static final String MRCI_EQUIVALENT_CONVERSION = "equivalent_conversion";
 
     public static final String MRCV_RECORD_ID = "record_id";
@@ -495,6 +509,7 @@ public class DC {
     public static final String MRCV_CONST_TYPE = "const_type";
     public static final String MRCV_CONST_VALUE = "const_value";
     public static final String MRCV_FULL_METHOD = "full_method";
+    public static final String MRCV_RETURN_TYPE = "return_type";
 
     public static final String MRFI_RECORD_ID = "record_id";
     public static final String MRFI_METHOD_HASH = "method_hash";
@@ -502,12 +517,13 @@ public class DC {
     public static final String MRFI_STATIC_FIELD = "static_field";
     public static final String MRFI_FIELD_OF_THIS = "field_of_this";
     public static final String MRFI_FIELD_IN_SIMPLE_CLASS_NAME = "field_in_simple_class_name";
-    public static final String MRFI_FIELD_SIMPLE_TYPE = "field_simple_type";
+    public static final String MRFI_SIMPLE_FIELD_TYPE_NAD = "simple_field_type_nad";
     public static final String MRFI_FIELD_ARRAY_DIMENSIONS = "field_array_dimensions";
     public static final String MRFI_FIELD_NAME = "field_name";
     public static final String MRFI_FIELD_IN_CLASS_NAME = "field_in_class_name";
-    public static final String MRFI_FIELD_TYPE = "field_type";
+    public static final String MRFI_FIELD_TYPE_NAD = "field_type_nad";
     public static final String MRFI_FULL_METHOD = "full_method";
+    public static final String MRFI_RETURN_TYPE = "return_type";
 
     public static final String MMGSD_RECORD_ID = "record_id";
     public static final String MMGSD_FLD_RELATIONSHIP_ID = "fld_relationship_id";
@@ -537,6 +553,7 @@ public class DC {
     public static final String MCTH_CATCH_MIN_CALL_ID = "catch_min_call_id";
     public static final String MCTH_CATCH_MAX_CALL_ID = "catch_max_call_id";
     public static final String MCTH_FULL_METHOD = "full_method";
+    public static final String MCTH_RETURN_TYPE = "return_type";
 
     public static final String MF_RECORD_ID = "record_id";
     public static final String MF_METHOD_HASH = "method_hash";
@@ -548,6 +565,7 @@ public class DC {
     public static final String MF_TRY_CATCH_MAX_CALL_ID = "try_catch_max_call_id";
     public static final String MF_FINALLY_START_LINE_NUMBER = "finally_start_line_number";
     public static final String MF_FULL_METHOD = "full_method";
+    public static final String MF_RETURN_TYPE = "return_type";
 
     public static final String MT_RECORD_ID = "record_id";
     public static final String MT_METHOD_HASH = "method_hash";
@@ -561,6 +579,7 @@ public class DC {
     public static final String MT_CATCH_EXCEPTION_VARIABLE_NAME = "catch_exception_variable_name";
     public static final String MT_CALL_ID = "call_id";
     public static final String MT_FULL_METHOD = "full_method";
+    public static final String MT_RETURN_TYPE = "return_type";
 
     public static final String SMAI_SET_RECORD_ID = "set_record_id";
     public static final String SMAI_SET_METHOD_CALL_ID = "set_method_call_id";
@@ -601,6 +620,7 @@ public class DC {
     public static final String MCMCR_CALLEE_SIMPLE_CLASS_NAME = "callee_simple_class_name";
     public static final String MCMCR_CALLEE_METHOD_NAME = "callee_method_name";
     public static final String MCMCR_CALLEE_FULL_METHOD = "callee_full_method";
+    public static final String MCMCR_CALLEE_RETURN_TYPE = "callee_return_type";
 
     public static final String MMFS_RECORD_ID = "record_id";
     public static final String MMFS_XML_FILE_NAME = "xml_file_name";

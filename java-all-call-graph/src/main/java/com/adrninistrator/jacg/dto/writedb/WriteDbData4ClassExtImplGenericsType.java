@@ -15,11 +15,11 @@ public class WriteDbData4ClassExtImplGenericsType implements BaseWriteDbData {
     private int seq;
     private String superItfSimpleClassName;
     private int genericsSeq;
-    private String simpleGenericsType;
+    private String simpleGenericsTypeNad;
     private int genericsArrayDimensions;
     private String typeVariablesName;
     private String genericsCategory;
-    private String genericsType;
+    private String genericsTypeNad;
     private String className;
     private String superItfClassName;
 
@@ -71,12 +71,12 @@ public class WriteDbData4ClassExtImplGenericsType implements BaseWriteDbData {
         this.genericsSeq = genericsSeq;
     }
 
-    public String getSimpleGenericsType() {
-        return simpleGenericsType;
+    public String getSimpleGenericsTypeNad() {
+        return simpleGenericsTypeNad;
     }
 
-    public void setSimpleGenericsType(String simpleGenericsType) {
-        this.simpleGenericsType = simpleGenericsType;
+    public void setSimpleGenericsTypeNad(String simpleGenericsTypeNad) {
+        this.simpleGenericsTypeNad = simpleGenericsTypeNad;
     }
 
     public int getGenericsArrayDimensions() {
@@ -103,12 +103,12 @@ public class WriteDbData4ClassExtImplGenericsType implements BaseWriteDbData {
         this.genericsCategory = genericsCategory;
     }
 
-    public String getGenericsType() {
-        return genericsType;
+    public String getGenericsTypeNad() {
+        return genericsTypeNad;
     }
 
-    public void setGenericsType(String genericsType) {
-        this.genericsType = genericsType;
+    public void setGenericsTypeNad(String genericsType) {
+        this.genericsTypeNad = genericsType;
     }
 
     public String getClassName() {

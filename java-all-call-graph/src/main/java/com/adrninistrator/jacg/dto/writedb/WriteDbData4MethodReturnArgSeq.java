@@ -13,6 +13,7 @@ public class WriteDbData4MethodReturnArgSeq implements BaseWriteDbData {
     private String methodHash;
     private int returnArgSeq;
     private String fullMethod;
+    private String returnType;
     private int equivalentConversion;
 
     public int getRecordId() {
@@ -45,6 +46,14 @@ public class WriteDbData4MethodReturnArgSeq implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 
     public int getEquivalentConversion() {

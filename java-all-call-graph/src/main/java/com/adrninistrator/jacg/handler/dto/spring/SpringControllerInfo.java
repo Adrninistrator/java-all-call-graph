@@ -8,10 +8,12 @@ package com.adrninistrator.jacg.handler.dto.spring;
 public class SpringControllerInfo {
     private final String showUri;
     private final String fullMethod;
+    private final String returnType;
 
-    public SpringControllerInfo(String showUri, String fullMethod) {
+    public SpringControllerInfo(String showUri, String fullMethod, String returnType) {
         this.showUri = showUri;
         this.fullMethod = fullMethod;
+        this.returnType = returnType;
     }
 
     public String getShowUri() {
@@ -20,5 +22,9 @@ public class SpringControllerInfo {
 
     public String getFullMethod() {
         return fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
     }
 }

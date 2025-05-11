@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallStaticField;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 /**
@@ -16,8 +16,8 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL_STATIC_FIELD,
-        minColumnNum = 7,
-        maxColumnNum = 7,
+        minColumnNum = 8,
+        maxColumnNum = 8,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL_STATIC_FIELD
 )
 public class WriteDbHandler4MethodCallStaticField extends AbstractWriteDbHandler<WriteDbData4MethodCallStaticField> {
@@ -28,20 +28,21 @@ public class WriteDbHandler4MethodCallStaticField extends AbstractWriteDbHandler
 
     @Override
     protected WriteDbData4MethodCallStaticField genData(String[] array) {
-        String callerFullMethod = array[6];
-        int callId = Integer.parseInt(array[0]);
-        String objArgsSeq = array[1];
-        String seq = array[2];
-        String className = array[3];
-        String fieldName = array[4];
-        String fieldType = array[5];
+        int callId = Integer.parseInt(readLineData());
+        String objArgsSeq = readLineData();
+        String seq = readLineData();
+        String className = readLineData();
+        String fieldName = readLineData();
+        String fieldType = readLineData();
+        String callerFullMethod = readLineData();
+        String callerReturnType = readLineData();
 
         WriteDbData4MethodCallStaticField writeDbData4MethodCallStaticField = new WriteDbData4MethodCallStaticField();
         writeDbData4MethodCallStaticField.setRecordId(genNextRecordId());
         writeDbData4MethodCallStaticField.setCallId(callId);
         writeDbData4MethodCallStaticField.setObjArgsSeq(Integer.parseInt(objArgsSeq));
         writeDbData4MethodCallStaticField.setSeq(Integer.parseInt(seq));
-        writeDbData4MethodCallStaticField.setCallerMethodHash(JACGUtil.genHashWithLen(callerFullMethod));
+        writeDbData4MethodCallStaticField.setCallerMethodHash(JACGClassMethodUtil.genMethodHashWithLen(callerFullMethod, callerReturnType));
         writeDbData4MethodCallStaticField.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4MethodCallStaticField.setFieldName(fieldName);
         writeDbData4MethodCallStaticField.setSimpleFieldType(dbOperWrapper.querySimpleClassName(fieldType));
@@ -76,7 +77,8 @@ public class WriteDbHandler4MethodCallStaticField extends AbstractWriteDbHandler
                 "静态字段所在类完整类名",
                 "静态字段名称",
                 "静态字段类型",
-                "调用方，完整方法（类名+方法名+参数）"
+                "调用方，完整方法（类名+方法名+参数）",
+                "调用方，方法返回类型，包含数组标志",
         };
     }
 

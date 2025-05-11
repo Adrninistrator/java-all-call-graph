@@ -74,11 +74,12 @@ public abstract class AbstractManualAddMethodCall1 {
             }
 
             for (MethodCallPair methodCallPair : methodCallPairList) {
-                String calleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(childOrImplClass, methodCallPair.getCallerFullMethod());
+                String calleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(childOrImplClass, methodCallPair.getCallerMethodAndArgs());
                 // 生成需要添加的方法调用关系的被调用完整方法
-                String addCalleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(childOrImplClass, methodCallPair.getCalleeFullMethod());
+                String addCalleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(childOrImplClass, methodCallPair.getCalleeMethodAndArgs());
                 // 添加方法调用
-                if (!methodCallHandler.manualAddMethodCall(calleeFullMethod, addCalleeFullMethod)) {
+                if (!methodCallHandler.manualAddMethodCall(calleeFullMethod, methodCallPair.getCallerMethodReturnType(), addCalleeFullMethod,
+                        methodCallPair.getCalleeMethodReturnType())) {
                     return false;
                 }
             }

@@ -3,8 +3,10 @@ package com.adrninistrator.jacg.handler.spring;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
+import com.adrninistrator.jacg.comparator.Comparator4FullMethodWithReturnType;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
@@ -13,8 +15,8 @@ import com.adrninistrator.jacg.handler.conf.JavaCG2ConfigHandler;
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfo;
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfoDetail;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
@@ -60,7 +62,7 @@ public class SpringHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY_ALL;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.SPC_SHOW_URI, DC.SPC_FULL_METHOD) +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.SPC_SHOW_URI, DC.SPC_FULL_METHOD, DC.SPC_RETURN_TYPE) +
                     " from " + DbTableInfoEnum.DTIE_SPRING_CONTROLLER.getTableName();
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
@@ -71,7 +73,7 @@ public class SpringHandler extends BaseHandler {
         }
         List<SpringControllerInfo> springControllerInfoList = new ArrayList<>(list.size());
         for (WriteDbData4SpringController springController : list) {
-            springControllerInfoList.add(new SpringControllerInfo(springController.getShowUri(), springController.getFullMethod()));
+            springControllerInfoList.add(new SpringControllerInfo(springController.getShowUri(), springController.getFullMethod(), springController.getReturnType()));
         }
         springControllerInfoList.sort(Comparator.comparing(SpringControllerInfo::getFullMethod));
         return springControllerInfoList;
@@ -159,10 +161,11 @@ public class SpringHandler extends BaseHandler {
      * 根据完整方法查询Spring Controller对应的URI列表
      *
      * @param fullMethod
+     * @param returnType
      * @return 空列表: 指定的方法不是Spring Controller方法
      */
-    public List<String> queryControllerUriList(String fullMethod) {
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+    public List<String> queryControllerUriList(String fullMethod, String returnType) {
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY_BY_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -179,10 +182,11 @@ public class SpringHandler extends BaseHandler {
      * 根据完整方法查询Spring Controller对应的URI，获取第1个
      *
      * @param fullMethod
+     * @param returnType
      * @return null: 指定的方法不是Spring Controller方法
      */
-    public String queryControllerUri(String fullMethod) {
-        List<String> uriList = queryControllerUriList(fullMethod);
+    public String queryControllerUri(String fullMethod, String returnType) {
+        List<String> uriList = queryControllerUriList(fullMethod, returnType);
         if (JavaCG2Util.isCollectionEmpty(uriList)) {
             return null;
         }
@@ -236,7 +240,7 @@ public class SpringHandler extends BaseHandler {
         List<SpringControllerInfoDetail> springControllerInfoDetailList = new ArrayList<>(fileUploadMethodList.size());
         for (WriteDbData4SpringController fileUploadMethod : fileUploadMethodList) {
             // 查询方法返回类型
-            WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(fileUploadMethod.getFullMethod());
+            WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(fileUploadMethod.getFullMethod(), fileUploadMethod.getReturnType());
             SpringControllerInfoDetail springControllerInfoDetail = new SpringControllerInfoDetail();
             springControllerInfoDetail.setSpringController(fileUploadMethod);
             springControllerInfoDetail.setMethodInfo(methodInfo);
@@ -268,7 +272,7 @@ public class SpringHandler extends BaseHandler {
      *
      * @return
      */
-    public List<WriteDbData4SpringController> queryFileDownloadControllerMethod() {
+    public List<WriteDbData4SpringController> queryFileDownloadControllerInfo() {
         checkParseMethodCallTypeValue();
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY_FILE_DOWNLOAD;
@@ -292,27 +296,29 @@ public class SpringHandler extends BaseHandler {
      *
      * @return
      */
-    public List<String> queryFileDownloadControllerOnlyMethod() {
+    public List<FullMethodWithReturnType> queryFileDownloadControllerMethod() {
         // 查询所有可能用于文件下载的Spring Controller方法
-        List<WriteDbData4SpringController> fileDownloadMethodList = queryFileDownloadControllerMethod();
+        List<WriteDbData4SpringController> fileDownloadMethodList = queryFileDownloadControllerInfo();
         if (JavaCG2Util.isCollectionEmpty(fileDownloadMethodList)) {
             return Collections.emptyList();
         }
-        List<String> fullMethodList = new ArrayList<>(fileDownloadMethodList.size());
+        List<FullMethodWithReturnType> methodList = new ArrayList<>(fileDownloadMethodList.size());
         for (WriteDbData4SpringController fileDownloadMethod : fileDownloadMethodList) {
-            fullMethodList.add(fileDownloadMethod.getFullMethod());
+            methodList.add(new FullMethodWithReturnType(fileDownloadMethod.getFullMethod(), fileDownloadMethod.getReturnType()));
         }
-        return fullMethodList;
+        methodList.sort(Comparator4FullMethodWithReturnType.getInstance());
+        return methodList;
     }
 
     /**
      * 判断指定的方法是否为Spring Task方法
      *
      * @param fullMethod
+     * @param returnType
      * @return
      */
-    public boolean checkSpringTask(String fullMethod) {
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+    public boolean checkSpringTask(String fullMethod, String returnType) {
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPT_QUERY_BY_FULL_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {

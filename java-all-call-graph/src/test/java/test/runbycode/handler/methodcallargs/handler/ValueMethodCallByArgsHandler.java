@@ -2,7 +2,7 @@ package test.runbycode.handler.methodcallargs.handler;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.handler.methodcallargs.BaseMethodCallByArgsHandler;
@@ -37,8 +37,8 @@ public class ValueMethodCallByArgsHandler extends BaseMethodCallByArgsHandler {
     }
 
     @Override
-    protected void handleMethodCallWithInfo(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail,
-                                            WriteDbData4MethodCallInfo methodCallInfo) {
+    protected void handleMethodCallWithInfo(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
+                                            MethodDetailNoReturnType calleeMethodDetailNoReturnType, WriteDbData4MethodCallInfo methodCallInfo) {
         logger.info("### {} {} {} {} {} {}", methodCall.getCallerFullMethod(), methodCall.getCalleeFullMethod(), methodCallInfo.getType(), methodCallInfo.getValueType(),
                 methodCallInfo.getTheValue(), methodCallInfo.getOrigValue());
     }

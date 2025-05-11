@@ -2,7 +2,7 @@ package test.runbycode.handler.methodcall.handler;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
 import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.methodcall.BaseMethodCallByEEDetailHandler;
@@ -31,8 +31,8 @@ public class StringAllMethodCallByEEDetailHandler extends BaseMethodCallByEEDeta
     }
 
     @Override
-    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail,
-                                        ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args) {
+    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
+                                        MethodDetailNoReturnType calleeMethodDetailNoReturnType, ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args) {
         logger.info("### {} {} {}", methodCall.getCallerFullMethod(), methodCall.getCalleeFullMethod(), methodCall.getCallerLineNumber());
     }
 }

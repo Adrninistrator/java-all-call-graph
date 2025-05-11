@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnCallId;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 /**
@@ -16,8 +16,8 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_RETURN_CALL_ID,
-        minColumnNum = 3,
-        maxColumnNum = 3,
+        minColumnNum = 4,
+        maxColumnNum = 4,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_RETURN_CALL_ID
 )
 public class WriteDbHandler4MethodReturnCallId extends AbstractWriteDbHandler<WriteDbData4MethodReturnCallId> {
@@ -29,14 +29,16 @@ public class WriteDbHandler4MethodReturnCallId extends AbstractWriteDbHandler<Wr
     @Override
     protected WriteDbData4MethodReturnCallId genData(String[] array) {
         String fullMethod = readLineData();
+        String returnType = readLineData();
         int returnCallId = Integer.parseInt(readLineData());
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType);
         int equivalentConversion = Integer.parseInt(readLineData());
         WriteDbData4MethodReturnCallId methodReturnCallId = new WriteDbData4MethodReturnCallId();
         methodReturnCallId.setRecordId(genNextRecordId());
         methodReturnCallId.setMethodHash(methodHash);
         methodReturnCallId.setReturnCallId(returnCallId);
         methodReturnCallId.setFullMethod(fullMethod);
+        methodReturnCallId.setReturnType(returnType);
         methodReturnCallId.setEquivalentConversion(equivalentConversion);
         return methodReturnCallId;
     }
@@ -48,6 +50,7 @@ public class WriteDbHandler4MethodReturnCallId extends AbstractWriteDbHandler<Wr
                 data.getMethodHash(),
                 data.getReturnCallId(),
                 data.getFullMethod(),
+                data.getReturnType(),
                 data.getEquivalentConversion()
         };
     }
@@ -56,6 +59,7 @@ public class WriteDbHandler4MethodReturnCallId extends AbstractWriteDbHandler<Wr
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志",
                 "方法返回值对应的方法调用序号，从1开始",
                 "是否返回等值转换前的方法调用，1:是，0:否"
         };

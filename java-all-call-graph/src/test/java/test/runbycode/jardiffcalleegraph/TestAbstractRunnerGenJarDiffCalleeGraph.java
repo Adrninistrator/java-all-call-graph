@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.diff.dto.result.JarDiffResult;
 import com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCalleeGraph;
 import com.adrninistrator.jacg.handler.entrymethodinfo.EntryMethodInfoFiller4Spring;
 import org.junit.Assert;
@@ -38,7 +39,10 @@ public abstract class TestAbstractRunnerGenJarDiffCalleeGraph extends TestRunByC
             if (skipWriteDb) {
                 genJarDiffCalleeGraph.setSkipWriteDb(true);
             }
-            Assert.assertTrue(genJarDiffCalleeGraph.generate(entryMethodInfoFiller4Spring));
+            JarDiffResult jarDiffResult = genJarDiffCalleeGraph.generate(entryMethodInfoFiller4Spring);
+            Assert.assertTrue(jarDiffResult.isSuccess());
+            printMapContent(jarDiffResult.getJarModifiedMethodInfoMap());
+            Assert.assertEquals(isResultEmpty(), jarDiffResult.getJarModifiedMethodInfoMap().isEmpty());
         }
     }
 
@@ -60,4 +64,6 @@ public abstract class TestAbstractRunnerGenJarDiffCalleeGraph extends TestRunByC
     protected abstract String chooseDirNameOld();
 
     protected abstract String chooseDirNameNew();
+
+    protected abstract boolean isResultEmpty();
 }

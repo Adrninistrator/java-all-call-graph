@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.lambda;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCall;
-import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
@@ -72,18 +71,5 @@ public class LambdaMethodHandlerByStreamMethod extends BaseLambdaMethodPageHandl
         logger.info("通过Stream条件查询Lambda表达式方法调用信息 {} {}", lambdaNextIsStream, lambdaNextIsIntermediate);
         // 分页查询，结果合并到List中
         return QueryByPageHandler.queryAll2List(this, JavaCG2Constants.METHOD_CALL_ID_MIN_BEFORE, lambdaNextIsStream, lambdaNextIsIntermediate);
-    }
-
-    /**
-     * 通过Stream条件查询Lambda表达式方法调用信息，包含各方法的详细信息
-     *
-     * @param lambdaNextIsStream       下一个被调用方法是否为Stream，若为null则查询全部数据
-     * @param lambdaNextIsIntermediate true: 下一个被调用方法为Stream的intermediate（中间）操作 false: 下一个被调用方法为Stream的terminal（终端）操作 仅当参数1非null时当前参数可为非null
-     * @return
-     */
-    public List<LambdaMethodCallDetail> queryByStreamMethodDetail(Boolean lambdaNextIsStream, Boolean lambdaNextIsIntermediate) {
-        // 执行查询操作
-        List<LambdaMethodCall> list = queryByStreamMethod(lambdaNextIsStream, lambdaNextIsIntermediate);
-        return genDetailList(list);
     }
 }

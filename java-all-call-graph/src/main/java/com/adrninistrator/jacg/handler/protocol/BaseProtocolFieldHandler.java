@@ -160,7 +160,8 @@ public abstract class BaseProtocolFieldHandler extends BaseHandler {
     // 处理Spring Controller方法参数
     private void handleSpringControllerMethodArg(WriteDbData4SpringController springController, Set<String> customTypeSet) {
         // 查询Spring Controller方法参数
-        List<WriteDbData4MethodArgument> methodArgumentList = methodArgReturnHandler.queryMethodArgumentByMethod(springController.getFullMethod());
+        List<WriteDbData4MethodArgument> methodArgumentList = methodArgReturnHandler.queryMethodArgumentByMethod(springController.getFullMethod(),
+                springController.getReturnType());
         if (JavaCG2Util.isCollectionEmpty(methodArgumentList)) {
             // 当前Spring Controller方法没有参数
             return;
@@ -171,9 +172,9 @@ public abstract class BaseProtocolFieldHandler extends BaseHandler {
 
             if (JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(methodArgument.getArgCategory())) {
                 // 记录有处理过的自定义类型
-                customTypeSet.add(methodArgument.getArgType());
+                customTypeSet.add(methodArgument.getArgTypeNad());
                 // 查询Spring Controller某个方法的某个自定义类型参数中的全部常用数据类型的字段信息
-                List<CommonFieldInfoInClass> commonFieldInfoInClassList = fieldInfoHandler.queryAllCommonFieldInfoInClass(methodArgument.getArgType(), true, true, true,
+                List<CommonFieldInfoInClass> commonFieldInfoInClassList = fieldInfoHandler.queryAllCommonFieldInfoInClass(methodArgument.getArgTypeNad(), true, true, true,
                         customTypeSet);
                 for (CommonFieldInfoInClass commonFieldInfoInClass : commonFieldInfoInClassList) {
                     // 处理Spring Controller某个方法的某个自定义类型参数中的常用数据类型的字段信息
@@ -183,7 +184,8 @@ public abstract class BaseProtocolFieldHandler extends BaseHandler {
 
             if (JavaCG2YesNoEnum.isYes(methodArgument.getExistsGenericsType())) {
                 // 查询指定方法指定的参数中的泛型类型
-                List<String> methodArgGenericsTypeList = methodArgReturnHandler.queryGenericsTypeInMethodArg(springController.getFullMethod(), methodArgument.getArgSeq(), true);
+                List<String> methodArgGenericsTypeList = methodArgReturnHandler.queryGenericsTypeInMethodArg(springController.getFullMethod(), springController.getReturnType(),
+                        methodArgument.getArgSeq(), true);
                 // 记录有处理过的自定义类型
                 customTypeSet.addAll(methodArgGenericsTypeList);
                 for (String methodArgGenericsType : methodArgGenericsTypeList) {
@@ -202,17 +204,17 @@ public abstract class BaseProtocolFieldHandler extends BaseHandler {
     // 处理Spring Controller方法返回类型
     private void handleSpringControllerReturnType(WriteDbData4SpringController springController, Set<String> customTypeSet) {
         // 查询Spring Controller方法信息
-        WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(springController.getFullMethod());
-        if (JavaCG2CommonNameConstants.RETURN_TYPE_VOID.equals(methodInfo.getReturnType())) {
+        WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(springController.getFullMethod(), springController.getReturnType());
+        if (JavaCG2CommonNameConstants.RETURN_TYPE_VOID.equals(methodInfo.getReturnTypeNad())) {
             // 当前Spring Controller方法返回void
             return;
         }
 
         if (JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(methodInfo.getReturnCategory())) {
             // 记录有处理过的自定义类型
-            customTypeSet.add(methodInfo.getReturnType());
+            customTypeSet.add(methodInfo.getReturnTypeNad());
             // 查询Spring Controller某个方法的某个自定义类型参数中的全部常用数据类型的字段信息
-            List<CommonFieldInfoInClass> commonFieldInfoInClassList = fieldInfoHandler.queryAllCommonFieldInfoInClass(methodInfo.getReturnType(), true, true, true,
+            List<CommonFieldInfoInClass> commonFieldInfoInClassList = fieldInfoHandler.queryAllCommonFieldInfoInClass(methodInfo.getReturnTypeNad(), true, true, true,
                     customTypeSet);
             for (CommonFieldInfoInClass commonFieldInfoInClass : commonFieldInfoInClassList) {
                 // 处理Spring Controller某个方法的返回类型中的常用数据类型的字段信息
@@ -222,8 +224,8 @@ public abstract class BaseProtocolFieldHandler extends BaseHandler {
 
         if (JavaCG2YesNoEnum.isYes(methodInfo.getReturnExistsGenericsType())) {
             // 查询指定方法返回类型中泛型类型中出现的自定义类型
-            List<String> methodReturnGenericsCustomTypeList =
-                    methodArgReturnHandler.queryGenericsTypeInMethodReturn(springController.getFullMethod(), true);
+            List<String> methodReturnGenericsCustomTypeList = methodArgReturnHandler.queryGenericsTypeInMethodReturn(springController.getFullMethod(),
+                    springController.getReturnType(), true);
             // 记录有处理过的自定义类型
             customTypeSet.addAll(methodReturnGenericsCustomTypeList);
             for (String methodReturnGenericsType : methodReturnGenericsCustomTypeList) {

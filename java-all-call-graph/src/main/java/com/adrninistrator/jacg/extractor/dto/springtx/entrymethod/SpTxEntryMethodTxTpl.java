@@ -15,15 +15,19 @@ public class SpTxEntryMethodTxTpl extends AbstractInfoWithMethodHash {
     // 事务模板中调用的完整方法
     private final String txTplFullMethod;
 
+    // 事务模板中调用的方法返回类型
+    private final String txTplReturnType;
+
     // 调用事务模板的完整方法
     private final String callerFullMethod;
 
     // 调用事务模板的代码行号
     private final int callerLineNumber;
 
-    public SpTxEntryMethodTxTpl(SpecialCallTypeEnum callType, String txTplFullMethod, String callerFullMethod, int callerLineNumber) {
+    public SpTxEntryMethodTxTpl(SpecialCallTypeEnum callType, String txTplFullMethod, String txTplReturnType, String callerFullMethod, int callerLineNumber) {
         this.callType = callType;
         this.txTplFullMethod = txTplFullMethod;
+        this.txTplReturnType = txTplReturnType;
         this.callerFullMethod = callerFullMethod;
         this.callerLineNumber = callerLineNumber;
     }
@@ -34,6 +38,10 @@ public class SpTxEntryMethodTxTpl extends AbstractInfoWithMethodHash {
 
     public String getTxTplFullMethod() {
         return txTplFullMethod;
+    }
+
+    public String getTxTplReturnType() {
+        return txTplReturnType;
     }
 
     public String getCallerFullMethod() {
@@ -47,5 +55,10 @@ public class SpTxEntryMethodTxTpl extends AbstractInfoWithMethodHash {
     @Override
     protected String chooseFullMethod() {
         return txTplFullMethod;
+    }
+
+    @Override
+    protected String chooseMethodReturnType() {
+        return txTplReturnType;
     }
 }

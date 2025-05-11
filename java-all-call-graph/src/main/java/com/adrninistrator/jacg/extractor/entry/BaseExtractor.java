@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
@@ -50,10 +51,10 @@ public abstract class BaseExtractor {
      * @return
      */
     protected ListWithResult<String> findStack(ConfigureWrapper configureWrapper) {
-        // 判断生成调用链时的详细程度是否为详细
-        if (!OutputDetailEnum.ODE_1.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL))) {
-            logger.warn("生成调用链时的详细程度自动设置为详细 {} {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getConfigPrintInfo(), OutputDetailEnum.ODE_1.getDetail());
-            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_1.getDetail());
+        // 判断生成调用链时的详细程度是否为最详细
+        if (!OutputDetailEnum.ODE_0.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL))) {
+            logger.warn("生成调用链时的详细程度自动设置为最详细 {} {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getConfigPrintInfo(), OutputDetailEnum.ODE_0.getDetail());
+            configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_0.getDetail());
         }
 
         FindCallStackTrace findCallStackTrace = new FindCallStackTrace(chooseOrder4ee(), configureWrapper);
@@ -64,7 +65,6 @@ public abstract class BaseExtractor {
         List<String> callStackFilePathList = callStackFileResult.getStackFilePathList();
 
         // 执行完毕时打印当前使用的配置信息
-        // todo 检查效果
         configureWrapper.printUsedConfigInfo(currentSimpleClassName, findCallStackTrace.getCallGraphOutputDirPath(), JACGConstants.FILE_JACG_USED_CONFIG_MD);
         return new ListWithResult<>(callStackFilePathList);
     }
@@ -125,14 +125,16 @@ public abstract class BaseExtractor {
 
         callGraphExtractedFile.setMethodHash(methodHashInFileName);
         // 根据调用方完整方法HASH+长度，从方法调用表获取对应的完整方法
-        String fullMethod;
+        FullMethodWithReturnType fullMethodWithReturnType;
         if (order4ee) {
-            fullMethod = methodCallHandler.queryCalleeFullMethodByHash(callGraphExtractedFile.getMethodHash());
+            fullMethodWithReturnType = methodCallHandler.queryCalleeFullMethodByHash(callGraphExtractedFile.getMethodHash());
         } else {
-            fullMethod = methodCallHandler.queryCallerFullMethodByHash(callGraphExtractedFile.getMethodHash());
+            fullMethodWithReturnType = methodCallHandler.queryCallerFullMethodByHash(callGraphExtractedFile.getMethodHash());
         }
-        callGraphExtractedFile.setFullMethod(fullMethod);
-        if (fullMethod != null) {
+        if (fullMethodWithReturnType != null) {
+            String fullMethod = fullMethodWithReturnType.getFullMethod();
+            callGraphExtractedFile.setFullMethod(fullMethod);
+            callGraphExtractedFile.setReturnType(fullMethodWithReturnType.getReturnType());
             String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
             String simpleClassName = dbOperWrapper.querySimpleClassName(className);
             String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);

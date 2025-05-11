@@ -2,28 +2,24 @@
 
 ## 1.1. 生成包含关键字的所有方法到起始方法之间的调用链
 
-通常情况下，生成的向上或向下的Java方法完整调用链内容通常会比较多，如果只关注某个方法到起始方法之间的调用链时，可以按照以下步骤进行处理。相当于将关注的树形结构的方法调用链转换为多个链表的形式。
+通常情况下，生成的向上或向下的 Java 方法完整调用链内容通常会比较多，如果只关注某个方法到起始方法之间的调用链时，可以按照以下步骤进行处理。相当于将关注的树形结构的方法调用链转换为多个链表的形式。
 
-如果需要生成包含关键字的所有方法到起始方法之间的调用链，例如获得入口方法到被调用的起始方法之间的调用链，或起始方法到Mybatis的Mapper之间的调用链等场景，可以按照以下步骤生成：
+如果需要生成包含关键字的所有方法到起始方法之间的调用链，例如获得入口方法到被调用的起始方法之间的调用链，或起始方法到 Mybatis 的 Mapper 之间的调用链等场景，可以按照以下步骤生成：
 
-执行以下java类：
+执行以下 java 类：
 
 |完整类名|说明|
 |---|---|
 |test.jacg.TestFindCallStackTrace4ee|处理向上的完整调用链文件，按照层级减小的方向显示|
 |test.jacg.TestFindCallStackTrace4er|处理向下的完整调用链文件，按照层级增大的方向显示|
 
-以上类在执行时支持不指定程序参数（即main()方法处理的参数），或指定程序参数，建议使用不指定程序参数的方式。
+以上类在执行时支持不指定程序参数（即 main() 方法处理的参数），或指定程序参数，建议使用不指定程序参数的方式。
 
 - 不指定程序参数
 
 执行以上类时不指定程序参数，则会先生成对应的向上（或向下）方法完整调用链，再对生成目录的文件根据关键字生成到起始方法的调用链。
 
-执行TestFindCallStackTrace4ee类时，关键字在配置文件“_jacg_find_keyword/find_keyword_4callee.properties”中指定；执行TestFindCallStackTrace4er类时，关键字在配置文件“_jacg_find_keyword/find_keyword_4caller.properties”中指定。
-
-- 指定程序参数
-
-在程序参数中指定对应的向上或向下的Java方法完整调用链文件路径，及对应的关键字，支持批量查询，格式为“\[完整调用链文件路径/保存完整调用链文件的目录路径\] \[关键字1\] \[关键字2\] ... \[关键字n\]”。
+执行 TestFindCallStackTrace4ee 类时，关键字在配置文件“_jacg_find_keyword/find_keyword_4callee.properties”中指定；执行 TestFindCallStackTrace4er 类时，关键字在配置文件“_jacg_find_keyword/find_keyword_4caller.properties”中指定。
 
 - 生成结果示例
 
@@ -32,17 +28,17 @@
 假如希望知道包含关键字“!entry!”的所有方法到起始方法“\[0\]#DestClass.destfunc()”之间的调用关系，执行以上类生成调用关系如下：
 
 ```
-# 行号: 4
+# 行号：4
 [0]#DestClass.destfunc()
 [1]#  ClassA3.funcA3()	(ClassA3:10)
 [2]#    ClassA2.funcA2()	(ClassA2:19)
 [3]#      ClassA1.funcA1()	(ClassA1:23)    !entry!
 
-# 行号: 5
+# 行号：5
 [0]#DestClass.destfunc()
 [1]#  ClassB1.funcB1()	(ClassB1:57)    !entry!
 
-# 行号: 7
+# 行号：7
 [0]#DestClass.destfunc()
 [1]#  ClassC2.funcC2()	(ClassC2:31)
 [2]#    ClassC1.funcC1()	(ClassC1:9)    !entry!
@@ -54,7 +50,7 @@
 
 - 获取方式
 
-假如存在调用链“ a -> b -> c -> d -> e ”，将方法a称为入口方法（即向上没有被其他方法调用的方法），获得从哪些入口方法会直接或间接调用到方法e（或b、c、d），可以使用以下方法获取：
+假如存在调用链“ a -> b -> c -> d -> e ”，将方法 a 称为入口方法（即向上没有被其他方法调用的方法），获得从哪些入口方法会直接或间接调用到方法 e（或 b、c、d），可以使用以下方法获取：
 
 ```java
 com.adrninistrator.jacg.extractor.entry.CalleeGraphBaseExtractor#baseExtract(com.adrninistrator.jacg.conf.ConfigureWrapper)
@@ -89,7 +85,6 @@ public class TestMCCaller {
 ```
 
 通过以上方式获取调用 TestMCCallee.testFindEntry() 方法的入口方法的结果，找到对应的入口方法： TestMCCaller:testFindEntryB1() 、TestMCCaller:testFindEntryA1() ，示例如下：
-
 
 ```log
 {
@@ -159,7 +154,7 @@ public class TestMCCaller {
 
 ### 1.2.1. 执行顺序
 
-使用以上方式，首先需要使对应jar包完成解析并写入数据库，使用以下方法：
+使用以上方式，首先需要使对应 jar 包完成解析并写入数据库，使用以下方法：
 
 ```
 com.adrninistrator.jacg.runner.RunnerWriteDb:run()
@@ -167,9 +162,9 @@ com.adrninistrator.jacg.runner.RunnerWriteDb:run()
 
 ## 1.3. 处理循环方法调用
 
-在生成Java方法完整调用链时，若出现了循环方法调用，本工具会从循环调用中跳出，并在生成的方法调用链中对出现循环调用的方法增加标记“!cycle\[n\]!”，其中n代表被循环调用的方法对应层级。
+在生成 Java 方法完整调用链时，若出现了循环方法调用，本工具会从循环调用中跳出，并在生成的方法调用链中对出现循环调用的方法增加标记“!cycle\[n\]!”，其中 n 代表被循环调用的方法对应层级。
 
-生成向上的Java方法完整调用链时，出现循环方法调用的示例如下：
+生成向上的 Java 方法完整调用链时，出现循环方法调用的示例如下：
 
 ```
 org.springframework.transaction.TransactionDefinition:getIsolationLevel()
@@ -178,7 +173,7 @@ org.springframework.transaction.TransactionDefinition:getIsolationLevel()
 [2]#    org.springframework.transaction.TransactionDefinition:getIsolationLevel	(TransactionDefinition:0)	!cycle[0]!
 ```
 
-生成向下的Java方法完整调用链时，出现循环方法调用的示例如下：
+生成向下的 Java 方法完整调用链时，出现循环方法调用的示例如下：
 
 ```
 org.springframework.transaction.support.TransactionTemplate:execute(org.springframework.transaction.support.TransactionCallback)
@@ -191,4 +186,22 @@ org.springframework.transaction.support.TransactionTemplate:execute(org.springfr
 [4]#        [TransactionDefinition:0]	org.springframework.transaction.support.DefaultTransactionDefinition:getTimeout
 [4]#        [TransactionDefinition:0]	org.springframework.transaction.support.DelegatingTransactionDefinition:getTimeout
 [5]#          [DelegatingTransactionDefinition:61]	org.springframework.transaction.TransactionDefinition:getTimeout	!cycle[3]!
+```
+
+## 1.4. 比较 jar 包方法变化并生成影响范围
+
+- 作用
+
+用于比较新旧两个目录中不同版本 jar 包的方法修改情况，以及新目录中修改方法的影响范围
+
+- 入口类
+
+com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCalleeGraph
+
+- 示例代码
+
+```
+test.runbycode.jardiffcalleegraph.TestRBCRunnerGenJarDiffCalleeGraphDiffSame
+test.runbycode.jardiffcalleegraph.TestRBCRunnerGenJarDiffCalleeGraphOneJarDiff
+test.runbycode.jardiffcalleegraph.TestRBCRunnerGenJarDiffCalleeGraphOneJarSame
 ```

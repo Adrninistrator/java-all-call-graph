@@ -6,7 +6,12 @@ package test.callgraph.interfacesgeneric.classes;
  * @description:
  */
 public class GenericClassImplSuper2b2 extends GenericAbstractSuper2<String[], byte[]> {
+
     @Override
     public void test(String[] a1, byte[] a2, String str, int i) {
+        doTest();
+    }
+
+    private void doTest() {
     }
 }

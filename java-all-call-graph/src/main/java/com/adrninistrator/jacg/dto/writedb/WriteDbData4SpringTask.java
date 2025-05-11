@@ -15,6 +15,7 @@ public class WriteDbData4SpringTask implements BaseWriteDbData {
     private String methodName;
     private String type;
     private String fullMethod;
+    private String returnType;
 
     public int getRecordId() {
         return recordId;
@@ -70,5 +71,13 @@ public class WriteDbData4SpringTask implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }

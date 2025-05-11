@@ -15,6 +15,9 @@ public class CallerTaskInfo {
     // 调用方方法名，可包括参数
     private String callerMethodName;
 
+    // 调用方方法返回类型
+    private String callerReturnType;
+
     // 调用方方法代码行号
     private int methodLineNumber;
 
@@ -49,6 +52,14 @@ public class CallerTaskInfo {
 
     public void setCallerMethodName(String callerMethodName) {
         this.callerMethodName = callerMethodName;
+    }
+
+    public String getCallerReturnType() {
+        return callerReturnType;
+    }
+
+    public void setCallerReturnType(String callerReturnType) {
+        this.callerReturnType = callerReturnType;
     }
 
     public int getMethodLineNumber() {

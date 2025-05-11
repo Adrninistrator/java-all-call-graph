@@ -468,18 +468,18 @@ public class JACGCallGraphFileUtil {
     // 处理完整方法及注解
     private static void handleFullMethodWithAnnotations(CallGraphLineParsed callGraphLineParsed, String fullMethodWithAnnotations) {
         int index = fullMethodWithAnnotations.indexOf(JACGConstants.FLAG_AT);
-        String fullMethod;
+        String fullMethodWithReturnType;
         if (index == -1) {
             // 方法上不存在注解
-            fullMethod = fullMethodWithAnnotations;
+            fullMethodWithReturnType = fullMethodWithAnnotations;
         } else {
             // 方法上存在注解
-            fullMethod = fullMethodWithAnnotations.substring(0, index);
+            fullMethodWithReturnType = fullMethodWithAnnotations.substring(0, index);
             String annotations = fullMethodWithAnnotations.substring(index + JACGConstants.FLAG_AT.length());
             String[] annotationArray = StringUtils.splitPreserveAllTokens(annotations, JACGConstants.FLAG_AT);
             callGraphLineParsed.setAnnotations(annotationArray);
         }
-        MethodDetail methodDetail = JACGClassMethodUtil.genMethodDetail(fullMethod);
+        MethodDetail methodDetail = JACGClassMethodUtil.genMethodDetail(fullMethodWithReturnType);
         callGraphLineParsed.setMethodDetail(methodDetail);
     }
 

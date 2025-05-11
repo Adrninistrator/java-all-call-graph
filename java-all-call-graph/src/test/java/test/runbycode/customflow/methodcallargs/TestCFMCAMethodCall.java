@@ -49,7 +49,7 @@ public class TestCFMCAMethodCall extends TestRunByCodeBase {
 
     @Test
     public void test1AddMethodCall() {
-        commonWriteDb();
+        commonWriteDbForce();
         // 添加方法调用关系，需要在写数据库之后执行
         try (CFMCAMethodCallHandler cfmcaMethodCallHandler = new CFMCAMethodCallHandler(configureWrapper)) {
             cfmcaMethodCallHandler.addMethodCall();

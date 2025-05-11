@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.dto.infowithhash.AbstractInfoWithMethodHash;
 import com.adrninistrator.jacg.extensions.findstackfilter.SpringTxMethodCallFilter;
-import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedFile;
 import com.adrninistrator.jacg.extractor.dto.springtx.entrymethod.SpTxEntryMethodTxAnnotation;
 import com.adrninistrator.jacg.extractor.dto.springtx.entrymethod.SpTxEntryMethodTxTpl;
@@ -88,7 +87,7 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
         for (CallerExtractedFile callerExtractedFile : callerExtractedFileList.getList()) {
             String txEntryFullMethod = callerExtractedFile.getFullMethod();
             // 查询事务注解对应的事务传播行为
-            String txPropagation = queryTxAnnotationPropagation(annotationHandler, txEntryFullMethod);
+            String txPropagation = queryTxAnnotationPropagation(annotationHandler, txEntryFullMethod, callerExtractedFile.getReturnType());
             SpTxEntryMethodTxAnnotation spTxEntryMethodTxAnnotation = new SpTxEntryMethodTxAnnotation(txEntryFullMethod, txPropagation);
 
             // 根据调用堆栈文件，生成Spring事务被调用信息列表
@@ -96,7 +95,7 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
 
             SpTxNestedByAnnotationFile spTxNestedByAnnotationFile = new SpTxNestedByAnnotationFile(spTxEntryMethodTxAnnotation,
                     spTxCalleeInfoList);
-            AbstractCallGraphExtractedFile.copy(callerExtractedFile, spTxNestedByAnnotationFile);
+            spTxNestedByAnnotationFile.copy(callerExtractedFile);
             spTxNestedByAnnotationFileList.add(spTxNestedByAnnotationFile);
         }
         return new ListWithResult<>(spTxNestedByAnnotationFileList);
@@ -130,9 +129,8 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
             // 根据调用堆栈文件，生成Spring事务被调用信息列表
             List<SpTxCalleeInfo> spTxCalleeInfoList = genSpTxCalleeInfoList(annotationHandler, callerExtractedFile.getCallerExtractedLineList());
             SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = spTxEntryMethodTxTplMap.get(callerExtractedFile.getMethodHash());
-            SpTxNestedByTplFile spTxNestedByTplFile = new SpTxNestedByTplFile(spTxEntryMethodTxTpl,
-                    spTxCalleeInfoList);
-            AbstractCallGraphExtractedFile.copy(callerExtractedFile, spTxNestedByTplFile);
+            SpTxNestedByTplFile spTxNestedByTplFile = new SpTxNestedByTplFile(spTxEntryMethodTxTpl, spTxCalleeInfoList);
+            spTxNestedByTplFile.copy(callerExtractedFile);
             spTxNestedByTplFileList.add(spTxNestedByTplFile);
         }
 

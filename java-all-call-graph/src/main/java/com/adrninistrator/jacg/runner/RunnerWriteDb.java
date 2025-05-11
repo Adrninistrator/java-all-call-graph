@@ -80,6 +80,7 @@ import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.dto.output.JavaCG2OutputInfo;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
@@ -125,6 +126,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
     // 跳过调用java-callgraph2的步骤
     private boolean skipCallJavaCG2 = false;
+
+    public static void main(String[] args) {
+        boolean success = new RunnerWriteDb().run();
+        if (!success) {
+            throw new JavaCG2RuntimeException("执行失败");
+        }
+    }
 
     /**
      * 构造函数，使用配置文件中的参数
@@ -268,12 +276,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
-        JavaCG2Counter springTaskAnnotationCounter = new JavaCG2Counter();
-        // 处理Spring相关信息（不包括Spring Controller）
-        if (!handleSpringInfo(springTaskAnnotationCounter)) {
-            return false;
-        }
-
         Set<String> withArgsGenericsTypeMethodHash = new HashSet<>();
         Set<String> withReturnGenericsTypeMethodHash = new HashSet<>();
         Set<Integer> withInfoCallIdSet = new HashSet<>();
@@ -282,8 +284,14 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
-        // 以下处理注解信息时会处理 Spring Controller ，需要等前面的方法相关信息处理完毕
+        // 以下处理注解信息时会处理 Spring Task、Controller ，需要等前面的方法相关信息处理完毕
         wait4TPEDone();
+
+        JavaCG2Counter springTaskAnnotationCounter = new JavaCG2Counter();
+        // 处理Spring相关信息（不包括Spring Controller）
+        if (!handleSpringInfo(springTaskAnnotationCounter)) {
+            return false;
+        }
 
         Set<String> withAnnotationMethodHashSet = new HashSet<>();
         // 处理注解信息

@@ -98,7 +98,7 @@ public class ClassLineNumberHandler extends BaseHandler {
         for (BaseWriteDbData4GetSetMethod getSetMethod : getSetMethodList.getList()) {
             String getMethodName = getSetMethod.isGetOrSet() ? getSetMethod.getMethodName() : "";
             String setMethodName = getSetMethod.isGetOrSet() ? "" : getSetMethod.getMethodName();
-            FieldBehavior fieldBehavior = new FieldBehavior(getSetMethod.getClassName(), getSetMethod.getFieldName(), getSetMethod.getFieldType(), getMethodName, setMethodName,
+            FieldBehavior fieldBehavior = new FieldBehavior(getSetMethod.getClassName(), getSetMethod.getFieldName(), getSetMethod.getFieldTypeNad(), getMethodName, setMethodName,
                     getSetMethod.isGetOrSet(), 0);
             for (FieldBehaviorFillerInterface fieldBehaviorFiller : fieldBehaviorFillers) {
                 FieldRelationshipIdTypeEnum fieldRelationshipIdTypeEnum = getSetMethod.isGetOrSet() ? FieldRelationshipIdTypeEnum.FRITE_GET_METHOD_CALL_ID :

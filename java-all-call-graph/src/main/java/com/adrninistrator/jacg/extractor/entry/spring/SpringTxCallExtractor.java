@@ -7,7 +7,6 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.dto.infowithhash.AbstractInfoWithMethodHash;
 import com.adrninistrator.jacg.extractor.dto.common.extract.BaseCalleeExtractedMethod;
-import com.adrninistrator.jacg.extractor.dto.common.extractfile.AbstractCallGraphExtractedFile;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedFile;
 import com.adrninistrator.jacg.extractor.dto.springtx.entrymethod.SpTxEntryMethodTxAnnotation;
 import com.adrninistrator.jacg.extractor.dto.springtx.entrymethod.SpTxEntryMethodTxTpl;
@@ -95,7 +94,7 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
         for (CallerExtractedFile callerExtractedFile : callerExtractedFileList.getList()) {
             String txEntryFullMethod = callerExtractedFile.getFullMethod();
             // 查询事务注解对应的事务传播行为
-            String txPropagation = queryTxAnnotationPropagation(annotationHandler, txEntryFullMethod);
+            String txPropagation = queryTxAnnotationPropagation(annotationHandler, txEntryFullMethod, callerExtractedFile.getReturnType());
             SpTxEntryMethodTxAnnotation spTxEntryMethodTxAnnotation = new SpTxEntryMethodTxAnnotation(txEntryFullMethod, txPropagation);
 
             // 根据调用堆栈文件，生成Spring事务被调用信息列表
@@ -103,7 +102,7 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
 
             SpTxCallByAnnotationFile spTxCallByAnnotationFile = new SpTxCallByAnnotationFile(spTxEntryMethodTxAnnotation,
                     calleeExtractedMethodList);
-            AbstractCallGraphExtractedFile.copy(callerExtractedFile, spTxCallByAnnotationFile);
+            spTxCallByAnnotationFile.copy(callerExtractedFile);
             spTxCallByAnnotationFileList.add(spTxCallByAnnotationFile);
         }
         // 文件信息列表排序
@@ -141,7 +140,7 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
             SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = spTxEntryMethodTxTplMap.get(callerExtractedFile.getMethodHash());
             SpTxCallByTplFile spTxCallByTplFile = new SpTxCallByTplFile(spTxEntryMethodTxTpl,
                     calleeExtractedMethodList);
-            AbstractCallGraphExtractedFile.copy(callerExtractedFile, spTxCallByTplFile);
+            spTxCallByTplFile.copy(callerExtractedFile);
             spTxCallByTplFileList.add(spTxCallByTplFile);
         }
         // 文件信息列表排序

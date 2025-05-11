@@ -51,11 +51,11 @@ public class ClassExtImplGenericsTypeHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CEIGT_QUERY_GENERICS_TYPE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + DC.CEIGT_GENERICS_TYPE +
+            sql = "select " + DC.CEIGT_GENERICS_TYPE_NAD +
                     " from " + DbTableInfoEnum.DTIE_CLASS_EXT_IMPL_GENERICS_TYPE.getTableName() +
                     " where " + DC.CEIGT_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.CEIGT_SUPER_ITF_CLASS_NAME + " = ?" +
-                    " and " + DC.CEIGT_GENERICS_TYPE + " != ''" +
+                    " and " + DC.CEIGT_GENERICS_TYPE_NAD + " != ''" +
                     " order by " + JACGSqlUtil.joinColumns(DC.CEIGT_SEQ, DC.CEIGT_GENERICS_SEQ);
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }

@@ -1,5 +1,7 @@
 package test.runbycodemain;
 
+import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import org.junit.Test;
 import test.annotation.JACGExample;
@@ -17,6 +19,7 @@ public class TestRBCFindCallStackTrace4er extends TestRunByCodeBase {
 
     @Test
     public void test() {
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_0.getDetail());
         runFindCallStackTraceAndCheck(new FindCallStackTrace(false, configureWrapper));
     }
 }

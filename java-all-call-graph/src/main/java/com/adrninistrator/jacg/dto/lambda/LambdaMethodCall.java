@@ -18,6 +18,12 @@ public class LambdaMethodCall {
     // 被调用方完整方法（Lambda表达式中实际被调用的方法）
     private String calleeFullMethod;
 
+    /*
+        被调用方返回类型（Lambda表达式中实际被调用的方法）
+        与method_call表的raw_return_type字段名称保持一致
+     */
+    private String rawReturnType;
+
     // 被调用的Lambda表达式完整方法
     private String lambdaCalleeFullMethod;
 
@@ -66,6 +72,14 @@ public class LambdaMethodCall {
 
     public void setCalleeFullMethod(String calleeFullMethod) {
         this.calleeFullMethod = calleeFullMethod;
+    }
+
+    public String getRawReturnType() {
+        return rawReturnType;
+    }
+
+    public void setRawReturnType(String rawReturnType) {
+        this.rawReturnType = rawReturnType;
     }
 
     public String getLambdaCalleeFullMethod() {

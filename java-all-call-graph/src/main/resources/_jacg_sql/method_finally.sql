@@ -9,6 +9,7 @@ CREATE TABLE if not exists jacg_method_finally_{appName} (
   try_catch_max_call_id int NOT NULL COMMENT 'try或catch代码块最大方法调用ID',
   finally_start_line_number int NOT NULL COMMENT 'finally代码块开始代码行号',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
+  return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
   INDEX idx_mf_mh_{appName}(method_hash),
   INDEX idx_mf_scn_{appName}(simple_class_name)

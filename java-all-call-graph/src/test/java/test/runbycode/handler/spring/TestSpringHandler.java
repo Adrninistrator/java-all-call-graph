@@ -50,20 +50,21 @@ public class TestSpringHandler extends TestRunByCodeBase {
     @Test
     public void testQueryControllerUriList() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
-            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "<init>"), false);
-            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test1"), true);
+            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "<init>"), "void", false);
+            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test1"), "void", true);
             doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController1.class.getName(), "test2",
-                    TestUseFieldGenericsCycle1.class.getName()), true);
-            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController2.class.getName(), "test1", TestField1.class.getName()), true);
+                    TestUseFieldGenericsCycle1.class.getName()), "void", true);
+            doQueryControllerUriList(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(TestSpringController2.class.getName(), "test1", TestField1.class.getName()), "void"
+                    , true);
         }
     }
 
-    private void doQueryControllerUriList(SpringHandler springHandler, String fullMethod, boolean exists) {
-        List<String> controllerUriList = springHandler.queryControllerUriList(fullMethod);
+    private void doQueryControllerUriList(SpringHandler springHandler, String fullMethod, String returnType, boolean exists) {
+        List<String> controllerUriList = springHandler.queryControllerUriList(fullMethod, returnType);
         Assert.assertEquals(exists, !JavaCG2Util.isCollectionEmpty(controllerUriList));
         printListContent(controllerUriList, fullMethod);
 
-        String controllerUri = springHandler.queryControllerUri(fullMethod);
+        String controllerUri = springHandler.queryControllerUri(fullMethod, returnType);
         Assert.assertEquals(exists, StringUtils.isNotBlank(controllerUri));
         printObjectContent(controllerUri, fullMethod);
     }
@@ -83,13 +84,13 @@ public class TestSpringHandler extends TestRunByCodeBase {
     @Test
     public void testCheckSpringTask() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
-            doCheckSpringTask(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(SpringServiceImplA1.class.getName(), "test1"));
-            doCheckSpringTask(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(SpringServiceImplA1.class.getName(), "test2"));
+            doCheckSpringTask(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(SpringServiceImplA1.class.getName(), "test1"), "void");
+            doCheckSpringTask(springHandler, JavaCG2ClassMethodUtil.formatFullMethodStr(SpringServiceImplA1.class.getName(), "test2"), String.class.getName());
         }
     }
 
-    private void doCheckSpringTask(SpringHandler springHandler, String fullMethod) {
-        boolean isSpringTask = springHandler.checkSpringTask(fullMethod);
-        printObjectContent(isSpringTask, fullMethod);
+    private void doCheckSpringTask(SpringHandler springHandler, String fullMethod, String returnType) {
+        boolean isSpringTask = springHandler.checkSpringTask(fullMethod, returnType);
+        printObjectContent(isSpringTask, fullMethod, returnType);
     }
 }

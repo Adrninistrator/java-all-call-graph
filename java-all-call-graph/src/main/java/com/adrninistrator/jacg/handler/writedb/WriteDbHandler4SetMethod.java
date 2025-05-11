@@ -18,8 +18,8 @@ import java.util.Set;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_SET_METHOD,
-        minColumnNum = 7,
-        maxColumnNum = 7,
+        minColumnNum = 8,
+        maxColumnNum = 8,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_SET_METHOD
 )
 public class WriteDbHandler4SetMethod extends AbstractWriteDbHandler4GetSetMethod<WriteDbData4SetMethod> {

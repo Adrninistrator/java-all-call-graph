@@ -9,7 +9,8 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
-import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
+import com.adrninistrator.jacg.dto.lambda.LambdaMethodCall;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.extractor.common.enums.SpringTxTypeEnum;
@@ -22,6 +23,7 @@ import com.adrninistrator.jacg.extractor.entry.CallerGraphBaseExtractor;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByClassMethodName;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -48,7 +51,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
      * @return
      */
     protected ListWithResult<CallerExtractedFile> extractTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
-        List<String> springTransactionalMethodList = annotationHandler.queryMethodsWithAnnotation(true, JACGCommonNameConstants.SPRING_TX_ANNOTATION);
+        List<FullMethodWithReturnType> springTransactionalMethodList = annotationHandler.queryMethodsWithAnnotation(JACGCommonNameConstants.SPRING_TX_ANNOTATION);
         if (springTransactionalMethodList == null) {
             return ListWithResult.genFail();
         }
@@ -57,9 +60,10 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
             return ListWithResult.genEmpty();
         }
 
-        logger.info("找到@Transactional注解对应的方法\n{}", StringUtils.join(springTransactionalMethodList, "\n"));
         // 设置入口方法
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, new HashSet<>(springTransactionalMethodList));
+        Set<String> entryMethodSet = new HashSet<>(JACGClassMethodUtil.genFullMethodWithReturnTypeStrList(springTransactionalMethodList));
+        logger.info("找到@Transactional注解对应的方法\n{}", StringUtils.join(entryMethodSet, "\n"));
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, entryMethodSet);
 
         // 调用父类的方法生成调用堆栈文件，参数2设为false，使父类不关闭数据源
         ListWithResult<CallerExtractedFile> callerExtractedFileList = baseExtract(configureWrapper, false);
@@ -125,19 +129,19 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         // 查询TransactionTemplate使用Lambda表达式的方法
         try (LambdaMethodHandlerByClassMethodName lambdaMethodHandlerByClassMethodName = new LambdaMethodHandlerByClassMethodName(configureWrapper)) {
             // 查询通过Lambda表达式使用TransactionTemplate的情况
-            List<LambdaMethodCallDetail> lambdaMethodCallDetailList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaCallee(
+            List<LambdaMethodCall> lambdaMethodCallList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaCallee(
                     JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK, JavaCG2CommonNameConstants.METHOD_DO_IN_TRANSACTION);
-            if (!JavaCG2Util.isCollectionEmpty(lambdaMethodCallDetailList)) {
-                List<String> lambdaEntryMethodList = new ArrayList<>(lambdaMethodCallDetailList.size());
+            if (!JavaCG2Util.isCollectionEmpty(lambdaMethodCallList)) {
+                List<String> lambdaEntryMethodList = new ArrayList<>(lambdaMethodCallList.size());
 
-                for (LambdaMethodCallDetail lambdaMethodCallDetail : lambdaMethodCallDetailList) {
-                    SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = new SpTxEntryMethodTxTpl(SpecialCallTypeEnum.SCTE_LAMBDA, lambdaMethodCallDetail.getCalleeFullMethod(),
-                            lambdaMethodCallDetail.getCallerFullMethod(), lambdaMethodCallDetail.getCallerLineNumber());
+                for (LambdaMethodCall lambdaMethodCall : lambdaMethodCallList) {
+                    SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = new SpTxEntryMethodTxTpl(SpecialCallTypeEnum.SCTE_LAMBDA, lambdaMethodCall.getCalleeFullMethod(),
+                            lambdaMethodCall.getRawReturnType(), lambdaMethodCall.getCallerFullMethod(), lambdaMethodCall.getCallerLineNumber());
                     spTxEntryMethodTxTplList.add(spTxEntryMethodTxTpl);
-                    lambdaEntryMethodList.add(lambdaMethodCallDetail.getCalleeFullMethod());
+                    lambdaEntryMethodList.add(lambdaMethodCall.getCalleeFullMethod());
                 }
 
-                logger.info("找到TransactionTemplate使用Lambda表达式的方法\n{}", StringUtils.join(lambdaMethodCallDetailList, "\n"));
+                logger.info("找到TransactionTemplate使用Lambda表达式的方法\n{}", StringUtils.join(lambdaMethodCallList, "\n"));
                 txTplEntryMethodList.addAll(lambdaEntryMethodList);
             }
         }
@@ -165,7 +169,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
             for (WriteDbData4MethodCall methodCall : methodCallList) {
                 // 记录Spring事务入口方法
                 SpTxEntryMethodTxTpl spTxEntryMethodTxTpl = new SpTxEntryMethodTxTpl(SpecialCallTypeEnum.SCTE_ANONYMOUS_INNER_CLASS, methodCall.getCalleeFullMethod(),
-                        methodCall.getCallerFullMethod(), methodCall.getCallerLineNumber());
+                        methodCall.getRawReturnType(), methodCall.getCallerFullMethod(), methodCall.getCallerLineNumber());
                 spTxEntryMethodTxTplList.add(spTxEntryMethodTxTpl);
                 txTplEntryMethodList.add(methodCall.getCalleeFullMethod());
             }
@@ -200,7 +204,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
                 // 类型为事务注解
                 springTxTypeEnum = SpringTxTypeEnum.STTE_ANNOTATION;
                 // 查询事务注解对应的事务传播行为
-                txPropagation = queryTxAnnotationPropagation(annotationHandler, callGraphLineMethodDetail.getFullMethod());
+                txPropagation = queryTxAnnotationPropagation(annotationHandler, callGraphLineMethodDetail.getFullMethod(), callGraphLineMethodDetail.getReturnType());
             }
             SpTxCalleeInfo spTxCalleeInfo = new SpTxCalleeInfo(callerExtractedLine.getDataSeq(),
                     callerExtractedLine.getLineNumber(),
@@ -241,8 +245,8 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
     }
 
     // 查询事务注解对应的事务传播行为
-    protected String queryTxAnnotationPropagation(AnnotationHandler annotationHandler, String fullMethod) {
-        return annotationHandler.querySpringTxAnnotationPropagation(fullMethod);
+    protected String queryTxAnnotationPropagation(AnnotationHandler annotationHandler, String fullMethod, String returnType) {
+        return annotationHandler.querySpringTxAnnotationPropagation(fullMethod, returnType);
     }
 
     // 指定公共配置参数
@@ -252,16 +256,5 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
                 SpringTransactionalFormatter.class.getName(),
                 DefaultAnnotationFormatter.class.getName()
         );
-
-        // 在需要处理的类名前缀中增加Spring事务模板类
-        setAllowedClassNamePrefix(configureWrapper);
-    }
-
-    // 在需要处理的类名前缀中增加Spring事务模板类
-    public void setAllowedClassNamePrefix(ConfigureWrapper configureWrapper) {
-//    todo    configureWrapper.addAllowedClassNamePrefixes(JACGCommonNameConstants.SPRING_TRANSACTION_TEMPLATE_CLASS,
-//                JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK_WITHOUT_RESULT,
-//                JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK
-//        );
     }
 }

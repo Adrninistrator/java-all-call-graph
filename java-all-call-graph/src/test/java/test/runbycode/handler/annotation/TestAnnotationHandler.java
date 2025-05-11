@@ -2,6 +2,7 @@ package test.runbycode.handler.annotation;
 
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldAnnotation;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -69,13 +70,14 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     @Test
     public void testQueryMethodsWithAnnotationsFullMethod() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
-            List<String> methodList = annotationHandler.queryMethodsWithAnnotation(true, PostMapping.class.getName());
+            List<FullMethodWithReturnType> methodList = annotationHandler.queryMethodsWithAnnotation(PostMapping.class.getName());
             Assert.assertFalse(JavaCG2Util.isCollectionEmpty(methodList));
             printListContent(methodList, "methodList");
-            for (String method : methodList) {
-                Map<String, BaseAnnotationAttribute> map = annotationHandler.queryMethodAnnotationAttributes(method, PostMapping.class.getName());
+            for (FullMethodWithReturnType method : methodList) {
+                Map<String, BaseAnnotationAttribute> map = annotationHandler.queryMethodAnnotationAttributes(method.getFullMethod(), method.getReturnType(),
+                        PostMapping.class.getName());
                 Assert.assertFalse(JavaCG2Util.isMapEmpty(map));
-                printMapContent(map, method, PostMapping.class.getName());
+                printMapContent(map, method.getFullMethod(), method.getReturnType(), PostMapping.class.getName());
             }
         }
     }
@@ -83,7 +85,7 @@ public class TestAnnotationHandler extends TestRunByCodeBase {
     @Test
     public void testQueryMethodsWithAnnotationsMethodHash() {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
-            List<String> methodHashList = annotationHandler.queryMethodsWithAnnotation(false, Bean.class.getName());
+            List<String> methodHashList = annotationHandler.queryMethodHashWithAnnotation(Bean.class.getName());
             Assert.assertFalse(JavaCG2Util.isCollectionEmpty(methodHashList));
             printListContent(methodHashList, "methodHashList");
         }

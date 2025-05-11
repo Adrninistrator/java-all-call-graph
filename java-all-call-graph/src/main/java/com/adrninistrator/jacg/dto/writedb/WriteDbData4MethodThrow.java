@@ -21,6 +21,7 @@ public class WriteDbData4MethodThrow implements BaseWriteDbData {
     private String catchExceptionVariableName;
     private Integer callId;
     private String fullMethod;
+    private String returnType;
 
     public int getRecordId() {
         return recordId;
@@ -116,5 +117,13 @@ public class WriteDbData4MethodThrow implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }

@@ -2,7 +2,7 @@ package test.runbycode.handler.methodcall.handler;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallInfo4Read;
 import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
@@ -35,17 +35,18 @@ public class StringAppendCharMethodCallByEEDetailHandler extends BaseMethodCallB
     }
 
     @Override
-    protected boolean chooseHandleMethod(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail) {
-        if (StringBuilder.class.getName().equals(calleeMethodDetail.getClassName())
-                && "append".equals(calleeMethodDetail.getMethodName())
-                && !JavaCG2ConstantTypeEnum.CONSTTE_CHAR.getType().equals(calleeMethodDetail.getArgTypeStr())) {
+    protected boolean chooseHandleMethod(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
+                                         MethodDetailNoReturnType calleeMethodDetailNoReturnType) {
+        if (StringBuilder.class.getName().equals(calleeMethodDetailNoReturnType.getClassName())
+                && "append".equals(calleeMethodDetailNoReturnType.getMethodName())
+                && !JavaCG2ConstantTypeEnum.CONSTTE_CHAR.getType().equals(calleeMethodDetailNoReturnType.getArgTypeStr())) {
             return false;
         }
         return true;
     }
 
     @Override
-    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail,
+    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType, MethodDetailNoReturnType calleeMethodDetailNoReturnType,
                                         ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args) {
         List<String> argTypeList = Arrays.asList(
                 String.class.getName(),
@@ -55,7 +56,7 @@ public class StringAppendCharMethodCallByEEDetailHandler extends BaseMethodCallB
         );
 
         // 获取类型匹配的被调用对象及参数的用于人工查看的方法调用中使用的相关信息
-        Map<Integer, List<MethodCallInfo4Read>> methodCallInfo4ReadMap = JACGMethodCallInfoUtil.genMethodCallInfo4ReadMapByArgType(calleeMethodDetail, objArgsInfoInMethodCall,
+        Map<Integer, List<MethodCallInfo4Read>> methodCallInfo4ReadMap = JACGMethodCallInfoUtil.genMethodCallInfo4ReadMapByArgType(calleeMethodDetailNoReturnType, objArgsInfoInMethodCall,
                 argTypeList);
         if (!methodCallInfo4ReadMap.isEmpty()) {
             List<Integer> seqList = new ArrayList<>(methodCallInfo4ReadMap.keySet());

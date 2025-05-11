@@ -1,13 +1,19 @@
 package com.adrninistrator.jacg.handler.dto.spring;
 
-import com.adrninistrator.jacg.dto.methodcall.MethodCallPair;
-
 /**
  * @author adrninistrator
  * @date 2023/3/6
  * @description: Spring非法的事务注解方法调用
  */
-public class SpringInvalidTxAnnotationMethodCall extends MethodCallPair {
+public class SpringInvalidTxAnnotationMethodCall {
+    // 调用方完整方法
+    private final String callerFullMethod;
+
+    // 调用方代码行号
+    private final int callerLineNumber;
+
+    // 被调用方完整方法
+    private final String calleeFullMethod;
 
     // 调用方法是否使用了Spring事务注解
     private final boolean callerWithSpringTx;
@@ -20,10 +26,24 @@ public class SpringInvalidTxAnnotationMethodCall extends MethodCallPair {
 
     public SpringInvalidTxAnnotationMethodCall(String callerFullMethod, int callerLineNumber, String calleeFullMethod, boolean callerWithSpringTx, String callerTxPropagation,
                                                String calleeTxPropagation) {
-        super(callerFullMethod, callerLineNumber, calleeFullMethod);
+        this.callerFullMethod = callerFullMethod;
+        this.callerLineNumber = callerLineNumber;
+        this.calleeFullMethod = calleeFullMethod;
         this.callerWithSpringTx = callerWithSpringTx;
         this.callerTxPropagation = callerTxPropagation;
         this.calleeTxPropagation = calleeTxPropagation;
+    }
+
+    public String getCallerFullMethod() {
+        return callerFullMethod;
+    }
+
+    public int getCallerLineNumber() {
+        return callerLineNumber;
+    }
+
+    public String getCalleeFullMethod() {
+        return calleeFullMethod;
     }
 
     public boolean isCallerWithSpringTx() {

@@ -2,7 +2,9 @@ package com.adrninistrator.jacg.extractor.entry;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.handler.spring.SpringHandler;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 
 import java.util.List;
@@ -18,13 +20,14 @@ public class CalleeGraphSPCFileDownloadExtractor extends CalleeGraphEntryExtract
     @Override
     protected boolean setFindStackKeyword4ee(ConfigureWrapper configureWrapper) {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
-            List<String> fileDownloadControllerFullMethodList = springHandler.queryFileDownloadControllerOnlyMethod();
+            List<FullMethodWithReturnType> fileDownloadControllerMethodList = springHandler.queryFileDownloadControllerMethod();
             // 对（可能的）Spring Controller文件下载方法的处理
-            fileDownloadControllerFullMethodList = handleFileDownloadControllerFullMethodList(fileDownloadControllerFullMethodList, configureWrapper);
-            if (JavaCG2Util.isCollectionEmpty(fileDownloadControllerFullMethodList)) {
+            fileDownloadControllerMethodList = handleFileDownloadControllerFullMethodList(fileDownloadControllerMethodList, configureWrapper);
+            if (JavaCG2Util.isCollectionEmpty(fileDownloadControllerMethodList)) {
                 return false;
             }
-            configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, fileDownloadControllerFullMethodList);
+            configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE,
+                    JACGClassMethodUtil.genFullMethodWithReturnTypeStrList(fileDownloadControllerMethodList));
             return true;
         }
     }
@@ -36,7 +39,8 @@ public class CalleeGraphSPCFileDownloadExtractor extends CalleeGraphEntryExtract
      * @param configureWrapper
      * @return
      */
-    protected List<String> handleFileDownloadControllerFullMethodList(List<String> fileDownloadControllerFullMethodList, ConfigureWrapper configureWrapper) {
+    protected List<FullMethodWithReturnType> handleFileDownloadControllerFullMethodList(List<FullMethodWithReturnType> fileDownloadControllerFullMethodList,
+                                                                                        ConfigureWrapper configureWrapper) {
         return fileDownloadControllerFullMethodList;
     }
 }

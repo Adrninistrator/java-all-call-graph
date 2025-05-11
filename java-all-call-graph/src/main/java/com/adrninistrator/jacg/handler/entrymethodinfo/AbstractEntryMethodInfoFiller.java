@@ -25,10 +25,11 @@ public abstract class AbstractEntryMethodInfoFiller extends BaseHandler {
     }
 
     /**
-     * 查询指定的入口方法对应的信息
+     * 查询指定的入口方法与返回类型对应的信息
      *
      * @param entryMethod
+     * @param entryMethodReturnType
      * @return
      */
-    public abstract BaseEntryMethodInfo query(String entryMethod);
+    public abstract BaseEntryMethodInfo query(String entryMethod, String entryMethodReturnType);
 }

@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.WriteDbHandlerWriteFileEnum;
-import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnGenericsType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
@@ -76,7 +76,8 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
                 "唯一类名",
                 "方法可能用于文件上传，1:是，0:否",
                 "方法可能用于文件下载，1:是，0:否",
-                "完整方法（类名+方法名+参数）"
+                "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志"
         };
     }
 
@@ -95,9 +96,11 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringController data) {
         // 通过Spring Controller方法参数判断是否可能用于文件上传
-        JavaCG2YesNoEnum maybeFileUpload = checkMaybeFileUpload(data.getFullMethod());
+        JavaCG2YesNoEnum maybeFileUpload = checkMaybeFileUpload(data.getFullMethod(), data.getReturnType());
         // 通过Spring Controller方法参数与返回类型判断是否可能用于文件下载
-        JavaCG2YesNoEnum maybeFileDownload = checkMaybeFileDownload(data.getFullMethod());
+        JavaCG2YesNoEnum maybeFileDownload = checkMaybeFileDownload(data.getFullMethod(), data.getReturnType());
+        data.setMaybeFileUpload(maybeFileUpload.getIntValue());
+        data.setMaybeFileDownload(maybeFileDownload.getIntValue());
 
         return new Object[]{
                 data.getRecordId(),
@@ -108,9 +111,10 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
                 data.getMethodPath(),
                 data.getAnnotationName(),
                 data.getSimpleClassName(),
-                maybeFileUpload.getIntValue(),
-                maybeFileDownload.getIntValue(),
-                data.getFullMethod()
+                data.getMaybeFileUpload(),
+                data.getMaybeFileDownload(),
+                data.getFullMethod(),
+                data.getReturnType()
         };
     }
 
@@ -119,11 +123,12 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
      * 通过Spring Controller方法参数判断是否可能用于文件上传
      *
      * @param fullMethod 完整方法
+     * @param returnType 方法返回类型
      * @return
      */
-    private JavaCG2YesNoEnum checkMaybeFileUpload(String fullMethod) {
-        MethodDetail methodDetail = JACGClassMethodUtil.genMethodDetail(fullMethod);
-        List<String> argTypeList = methodDetail.getArgTypeList();
+    private JavaCG2YesNoEnum checkMaybeFileUpload(String fullMethod, String returnType) {
+        MethodDetailNoReturnType methodDetailNoReturnType = JACGClassMethodUtil.genMethodDetailNoReturnType(fullMethod);
+        List<String> argTypeList = methodDetailNoReturnType.getArgTypeList();
         for (int argSeq = 0; argSeq < argTypeList.size(); argSeq++) {
             String argType = argTypeList.get(argSeq);
             String argTypeStr = JavaCG2ByteCodeUtil.removeAllArrayFlag(argType);
@@ -136,7 +141,7 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
                 return JavaCG2YesNoEnum.NOT_SURE;
             }
             // 判断方法参数是否有被使用
-            if (methodCallInfoHandler.checkMethodArgUsed(fullMethod, argSeq + 1)) {
+            if (methodCallInfoHandler.checkMethodArgUsed(fullMethod, returnType, argSeq + 1)) {
                 return JavaCG2YesNoEnum.YES;
             }
         }
@@ -147,12 +152,13 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
      * 通过Spring Controller方法参数与返回类型判断是否可能用于文件下载
      *
      * @param fullMethod 完整方法
+     * @param returnType 方法返回类型
      * @return
      */
-    private JavaCG2YesNoEnum checkMaybeFileDownload(String fullMethod) {
+    private JavaCG2YesNoEnum checkMaybeFileDownload(String fullMethod, String returnType) {
         // 通过方法参数判断
-        MethodDetail methodDetail = JACGClassMethodUtil.genMethodDetail(fullMethod);
-        List<String> argTypeList = methodDetail.getArgTypeList();
+        MethodDetailNoReturnType methodDetailNoReturnType = JACGClassMethodUtil.genMethodDetailNoReturnType(fullMethod);
+        List<String> argTypeList = methodDetailNoReturnType.getArgTypeList();
         for (int argSeq = 0; argSeq < argTypeList.size(); argSeq++) {
             String argType = argTypeList.get(argSeq);
             String argTypeStr = JavaCG2ByteCodeUtil.removeAllArrayFlag(argType);
@@ -165,24 +171,24 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
                 return JavaCG2YesNoEnum.NOT_SURE;
             }
             // 判断方法参数是否有被使用
-            if (methodCallInfoHandler.checkMethodArgUsed(fullMethod, argSeq + 1)) {
+            if (methodCallInfoHandler.checkMethodArgUsed(fullMethod, returnType, argSeq + 1)) {
                 return JavaCG2YesNoEnum.YES;
             }
         }
 
         // 通过返回类型判断
-        WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(fullMethod);
-        if (methodInfo == null || !StringUtils.equalsAny(methodInfo.getReturnType(), JACGCommonNameConstants.SPRING_HTTP_ENTITY_CLASS,
+        WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(fullMethod, returnType);
+        if (methodInfo == null || !StringUtils.equalsAny(methodInfo.getReturnTypeNad(), JACGCommonNameConstants.SPRING_HTTP_ENTITY_CLASS,
                 JACGCommonNameConstants.SPRING_RESPONSE_ENTITY_CLASS)) {
             return JavaCG2YesNoEnum.NO;
         }
         // 返回类型为HttpEntity或ResponseEntity
-        List<WriteDbData4MethodReturnGenericsType> methodReturnGenericsTypeList = methodArgReturnHandler.queryReturnGenericsTypeByMethod(fullMethod);
+        List<WriteDbData4MethodReturnGenericsType> methodReturnGenericsTypeList = methodArgReturnHandler.queryReturnGenericsTypeByMethod(fullMethod, returnType);
         if (methodReturnGenericsTypeList == null || methodReturnGenericsTypeList.size() != 1) {
             return JavaCG2YesNoEnum.NO;
         }
         // 返回类型泛型类型非String时，认为用于文件下载
-        if (JavaCG2CommonNameConstants.CLASS_NAME_STRING.equals(methodReturnGenericsTypeList.get(0).getGenericsType())) {
+        if (JavaCG2CommonNameConstants.CLASS_NAME_STRING.equals(methodReturnGenericsTypeList.get(0).getGenericsTypeNad())) {
             return JavaCG2YesNoEnum.NO;
         }
         return JavaCG2YesNoEnum.YES;

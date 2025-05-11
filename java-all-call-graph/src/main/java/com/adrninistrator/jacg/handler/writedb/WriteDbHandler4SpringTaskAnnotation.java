@@ -33,7 +33,8 @@ public class WriteDbHandler4SpringTaskAnnotation extends AbstractWriteDbHandler<
                 "完整类名",
                 "方法名",
                 "类型，XML: 在XML文件中定义，annotation: 通过注解定义",
-                "完整方法（类名+方法名+参数）"
+                "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志"
         };
     }
 

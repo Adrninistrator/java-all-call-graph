@@ -40,7 +40,7 @@ public class TestCharset1MethodCallByERDetailHandler extends TestRunByCodeBase {
                 calleeClassNameList.add(writeDbData4ClassName.getClassName());
             }
 
-            Assert.assertTrue(showAllMethodCallByERDetailHandler.handleMethodCallByER(callerFullMethod, calleeClassNameList));
+            Assert.assertTrue(showAllMethodCallByERDetailHandler.handleMethodCallByER(callerFullMethod, "void", calleeClassNameList));
         }
     }
 }

@@ -942,3 +942,56 @@ com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException: 当前类依赖�
 对比 jar 不同版本的方法变动并生成对应向上方法调用链，解决 jar 文件未修改时也被认为发生修改的问题
 
 生成测试用 jar 文件时输出目录修改为 build
+
+## 1.34. (3.1.0)
+
+### 1.34.1. 数据库表修改
+
+以下数据库表增加方法返回类型字段
+
+```
+class_ext_impl_generics_type
+dup_method_info
+field_generics_type
+field_info
+get_method
+method_annotation
+method_arg_annotation
+method_arg_generics_type
+method_argument
+method_call_method_call_return
+method_catch
+method_finally
+method_info
+method_line_number
+method_return_arg_seq
+method_return_call_id
+method_return_const_value
+method_return_field_info
+method_return_generics_type
+method_throw
+set_method
+sf_field_method_call
+spring_controller
+spring_task
+```
+
+### 1.34.2. 计算方法 HASH 增加返回类型
+
+之前计算方法 HASH 作为方法唯一标识时，使用完整类名+方法名+方法参数类型；从当前版本开始，在以上基础上增加方法返回类型
+
+即使用完整类名+方法名+方法参数类型+方法返回类型计算方法 HASH
+
+### 1.34.3. 配置文件修改
+
+_jacg_config/method_class_4callee.properties、_jacg_config/method_class_4caller.properties 支持指定需要解析的方法的返回类型
+
+### 1.34.4. 比较 jar 包方法变化并生成影响范围功能修改
+
+修改 com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCalleeGraph:generate 方法返回类型
+
+在返回类型中增加各个 jar 包中发生变化的方法信息
+
+### 1.34.5. 支持 spring-boot jar 形式的组件版本检查
+
+java-all-call-graph 会检查当前使用的特定组件是否为指定的版本，支持 spring-boot jar 形式执行时的检查

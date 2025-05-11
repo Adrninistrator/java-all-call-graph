@@ -6,6 +6,7 @@ CREATE TABLE if not exists jacg_method_line_number_{appName} (
   min_line_number int NOT NULL COMMENT '起始代码行号',
   max_line_number int NOT NULL COMMENT '结束代码行号',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
+  return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
   INDEX idx_mln_mh_{appName}(method_hash),
   INDEX idx_mln_scl_{appName}(simple_class_name, min_line_number, max_line_number),

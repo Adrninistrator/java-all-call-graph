@@ -3,9 +3,8 @@ package com.adrninistrator.jacg.extensions.methodcall;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
-import com.adrninistrator.javacg2.common.enums.JavaCG2ConstantTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +25,7 @@ public class JACGApacheCommonsChainMethodCallExtension extends AbstractJACGMetho
 
     public static final String METHOD_NAME = "execute";
     public static final String ARG_TYPES = "(org.apache.commons.chain.Context)";
+    public static final String RETURN_TYPE = boolean.class.getName();
 
     private final MethodCallInfoHandler methodCallInfoHandler;
 
@@ -60,8 +60,8 @@ public class JACGApacheCommonsChainMethodCallExtension extends AbstractJACGMetho
             methodCall.setCalleeMethodName(METHOD_NAME);
             String calleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethod(calleeClassName, METHOD_NAME, ARG_TYPES);
             methodCall.setCalleeFullMethod(calleeFullMethod);
-            methodCall.setCalleeMethodHash(JACGUtil.genHashWithLen(calleeFullMethod));
-            methodCall.setRawReturnType(JavaCG2ConstantTypeEnum.CONSTTE_BOOLEAN.getType());
+            methodCall.setCalleeMethodHash(JACGClassMethodUtil.genMethodHashWithLen(calleeFullMethod, RETURN_TYPE));
+            methodCall.setRawReturnType(RETURN_TYPE);
             methodCall.setCalleeJarNum(0);
         }
 

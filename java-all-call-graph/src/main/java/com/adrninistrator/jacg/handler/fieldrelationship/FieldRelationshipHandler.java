@@ -89,13 +89,13 @@ public class FieldRelationshipHandler extends BaseHandler {
         String fieldType = null;
         if (getMethod != null) {
             getMethodName = getMethod.getMethodName();
-            fieldType = getMethod.getFieldType();
+            fieldType = getMethod.getFieldTypeNad();
         }
         String setMethodName = null;
         if (setMethod != null) {
             setMethodName = setMethod.getMethodName();
             if (fieldType == null) {
-                fieldType = setMethod.getFieldType();
+                fieldType = setMethod.getFieldTypeNad();
             }
         }
         FieldBehavior fieldBehavior = new FieldBehavior(className, fieldName, fieldType, getMethodName, setMethodName, getOrSet, fieldRelationship.getRelationshipFlags());

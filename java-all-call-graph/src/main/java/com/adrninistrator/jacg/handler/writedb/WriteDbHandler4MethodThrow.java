@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodThrow;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -18,8 +18,8 @@ import com.adrninistrator.javacg2.util.JavaCG2Util;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_THROW,
-        minColumnNum = 9,
-        maxColumnNum = 9,
+        minColumnNum = 10,
+        maxColumnNum = 10,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_THROW
 )
 public class WriteDbHandler4MethodThrow extends AbstractWriteDbHandler<WriteDbData4MethodThrow> {
@@ -30,17 +30,18 @@ public class WriteDbHandler4MethodThrow extends AbstractWriteDbHandler<WriteDbDa
 
     @Override
     protected WriteDbData4MethodThrow genData(String[] array) {
-        String fullMethod = array[0];
+        String fullMethod = readLineData();
+        String returnType = readLineData();
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        int throwOffset = Integer.parseInt(array[1]);
-        int lineNumber = Integer.parseInt(array[2]);
-        int seq = Integer.parseInt(array[3]);
-        String throwExceptionType = array[4];
-        String throwFlag = array[5];
-        Integer catchStartOffset = JavaCG2Util.genIntegerFromString(array[6]);
-        String catchExceptionVariableName = array[7];
-        Integer callId = JavaCG2Util.genIntegerFromString(array[8]);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
+        int throwOffset = Integer.parseInt(readLineData());
+        int lineNumber = Integer.parseInt(readLineData());
+        int seq = Integer.parseInt(readLineData());
+        String throwExceptionType = readLineData();
+        String throwFlag = readLineData();
+        Integer catchStartOffset = JavaCG2Util.genIntegerFromString(readLineData());
+        String catchExceptionVariableName = readLineData();
+        Integer callId = JavaCG2Util.genIntegerFromString(readLineData());
 
         WriteDbData4MethodThrow writeDbData4MethodThrow = new WriteDbData4MethodThrow();
         writeDbData4MethodThrow.setRecordId(genNextRecordId());
@@ -55,6 +56,7 @@ public class WriteDbHandler4MethodThrow extends AbstractWriteDbHandler<WriteDbDa
         writeDbData4MethodThrow.setCatchExceptionVariableName(catchExceptionVariableName);
         writeDbData4MethodThrow.setCallId(callId);
         writeDbData4MethodThrow.setFullMethod(fullMethod);
+        writeDbData4MethodThrow.setReturnType(returnType);
         return writeDbData4MethodThrow;
     }
 
@@ -72,7 +74,8 @@ public class WriteDbHandler4MethodThrow extends AbstractWriteDbHandler<WriteDbDa
                 data.getCatchStartOffset(),
                 data.getCatchExceptionVariableName(),
                 data.getCallId(),
-                data.getFullMethod()
+                data.getFullMethod(),
+                data.getReturnType()
         };
     }
 
@@ -80,6 +83,7 @@ public class WriteDbHandler4MethodThrow extends AbstractWriteDbHandler<WriteDbDa
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志",
                 "throw指令的偏移量",
                 "throw的代码行号",
                 "序号，从0开始，大于0代表有多种可能",

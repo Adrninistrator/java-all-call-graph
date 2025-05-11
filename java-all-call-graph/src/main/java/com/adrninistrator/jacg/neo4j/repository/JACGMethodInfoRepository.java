@@ -16,14 +16,18 @@ import java.util.List;
 public interface JACGMethodInfoRepository extends Neo4jRepository<JACGMethodInfo, String> {
 
     @Query("MATCH (n:jacg_method_info) " +
-            "WHERE n.appName = $appName AND n.simpleClassName = $simpleClassName AND n.fullMethod STARTS WITH $fullMethodPrefix " +
-            "RETURN n.methodHash")
-    String queryMethodHashByPrefix(@Param("appName") String appName, @Param("simpleClassName") String simpleClassName, @Param("fullMethodPrefix") String fullMethodPrefix);
+            "WHERE n.appName = $appName" +
+            " AND n.simpleClassName = $simpleClassName" +
+            " AND n.fullMethod STARTS WITH $fullMethodPrefix" +
+            " AND n.returnType = $returnType" +
+            " RETURN n.methodHash")
+    String queryMethodHashByPrefix(@Param("appName") String appName, @Param("simpleClassName") String simpleClassName, @Param("fullMethodPrefix") String fullMethodPrefix,
+                                   @Param("returnType") String returnType);
 
     @Query("MATCH (n:jacg_method_info) " +
             "WHERE n.appName = $appName AND n.simpleClassName = $simpleClassName " +
-            "RETURN n.fullMethod")
-    List<String> queryFullMethodWithAppName(@Param("appName") String appName, @Param("simpleClassName") String simpleClassName);
+            "RETURN n.fullMethod, n.returnType")
+    List<WriteDbData4MethodInfo> queryFullMethodWithAppName(@Param("appName") String appName, @Param("simpleClassName") String simpleClassName);
 
     @Query("MATCH (n:jacg_method_info) " +
             "WHERE n.appName = $appName " +

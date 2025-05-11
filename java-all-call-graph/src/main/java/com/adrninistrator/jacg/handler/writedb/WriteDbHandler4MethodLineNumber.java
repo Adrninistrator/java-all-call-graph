@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
@@ -17,8 +17,8 @@ import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_LINE_NUMBER,
-        minColumnNum = 3,
-        maxColumnNum = 3,
+        minColumnNum = 4,
+        maxColumnNum = 4,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_LINE_NUMBER
 )
 public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<WriteDbData4MethodLineNumber> {
@@ -30,9 +30,10 @@ public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<Writ
     @Override
     protected WriteDbData4MethodLineNumber genData(String[] array) {
         String fullMethod = readLineData();
+        String returnType = readLineData();
         String minLineNumber = readLineData();
         String maxLineNumber = readLineData();
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType);
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);
@@ -44,6 +45,7 @@ public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<Writ
         methodLineNumber.setMinLineNumber(Integer.parseInt(minLineNumber));
         methodLineNumber.setMaxLineNumber(Integer.parseInt(maxLineNumber));
         methodLineNumber.setFullMethod(fullMethod);
+        methodLineNumber.setReturnType(returnType);
         return methodLineNumber;
     }
 
@@ -56,7 +58,8 @@ public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<Writ
                 data.getMethodName(),
                 data.getMinLineNumber(),
                 data.getMaxLineNumber(),
-                data.getFullMethod()
+                data.getFullMethod(),
+                data.getReturnType()
         };
     }
 
@@ -64,6 +67,7 @@ public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<Writ
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志",
                 "起始代码行号",
                 "结束代码行号"
         };

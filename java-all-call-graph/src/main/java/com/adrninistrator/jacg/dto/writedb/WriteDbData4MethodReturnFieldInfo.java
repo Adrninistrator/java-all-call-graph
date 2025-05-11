@@ -15,12 +15,13 @@ public class WriteDbData4MethodReturnFieldInfo implements BaseWriteDbData {
     private boolean staticField;
     private boolean fieldOfThis;
     private String fieldInSimpleClassName;
-    private String fieldSimpleType;
+    private String simpleFieldTypeNad;
     private int fieldArrayDimensions;
     private String fieldName;
     private String fieldInClassName;
-    private String fieldType;
+    private String fieldTypeNad;
     private String fullMethod;
+    private String returnType;
 
     public int getRecordId() {
         return recordId;
@@ -70,12 +71,12 @@ public class WriteDbData4MethodReturnFieldInfo implements BaseWriteDbData {
         this.fieldInSimpleClassName = fieldInSimpleClassName;
     }
 
-    public String getFieldSimpleType() {
-        return fieldSimpleType;
+    public String getSimpleFieldTypeNad() {
+        return simpleFieldTypeNad;
     }
 
-    public void setFieldSimpleType(String fieldSimpleType) {
-        this.fieldSimpleType = fieldSimpleType;
+    public void setSimpleFieldTypeNad(String simpleFieldTypeNad) {
+        this.simpleFieldTypeNad = simpleFieldTypeNad;
     }
 
     public int getFieldArrayDimensions() {
@@ -102,12 +103,12 @@ public class WriteDbData4MethodReturnFieldInfo implements BaseWriteDbData {
         this.fieldInClassName = fieldInClassName;
     }
 
-    public String getFieldType() {
-        return fieldType;
+    public String getFieldTypeNad() {
+        return fieldTypeNad;
     }
 
-    public void setFieldType(String fieldType) {
-        this.fieldType = fieldType;
+    public void setFieldTypeNad(String fieldTypeNad) {
+        this.fieldTypeNad = fieldTypeNad;
     }
 
     public String getFullMethod() {
@@ -116,5 +117,13 @@ public class WriteDbData4MethodReturnFieldInfo implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }

@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.diff.dto.method;
 /**
  * @author adrninistrator
  * @date 2024/3/13
- * @description: 发生变化的广泛信息
+ * @description: 发生变化的方法信息
  */
 public class ModifiedMethodInfo {
 

@@ -334,7 +334,8 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
 
             logger.info("找到MyBatis Mapper用于插入Entity数据的方法 {}", mapperMethodInfo.getFullMethod());
             // 查询调用以上Mapper方法的方法
-            List<WriteDbData4MethodCall> insertEntityMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
+            List<WriteDbData4MethodCall> insertEntityMethodCallList = methodCallHandler.queryMethodCallByCalleeMethodWithReturn(mapperMethodInfo.getFullMethod(),
+                    mapperMethodInfo.getReturnType());
             if (JavaCG2Util.isCollectionEmpty(insertEntityMethodCallList)) {
                 // 当前Mapper方法未找到调用方法
                 continue;
@@ -395,9 +396,10 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
         }
         String entityClassName = mybatisMSEntity.getEntityClassName();
         for (WriteDbData4MethodInfo mapperMethodInfo : mapperMethodInfoList) {
-            boolean returnTypeIsEntity = StringUtils.equals(entityClassName, mapperMethodInfo.getReturnType());
+            boolean returnTypeIsEntity = StringUtils.equals(entityClassName, mapperMethodInfo.getReturnTypeNad());
             // 查询调用以上Mapper方法的方法
-            List<WriteDbData4MethodCall> selectMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
+            List<WriteDbData4MethodCall> selectMethodCallList = methodCallHandler.queryMethodCallByCalleeMethodWithReturn(mapperMethodInfo.getFullMethod(),
+                    mapperMethodInfo.getReturnType());
             if (JavaCG2Util.isCollectionEmpty(selectMethodCallList)) {
                 // 当前Mapper方法未找到调用方法
                 continue;
@@ -419,7 +421,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
                 List<MyBatisMapperArgAndParamDbInfo> myBatisMapperArgAndParamDbInfoList4Where = new ArrayList<>();
                 // 查询指定MyBatis Mapper方法的参数所对应的数据库信息，包括对应的set与where的字段与数据库信息
                 List<AbstractMyBatisMapperArg> myBatisMapperArgList = myBatisMSMapperEntityHandler.queryParamDbInfo4MyBatisMapperMethod(mybatisMSEntity.getMapperClassName(),
-                        selectMapperMethodName, mapperMethodInfo.getFullMethod(), myBatisMapperArgAndParamDbInfoList4Where, null);
+                        selectMapperMethodName, mapperMethodInfo.getFullMethod(), mapperMethodInfo.getReturnType(), myBatisMapperArgAndParamDbInfoList4Where, null);
                 if (JavaCG2Util.isCollectionEmpty(myBatisMapperArgList)) {
                     // select方法无参数，不处理
                     continue;
@@ -567,14 +569,16 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             List<MyBatisMapperArgAndParamDbInfo> myBatisMapperArgAndParamDbInfoList4Set = new ArrayList<>();
             // 查询指定MyBatis Mapper方法的参数所对应的数据库信息，包括对应的set与where的字段与数据库信息
             List<AbstractMyBatisMapperArg> myBatisMapperArgList = myBatisMSMapperEntityHandler.queryParamDbInfo4MyBatisMapperMethod(mybatisMSEntity.getMapperClassName(),
-                    updateMapperMethodName, mapperMethodInfo.getFullMethod(), myBatisMapperArgAndParamDbInfoList4Where, myBatisMapperArgAndParamDbInfoList4Set);
+                    updateMapperMethodName, mapperMethodInfo.getFullMethod(), mapperMethodInfo.getReturnType(), myBatisMapperArgAndParamDbInfoList4Where,
+                    myBatisMapperArgAndParamDbInfoList4Set);
             if (JavaCG2Util.isCollectionEmpty(myBatisMapperArgList)) {
                 // update方法无参数，不处理
                 return;
             }
 
             // 查询调用以上Mapper方法的方法
-            List<WriteDbData4MethodCall> updateMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(mapperMethodInfo.getFullMethod());
+            List<WriteDbData4MethodCall> updateMethodCallList = methodCallHandler.queryMethodCallByCalleeMethodWithReturn(mapperMethodInfo.getFullMethod(),
+                    mapperMethodInfo.getReturnType());
             if (JavaCG2Util.isCollectionEmpty(updateMethodCallList)) {
                 // 当前Mapper方法未找到调用方法
                 return;

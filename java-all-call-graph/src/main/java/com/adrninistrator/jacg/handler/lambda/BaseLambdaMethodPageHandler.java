@@ -4,16 +4,9 @@ import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCall;
-import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg2.util.JavaCG2Util;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author adrninistrator
@@ -43,6 +36,7 @@ public abstract class BaseLambdaMethodPageHandler extends BaseHandler implements
                     "mc." + DC.MC_CALLER_FULL_METHOD,
                     "mc." + DC.MC_CALLER_LINE_NUMBER,
                     "mc." + DC.MC_CALLEE_FULL_METHOD,
+                    "mc." + DC.MC_RAW_RETURN_TYPE,
                     "lmi." + DC.LMI_LAMBDA_CALLEE_FULL_METHOD,
                     "lmi." + DC.LMI_LAMBDA_NEXT_FULL_METHOD,
                     "lmi." + DC.LMI_LAMBDA_NEXT_IS_STREAM,
@@ -59,37 +53,5 @@ public abstract class BaseLambdaMethodPageHandler extends BaseHandler implements
         }
 
         return lastQuery ? cachedQuerySqlLast : cachedQuerySqlNotLast;
-    }
-
-    /**
-     * 转换Lambda表达式方法调用列表，获得Lambda表达式方法调用包含各方法的详细信息列表
-     *
-     * @param lambdaMethodCallList
-     * @return
-     */
-    protected List<LambdaMethodCallDetail> genDetailList(List<LambdaMethodCall> lambdaMethodCallList) {
-        if (JavaCG2Util.isCollectionEmpty(lambdaMethodCallList)) {
-            return Collections.emptyList();
-        }
-
-        List<LambdaMethodCallDetail> lambdaMethodCallDetailList = new ArrayList<>(lambdaMethodCallList.size());
-        for (LambdaMethodCall lambdaMethodCall : lambdaMethodCallList) {
-            LambdaMethodCallDetail lambdaMethodCallDetail = LambdaMethodCallDetail.genLambdaMethodCallDetail(lambdaMethodCall);
-            lambdaMethodCallDetailList.add(lambdaMethodCallDetail);
-
-            if (lambdaMethodCall.getCallerFullMethod() != null) {
-                lambdaMethodCallDetail.setCallerFullMethodDetail(JACGClassMethodUtil.genMethodDetail(lambdaMethodCall.getCallerFullMethod()));
-            }
-            if (lambdaMethodCall.getCalleeFullMethod() != null) {
-                lambdaMethodCallDetail.setCalleeFullMethodDetail(JACGClassMethodUtil.genMethodDetail(lambdaMethodCall.getCalleeFullMethod()));
-            }
-            if (lambdaMethodCall.getLambdaCalleeFullMethod() != null) {
-                lambdaMethodCallDetail.setLambdaCalleeFullMethodDetail(JACGClassMethodUtil.genMethodDetail(lambdaMethodCall.getLambdaCalleeFullMethod()));
-            }
-            if (lambdaMethodCall.getLambdaNextFullMethod() != null) {
-                lambdaMethodCallDetail.setLambdaNextFullMethodDetail(JACGClassMethodUtil.genMethodDetail(lambdaMethodCall.getLambdaNextFullMethod()));
-            }
-        }
-        return lambdaMethodCallDetailList;
     }
 }

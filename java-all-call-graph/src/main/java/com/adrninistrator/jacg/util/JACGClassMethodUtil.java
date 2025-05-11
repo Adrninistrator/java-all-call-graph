@@ -1,12 +1,16 @@
 package com.adrninistrator.jacg.util;
 
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2Error;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
@@ -20,6 +24,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,14 +38,52 @@ public class JACGClassMethodUtil {
     private static final Logger logger = LoggerFactory.getLogger(JACGClassMethodUtil.class);
 
     /**
-     * 将完整方法与返回类型拼接
+     * 生成方法HASH+长度
      *
-     * @param fullMethod
-     * @param returnType
+     * @param fullMethod 完整方法
+     * @param returnType 返回类型（包含数组标志）
      * @return
      */
-    public static String genFullMethodWithReturnType(String fullMethod, String returnType) {
-        return fullMethod + JavaCG2Constants.FLAG_COLON + returnType;
+    public static String genMethodHashWithLen(String fullMethod, String returnType) {
+        if (StringUtils.contains(fullMethod, JACGConstants.CLASS_PLACE_HOLDER)
+                && StringUtils.contains(fullMethod, JACGConstants.METHOD_PLACE_HOLDER)) {
+            // 当方法使用占位符时，允许返回类型为空
+            return "";
+        }
+
+        if (StringUtils.isBlank(returnType)) {
+            throw new JavaCG2Error("返回类型为空 " + fullMethod);
+        }
+        return JACGUtil.genHashWithLen(JavaCG2ClassMethodUtil.genFullMethodWithReturnType(fullMethod, returnType));
+    }
+
+    /**
+     * 将完整方法与返回类型列表生成字符串列表
+     *
+     * @param fullMethodWithReturnTypeList
+     * @return
+     */
+    public static List<String> genFullMethodWithReturnTypeStrList(List<FullMethodWithReturnType> fullMethodWithReturnTypeList) {
+        List<String> list = new ArrayList<>(fullMethodWithReturnTypeList.size());
+        for (FullMethodWithReturnType fullMethodWithReturnType : fullMethodWithReturnTypeList) {
+            list.add(fullMethodWithReturnType.genFullMethodWithReturnType());
+        }
+        Collections.sort(list);
+        return list;
+    }
+
+    /**
+     * 将完整方法与返回类型列表生成字符串Set
+     *
+     * @param fullMethodWithReturnTypeSet
+     * @return
+     */
+    public static Set<String> genFullMethodWithReturnTypeStrSet(Set<FullMethodWithReturnType> fullMethodWithReturnTypeSet) {
+        Set<String> list = new HashSet<>(fullMethodWithReturnTypeSet.size());
+        for (FullMethodWithReturnType fullMethodWithReturnType : fullMethodWithReturnTypeSet) {
+            list.add(fullMethodWithReturnType.genFullMethodWithReturnType());
+        }
+        return list;
     }
 
     /**
@@ -94,23 +137,54 @@ public class JACGClassMethodUtil {
     }
 
     /**
-     * 根据完整方法生成方法详细信息
+     * 根据完整方法生成方法详细信息，不包含返回类型
      *
      * @param fullMethod
      * @return
      */
-    public static MethodDetail genMethodDetail(String fullMethod) {
-        return genMethodDetail(fullMethod, null);
+    public static MethodDetailNoReturnType genMethodDetailNoReturnType(String fullMethod) {
+        MethodDetailNoReturnType methodDetailNoReturnType = new MethodDetailNoReturnType();
+        genMethodDetailNoReturnType(fullMethod, methodDetailNoReturnType);
+        return methodDetailNoReturnType;
     }
 
     /**
-     * 根据完整方法生成方法详细信息
+     * 根据完整方法+返回类型生成方法详细信息
      *
-     * @param fullMethod
-     * @param methodDetail
+     * @param fullMethodWithReturnType
      * @return
      */
-    public static MethodDetail genMethodDetail(String fullMethod, MethodDetail methodDetail) {
+    public static MethodDetail genMethodDetail(String fullMethodWithReturnType) {
+        String fullMethod = StringUtils.substringBeforeLast(fullMethodWithReturnType, JavaCG2Constants.FLAG_COLON);
+        String returnType = StringUtils.substringAfterLast(fullMethodWithReturnType, JavaCG2Constants.FLAG_COLON);
+        MethodDetail methodDetail = new MethodDetail();
+        genMethodDetailNoReturnType(fullMethod, methodDetail);
+        methodDetail.setReturnType(returnType);
+        return methodDetail;
+    }
+
+    /**
+     * 根据完整方法与返回类型生成方法详细信息
+     *
+     * @param fullMethod
+     * @param returnType
+     * @return
+     */
+    public static MethodDetail genMethodDetail(String fullMethod, String returnType) {
+        MethodDetail methodDetail = new MethodDetail();
+        genMethodDetailNoReturnType(fullMethod, methodDetail);
+        methodDetail.setReturnType(returnType);
+        return methodDetail;
+    }
+
+    /**
+     * 根据完整方法生成方法详细信息，不包含返回类型
+     *
+     * @param fullMethod
+     * @param methodDetailNoReturnType
+     * @return
+     */
+    public static void genMethodDetailNoReturnType(String fullMethod, MethodDetailNoReturnType methodDetailNoReturnType) {
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         int indexColon = fullMethod.indexOf(JavaCG2Constants.FLAG_COLON);
         int indexLeftBrackets = fullMethod.indexOf(JavaCG2Constants.FLAG_LEFT_BRACKET);
@@ -118,13 +192,11 @@ public class JACGClassMethodUtil {
         int indexRightBrackets = fullMethod.lastIndexOf(JavaCG2Constants.FLAG_RIGHT_BRACKET);
         // 不包含括号的方法参数类型字符串
         String argTypeStr = fullMethod.substring(indexLeftBrackets + JavaCG2Constants.FLAG_LEFT_BRACKET.length(), indexRightBrackets);
-        MethodDetail usedMethodDetail = methodDetail != null ? methodDetail : new MethodDetail();
-        usedMethodDetail.setFullMethod(fullMethod);
-        usedMethodDetail.setClassName(className);
-        usedMethodDetail.setMethodName(methodName);
-        usedMethodDetail.setArgTypeStr(argTypeStr);
-        usedMethodDetail.setArgTypeList(genMethodArgTypeList(fullMethod));
-        return usedMethodDetail;
+        methodDetailNoReturnType.setFullMethod(fullMethod);
+        methodDetailNoReturnType.setClassName(className);
+        methodDetailNoReturnType.setMethodName(methodName);
+        methodDetailNoReturnType.setArgTypeStr(argTypeStr);
+        methodDetailNoReturnType.setArgTypeList(genMethodArgTypeList(fullMethod));
     }
 
     /**

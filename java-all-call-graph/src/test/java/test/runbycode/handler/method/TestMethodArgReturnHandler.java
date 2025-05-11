@@ -2,6 +2,7 @@ package test.runbycode.handler.method;
 
 import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.method.MethodArgAndCommonFieldInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgGenericsType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgument;
@@ -53,26 +54,30 @@ public class TestMethodArgReturnHandler extends TestRunByCodeBase {
 
     private void doQueryMethodArgAndGenericsType(MethodArgReturnHandler methodArgReturnHandler, String className) {
         DbOperWrapper dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, this);
-        List<String> fullMethodList = dbOperWrapper.queryMethodByClassName(className);
-        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(fullMethodList));
-        for (String fullMethod : fullMethodList) {
-            List<WriteDbData4MethodArgument> methodArgumentList = methodArgReturnHandler.queryMethodArgumentByMethod(fullMethod);
+        List<FullMethodWithReturnType> methodList = dbOperWrapper.queryMethodByClassName(className);
+        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(methodList));
+        for (FullMethodWithReturnType fullMethodWithReturnType : methodList) {
+            List<WriteDbData4MethodArgument> methodArgumentList = methodArgReturnHandler.queryMethodArgumentByMethod(fullMethodWithReturnType.getFullMethod(),
+                    fullMethodWithReturnType.getReturnType());
             if (JavaCG2Util.isCollectionEmpty(methodArgumentList)) {
-                logger.info("当前方法未查询到参数 {}", fullMethod);
+                logger.info("当前方法未查询到参数 {}", fullMethodWithReturnType);
                 continue;
             }
             for (WriteDbData4MethodArgument methodArgument : methodArgumentList) {
-                printObjectContent(methodArgument, "方法参数 " + fullMethod + " " + methodArgument.getArgSeq());
+                printObjectContent(methodArgument, "方法参数 " + fullMethodWithReturnType + " " + methodArgument.getArgSeq());
                 if (JavaCG2YesNoEnum.isYes(methodArgument.getExistsGenericsType())) {
-                    List<WriteDbData4MethodArgGenericsType> methodArgGenericsTypeList = methodArgReturnHandler.queryMethodArgGenericsTypeByMethodArg(fullMethod,
-                            methodArgument.getArgSeq());
-                    printListContent(methodArgGenericsTypeList, "方法参数的泛型类型 " + fullMethod + " " + methodArgument.getArgSeq());
-                    List<String> typeList = methodArgReturnHandler.queryGenericsTypeInMethodArg(fullMethod, methodArgument.getArgSeq(), false);
-                    printListContent(typeList, "方法参数的泛型类型中的类型 " + fullMethod + " " + methodArgument.getArgSeq());
-                    List<String> customTypeList = methodArgReturnHandler.queryGenericsTypeInMethodArg(fullMethod, methodArgument.getArgSeq(), true);
-                    printListContent(customTypeList, "方法参数的泛型类型中的自定义类型 " + fullMethod + " " + methodArgument.getArgSeq());
+                    List<WriteDbData4MethodArgGenericsType> methodArgGenericsTypeList =
+                            methodArgReturnHandler.queryMethodArgGenericsTypeByMethodArg(fullMethodWithReturnType.getFullMethod(), fullMethodWithReturnType.getReturnType(),
+                                    methodArgument.getArgSeq());
+                    printListContent(methodArgGenericsTypeList, "方法参数的泛型类型 " + fullMethodWithReturnType + " " + methodArgument.getArgSeq());
+                    List<String> typeList = methodArgReturnHandler.queryGenericsTypeInMethodArg(fullMethodWithReturnType.getFullMethod(),
+                            fullMethodWithReturnType.getReturnType(), methodArgument.getArgSeq(), false);
+                    printListContent(typeList, "方法参数的泛型类型中的类型 " + fullMethodWithReturnType + " " + methodArgument.getArgSeq());
+                    List<String> customTypeList = methodArgReturnHandler.queryGenericsTypeInMethodArg(fullMethodWithReturnType.getFullMethod(),
+                            fullMethodWithReturnType.getReturnType(), methodArgument.getArgSeq(), true);
+                    printListContent(customTypeList, "方法参数的泛型类型中的自定义类型 " + fullMethodWithReturnType + " " + methodArgument.getArgSeq());
                 } else {
-                    logger.info("当前方法不存在泛型类型 {} {}", fullMethod, methodArgument.getArgSeq());
+                    logger.info("当前方法不存在泛型类型 {} {}", fullMethodWithReturnType, methodArgument.getArgSeq());
                 }
             }
         }
@@ -85,11 +90,12 @@ public class TestMethodArgReturnHandler extends TestRunByCodeBase {
             String fullMethod = methodInfo.getFullMethod();
             printObjectContent(methodInfo, "方法信息 " + fullMethod);
             if (JavaCG2YesNoEnum.isYes(methodInfo.getReturnExistsGenericsType())) {
-                List<WriteDbData4MethodReturnGenericsType> methodArgGenericsTypeList = methodArgReturnHandler.queryReturnGenericsTypeByMethod(fullMethod);
+                List<WriteDbData4MethodReturnGenericsType> methodArgGenericsTypeList = methodArgReturnHandler.queryReturnGenericsTypeByMethod(fullMethod,
+                        methodInfo.getReturnType());
                 printListContent(methodArgGenericsTypeList, "方法返回类型的泛型类型 " + fullMethod);
-                List<String> typeList = methodArgReturnHandler.queryGenericsTypeInMethodReturn(fullMethod, false);
+                List<String> typeList = methodArgReturnHandler.queryGenericsTypeInMethodReturn(fullMethod, methodInfo.getReturnType(), false);
                 printListContent(typeList, "方法返回类型的泛型类型中的类型 " + fullMethod);
-                List<String> customTypeList = methodArgReturnHandler.queryGenericsTypeInMethodReturn(fullMethod, true);
+                List<String> customTypeList = methodArgReturnHandler.queryGenericsTypeInMethodReturn(fullMethod, methodInfo.getReturnType(), true);
                 printListContent(customTypeList, "方法返回类型的泛型类型中的自定义类型 " + fullMethod);
             } else {
                 logger.info("当前方法返回类型不存在泛型类型 {}", fullMethod);
@@ -107,10 +113,11 @@ public class TestMethodArgReturnHandler extends TestRunByCodeBase {
 
     private void doQueryMethodArgAndCommonFieldInfo(MethodArgReturnHandler methodArgReturnHandler, Class<?> clazz) {
         DbOperWrapper dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, this);
-        List<String> fullMethodList = dbOperWrapper.queryMethodByClassName(clazz.getName());
-        for (String fullMethod : fullMethodList) {
-            List<MethodArgAndCommonFieldInfo> methodArgAndCommonFieldInfoList = methodArgReturnHandler.queryMethodArgAndCommonFieldInfo(fullMethod);
-            printListContent(methodArgAndCommonFieldInfoList, fullMethod);
+        List<FullMethodWithReturnType> methodList = dbOperWrapper.queryMethodByClassName(clazz.getName());
+        for (FullMethodWithReturnType fullMethodWithReturnType : methodList) {
+            List<MethodArgAndCommonFieldInfo> methodArgAndCommonFieldInfoList = methodArgReturnHandler.queryMethodArgAndCommonFieldInfo(fullMethodWithReturnType.getFullMethod(),
+                    fullMethodWithReturnType.getReturnType());
+            printListContent(methodArgAndCommonFieldInfoList, fullMethodWithReturnType.getFullMethod(), fullMethodWithReturnType.getReturnType());
         }
     }
 }

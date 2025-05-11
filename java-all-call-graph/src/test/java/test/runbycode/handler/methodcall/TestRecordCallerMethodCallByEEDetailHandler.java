@@ -1,5 +1,6 @@
 package test.runbycode.handler.methodcall;
 
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,8 +31,8 @@ public class TestRecordCallerMethodCallByEEDetailHandler extends TestRunByCodeBa
             Assert.assertTrue(recordCallerMethodCallByEEDetailHandler.handleMethodCallByEECMKeyword(StringUtils.class.getName(), methodNameList, "test"));
             Assert.assertTrue(recordCallerMethodCallByEEDetailHandler.handleMethodCallByEECMKeyword(StringUtils.class.getName(), methodNameList, 1, "test"));
 
-            printSetContent(recordCallerMethodCallByEEDetailHandler.getIndexOfCallerMethodSet(), "indexOf");
-            printSetContent(recordCallerMethodCallByEEDetailHandler.getSubstringCallerMethodSet(), "substring");
+            printSetContent(JACGClassMethodUtil.genFullMethodWithReturnTypeStrSet(recordCallerMethodCallByEEDetailHandler.getIndexOfCallerMethodSet()), "indexOf");
+            printSetContent(JACGClassMethodUtil.genFullMethodWithReturnTypeStrSet(recordCallerMethodCallByEEDetailHandler.getSubstringCallerMethodSet()), "substring");
         }
     }
 }

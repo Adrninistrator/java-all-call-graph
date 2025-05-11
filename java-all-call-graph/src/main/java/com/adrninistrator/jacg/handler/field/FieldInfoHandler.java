@@ -68,12 +68,12 @@ public class FieldInfoHandler extends BaseHandler {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_FIELD_INFO) +
                     " from " + DbTableInfoEnum.DTIE_FIELD_INFO.getTableName() +
                     " where " + DC.FI_SIMPLE_CLASS_NAME + " = ?" +
-                    " and " + DC.FI_FIELD_TYPE + " like concat(?, '%')" +
+                    " and " + DC.FI_FIELD_TYPE_NAD + " like concat(?, '%')" +
                     " and " + DC.FI_MODIFIERS + " != ?" +
                     " and " + DC.FI_STATIC_FLAG + " = ?" +
                     " and " + DC.FI_FINAL_FLAG + " = ?";
             if (excludedTypeNum > 0) {
-                sql = sql + " and " + DC.FI_FIELD_TYPE + " not in " + JACGSqlUtil.genQuestionString(excludedTypeNum);
+                sql = sql + " and " + DC.FI_FIELD_TYPE_NAD + " not in " + JACGSqlUtil.genQuestionString(excludedTypeNum);
             }
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql, excludedTypeNum);
         }
@@ -102,7 +102,7 @@ public class FieldInfoHandler extends BaseHandler {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_FIELD_INFO) +
                     " from " + DbTableInfoEnum.DTIE_FIELD_INFO.getTableName() +
                     " where " + DC.FI_SIMPLE_CLASS_NAME + " = ?" +
-                    " and " + DC.FI_FIELD_TYPE + " not like concat(?, '%')" +
+                    " and " + DC.FI_FIELD_TYPE_NAD + " not like concat(?, '%')" +
                     " and " + DC.FI_PRIMITIVE_TYPE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
@@ -144,7 +144,7 @@ public class FieldInfoHandler extends BaseHandler {
         if (sql == null) {
             sql = "select distinct " + DC.FGT_CLASS_NAME +
                     " from " + DbTableInfoEnum.DTIE_FIELD_GENERICS_TYPE.getTableName() +
-                    " where " + DC.FGT_SIMPLE_GENERICS_TYPE + " = ?";
+                    " where " + DC.FGT_SIMPLE_GENERICS_TYPE_NAD + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(fieldType));
@@ -318,7 +318,7 @@ public class FieldInfoHandler extends BaseHandler {
             commonFieldInfoInClass.setFieldTypeAndNameList(fieldTypeAndNameList);
             commonFieldInfoInClass.setJsonAlias(jsonAlias);
 
-            String fieldType = fieldInfo.getFieldType();
+            String fieldType = fieldInfo.getFieldTypeNad();
             /*
                 处理自定义类型字段
                 需要判断当前处理的类与字段的类型不同时才处理，避免死循环
@@ -347,7 +347,7 @@ public class FieldInfoHandler extends BaseHandler {
                 Set<String> recordedGenericsTypeSet = new HashSet<>();
 
                 for (WriteDbData4FieldGenericsType fieldGenericsType : fieldGenericsTypeList) {
-                    String fieldGenericsTypeStr = fieldGenericsType.getGenericsType();
+                    String fieldGenericsTypeStr = fieldGenericsType.getGenericsTypeNad();
                     if (!JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(fieldGenericsType.getGenericsCategory())
                             || !recordedGenericsTypeSet.add(fieldGenericsTypeStr)) {
                         /*

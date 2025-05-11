@@ -9,6 +9,7 @@ CREATE TABLE if not exists jacg_method_call_method_call_return_{appName} (
   callee_simple_class_name varchar(255) COLLATE utf8_bin NOT NULL COMMENT '被调用方，唯一类名（完整类名或简单类名），需要有单列索引',
   callee_method_name varchar(300) COLLATE utf8_bin NOT NULL COMMENT '被调用方，方法名',
   callee_full_method text COLLATE utf8_bin NOT NULL COMMENT '被调用方，完整方法（类名+方法名+参数）',
+  callee_return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
   INDEX idx_mcmcr_eemh_{appName}(callee_method_hash),
   INDEX idx_mcmcr_eecm_{appName}(callee_simple_class_name, callee_method_name)

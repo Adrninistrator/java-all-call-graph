@@ -9,7 +9,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
  * @description: 数据库表信息枚举
  */
 public enum DbTableInfoEnum {
-    // todo el
+    // todo el 后续补充
     DTIE_JAVACG2_CONFIG("javacg2_config", new String[]{
             DC.JAVACG2C_CONFIG_FILE_NAME,
             DC.JAVACG2C_CONFIG_KEY,
@@ -60,11 +60,11 @@ public enum DbTableInfoEnum {
             DC.CEIGT_SEQ,
             DC.CEIGT_SUPER_ITF_SIMPLE_CLASS_NAME,
             DC.CEIGT_GENERICS_SEQ,
-            DC.CEIGT_SIMPLE_GENERICS_TYPE,
+            DC.CEIGT_SIMPLE_GENERICS_TYPE_NAD,
             DC.CEIGT_GENERICS_ARRAY_DIMENSIONS,
             DC.CEIGT_TYPE_VARIABLES_NAME,
             DC.CEIGT_GENERICS_CATEGORY,
-            DC.CEIGT_GENERICS_TYPE,
+            DC.CEIGT_GENERICS_TYPE_NAD,
             DC.CEIGT_CLASS_NAME,
             DC.CEIGT_SUPER_ITF_CLASS_NAME,
     }),
@@ -141,6 +141,7 @@ public enum DbTableInfoEnum {
             DC.MA_ATTRIBUTE_TYPE,
             DC.MA_ATTRIBUTE_VALUE,
             DC.MA_FULL_METHOD,
+            DC.MA_RETURN_TYPE,
             DC.MA_SIMPLE_CLASS_NAME,
     }),
     DTIE_METHOD_ARG_ANNOTATION("method_arg_annotation", new String[]{
@@ -152,6 +153,7 @@ public enum DbTableInfoEnum {
             DC.MAA_ATTRIBUTE_TYPE,
             DC.MAA_ATTRIBUTE_VALUE,
             DC.MAA_FULL_METHOD,
+            DC.MAA_RETURN_TYPE,
             DC.MAA_SIMPLE_CLASS_NAME,
     }),
     DTIE_METHOD_ARG_GENERICS_TYPE("method_arg_generics_type", new String[]{
@@ -161,27 +163,29 @@ public enum DbTableInfoEnum {
             DC.MAGT_SEQ,
             DC.MAGT_TYPE,
             DC.MAGT_TYPE_SEQ,
-            DC.MAGT_SIMPLE_GENERICS_TYPE,
+            DC.MAGT_SIMPLE_GENERICS_TYPE_NAD,
             DC.MAGT_GENERICS_ARRAY_DIMENSIONS,
             DC.MAGT_TYPE_VARIABLES_NAME,
             DC.MAGT_WILDCARD,
             DC.MAGT_REFERENCE_TYPE,
             DC.MAGT_GENERICS_CATEGORY,
-            DC.MAGT_GENERICS_TYPE,
+            DC.MAGT_GENERICS_TYPE_NAD,
             DC.MAGT_FULL_METHOD,
+            DC.MAGT_RETURN_TYPE,
     }),
     DTIE_METHOD_ARGUMENT("method_argument", new String[]{
             DC.MARG_RECORD_ID,
             DC.MARG_METHOD_HASH,
             DC.MARG_ARG_SEQ,
-            DC.MARG_SIMPLE_ARG_TYPE,
+            DC.MARG_SIMPLE_ARG_TYPE_NAD,
             DC.MARG_ARG_NAME,
-            DC.MARG_ARG_TYPE,
+            DC.MARG_ARG_TYPE_NAD,
             DC.MARG_ARRAY_DIMENSIONS,
             DC.MARG_ARG_CATEGORY,
             DC.MARG_EXISTS_GENERICS_TYPE,
             DC.MARG_SIMPLE_CLASS_NAME,
             DC.MARG_FULL_METHOD,
+            DC.MARG_RETURN_TYPE,
     }),
     DTIE_METHOD_CALL("method_call", new String[]{
             DC.MC_CALL_ID,
@@ -239,6 +243,7 @@ public enum DbTableInfoEnum {
             DC.MLN_MIN_LINE_NUMBER,
             DC.MLN_MAX_LINE_NUMBER,
             DC.MLN_FULL_METHOD,
+            DC.MLN_RETURN_TYPE
     }),
     DTIE_METHOD_RETURN_GENERICS_TYPE("method_return_generics_type", new String[]{
             DC.MRGT_RECORD_ID,
@@ -246,14 +251,15 @@ public enum DbTableInfoEnum {
             DC.MRGT_SIMPLE_CLASS_NAME,
             DC.MRGT_TYPE,
             DC.MRGT_TYPE_SEQ,
-            DC.MRGT_SIMPLE_GENERICS_TYPE,
+            DC.MRGT_SIMPLE_GENERICS_TYPE_NAD,
             DC.MRGT_GENERICS_ARRAY_DIMENSIONS,
             DC.MRGT_TYPE_VARIABLES_NAME,
             DC.MRGT_WILDCARD,
             DC.MRGT_REFERENCE_TYPE,
             DC.MRGT_GENERICS_CATEGORY,
-            DC.MRGT_GENERICS_TYPE,
+            DC.MRGT_GENERICS_TYPE_NAD,
             DC.MRGT_FULL_METHOD,
+            DC.MRGT_RETURN_TYPE,
     }),
     DTIE_MYBATIS_MS_TABLE("mybatis_ms_table", new String[]{
             DC.MMT_RECORD_ID,
@@ -282,7 +288,7 @@ public enum DbTableInfoEnum {
             DC.SFFMC_FIELD_NAME,
             DC.SFFMC_SEQ,
             DC.SFFMC_CALL_ID,
-            DC.SFFMC_FIELD_TYPE,
+            DC.SFFMC_FIELD_TYPE_NAD,
             DC.SFFMC_ARRAY_DIMENSIONS,
             DC.SFFMC_CLASS_NAME,
             DC.SFFMC_CALLEE_CLASS_NAME,
@@ -307,6 +313,7 @@ public enum DbTableInfoEnum {
             DC.SPC_MAYBE_FILE_UPLOAD,
             DC.SPC_MAYBE_FILE_DOWNLOAD,
             DC.SPC_FULL_METHOD,
+            DC.SPC_RETURN_TYPE,
     }),
     DTIE_SPRING_TASK("spring_task", new String[]{
             DC.SPT_RECORD_ID,
@@ -316,6 +323,7 @@ public enum DbTableInfoEnum {
             DC.SPT_METHOD_NAME,
             DC.SPT_TYPE,
             DC.SPT_FULL_METHOD,
+            DC.SPT_RETURN_TYPE,
     }),
     DTIE_FIELD_ANNOTATION("field_annotation", new String[]{
             DC.FA_RECORD_ID,
@@ -331,7 +339,7 @@ public enum DbTableInfoEnum {
             DC.FI_RECORD_ID,
             DC.FI_SIMPLE_CLASS_NAME,
             DC.FI_FIELD_NAME,
-            DC.FI_FIELD_TYPE,
+            DC.FI_FIELD_TYPE_NAD,
             DC.FI_ARRAY_DIMENSIONS,
             DC.FI_FIELD_CATEGORY,
             DC.FI_MODIFIERS,
@@ -407,13 +415,13 @@ public enum DbTableInfoEnum {
             DC.FGT_FIELD_NAME,
             DC.FGT_TYPE,
             DC.FGT_TYPE_SEQ,
-            DC.FGT_SIMPLE_GENERICS_TYPE,
+            DC.FGT_SIMPLE_GENERICS_TYPE_NAD,
             DC.FGT_GENERICS_ARRAY_DIMENSIONS,
             DC.FGT_TYPE_VARIABLES_NAME,
             DC.FGT_WILDCARD,
             DC.FGT_REFERENCE_TYPE,
             DC.FGT_GENERICS_CATEGORY,
-            DC.FGT_GENERICS_TYPE,
+            DC.FGT_GENERICS_TYPE_NAD,
             DC.FGT_CLASS_NAME,
     }),
     DTIE_PROPERTIES_CONF("properties_conf", new String[]{
@@ -467,6 +475,7 @@ public enum DbTableInfoEnum {
             DC.MRAS_METHOD_HASH,
             DC.MRAS_RETURN_ARG_SEQ,
             DC.MRAS_FULL_METHOD,
+            DC.MRAS_RETURN_TYPE,
             DC.MRAS_EQUIVALENT_CONVERSION,
     }),
     DTIE_METHOD_RETURN_CALL_ID("method_return_call_id", new String[]{
@@ -474,6 +483,7 @@ public enum DbTableInfoEnum {
             DC.MRCI_METHOD_HASH,
             DC.MRCI_RETURN_CALL_ID,
             DC.MRCI_FULL_METHOD,
+            DC.MRCI_RETURN_TYPE,
             DC.MRCI_EQUIVALENT_CONVERSION,
     }),
     DTIE_METHOD_RETURN_CONST_VALUE("method_return_const_value", new String[]{
@@ -483,6 +493,7 @@ public enum DbTableInfoEnum {
             DC.MRCV_CONST_TYPE,
             DC.MRCV_CONST_VALUE,
             DC.MRCV_FULL_METHOD,
+            DC.MRCV_RETURN_TYPE,
     }),
     DTIE_METHOD_RETURN_FIELD_INFO("method_return_field_info", new String[]{
             DC.MRFI_RECORD_ID,
@@ -491,12 +502,13 @@ public enum DbTableInfoEnum {
             DC.MRFI_STATIC_FIELD,
             DC.MRFI_FIELD_OF_THIS,
             DC.MRFI_FIELD_IN_SIMPLE_CLASS_NAME,
-            DC.MRFI_FIELD_SIMPLE_TYPE,
+            DC.MRFI_SIMPLE_FIELD_TYPE_NAD,
             DC.MRFI_FIELD_ARRAY_DIMENSIONS,
             DC.MRFI_FIELD_NAME,
             DC.MRFI_FIELD_IN_CLASS_NAME,
-            DC.MRFI_FIELD_TYPE,
+            DC.MRFI_FIELD_TYPE_NAD,
             DC.MRFI_FULL_METHOD,
+            DC.MRFI_RETURN_TYPE,
     }),
     DTIE_METHOD_CATCH("method_catch", new String[]{
             DC.MCTH_RECORD_ID,
@@ -517,6 +529,7 @@ public enum DbTableInfoEnum {
             DC.MCTH_CATCH_MIN_CALL_ID,
             DC.MCTH_CATCH_MAX_CALL_ID,
             DC.MCTH_FULL_METHOD,
+            DC.MCTH_RETURN_TYPE,
     }),
     DTIE_METHOD_FINALLY("method_finally", new String[]{
             DC.MF_RECORD_ID,
@@ -529,6 +542,7 @@ public enum DbTableInfoEnum {
             DC.MF_TRY_CATCH_MAX_CALL_ID,
             DC.MF_FINALLY_START_LINE_NUMBER,
             DC.MF_FULL_METHOD,
+            DC.MF_RETURN_TYPE,
     }),
     DTIE_METHOD_THROW("method_throw", new String[]{
             DC.MT_RECORD_ID,
@@ -543,6 +557,7 @@ public enum DbTableInfoEnum {
             DC.MT_CATCH_EXCEPTION_VARIABLE_NAME,
             DC.MT_CALL_ID,
             DC.MT_FULL_METHOD,
+            DC.MT_RETURN_TYPE,
     }),
     DTIE_MYBATIS_MS_GET_SET_DB("mybatis_ms_get_set_db", new String[]{
             DC.MMGSD_RECORD_ID,
@@ -566,6 +581,7 @@ public enum DbTableInfoEnum {
             DC.MCMCR_CALLEE_SIMPLE_CLASS_NAME,
             DC.MCMCR_CALLEE_METHOD_NAME,
             DC.MCMCR_CALLEE_FULL_METHOD,
+            DC.MCMCR_CALLEE_RETURN_TYPE,
     }),
     DTIE_MYBATIS_MS_FORMATED_SQL("mybatis_ms_formated_sql", new String[]{
             DC.MMFS_RECORD_ID,

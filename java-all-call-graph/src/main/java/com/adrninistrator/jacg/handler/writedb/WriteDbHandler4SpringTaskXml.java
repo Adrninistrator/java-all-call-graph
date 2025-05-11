@@ -3,15 +3,20 @@ package com.adrninistrator.jacg.handler.writedb;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.SpringTaskXmlCodeParser;
+import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
+import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,7 +30,8 @@ import java.util.Map;
         minColumnNum = 2,
         maxColumnNum = 2,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_SPRING_TASK,
-        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_SPRING_BEAN}
+        dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_SPRING_BEAN,
+                DbTableInfoEnum.DTIE_METHOD_INFO}
 )
 public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDbData4SpringTask> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4SpringTaskXml.class);
@@ -39,13 +45,21 @@ public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDb
      */
     private Map<String, String> springBeanMap;
 
+    private MethodInfoHandler methodInfoHandler;
+
     public WriteDbHandler4SpringTaskXml(WriteDbResult writeDbResult) {
         super(writeDbResult);
     }
 
     @Override
+    public void init(WriteDbResult writeDbResult) {
+        super.init(writeDbResult);
+        methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
+    }
+
+    @Override
     protected WriteDbData4SpringTask genData(String[] array) {
-        String springBeanName = array[0];
+        String springBeanName = readLineData();
         String springBeanClassName = springBeanMap.get(springBeanName);
         if (springBeanClassName == null) {
             // 假如根据Spring Bean名称未获取到对应的类名，则将首字段修改为小写后继续尝试获取
@@ -58,17 +72,28 @@ public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDb
             return null;
         }
 
-        String methodName = array[1];
+        String methodName = readLineData();
         String fullMethod = JavaCG2ClassMethodUtil.formatFullMethodNoArgs(springBeanClassName, methodName);
 
+        List<WriteDbData4MethodInfo> methodInfoList = methodInfoHandler.queryMethodInfoByClassMethod(springBeanClassName, methodName);
+        if (JavaCG2Util.isCollectionEmpty(methodInfoList)) {
+            logger.error("Spring Task对应方法未查询到 {} {}", springBeanClassName, methodName);
+            return null;
+        }
+        if (methodInfoList.size() > 1) {
+            logger.error("Spring Task对应方法查询到多个 {} {} {}", springBeanClassName, methodName, JACGJsonUtil.getJsonStr(methodInfoList));
+            return null;
+        }
+        WriteDbData4MethodInfo methodInfo = methodInfoList.get(0);
         WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
         writeDbData4SpringTask.setRecordId(genNextRecordId());
-        writeDbData4SpringTask.setMethodHash(JACGUtil.genHashWithLen(fullMethod));
+        writeDbData4SpringTask.setMethodHash(methodInfo.getMethodHash());
         writeDbData4SpringTask.setSpringBeanName(springBeanName);
         writeDbData4SpringTask.setClassName(springBeanClassName);
         writeDbData4SpringTask.setMethodName(methodName);
         writeDbData4SpringTask.setType(JACGConstants.SPRING_TASK_TYPE_XML);
         writeDbData4SpringTask.setFullMethod(fullMethod);
+        writeDbData4SpringTask.setReturnType(methodInfo.getReturnType());
         return writeDbData4SpringTask;
     }
 

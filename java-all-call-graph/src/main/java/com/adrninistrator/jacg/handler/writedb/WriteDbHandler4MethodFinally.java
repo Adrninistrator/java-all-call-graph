@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodFinally;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
@@ -17,8 +17,8 @@ import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_FINALLY,
-        minColumnNum = 7,
-        maxColumnNum = 7,
+        minColumnNum = 8,
+        maxColumnNum = 8,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_FINALLY
 )
 public class WriteDbHandler4MethodFinally extends AbstractWriteDbHandler<WriteDbData4MethodFinally> {
@@ -29,15 +29,16 @@ public class WriteDbHandler4MethodFinally extends AbstractWriteDbHandler<WriteDb
 
     @Override
     protected WriteDbData4MethodFinally genData(String[] array) {
-        String fullMethod = array[0];
+        String fullMethod = readLineData();
+        String returnType = readLineData();
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        String tryCatch = array[1];
-        int tryCatchStartLineNumber = Integer.parseInt(array[2]);
-        int tryCatchEndLineNumber = Integer.parseInt(array[3]);
-        int tryCatchMinCallId = Integer.parseInt(array[4]);
-        int tryCatchMaxCallId = Integer.parseInt(array[5]);
-        int finallyCatchStartLineNumber = Integer.parseInt(array[6]);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
+        String tryCatch = readLineData();
+        int tryCatchStartLineNumber = Integer.parseInt(readLineData());
+        int tryCatchEndLineNumber = Integer.parseInt(readLineData());
+        int tryCatchMinCallId = Integer.parseInt(readLineData());
+        int tryCatchMaxCallId = Integer.parseInt(readLineData());
+        int finallyCatchStartLineNumber = Integer.parseInt(readLineData());
 
         WriteDbData4MethodFinally writeDbData4MethodFinally = new WriteDbData4MethodFinally();
         writeDbData4MethodFinally.setRecordId(genNextRecordId());
@@ -50,6 +51,7 @@ public class WriteDbHandler4MethodFinally extends AbstractWriteDbHandler<WriteDb
         writeDbData4MethodFinally.setTryCatchMaxCallId(tryCatchMaxCallId);
         writeDbData4MethodFinally.setFinallyStartLineNumber(finallyCatchStartLineNumber);
         writeDbData4MethodFinally.setFullMethod(fullMethod);
+        writeDbData4MethodFinally.setReturnType(returnType);
         return writeDbData4MethodFinally;
     }
 
@@ -65,7 +67,8 @@ public class WriteDbHandler4MethodFinally extends AbstractWriteDbHandler<WriteDb
                 data.getTryCatchMinCallId(),
                 data.getTryCatchMaxCallId(),
                 data.getFinallyStartLineNumber(),
-                data.getFullMethod()
+                data.getFullMethod(),
+                data.getReturnType()
         };
     }
 
@@ -73,6 +76,7 @@ public class WriteDbHandler4MethodFinally extends AbstractWriteDbHandler<WriteDb
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志",
                 "当前的finally对应try或catch",
                 "try或catch代码块开始代码行号",
                 "try或catch代码块结束代码行号",

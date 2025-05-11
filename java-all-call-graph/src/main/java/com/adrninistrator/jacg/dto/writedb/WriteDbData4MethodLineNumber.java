@@ -16,6 +16,7 @@ public class WriteDbData4MethodLineNumber implements BaseWriteDbData {
     private int minLineNumber;
     private int maxLineNumber;
     private String fullMethod;
+    private String returnType;
 
     public int getRecordId() {
         return recordId;
@@ -71,5 +72,13 @@ public class WriteDbData4MethodLineNumber implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }

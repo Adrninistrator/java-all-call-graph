@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -20,8 +20,8 @@ import java.util.Set;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL_INFO,
-        minColumnNum = 8,
-        maxColumnNum = 8,
+        minColumnNum = 9,
+        maxColumnNum = 9,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL_INFO
 )
 public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteDbData4MethodCallInfo> {
@@ -34,19 +34,20 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
 
     @Override
     protected WriteDbData4MethodCallInfo genData(String[] array) {
-        String callerFullMethod = array[7];
-        int callId = Integer.parseInt(array[0]);
-        String objArgsSeq = array[1];
-        String seq = array[2];
-        String type = array[3];
-        int arrayFlag = Integer.parseInt(array[4]);
-        String valueType = array[5];
-        String value = array[6];
+        int callId = Integer.parseInt(readLineData());
+        String objArgsSeq = readLineData();
+        String seq = readLineData();
+        String type = readLineData();
+        int arrayFlag = Integer.parseInt(readLineData());
+        String valueType = readLineData();
+        String value = readLineData();
         if (JavaCG2MethodCallInfoTypeEnum.MCIT_BASE64_VALUE.getType().equals(type)) {
             // bv类型数据需要进行base64解码
             value = JavaCG2Util.base64Decode(value);
         }
 
+        String callerFullMethod = readLineData();
+        String returnType = readLineData();
         // 记录被调用对象及参数存在信息的call_id
         withInfoCallIdSet.add(callId);
         WriteDbData4MethodCallInfo writeDbData4MethodCallInfo = new WriteDbData4MethodCallInfo();
@@ -54,7 +55,7 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
         writeDbData4MethodCallInfo.setCallId(callId);
         writeDbData4MethodCallInfo.setObjArgsSeq(Integer.parseInt(objArgsSeq));
         writeDbData4MethodCallInfo.setSeq(Integer.parseInt(seq));
-        writeDbData4MethodCallInfo.setCallerMethodHash(JACGUtil.genHashWithLen(callerFullMethod));
+        writeDbData4MethodCallInfo.setCallerMethodHash(JACGClassMethodUtil.genMethodHashWithLen(callerFullMethod, returnType));
         writeDbData4MethodCallInfo.setType(type);
         writeDbData4MethodCallInfo.setArrayFlag(arrayFlag);
         writeDbData4MethodCallInfo.setValueType(valueType);
@@ -87,7 +88,8 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
                 "是否为数组格式，1:是，0:否",
                 "值的类型，含义参考 JavaCG2ConstantTypeEnum 类",
                 "对应的值",
-                "调用方，完整方法（类名+方法名+参数）"
+                "调用方，完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志"
         };
     }
 

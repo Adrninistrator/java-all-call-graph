@@ -3,7 +3,6 @@ package test.runbycode.manualaddmethodcall.extensions;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallPair;
 import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddMethodCall1;
-import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import test.callgraph.otherjar.AbstractFixedOtherJarService1;
 
 import java.util.Collections;
@@ -28,8 +27,8 @@ public class MAMCExt4FixedService1 extends AbstractManualAddMethodCall1 {
 
     @Override
     protected List<MethodCallPair> chooseAddMethodCallPairList(String className) {
-        // 当AbstractFixedOtherJarService1子类的invoke()方法被调用时，添加调用execute()方法
-        return Collections.singletonList(new MethodCallPair(JavaCG2ClassMethodUtil.formatMethodWithArgTypesStr("invoke"),
-                JavaCG2ClassMethodUtil.formatMethodWithArgTypesStr("execute")));
+        // 当 AbstractFixedOtherJarService1 子类的 invoke() 方法被调用时，添加调用 execute() 方法
+        return Collections.singletonList(new MethodCallPair("invoke()", String.class.getName(),
+                "execute()", String.class.getName()));
     }
 }

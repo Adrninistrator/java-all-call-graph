@@ -19,11 +19,9 @@ public class SpringTransactionalFormatter extends AbstractAnnotationFormatter {
     }
 
     @Override
-    public String handleAnnotation(String fullMethod, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
-        StringAnnotationAttribute stringAnnotationAttribute = annotationHandler.queryAttribute4MethodAnnotation(fullMethod,
-                JACGCommonNameConstants.SPRING_TX_ANNOTATION,
-                JACGCommonNameConstants.SPRING_TX_ATTRIBUTE_PROPAGATION,
-                StringAnnotationAttribute.class);
+    public String handleAnnotation(String fullMethod, String returnType, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
+        StringAnnotationAttribute stringAnnotationAttribute = annotationHandler.queryAttribute4MethodAnnotation(fullMethod, returnType,
+                JACGCommonNameConstants.SPRING_TX_ANNOTATION, JACGCommonNameConstants.SPRING_TX_ATTRIBUTE_PROPAGATION, StringAnnotationAttribute.class);
         if (stringAnnotationAttribute == null) {
             // @Transactional注解未指定propagation时，直接返回
             return annotationName;

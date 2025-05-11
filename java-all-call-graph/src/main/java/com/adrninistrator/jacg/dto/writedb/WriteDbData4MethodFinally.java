@@ -19,6 +19,7 @@ public class WriteDbData4MethodFinally implements BaseWriteDbData {
     private int tryCatchMaxCallId;
     private int finallyStartLineNumber;
     private String fullMethod;
+    private String returnType;
 
     public int getRecordId() {
         return recordId;
@@ -98,5 +99,13 @@ public class WriteDbData4MethodFinally implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }

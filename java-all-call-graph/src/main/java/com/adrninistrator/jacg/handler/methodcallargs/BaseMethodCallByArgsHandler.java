@@ -5,7 +5,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
@@ -67,13 +67,13 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
     /**
      * 处理方法调用及对应的方法调用参数信息
      *
-     * @param methodCall         方法调用
-     * @param callerMethodDetail 调用方法详细信息，包含了方法名称、方法参数等
-     * @param calleeMethodDetail 被调用方法详细信息，包含了方法名称、方法参数等
-     * @param methodCallInfo     方法调用信息
+     * @param methodCall                     方法调用
+     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名称、方法参数等
+     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名称、方法参数等
+     * @param methodCallInfo                 方法调用信息
      */
-    protected abstract void handleMethodCallWithInfo(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail,
-                                                     WriteDbData4MethodCallInfo methodCallInfo);
+    protected abstract void handleMethodCallWithInfo(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
+                                                     MethodDetailNoReturnType calleeMethodDetailNoReturnType, WriteDbData4MethodCallInfo methodCallInfo);
 
     @Override
     public int queryCurrentEndId(int currentStartId, Object... argsByPage) {
@@ -124,10 +124,10 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
                     logger.warn("未查询到指定的方法调用，可能是同一个方法的递归调用未写入数据库 {}", methodCallInfo.getCallId());
                     continue;
                 }
-                MethodDetail callerMethodDetail = JACGClassMethodUtil.genMethodDetail(methodCall.getCallerFullMethod());
-                MethodDetail calleeMethodDetail = JACGClassMethodUtil.genMethodDetail(methodCall.getCalleeFullMethod());
+                MethodDetailNoReturnType callerMethodDetailNoReturnType = JACGClassMethodUtil.genMethodDetailNoReturnType(methodCall.getCallerFullMethod());
+                MethodDetailNoReturnType calleeMethodDetailNoReturnType = JACGClassMethodUtil.genMethodDetailNoReturnType(methodCall.getCalleeFullMethod());
                 // 处理方法调用及对应的方法调用参数信息
-                handleMethodCallWithInfo(methodCall, callerMethodDetail, calleeMethodDetail, methodCallInfo);
+                handleMethodCallWithInfo(methodCall, callerMethodDetailNoReturnType, calleeMethodDetailNoReturnType, methodCallInfo);
             }
         }
         return true;

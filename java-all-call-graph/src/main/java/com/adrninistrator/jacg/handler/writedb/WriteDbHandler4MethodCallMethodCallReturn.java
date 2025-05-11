@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallMethodCallReturn;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
@@ -17,8 +17,8 @@ import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CALL_METHOD_CALL_RETURN,
-        minColumnNum = 6,
-        maxColumnNum = 6,
+        minColumnNum = 7,
+        maxColumnNum = 7,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL_METHOD_CALL_RETURN
 )
 public class WriteDbHandler4MethodCallMethodCallReturn extends AbstractWriteDbHandler<WriteDbData4MethodCallMethodCallReturn> {
@@ -29,12 +29,13 @@ public class WriteDbHandler4MethodCallMethodCallReturn extends AbstractWriteDbHa
 
     @Override
     protected WriteDbData4MethodCallMethodCallReturn genData(String[] array) {
-        String calleeFullMethod = array[5];
-        int callId = Integer.parseInt(array[0]);
-        String objArgsSeq = array[1];
-        String seq = array[2];
-        int arrayFlag = Integer.parseInt(array[3]);
-        int useReturnCallId = Integer.parseInt(array[4]);
+        int callId = Integer.parseInt(readLineData());
+        String objArgsSeq = readLineData();
+        String seq = readLineData();
+        int arrayFlag = Integer.parseInt(readLineData());
+        int useReturnCallId = Integer.parseInt(readLineData());
+        String calleeFullMethod = readLineData();
+        String calleeReturnType = readLineData();
         String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
         String calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
 
@@ -45,10 +46,11 @@ public class WriteDbHandler4MethodCallMethodCallReturn extends AbstractWriteDbHa
         writeDbData4MethodCallMethodCallReturn.setSeq(Integer.parseInt(seq));
         writeDbData4MethodCallMethodCallReturn.setArrayFlag(arrayFlag);
         writeDbData4MethodCallMethodCallReturn.setUseReturnCallId(useReturnCallId);
-        writeDbData4MethodCallMethodCallReturn.setCalleeMethodHash(JACGUtil.genHashWithLen(calleeFullMethod));
+        writeDbData4MethodCallMethodCallReturn.setCalleeMethodHash(JACGClassMethodUtil.genMethodHashWithLen(calleeFullMethod,calleeReturnType));
         writeDbData4MethodCallMethodCallReturn.setCalleeSimpleClassName(dbOperWrapper.querySimpleClassName(calleeClassName));
         writeDbData4MethodCallMethodCallReturn.setCalleeMethodName(calleeMethodName);
         writeDbData4MethodCallMethodCallReturn.setCalleeFullMethod(calleeFullMethod);
+        writeDbData4MethodCallMethodCallReturn.setCalleeReturnType(calleeReturnType);
         return writeDbData4MethodCallMethodCallReturn;
     }
 
@@ -64,7 +66,8 @@ public class WriteDbHandler4MethodCallMethodCallReturn extends AbstractWriteDbHa
                 data.getCalleeMethodHash(),
                 data.getCalleeSimpleClassName(),
                 data.getCalleeMethodName(),
-                data.getCalleeFullMethod()
+                data.getCalleeFullMethod(),
+                data.getCalleeReturnType()
         };
     }
 
@@ -76,7 +79,8 @@ public class WriteDbHandler4MethodCallMethodCallReturn extends AbstractWriteDbHa
                 "序号，从0开始，大于0代表有多种可能",
                 "是否为数组格式，1:是，0:否",
                 "返回值被使用的方法调用序号，从1开始",
-                "被调用方，完整方法（类名+方法名+参数）"
+                "被调用方，完整方法（类名+方法名+参数）",
+                "被调用方，方法返回类型，包含数组标志",
         };
     }
 

@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.18' // Spring Boot 2.x 最后一个支持 JDK8 的版本
+    id 'io.spring.dependency-management' version '1.1.4' // 依赖管理插件
+}
+
+apply from: 'build.gradle'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+}
+
+bootJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    destinationDirectory = file("${buildDir}/spring-boot")
+    archiveFileName = "java-all-call-graph.jar"
+    manifest {
+        attributes 'Main-Class': 'org.springframework.boot.loader.JarLauncher'
+        attributes 'Start-Class': 'com.adrninistrator.jacg.runner.RunnerWriteDb'
+    }
+    doLast {
+        def jacgConfigDirs = new File('src/main/resources').listFiles().findAll { File f -> (f.isDirectory() && f.name.startsWith('_jacg_')) }
+        // 拷贝配置文件目录
+        jacgConfigDirs.each { jacgConfigDir ->
+            def dirName = jacgConfigDir.getName()
+            copy {
+                from 'src/main/resources/' + dirName
+                into "${buildDir}/spring-boot/" + dirName
+            }
+        }
+        // 复制 java-callgraph2 组件中的配置文件
+        configurations.runtimeClasspath.each { File file ->
+            if (file.name.startsWith('java-callgraph2-')) {
+                copy {
+                    from zipTree(file).matching {
+                        include '_javacg2_*/*'
+                    }
+                    into "${buildDir}/spring-boot/"
+                }
+            }
+        }
+    }
+}
+
+/*
+    生成 spring-boot jar
+    gradlew bootJar -b spring_boot.gradle
+
+    执行：进入 build/spring-boot 目录
+    java -jar java-all-call-graph.jar
+ */

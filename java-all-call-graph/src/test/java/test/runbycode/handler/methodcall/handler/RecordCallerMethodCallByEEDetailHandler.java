@@ -2,7 +2,8 @@ package test.runbycode.handler.methodcall.handler;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
+import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
 import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.methodcall.BaseMethodCallByEEDetailHandler;
@@ -17,9 +18,9 @@ import java.util.Set;
  */
 public class RecordCallerMethodCallByEEDetailHandler extends BaseMethodCallByEEDetailHandler {
 
-    private final Set<String> indexOfCallerMethodSet = new HashSet<>();
+    private final Set<FullMethodWithReturnType> indexOfCallerMethodSet = new HashSet<>();
 
-    private final Set<String> substringCallerMethodSet = new HashSet<>();
+    private final Set<FullMethodWithReturnType> substringCallerMethodSet = new HashSet<>();
 
     public RecordCallerMethodCallByEEDetailHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
@@ -35,21 +36,21 @@ public class RecordCallerMethodCallByEEDetailHandler extends BaseMethodCallByEED
     }
 
     @Override
-    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail,
-                                        ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args) {
+    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
+                                        MethodDetailNoReturnType calleeMethodDetailNoReturnType, ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args) {
         String calleeMethodName = methodCall.getCalleeMethodName();
         if (calleeMethodName.contains("indexOf") || calleeMethodName.contains("IndexOf")) {
-            indexOfCallerMethodSet.add(methodCall.getCallerFullMethod());
+            indexOfCallerMethodSet.add(new FullMethodWithReturnType(methodCall.getCallerFullMethod(), methodCall.getCallerReturnType()));
         } else if (calleeMethodName.contains("substring")) {
-            substringCallerMethodSet.add(methodCall.getCallerFullMethod());
+            substringCallerMethodSet.add(new FullMethodWithReturnType(methodCall.getCallerFullMethod(), methodCall.getCallerReturnType()));
         }
     }
 
-    public Set<String> getIndexOfCallerMethodSet() {
+    public Set<FullMethodWithReturnType> getIndexOfCallerMethodSet() {
         return indexOfCallerMethodSet;
     }
 
-    public Set<String> getSubstringCallerMethodSet() {
+    public Set<FullMethodWithReturnType> getSubstringCallerMethodSet() {
         return substringCallerMethodSet;
     }
 }

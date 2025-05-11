@@ -37,15 +37,15 @@ public class EntryMethodInfoFiller4Spring extends AbstractEntryMethodInfoFiller 
     }
 
     @Override
-    public BaseEntryMethodInfo query(String entryMethod) {
-        String controllerUri = springHandler.queryControllerUri(entryMethod);
+    public BaseEntryMethodInfo query(String entryMethod, String entryMethodReturnType) {
+        String controllerUri = springHandler.queryControllerUri(entryMethod, entryMethodReturnType);
         if (StringUtils.isNotBlank(controllerUri)) {
             EntryMethodInfo4SpringController entryMethodInfo4SpringController = new EntryMethodInfo4SpringController();
             entryMethodInfo4SpringController.setControllerUti(controllerUri);
             return entryMethodInfo4SpringController;
         }
 
-        if (springHandler.checkSpringTask(entryMethod)) {
+        if (springHandler.checkSpringTask(entryMethod, entryMethodReturnType)) {
             return new EntryMethodInfo4SpringTask();
         }
         return null;

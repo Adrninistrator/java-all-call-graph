@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.dto.callgraph;
 
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ public class CallGraphJson {
     }
 
     public void addMethod(CallGraphJsonMethod method) {
-        String methodHash = JACGUtil.genHashWithLen(method.getMethodDetail().getFullMethod());
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(method.getMethodDetail().getFullMethod(), method.getMethodDetail().getReturnType());
         methodMap.put(methodHash, method);
     }
 

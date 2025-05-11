@@ -143,10 +143,15 @@ public class JACGConstants {
     // 输出的注解信息文件，不包含属性时的列数
     public static final int ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_2 = 2;
 
-    // 输出的注解信息文件，多一列其他信息，包含属性时的列数
+    // 输出的注解信息文件，包含属性时的列数
     public static final int ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE_6 = 6;
-    // 输出的注解信息文件，多一列其他信息，不包含属性时的列数
+    // 输出的注解信息文件，不包含属性时的列数
     public static final int ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_3 = 3;
+
+    // 输出的注解信息文件，多一列其他信息，包含属性时的列数
+    public static final int ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE_7 = 7;
+    // 输出的注解信息文件，多一列其他信息，不包含属性时的列数
+    public static final int ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_4 = 4;
 
     public static final String H2_PROTOCOL = "jdbc:h2:file:";
     public static final String H2_SCHEMA = "jacg";

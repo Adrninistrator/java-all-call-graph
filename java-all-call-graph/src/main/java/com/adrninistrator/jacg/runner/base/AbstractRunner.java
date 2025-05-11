@@ -185,9 +185,19 @@ public abstract class AbstractRunner extends AbstractExecutor {
     // 执行检查使用的组件版本
     private void doCheckJarVersion(Class<?> clazz, String expectedJarName) {
         String jarFilePath = JACGFileUtil.getJarFilePathOfClass(clazz);
-        if (!StringUtils.endsWith(jarFilePath, expectedJarName)) {
-            logger.error("类对应的jar包名称与实际的不一致 {} {} {}", clazz.getName(), expectedJarName, jarFilePath);
+        /*
+            spring-boot中的jar格式如下，需要兼容：
+            file:/D:/java-all-call-graph/build/spring-boot/java-all-call-graph.jar!/BOOT-INF/lib/druid-1.2.15.jar!/
+         */
+        String springJarTail = "!/";
+        if (StringUtils.endsWith(jarFilePath, springJarTail)) {
+            jarFilePath = jarFilePath.substring(0, jarFilePath.length() - springJarTail.length());
         }
+        if (!StringUtils.endsWith(jarFilePath, expectedJarName)) {
+            logger.error("{} 类所在的jar包 {} 与要求的组件名称或版本 {} 不一致，请检查对应组件版本与 java-all-call-graph 项目中使用的是否相同", clazz.getName(), jarFilePath, expectedJarName);
+            return;
+        }
+        logger.info("{} 类所在的jar包 {} 与要求的组件名称或版本 {} 一致", clazz.getName(), jarFilePath, expectedJarName);
     }
 
     /**
@@ -214,13 +224,13 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
     // 结束前的处理
     protected void beforeExit() {
-        if (handleDb()) {
-            dbOperator.closeDs(this);
-        }
-
         if (threadPoolExecutor != null) {
             // 关闭并等待线程池
             shutdownAndWaitTPE();
+        }
+
+        if (handleDb()) {
+            dbOperator.closeDs(this);
         }
 
         if (someTaskFail) {

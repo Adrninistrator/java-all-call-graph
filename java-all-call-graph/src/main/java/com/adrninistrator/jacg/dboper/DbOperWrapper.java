@@ -5,7 +5,9 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
+import com.adrninistrator.jacg.comparator.Comparator4FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphNode4Caller;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodLineNumber;
@@ -478,6 +480,7 @@ public class DbOperWrapper {
                     DC.MC_CALLER_SIMPLE_CLASS_NAME,
                     DC.MC_CALLER_LINE_NUMBER,
                     DC.MC_CALL_FLAGS,
+                    DC.MC_CALLER_RETURN_TYPE,
                     DC.MC_RAW_RETURN_TYPE) + " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLER_METHOD_HASH + " = ?" +
                     " and " + DC.MC_CALL_ID + " > ?";
@@ -505,9 +508,10 @@ public class DbOperWrapper {
      *
      * @param simpleClassName
      * @param fullMethodPrefix
+     * @param returnType
      * @return
      */
-    public String queryMethodHashByPrefix(String simpleClassName, String fullMethodPrefix) {
+    public String queryMethodHashByPrefix(String simpleClassName, String fullMethodPrefix, String returnType) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_METHOD_HASH;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -515,11 +519,12 @@ public class DbOperWrapper {
                     " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
                     " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MI_FULL_METHOD + " like concat(?, '%')" +
+                    " and " + DC.MI_RETURN_TYPE + " = ?" +
                     " limit 1";
             sql = cacheSql(sqlKeyEnum, sql);
         }
 
-        return dbOperator.queryObjectOneColumn(sql, String.class, simpleClassName, fullMethodPrefix);
+        return dbOperator.queryObjectOneColumn(sql, String.class, simpleClassName, fullMethodPrefix, returnType);
     }
 
     /**
@@ -571,16 +576,29 @@ public class DbOperWrapper {
      * @param className
      * @return
      */
-    public List<String> queryMethodByClassName(String className) {
+    public List<FullMethodWithReturnType> queryMethodByClassName(String className) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_FULL_METHOD_BY_CLASS;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + DC.MI_FULL_METHOD +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MI_FULL_METHOD, DC.MI_RETURN_TYPE) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
                     " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?";
             sql = cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryListOneColumn(sql, String.class, querySimpleClassName(className));
+        List<WriteDbData4MethodInfo> list = dbOperator.queryList(sql, WriteDbData4MethodInfo.class, querySimpleClassName(className));
+        return genFullMethodWithReturnTypeList(list);
+    }
+
+    public List<FullMethodWithReturnType> genFullMethodWithReturnTypeList(List<WriteDbData4MethodInfo> list) {
+        if (list == null) {
+            return null;
+        }
+        List<FullMethodWithReturnType> fullMethodWithReturnTypeList = new ArrayList<>();
+        for (WriteDbData4MethodInfo methodInfo : list) {
+            fullMethodWithReturnTypeList.add(new FullMethodWithReturnType(methodInfo.getFullMethod(), methodInfo.getReturnType()));
+        }
+        fullMethodWithReturnTypeList.sort(Comparator4FullMethodWithReturnType.getInstance());
+        return fullMethodWithReturnTypeList;
     }
 
     /**
@@ -590,8 +608,8 @@ public class DbOperWrapper {
      * @param fullMethodPrefix
      * @return
      */
-    public List<WriteDbData4MethodInfo> queryMethodInfoByClassFullMethodPrefix(String className, String fullMethodPrefix) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_ALL_BY_CLASS_FULL_METHOD_PREFIX;
+    public List<WriteDbData4MethodInfo> queryMethodInfoByClassMethodPrefix(String className, String fullMethodPrefix) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_ALL_BY_CLASS_METHOD_PREFIX;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_INFO) +
@@ -601,6 +619,27 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryList(sql, WriteDbData4MethodInfo.class, querySimpleClassName(className), fullMethodPrefix);
+    }
+
+    /**
+     * 根据类名、完整方法前缀、返回类型查询方法信息
+     *
+     * @param className
+     * @param fullMethodPrefix
+     * @return
+     */
+    public List<WriteDbData4MethodInfo> queryMethodInfoByClassMethodPrefixReturnType(String className, String fullMethodPrefix, String returnType) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_ALL_BY_CLASS_METHOD_PREFIX_RETURN_TYPE;
+        String sql = getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
+                    " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.MI_FULL_METHOD + " like concat(?, '%')" +
+                    " and " + DC.MI_RETURN_TYPE + " = ?";
+            sql = cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodInfo.class, querySimpleClassName(className), fullMethodPrefix, returnType);
     }
 
     //

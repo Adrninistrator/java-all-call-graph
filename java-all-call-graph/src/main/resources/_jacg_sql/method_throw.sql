@@ -11,6 +11,7 @@ CREATE TABLE if not exists jacg_method_throw_{appName} (
   catch_exception_variable_name varchar(255) DEFAULT NULL COMMENT '抛出异常对应的catch的异常对象变量名称',
   call_id int DEFAULT NULL COMMENT '抛出异常属于方法调用返回值时，对应的方法调用ID',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
+  return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
   INDEX idx_mt_mhcso_{appName}(method_hash, catch_start_offset),
   INDEX idx_mt_mhci_{appName}(method_hash, call_id),

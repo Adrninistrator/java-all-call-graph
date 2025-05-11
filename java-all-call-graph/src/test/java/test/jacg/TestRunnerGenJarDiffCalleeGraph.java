@@ -1,5 +1,6 @@
 package test.jacg;
 
+import com.adrninistrator.jacg.diff.dto.result.JarDiffResult;
 import com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCalleeGraph;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
@@ -11,8 +12,8 @@ import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 public class TestRunnerGenJarDiffCalleeGraph {
 
     public static void main(String[] args) {
-        boolean success = new RunnerGenJarDiffCalleeGraph().generate();
-        if (!success) {
+        JarDiffResult jarDiffResult = new RunnerGenJarDiffCalleeGraph().generate();
+        if (!jarDiffResult.isSuccess()) {
             throw new JavaCG2RuntimeException("执行失败");
         }
     }

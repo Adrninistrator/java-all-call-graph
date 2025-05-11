@@ -4,7 +4,7 @@ CREATE TABLE if not exists jacg_sf_field_method_call_{appName} (
   field_name varchar(200) NOT NULL COMMENT '字段名',
   seq int NOT NULL COMMENT '序号，从0开始，大于0代表有多种可能',
   call_id int NOT NULL COMMENT '字段初始化对应的方法调用序号，从1开始',
-  field_type varchar(255) NOT NULL COMMENT '字段类型',
+  field_type_nad varchar(255) NOT NULL COMMENT '字段类型（不包含数组标志）',
   array_dimensions tinyint NOT NULL COMMENT '字段数组类型的维度，为0代表不是数组类型',
   class_name varchar(255) NOT NULL COMMENT '完整类名',
   callee_class_name varchar(255) NOT NULL COMMENT '初始化方法被调类名',

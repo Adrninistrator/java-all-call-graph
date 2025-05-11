@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgGenericsType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
@@ -19,8 +19,8 @@ import java.util.Set;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_ARG_GENERICS_TYPE,
-        minColumnNum = 10,
-        maxColumnNum = 10,
+        minColumnNum = 11,
+        maxColumnNum = 11,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_ARG_GENERICS_TYPE
 )
 public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler<WriteDbData4MethodArgGenericsType> {
@@ -34,14 +34,15 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
     @Override
     protected WriteDbData4MethodArgGenericsType genData(String[] array) {
         String fullMethod = readLineData();
+        String returnType = readLineData();
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType);
         int seq = Integer.parseInt(readLineData());
         String type = readLineData();
         int typeSeq = Integer.parseInt(readLineData());
-        String genericsType = readLineData();
-        String simpleGenericsType = dbOperWrapper.querySimpleClassName(genericsType);
+        String genericsTypeNad = readLineData();
+        String simpleGenericsTypeNad = dbOperWrapper.querySimpleClassName(genericsTypeNad);
         int genericsArrayDimensions = Integer.parseInt(readLineData());
         String typeVariablesName = readLineData();
         String wildcard = readLineData();
@@ -57,14 +58,15 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
         writeDbData4MethodArgGenericsType.setSeq(seq);
         writeDbData4MethodArgGenericsType.setType(type);
         writeDbData4MethodArgGenericsType.setTypeSeq(typeSeq);
-        writeDbData4MethodArgGenericsType.setSimpleGenericsType(simpleGenericsType);
+        writeDbData4MethodArgGenericsType.setSimpleGenericsTypeNad(simpleGenericsTypeNad);
         writeDbData4MethodArgGenericsType.setGenericsArrayDimensions(genericsArrayDimensions);
         writeDbData4MethodArgGenericsType.setTypeVariablesName(typeVariablesName);
         writeDbData4MethodArgGenericsType.setWildcard(wildcard);
         writeDbData4MethodArgGenericsType.setReferenceType(referenceType);
         writeDbData4MethodArgGenericsType.setGenericsCategory(genericsCategory);
-        writeDbData4MethodArgGenericsType.setGenericsType(genericsType);
+        writeDbData4MethodArgGenericsType.setGenericsTypeNad(genericsTypeNad);
         writeDbData4MethodArgGenericsType.setFullMethod(fullMethod);
+        writeDbData4MethodArgGenericsType.setReturnType(returnType);
         return writeDbData4MethodArgGenericsType;
     }
 
@@ -77,14 +79,15 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
                 data.getSeq(),
                 data.getType(),
                 data.getTypeSeq(),
-                data.getSimpleGenericsType(),
+                data.getSimpleGenericsTypeNad(),
                 data.getGenericsArrayDimensions(),
                 data.getTypeVariablesName(),
                 data.getWildcard(),
                 data.getReferenceType(),
                 data.getGenericsCategory(),
-                data.getGenericsType(),
-                data.getFullMethod()
+                data.getGenericsTypeNad(),
+                data.getFullMethod(),
+                data.getReturnType()
         };
     }
 
@@ -92,10 +95,11 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志",
                 "参数序号，从0开始",
                 "类型，t:参数类型，gt:参数的泛型类型",
                 "类型序号，参数类型固定为0，参数中的泛型类型从0开始",
-                "方法参数类型或其中的泛型类型类名",
+                "方法参数类型或其中的泛型类型类名（不包含数组标志）",
                 "方法参数中的泛型数组类型的维度，为0代表不是数组类型",
                 "方法参数中的泛型类型变量名称",
                 "方法参数中的泛型通配符",

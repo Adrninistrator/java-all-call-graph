@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CalleeExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CalleeExtractedFile;
@@ -69,15 +70,17 @@ public class CalleeGraphEntryExtractor extends CalleeGraphBaseExtractor {
      */
     @Override
     protected void customHandleCalleeExtractedLine(CalleeExtractedLine calleeExtractedLine) {
-        String entryFullMethod = calleeExtractedLine.getCallGraphLineParsed().getMethodDetail().getFullMethod();
+        MethodDetail methodDetail = calleeExtractedLine.getCallGraphLineParsed().getMethodDetail();
+        String entryFullMethod = methodDetail.getFullMethod();
+        String entryMethodReturnType = methodDetail.getReturnType();
         // 检查入口方法是否存在父类/接口调用子类/实现类的情况
-        if (methodCallHandler.checkExistsSuperCallChild(entryFullMethod)) {
+        if (methodCallHandler.checkExistsSuperCallChild(entryFullMethod, entryMethodReturnType)) {
             calleeExtractedLine.setEntryMethodExistsSuperCallChild(true);
         }
 
         // 检查入口方法是否定义在父类或接口中（不在当前对应的类中）
-        WriteDbData4MethodInfo entryMethodInfo = methodInfoHandler.queryMethodInfoByFullMethod(entryFullMethod);
-        if (entryMethodInfo == null && methodInfoHandler.checkExistsMethodByFullMethodSuperInterface(entryFullMethod)) {
+        WriteDbData4MethodInfo entryMethodInfo = methodInfoHandler.queryMethodInfoByFullMethod(entryFullMethod, entryMethodReturnType);
+        if (entryMethodInfo == null && methodInfoHandler.checkExistsMethodByFullMethodSuperInterface(entryFullMethod, entryMethodReturnType)) {
             calleeExtractedLine.setEntryMethodDefineInSuperInterface(true);
         }
     }

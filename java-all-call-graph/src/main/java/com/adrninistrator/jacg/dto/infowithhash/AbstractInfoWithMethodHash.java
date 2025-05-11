@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.dto.infowithhash;
 
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +18,12 @@ public abstract class AbstractInfoWithMethodHash {
     // 返回当前对应的完整方法
     protected abstract String chooseFullMethod();
 
+    // 返回当前对应的方法返回类型
+    protected abstract String chooseMethodReturnType();
+
     public String getMethodHash() {
         if (methodHash == null) {
-            methodHash = JACGUtil.genHashWithLen(chooseFullMethod());
+            methodHash = JACGClassMethodUtil.genMethodHashWithLen(chooseFullMethod(), chooseMethodReturnType());
         }
         return methodHash;
     }

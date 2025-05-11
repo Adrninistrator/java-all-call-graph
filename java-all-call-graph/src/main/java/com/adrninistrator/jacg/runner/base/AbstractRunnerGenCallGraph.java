@@ -9,11 +9,13 @@ import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
+import com.adrninistrator.jacg.comparator.Comparator4FullMethodWithReturnType;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallLineData;
 import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.multiple.MultiCallInfo;
@@ -38,7 +40,6 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
@@ -93,10 +94,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     private final Map<String, MultiCallInfo> sccMethodCallMap = new HashMap<>();
 
     // 接口调用对应实现类的方法调用，存在一对多的接口
-    private final Set<String> itfMultiCallerFullMethodSet = ConcurrentHashMap.newKeySet();
+    private final Set<FullMethodWithReturnType> itfMultiCallerMethodSet = ConcurrentHashMap.newKeySet();
 
     // 抽象父类调用对应子类的方法调用，存在一对多的抽象父类
-    private final Set<String> sccMultiCallerFullMethodSet = ConcurrentHashMap.newKeySet();
+    private final Set<FullMethodWithReturnType> sccMultiCallerMethodSet = ConcurrentHashMap.newKeySet();
 
     /*
         被禁用的接口调用对应实现类的方法调用
@@ -334,7 +335,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_NOTICE_INFO;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_METHOD_HASH, DC.MC_CALLER_FULL_METHOD, DC.MC_CALLEE_FULL_METHOD) +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_METHOD_HASH, DC.MC_CALLER_FULL_METHOD, DC.MC_CALLER_RETURN_TYPE, DC.MC_CALLEE_FULL_METHOD,
+                    DC.MC_RAW_RETURN_TYPE) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALL_ID + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
@@ -363,27 +365,26 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         Map<String, MultiCallInfo> methodCallMap;
-        Set<String> multiCallerFullMethodSet;
+        Set<FullMethodWithReturnType> multiCallerFullMethodSet;
 
         if (callTypeEnum == JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS) {
             methodCallMap = itfMethodCallMap;
-            multiCallerFullMethodSet = itfMultiCallerFullMethodSet;
+            multiCallerFullMethodSet = itfMultiCallerMethodSet;
         } else {
             methodCallMap = sccMethodCallMap;
-            multiCallerFullMethodSet = sccMultiCallerFullMethodSet;
+            multiCallerFullMethodSet = sccMultiCallerMethodSet;
         }
 
         String callerMethodHash = methodCall.getCallerMethodHash();
-        String callerFullMethod = methodCall.getCallerFullMethod();
-        String calleeFullMethod = methodCall.getCalleeFullMethod();
+        String callerFullMethodWithReturnType = JavaCG2ClassMethodUtil.genFullMethodWithReturnType(methodCall.getCallerFullMethod(), methodCall.getCallerReturnType());
 
         // 以下对Map及Set的处理会并发执行，需要串行执行，避免添加的数据丢失
         synchronized (AbstractRunnerGenCallGraph.class) {
-            MultiCallInfo multiCallInfo = methodCallMap.computeIfAbsent(callerFullMethod, k -> new MultiCallInfo(callerMethodHash, new HashSet<>()));
-            Set<String> calleeMethodSet = multiCallInfo.getCalleeFullMethodSet();
-            calleeMethodSet.add(calleeFullMethod);
+            MultiCallInfo multiCallInfo = methodCallMap.computeIfAbsent(callerFullMethodWithReturnType, k -> new MultiCallInfo(callerMethodHash, new HashSet<>()));
+            Set<FullMethodWithReturnType> calleeMethodSet = multiCallInfo.getCalleeMethodSet();
+            calleeMethodSet.add(new FullMethodWithReturnType(methodCall.getCalleeFullMethod(), methodCall.getRawReturnType()));
             if (calleeMethodSet.size() > 1) {
-                multiCallerFullMethodSet.add(callerFullMethod);
+                multiCallerFullMethodSet.add(new FullMethodWithReturnType(methodCall.getCallerFullMethod(), methodCall.getCallerReturnType()));
             }
         }
 
@@ -414,24 +415,23 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
         String callerMethodHash = methodCall.getCallerMethodHash();
         String callerFullMethod = methodCall.getCallerFullMethod();
-        String calleeFullMethod = methodCall.getCalleeFullMethod();
 
         MultiCallInfo multiCallInfo = methodCallMap.computeIfAbsent(callerFullMethod, k -> new MultiCallInfo(callerMethodHash, ConcurrentHashMap.newKeySet()));
-        multiCallInfo.getCalleeFullMethodSet().add(calleeFullMethod);
+        multiCallInfo.getCalleeMethodSet().add(new FullMethodWithReturnType(methodCall.getCalleeFullMethod(), methodCall.getRawReturnType()));
         return true;
     }
 
     // 打印存在一对多的方法调用
-    private void printMultiMethodCall(Map<String, MultiCallInfo> methodCallMap, Set<String> multiCallerFullMethodSet, JavaCG2CallTypeEnum callTypeEnum) {
+    private void printMultiMethodCall(Map<String, MultiCallInfo> methodCallMap, Set<FullMethodWithReturnType> multiCallerFullMethodSet, JavaCG2CallTypeEnum callTypeEnum) {
         // 判断相关存在一对多的调用方方法是否有被其他方法调用，若未被调用则不显示
-        List<String> multiCallerFullMethodList = new ArrayList<>(multiCallerFullMethodSet.size());
-        for (String multiCallerFullMethod : multiCallerFullMethodSet) {
-            String multiCallerMethodHash = JACGUtil.genHashWithLen(multiCallerFullMethod);
+        List<FullMethodWithReturnType> multiCallerFullMethodList = new ArrayList<>(multiCallerFullMethodSet.size());
+        for (FullMethodWithReturnType multiCallerMethod : multiCallerFullMethodSet) {
+            String multiCallerMethodHash = JACGClassMethodUtil.genMethodHashWithLen(multiCallerMethod.getFullMethod(), multiCallerMethod.getReturnType());
             if (methodCallHandler.checkExistsNormalMethodCallByCalleeMethodHash(multiCallerMethodHash)) {
                 // 当前存在一对多的调用方方法有被其他方法调用
-                multiCallerFullMethodList.add(multiCallerFullMethod);
+                multiCallerFullMethodList.add(multiCallerMethod);
             } else {
-                logger.warn("当前存在一对多的调用方方法未被其他方法调用，不打印到文件中 {}", multiCallerFullMethod);
+                logger.warn("当前存在一对多的调用方方法未被其他方法调用，不打印到文件中 {} {}", multiCallerMethod.getFullMethod(), multiCallerMethod.getReturnType());
             }
         }
 
@@ -472,23 +472,23 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             }
             markdownWriter.addCodeBlock();
 
-            Collections.sort(multiCallerFullMethodList);
-            for (String multiCallerFullMethod : multiCallerFullMethodList) {
-                MultiCallInfo multiCallInfo = methodCallMap.get(multiCallerFullMethod);
-                if (multiCallInfo == null || JavaCG2Util.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
-                    logger.error("未查找到对应的一对多方法调用关系 {}", multiCallerFullMethod);
+            multiCallerFullMethodList.sort(Comparator4FullMethodWithReturnType.getInstance());
+            for (FullMethodWithReturnType multiCallerMethod : multiCallerFullMethodList) {
+                MultiCallInfo multiCallInfo = methodCallMap.get(multiCallerMethod);
+                if (multiCallInfo == null || JavaCG2Util.isCollectionEmpty(multiCallInfo.getCalleeMethodSet())) {
+                    logger.error("未查找到对应的一对多方法调用关系 {}", multiCallerMethod);
                     continue;
                 }
 
-                markdownWriter.addTitle(2, multiCallerFullMethod);
+                markdownWriter.addTitle(2, multiCallerMethod.genFullMethodWithReturnType());
                 markdownWriter.addListWithNewLine(DC.MC_CALLER_METHOD_HASH);
                 markdownWriter.addLineWithNewLine(multiCallInfo.getCallerMethodHash());
                 markdownWriter.addListWithNewLine(DC.MC_CALLEE_FULL_METHOD + "（被调用的方法）");
                 markdownWriter.addCodeBlock();
-                List<String> calleeFullMethodList = new ArrayList<>(multiCallInfo.getCalleeFullMethodSet());
-                Collections.sort(calleeFullMethodList);
-                for (String calleeMethod : calleeFullMethodList) {
-                    markdownWriter.addLine(calleeMethod);
+                List<FullMethodWithReturnType> calleeMethodList = new ArrayList<>(multiCallInfo.getCalleeMethodSet());
+                calleeMethodList.sort(Comparator4FullMethodWithReturnType.getInstance());
+                for (FullMethodWithReturnType calleeMethod : calleeMethodList) {
+                    markdownWriter.addLine(calleeMethod.genFullMethodWithReturnType());
                 }
                 markdownWriter.addCodeBlock();
 
@@ -541,7 +541,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             Collections.sort(disabledCallerMethodList);
             for (String disabledCallerMethod : disabledCallerMethodList) {
                 MultiCallInfo multiCallInfo = disabledMethodCallMap.get(disabledCallerMethod);
-                if (multiCallInfo == null || JavaCG2Util.isCollectionEmpty(multiCallInfo.getCalleeFullMethodSet())) {
+                if (multiCallInfo == null || JavaCG2Util.isCollectionEmpty(multiCallInfo.getCalleeMethodSet())) {
                     logger.error("未查找到对应的被禁用方法调用关系 {}", disabledCallerMethod);
                     continue;
                 }
@@ -551,8 +551,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 markdownWriter.addListWithNewLine(DC.MC_CALLEE_FULL_METHOD + "（被调用的方法）");
 
                 markdownWriter.addCodeBlock();
-                for (String calleeMethod : multiCallInfo.getCalleeFullMethodSet()) {
-                    markdownWriter.addLine(calleeMethod);
+                for (FullMethodWithReturnType calleeMethod : multiCallInfo.getCalleeMethodSet()) {
+                    markdownWriter.addLine(calleeMethod.genFullMethodWithReturnType());
                 }
                 markdownWriter.addCodeBlock();
             }
@@ -563,8 +563,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 打印提示信息
     protected void printNoticeInfo() {
-        printMultiMethodCall(itfMethodCallMap, itfMultiCallerFullMethodSet, JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS);
-        printMultiMethodCall(sccMethodCallMap, sccMultiCallerFullMethodSet, JavaCG2CallTypeEnum.CTE_SUPER_CALL_CHILD);
+        printMultiMethodCall(itfMethodCallMap, itfMultiCallerMethodSet, JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS);
+        printMultiMethodCall(sccMethodCallMap, sccMultiCallerMethodSet, JavaCG2CallTypeEnum.CTE_SUPER_CALL_CHILD);
         printDisabledMethodCall(disabledItfMethodCallMap, JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS);
         printDisabledMethodCall(disabledSccMethodCallMap, JavaCG2CallTypeEnum.CTE_SUPER_CALL_CHILD);
     }
@@ -735,7 +735,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         // 根据完整方法HASH+长度获取对应的注解信息
-        Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = annotationHandler.queryAnnotationMap4FullMethod(methodCallLineData.getActualFullMethod());
+        Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap =
+                annotationHandler.queryAnnotationMap4MethodWithReturnType(methodCallLineData.getActualFullMethod(), methodCallLineData.getMethodReturnType());
         if (methodAnnotationMap == null) {
             // 当前方法上没有注解
             return;
@@ -765,8 +766,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
                 }
 
                 // 找到能够处理的类进行处理
-                String className = methodCallLineData.getActualMethodDetail().getClassName();
-                String annotationInfo = annotationFormatter.handleAnnotation(methodCallLineData.getActualFullMethod(), className, annotationName, annotationAttributeMap);
+                String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(methodCallLineData.getActualFullMethod());
+                String annotationInfo = annotationFormatter.handleAnnotation(methodCallLineData.getActualFullMethod(), methodCallLineData.getMethodReturnType(), className,
+                        annotationName, annotationAttributeMap);
                 if (annotationInfo != null) {
                     // 替换TAB、回车、换行等字符，再将半角的@替换为全角，避免影响通过@对注解进行分隔
                     String finalAnnotationInfo = JACGCallGraphFileUtil.replaceSplitChars(annotationInfo)

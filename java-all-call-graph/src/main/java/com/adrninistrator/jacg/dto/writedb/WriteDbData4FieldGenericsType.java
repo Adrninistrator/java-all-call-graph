@@ -13,13 +13,13 @@ public class WriteDbData4FieldGenericsType implements BaseWriteDbData {
     private String fieldName;
     private String type;
     private int typeSeq;
-    private String simpleGenericsType;
+    private String simpleGenericsTypeNad;
     private int genericsArrayDimensions;
     private String typeVariablesName;
     private String wildcard;
     private String referenceType;
     private String genericsCategory;
-    private String genericsType;
+    private String genericsTypeNad;
     private String className;
 
     public int getRecordId() {
@@ -62,12 +62,12 @@ public class WriteDbData4FieldGenericsType implements BaseWriteDbData {
         this.typeSeq = typeSeq;
     }
 
-    public String getSimpleGenericsType() {
-        return simpleGenericsType;
+    public String getSimpleGenericsTypeNad() {
+        return simpleGenericsTypeNad;
     }
 
-    public void setSimpleGenericsType(String simpleGenericsType) {
-        this.simpleGenericsType = simpleGenericsType;
+    public void setSimpleGenericsTypeNad(String simpleGenericsTypeNad) {
+        this.simpleGenericsTypeNad = simpleGenericsTypeNad;
     }
 
     public int getGenericsArrayDimensions() {
@@ -110,12 +110,12 @@ public class WriteDbData4FieldGenericsType implements BaseWriteDbData {
         this.genericsCategory = genericsCategory;
     }
 
-    public String getGenericsType() {
-        return genericsType;
+    public String getGenericsTypeNad() {
+        return genericsTypeNad;
     }
 
-    public void setGenericsType(String genericsType) {
-        this.genericsType = genericsType;
+    public void setGenericsTypeNad(String genericsTypeNad) {
+        this.genericsTypeNad = genericsTypeNad;
     }
 
     public String getClassName() {
@@ -134,13 +134,13 @@ public class WriteDbData4FieldGenericsType implements BaseWriteDbData {
                 ", fieldName='" + fieldName + '\'' +
                 ", type='" + type + '\'' +
                 ", typeSeq=" + typeSeq +
-                ", simpleGenericsType='" + simpleGenericsType + '\'' +
+                ", simpleGenericsType='" + simpleGenericsTypeNad + '\'' +
                 ", genericsArrayDimensions=" + genericsArrayDimensions +
                 ", typeVariablesName='" + typeVariablesName + '\'' +
                 ", wildcard='" + wildcard + '\'' +
                 ", referenceType='" + referenceType + '\'' +
                 ", genericsCategory='" + genericsCategory + '\'' +
-                ", genericsType='" + genericsType + '\'' +
+                ", genericsType='" + genericsTypeNad + '\'' +
                 ", className='" + className + '\'' +
                 '}';
     }

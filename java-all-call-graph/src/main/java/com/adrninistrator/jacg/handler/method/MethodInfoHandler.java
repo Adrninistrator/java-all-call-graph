@@ -5,13 +5,13 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.classes.ClassNameAndType;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.dto.stack.ListAsStack;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
@@ -166,9 +166,10 @@ public class MethodInfoHandler extends BaseHandler {
      * 根据完整方法查询方法信息
      *
      * @param fullMethod
+     * @param returnType
      * @return
      */
-    public WriteDbData4MethodInfo queryMethodInfoByFullMethod(String fullMethod) {
+    public WriteDbData4MethodInfo queryMethodInfoByFullMethod(String fullMethod, String returnType) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_ALL_BY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -178,17 +179,18 @@ public class MethodInfoHandler extends BaseHandler {
                     " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryObject(sql, WriteDbData4MethodInfo.class, JACGUtil.genHashWithLen(fullMethod));
+        return dbOperator.queryObject(sql, WriteDbData4MethodInfo.class, JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
     }
 
     /**
      * 根据完整方法判断方法是否存在于解析的jar包中，若在当前类中未查找到，则在父类与接口中查找
      *
      * @param fullMethod
+     * @param returnType
      * @return
      */
-    public boolean checkExistsMethodByFullMethodSuperInterface(String fullMethod) {
-        WriteDbData4MethodInfo methodInfo = queryMethodInfoByFullMethod(fullMethod);
+    public boolean checkExistsMethodByFullMethodSuperInterface(String fullMethod, String returnType) {
+        WriteDbData4MethodInfo methodInfo = queryMethodInfoByFullMethod(fullMethod, returnType);
         if (methodInfo != null) {
             // 指定的方法在当前类中存在
             return true;
@@ -203,7 +205,7 @@ public class MethodInfoHandler extends BaseHandler {
         String methodNameWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(fullMethod);
         for (ClassNameAndType superClassNameAndType : superClassNameAndTypeList) {
             String superFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(superClassNameAndType.getClassName(), methodNameWithArgs);
-            WriteDbData4MethodInfo superMethodInfo = queryMethodInfoByFullMethod(superFullMethod);
+            WriteDbData4MethodInfo superMethodInfo = queryMethodInfoByFullMethod(superFullMethod, returnType);
             if (superMethodInfo != null) {
                 // 在当前类的超类或实现的接口中找到了对应的方法，返回存在
                 return true;
@@ -232,7 +234,8 @@ public class MethodInfoHandler extends BaseHandler {
                 returnWriteDbData4MethodInfo.setFullMethod(JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(className, methodNameWithArgs));
             }
             returnWriteDbData4MethodInfo.setReturnType(methodInfo.getReturnType());
-            returnWriteDbData4MethodInfo.setMethodHash(JACGUtil.genHashWithLen(returnWriteDbData4MethodInfo.getFullMethod()));
+            returnWriteDbData4MethodInfo.setMethodHash(JACGClassMethodUtil.genMethodHashWithLen(returnWriteDbData4MethodInfo.getFullMethod(),
+                    returnWriteDbData4MethodInfo.getReturnType()));
             allMethodInfoList.add(returnWriteDbData4MethodInfo);
             allFullMethodList.add(returnWriteDbData4MethodInfo.getFullMethod());
         }
@@ -265,17 +268,18 @@ public class MethodInfoHandler extends BaseHandler {
      * @param methodName
      * @return
      */
-    public List<String> queryMethodByClassMethod(String className, String methodName) {
+    public List<FullMethodWithReturnType> queryMethodByClassMethod(String className, String methodName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_FULL_METHOD_BY_CLASS_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + DC.MI_FULL_METHOD +
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MI_FULL_METHOD, DC.MI_RETURN_TYPE) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
                     " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MI_METHOD_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(className), methodName);
+        List<WriteDbData4MethodInfo> list = dbOperator.queryList(sql, WriteDbData4MethodInfo.class, dbOperWrapper.querySimpleClassName(className), methodName);
+        return dbOperWrapper.genFullMethodWithReturnTypeList(list);
     }
 
     /**
@@ -300,9 +304,10 @@ public class MethodInfoHandler extends BaseHandler {
      * 查询方法返回的字段名称
      *
      * @param fullMethod
+     * @param returnType
      * @return null: 方法未返回字段，或返回了多个字段
      */
-    public String queryMethodReturnFieldName(String fullMethod) {
+    public String queryMethodReturnFieldName(String fullMethod, String returnType) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MRFI_QUERY_METHOD_RETURN_FIELD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -313,14 +318,14 @@ public class MethodInfoHandler extends BaseHandler {
                     " and " + DC.MRFI_FIELD_OF_THIS + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<String> list = dbOperator.queryListOneColumn(sql, String.class, JACGUtil.genHashWithLen(fullMethod), JavaCG2YesNoEnum.NO.getIntValue(),
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType), JavaCG2YesNoEnum.NO.getIntValue(),
                 JavaCG2YesNoEnum.YES.getIntValue());
         if (JavaCG2Util.isCollectionEmpty(list)) {
-            logger.debug("未查询到方法返回的字段名称 {}", fullMethod);
+            logger.debug("未查询到方法返回的字段名称 {} {}", fullMethod, returnType);
             return null;
         }
         if (list.size() > 1) {
-            logger.warn("查询到多个方法返回的字段名称 {} {}", fullMethod, StringUtils.join(list, " "));
+            logger.warn("查询到多个方法返回的字段名称 {} {} {}", fullMethod, returnType, StringUtils.join(list, " "));
             return null;
         }
         return list.get(0);

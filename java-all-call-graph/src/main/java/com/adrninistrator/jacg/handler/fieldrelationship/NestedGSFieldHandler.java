@@ -122,7 +122,7 @@ public class NestedGSFieldHandler extends BaseHandler {
             sql = "select " + JACGSqlUtil.joinColumns(DC.GSM_CLASS_NAME, DC.GSM_FIELD_NAME) +
                     " from " + DbTableInfoEnum.DTIE_GET_METHOD.getTableName() +
                     " where " + DC.GSM_FIELD_CATEGORY + " = ?" +
-                    " and " + DC.GSM_SIMPLE_FIELD_TYPE + " = ?";
+                    " and " + DC.GSM_SIMPLE_FIELD_TYPE_NAD + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         List<WriteDbData4GetMethod> getMethodList = dbOperator.queryList(sql, WriteDbData4GetMethod.class, JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM, simpleClassName);
@@ -144,7 +144,7 @@ public class NestedGSFieldHandler extends BaseHandler {
                         " and gm." + DC.GSM_FIELD_NAME + " = fgt." + DC.GSM_FIELD_NAME +
                         " and gm." + DC.GSM_FIELD_CATEGORY + " = ?" +
                         " and fgt." + DC.FGT_GENERICS_CATEGORY + " = ?" +
-                        " and fgt." + DC.FGT_SIMPLE_GENERICS_TYPE + " = ?";
+                        " and fgt." + DC.FGT_SIMPLE_GENERICS_TYPE_NAD + " = ?";
                 sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
             }
             List<WriteDbData4FieldGenericsType> fieldGenericsTypeList = dbOperator.queryList(sql, WriteDbData4FieldGenericsType.class,
@@ -184,21 +184,21 @@ public class NestedGSFieldHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.GM_FGT_QUERY_UNIQUE_CUSTOM_FIELD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select r." + DC.GSM_FIELD_TYPE + " from" +
+            sql = "select r." + DC.GSM_FIELD_TYPE_NAD + " from" +
                     " (" +
-                    " select " + DC.GSM_FIELD_TYPE +
+                    " select " + DC.GSM_FIELD_TYPE_NAD +
                     " from " + DbTableInfoEnum.DTIE_GET_METHOD.getTableName() +
                     " where " + DC.GSM_FIELD_CATEGORY + " = ?" +
                     " union all" +
-                    " select fgt." + DC.FGT_GENERICS_TYPE + " as " + DC.GSM_FIELD_TYPE +
+                    " select fgt." + DC.FGT_GENERICS_TYPE_NAD + " as " + DC.GSM_FIELD_TYPE_NAD +
                     " from " + DbTableInfoEnum.DTIE_GET_METHOD.getTableName() + " as gm, " + DbTableInfoEnum.DTIE_FIELD_GENERICS_TYPE.getTableName() + " as fgt" +
                     " where gm." + DC.GSM_SIMPLE_CLASS_NAME + " = fgt." + DC.FGT_SIMPLE_CLASS_NAME +
                     " and gm." + DC.GSM_FIELD_NAME + " = fgt." + DC.FGT_FIELD_NAME +
                     " and gm." + DC.GSM_FIELD_CATEGORY + " = ?" +
                     " and fgt." + DC.FGT_GENERICS_CATEGORY + " = ?" +
                     " ) as r" +
-                    " group by r." + DC.GSM_FIELD_TYPE +
-                    " having count(r." + DC.GSM_FIELD_TYPE + ") = 1";
+                    " group by r." + DC.GSM_FIELD_TYPE_NAD +
+                    " having count(r." + DC.GSM_FIELD_TYPE_NAD + ") = 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryListOneColumn(sql, String.class, JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM, JavaCG2Constants.FILE_KEY_CATEGORY_GENERICS_CUSTOM,

@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.extractor.entry;
 import com.adrninistrator.jacg.common.list.ListWithResult;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.extractor.callback.StackFileParsedCallback;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CalleeExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CalleeExtractedFile;
@@ -114,9 +115,11 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
         }
 
         // 根据被调用方完整方法HASH+长度，从方法调用表获取对应的完整方法
-        String callerFullMethod = methodCallHandler.queryCalleeFullMethodByHash(calleeExtractedFile.getMethodHash());
-        calleeExtractedFile.setFullMethod(callerFullMethod);
-        if (callerFullMethod != null) {
+        FullMethodWithReturnType callerMethod = methodCallHandler.queryCalleeFullMethodByHash(calleeExtractedFile.getMethodHash());
+        if (callerMethod != null) {
+            String callerFullMethod = callerMethod.getFullMethod();
+            calleeExtractedFile.setFullMethod(callerFullMethod);
+            calleeExtractedFile.setReturnType(callerMethod.getReturnType());
             calleeExtractedFile.setClassName(JavaCG2ClassMethodUtil.getClassNameFromMethod(callerFullMethod));
         }
         return calleeExtractedFile;

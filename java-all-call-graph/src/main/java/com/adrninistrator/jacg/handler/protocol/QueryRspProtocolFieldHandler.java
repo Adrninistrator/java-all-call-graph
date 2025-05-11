@@ -44,27 +44,28 @@ public class QueryRspProtocolFieldHandler extends BaseHandler {
      * 查询指定方法的返回类型，包含泛型类型
      *
      * @param fullMethod
+     * @param returnType
      * @return
      */
-    public MethodReturnTypeWithGenerics queryMethodReturnTypeWithGenerics(String fullMethod) {
+    public MethodReturnTypeWithGenerics queryMethodReturnTypeWithGenerics(String fullMethod, String returnType) {
         MethodReturnTypeWithGenerics methodReturnTypeWithGenerics = new MethodReturnTypeWithGenerics();
         // 查询方法信息
-        WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(fullMethod);
-        methodReturnTypeWithGenerics.setMethodReturnType(methodInfo.getReturnType());
+        WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(fullMethod, returnType);
+        methodReturnTypeWithGenerics.setMethodReturnType(methodInfo.getReturnTypeNad());
 
         List<String> objectFieldNameList = new ArrayList<>();
         methodReturnTypeWithGenerics.setObjectFieldNameList(objectFieldNameList);
         // 查询类的字段信息，包含超类中的字段，根据类名查询
-        List<WriteDbData4FieldInfo> fieldInfoList = fieldInfoHandler.queryFieldInfoByClassNameIncludeSuper(methodInfo.getReturnType());
+        List<WriteDbData4FieldInfo> fieldInfoList = fieldInfoHandler.queryFieldInfoByClassNameIncludeSuper(methodInfo.getReturnTypeNad());
         for (WriteDbData4FieldInfo fieldInfo : fieldInfoList) {
-            if (JavaCG2CommonNameConstants.CLASS_NAME_OBJECT.equals(fieldInfo.getFieldType())) {
+            if (JavaCG2CommonNameConstants.CLASS_NAME_OBJECT.equals(fieldInfo.getFieldTypeNad())) {
                 objectFieldNameList.add(fieldInfo.getFieldName());
             }
         }
 
         if (JavaCG2YesNoEnum.isYes(methodInfo.getReturnExistsGenericsType())) {
             // 查询返回类型中泛型类型
-            List<String> genericsTypeInMethodReturn = methodArgReturnHandler.queryGenericsTypeInMethodReturn(fullMethod, false);
+            List<String> genericsTypeInMethodReturn = methodArgReturnHandler.queryGenericsTypeInMethodReturn(fullMethod, returnType, false);
             methodReturnTypeWithGenerics.setMethodReturnGenericsTypeList(genericsTypeInMethodReturn);
         }
         return methodReturnTypeWithGenerics;

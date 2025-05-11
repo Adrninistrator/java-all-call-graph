@@ -32,8 +32,8 @@ public class WriteDbHandler4FieldGenericsType extends AbstractWriteDbHandler<Wri
         String fieldName = readLineData();
         String type = readLineData();
         int typeSeq = Integer.parseInt(readLineData());
-        String genericsType = readLineData();
-        String simpleGenericsType = dbOperWrapper.querySimpleClassName(genericsType);
+        String genericsTypeNad = readLineData();
+        String simpleGenericsTypeNad = dbOperWrapper.querySimpleClassName(genericsTypeNad);
         int genericsArrayDimensions = Integer.parseInt(readLineData());
         String typeVariablesName = readLineData();
         String wildcard = readLineData();
@@ -46,13 +46,13 @@ public class WriteDbHandler4FieldGenericsType extends AbstractWriteDbHandler<Wri
         writeDbData4FieldGenericsType.setFieldName(fieldName);
         writeDbData4FieldGenericsType.setType(type);
         writeDbData4FieldGenericsType.setTypeSeq(typeSeq);
-        writeDbData4FieldGenericsType.setSimpleGenericsType(simpleGenericsType);
+        writeDbData4FieldGenericsType.setSimpleGenericsTypeNad(simpleGenericsTypeNad);
         writeDbData4FieldGenericsType.setGenericsArrayDimensions(genericsArrayDimensions);
         writeDbData4FieldGenericsType.setTypeVariablesName(typeVariablesName);
         writeDbData4FieldGenericsType.setWildcard(wildcard);
         writeDbData4FieldGenericsType.setReferenceType(referenceType);
         writeDbData4FieldGenericsType.setGenericsCategory(genericsCategory);
-        writeDbData4FieldGenericsType.setGenericsType(genericsType);
+        writeDbData4FieldGenericsType.setGenericsTypeNad(genericsTypeNad);
         writeDbData4FieldGenericsType.setClassName(className);
         return writeDbData4FieldGenericsType;
     }
@@ -65,13 +65,13 @@ public class WriteDbHandler4FieldGenericsType extends AbstractWriteDbHandler<Wri
                 data.getFieldName(),
                 data.getType(),
                 data.getTypeSeq(),
-                data.getSimpleGenericsType(),
+                data.getSimpleGenericsTypeNad(),
                 data.getGenericsArrayDimensions(),
                 data.getTypeVariablesName(),
                 data.getWildcard(),
                 data.getReferenceType(),
                 data.getGenericsCategory(),
-                data.getGenericsType(),
+                data.getGenericsTypeNad(),
                 data.getClassName()
         };
     }
@@ -83,7 +83,7 @@ public class WriteDbHandler4FieldGenericsType extends AbstractWriteDbHandler<Wri
                 "字段名",
                 "类型，t:字段类型，gt:字段中的泛型类型",
                 "类型序号，字段类型固定为0，字段的泛型类型从0开始",
-                "非静态字段类型或其中的泛型类型类名",
+                "非静态字段类型或其中的泛型类型类名（不包含数组标志）",
                 "非静态字段中的泛型数组类型的维度，为0代表不是数组类型",
                 "非静态字段中的泛型类型变量名称",
                 "非静态字段中的泛型通配符",

@@ -13,7 +13,7 @@ public class WriteDbData4SfFieldMethodCall implements BaseWriteDbData {
     private String fieldName;
     private int seq;
     private int callId;
-    private String fieldType;
+    private String fieldTypeNad;
     private int arrayDimensions;
     private String className;
     private String calleeClassName;
@@ -59,12 +59,12 @@ public class WriteDbData4SfFieldMethodCall implements BaseWriteDbData {
         this.callId = callId;
     }
 
-    public String getFieldType() {
-        return fieldType;
+    public String getFieldTypeNad() {
+        return fieldTypeNad;
     }
 
-    public void setFieldType(String fieldType) {
-        this.fieldType = fieldType;
+    public void setFieldTypeNad(String fieldTypeNad) {
+        this.fieldTypeNad = fieldTypeNad;
     }
 
     public int getArrayDimensions() {

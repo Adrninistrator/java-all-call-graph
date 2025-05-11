@@ -37,7 +37,9 @@ public class Neo4jWriteDbHandler4MethodInfo extends WriteDbHandler4MethodInfo {
         jacgMethodInfo.setAccessFlags(data.getAccessFlags());
         jacgMethodInfo.setMethodName(data.getMethodName());
         jacgMethodInfo.setFullMethod(data.getFullMethod());
-        jacgMethodInfo.setSimpleReturnType(data.getSimpleReturnType());
+        jacgMethodInfo.setSimpleReturnTypeNad(data.getSimpleReturnTypeNad());
+        jacgMethodInfo.setReturnTypeNad(data.getReturnTypeNad());
+        jacgMethodInfo.setReturnArrayDimensions(data.getReturnArrayDimensions());
         jacgMethodInfo.setReturnType(data.getReturnType());
         jacgMethodInfo.setMethodInstructionsHash(data.getMethodInstructionsHash());
         jacgMethodInfo.setJarNum(data.getJarNum());

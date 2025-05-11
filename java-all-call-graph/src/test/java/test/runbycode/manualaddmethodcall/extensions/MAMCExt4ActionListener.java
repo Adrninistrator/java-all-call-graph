@@ -1,6 +1,7 @@
 package test.runbycode.manualaddmethodcall.extensions;
 
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallPair;
 import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
@@ -38,16 +39,19 @@ public class MAMCExt4ActionListener extends AbstractManualAddMethodCall1 {
     @Override
     protected List<MethodCallPair> chooseAddMethodCallPairList(String className) {
         // ActionListener实现类使用匿名内部类形式时，构造函数参数类型不固定，需要查询当前类的所有构造函数并处理
-        List<String> fullMethodList = methodInfoHandler.queryMethodByClassMethod(className, JavaCG2CommonNameConstants.METHOD_NAME_INIT);
-        if (JavaCG2Util.isCollectionEmpty(fullMethodList)) {
+        List<FullMethodWithReturnType> methodList = methodInfoHandler.queryMethodByClassMethod(className, JavaCG2CommonNameConstants.METHOD_NAME_INIT);
+        if (JavaCG2Util.isCollectionEmpty(methodList)) {
             return null;
         }
 
-        List<MethodCallPair> methodCallPairList = new ArrayList<>(fullMethodList.size());
-        for (String fullMethod : fullMethodList) {
-            // 当ActionListener接口实现类的构造函数被调用时，添加调用actionPerformed()方法
-            String methodAndArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(fullMethod);
-            return Collections.singletonList(new MethodCallPair(methodAndArgs, JavaCG2ClassMethodUtil.formatMethodWithArgTypes("actionPerformed", ActionEvent.class)));
+        List<MethodCallPair> methodCallPairList = new ArrayList<>(methodList.size());
+        for (FullMethodWithReturnType fullMethodWithReturnType : methodList) {
+            // 当 ActionListener 接口实现类的构造函数被调用时，添加调用 actionPerformed()方法
+            String methodAndArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(fullMethodWithReturnType.getFullMethod());
+            return Collections.singletonList(new MethodCallPair(methodAndArgs,
+                    fullMethodWithReturnType.getReturnType(),
+                    JavaCG2ClassMethodUtil.formatMethodWithArgTypes("actionPerformed", ActionEvent.class),
+                    "void"));
         }
         return methodCallPairList;
     }

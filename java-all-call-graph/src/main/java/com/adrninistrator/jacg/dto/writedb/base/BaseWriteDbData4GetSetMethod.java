@@ -14,12 +14,13 @@ public class BaseWriteDbData4GetSetMethod implements BaseWriteDbData {
     private String methodName;
     private String fieldName;
     private String fieldCategory;
-    private String simpleFieldType;
-    private String fieldType;
+    private String simpleFieldTypeNad;
+    private String fieldTypeNad;
     private int arrayDimensions;
     private String className;
     private String methodHash;
     private String fullMethod;
+    private String returnType;
 
     // 不出现在数据库表中的字段
     // 当前方法是否在超类中
@@ -75,20 +76,20 @@ public class BaseWriteDbData4GetSetMethod implements BaseWriteDbData {
         this.fieldCategory = fieldCategory;
     }
 
-    public String getSimpleFieldType() {
-        return simpleFieldType;
+    public String getSimpleFieldTypeNad() {
+        return simpleFieldTypeNad;
     }
 
-    public void setSimpleFieldType(String simpleFieldType) {
-        this.simpleFieldType = simpleFieldType;
+    public void setSimpleFieldTypeNad(String simpleFieldTypeNad) {
+        this.simpleFieldTypeNad = simpleFieldTypeNad;
     }
 
-    public String getFieldType() {
-        return fieldType;
+    public String getFieldTypeNad() {
+        return fieldTypeNad;
     }
 
-    public void setFieldType(String fieldType) {
-        this.fieldType = fieldType;
+    public void setFieldTypeNad(String fieldTypeNad) {
+        this.fieldTypeNad = fieldTypeNad;
     }
 
     public int getArrayDimensions() {
@@ -123,6 +124,14 @@ public class BaseWriteDbData4GetSetMethod implements BaseWriteDbData {
         this.fullMethod = fullMethod;
     }
 
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
+
     public boolean isInSuperClass() {
         return inSuperClass;
     }
@@ -155,11 +164,12 @@ public class BaseWriteDbData4GetSetMethod implements BaseWriteDbData {
                 ", methodName='" + methodName + '\'' +
                 ", fieldName='" + fieldName + '\'' +
                 ", fieldCategory='" + fieldCategory + '\'' +
-                ", simpleFieldType='" + simpleFieldType + '\'' +
-                ", fieldType='" + fieldType + '\'' +
+                ", simpleFieldType='" + simpleFieldTypeNad + '\'' +
+                ", fieldType='" + fieldTypeNad + '\'' +
                 ", className='" + className + '\'' +
                 ", methodHash='" + methodHash + '\'' +
                 ", fullMethod='" + fullMethod + '\'' +
+                ", returnType='" + returnType + '\'' +
                 '}';
     }
 }

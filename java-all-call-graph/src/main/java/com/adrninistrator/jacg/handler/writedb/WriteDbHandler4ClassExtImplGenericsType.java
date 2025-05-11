@@ -32,7 +32,7 @@ public class WriteDbHandler4ClassExtImplGenericsType extends AbstractWriteDbHand
         int seq = Integer.parseInt(readLineData());
         String superItfClassName = readLineData();
         int genericsSeq = Integer.parseInt(readLineData());
-        String genericsType = readLineData();
+        String genericsTypeNad = readLineData();
         int genericsArrayDimensions = Integer.parseInt(readLineData());
         String typeVariablesName = readLineData();
         String genericsCategory = readLineData();
@@ -44,11 +44,11 @@ public class WriteDbHandler4ClassExtImplGenericsType extends AbstractWriteDbHand
         writeDbData4ClassExtImplGenericsType.setSeq(seq);
         writeDbData4ClassExtImplGenericsType.setSuperItfSimpleClassName(dbOperWrapper.querySimpleClassName(superItfClassName));
         writeDbData4ClassExtImplGenericsType.setGenericsSeq(genericsSeq);
-        writeDbData4ClassExtImplGenericsType.setSimpleGenericsType(dbOperWrapper.querySimpleClassName(genericsType));
+        writeDbData4ClassExtImplGenericsType.setSimpleGenericsTypeNad(dbOperWrapper.querySimpleClassName(genericsTypeNad));
         writeDbData4ClassExtImplGenericsType.setGenericsArrayDimensions(genericsArrayDimensions);
         writeDbData4ClassExtImplGenericsType.setTypeVariablesName(typeVariablesName);
         writeDbData4ClassExtImplGenericsType.setGenericsCategory(genericsCategory);
-        writeDbData4ClassExtImplGenericsType.setGenericsType(genericsType);
+        writeDbData4ClassExtImplGenericsType.setGenericsTypeNad(genericsTypeNad);
         writeDbData4ClassExtImplGenericsType.setClassName(className);
         writeDbData4ClassExtImplGenericsType.setSuperItfClassName(superItfClassName);
         return writeDbData4ClassExtImplGenericsType;
@@ -63,11 +63,11 @@ public class WriteDbHandler4ClassExtImplGenericsType extends AbstractWriteDbHand
                 data.getSeq(),
                 data.getSuperItfSimpleClassName(),
                 data.getGenericsSeq(),
-                data.getSimpleGenericsType(),
+                data.getSimpleGenericsTypeNad(),
                 data.getGenericsArrayDimensions(),
                 data.getTypeVariablesName(),
                 data.getGenericsCategory(),
-                data.getGenericsType(),
+                data.getGenericsTypeNad(),
                 data.getClassName(),
                 data.getSuperItfClassName()
         };
@@ -81,7 +81,7 @@ public class WriteDbHandler4ClassExtImplGenericsType extends AbstractWriteDbHand
                 "继承或实现的序号，从0开始",
                 "父类或接口的类名",
                 "类的继承或实现中的泛型类型序号，从0开始",
-                "类的继承或实现中的泛型类型类名",
+                "类的继承或实现中的泛型类型类名（不包含数组标志）",
                 "类的继承或实现中的泛型数组类型的维度，为0代表不是数组类型",
                 "类的继承或实现中的泛型类型变量名称",
                 "类的继承或实现中的泛型类型分类，J:JDK中的类型，C:自定义类型"

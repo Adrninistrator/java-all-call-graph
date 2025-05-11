@@ -17,7 +17,7 @@ public class DefaultAnnotationFormatter extends AbstractAnnotationFormatter {
     }
 
     @Override
-    public String handleAnnotation(String fullMethod, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
+    public String handleAnnotation(String fullMethod, String returnType, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
         // 对注解的默认处理，返回注解类名
         return annotationName;
     }

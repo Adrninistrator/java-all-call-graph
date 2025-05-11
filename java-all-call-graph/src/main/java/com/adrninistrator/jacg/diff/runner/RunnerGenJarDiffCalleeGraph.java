@@ -14,6 +14,7 @@ import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.diff.dto.method.ModifiedMethodInfo;
+import com.adrninistrator.jacg.diff.dto.result.JarDiffResult;
 import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
 import com.adrninistrator.jacg.dto.entrymethodinfo.BaseEntryMethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
@@ -90,14 +91,14 @@ public class RunnerGenJarDiffCalleeGraph {
      * @param entryMethodInfoFillers 对入口方法信息进行填充的类
      * @return
      */
-    public boolean generate(AbstractEntryMethodInfoFiller... entryMethodInfoFillers) {
-        String dirPathNew = null;
+    public JarDiffResult generate(AbstractEntryMethodInfoFiller... entryMethodInfoFillers) {
+        String dirPathNew;
 
         if (!skipWriteDb) {
             List<String> jarDiffDirPathList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR);
             if (JavaCG2Util.isCollectionEmpty(jarDiffDirPathList) || jarDiffDirPathList.size() != 2) {
                 logger.error("请修改配置文件，或通过代码指定对应的参数，在其中指定两行内容，第一行为旧目录的路径，第二行为新目录的路径 {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_DIR.getConfigPrintInfo());
-                return false;
+                return JarDiffResult.genFailResult();
             }
 
             String dirPathOld = jarDiffDirPathList.get(0);
@@ -105,7 +106,7 @@ public class RunnerGenJarDiffCalleeGraph {
 
             // 解析新旧目录的jar包并写入数据库
             if (!writeDb(dirPathOld, dirPathNew)) {
-                return false;
+                return JarDiffResult.genFailResult();
             }
         } else {
             logger.info("跳过与入数据库步骤");
@@ -115,7 +116,8 @@ public class RunnerGenJarDiffCalleeGraph {
             // 查询新的发生改变的jar包
             List<Pair<WriteDbData4JarInfo, WriteDbData4JarInfo>> modifiedJarInfoList = queryModifiedJarInfo();
             if (JavaCG2Util.isCollectionEmpty(modifiedJarInfoList)) {
-                return true;
+                logger.warn("未查询到发生改变的jar包");
+                return JarDiffResult.genSuccessResult(Collections.emptyMap());
             }
 
             /*
@@ -145,10 +147,14 @@ public class RunnerGenJarDiffCalleeGraph {
             }
 
             // 处理发生变化的jar包
-            return handleModifiedJar(modifiedJarMap, jarModifiedMethodInfoMap, modifiedClassJarMap, dirPathNew, entryMethodInfoFillers);
+            boolean success = handleModifiedJar(modifiedJarMap, jarModifiedMethodInfoMap, modifiedClassJarMap, entryMethodInfoFillers);
+            if (!success) {
+                return JarDiffResult.genFailResult();
+            }
+            return JarDiffResult.genSuccessResult(jarModifiedMethodInfoMap);
         } catch (Exception e) {
             logger.error("error ", e);
-            return false;
+            return JarDiffResult.genFailResult();
         } finally {
             if (dbOperator != null) {
                 dbOperator.closeDs(this);
@@ -269,7 +275,7 @@ public class RunnerGenJarDiffCalleeGraph {
 
     // 处理发生变化的jar包
     private boolean handleModifiedJar(Map<String, String> modifiedJarMap, Map<String, List<ModifiedMethodInfo>> jarModifiedMethodInfoMap, Map<String, String> modifiedClassJarMap,
-                                      String dirPathNew, AbstractEntryMethodInfoFiller... entryMethodInfoFillers) {
+                                      AbstractEntryMethodInfoFiller... entryMethodInfoFillers) {
         Set<String> modifiedMethodSet = new HashSet<>();
         List<String> jarFileNameListNew = new ArrayList<>(modifiedJarMap.keySet());
         Collections.sort(jarFileNameListNew);
@@ -283,7 +289,7 @@ public class RunnerGenJarDiffCalleeGraph {
         ConfigureWrapper configureWrapperNew = configureWrapper.copy();
         // 指定数据库表名后缀使用代表新的
         configureWrapperNew.setMainConfig(ConfigDbKeyEnum.CDKE_DB_TABLE_SUFFIX, JACGConstants.TABLE_SUFFIX_NEW);
-        configureWrapperNew.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_1.getDetail());
+        configureWrapperNew.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_0.getDetail());
         configureWrapperNew.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, modifiedMethodSet);
         configureWrapperNew.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, JACGConstants.CALLEE_FLAG_ENTRY);
         FindCallStackTrace findCallStackTrace = new FindCallStackTrace(true, configureWrapperNew);
@@ -338,24 +344,25 @@ public class RunnerGenJarDiffCalleeGraph {
                 String stackSeq = array[1];
                 String callerMethod = array[2];
                 String entryMethod = array[3];
+                String entryMethodReturnType = array[4];
                 String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeMethod);
                 String jarName = modifiedClassJarMap.get(calleeClassName);
                 // 查询入口方法的信息
-                String entryMethodInfo = queryEntryMethodInfo(entryMethod, entryMethodInfoFillers);
+                String entryMethodInfo = queryEntryMethodInfo(entryMethod, entryMethodReturnType, entryMethodInfoFillers);
                 JavaCG2FileUtil.write2FileWithTab(modifiedMethodsStackWriter, jarName, calleeMethod, stackSeq, callerMethod, entryMethod, entryMethodInfo);
             }
         }
     }
 
     // 查询入口方法的信息
-    private String queryEntryMethodInfo(String entryMethod, AbstractEntryMethodInfoFiller... entryMethodInfoFillers) {
+    private String queryEntryMethodInfo(String entryMethod, String entryMethodReturnType, AbstractEntryMethodInfoFiller... entryMethodInfoFillers) {
         if (ArrayUtils.isEmpty(entryMethodInfoFillers)) {
             return "";
         }
 
         // 使用指定的入口方法信息填充类进行处理
         for (AbstractEntryMethodInfoFiller entryMethodInfoFiller : entryMethodInfoFillers) {
-            BaseEntryMethodInfo baseEntryMethodInfo = entryMethodInfoFiller.query(entryMethod);
+            BaseEntryMethodInfo baseEntryMethodInfo = entryMethodInfoFiller.query(entryMethod, entryMethodReturnType);
             if (baseEntryMethodInfo != null) {
                 return JACGJsonUtil.getJsonStr(baseEntryMethodInfo);
             }

@@ -15,6 +15,7 @@ public class WriteDbData4MethodReturnConstValue implements BaseWriteDbData {
     private String constType;
     private String constValue;
     private String fullMethod;
+    private String returnType;
 
     public int getRecordId() {
         return recordId;
@@ -62,5 +63,13 @@ public class WriteDbData4MethodReturnConstValue implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }

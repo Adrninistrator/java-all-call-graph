@@ -23,45 +23,45 @@ public class TestRunByReflection2 {
     private SpringInterfaceC springServiceC2C;
 
     public String test1AField() {
-        TestReflectionUtil1.runByReflection("test_thread_nam", testMCCallee, "test2", "test1AField", "");
+        TestReflectionUtil1.runByReflection("test_thread_name", testMCCallee, "test2", "test1AField", "");
         return Thread.currentThread().getName();
     }
 
     public String test1BSpringField() {
-        TestReflectionUtil1.runByReflection("test_thread_nam", springServiceC2C, "test3", "test1BSpringField");
+        TestReflectionUtil1.runByReflection("test_thread_name", springServiceC2C, "test3", "test1BSpringField");
         return Thread.currentThread().getName();
     }
 
     public String test2AMethodCallReturn() {
-        TestReflectionUtil1.runByReflection("test_thread_nam", FRDClass1.test6b(null), "testString", "test2AMethodCallReturn");
+        TestReflectionUtil1.runByReflection("test_thread_name", FRDClass1.test6b(null), "testString", "test2AMethodCallReturn");
         return Thread.currentThread().getName();
     }
 
     public String test2BMethodCallReturn() {
         FRCDtoA frcDtoA = FRCClass1.genFRCDtoA();
-        TestReflectionUtil1.runByReflection("test_thread_nam", frcDtoA, "testStrFRCDtoA", "test2BMethodCallReturn");
+        TestReflectionUtil1.runByReflection("test_thread_name", frcDtoA, "testStrFRCDtoA", "test2BMethodCallReturn");
         return Thread.currentThread().getName();
     }
 
     public String test2CMethodCallReturn() {
         FRCDtoA frcDtoA = FRCClass1.genFRCDtoA();
-        TestReflectionUtil1.runByReflection("test_thread_nam", (FRCDtoB) frcDtoA, "testStrFRCDtoB", "test2CMethodCallReturn");
+        TestReflectionUtil1.runByReflection("test_thread_name", (FRCDtoB) frcDtoA, "testStrFRCDtoB", "test2CMethodCallReturn");
         return Thread.currentThread().getName();
     }
 
     public String test2DMethodCallReturn() {
-        TestReflectionUtil1.runByReflection("test_thread_nam", new FRCDtoA(), "testStrFRCDtoA", "test2DMethodCallReturn");
+        TestReflectionUtil1.runByReflection("test_thread_name", new FRCDtoA(), "testStrFRCDtoA", "test2DMethodCallReturn");
         return Thread.currentThread().getName();
     }
 
     public String test2EMethodCallReturnInSupper() {
         FRCDtoA frcDtoA = new FRCDtoA();
-        TestReflectionUtil1.runByReflection("test_thread_nam", (FRCDtoB) frcDtoA, "testStrFRCDtoA", "test2EMethodCallReturnInSupper");
+        TestReflectionUtil1.runByReflection("test_thread_name", (FRCDtoB) frcDtoA, "testStrFRCDtoA", "test2EMethodCallReturnInSupper");
         return Thread.currentThread().getName();
     }
 
     public String test3Arg(FRCDtoA frcDtoA) {
-        TestReflectionUtil1.runByReflection("test_thread_nam", frcDtoA, "testStrFRCDtoA", "test3Arg");
+        TestReflectionUtil1.runByReflection("test_thread_name", frcDtoA, "testStrFRCDtoA", "test3Arg");
         return Thread.currentThread().getName();
     }
 }

@@ -19,6 +19,7 @@ public class WriteDbData4MethodCallMethodCallReturn implements BaseWriteDbData {
     private String calleeSimpleClassName;
     private String calleeMethodName;
     private String calleeFullMethod;
+    private String calleeReturnType;
 
     public int getRecordId() {
         return recordId;
@@ -98,5 +99,13 @@ public class WriteDbData4MethodCallMethodCallReturn implements BaseWriteDbData {
 
     public void setCalleeFullMethod(String calleeFullMethod) {
         this.calleeFullMethod = calleeFullMethod;
+    }
+
+    public String getCalleeReturnType() {
+        return calleeReturnType;
+    }
+
+    public void setCalleeReturnType(String calleeReturnType) {
+        this.calleeReturnType = calleeReturnType;
     }
 }

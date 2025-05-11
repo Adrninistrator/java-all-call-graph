@@ -7,7 +7,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.method.MethodDetail;
+import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallInfo;
 import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldRelationship;
@@ -135,8 +135,8 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
     }
 
     @Override
-    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetail callerMethodDetail, MethodDetail calleeMethodDetail,
-                                        ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args) {
+    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
+                                        MethodDetailNoReturnType calleeMethodDetailNoReturnType, ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args) {
         Integer setClassArgSeq = JACGUtil.getArgAt(0, args);
         Integer getClassArgSeq = JACGUtil.getArgAt(1, args);
         if (objArgsInfoInMethodCall == null) {

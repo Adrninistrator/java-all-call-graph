@@ -6,36 +6,38 @@ package com.adrninistrator.jacg.dto.methodcall;
  * @description: 包含调用方与被调用方的方法调用信息
  */
 public class MethodCallPair {
-    // 调用方完整方法
-    protected final String callerFullMethod;
+    // 调用方方法名称+类型
+    protected final String callerMethodAndArgs;
 
-    // 调用方代码行号
-    protected final int callerLineNumber;
+    // 调用方方法返回类型
+    protected final String callerMethodReturnType;
 
     // 被调用方完整方法
-    protected final String calleeFullMethod;
+    protected final String calleeMethodAndArgs;
 
-    public MethodCallPair(String callerFullMethod, String calleeFullMethod) {
-        this.callerFullMethod = callerFullMethod;
-        this.callerLineNumber = 0;
-        this.calleeFullMethod = calleeFullMethod;
+    // 被调用方方法返回类型
+    protected final String calleeMethodReturnType;
+
+    public MethodCallPair(String callerMethodAndArgs, String callerMethodReturnType, String calleeMethodAndArgs, String calleeMethodReturnType) {
+        this.callerMethodAndArgs = callerMethodAndArgs;
+        this.callerMethodReturnType = callerMethodReturnType;
+        this.calleeMethodAndArgs = calleeMethodAndArgs;
+        this.calleeMethodReturnType = calleeMethodReturnType;
     }
 
-    public MethodCallPair(String callerFullMethod, int callerLineNumber, String calleeFullMethod) {
-        this.callerFullMethod = callerFullMethod;
-        this.callerLineNumber = callerLineNumber;
-        this.calleeFullMethod = calleeFullMethod;
+    public String getCallerMethodAndArgs() {
+        return callerMethodAndArgs;
     }
 
-    public String getCallerFullMethod() {
-        return callerFullMethod;
+    public String getCallerMethodReturnType() {
+        return callerMethodReturnType;
     }
 
-    public int getCallerLineNumber() {
-        return callerLineNumber;
+    public String getCalleeMethodAndArgs() {
+        return calleeMethodAndArgs;
     }
 
-    public String getCalleeFullMethod() {
-        return calleeFullMethod;
+    public String getCalleeMethodReturnType() {
+        return calleeMethodReturnType;
     }
 }

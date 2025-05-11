@@ -1,48 +1,32 @@
 package com.adrninistrator.jacg.dto.method;
 
-import java.util.List;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 /**
  * @author adrninistrator
  * @date 2022/12/10
  * @description: 方法详细信息
  */
-public class MethodDetail extends ClassAndMethodName {
-    // 完整方法
-    private String fullMethod;
+public class MethodDetail extends MethodDetailNoReturnType {
 
-    // 参数类型字符串（不包含括号）
-    private String argTypeStr;
+    // 方法返回类型
+    private String returnType;
 
-    // 参数类型数组（不可修改）
-    private List<String> argTypeList;
-
-    public String getFullMethod() {
-        return fullMethod;
+    public String getFullMethodWithReturnType() {
+        return JavaCG2ClassMethodUtil.genFullMethodWithReturnType(getFullMethod(), returnType);
     }
 
-    public void setFullMethod(String fullMethod) {
-        this.fullMethod = fullMethod;
+    //
+    public String getReturnType() {
+        return returnType;
     }
 
-    public String getArgTypeStr() {
-        return argTypeStr;
-    }
-
-    public void setArgTypeStr(String argTypeStr) {
-        this.argTypeStr = argTypeStr;
-    }
-
-    public List<String> getArgTypeList() {
-        return argTypeList;
-    }
-
-    public void setArgTypeList(List<String> argTypeList) {
-        this.argTypeList = argTypeList;
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 
     @Override
     public String toString() {
-        return fullMethod;
+        return getFullMethodWithReturnType();
     }
 }

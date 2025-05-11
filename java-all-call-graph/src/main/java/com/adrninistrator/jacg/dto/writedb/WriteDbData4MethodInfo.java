@@ -14,9 +14,10 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
     private String simpleClassName;
     private int accessFlags;
     private String methodName;
-    private String simpleReturnType;
-    private String returnType;
+    private String simpleReturnTypeNad;
+    private String returnTypeNad;
     private int returnArrayDimensions;
+    private String returnType;
     private String returnCategory;
     private int returnExistsGenericsType;
     private String className;
@@ -69,20 +70,20 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
         this.methodName = methodName;
     }
 
-    public String getSimpleReturnType() {
-        return simpleReturnType;
+    public String getSimpleReturnTypeNad() {
+        return simpleReturnTypeNad;
     }
 
-    public void setSimpleReturnType(String simpleReturnType) {
-        this.simpleReturnType = simpleReturnType;
+    public void setSimpleReturnTypeNad(String simpleReturnTypeNad) {
+        this.simpleReturnTypeNad = simpleReturnTypeNad;
     }
 
-    public String getReturnType() {
-        return returnType;
+    public String getReturnTypeNad() {
+        return returnTypeNad;
     }
 
-    public void setReturnType(String returnType) {
-        this.returnType = returnType;
+    public void setReturnTypeNad(String returnTypeNad) {
+        this.returnTypeNad = returnTypeNad;
     }
 
     public int getReturnArrayDimensions() {
@@ -91,6 +92,14 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
 
     public void setReturnArrayDimensions(int returnArrayDimensions) {
         this.returnArrayDimensions = returnArrayDimensions;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 
     public String getReturnCategory() {

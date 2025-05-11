@@ -27,14 +27,14 @@ public class WriteDbHandler4SfFieldMethodCall extends AbstractWriteDbHandler<Wri
 
     @Override
     protected WriteDbData4SfFieldMethodCall genData(String[] array) {
-        String className = array[0];
-        String fieldName = array[1];
-        int seq = Integer.parseInt(array[2]);
-        int callId = Integer.parseInt(array[3]);
-        String fieldType = array[4];
-        String arrayDimensions = array[5];
-        String calleeClassName = array[6];
-        String calleeMethodName = array[7];
+        String className = readLineData();
+        String fieldName = readLineData();
+        int seq = Integer.parseInt(readLineData());
+        int callId = Integer.parseInt(readLineData());
+        String fieldTypeNad = readLineData();
+        String arrayDimensions = readLineData();
+        String calleeClassName = readLineData();
+        String calleeMethodName = readLineData();
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         WriteDbData4SfFieldMethodCall writeDbData4SfFieldMethodCall = new WriteDbData4SfFieldMethodCall();
         writeDbData4SfFieldMethodCall.setRecordId(genNextRecordId());
@@ -42,7 +42,7 @@ public class WriteDbHandler4SfFieldMethodCall extends AbstractWriteDbHandler<Wri
         writeDbData4SfFieldMethodCall.setFieldName(fieldName);
         writeDbData4SfFieldMethodCall.setSeq(seq);
         writeDbData4SfFieldMethodCall.setCallId(callId);
-        writeDbData4SfFieldMethodCall.setFieldType(fieldType);
+        writeDbData4SfFieldMethodCall.setFieldTypeNad(fieldTypeNad);
         writeDbData4SfFieldMethodCall.setArrayDimensions(Integer.parseInt(arrayDimensions));
         writeDbData4SfFieldMethodCall.setClassName(className);
         writeDbData4SfFieldMethodCall.setCalleeClassName(calleeClassName);
@@ -58,7 +58,7 @@ public class WriteDbHandler4SfFieldMethodCall extends AbstractWriteDbHandler<Wri
                 data.getFieldName(),
                 data.getSeq(),
                 data.getCallId(),
-                data.getFieldType(),
+                data.getFieldTypeNad(),
                 data.getArrayDimensions(),
                 data.getClassName(),
                 data.getCalleeClassName(),
@@ -73,7 +73,7 @@ public class WriteDbHandler4SfFieldMethodCall extends AbstractWriteDbHandler<Wri
                 "字段名称",
                 "序号，从0开始，大于0代表有多种可能",
                 "字段初始化对应的方法调用序号，从1开始",
-                "字段类型",
+                "字段类型（不包含数组标志）",
                 "字段数组类型的维度，为0代表不是数组类型",
                 "初始化方法被调类名",
                 "初始化方法被调用方法名"

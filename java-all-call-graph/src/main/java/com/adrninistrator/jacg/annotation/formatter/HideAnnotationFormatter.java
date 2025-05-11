@@ -17,7 +17,7 @@ public class HideAnnotationFormatter extends AbstractAnnotationFormatter {
     }
 
     @Override
-    public String handleAnnotation(String fullMethod, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
+    public String handleAnnotation(String fullMethod, String returnType, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap) {
         // 返回null，代表不显示注解信息
         return null;
     }

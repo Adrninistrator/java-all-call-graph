@@ -1,6 +1,7 @@
 package test.runbycode.extractor.spcfiledownload;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.method.MethodArgAndCommonFieldInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgument;
@@ -29,16 +30,18 @@ public class MyCalleeGraphSPCFileDownloadExtractor extends CalleeGraphSPCFileDow
      * @return
      */
     @Override
-    protected List<String> handleFileDownloadControllerFullMethodList(List<String> fileDownloadControllerFullMethodList, ConfigureWrapper configureWrapper) {
-        List<String> newMethodList = new ArrayList<>();
+    protected List<FullMethodWithReturnType> handleFileDownloadControllerFullMethodList(List<FullMethodWithReturnType> fileDownloadControllerFullMethodList,
+                                                                                        ConfigureWrapper configureWrapper) {
+        List<FullMethodWithReturnType> newMethodList = new ArrayList<>();
 
         try (MethodArgReturnHandler methodArgReturnHandler = new MethodArgReturnHandler(configureWrapper)) {
             // 对于（可能的）Spring Controller文件下载方法，仅处理方法参数、方法参数的类型中的字段、方法参数的泛型类型中的字段存在名称为 fileId 的方法
-            for (String fileDownloadControllerFullMethod : fileDownloadControllerFullMethodList) {
-                List<MethodArgAndCommonFieldInfo> methodArgAndCommonFieldInfoList = methodArgReturnHandler.queryMethodArgAndCommonFieldInfo(fileDownloadControllerFullMethod);
+            for (FullMethodWithReturnType fileDownloadControllerMethod : fileDownloadControllerFullMethodList) {
+                List<MethodArgAndCommonFieldInfo> methodArgAndCommonFieldInfoList =
+                        methodArgReturnHandler.queryMethodArgAndCommonFieldInfo(fileDownloadControllerMethod.getFullMethod(), fileDownloadControllerMethod.getReturnType());
                 // 判断指定的方法是否需要处理
                 if (checkNeedHandleMethod(methodArgAndCommonFieldInfoList)) {
-                    newMethodList.add(fileDownloadControllerFullMethod);
+                    newMethodList.add(fileDownloadControllerMethod);
                 }
             }
         }

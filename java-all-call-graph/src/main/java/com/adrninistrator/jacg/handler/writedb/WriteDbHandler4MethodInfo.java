@@ -4,8 +4,9 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 /**
@@ -30,16 +31,17 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
     @Override
     protected WriteDbData4MethodInfo genData(String[] array) {
         String fullMethod = readLineData();
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
         String accessFlags = readLineData();
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);
-        String returnType = readLineData();
+        String returnTypeNad = readLineData();
         int returnArrayDimensions = Integer.parseInt(readLineData());
+        String returnType = JavaCG2ByteCodeUtil.addArrayFlag(returnTypeNad, returnArrayDimensions);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         String returnCategory = readLineData();
         int returnExistsGenericsType = Integer.parseInt(readLineData());
-        String simpleReturnType = dbOperWrapper.querySimpleClassName(returnType);
+        String simpleReturnTypeNad = dbOperWrapper.querySimpleClassName(returnTypeNad);
         String methodInstructionsHash = readLineData();
         int jarNum = Integer.parseInt(readLineData());
 
@@ -49,9 +51,10 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
         methodInfo.setSimpleClassName(simpleClassName);
         methodInfo.setAccessFlags(Integer.parseInt(accessFlags));
         methodInfo.setMethodName(methodName);
-        methodInfo.setSimpleReturnType(simpleReturnType);
-        methodInfo.setReturnType(returnType);
+        methodInfo.setSimpleReturnTypeNad(simpleReturnTypeNad);
+        methodInfo.setReturnTypeNad(returnTypeNad);
         methodInfo.setReturnArrayDimensions(returnArrayDimensions);
+        methodInfo.setReturnType(returnType);
         methodInfo.setReturnCategory(returnCategory);
         methodInfo.setReturnExistsGenericsType(returnExistsGenericsType);
         methodInfo.setClassName(className);
@@ -69,9 +72,10 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
                 data.getSimpleClassName(),
                 data.getAccessFlags(),
                 data.getMethodName(),
-                data.getSimpleReturnType(),
-                data.getReturnType(),
+                data.getSimpleReturnTypeNad(),
+                data.getReturnTypeNad(),
                 data.getReturnArrayDimensions(),
+                data.getReturnType(),
                 data.getReturnCategory(),
                 data.getReturnExistsGenericsType(),
                 data.getClassName(),
@@ -86,7 +90,7 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
         return new String[]{
                 "完整方法（类名+方法名+参数）",
                 "方法的access_flags",
-                "返回类型类名",
+                "返回类型类名（不包含数组标志）",
                 "返回类型数组的维度，为0代表不是数组类型",
                 "返回类型分类，J:JDK中的类型，C:自定义类型",
                 "返回类型是否存在泛型类型，1:是，0:否",

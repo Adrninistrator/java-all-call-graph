@@ -23,14 +23,16 @@ public class MAMCExt4UnfixedService1 extends AbstractManualAddMethodCall1 {
 
     @Override
     protected String chooseSuperOrItfClassName() {
-        // AbstractUnFixedOtherJarService1类的完整类名
+        // AbstractUnFixedOtherJarService1 类的完整类名
         return AbstractUnFixedOtherJarService1.class.getName();
     }
 
     @Override
     protected List<MethodCallPair> chooseAddMethodCallPairList(String className) {
-        // 当AbstractUnFixedOtherJarService1子类的invoke()方法被调用时，添加调用execute()方法
+        // 当 AbstractUnFixedOtherJarService1 子类的 invoke() 方法被调用时，添加调用 execute() 方法
         return Collections.singletonList(new MethodCallPair(JavaCG2ClassMethodUtil.formatMethodWithArgTypes("invoke", Object.class, Collection.class),
-                JavaCG2ClassMethodUtil.formatMethodWithArgTypes("execute", Object.class, Collection.class)));
+                Collection.class.getName(),
+                JavaCG2ClassMethodUtil.formatMethodWithArgTypes("execute", Object.class, Collection.class),
+                Collection.class.getName()));
     }
 }

@@ -103,9 +103,6 @@ public class SpringTxNestedReporter extends AbstractReporter {
      */
     public boolean generate() {
         SpringTxNestedExtractor springTxNestedExtractor = new SpringTxNestedExtractor();
-        // 在需要处理的类名前缀中增加Spring事务模板类，需要在写入数据库之前设置
-        springTxNestedExtractor.setAllowedClassNamePrefix(configureWrapper);
-
         // 公共预处理，包含写数据库步骤
         if (!commonPreHandle()) {
             return false;

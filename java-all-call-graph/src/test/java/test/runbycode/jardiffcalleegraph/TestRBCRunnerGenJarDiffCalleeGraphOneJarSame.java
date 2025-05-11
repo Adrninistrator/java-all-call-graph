@@ -41,4 +41,9 @@ public class TestRBCRunnerGenJarDiffCalleeGraphOneJarSame extends TestAbstractRu
     protected String chooseDirNameNew() {
         return "test_jar_2";
     }
+
+    @Override
+    protected boolean isResultEmpty() {
+        return true;
+    }
 }

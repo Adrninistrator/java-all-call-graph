@@ -155,6 +155,7 @@ public class SpringInvalidTxMethodReporter extends AbstractReporter {
             for (SpringInvalidTxAnnotationMethod springInvalidTxAnnotationMethod : springInvalidTxAnnotationMethodList) {
                 List<String> stringList = new ArrayList<>();
                 stringList.add(springInvalidTxAnnotationMethod.getFullMethod());
+                stringList.add(springInvalidTxAnnotationMethod.getReturnType());
                 stringList.add(springInvalidTxAnnotationMethod.getMethodFlagsDesc());
 
                 // 在报告文件写入一行

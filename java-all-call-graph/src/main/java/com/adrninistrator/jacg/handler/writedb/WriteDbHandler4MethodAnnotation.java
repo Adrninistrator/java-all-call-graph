@@ -8,8 +8,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodAnnotation;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSpringUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.slf4j.Logger;
@@ -31,8 +31,8 @@ import java.util.Set;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_ANNOTATION,
-        minColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_2,
-        maxColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE_5,
+        minColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_3,
+        maxColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE_6,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_ANNOTATION,
         dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_CLASS_ANNOTATION}
 )
@@ -74,15 +74,16 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     protected WriteDbData4MethodAnnotation genData(String[] array) {
         // 拆分时限制列数，最后一列注解属性中可能出现空格
         String fullMethod = readLineData();
+        String returnType = readLineData();
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         String annotationName = readLineData();
         // 若当前行的注解信息无属性，注解属性名称设为空字符串
         String attributeName = "";
         String attributeType = null;
         String attributeValue = null;
-        if (array.length > JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_2) {
+        if (array.length > JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_3) {
             // 当前行的注解信息有属性
             attributeName = readLineData();
             attributeType = readLineData();
@@ -94,10 +95,10 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         withAnnotationMethodHashSet.add(methodHash);
 
         // 处理Spring Controller相关注解
-        handleSpringControllerAnnotation(methodHash, fullMethod, simpleClassName, annotationName, attributeName, attributeValue);
+        handleSpringControllerAnnotation(methodHash, fullMethod, returnType, simpleClassName, annotationName, attributeName, attributeValue);
 
         // 处理Spring Task相关注解
-        handleSpringTaskAnnotation(fullMethod, annotationName);
+        handleSpringTaskAnnotation(fullMethod, returnType, annotationName);
 
         WriteDbData4MethodAnnotation writeDbData4MethodAnnotation = new WriteDbData4MethodAnnotation();
         writeDbData4MethodAnnotation.setRecordId(genNextRecordId());
@@ -107,6 +108,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         writeDbData4MethodAnnotation.setAnnotationType(attributeType);
         writeDbData4MethodAnnotation.setAttributeValue(attributeValue);
         writeDbData4MethodAnnotation.setFullMethod(fullMethod);
+        writeDbData4MethodAnnotation.setReturnType(returnType);
         writeDbData4MethodAnnotation.setSimpleClassName(simpleClassName);
         return writeDbData4MethodAnnotation;
     }
@@ -121,6 +123,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 data.getAnnotationType(),
                 data.getAttributeValue(),
                 data.getFullMethod(),
+                data.getReturnType(),
                 data.getSimpleClassName()
         };
     }
@@ -129,6 +132,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志",
                 "注解类名",
                 "注解属性名称，空字符串代表无注解属性",
                 "注解属性类型，参考AnnotationAttributesTypeEnum类",
@@ -150,12 +154,13 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
      *
      * @param methodHash
      * @param fullMethod
+     * @param returnType
      * @param simpleClassName
      * @param annotationName
      * @param attributeName
      * @param attributeValue
      */
-    private void handleSpringControllerAnnotation(String methodHash, String fullMethod, String simpleClassName, String annotationName, String attributeName,
+    private void handleSpringControllerAnnotation(String methodHash, String fullMethod, String returnType, String simpleClassName, String annotationName, String attributeName,
                                                   String attributeValue) {
         // 判断对应的类是否与Spring Controller相关
         List<String> classRequestMappingPathList = classRequestMappingMap.get(simpleClassName);
@@ -198,6 +203,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 writeDbData4SpringController.setAnnotationName(annotationName);
                 writeDbData4SpringController.setSimpleClassName(simpleClassName);
                 writeDbData4SpringController.setFullMethod(fullMethod);
+                writeDbData4SpringController.setReturnType(returnType);
 
                 logger.debug("找到Spring Controller信息 {}", writeDbData4SpringController);
                 writeDbHandler4SpringController.addData(writeDbData4SpringController);
@@ -209,7 +215,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     }
 
     // 处理Spring Task相关注解
-    private void handleSpringTaskAnnotation(String fullMethod, String annotationName) {
+    private void handleSpringTaskAnnotation(String fullMethod, String returnType, String annotationName) {
         if (!JACGSpringUtil.isTaskAnnotation(annotationName)) {
             // 当前注解不是Spring Task的注解
             return;
@@ -219,12 +225,13 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);
         WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
         writeDbData4SpringTask.setRecordId(writeDbHandler4SpringTaskAnnotation.genNextRecordId());
-        writeDbData4SpringTask.setMethodHash(JACGUtil.genHashWithLen(fullMethod));
+        writeDbData4SpringTask.setMethodHash(JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
         writeDbData4SpringTask.setSpringBeanName("");
         writeDbData4SpringTask.setClassName(className);
         writeDbData4SpringTask.setMethodName(methodName);
         writeDbData4SpringTask.setType(JACGConstants.SPRING_TASK_TYPE_ANNOTATION);
         writeDbData4SpringTask.setFullMethod(fullMethod);
+        writeDbData4SpringTask.setReturnType(returnType);
         writeDbHandler4SpringTaskAnnotation.addData(writeDbData4SpringTask);
         writeDbHandler4SpringTaskAnnotation.tryInsertDb();
     }

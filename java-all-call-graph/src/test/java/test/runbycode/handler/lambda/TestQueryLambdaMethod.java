@@ -1,6 +1,6 @@
 package test.runbycode.handler.lambda;
 
-import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
+import com.adrninistrator.jacg.dto.lambda.LambdaMethodCall;
 import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByClassMethodName;
 import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByClassNamePrefix;
 import com.adrninistrator.jacg.handler.lambda.LambdaMethodHandlerByStreamMethod;
@@ -55,7 +55,7 @@ public class TestQueryLambdaMethod extends TestRunByCodeBase {
     private void queryByClassNamePrefix(LambdaMethodHandlerByClassNamePrefix lambdaMethodHandlerByClassNamePrefix,
                                         String lambdaCalleeClassNamePrefix,
                                         String lambdaNextClassNamePrefix) {
-        List<LambdaMethodCallDetail> lambdaMethodCallDetailList = lambdaMethodHandlerByClassNamePrefix.queryByClassNamePrefixDetail(lambdaCalleeClassNamePrefix,
+        List<LambdaMethodCall> lambdaMethodCallDetailList = lambdaMethodHandlerByClassNamePrefix.queryByClassNamePrefix(lambdaCalleeClassNamePrefix,
                 lambdaNextClassNamePrefix);
         if (lambdaMethodCallDetailList == null) {
             return;
@@ -67,24 +67,24 @@ public class TestQueryLambdaMethod extends TestRunByCodeBase {
                                         String className,
                                         String methodName,
                                         boolean isLambdaCallee) {
-        List<LambdaMethodCallDetail> lambdaMethodCallDetailList;
+        List<LambdaMethodCall> lambdaMethodCallList;
         if (isLambdaCallee) {
-            lambdaMethodCallDetailList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaCallee(className, methodName);
+            lambdaMethodCallList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaCallee(className, methodName);
         } else {
-            lambdaMethodCallDetailList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaNext(className, methodName);
+            lambdaMethodCallList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaNext(className, methodName);
         }
-        if (lambdaMethodCallDetailList == null) {
+        if (lambdaMethodCallList == null) {
             return;
         }
-        printListContent(lambdaMethodCallDetailList, className, methodName, String.valueOf(lambdaMethodCallDetailList.size()));
+        printListContent(lambdaMethodCallList, className, methodName, String.valueOf(lambdaMethodCallList.size()));
     }
 
     private void queryByStreamMethod(LambdaMethodHandlerByStreamMethod lambdaMethodHandlerByStreamMethod, Boolean lambdaNextIsStream, Boolean lambdaNextIsIntermediate) {
-        List<LambdaMethodCallDetail> lambdaMethodCallDetailList = lambdaMethodHandlerByStreamMethod.queryByStreamMethodDetail(lambdaNextIsStream, lambdaNextIsIntermediate);
-        if (lambdaMethodCallDetailList == null) {
+        List<LambdaMethodCall> lambdaMethodCallList = lambdaMethodHandlerByStreamMethod.queryByStreamMethod(lambdaNextIsStream, lambdaNextIsIntermediate);
+        if (lambdaMethodCallList == null) {
             return;
         }
-        printListContent(lambdaMethodCallDetailList, String.valueOf(lambdaNextIsStream), String.valueOf(lambdaNextIsIntermediate),
-                String.valueOf(lambdaMethodCallDetailList.size()));
+        printListContent(lambdaMethodCallList, String.valueOf(lambdaNextIsStream), String.valueOf(lambdaNextIsIntermediate),
+                String.valueOf(lambdaMethodCallList.size()));
     }
 }

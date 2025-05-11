@@ -86,7 +86,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
             if (StringUtils.equalsAny(getSetMethod.getFieldCategory(), JavaCG2Constants.FILE_KEY_CATEGORY_JDK, JavaCG2Constants.FILE_KEY_CATEGORY_GENERICS_JDK)) {
                 // 字段类型为JDK中的类，或字段的泛型类型为JDK中的类，直接添加
                 String fieldShowName = getFieldShowName(fieldUsedName, upperFieldUsedNameList);
-                allFieldInfoList.add(new JACGFieldInfo(fieldName, getSetMethod.getFieldType(), fieldShowName, jsonPropertyValue, className));
+                allFieldInfoList.add(new JACGFieldInfo(fieldName, getSetMethod.getFieldTypeNad(), fieldShowName, jsonPropertyValue, className));
                 continue;
             }
 
@@ -94,7 +94,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
             newUpperFieldUsedNameList.add(fieldUsedName);
             if (JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(getSetMethod.getFieldCategory())) {
                 // 字段类型为自定义类型，递归处理
-                doQueryAllFieldInfoList(allFieldInfoList, queryGetMethod, getSetMethod.getFieldType(), newUpperFieldUsedNameList, handledClassNameSet);
+                doQueryAllFieldInfoList(allFieldInfoList, queryGetMethod, getSetMethod.getFieldTypeNad(), newUpperFieldUsedNameList, handledClassNameSet);
                 continue;
             }
 
@@ -105,7 +105,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
             }
             for (WriteDbData4FieldGenericsType fieldGenericsType : fieldGenericsTypeList) {
                 // 递归处理
-                doQueryAllFieldInfoList(allFieldInfoList, queryGetMethod, fieldGenericsType.getGenericsType(), newUpperFieldUsedNameList, handledClassNameSet);
+                doQueryAllFieldInfoList(allFieldInfoList, queryGetMethod, fieldGenericsType.getGenericsTypeNad(), newUpperFieldUsedNameList, handledClassNameSet);
             }
         }
     }
@@ -141,9 +141,9 @@ public class QueryGSFieldsHandler extends BaseHandler {
         for (BaseWriteDbData4GetSetMethod getSetMethod : getSetMethodList) {
             if (JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(getSetMethod.getFieldCategory())) {
                 // 字段类型为自定义类型
-                customFieldTypeList.add(getSetMethod.getFieldType());
+                customFieldTypeList.add(getSetMethod.getFieldTypeNad());
                 // 递归处理
-                doQueryCustomFieldTypeList(customFieldTypeList, queryGetMethod, getSetMethod.getFieldType(), handledClassNameSet);
+                doQueryCustomFieldTypeList(customFieldTypeList, queryGetMethod, getSetMethod.getFieldTypeNad(), handledClassNameSet);
                 continue;
             }
 
@@ -155,7 +155,7 @@ public class QueryGSFieldsHandler extends BaseHandler {
                 }
                 for (WriteDbData4FieldGenericsType fieldGenericsType : fieldGenericsTypeList) {
                     // 递归处理
-                    doQueryCustomFieldTypeList(customFieldTypeList, queryGetMethod, fieldGenericsType.getGenericsType(), handledClassNameSet);
+                    doQueryCustomFieldTypeList(customFieldTypeList, queryGetMethod, fieldGenericsType.getGenericsTypeNad(), handledClassNameSet);
                 }
             }
         }

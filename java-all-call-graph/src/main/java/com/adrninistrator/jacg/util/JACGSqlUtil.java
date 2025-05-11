@@ -148,7 +148,8 @@ public class JACGSqlUtil {
                 data.getClassName(),
                 data.getMethodName(),
                 data.getType(),
-                data.getFullMethod()
+                data.getFullMethod(),
+                data.getReturnType()
         };
     }
 

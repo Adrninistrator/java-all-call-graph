@@ -28,7 +28,6 @@ import com.adrninistrator.jacg.handler.dto.mybatis.mapper.MyBatisMapperArgObject
 import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.adrninistrator.mybatismysqltableparser.common.enums.MySqlStatementEnum;
@@ -411,9 +410,10 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
      * 解析MyBatis Mapper方法参数
      *
      * @param mapperFullMethod
+     * @param mapperReturnType
      * @return
      */
-    private List<AbstractMyBatisMapperArg> parseMyBatisMapperArg(String mapperFullMethod) {
+    private List<AbstractMyBatisMapperArg> parseMyBatisMapperArg(String mapperFullMethod, String mapperReturnType) {
         // 获取方法参数类型列表
         List<String> argTypeList = JACGClassMethodUtil.genMethodArgTypeList(mapperFullMethod);
         List<AbstractMyBatisMapperArg> myBatisMapperArgList = new ArrayList<>(argTypeList.size());
@@ -422,7 +422,8 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
         }
 
         // 获取方法参数泛型类型
-        MethodArgGenericsTypeInfo methodArgGenericsTypeInfo = methodArgReturnHandler.queryArgsGenericsTypeInfo(JACGUtil.genHashWithLen(mapperFullMethod));
+        MethodArgGenericsTypeInfo methodArgGenericsTypeInfo = methodArgReturnHandler.queryArgsGenericsTypeInfo(JACGClassMethodUtil.genMethodHashWithLen(mapperFullMethod,
+                mapperReturnType));
 
         for (int i = 0; i < argTypeList.size(); i++) {
             if (methodArgGenericsTypeInfo != null) {
@@ -446,13 +447,13 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
             // 记录参数在sql语句中的名称
             String argNameInSql;
             // 判断参数是否有@Param注解
-            StringAnnotationAttribute stringAnnotationAttribute = annotationHandler.queryAttribute4MethodArgAnnotation(mapperFullMethod, i,
+            StringAnnotationAttribute stringAnnotationAttribute = annotationHandler.queryAttribute4MethodArgAnnotation(mapperFullMethod, mapperReturnType, i,
                     JACGCommonNameConstants.MYBATIS_PARAM_ANNOTATION_NAME, JACGCommonNameConstants.ANNOTATION_ATTRIBUTE_NAME_VALUE, StringAnnotationAttribute.class);
             if (stringAnnotationAttribute != null) {
                 argNameInSql = stringAnnotationAttribute.getAttributeString();
             } else {
                 // 获取参数名称
-                argNameInSql = methodArgReturnHandler.queryMethodArgName(mapperFullMethod, i);
+                argNameInSql = methodArgReturnHandler.queryMethodArgName(mapperFullMethod, mapperReturnType, i);
             }
             myBatisMapperArg.setArgType(argType);
             myBatisMapperArg.setArgNameInSql(argNameInSql);
@@ -509,15 +510,16 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
      * @param mapperClassName
      * @param mapperMethodName
      * @param mapperFullMethod
+     * @param mapperReturnType
      * @param myBatisMapperArgAndParamDbInfoList4Where 不允许为空，保存参数在where子句中对应的字段信息，序号与参数序号相同
      * @param myBatisMapperArgAndParamDbInfoList4Set   允许为空，非空时保存参数在update set子句中对应的字段信息，序号与参数序号相同
      * @return
      */
-    public List<AbstractMyBatisMapperArg> queryParamDbInfo4MyBatisMapperMethod(String mapperClassName, String mapperMethodName, String mapperFullMethod,
+    public List<AbstractMyBatisMapperArg> queryParamDbInfo4MyBatisMapperMethod(String mapperClassName, String mapperMethodName, String mapperFullMethod, String mapperReturnType,
                                                                                List<MyBatisMapperArgAndParamDbInfo> myBatisMapperArgAndParamDbInfoList4Where,
                                                                                List<MyBatisMapperArgAndParamDbInfo> myBatisMapperArgAndParamDbInfoList4Set) {
         // 解析MyBatis Mapper方法参数
-        List<AbstractMyBatisMapperArg> myBatisMapperArgList = parseMyBatisMapperArg(mapperFullMethod);
+        List<AbstractMyBatisMapperArg> myBatisMapperArgList = parseMyBatisMapperArg(mapperFullMethod, mapperReturnType);
         if (JavaCG2Util.isCollectionEmpty(myBatisMapperArgList)) {
             return null;
         }

@@ -12,14 +12,15 @@ import com.adrninistrator.jacg.dto.annotation.AnnotationWithAttributeInfo;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.StringAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassAnnotation;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldAnnotation;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodAnnotation;
 import com.adrninistrator.jacg.extractor.common.enums.SpTxPropagationEnum;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -74,13 +75,31 @@ public class AnnotationHandler extends BaseHandler {
     }
 
     /**
-     * 查询带有指定注解的完整方法列表
+     * 查询带有指定注解的完整方法与返回类型列表
      *
-     * @param queryFullMethod     true: 查询完整方法 false: 方法HASH+长度
      * @param annotationClassName 指定的注解类名
      * @return
      */
-    public List<String> queryMethodsWithAnnotation(boolean queryFullMethod, String annotationClassName) {
+    public List<FullMethodWithReturnType> queryMethodsWithAnnotation(String annotationClassName) {
+        List<WriteDbData4MethodAnnotation> list = queryMethodsAndHashWithAnnotation(annotationClassName);
+        if (list == null) {
+            return null;
+        }
+
+        List<FullMethodWithReturnType> methodList = new ArrayList<>(list.size());
+        for (WriteDbData4MethodAnnotation methodAnnotation : list) {
+            methodList.add(new FullMethodWithReturnType(methodAnnotation.getFullMethod(), methodAnnotation.getReturnType()));
+        }
+        return methodList;
+    }
+
+    /**
+     * 查询带有指定注解的方法HASH+长度列表
+     *
+     * @param annotationClassName 指定的注解类名
+     * @return
+     */
+    public List<String> queryMethodHashWithAnnotation(String annotationClassName) {
         List<WriteDbData4MethodAnnotation> list = queryMethodsAndHashWithAnnotation(annotationClassName);
         if (list == null) {
             return null;
@@ -88,7 +107,7 @@ public class AnnotationHandler extends BaseHandler {
 
         List<String> stringList = new ArrayList<>(list.size());
         for (WriteDbData4MethodAnnotation methodAnnotation : list) {
-            stringList.add(queryFullMethod ? methodAnnotation.getFullMethod() : methodAnnotation.getMethodHash());
+            stringList.add(methodAnnotation.getMethodHash());
         }
         return stringList;
     }
@@ -103,7 +122,7 @@ public class AnnotationHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_FMAH_WITH_ANNOTATIONS;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select distinct " + JACGSqlUtil.joinColumns(DC.MA_FULL_METHOD, DC.MA_METHOD_HASH) +
+            sql = "select distinct " + JACGSqlUtil.joinColumns(DC.MA_FULL_METHOD, DC.MA_RETURN_TYPE, DC.MA_METHOD_HASH) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_ANNOTATION.getTableName() +
                     " where " + DC.MA_ANNOTATION_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
@@ -115,6 +134,7 @@ public class AnnotationHandler extends BaseHandler {
      * 根据完整方法，查询方法指定注解的指定属性
      *
      * @param fullMethod     完整方法
+     * @param returnType     方法返回类型
      * @param annotationName 注解类名
      * @param attributeName  注解属性名
      * @param attributeName  注解属性名
@@ -122,11 +142,12 @@ public class AnnotationHandler extends BaseHandler {
      */
     @SuppressWarnings("unchecked")
     public <T extends BaseAnnotationAttribute> T queryAttribute4MethodAnnotation(String fullMethod,
+                                                                                 String returnType,
                                                                                  String annotationName,
                                                                                  String attributeName,
                                                                                  Class<T> attributeClassType) {
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        logger.debug("查询方法指定注解的指定属性 {} {} {} {}", fullMethod, methodHash, annotationName, attributeName);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
+        logger.debug("查询方法指定注解的指定属性 {} {} {} {} {}", fullMethod, returnType, methodHash, annotationName, attributeName);
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_SINGLE_ATTRIBUTE_BY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
@@ -158,24 +179,26 @@ public class AnnotationHandler extends BaseHandler {
      * 根据完整方法，及注解类名获取对应的方法的注解信息
      *
      * @param fullMethod
+     * @param returnType
      * @param annotationName
      * @return key：注解属性名称，value：注解属性
      */
-    public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod, String annotationName) {
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        return queryMethodAnnotationAttributes(fullMethod, methodHash, annotationName);
+    public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod, String returnType, String annotationName) {
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
+        return queryMethodAnnotationAttributes(fullMethod, returnType, methodHash, annotationName);
     }
 
     /**
      * 根据完整方法，及注解类名获取对应的方法的注解信息
      *
      * @param fullMethod     仅用于打印日志
+     * @param returnType     仅用于打印日志
      * @param methodHash
      * @param annotationName
      * @return key：注解属性名称，value：注解属性
      */
-    public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod, String methodHash, String annotationName) {
-        logger.debug("查询方法上注解的属性 {} {}", fullMethod, annotationName);
+    public Map<String, BaseAnnotationAttribute> queryMethodAnnotationAttributes(String fullMethod, String returnType, String methodHash, String annotationName) {
+        logger.debug("查询方法上注解的属性 {} {} {}", fullMethod, returnType, annotationName);
         String sql;
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_ALL_ATTRIBUTES;
         sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
@@ -196,10 +219,12 @@ public class AnnotationHandler extends BaseHandler {
      * 查询Spring事务注解@Transactional对应的事务传播行为，仅当确认对应方法上有@Transactional注解时，才能使用当前方法查询
      *
      * @param fullMethod
+     * @param returnType
      * @return
      */
-    public String querySpringTxAnnotationPropagation(String fullMethod) {
+    public String querySpringTxAnnotationPropagation(String fullMethod, String returnType) {
         StringAnnotationAttribute propagationAttribute = queryAttribute4MethodAnnotation(fullMethod,
+                returnType,
                 JACGCommonNameConstants.SPRING_TX_ANNOTATION,
                 JACGCommonNameConstants.SPRING_TX_ATTRIBUTE_PROPAGATION,
                 StringAnnotationAttribute.class);
@@ -280,19 +305,20 @@ public class AnnotationHandler extends BaseHandler {
     }
 
     /**
-     * 根据完整方法HASH+长度获取对应的方法的注解信息，Map格式
+     * 根据完整方法与返回类型获取对应的方法的注解信息，Map格式
      *
      * @param fullMethod 完整方法
+     * @param returnType 方法返回类型
      * @return
      */
-    public Map<String, Map<String, BaseAnnotationAttribute>> queryAnnotationMap4FullMethod(String fullMethod) {
+    public Map<String, Map<String, BaseAnnotationAttribute>> queryAnnotationMap4MethodWithReturnType(String fullMethod, String returnType) {
         /*
             返回的Map格式
                 key     注解类名
                 value   Map<String, BaseAnnotationAttribute> key：注解属性名称，value：注解属性
          */
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        logger.debug("从数据库查询方法注解信息 {} {}", fullMethod, methodHash);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
+        logger.debug("从数据库查询方法注解信息 {} {} {}", fullMethod, returnType, methodHash);
         // 查询有方法的注解信息
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MA_QUERY_ANNOTATION_BY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
@@ -437,6 +463,7 @@ public class AnnotationHandler extends BaseHandler {
      * 根据完整方法，查询方法指定参数的注解的指定属性
      *
      * @param fullMethod     完整方法
+     * @param returnType     方法返回类型
      * @param argSeq         参数序号，从0开始
      * @param annotationName 注解类名
      * @param attributeName  注解属性名
@@ -445,12 +472,13 @@ public class AnnotationHandler extends BaseHandler {
      */
     @SuppressWarnings("unchecked")
     public <T extends BaseAnnotationAttribute> T queryAttribute4MethodArgAnnotation(String fullMethod,
+                                                                                    String returnType,
                                                                                     int argSeq,
                                                                                     String annotationName,
                                                                                     String attributeName,
                                                                                     Class<T> attributeClassType) {
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        logger.debug("查询方法指定参数的指定注解的指定属性 {} {} {} {} {}", fullMethod, argSeq, methodHash, annotationName, attributeName);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
+        logger.debug("查询方法指定参数的指定注解的指定属性 {} {} {} {} {} {}", fullMethod, returnType, argSeq, methodHash, annotationName, attributeName);
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MAA_QUERY_SINGLE_ATTRIBUTE_BY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);

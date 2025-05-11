@@ -43,4 +43,9 @@ public class TestRBCRunnerGenJarDiffCalleeGraphOneJarDiff extends TestAbstractRu
     protected String chooseDirNameNew() {
         return "jar-diff-version-2";
     }
+
+    @Override
+    protected boolean isResultEmpty() {
+        return false;
+    }
 }

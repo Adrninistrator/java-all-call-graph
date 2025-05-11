@@ -14,14 +14,15 @@ public class WriteDbData4MethodArgGenericsType implements BaseWriteDbData {
     private int seq;
     private String type;
     private int typeSeq;
-    private String simpleGenericsType;
+    private String simpleGenericsTypeNad;
     private int genericsArrayDimensions;
     private String typeVariablesName;
     private String wildcard;
     private String referenceType;
     private String genericsCategory;
-    private String genericsType;
+    private String genericsTypeNad;
     private String fullMethod;
+    private String returnType;
 
     public int getRecordId() {
         return recordId;
@@ -71,12 +72,12 @@ public class WriteDbData4MethodArgGenericsType implements BaseWriteDbData {
         this.typeSeq = typeSeq;
     }
 
-    public String getSimpleGenericsType() {
-        return simpleGenericsType;
+    public String getSimpleGenericsTypeNad() {
+        return simpleGenericsTypeNad;
     }
 
-    public void setSimpleGenericsType(String simpleGenericsType) {
-        this.simpleGenericsType = simpleGenericsType;
+    public void setSimpleGenericsTypeNad(String simpleGenericsTypeNad) {
+        this.simpleGenericsTypeNad = simpleGenericsTypeNad;
     }
 
     public int getGenericsArrayDimensions() {
@@ -119,12 +120,12 @@ public class WriteDbData4MethodArgGenericsType implements BaseWriteDbData {
         this.genericsCategory = genericsCategory;
     }
 
-    public String getGenericsType() {
-        return genericsType;
+    public String getGenericsTypeNad() {
+        return genericsTypeNad;
     }
 
-    public void setGenericsType(String genericsType) {
-        this.genericsType = genericsType;
+    public void setGenericsTypeNad(String genericsTypeNad) {
+        this.genericsTypeNad = genericsTypeNad;
     }
 
     public String getFullMethod() {
@@ -133,5 +134,13 @@ public class WriteDbData4MethodArgGenericsType implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }

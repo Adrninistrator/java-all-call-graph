@@ -30,7 +30,7 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
         String className = readLineData();
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String fieldName = readLineData();
-        String fieldType = readLineData();
+        String fieldTypeNad = readLineData();
         int arrayDimensions = Integer.parseInt(readLineData());
         String fieldCategory = readLineData();
         String modifiers = readLineData();
@@ -44,7 +44,7 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
         writeDbData4FieldInfo.setRecordId(genNextRecordId());
         writeDbData4FieldInfo.setSimpleClassName(simpleClassName);
         writeDbData4FieldInfo.setFieldName(fieldName);
-        writeDbData4FieldInfo.setFieldType(fieldType);
+        writeDbData4FieldInfo.setFieldTypeNad(fieldTypeNad);
         writeDbData4FieldInfo.setArrayDimensions(arrayDimensions);
         writeDbData4FieldInfo.setFieldCategory(fieldCategory);
         writeDbData4FieldInfo.setModifiers(modifiers);
@@ -64,7 +64,7 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
                 data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getFieldName(),
-                data.getFieldType(),
+                data.getFieldTypeNad(),
                 data.getArrayDimensions(),
                 data.getFieldCategory(),
                 data.getModifiers(),
@@ -83,7 +83,7 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
         return new String[]{
                 "完整类名",
                 "字段名称",
-                "字段类型",
+                "字段类型（不包含数组标志）",
                 "字段数组类型的维度，为0代表不是数组类型",
                 "字段中的泛型类型分类，J:JDK中的类型，C:自定义类型",
                 "字段修饰符",

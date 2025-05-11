@@ -6,6 +6,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
@@ -140,13 +141,17 @@ public class MethodCalleeNotExistsHandler extends BaseHandler implements QueryBy
             return;
         }
 
-        // 查找指定被调用类的被调用完整方法，使用简单类名
-        List<String> calleeFullMethodList = methodCallHandler.queryNormalCalleeFullMethodBySCN(calleeSimpleClassName);
-        for (String calleeFullMethod : calleeFullMethodList) {
+        // 查找指定被调用类的被调用方法，使用简单类名
+        List<FullMethodWithReturnType> calleeMethodList = methodCallHandler.queryNormalCalleeMethodBySCN(calleeSimpleClassName);
+        if (JavaCG2Util.isCollectionEmpty(calleeMethodList)) {
+            logger.warn("未找到被调用方法 {}", calleeClassName);
+            return;
+        }
+        for (FullMethodWithReturnType calleeMethod : calleeMethodList) {
             // 根据完整方法查询方法信息，若在当前类中未查找到，则在父类与接口中查找
-            boolean calleeMethodExists = methodInfoHandler.checkExistsMethodByFullMethodSuperInterface(calleeFullMethod);
+            boolean calleeMethodExists = methodInfoHandler.checkExistsMethodByFullMethodSuperInterface(calleeMethod.getFullMethod(), calleeMethod.getReturnType());
             if (!calleeMethodExists) {
-                logger.error("未找到被调用方法 {}", calleeFullMethod);
+                logger.error("未找到被调用方法 {}", calleeMethod);
             }
         }
 

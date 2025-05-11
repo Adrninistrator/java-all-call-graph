@@ -20,9 +20,9 @@ import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
 import com.adrninistrator.jacg.handler.dto.methodcall.MethodCallObjArgValue;
 import com.adrninistrator.jacg.handler.dto.methodcall.MethodCallWithValueSupportEnum;
 import com.adrninistrator.jacg.handler.enums.EnumsHandler;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGMethodCallInfoUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2ConstantTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
@@ -408,10 +408,11 @@ public class MethodCallInfoHandler extends BaseHandler {
      * 查询指定方法的参数的使用情况
      *
      * @param fullMethod 完整方法
+     * @param returnType 方法返回类型
      * @param argSeq     参数序号，从1开始
      * @return
      */
-    public List<WriteDbData4MethodCallInfo> queryMethodArgUsage(String fullMethod, int argSeq) {
+    public List<WriteDbData4MethodCallInfo> queryMethodArgUsage(String fullMethod, String returnType, int argSeq) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_METHOD_ARG_USAGE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -422,7 +423,7 @@ public class MethodCallInfoHandler extends BaseHandler {
                     " and " + DC.MCI_THE_VALUE + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         return dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, methodHash, JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType(), String.valueOf(argSeq));
     }
 
@@ -430,11 +431,12 @@ public class MethodCallInfoHandler extends BaseHandler {
      * 检查指定方法的参数是否有使用
      *
      * @param fullMethod 完整方法
+     * @param returnType 方法返回类型
      * @param argSeq     参数序号，从1开始
      * @return true: 有使用 false: 未使用
      */
-    public boolean checkMethodArgUsed(String fullMethod, int argSeq) {
-        List<WriteDbData4MethodCallInfo> list = queryMethodArgUsage(fullMethod, argSeq);
+    public boolean checkMethodArgUsed(String fullMethod, String returnType, int argSeq) {
+        List<WriteDbData4MethodCallInfo> list = queryMethodArgUsage(fullMethod, returnType, argSeq);
         return !JavaCG2Util.isCollectionEmpty(list);
     }
 
@@ -581,8 +583,8 @@ public class MethodCallInfoHandler extends BaseHandler {
             logger.debug("被调用类不是枚举，不处理 {}", className);
             return null;
         }
-        String fullMethod = JavaCG2ClassMethodUtil.formatFullMethodStr(className, classFieldMethodCall.getMethodName(), classFieldMethodCall.getArgTypes());
-        return enumsHandler.queryEnumConstantFieldMethodReturnValue(className, classFieldMethodCall.getFieldName(), fullMethod);
+        return enumsHandler.queryEnumConstantFieldMethodReturnValue(className, classFieldMethodCall.getFieldName(), classFieldMethodCall.genFullMethod(),
+                classFieldMethodCall.getReturnType());
     }
 
     /**
@@ -593,7 +595,7 @@ public class MethodCallInfoHandler extends BaseHandler {
      * @param objArgSeqs       需要查询的被调用对象或参数序号，若为空则查询全部被调用对象及参数，0代表被调用对象，1开始为参数
      * @return
      */
-    public List<MethodCallWithValueSupportEnum> queryMethodCallWithValueSupportEnum(String calleeClassName, String calleeMethodName, int... objArgSeqs) {
+    public List<MethodCallWithValueSupportEnum> queryMethodCallWithValueByClassMethodSupportEnum(String calleeClassName, String calleeMethodName, int... objArgSeqs) {
         List<MethodCallWithValueSupportEnum> list = new ArrayList<>();
         List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryNormalMethodCallByCalleeClassMethod(calleeClassName, calleeMethodName, true);
         doQueryMethodCallWithValueSupportEnum(list, methodCallList, objArgSeqs);
@@ -604,12 +606,19 @@ public class MethodCallInfoHandler extends BaseHandler {
      * 查询方法调用，及对应的被调用对象、参数的值（支持枚举）
      *
      * @param calleeFullMethod 被调用方完整方法
+     * @param calleeReturnType 被调用方法返回类型，可为空
      * @param objArgSeqs       需要查询的被调用对象或参数序号，若为空则查询全部被调用对象及参数，0代表被调用对象，1开始为参数
      * @return
      */
-    public List<MethodCallWithValueSupportEnum> queryMethodCallWithValueSupportEnum(String calleeFullMethod, int... objArgSeqs) {
+    public List<MethodCallWithValueSupportEnum> queryMethodCallWithValueByMethodSupportEnum(String calleeFullMethod, String calleeReturnType, int... objArgSeqs) {
         List<MethodCallWithValueSupportEnum> list = new ArrayList<>();
-        List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryNormalMethodCallByCalleeFullMethod(calleeFullMethod);
+        List<WriteDbData4MethodCall> methodCallList;
+        if (StringUtils.isNotBlank(calleeReturnType)) {
+            methodCallList = methodCallHandler.queryNormalMethodCallByCalleeMethodReturnType(calleeFullMethod, calleeReturnType);
+        } else {
+            methodCallList = methodCallHandler.queryNormalMethodCallByCalleeFullMethod(calleeFullMethod);
+        }
+
         doQueryMethodCallWithValueSupportEnum(list, methodCallList, objArgSeqs);
         return list;
     }

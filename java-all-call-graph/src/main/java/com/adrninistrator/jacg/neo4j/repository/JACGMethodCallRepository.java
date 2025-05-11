@@ -36,7 +36,7 @@ public interface JACGMethodCallRepository extends Neo4jRepository<JACGMethodCall
             "AND mc.callerLineNumber >= $lineNumStart AND mc.callerLineNumber <= $lineNumEnd " +
             "RETURN {callId: mc.callId, callType: mc.callType, enabled: mc.enabled, " +
             "calleeFullMethod: callee.fullMethod, calleeMethodHash: callee.methodHash, " +
-            "callerLineNumber: mc.callerLineNumber, callFlags: mc.callFlags, rawReturnType: caller.returnType} AS result " +
+            "callerLineNumber: mc.callerLineNumber, callerReturnType: caller.returnType, callFlags: mc.callFlags, rawReturnType: caller.returnType} AS result " +
             "ORDER BY mc.callId ASC " +
             "LIMIT 1")
     Map<String, Object> queryOneCalleeMethodByLine(@Param("appName") String appName, @Param("callerMethodHash") String callerMethodHash, @Param("callId") int callId,

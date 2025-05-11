@@ -30,20 +30,20 @@ public class WriteDbHandler4FieldAnnotation extends AbstractWriteDbHandler<Write
     @Override
     protected WriteDbData4FieldAnnotation genData(String[] array) {
         // 拆分时限制列数，最后一列注解属性中可能出现空格
-        String className = array[0];
+        String className = readLineData();
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        String fieldName = array[1];
-        String annotationName = array[2];
+        String fieldName = readLineData();
+        String annotationName = readLineData();
         // 假如当前行的注解信息无属性，注解属性名称设为空字符串
         String attributeName = "";
         String attributeType = null;
         String attributeValue = null;
         if (array.length > JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_3) {
             // 当前行的注解信息有属性
-            attributeName = array[3];
-            attributeType = array[4];
+            attributeName = readLineData();
+            attributeType = readLineData();
             // 从文件记录解析注解属性
-            attributeValue = AnnotationAttributesParseUtil.parseFromFile(attributeType, array[5]);
+            attributeValue = AnnotationAttributesParseUtil.parseFromFile(attributeType, readLineData());
         }
 
         WriteDbData4FieldAnnotation writeDbData4FieldAnnotation = new WriteDbData4FieldAnnotation();

@@ -29,12 +29,13 @@ public abstract class AbstractAnnotationFormatter {
      * 当前方法不需要以@开头
      *
      * @param fullMethod     完整方法
+     * @param returnType     方法返回类型
      * @param className      方法所在类完整类名
      * @param annotationName 注解类名
      * @param attributesMap  注解属性Map
      * @return
      */
-    public abstract String handleAnnotation(String fullMethod, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap);
+    public abstract String handleAnnotation(String fullMethod, String returnType, String className, String annotationName, Map<String, BaseAnnotationAttribute> attributesMap);
 
     public void setAnnotationHandler(AnnotationHandler annotationHandler) {
         this.annotationHandler = annotationHandler;

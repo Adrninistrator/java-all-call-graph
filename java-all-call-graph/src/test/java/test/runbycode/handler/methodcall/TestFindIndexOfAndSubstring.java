@@ -1,5 +1,6 @@
 package test.runbycode.handler.methodcall;
 
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassName;
 import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
 import org.junit.Assert;
@@ -44,14 +45,14 @@ public class TestFindIndexOfAndSubstring extends TestRunByCodeBase {
                 Assert.assertTrue(recordCallerMethodCallByEEDetailHandler.handleMethodCallByEECMKeyword(calleeStringUtilClassName, methodNameList));
             }
 
-            Set<String> indexOfCallerMethodSet = recordCallerMethodCallByEEDetailHandler.getIndexOfCallerMethodSet();
-            Set<String> substringCallerMethodSet = recordCallerMethodCallByEEDetailHandler.getSubstringCallerMethodSet();
+            Set<FullMethodWithReturnType> indexOfCallerMethodSet = recordCallerMethodCallByEEDetailHandler.getIndexOfCallerMethodSet();
+            Set<FullMethodWithReturnType> substringCallerMethodSet = recordCallerMethodCallByEEDetailHandler.getSubstringCallerMethodSet();
             if (indexOfCallerMethodSet.isEmpty() || substringCallerMethodSet.isEmpty()) {
                 return;
             }
 
-            List<String> commonCallerFullMethodList = new ArrayList<>();
-            for (String indexOfMethod : indexOfCallerMethodSet) {
+            List<FullMethodWithReturnType> commonCallerFullMethodList = new ArrayList<>();
+            for (FullMethodWithReturnType indexOfMethod : indexOfCallerMethodSet) {
                 if (substringCallerMethodSet.contains(indexOfMethod)) {
                     commonCallerFullMethodList.add(indexOfMethod);
                 }
@@ -65,8 +66,9 @@ public class TestFindIndexOfAndSubstring extends TestRunByCodeBase {
             allCalleeClassNameList.add(String.class.getName());
             allCalleeClassNameList.addAll(stringUtilCalleeClassNameList);
 
-            for (String commonCallerFullMethod : commonCallerFullMethodList) {
-                Assert.assertTrue(showAllMethodCallByERDetailHandler.handleMethodCallByER(commonCallerFullMethod, allCalleeClassNameList));
+            for (FullMethodWithReturnType commonCallerFullMethod : commonCallerFullMethodList) {
+                Assert.assertTrue(showAllMethodCallByERDetailHandler.handleMethodCallByER(commonCallerFullMethod.getFullMethod(), commonCallerFullMethod.getReturnType(),
+                        allCalleeClassNameList));
             }
         }
     }

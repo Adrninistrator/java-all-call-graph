@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.lambda;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.lambda.LambdaMethodCall;
-import com.adrninistrator.jacg.dto.lambda.LambdaMethodCallDetail;
 import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
@@ -65,18 +64,5 @@ public class LambdaMethodHandlerByClassNamePrefix extends BaseLambdaMethodPageHa
         logger.info("通过类名前缀查询Lambda表达式方法调用信息 {} {}", lambdaCalleeClassNamePrefix, lambdaNextClassNamePrefix);
         // 分页查询，结果合并到List中
         return QueryByPageHandler.queryAll2List(this, JavaCG2Constants.METHOD_CALL_ID_MIN_BEFORE, lambdaCalleeClassNamePrefix, lambdaNextClassNamePrefix);
-    }
-
-    /**
-     * 通过类名前缀查询Lambda表达式方法调用信息，包含各方法的详细信息
-     *
-     * @param lambdaCalleeClassNamePrefix Lambda表达式被调用方类名前缀
-     * @param lambdaNextClassNamePrefix   Lambda表达式下一个被调用方类名前缀
-     * @return
-     */
-    public List<LambdaMethodCallDetail> queryByClassNamePrefixDetail(String lambdaCalleeClassNamePrefix, String lambdaNextClassNamePrefix) {
-        // 执行查询操作
-        List<LambdaMethodCall> list = queryByClassNamePrefix(lambdaCalleeClassNamePrefix, lambdaNextClassNamePrefix);
-        return genDetailList(list);
     }
 }

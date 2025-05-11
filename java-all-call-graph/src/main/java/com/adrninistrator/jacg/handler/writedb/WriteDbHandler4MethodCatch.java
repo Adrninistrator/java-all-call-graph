@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCatch;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
@@ -17,8 +17,8 @@ import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_CATCH,
-        minColumnNum = 13,
-        maxColumnNum = 13,
+        minColumnNum = 14,
+        maxColumnNum = 14,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CATCH
 )
 public class WriteDbHandler4MethodCatch extends AbstractWriteDbHandler<WriteDbData4MethodCatch> {
@@ -29,22 +29,23 @@ public class WriteDbHandler4MethodCatch extends AbstractWriteDbHandler<WriteDbDa
 
     @Override
     protected WriteDbData4MethodCatch genData(String[] array) {
-        String fullMethod = array[0];
+        String fullMethod = readLineData();
+        String returnType = readLineData();
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        String catchExceptionType = array[1];
-        String catchFlag = array[2];
-        int tryStartLineNumber = Integer.parseInt(array[3]);
-        int tryEndLineNumber = Integer.parseInt(array[4]);
-        int tryMinCallId = Integer.parseInt(array[5]);
-        int tryMaxCallId = Integer.parseInt(array[6]);
-        int catchStartOffset = Integer.parseInt(array[7]);
-        int catchEndOffset = Integer.parseInt(array[8]);
-        int catchStartLineNumber = Integer.parseInt(array[9]);
-        int catchEndLineNumber = Integer.parseInt(array[10]);
-        int catchMinCallId = Integer.parseInt(array[11]);
-        int catchMaxCallId = Integer.parseInt(array[12]);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
+        String catchExceptionType = readLineData();
+        String catchFlag = readLineData();
+        int tryStartLineNumber = Integer.parseInt(readLineData());
+        int tryEndLineNumber = Integer.parseInt(readLineData());
+        int tryMinCallId = Integer.parseInt(readLineData());
+        int tryMaxCallId = Integer.parseInt(readLineData());
+        int catchStartOffset = Integer.parseInt(readLineData());
+        int catchEndOffset = Integer.parseInt(readLineData());
+        int catchStartLineNumber = Integer.parseInt(readLineData());
+        int catchEndLineNumber = Integer.parseInt(readLineData());
+        int catchMinCallId = Integer.parseInt(readLineData());
+        int catchMaxCallId = Integer.parseInt(readLineData());
 
         WriteDbData4MethodCatch writeDbData4MethodCatch = new WriteDbData4MethodCatch();
         writeDbData4MethodCatch.setRecordId(genNextRecordId());
@@ -65,6 +66,7 @@ public class WriteDbHandler4MethodCatch extends AbstractWriteDbHandler<WriteDbDa
         writeDbData4MethodCatch.setCatchMinCallId(catchMinCallId);
         writeDbData4MethodCatch.setCatchMaxCallId(catchMaxCallId);
         writeDbData4MethodCatch.setFullMethod(fullMethod);
+        writeDbData4MethodCatch.setReturnType(returnType);
         return writeDbData4MethodCatch;
     }
 
@@ -88,7 +90,8 @@ public class WriteDbHandler4MethodCatch extends AbstractWriteDbHandler<WriteDbDa
                 data.getCatchEndLineNumber(),
                 data.getCatchMinCallId(),
                 data.getCatchMaxCallId(),
-                data.getFullMethod()
+                data.getFullMethod(),
+                data.getReturnType()
         };
     }
 
@@ -96,6 +99,7 @@ public class WriteDbHandler4MethodCatch extends AbstractWriteDbHandler<WriteDbDa
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志",
                 "catch捕获的异常类型",
                 "catch标志，switch: 编译器为switch生成的catch代码块，try-with-resource: 编译器为try-with-resource生成的catch代码块",
                 "try代码块开始代码行号",

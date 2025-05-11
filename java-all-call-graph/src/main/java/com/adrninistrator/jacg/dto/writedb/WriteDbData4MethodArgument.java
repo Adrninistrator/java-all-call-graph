@@ -12,14 +12,15 @@ public class WriteDbData4MethodArgument implements BaseWriteDbData {
     private int recordId;
     private String methodHash;
     private Integer argSeq;
-    private String simpleArgType;
+    private String simpleArgTypeNad;
     private String argName;
-    private String argType;
+    private String argTypeNad;
     private int arrayDimensions;
     private String argCategory;
     private int existsGenericsType;
     private String simpleClassName;
     private String fullMethod;
+    private String returnType;
 
     public int getRecordId() {
         return recordId;
@@ -45,12 +46,12 @@ public class WriteDbData4MethodArgument implements BaseWriteDbData {
         this.argSeq = argSeq;
     }
 
-    public String getSimpleArgType() {
-        return simpleArgType;
+    public String getSimpleArgTypeNad() {
+        return simpleArgTypeNad;
     }
 
-    public void setSimpleArgType(String simpleArgType) {
-        this.simpleArgType = simpleArgType;
+    public void setSimpleArgTypeNad(String simpleArgTypeNad) {
+        this.simpleArgTypeNad = simpleArgTypeNad;
     }
 
     public String getArgName() {
@@ -61,12 +62,12 @@ public class WriteDbData4MethodArgument implements BaseWriteDbData {
         this.argName = argName;
     }
 
-    public String getArgType() {
-        return argType;
+    public String getArgTypeNad() {
+        return argTypeNad;
     }
 
-    public void setArgType(String argType) {
-        this.argType = argType;
+    public void setArgTypeNad(String argTypeNad) {
+        this.argTypeNad = argTypeNad;
     }
 
     public int getArrayDimensions() {
@@ -107,5 +108,13 @@ public class WriteDbData4MethodArgument implements BaseWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }

@@ -155,7 +155,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             }
 
             // 查询set方法的被调用情况
-            List<WriteDbData4MethodCall> setMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(setMethod.getFullMethod());
+            List<WriteDbData4MethodCall> setMethodCallList = methodCallHandler.queryMethodCallByCalleeMethodWithReturn(setMethod.getFullMethod(), setMethod.getReturnType());
             if (JavaCG2Util.isCollectionEmpty(setMethodCallList)) {
                 // set方法未被调用，不向dto的set方法被调用时的赋值信息表写入数据，因为当set方法在父类中时，会被子类写入多次，属于重复数据
                 continue;
@@ -373,7 +373,8 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
         // 被调用方法不符合get方法，继续处理
         List<AbstractMethodCallInfoParsed> add2StackMethodCallInfoParsedList = new ArrayList<>();
         // 查询set方法参数对应方法返回的方法参数序号
-        List<WriteDbData4MethodReturnArgSeq> methodReturnArgSeqList = methodArgReturnHandler.queryMethodReturnArgSeq(currentMethodCall.getCalleeFullMethod());
+        List<WriteDbData4MethodReturnArgSeq> methodReturnArgSeqList = methodArgReturnHandler.queryMethodReturnArgSeq(currentMethodCall.getCalleeFullMethod(),
+                currentMethodCall.getRawReturnType());
         if (!JavaCG2Util.isCollectionEmpty(methodReturnArgSeqList)) {
             for (WriteDbData4MethodReturnArgSeq setMethodArgMethodArgSeq : methodReturnArgSeqList) {
                 // set方法参数来源为方法调用返回值，查询被调用方法返回对应的方法参数
@@ -386,7 +387,8 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
         }
 
         // 查询set方法参数对应方法返回的方法调用ID
-        List<WriteDbData4MethodReturnCallId> methodReturnCallIdList = methodArgReturnHandler.queryMethodReturnCallId(currentMethodCall.getCalleeFullMethod());
+        List<WriteDbData4MethodReturnCallId> methodReturnCallIdList = methodArgReturnHandler.queryMethodReturnCallId(currentMethodCall.getCalleeFullMethod(),
+                currentMethodCall.getRawReturnType());
         if (!JavaCG2Util.isCollectionEmpty(methodReturnCallIdList)) {
             for (WriteDbData4MethodReturnCallId methodReturnCallId : methodReturnCallIdList) {
                 MethodCallInfoParsed4MCReturnCallId methodCallInfoParsed =
@@ -440,7 +442,8 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
                                               MethodCallInfoParsed4MethodArg methodCallInfoParsed4MethodArg, MethodCallPassedFRNode currentNode, JavaCG2Counter seq,
                                               int step) {
         // 查询当前方法的被调用情况
-        List<WriteDbData4MethodCall> callerMethodCallList = methodCallHandler.queryMethodCallByCalleeFullMethod(currentMethodCall.getCallerFullMethod());
+        List<WriteDbData4MethodCall> callerMethodCallList = methodCallHandler.queryMethodCallByCalleeMethodWithReturn(currentMethodCall.getCallerFullMethod(),
+                currentMethodCall.getRawReturnType());
         if (JavaCG2Util.isCollectionEmpty(callerMethodCallList)) {
             // 向dto的set方法被调用时的赋值信息表写入数据
             insertSetMethodAssignInfo(addedSuperSeqStepMap, setMethodCallId, setMethod, currentMethodCall, seq, step, currentMethodCall.getCallerFullMethod(),

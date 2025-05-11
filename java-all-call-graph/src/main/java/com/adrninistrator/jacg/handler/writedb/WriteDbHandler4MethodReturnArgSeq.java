@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnArgSeq;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
 /**
@@ -16,8 +16,8 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_METHOD_RETURN_ARG_SEQ,
-        minColumnNum = 3,
-        maxColumnNum = 3,
+        minColumnNum = 4,
+        maxColumnNum = 4,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_RETURN_ARG_SEQ
 )
 public class WriteDbHandler4MethodReturnArgSeq extends AbstractWriteDbHandler<WriteDbData4MethodReturnArgSeq> {
@@ -29,14 +29,16 @@ public class WriteDbHandler4MethodReturnArgSeq extends AbstractWriteDbHandler<Wr
     @Override
     protected WriteDbData4MethodReturnArgSeq genData(String[] array) {
         String fullMethod = readLineData();
+        String returnType = readLineData();
         int returnArgSeq = Integer.parseInt(readLineData());
-        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType);
         int equivalentConversion = Integer.parseInt(readLineData());
         WriteDbData4MethodReturnArgSeq methodReturnArgSeq = new WriteDbData4MethodReturnArgSeq();
         methodReturnArgSeq.setRecordId(genNextRecordId());
         methodReturnArgSeq.setMethodHash(methodHash);
         methodReturnArgSeq.setReturnArgSeq(returnArgSeq);
         methodReturnArgSeq.setFullMethod(fullMethod);
+        methodReturnArgSeq.setReturnType(returnType);
         methodReturnArgSeq.setEquivalentConversion(equivalentConversion);
         return methodReturnArgSeq;
     }
@@ -48,6 +50,7 @@ public class WriteDbHandler4MethodReturnArgSeq extends AbstractWriteDbHandler<Wr
                 data.getMethodHash(),
                 data.getReturnArgSeq(),
                 data.getFullMethod(),
+                data.getReturnType(),
                 data.getEquivalentConversion()
         };
     }
@@ -56,6 +59,7 @@ public class WriteDbHandler4MethodReturnArgSeq extends AbstractWriteDbHandler<Wr
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
+                "方法返回类型，包含数组标志",
                 "方法返回值对应的方法参数序号，从0开始",
                 "是否返回等值转换前的方法参数，1:是，0:否"
         };

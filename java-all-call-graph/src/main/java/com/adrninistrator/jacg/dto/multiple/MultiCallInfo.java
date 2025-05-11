@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.dto.multiple;
 
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
+
 import java.util.Set;
 
 /**
@@ -11,18 +13,18 @@ import java.util.Set;
 public class MultiCallInfo {
     private final String callerMethodHash;
 
-    private final Set<String> calleeFullMethodSet;
+    private final Set<FullMethodWithReturnType> calleeMethodSet;
 
-    public MultiCallInfo(String callerMethodHash, Set<String> calleeFullMethodSet) {
+    public MultiCallInfo(String callerMethodHash, Set<FullMethodWithReturnType> calleeMethodSet) {
         this.callerMethodHash = callerMethodHash;
-        this.calleeFullMethodSet = calleeFullMethodSet;
+        this.calleeMethodSet = calleeMethodSet;
     }
 
     public String getCallerMethodHash() {
         return callerMethodHash;
     }
 
-    public Set<String> getCalleeFullMethodSet() {
-        return calleeFullMethodSet;
+    public Set<FullMethodWithReturnType> getCalleeMethodSet() {
+        return calleeMethodSet;
     }
 }

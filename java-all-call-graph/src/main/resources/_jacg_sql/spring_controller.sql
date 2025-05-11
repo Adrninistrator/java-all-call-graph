@@ -10,6 +10,7 @@ CREATE TABLE if not exists jacg_spring_controller_{appName} (
   maybe_file_upload tinyint NOT NULL COMMENT '方法可能用于文件上传，1:是，0:否',
   maybe_file_download tinyint NOT NULL COMMENT '方法可能用于文件下载，1:是，0:否',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
+  return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
   INDEX idx_spc_mhs_{appName}(method_hash, seq),
   INDEX idx_spc_su_{appName}(show_uri),

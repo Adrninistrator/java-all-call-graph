@@ -7,11 +7,17 @@ package test.callgraph.array;
  */
 public class TestReturnArray1 {
 
+    public static void testUse1() {
+        return1();
+    }
+
     public static int[] return1() {
+        return2();
         return TestUseArray1.ARRAY1;
     }
 
     public static int[][] return2() {
+        return3();
         return TestUseArray1.ARRAY2;
     }
 

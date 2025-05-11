@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.neo4j.dboper;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphNode4Caller;
+import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodLineNumber;
@@ -118,17 +119,18 @@ public class Neo4jDbOperWrapper extends DbOperWrapper {
 
     // 根据类名查询相关的方法
     @Override
-    public List<String> queryMethodByClassName(String className) {
-        return jacgMethodInfoRepository.queryFullMethodWithAppName(appName, className);
+    public List<FullMethodWithReturnType> queryMethodByClassName(String className) {
+        List<WriteDbData4MethodInfo> list = jacgMethodInfoRepository.queryFullMethodWithAppName(appName, className);
+        return genFullMethodWithReturnTypeList(list);
     }
 
     // 根据类名及完整方法前缀查询方法信息
     @Override
-    public List<WriteDbData4MethodInfo> queryMethodInfoByClassFullMethodPrefix(String className, String fullMethodPrefix) {
-        return jacgMethodInfoRepository.queryMethodInfoByClassFullMethodPrefix(appName, className,fullMethodPrefix);
+    public List<WriteDbData4MethodInfo> queryMethodInfoByClassMethodPrefix(String className, String fullMethodPrefix) {
+        return jacgMethodInfoRepository.queryMethodInfoByClassFullMethodPrefix(appName, className, fullMethodPrefix);
     }
 
-        // 根据调用方简单类名，查找1个对应的完整方法
+    // 根据调用方简单类名，查找1个对应的完整方法
     @Override
     public String queryOneFullMethodByCallerSCN(String callerSimpleClassName) {
         return jacgMethodInMCRepository.queryOneFullMethodByCallerSCN(appName, callerSimpleClassName);
@@ -173,12 +175,13 @@ public class Neo4jDbOperWrapper extends DbOperWrapper {
         writeDbData4MethodCall.setCallerLineNumber(getIntValue(methodCallMap, Neo4jColumnConstants.MC_CALLER_LINE_NUMBER));
         writeDbData4MethodCall.setCallFlags(getIntValue(methodCallMap, Neo4jColumnConstants.MC_CALL_FLAGS));
         writeDbData4MethodCall.setRawReturnType(getStringValue(methodCallMap, Neo4jColumnConstants.MC_RAW_RETURN_TYPE));
+        writeDbData4MethodCall.setCallerReturnType(getStringValue(methodCallMap, Neo4jColumnConstants.MC_CALLER_RETURN_TYPE));
         return writeDbData4MethodCall;
     }
 
     @Override
-    public String queryMethodHashByPrefix(String simpleClassName, String fullMethodPrefix) {
-        return jacgMethodInfoRepository.queryMethodHashByPrefix(appName, simpleClassName, fullMethodPrefix);
+    public String queryMethodHashByPrefix(String simpleClassName, String fullMethodPrefix, String returnType) {
+        return jacgMethodInfoRepository.queryMethodHashByPrefix(appName, simpleClassName, fullMethodPrefix,  returnType);
     }
 
     @Override

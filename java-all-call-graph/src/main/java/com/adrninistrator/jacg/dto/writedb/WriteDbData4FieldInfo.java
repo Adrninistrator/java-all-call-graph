@@ -11,7 +11,7 @@ public class WriteDbData4FieldInfo implements BaseWriteDbData {
     private int recordId;
     private String simpleClassName;
     private String fieldName;
-    private String fieldType;
+    private String fieldTypeNad;
     private int arrayDimensions;
     private String fieldCategory;
     private String modifiers;
@@ -28,7 +28,7 @@ public class WriteDbData4FieldInfo implements BaseWriteDbData {
         return "recordId=" + recordId +
                 ", simpleClassName=" + simpleClassName +
                 ", fieldName=" + fieldName +
-                ", fieldType=" + fieldType;
+                ", fieldTypeNad=" + fieldTypeNad;
     }
 
     public int getRecordId() {
@@ -55,12 +55,12 @@ public class WriteDbData4FieldInfo implements BaseWriteDbData {
         this.fieldName = fieldName;
     }
 
-    public String getFieldType() {
-        return fieldType;
+    public String getFieldTypeNad() {
+        return fieldTypeNad;
     }
 
-    public void setFieldType(String fieldType) {
-        this.fieldType = fieldType;
+    public void setFieldTypeNad(String fieldTypeNad) {
+        this.fieldTypeNad = fieldTypeNad;
     }
 
     public int getArrayDimensions() {

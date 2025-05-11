@@ -343,7 +343,7 @@ public class GetSetMethodHandler extends BaseHandler {
         if (sql == null) {
             sql = "select distinct " + DC.GSM_CLASS_NAME +
                     " from " + getGetSetMethodTableName(queryGetMethod) +
-                    " where " + DC.GSM_SIMPLE_FIELD_TYPE + " = ?";
+                    " where " + DC.GSM_SIMPLE_FIELD_TYPE_NAD + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryListOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(fieldType));

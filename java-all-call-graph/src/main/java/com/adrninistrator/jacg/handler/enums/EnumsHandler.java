@@ -61,15 +61,16 @@ public class EnumsHandler extends BaseHandler {
      * @param enumClassName
      * @param enumConstName
      * @param enumFullMethod
+     * @param enumReturnType
      * @return
      */
-    public String queryEnumConstantFieldMethodReturnValue(String enumClassName, String enumConstName, String enumFullMethod) {
+    public String queryEnumConstantFieldMethodReturnValue(String enumClassName, String enumConstName, String enumFullMethod, String enumReturnType) {
         // 判断是否返回了枚举的name()方法
         if (enumFullMethod.endsWith(JACGCommonNameConstants.ENUM_METHOD_NAME)) {
             return enumConstName;
         }
 
-        String methodReturnFieldName = methodInfoHandler.queryMethodReturnFieldName(enumFullMethod);
+        String methodReturnFieldName = methodInfoHandler.queryMethodReturnFieldName(enumFullMethod, enumReturnType);
         if (StringUtils.isBlank(methodReturnFieldName)) {
             return null;
         }
