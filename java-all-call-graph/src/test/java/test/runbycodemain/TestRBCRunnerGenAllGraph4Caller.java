@@ -12,6 +12,7 @@ import test.callgraph.extendcomplex.TestExtendComplex;
 import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -44,26 +45,9 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
             desc = {"方法调用链数据不写入文件"})
     @Test
     public void testReturnInMemory() {
-        doTestReturnInMemory();
-    }
-
-    public List<MethodCallLineData4Er> doTestReturnInMemory() {
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE, Boolean.FALSE.toString());
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY, Boolean.TRUE.toString());
-
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 TestExtendComplex.class.getName() + ":test1()");
-
-        RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
-        int callGraphDirNumBefore = getCallGraphDirNum4Er();
-        Assert.assertTrue(runnerGenAllGraph4Caller.run());
-        int callGraphDirNumAfter = getCallGraphDirNum4Er();
-        Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore);
-
-        List<MethodCallLineData4Er> allMethodCallLineData4ErList = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErList();
-        printListContent(allMethodCallLineData4ErList);
-        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(allMethodCallLineData4ErList));
-        return allMethodCallLineData4ErList;
+        doTestReturnInMemory();
     }
 
     @JACGExample(title = "方法调用链数据写入文件，也在内存中返回",
@@ -73,7 +57,23 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
         doTestBoth();
     }
 
-    public List<MethodCallLineData4Er> doTestBoth() {
+    public Map<String, List<MethodCallLineData4Er>> doTestReturnInMemory() {
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE, Boolean.FALSE.toString());
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY, Boolean.TRUE.toString());
+
+        RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
+        int callGraphDirNumBefore = getCallGraphDirNum4Er();
+        Assert.assertTrue(runnerGenAllGraph4Caller.run());
+        int callGraphDirNumAfter = getCallGraphDirNum4Er();
+        Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore);
+
+        Map<String, List<MethodCallLineData4Er>> allMethodCallLineData4ErMap = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErMap();
+        printMapContent(allMethodCallLineData4ErMap);
+        Assert.assertFalse(JavaCG2Util.isMapEmpty(allMethodCallLineData4ErMap));
+        return allMethodCallLineData4ErMap;
+    }
+
+    public Map<String, List<MethodCallLineData4Er>> doTestBoth() {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE, Boolean.TRUE.toString());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY, Boolean.TRUE.toString());
 
@@ -87,9 +87,20 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
         int callGraphDirNumAfter = getCallGraphDirNum4Er();
         Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore + 1);
 
-        List<MethodCallLineData4Er> allMethodCallLineData4ErList = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErList();
-        printListContent(allMethodCallLineData4ErList);
-        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(allMethodCallLineData4ErList));
-        return allMethodCallLineData4ErList;
+        Map<String, List<MethodCallLineData4Er>> allMethodCallLineData4ErMap = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErMap();
+        printMapContent(allMethodCallLineData4ErMap);
+        Assert.assertFalse(JavaCG2Util.isMapEmpty(allMethodCallLineData4ErMap));
+        return allMethodCallLineData4ErMap;
+    }
+
+
+    @JACGExample(title = "方法调用链数据仅在内存中返回，返回多个方法",
+            desc = {"方法调用链数据不写入文件"})
+    @Test
+    public void testReturnInMemoryMulti() {
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
+                TestExtendComplex.class.getName());
+        Map<String, List<MethodCallLineData4Er>> methodCallLineData4ErMap = doTestReturnInMemory();
+        printSetContent(methodCallLineData4ErMap.keySet());
     }
 }

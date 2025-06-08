@@ -31,7 +31,7 @@ public class WriteDbHandler4MethodReturnArgSeq extends AbstractWriteDbHandler<Wr
         String fullMethod = readLineData();
         String returnType = readLineData();
         int returnArgSeq = Integer.parseInt(readLineData());
-        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         int equivalentConversion = Integer.parseInt(readLineData());
         WriteDbData4MethodReturnArgSeq methodReturnArgSeq = new WriteDbData4MethodReturnArgSeq();
         methodReturnArgSeq.setRecordId(genNextRecordId());

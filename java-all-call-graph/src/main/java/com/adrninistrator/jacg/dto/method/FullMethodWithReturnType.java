@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.dto.method;
 
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 import java.util.Objects;
@@ -27,6 +28,10 @@ public class FullMethodWithReturnType {
 
     public String genFullMethodWithReturnType() {
         return JavaCG2ClassMethodUtil.genFullMethodWithReturnType(fullMethod, returnType);
+    }
+
+    public String genMethodHash() {
+        return JACGUtil.genHashWithLen(genFullMethodWithReturnType());
     }
 
     public String getFullMethod() {

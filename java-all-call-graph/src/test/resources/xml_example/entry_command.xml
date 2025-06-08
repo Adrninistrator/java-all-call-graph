@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<execution-commands>
+    <command>
+        <key>command_a</key>
+        <class>test.diffjar.service.TestService1</class>
+        <method>commandA</method>
+    </command>
+    <command>
+        <key>command_b</key>
+        <class>test.diffjar.service.TestService1</class>
+        <method>commandB</method>
+    </command>
+</execution-commands>

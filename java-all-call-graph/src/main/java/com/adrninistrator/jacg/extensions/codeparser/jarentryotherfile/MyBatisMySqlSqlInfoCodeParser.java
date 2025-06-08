@@ -2,7 +2,6 @@ package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.mybatismysqltableparser.common.enums.MySqlStatementEnum;
 import com.adrninistrator.mybatismysqltableparser.dto.MyBatisMySqlInfo;
 import com.adrninistrator.mybatismysqltableparser.dto.MySqlTableColumnInfo;
@@ -70,7 +69,7 @@ public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
 
     // 处理.xml文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
+    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
         try {
             // 尝试解析xml文件
             MyBatisMySqlInfo myBatisMySqlInfo = entry4ParseMyBatisMySqlTable.parseFile(inputStream, jarEntryPath);
@@ -109,7 +108,10 @@ public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
                 writeFile(mapperInterfaceName, methodName, MySqlStatementEnum.DSSE_TRUNCATE.getInitials(), mySqlTableColumnInfo.getTruncateTableList(), jarEntryPath);
                 writeFile(mapperInterfaceName, methodName, MySqlStatementEnum.DSSE_CREATE.getInitials(), mySqlTableColumnInfo.getCreateTableList(), jarEntryPath);
                 writeFile(mapperInterfaceName, methodName, MySqlStatementEnum.DSSE_DROP.getInitials(), mySqlTableColumnInfo.getDropTableList(), jarEntryPath);
-
+                if (mySqlTableColumnInfo.getAllTableSet().isEmpty()) {
+                    // 当前XML元素未获取到数据库表名，写一条记录代表对应表名为空
+                    writeFile(mapperInterfaceName, methodName, "", Collections.singletonList(""), jarEntryPath);
+                }
                 // 处理写操作语句及数据库表名
                 MySqlWriteTableInfo mySqlWriteTableInfo = mySqlTableColumnInfo.getMySqlWriteTableInfo();
                 if (mySqlWriteTableInfo != null) {
@@ -126,7 +128,7 @@ public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
             return;
         }
         for (int i = 0; i < tableList.size(); i++) {
-            JavaCG2FileUtil.write2FileWithTab(writer, mapperInterfaceName, methodName, initials, String.valueOf(i), tableList.get(i), mybatisXmlFilePath);
+            writeData2File(mapperInterfaceName, methodName, initials, String.valueOf(i), tableList.get(i), mybatisXmlFilePath);
         }
     }
 

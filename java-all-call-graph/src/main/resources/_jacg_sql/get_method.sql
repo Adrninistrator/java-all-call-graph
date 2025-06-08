@@ -8,7 +8,7 @@ CREATE TABLE if not exists jacg_get_method_{appName} (
   field_type_nad varchar(255) NOT NULL COMMENT '字段类型（不包含数组标志）',
   array_dimensions tinyint NOT NULL COMMENT '字段数组类型的维度，为0代表不是数组类型',
   class_name varchar(255) NOT NULL COMMENT '完整类名',
-  method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
+  method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
   return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),

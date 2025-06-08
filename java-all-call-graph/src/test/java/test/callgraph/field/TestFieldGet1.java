@@ -15,4 +15,10 @@ public class TestFieldGet1 {
             System.out.println(str);
         }
     }
+
+    public void test2(){
+        TestField1 testField1=new TestField1();
+        System.out.println(testField1.testField2a);
+        System.out.println(testField1.testField2b);
+    }
 }

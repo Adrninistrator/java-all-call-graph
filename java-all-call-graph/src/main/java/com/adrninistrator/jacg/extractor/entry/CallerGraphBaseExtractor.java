@@ -7,8 +7,8 @@ import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 import com.adrninistrator.jacg.extractor.callback.StackFileParsedCallback;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedFile;
-import com.adrninistrator.jacg.extractor.parser.StackFileParser;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGCallStackUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,42 +24,35 @@ import java.util.List;
 public class CallerGraphBaseExtractor extends BaseExtractor implements StackFileParsedCallback {
     private static final Logger logger = LoggerFactory.getLogger(CallerGraphBaseExtractor.class);
 
-    /**
-     * 生成向下的完整调用链，根据关键字进行查找，获取调用链结果文件信息并返回，使用配置文件中的参数
-     *
-     * @return
-     */
-    public ListWithResult<CallerExtractedFile> baseExtract() {
-        return baseExtract(new ConfigureWrapper(false), true);
+    public CallerGraphBaseExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
     }
 
     /**
      * 生成向下的完整调用链，根据关键字进行查找，获取调用链结果文件信息并返回，使用代码指定的参数
      *
-     * @param configureWrapper
      * @return
      */
-    public ListWithResult<CallerExtractedFile> baseExtract(ConfigureWrapper configureWrapper) {
-        return baseExtract(configureWrapper, true);
+    public ListWithResult<CallerExtractedFile> baseExtract() {
+        return baseExtract(true);
     }
 
     /**
      * 生成向下的完整调用链，根据关键字进行查找，获取调用链结果文件信息并返回
      *
-     * @param configureWrapper
-     * @param needCloseDs      是否需要在执行完毕时关闭数据源
+     * @param needCloseDs 是否需要在执行完毕时关闭数据源
      * @return
      */
-    protected ListWithResult<CallerExtractedFile> baseExtract(ConfigureWrapper configureWrapper, boolean needCloseDs) {
+    protected ListWithResult<CallerExtractedFile> baseExtract(boolean needCloseDs) {
         List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER);
         if (keywordList.isEmpty()) {
-            logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER);
+            logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER));
             return ListWithResult.genFail();
         }
 
         try {
             // 生成向下的方法完整调用链文件，并根据关键字生成调用堆栈文件
-            ListWithResult<String> stackFilePathList = genStackFiles(configureWrapper);
+            ListWithResult<String> stackFilePathList = genStackFiles();
             if (!stackFilePathList.isSuccess()) {
                 return ListWithResult.genFail();
             }
@@ -84,9 +77,9 @@ public class CallerGraphBaseExtractor extends BaseExtractor implements StackFile
     }
 
     // 生成向下的方法完整调用链文件，并根据关键字生成调用堆栈文件
-    protected ListWithResult<String> genStackFiles(ConfigureWrapper configureWrapper) {
+    protected ListWithResult<String> genStackFiles() {
         // 根据关键字生成调用堆栈
-        ListWithResult<String> stackFilePathList = findStack(configureWrapper);
+        ListWithResult<String> stackFilePathList = findStack();
         if (stackFilePathList.isSuccess()) {
             // 处理成功时创建数据库相关对象
             genDbObject(configureWrapper);
@@ -101,7 +94,7 @@ public class CallerGraphBaseExtractor extends BaseExtractor implements StackFile
         List<CallerExtractedLine> callerExtractedLineList = new ArrayList<>();
 
         // 解析调用堆栈文件
-        if (!StackFileParser.parseStackFile(this, stackFilePath, callerExtractedLineList)) {
+        if (!JACGCallStackUtil.parseStackFile(this, stackFilePath, callerExtractedLineList)) {
             return null;
         }
 

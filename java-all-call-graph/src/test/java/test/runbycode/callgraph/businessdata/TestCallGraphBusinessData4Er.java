@@ -12,6 +12,7 @@ import test.callgraph.annotation.MethodWithAnnotation;
 import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -56,7 +57,10 @@ public class TestCallGraphBusinessData4Er extends TestRunByCodeBase {
 
         RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
         Assert.assertTrue(runnerGenAllGraph4Caller.run());
-        List<MethodCallLineData4Er> allMethodCallLineData4ErList = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErList();
-        Assert.assertTrue(checkListDataAllFieldFilled(allMethodCallLineData4ErList));
+        Map<String, List<MethodCallLineData4Er>> allMethodCallLineData4ErMap = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErMap();
+        for (Map.Entry<String, List<MethodCallLineData4Er>> entry : allMethodCallLineData4ErMap.entrySet()) {
+            List<MethodCallLineData4Er> methodCallLineData4ErList = entry.getValue();
+            Assert.assertTrue(checkListDataAllFieldFilled(methodCallLineData4ErList));
+        }
     }
 }

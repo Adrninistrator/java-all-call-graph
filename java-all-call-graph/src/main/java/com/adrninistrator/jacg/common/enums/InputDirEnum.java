@@ -11,7 +11,7 @@ public enum InputDirEnum {
     IDE_KEYWORD_CONF("_jacg_find_stack_keyword", "保存需要查找的关键字的目录"),
     IDE_EXTENSIONS("_jacg_extensions", "保存扩展类配置文件的目录"),
     IDE_BUSINESS_DATA_TYPE("_jacg_business_data_type", "保存业务功能数据类型配置文件的目录"),
-    IDE_JAR_DIFF_CALLEE_GRAPH("_jacg_jar_diff_callee_graph", "比较新旧两个目录中不同版本jar包相关配置文件的目录"),
+    IDE_JAR_DIFF("_jacg_jar_diff", "比较新旧两个目录中不同版本jar文件相关配置文件的目录"),
     ;
 
     private final String dirName;

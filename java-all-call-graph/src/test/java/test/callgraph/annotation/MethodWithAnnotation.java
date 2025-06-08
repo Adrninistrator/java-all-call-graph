@@ -32,6 +32,8 @@ public class MethodWithAnnotation extends TestParentClass1 {
     public void test1() {
         System.out.println("");
         clone();
+        test2();
+        test3();
     }
 
     @TestAnnotationOuter(value = "aaa",

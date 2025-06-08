@@ -12,25 +12,23 @@ public class JACGConstants {
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLEE = "_jacg_o_ee";
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLER = "_jacg_o_er";
     public static final String DIR_OUTPUT_STACK = "_stack";
-    public static final String DIR_OUTPUT_STACK_SEPARATE = "_separate";
+    public static final String DIR_OUTPUT_STACK_OTHER_FORMS = "_other_forms";
     public static final String DIR_KEYWORDS_NOT_FOUND = "_keywords_not_found";
+    public static final String DIR_CALLEE_JAR_DIFF_SUMMARY = "_callee_jar_diff_summary";
+    public static final String DIR_CALLER_JAR_DIFF_SUMMARY = "_caller_jar_diff_summary";
     public static final String DIR_OUTPUT_JSON = "_json";
-    public static final String DIR_OUTPUT_UNITTEST = "_unittest_output";
 
     // 保存全部的配置参数信息文件
     public static final String FILE_JACG_ALL_CONFIG_MD = "_jacg_all_config.md";
     // 保存当前有使用的配置参数信息文件
     public static final String FILE_JACG_USED_CONFIG_MD = "_jacg_used_config.md";
-    public static final String FILE_STACK_CALLEE_MD = "_stack_callee.md";
-    public static final String FILE_STACK_CALLER_MD = "_stack_caller.md";
-    public static final String FILE_STACK_SUMMARY_CALLEE_MD = "_summary_callee.md";
-    public static final String FILE_STACK_SUMMARY_CALLER_MD = "_summary_caller.md";
+    public static final String FILE_CALLEE_STACK_TABLE = "callee_stack_table.md";
+    public static final String FILE_CALLER_STACK_TABLE = "caller_stack_table.md";
+    public static final String FILE_CALLEE_STACK_SUMMARY = "callee_stack_summary.md";
+    public static final String FILE_CALLER_STACK_SUMMARY = "caller_stack_summary.md";
 
-    public static final String FILE_JAR_DIFF_MODIFIED_METHODS_BASE = "_modified_methods_base.md";
-    public static final String FILE_JAR_DIFF_MODIFIED_METHODS_STACK = "_modified_methods_stack.md";
-
-    public static final String JAR_DIFF_METHOD_EXISTED = "existed";
-    public static final String JAR_DIFF_METHOD_NEW = "new";
+    public static final String FILE_JAR_DIFF_MODIFIED_METHODS_BASE = "modified_methods_base.md";
+    public static final String FILE_JAR_DIFF_MODIFIED_METHODS_STACK = "modified_methods_stack.md";
 
     public static final String TABLE_PREFIX = "jacg_";
 

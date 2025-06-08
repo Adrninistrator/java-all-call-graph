@@ -34,7 +34,7 @@ public class WriteDbHandler4MethodReturnConstValue extends AbstractWriteDbHandle
         String returnType = readLineData();
         WriteDbData4MethodReturnConstValue methodReturnConstValue = new WriteDbData4MethodReturnConstValue();
         methodReturnConstValue.setRecordId(genNextRecordId());
-        methodReturnConstValue.setMethodHash(JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType));
+        methodReturnConstValue.setMethodHash(JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
         methodReturnConstValue.setSeq(Integer.parseInt(readLineData()));
         methodReturnConstValue.setConstType(readLineData());
         boolean isBase64Value = JavaCG2YesNoEnum.isYes(readLineData());

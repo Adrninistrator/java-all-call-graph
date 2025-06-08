@@ -1,5 +1,6 @@
 package test.runbycodemain;
 
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,6 +19,7 @@ public class TestRBC1RunnerWriteDb extends TestRunByCodeBase {
 
     @Test
     public void test() {
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_SKIP_WRITE_DB_WHEN_JAR_NOT_MODIFIED, Boolean.FALSE.toString());
         Assert.assertTrue(new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper).run());
     }
 }

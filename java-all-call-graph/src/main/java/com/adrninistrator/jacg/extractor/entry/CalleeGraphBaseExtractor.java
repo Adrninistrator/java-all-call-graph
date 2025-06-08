@@ -7,8 +7,8 @@ import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.extractor.callback.StackFileParsedCallback;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CalleeExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CalleeExtractedFile;
-import com.adrninistrator.jacg.extractor.parser.StackFileParser;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGCallStackUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.slf4j.Logger;
@@ -26,33 +26,27 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
     private static final Logger logger = LoggerFactory.getLogger(CalleeGraphBaseExtractor.class);
 
     // 是否需要解析任务指定的被调用方法的直接调用方法所在行的内容
-    private boolean parseDirectlyCallerLineP;
+    private boolean parseDirectlyCallerLine;
 
-    /**
-     * 生成向上的完整调用链，根据关键字进行查找，使用配置文件中的参数
-     *
-     * @return
-     */
-    public ListWithResult<CalleeExtractedFile> baseExtract() {
-        return baseExtract(new ConfigureWrapper(false));
+    public CalleeGraphBaseExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
     }
 
     /**
      * 生成向上的完整调用链，根据关键字进行查找，通过代码指定配置参数
      *
-     * @param configureWrapper
      * @return
      */
-    public ListWithResult<CalleeExtractedFile> baseExtract(ConfigureWrapper configureWrapper) {
+    public ListWithResult<CalleeExtractedFile> baseExtract() {
         List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE);
         if (keywordList.isEmpty()) {
-            logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE);
+            logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE));
             return ListWithResult.genFail();
         }
 
         try {
             // 根据关键字生成调用堆栈
-            ListWithResult<String> stackFilePathList = findStack(configureWrapper);
+            ListWithResult<String> stackFilePathList = findStack();
             if (!stackFilePathList.isSuccess()) {
                 logger.error("根据关键字生成调用堆栈失败");
                 return ListWithResult.genFail();
@@ -85,7 +79,6 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
      * 自定义初始化操作
      */
     protected void customInit() {
-
     }
 
     /**
@@ -103,7 +96,7 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
         List<CalleeExtractedLine> calleeExtractedLineList = new ArrayList<>();
 
         // 解析调用堆栈文件
-        if (!StackFileParser.parseStackFile(this, stackFilePath, calleeExtractedLineList)) {
+        if (!JACGCallStackUtil.parseStackFile(this, stackFilePath, calleeExtractedLineList)) {
             return null;
         }
 
@@ -145,7 +138,7 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
             // 假如当前调用堆栈中的行数超过1行，则处理下一行数据
             String nextLine = lineList.get(lineList.size() - 2);
             calleeExtractedLine.setDirectlyCallerLineContent(nextLine);
-            if (parseDirectlyCallerLineP) {
+            if (parseDirectlyCallerLine) {
                 calleeExtractedLine.setDirectlyCallerLineParsed(JACGCallGraphFileUtil.parseCallGraphLine4ee(nextLine));
             }
         }
@@ -161,6 +154,6 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
     }
 
     public void setParseDirectlyCallerLine(boolean parseDirectlyCallerLineP) {
-        this.parseDirectlyCallerLineP = parseDirectlyCallerLineP;
+        this.parseDirectlyCallerLine = parseDirectlyCallerLineP;
     }
 }

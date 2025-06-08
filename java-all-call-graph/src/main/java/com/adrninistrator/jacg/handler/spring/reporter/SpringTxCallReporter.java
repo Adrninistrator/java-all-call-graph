@@ -120,7 +120,7 @@ public class SpringTxCallReporter extends AbstractReporter {
      * @return
      */
     public boolean generate() {
-        SpringTxCallExtractor springTxCallExtractor = new SpringTxCallExtractor();
+        SpringTxCallExtractor springTxCallExtractor = new SpringTxCallExtractor(configureWrapper);
 
         // 公共预处理，包含写数据库步骤
         if (!commonPreHandle()) {
@@ -135,7 +135,7 @@ public class SpringTxCallReporter extends AbstractReporter {
         }
 
         // 查找Spring事务嵌套的调用情况
-        SpTxCallCombined spTxCallCombined = springTxCallExtractor.extract(configureWrapper);
+        SpTxCallCombined spTxCallCombined = springTxCallExtractor.extract();
         if (!spTxCallCombined.getSpTxCallByAnnotationFileList().isSuccess()) {
             logger.error("处理事务注解失败");
             return false;

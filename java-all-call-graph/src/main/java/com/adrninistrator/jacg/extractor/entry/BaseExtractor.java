@@ -35,7 +35,13 @@ public abstract class BaseExtractor {
 
     protected MethodCallHandler methodCallHandler;
 
+    protected final ConfigureWrapper configureWrapper;
+
     protected final String currentSimpleClassName = this.getClass().getSimpleName();
+
+    protected BaseExtractor(ConfigureWrapper configureWrapper) {
+        this.configureWrapper = configureWrapper;
+    }
 
     /**
      * 选择方法调用链方向
@@ -47,13 +53,12 @@ public abstract class BaseExtractor {
     /**
      * 根据关键字生成调用堆栈，并返回结果文件路径
      *
-     * @param configureWrapper
      * @return
      */
-    protected ListWithResult<String> findStack(ConfigureWrapper configureWrapper) {
+    protected ListWithResult<String> findStack() {
         // 判断生成调用链时的详细程度是否为最详细
         if (!OutputDetailEnum.ODE_0.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL))) {
-            logger.warn("生成调用链时的详细程度自动设置为最详细 {} {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getConfigPrintInfo(), OutputDetailEnum.ODE_0.getDetail());
+            logger.warn("生成调用链时的详细程度自动设置为最详细 {} {}", OutputDetailEnum.ODE_0.getDetail(), configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL));
             configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_0.getDetail());
         }
 

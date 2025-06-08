@@ -46,11 +46,11 @@ public class JACGMethodCallInfoUtil {
             case MCIT_STATIC_FIELD:
                 methodCallInfo.setStaticField(value);
                 break;
-            case MCIT_STATIC_FIELD_METHOD_CALL:
-                methodCallInfo.setStaticFieldMethodCall(value);
+            case MCIT_NON_STATIC_FIELD:
+                methodCallInfo.setNonStaticField(value);
                 break;
-            case MCIT_NAME_OF_FIELD:
-                methodCallInfo.setNameOfField(value);
+            case MCIT_STATIC_FIELD_MCR:
+                methodCallInfo.setStaticFieldMCR(value);
                 break;
             case MCIT_NAME_OF_VARIABLE:
                 methodCallInfo.setNameOfVariable(value);
@@ -103,11 +103,11 @@ public class JACGMethodCallInfoUtil {
         if (methodCallInfo.getStaticField() != null) {
             return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD, methodCallInfo.getStaticField());
         }
-        if (methodCallInfo.getStaticFieldMethodCall() != null) {
-            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD_METHOD_CALL, methodCallInfo.getStaticFieldMethodCall());
+        if (methodCallInfo.getNonStaticField() != null) {
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_NON_STATIC_FIELD, methodCallInfo.getNonStaticField());
         }
-        if (methodCallInfo.getNameOfField() != null) {
-            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_FIELD, methodCallInfo.getNameOfField());
+        if (methodCallInfo.getStaticFieldMCR() != null) {
+            return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD_MCR, methodCallInfo.getStaticFieldMCR());
         }
         if (methodCallInfo.getNameOfVariable() != null) {
             return new MethodCallInfo4Read(JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE, methodCallInfo.getNameOfVariable());
@@ -143,12 +143,13 @@ public class JACGMethodCallInfoUtil {
     /**
      * 获取类型匹配的被调用对象及参数的用于人工查看的方法调用中使用的相关信息
      *
-     * @param calleeMethodDetailNoReturnType      被调用方法详情
-     * @param objArgsInfoInMethodCall 被调用对象与参数使用的信息
-     * @param expectedArgTypeList     需要处理的参数类型列表，被调用对象类型也需要指定
+     * @param calleeMethodDetailNoReturnType 被调用方法详情
+     * @param objArgsInfoInMethodCall        被调用对象与参数使用的信息
+     * @param expectedArgTypeList            需要处理的参数类型列表，被调用对象类型也需要指定
      * @return Map的key含义: 0代表被调用对象，1开始为参数
      */
-    public static Map<Integer, List<MethodCallInfo4Read>> genMethodCallInfo4ReadMapByArgType(MethodDetailNoReturnType calleeMethodDetailNoReturnType, ObjArgsInfoInMethodCall objArgsInfoInMethodCall,
+    public static Map<Integer, List<MethodCallInfo4Read>> genMethodCallInfo4ReadMapByArgType(MethodDetailNoReturnType calleeMethodDetailNoReturnType,
+                                                                                             ObjArgsInfoInMethodCall objArgsInfoInMethodCall,
                                                                                              List<String> expectedArgTypeList) {
         Map<Integer, List<MethodCallInfo4Read>> methodCallInfo4ReadMap = new HashMap<>();
         if (objArgsInfoInMethodCall == null) {

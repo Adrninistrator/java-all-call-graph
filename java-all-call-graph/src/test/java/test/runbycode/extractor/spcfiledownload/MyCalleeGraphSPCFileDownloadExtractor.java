@@ -22,16 +22,18 @@ public class MyCalleeGraphSPCFileDownloadExtractor extends CalleeGraphSPCFileDow
 
     public static final String FIELD_NAME_FILE_INFO = "fileInfo";
 
+    public MyCalleeGraphSPCFileDownloadExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
+    }
+
     /**
      * 对（可能的）Spring Controller文件下载方法的处理，可重载进行自定义处理
      *
      * @param fileDownloadControllerFullMethodList
-     * @param configureWrapper
      * @return
      */
     @Override
-    protected List<FullMethodWithReturnType> handleFileDownloadControllerFullMethodList(List<FullMethodWithReturnType> fileDownloadControllerFullMethodList,
-                                                                                        ConfigureWrapper configureWrapper) {
+    protected List<FullMethodWithReturnType> handleFileDownloadControllerFullMethodList(List<FullMethodWithReturnType> fileDownloadControllerFullMethodList) {
         List<FullMethodWithReturnType> newMethodList = new ArrayList<>();
 
         try (MethodArgReturnHandler methodArgReturnHandler = new MethodArgReturnHandler(configureWrapper)) {

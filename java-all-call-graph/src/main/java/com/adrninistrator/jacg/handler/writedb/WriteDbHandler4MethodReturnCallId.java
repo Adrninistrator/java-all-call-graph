@@ -31,7 +31,7 @@ public class WriteDbHandler4MethodReturnCallId extends AbstractWriteDbHandler<Wr
         String fullMethod = readLineData();
         String returnType = readLineData();
         int returnCallId = Integer.parseInt(readLineData());
-        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         int equivalentConversion = Integer.parseInt(readLineData());
         WriteDbData4MethodReturnCallId methodReturnCallId = new WriteDbData4MethodReturnCallId();
         methodReturnCallId.setRecordId(genNextRecordId());

@@ -62,6 +62,24 @@ public class TestField2 {
         System.out.println(DbStatementEnum.DSE_INSERT);
     }
 
+    public void testUseField1() {
+        TestField1 testField1 = new TestField1();
+        System.out.println(testField1.testField2a);
+        System.out.println(testField1.int1);
+    }
+
+    public void testUseSFMCR1() {
+        boolean flag = System.currentTimeMillis() % 7 == 1;
+        String name = flag ? DbStatementEnum.DSE_INSERT.getStatement() : DbStatementEnum.DSE_UPDATE.getStatement();
+        System.out.println(name);
+    }
+
+    public void testUseSFMCR2() {
+        boolean flag = System.currentTimeMillis() % 7 == 1;
+        String value = flag ? DbStatementEnum.DSE_INSERT.getStatement() : DbStatementEnum.DSE_INSERT.getDesc();
+        System.out.println(value);
+    }
+
     public List<TestFieldDto1> getTestFieldDto1List() {
         return testFieldDto1List;
     }

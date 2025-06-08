@@ -9,17 +9,17 @@ public class EntryMethodInfo4SpringController extends BaseEntryMethodInfo {
 
     public static final String TYPE = "spc";
 
-    private String controllerUti;
+    private String controllerUri;
 
     public EntryMethodInfo4SpringController() {
         this.type = TYPE;
     }
 
-    public String getControllerUti() {
-        return controllerUti;
+    public String getControllerUri() {
+        return controllerUri;
     }
 
-    public void setControllerUti(String controllerUti) {
-        this.controllerUti = controllerUti;
+    public void setControllerUri(String controllerUri) {
+        this.controllerUri = controllerUri;
     }
 }

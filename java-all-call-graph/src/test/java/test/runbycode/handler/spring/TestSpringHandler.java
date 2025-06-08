@@ -1,5 +1,6 @@
 package test.runbycode.handler.spring;
 
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringBean;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfo;
 import com.adrninistrator.jacg.handler.spring.SpringHandler;
@@ -8,6 +9,8 @@ import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import test.callgraph.chain.define.TestChainCommandService1;
+import test.callgraph.customflow.methodcallargs.handler.TestCFMCAHandler1a;
 import test.callgraph.field.TestField1;
 import test.callgraph.field.cycle.TestUseFieldGenericsCycle1;
 import test.callgraph.spring.bean.define.impl.SpringServiceImplA1;
@@ -92,5 +95,23 @@ public class TestSpringHandler extends TestRunByCodeBase {
     private void doCheckSpringTask(SpringHandler springHandler, String fullMethod, String returnType) {
         boolean isSpringTask = springHandler.checkSpringTask(fullMethod, returnType);
         printObjectContent(isSpringTask, fullMethod, returnType);
+    }
+
+    @Test
+    public void testSpringBean() {
+        try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
+            doTestSpringBean(springHandler, TestCFMCAHandler1a.class.getName(), null);
+            doTestSpringBean(springHandler, null, TestChainCommandService1.SERVICE_NAME);
+        }
+    }
+
+    private void doTestSpringBean(SpringHandler springHandler, String className, String beanName) {
+        List<WriteDbData4SpringBean> springBeanList;
+        if (StringUtils.isNotBlank(className)) {
+            springBeanList = springHandler.querySpringBeanByClassName(className);
+        } else {
+            springBeanList = springHandler.querySpringBeanByBeanName(beanName);
+        }
+        printListContent(springBeanList, className + " " + beanName);
     }
 }

@@ -40,10 +40,10 @@ public class TestExtractCalleeGraphToEntry extends TestRunByCodeBase {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
                 TestMCCallee.class.getName() + ":testFindEntry(",
                 TestMCCallee.class.getName() + ":notCalled(");
-        CalleeGraphEntryExtractor calleeGraphEntryExtractor = new CalleeGraphEntryExtractor();
+        CalleeGraphEntryExtractor calleeGraphEntryExtractor = new CalleeGraphEntryExtractor(configureWrapper);
         // 设置需要解析任务指定的被调用方法的直接调用方法所在行的内容
         calleeGraphEntryExtractor.setParseDirectlyCallerLine(true);
-        ListWithResult<CalleeExtractedFile> list = calleeGraphEntryExtractor.extract(configureWrapper);
+        ListWithResult<CalleeExtractedFile> list = calleeGraphEntryExtractor.extract();
         Assert.assertTrue(list.isSuccess());
         printListContent(list.getList());
     }

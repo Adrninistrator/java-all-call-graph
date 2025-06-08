@@ -1,6 +1,6 @@
 CREATE TABLE if not exists jacg_method_finally_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
-  method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
+  method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   simple_class_name varchar(255) NOT NULL COMMENT '唯一类名',
   try_catch varchar(7)  NOT NULL COMMENT '当前的finally对应try或catch',
   try_catch_start_line_number int NOT NULL COMMENT 'try或catch代码块开始代码行号',

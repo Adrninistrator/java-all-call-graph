@@ -38,4 +38,9 @@ public class TestExtendsField1 extends TestExtendsField2 {
     public void setBigDecimal1(BigDecimal bigDecimal1) {
         this.bigDecimal1 = bigDecimal1;
     }
+
+    public void testUseSuperFiled() {
+        System.out.println(i2);
+        System.out.println(super.i2);
+    }
 }

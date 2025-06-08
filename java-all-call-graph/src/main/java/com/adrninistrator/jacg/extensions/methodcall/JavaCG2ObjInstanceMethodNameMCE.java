@@ -66,6 +66,7 @@ public abstract class JavaCG2ObjInstanceMethodNameMCE implements JavaCG2MethodCa
 
     /**
      * 选择需要替换的方法调用类型，需要唯一
+     *
      * @return
      */
     protected abstract String chooseMethodCallType();

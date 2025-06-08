@@ -122,12 +122,11 @@ public class TestConfigGenerator {
                 Deprecated.class.getName()
         );
 
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_SEPARATE_STACK, Boolean.TRUE.toString());
-//        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_SEPARATE_STACK, Boolean.FALSE.toString());
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_STACK_OTHER_FORMS, Boolean.TRUE.toString());
+//        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_STACK_OTHER_FORMS, Boolean.FALSE.toString());
 
         return configureWrapper;
     }
-
 
     public static JavaCG2ConfigureWrapper genJavaCG2ConfigureWrapper() {
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = new JavaCG2ConfigureWrapper();

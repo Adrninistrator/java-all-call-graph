@@ -6,6 +6,7 @@ import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.comparator.Comparator4FullMethodWithReturnType;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphNode4Caller;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
@@ -52,6 +53,8 @@ public class DbOperWrapper {
      */
     protected final Map<String, Set<String>> duplicateSimpleClassNameMap = new HashMap<>();
 
+    protected ConfigureWrapper configureWrapper;
+
     protected DbOperator dbOperator;
 
     protected String appName;
@@ -74,7 +77,8 @@ public class DbOperWrapper {
     protected DbOperWrapper() {
     }
 
-    DbOperWrapper(DbOperator dbOperator) {
+    DbOperWrapper(ConfigureWrapper configureWrapper, DbOperator dbOperator) {
+        this.configureWrapper = configureWrapper;
         this.dbOperator = dbOperator;
         appName = dbOperator.getAppName();
         tableSuffix = dbOperator.getTableSuffix();
@@ -96,28 +100,45 @@ public class DbOperWrapper {
     }
 
     /**
-     * 获取缓存的sql语句，参数数量可变
+     * 获取缓存的sql语句，key使用枚举，参数数量可变
      *
      * @param sqlKeyEnum
-     * @param num
+     * @param num        参数数量
      * @return
      */
     public String getCachedSql(SqlKeyEnum sqlKeyEnum, int num) {
         return getCachedSql(String.valueOf(sqlKeyEnum.ordinal()), num);
     }
 
+    /**
+     * 获取缓存的sql语句，key使用字符串，参数数量固定为0
+     *
+     * @param sqlKey
+     * @return
+     */
     public String getCachedSql(String sqlKey) {
         return getCachedSql(sqlKey, 0);
     }
 
     /**
-     * 获取缓存的sql语句，参数数量固定
+     * 获取缓存的sql语句，key使用枚举，参数数量固定为0
      *
      * @param sqlKeyEnum
      * @return
      */
     public String getCachedSql(SqlKeyEnum sqlKeyEnum) {
         return getCachedSql(String.valueOf(sqlKeyEnum.ordinal()));
+    }
+
+    /**
+     * 获取缓存的sql语句，key使用枚举，参数数量固定为0，支持表名后缀
+     *
+     * @param sqlKeyEnum
+     * @param tableSuffix
+     * @return
+     */
+    public String getCachedSqlWithSuffix(SqlKeyEnum sqlKeyEnum, String tableSuffix) {
+        return getCachedSql(sqlKeyEnum.ordinal() + " " + tableSuffix);
     }
 
     private String cacheSql(String sqlKey, String sql, String sqlKey4Print, int num) {
@@ -134,28 +155,51 @@ public class DbOperWrapper {
     }
 
     /**
-     * 缓存并格式化sql，参数数量可变
+     * 缓存并格式化sql，key使用枚举，参数数量可变
      *
      * @param sqlKeyEnum
      * @param sql
-     * @param num
+     * @param num        参数数量
      */
     public String cacheSql(SqlKeyEnum sqlKeyEnum, String sql, int num) {
         return cacheSql(String.valueOf(sqlKeyEnum.ordinal()), sql, sqlKeyEnum.name(), num);
     }
 
+    /**
+     * 缓存并格式化sql，key使用枚举，参数数量可变，支持指定用于在日志中打印的sql的key
+     *
+     * @param sqlKey
+     * @param sql
+     * @param key4Print
+     * @return
+     */
     public String cacheSql(String sqlKey, String sql, String key4Print) {
         return cacheSql(sqlKey, sql, key4Print, 0);
     }
 
     /**
-     * 缓存并格式化sql，参数数量固定
+     * 缓存并格式化sql，key使用枚举，参数数量固定为0
      *
      * @param sqlKeyEnum
      * @param sql
      */
     public String cacheSql(SqlKeyEnum sqlKeyEnum, String sql) {
         return cacheSql(String.valueOf(sqlKeyEnum.ordinal()), sql, sqlKeyEnum.name());
+    }
+
+    /**
+     * 缓存并格式化sql，key使用枚举，参数数量固定为0，，支持表名后缀
+     *
+     * @param sqlKeyEnum
+     * @param sql
+     * @param tableSuffix
+     */
+    public String cacheSqlWithSuffix(SqlKeyEnum sqlKeyEnum, String sql, String tableSuffix) {
+        return cacheSql(genSqlKeyWithSuffix(sqlKeyEnum, tableSuffix), sql, sqlKeyEnum.name() + tableSuffix);
+    }
+
+    private String genSqlKeyWithSuffix(SqlKeyEnum sqlKeyEnum, String tableSuffix) {
+        return sqlKeyEnum.ordinal() + " " + tableSuffix;
     }
 
     /**
@@ -392,7 +436,7 @@ public class DbOperWrapper {
             // 当前指定的是完整类名，查找对应的简单类名
             String simpleClassName = querySimpleClassNameByFull(className);
             if (simpleClassName == null) {
-                logger.warn("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定", className, JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
+                logger.warn("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar文件未在配置文件中指定 {}", className, configureWrapper.genConfigUsage(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR));
             }
             return simpleClassName;
         }
@@ -400,10 +444,10 @@ public class DbOperWrapper {
         // 当前指定的是简单类名
         String simpleClassName = querySimpleClassNameBySimple(className);
         if (simpleClassName == null) {
-            logger.warn("指定的简单类名 {} 不存在，请检查，可能因为以下原因\n" +
-                            "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
+            logger.warn("指定的简单类名 {} 不存在，请检查，可能因为以下原因 " +
+                            "1. 指定的类所在的jar文件未在配置文件中指定 {} " +
                             "2. 指定的类存在同名类，需要使用完整类名形式",
-                    className, JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo());
+                    className, configureWrapper.genConfigUsage(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR));
             return className;
         }
         return simpleClassName;
@@ -643,6 +687,10 @@ public class DbOperWrapper {
     }
 
     //
+    public ConfigureWrapper getConfigureWrapper() {
+        return configureWrapper;
+    }
+
     public DbOperator getDbOperator() {
         return dbOperator;
     }

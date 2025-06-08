@@ -14,6 +14,7 @@ public class WriteDbData4MyBatisMSFormatedSql implements BaseWriteDbData {
     private int sqlSeq;
     private String xmlElementName;
     private String formatedSql;
+    private String sqlHash;
     private String mapperSimpleClassName;
     private String mapperClassName;
     private String xmlFilePath;
@@ -64,6 +65,14 @@ public class WriteDbData4MyBatisMSFormatedSql implements BaseWriteDbData {
 
     public void setFormatedSql(String formatedSql) {
         this.formatedSql = formatedSql;
+    }
+
+    public String getSqlHash() {
+        return sqlHash;
+    }
+
+    public void setSqlHash(String sqlHash) {
+        this.sqlHash = sqlHash;
     }
 
     public String getMapperSimpleClassName() {

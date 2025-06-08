@@ -33,7 +33,7 @@ public class WriteDbHandler4MethodReturnFieldInfo extends AbstractWriteDbHandler
         String returnType = readLineData();
         WriteDbData4MethodReturnFieldInfo methodReturnFieldInfo = new WriteDbData4MethodReturnFieldInfo();
         methodReturnFieldInfo.setRecordId(genNextRecordId());
-        methodReturnFieldInfo.setMethodHash(JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType));
+        methodReturnFieldInfo.setMethodHash(JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
         methodReturnFieldInfo.setSeq(Integer.parseInt(readLineData()));
         methodReturnFieldInfo.setStaticField(JavaCG2YesNoEnum.isYes(readLineData()));
         methodReturnFieldInfo.setFieldOfThis(JavaCG2YesNoEnum.isYes(readLineData()));

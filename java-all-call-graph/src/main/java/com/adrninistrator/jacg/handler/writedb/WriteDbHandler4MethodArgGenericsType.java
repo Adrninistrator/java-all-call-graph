@@ -37,7 +37,7 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
         String returnType = readLineData();
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
-        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         int seq = Integer.parseInt(readLineData());
         String type = readLineData();
         int typeSeq = Integer.parseInt(readLineData());

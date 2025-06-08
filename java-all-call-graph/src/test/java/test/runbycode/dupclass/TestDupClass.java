@@ -19,8 +19,8 @@ public class TestDupClass extends TestRunByCodeBase {
     @Test
     public void test() {
         javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
-                "build/jar-diff-version-1/jar-diff.jar",
-                "build/jar-diff-version-2/jar-diff.jar");
+                "build/jar-diff-version-1/jar-diff-1.0.0.jar",
+                "build/jar-diff-version-2/jar-diff-2.0.0.jar");
         commonWriteDb();
     }
 }

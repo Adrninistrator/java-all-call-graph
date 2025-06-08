@@ -25,9 +25,8 @@ public abstract class AbstractWriteDbHandler4GetSetMethod<T extends BaseWriteDbD
      *
      * @param baseWriteDbData4GetSetMethod
      * @param getSetMethodSimpleClassMap
-     * @return true: 当前对象需要处理 false: 当前对象不需要处理
      */
-    protected boolean fillInBaseWriteDbData4GetSetMethod(BaseWriteDbData4GetSetMethod baseWriteDbData4GetSetMethod, Map<String, Set<String>> getSetMethodSimpleClassMap) {
+    protected void fillInBaseWriteDbData4GetSetMethod(BaseWriteDbData4GetSetMethod baseWriteDbData4GetSetMethod, Map<String, Set<String>> getSetMethodSimpleClassMap) {
         String className = readLineData();
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = readLineData();
@@ -54,7 +53,6 @@ public abstract class AbstractWriteDbHandler4GetSetMethod<T extends BaseWriteDbD
         baseWriteDbData4GetSetMethod.setMethodHash(JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
         baseWriteDbData4GetSetMethod.setFullMethod(fullMethod);
         baseWriteDbData4GetSetMethod.setReturnType(returnType);
-        return true;
     }
 
     protected Object[] genObjectArrayBase(BaseWriteDbData4GetSetMethod data) {

@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.dto.methodcall.parsed;
 /**
  * @author adrninistrator
  * @date 2023/11/9
- * @description: 方法调用信息，解析后的数据，变量，使用方法的参数
+ * @description: 方法调用信息，解析后的数据，使用方法的参数
  */
 public class MethodCallInfoParsed4MethodArg extends AbstractMethodCallInfoParsed {
 

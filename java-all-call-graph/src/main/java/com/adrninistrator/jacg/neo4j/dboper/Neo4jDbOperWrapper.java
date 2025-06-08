@@ -181,7 +181,7 @@ public class Neo4jDbOperWrapper extends DbOperWrapper {
 
     @Override
     public String queryMethodHashByPrefix(String simpleClassName, String fullMethodPrefix, String returnType) {
-        return jacgMethodInfoRepository.queryMethodHashByPrefix(appName, simpleClassName, fullMethodPrefix,  returnType);
+        return jacgMethodInfoRepository.queryMethodHashByPrefix(appName, simpleClassName, fullMethodPrefix, returnType);
     }
 
     @Override

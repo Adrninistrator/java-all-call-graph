@@ -1,6 +1,6 @@
 CREATE TABLE if not exists jacg_method_return_const_value_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
-  method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
+  method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   seq int NOT NULL COMMENT '某个方法返回的常量值序号，从0开始',
   const_type varchar(30) NOT NULL COMMENT '常量类型，含义参考 JavaCG2ConstantTypeEnum 类',
   const_value text COLLATE utf8mb4_bin NOT NULL COMMENT '常量的值',

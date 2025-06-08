@@ -1,6 +1,8 @@
 package test.diffjar.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import test.diffjar.dao.TestJarDiffTableMapper;
 
 /**
  * @author adrninistrator
@@ -10,11 +12,37 @@ import org.springframework.stereotype.Service;
 @Service
 public class TestService1 {
 
-    public String testA(){
+    private TestJarDiffTableMapper testJarDiffTableMapper;
+
+    public String testA() {
         return "test1-";
     }
 
     public int testB(){
         return 12;
+    }
+
+    public String commandA(){
+        return "test1-";
+    }
+
+    public String commandA2(){
+        return "test1-";
+    }
+
+    public int commandB(){
+        return 12;
+    }
+
+    public void testMapperModified() {
+        testJarDiffTableMapper.selectByPrimaryKey("");
+    }
+
+    public void testMapperNotModified() {
+        testJarDiffTableMapper.deleteByFlag("");
+    }
+
+    public void testMapperNew() {
+        testJarDiffTableMapper.selectByPrimaryKey2("");
     }
 }

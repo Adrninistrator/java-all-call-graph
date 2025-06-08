@@ -31,13 +31,13 @@ public class CallGraphLineParsed {
     private Integer cycleCallLevel;
 
     // 是否入口方法（向上的完整方法调用链有效）
-    private boolean entryMethod;
+    private boolean entryMethodFlag;
 
     // 是否在其他线程执行
-    private boolean runInOtherThread;
+    private boolean runInOtherThreadFlag;
 
     // 是否在事务中执行
-    private boolean runInTransaction;
+    private boolean runInTransactionFlag;
 
     public String getCallerLineNumberStr() {
         if (callerLineNumber == null) {
@@ -94,27 +94,27 @@ public class CallGraphLineParsed {
         this.cycleCallLevel = cycleCallLevel;
     }
 
-    public boolean isEntryMethod() {
-        return entryMethod;
+    public boolean isEntryMethodFlag() {
+        return entryMethodFlag;
     }
 
-    public void setEntryMethod(boolean entryMethod) {
-        this.entryMethod = entryMethod;
+    public void setEntryMethodFlag(boolean entryMethodFlag) {
+        this.entryMethodFlag = entryMethodFlag;
     }
 
-    public boolean isRunInOtherThread() {
-        return runInOtherThread;
+    public boolean isRunInOtherThreadFlag() {
+        return runInOtherThreadFlag;
     }
 
-    public void setRunInOtherThread(boolean runInOtherThread) {
-        this.runInOtherThread = runInOtherThread;
+    public void setRunInOtherThreadFlag(boolean runInOtherThreadFlag) {
+        this.runInOtherThreadFlag = runInOtherThreadFlag;
     }
 
-    public boolean isRunInTransaction() {
-        return runInTransaction;
+    public boolean isRunInTransactionFlag() {
+        return runInTransactionFlag;
     }
 
-    public void setRunInTransaction(boolean runInTransaction) {
-        this.runInTransaction = runInTransaction;
+    public void setRunInTransactionFlag(boolean runInTransactionFlag) {
+        this.runInTransactionFlag = runInTransactionFlag;
     }
 }

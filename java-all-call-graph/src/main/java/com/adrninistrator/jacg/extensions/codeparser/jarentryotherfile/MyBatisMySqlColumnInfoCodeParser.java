@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.adrninistrator.mybatismysqltableparser.dto.MyBatisMySqlInfo;
 import org.slf4j.Logger;
@@ -36,7 +35,7 @@ public class MyBatisMySqlColumnInfoCodeParser extends AbstractSaveData2FileParse
 
     // 不需要处理文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
+    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
     }
 
     public void handleMyBatisMySqlInfo(MyBatisMySqlInfo myBatisMySqlInfo, String mybatisXmlFilePath) {
@@ -49,7 +48,7 @@ public class MyBatisMySqlColumnInfoCodeParser extends AbstractSaveData2FileParse
                 Collections.sort(entityColumnNameList);
                 for (String entityColumnName : entityColumnNameList) {
                     String columnName = entityAndColumnNameMap.get(entityColumnName);
-                    JavaCG2FileUtil.write2FileWithTab(writer, entityClassName, entityColumnName, columnName, mybatisXmlFilePath);
+                    writeData2File(entityClassName, entityColumnName, columnName, mybatisXmlFilePath);
                 }
             }
         } catch (Exception e) {

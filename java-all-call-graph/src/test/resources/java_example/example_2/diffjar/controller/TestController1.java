@@ -26,7 +26,7 @@ public class TestController1 {
 
     @GetMapping("get1")
     public String get1() {
-        return testService1.testA();
+        return test();
     }
 
     @GetMapping("get2")
@@ -38,5 +38,9 @@ public class TestController1 {
     public String post(@RequestBody final String req) {
         logger.info("req- {}", req);
         return String.valueOf(testService1.testB());
+    }
+
+    private String test() {
+        return testService1.testA();
     }
 }

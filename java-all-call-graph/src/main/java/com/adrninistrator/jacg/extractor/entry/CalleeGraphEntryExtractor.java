@@ -10,8 +10,6 @@ import com.adrninistrator.jacg.extractor.dto.common.extract.CalleeExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CalleeExtractedFile;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author adrninistrator
@@ -20,38 +18,24 @@ import org.slf4j.LoggerFactory;
  */
 public class CalleeGraphEntryExtractor extends CalleeGraphBaseExtractor {
 
-    private static final Logger logger = LoggerFactory.getLogger(CalleeGraphEntryExtractor.class);
-
     private MethodCallHandler methodCallHandler;
     private MethodInfoHandler methodInfoHandler;
 
-    /**
-     * 生成向上的完整调用链，根据关键字进行查找，获取入口方法信息并返回，使用配置文件中的参数
-     *
-     * @return
-     */
-    public ListWithResult<CalleeExtractedFile> extract() {
-        ConfigureWrapper configureWrapper = new ConfigureWrapper(false);
-        // 指定生成方法调用堆栈时的关键字使用代表入口方法的标志
-        if (!setFindStackKeyword4ee(configureWrapper)) {
-            logger.warn("未查询到生成方法调用堆栈时的关键字");
-            return ListWithResult.genEmpty();
-        }
-        return baseExtract(configureWrapper);
+    public CalleeGraphEntryExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
     }
 
     /**
      * 生成向上的完整调用链，根据关键字进行查找，获取入口方法信息并返回，通过代码指定配置参数
      *
-     * @param configureWrapper
      * @return
      */
-    public ListWithResult<CalleeExtractedFile> extract(ConfigureWrapper configureWrapper) {
+    public ListWithResult<CalleeExtractedFile> extract() {
         // 指定生成方法调用堆栈时的关键字使用代表入口方法的标志
-        if (!setFindStackKeyword4ee(configureWrapper)) {
+        if (!setFindStackKeyword4ee()) {
             return ListWithResult.genEmpty();
         }
-        return baseExtract(configureWrapper);
+        return baseExtract();
     }
 
     /**
@@ -88,10 +72,9 @@ public class CalleeGraphEntryExtractor extends CalleeGraphBaseExtractor {
     /**
      * 指定生成方法调用堆栈时的关键字使用代表入口方法的标志
      *
-     * @param configureWrapper
      * @return true: 关键字非空，需要查找 false: 关键字为空,不需要查找
      */
-    protected boolean setFindStackKeyword4ee(ConfigureWrapper configureWrapper) {
+    protected boolean setFindStackKeyword4ee() {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, JACGConstants.CALLEE_FLAG_ENTRY);
         return true;
     }

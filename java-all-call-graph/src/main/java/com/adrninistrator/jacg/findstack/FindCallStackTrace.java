@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.dto.callline.CallGraphLineParsed;
 import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
+import com.adrninistrator.jacg.dto.callstack.CalleeStackSummary;
 import com.adrninistrator.jacg.dto.keyword.FileContentNode;
 import com.adrninistrator.jacg.extensions.findstackfilter.FindStackKeywordFilterInterface;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
@@ -14,8 +15,10 @@ import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import com.adrninistrator.jacg.runner.base.AbstractExecutor;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGCallStackUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
+import com.adrninistrator.jacg.writer.WriterSupportHeader;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
@@ -28,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,6 +48,32 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FindCallStackTrace extends AbstractExecutor {
     private static final Logger logger = LoggerFactory.getLogger(FindCallStackTrace.class);
 
+    public static final String[] FILE_HEADER_ARRAY_STACK_TABLE = new String[]{
+            "调用堆栈在文件中的序号",
+            "调用堆栈内部的序号",
+            "完整调用方法/被调用方法",
+            "调用方法代码行号"
+    };
+
+    public static final String[] FILE_HEADER_ARRAY_CALLEE_STACK_SUMMARY = new String[]{
+            "调用堆栈在文件中的序号",
+            "完整被调用方法",
+            "上层完整调用方法",
+            "向上通过关键字找到的完整方法",
+            "向上通过关键字找到的方法返回类型",
+    };
+
+    public static final String[] FILE_HEADER_ARRAY_CALLER_STACK_SUMMARY = new String[]{
+            "调用堆栈在文件中的序号",
+            "完整调用方法",
+            "向下通过关键字找到的完整方法",
+            "向下通过关键字找到的方法返回类型",
+    };
+
+    public static final String FILE_HEADER_STACK_TABLE = StringUtils.join(FILE_HEADER_ARRAY_STACK_TABLE, JavaCG2Constants.FLAG_TAB);
+    public static final String FILE_HEADER_CALLEE_STACK_SUMMARY = StringUtils.join(FILE_HEADER_ARRAY_CALLEE_STACK_SUMMARY, JavaCG2Constants.FLAG_TAB);
+    public static final String FILE_HEADER_CALLER_STACK_SUMMARY = StringUtils.join(FILE_HEADER_ARRAY_CALLER_STACK_SUMMARY, JavaCG2Constants.FLAG_TAB);
+
     private final boolean order4ee;
 
     // 用于生成方法完整调用链的对象
@@ -60,11 +88,11 @@ public class FindCallStackTrace extends AbstractExecutor {
     // 未搜索到关键字的文件保存目录，以分隔符结束，分隔符使用/（后续需要判断.md文件路径是否以该目录开头）
     private String keyWordsNotFoundDirPath;
 
-    // 是否需要为每个调用堆栈生成独立的文件
-    private boolean genSeparateStack = false;
+    // 是否需要生成其他形式的调用堆栈文件
+    private boolean genStackOtherForms = false;
 
-    // 创建保存单独的调用堆栈文件的目录
-    private String separateStackDirPath;
+    // 创建保存其他形式的调用堆栈文件的目录
+    private String otherFormsStackDirPath;
 
     // 根据关键字生成调用堆栈过滤器扩展类列表
     private List<FindStackKeywordFilterInterface> findStackKeywordFilterList;
@@ -133,24 +161,23 @@ public class FindCallStackTrace extends AbstractExecutor {
      * @return 生成调用堆栈文件结果
      */
     public CallStackFileResult find() {
-        if (Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_SEPARATE_STACK))) {
+        if (Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_STACK_OTHER_FORMS))) {
             if (!OutputDetailEnum.ODE_0.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL))) {
-                logger.warn("{}={} 时，需要将 {} 设置为 {}", ConfigKeyEnum.CKE_CALL_GRAPH_GEN_SEPARATE_STACK.getKey(), Boolean.TRUE,
-                        ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getKey(), OutputDetailEnum.ODE_0.getDetail());
+                logger.warn("自动设置参数值为 {} {}", OutputDetailEnum.ODE_0.getDetail(), configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL));
                 configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_0.getDetail());
             }
-            logger.info("后续会为每个调用堆栈生成独立的文件");
-            genSeparateStack = true;
+            logger.info("后续会生成其他形式的调用堆栈文件");
+            genStackOtherForms = true;
         } else {
-            logger.info("后续不会为每个调用堆栈生成独立的文件");
+            logger.info("后续不会生成其他形式的调用堆栈文件");
         }
 
         if (!Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE))) {
-            logger.error("{} 需要设置为 {}", ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE.getKey(), Boolean.TRUE);
+            logger.error("参数值需要设置为 {} {}", Boolean.TRUE, configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE));
             return CallStackFileResult.FAIL;
         }
         if (!Boolean.FALSE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY))) {
-            logger.error("{} 需要设置为 {}", ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY.getKey(), Boolean.FALSE);
+            logger.error("参数值需要设置为 {} {}", Boolean.FALSE, configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY));
             return CallStackFileResult.FAIL;
         }
 
@@ -266,9 +293,9 @@ public class FindCallStackTrace extends AbstractExecutor {
         // 未搜索到关键字的文件保存目录
         keyWordsNotFoundDirPath = JavaCG2FileUtil.replaceFilePath2Slash(stackOutputDirPath + File.separator + JACGConstants.DIR_KEYWORDS_NOT_FOUND + File.separator);
 
-        if (genSeparateStack) {
-            // 创建保存单独的调用堆栈文件的目录
-            separateStackDirPath = stackOutputDirPath + File.separator + JACGConstants.DIR_OUTPUT_STACK_SEPARATE;
+        if (genStackOtherForms) {
+            // 创建保存其他形式的调用堆栈文件的目录
+            otherFormsStackDirPath = stackOutputDirPath + File.separator + JACGConstants.DIR_OUTPUT_STACK_OTHER_FORMS;
         }
 
         Set<String> subDirPathSet = new HashSet<>();
@@ -305,15 +332,15 @@ public class FindCallStackTrace extends AbstractExecutor {
 
             // 在生成调用堆栈文件的目录中搜索结果文件路径列表
             List<String> stackFilePathList = JACGFileUtil.findFilePathInCurrentDir(stackOutputDirPath, JavaCG2Constants.EXT_MD);
-            List<String> separateStackFilePathList = null;
-            if (genSeparateStack) {
-                separateStackFilePathList = JACGFileUtil.findDirPathInCurrentDir(separateStackDirPath);
+            List<String> otherFormsStackFilePathList = null;
+            if (genStackOtherForms) {
+                otherFormsStackFilePathList = JACGFileUtil.findDirPathInCurrentDir(otherFormsStackDirPath);
             }
             logger.info("处理完毕");
             if (failCounter.getCount() > 0) {
                 return CallStackFileResult.FAIL;
             }
-            return new CallStackFileResult(stackFilePathList, separateStackFilePathList);
+            return new CallStackFileResult(callGraphOutputDirPath, stackFilePathList, otherFormsStackFilePathList);
         } finally {
             // 关闭并等待线程池
             shutdownAndWaitTPE();
@@ -326,28 +353,29 @@ public class FindCallStackTrace extends AbstractExecutor {
         String txtFileName = txtFilePath.substring(srcDirPathLength);
         String txtFileNameWithOutExt = JACGFileUtil.getFileNameWithOutExt(txtFileName);
         String stackFilePath = stackOutputDirPath + File.separator + txtFileNameWithOutExt + JavaCG2Constants.EXT_MD;
-        String separateDirPath = null;
+        String otherFormsDirPath = null;
 
-        if (genSeparateStack) {
-            separateDirPath = separateStackDirPath + File.separator + txtFileNameWithOutExt;
+        if (genStackOtherForms) {
+            otherFormsDirPath = otherFormsStackDirPath + File.separator + txtFileNameWithOutExt;
 
-            if (!JavaCG2FileUtil.isDirectoryExists(separateDirPath)) {
+            if (!JavaCG2FileUtil.isDirectoryExists(otherFormsDirPath)) {
                 return false;
             }
         }
 
-        // 用于写单独的调用堆栈文件
-        BufferedWriter separateStackWriter = null;
+        // 用于写其他形式的调用堆栈文件
+        WriterSupportHeader stackTableWriter = null;
         // 用于写汇总文件
-        BufferedWriter summaryWriter = null;
+        WriterSupportHeader stackSummaryWriter = null;
         try (BufferedReader br = JavaCG2FileUtil.genBufferedReader(txtFilePath);
              MarkdownWriter markdownWriter = new MarkdownWriter(stackFilePath, true)) {
 
-            if (genSeparateStack) {
-                String separateCallStackFilePath = separateDirPath + File.separator + (order4ee ? JACGConstants.FILE_STACK_CALLEE_MD : JACGConstants.FILE_STACK_CALLER_MD);
-                separateStackWriter = JavaCG2FileUtil.genBufferedWriter(separateCallStackFilePath);
-                String summaryFilePath = separateDirPath + File.separator + (order4ee ? JACGConstants.FILE_STACK_SUMMARY_CALLEE_MD : JACGConstants.FILE_STACK_SUMMARY_CALLER_MD);
-                summaryWriter = JavaCG2FileUtil.genBufferedWriter(summaryFilePath);
+            if (genStackOtherForms) {
+                String otherFormsCallStackFilePath = otherFormsDirPath + File.separator + (order4ee ? JACGConstants.FILE_CALLEE_STACK_TABLE :
+                        JACGConstants.FILE_CALLER_STACK_TABLE);
+                stackTableWriter = new WriterSupportHeader(otherFormsCallStackFilePath, FILE_HEADER_STACK_TABLE);
+                String summaryFilePath = otherFormsDirPath + File.separator + (order4ee ? JACGConstants.FILE_CALLEE_STACK_SUMMARY : JACGConstants.FILE_CALLER_STACK_SUMMARY);
+                stackSummaryWriter = new WriterSupportHeader(summaryFilePath, order4ee ? FILE_HEADER_CALLEE_STACK_SUMMARY : FILE_HEADER_CALLER_STACK_SUMMARY);
             }
 
             // 写入文件头信息
@@ -368,7 +396,7 @@ public class FindCallStackTrace extends AbstractExecutor {
                 // md文件中的标题内容
                 String title = JACGConstants.FLAG_MD_LINE_NUMBER + lineNum;
                 // 处理txt文件的一行
-                if (!handleTxtFileOneLine(line, keywordList, markdownWriter, fileContentNodeList, title, callStackCounter, separateStackWriter, summaryWriter,
+                if (!handleTxtFileOneLine(line, keywordList, markdownWriter, fileContentNodeList, title, callStackCounter, stackTableWriter, stackSummaryWriter,
                         lastNodeReference)) {
                     return false;
                 }
@@ -390,12 +418,12 @@ public class FindCallStackTrace extends AbstractExecutor {
             logger.error("error ", e);
             return false;
         } finally {
-            if (genSeparateStack) {
-                if (separateStackWriter != null) {
-                    IOUtils.closeQuietly(separateStackWriter);
+            if (genStackOtherForms) {
+                if (stackTableWriter != null) {
+                    IOUtils.closeQuietly(stackTableWriter);
                 }
-                if (summaryWriter != null) {
-                    IOUtils.closeQuietly(summaryWriter);
+                if (stackSummaryWriter != null) {
+                    IOUtils.closeQuietly(stackSummaryWriter);
                 }
             }
         }
@@ -403,7 +431,7 @@ public class FindCallStackTrace extends AbstractExecutor {
 
     // 处理txt文件的一行
     private boolean handleTxtFileOneLine(String line, List<String> keywordList, MarkdownWriter markdownWriter, List<FileContentNode> fileContentNodeList, String title,
-                                         JavaCG2Counter callStackCounter, BufferedWriter separateStackWriter, BufferedWriter summaryWriter,
+                                         JavaCG2Counter callStackCounter, WriterSupportHeader stackTableWriter, WriterSupportHeader stackSummaryWriter,
                                          AtomicReference<FileContentNode> lastNodeReference) throws IOException {
         if (!JACGCallGraphFileUtil.isCallGraphLine(line)) {
             // 不属于调用链信息的行，不处理
@@ -436,7 +464,7 @@ public class FindCallStackTrace extends AbstractExecutor {
             recordFileContentNodeInList(methodLevel, fileContentNodeList, lastNode);
 
             // 生成当前节点到根节点的调用堆栈
-            genCallStack(line, keywordList, markdownWriter, title, callStackCounter, separateStackWriter, summaryWriter, lastNode);
+            genCallStack(line, keywordList, markdownWriter, title, callStackCounter, stackTableWriter, stackSummaryWriter, lastNode);
             return true;
         }
 
@@ -466,7 +494,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         recordFileContentNodeInList(methodLevel, fileContentNodeList, lastNode);
 
         // 生成当前节点到根节点的调用堆栈
-        genCallStack(line, keywordList, markdownWriter, title, callStackCounter, separateStackWriter, summaryWriter, lastNode);
+        genCallStack(line, keywordList, markdownWriter, title, callStackCounter, stackTableWriter, stackSummaryWriter, lastNode);
         return true;
     }
 
@@ -484,7 +512,7 @@ public class FindCallStackTrace extends AbstractExecutor {
 
     // 生成当前节点到根节点的调用堆栈
     private boolean genCallStack(String line, List<String> keywordList, MarkdownWriter markdownWriter, String title, JavaCG2Counter callStackCounter,
-                                 BufferedWriter separateStackWriter, BufferedWriter summaryWriter, FileContentNode lastNode) throws IOException {
+                                 WriterSupportHeader stackTableWriter, WriterSupportHeader stackSummaryWriter, FileContentNode lastNode) throws IOException {
         // 在指定行中查找关键字
         if (!findKeyword(line, keywordList)) {
             return true;
@@ -529,7 +557,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         markdownWriter.addCodeBlock();
 
         // 写调用堆栈文件
-        if (!writeCallStackFile(callStackCounter, lineList, markdownWriter, separateStackWriter, summaryWriter)) {
+        if (!writeCallStackFile(callStackCounter, lineList, markdownWriter, stackTableWriter, stackSummaryWriter)) {
             return false;
         }
 
@@ -538,15 +566,15 @@ public class FindCallStackTrace extends AbstractExecutor {
     }
 
     // 写调用堆栈文件
-    private boolean writeCallStackFile(JavaCG2Counter callStackCounter, List<String> lineList, MarkdownWriter markdownWriter, BufferedWriter separateStackWriter,
-                                       BufferedWriter summaryWriter) {
+    private boolean writeCallStackFile(JavaCG2Counter callStackCounter, List<String> lineList, MarkdownWriter markdownWriter, WriterSupportHeader stackTableWriter,
+                                       WriterSupportHeader stackSummaryWriter) {
         String seqInFile = null;
         try {
-            if (genSeparateStack) {
+            if (genStackOtherForms) {
                 seqInFile = String.format("%06x", callStackCounter.addAndGet());
             }
-            // 生成单独的调用堆栈时，当前行所代表的层级
-            int separateLevel = 1;
+            // 生成表格形式的调用堆栈时，当前行所代表的层级
+            int stackLevel = 1;
             int lineNumber = lineList.size();
             if (order4ee) {
                 // 向上的调用链，顺序遍历
@@ -564,12 +592,12 @@ public class FindCallStackTrace extends AbstractExecutor {
                     markdownWriter.setWriteData(true);
                     markdownWriter.addLine(str);
 
-                    if (genSeparateStack) {
+                    if (genStackOtherForms) {
                         CallGraphLineParsed callGraphLineParsed = JACGCallGraphFileUtil.parseCallGraphLine4ee(str);
                         String fullMethod = callGraphLineParsed.getMethodDetail().getFullMethod();
                         String methodReturnType = callGraphLineParsed.getMethodDetail().getReturnType();
-                        JavaCG2FileUtil.write2FileWithTab(separateStackWriter, seqInFile, String.valueOf(separateLevel), fullMethod, callGraphLineParsed.getCallerLineNumberStr());
-                        separateLevel++;
+                        stackTableWriter.writeDataInLine(seqInFile, String.valueOf(stackLevel), fullMethod, callGraphLineParsed.getCallerLineNumberStr());
+                        stackLevel++;
 
                         if (i == 0) {
                             keywordMethod = fullMethod;
@@ -585,8 +613,10 @@ public class FindCallStackTrace extends AbstractExecutor {
                         }
                     }
                 }
-                if (genSeparateStack) {
-                    JavaCG2FileUtil.write2FileWithTab(summaryWriter, seqInFile, calleeMethod, callerMethod, keywordMethod, keywordMethodReturnType);
+                if (genStackOtherForms) {
+                    // 向上生成时输出的汇总文件
+                    CalleeStackSummary calleeStackSummary = new CalleeStackSummary(seqInFile, calleeMethod, callerMethod, keywordMethod, keywordMethodReturnType);
+                    stackSummaryWriter.writeDataInLine(JACGCallStackUtil.formatCalleeStackSummaryLine(calleeStackSummary));
                 }
                 return true;
             }
@@ -604,14 +634,14 @@ public class FindCallStackTrace extends AbstractExecutor {
                 String str = lineList.get(i);
                 markdownWriter.setWriteData(true);
                 markdownWriter.addLine(str);
-                if (genSeparateStack) {
+                if (genStackOtherForms) {
                     CallGraphLineParsed callGraphLineParsed = JACGCallGraphFileUtil.parseCallGraphLine4er(str);
                     String fullMethod = callGraphLineParsed.getMethodDetail().getFullMethod();
                     String methodReturnType = callGraphLineParsed.getMethodDetail().getReturnType();
                     if (lastCallerMethod != null) {
-                        JavaCG2FileUtil.write2FileWithTab(separateStackWriter, seqInFile, String.valueOf(separateLevel), lastCallerMethod,
+                        stackTableWriter.writeDataInLine(seqInFile, String.valueOf(stackLevel), lastCallerMethod,
                                 callGraphLineParsed.getCallerLineNumberStr());
-                        separateLevel++;
+                        stackLevel++;
                     }
                     lastCallerMethod = fullMethod;
 
@@ -625,10 +655,11 @@ public class FindCallStackTrace extends AbstractExecutor {
                     }
                 }
             }
-            if (genSeparateStack) {
-                // 写入最后一行
-                JavaCG2FileUtil.write2FileWithTab(separateStackWriter, seqInFile, String.valueOf(separateLevel), lastCallerMethod, JavaCG2Constants.DEFAULT_LINE_NUMBER_STR);
-                JavaCG2FileUtil.write2FileWithTab(summaryWriter, seqInFile, callerMethod, keywordMethod, keywordMethodReturnType);
+            if (genStackOtherForms) {
+                // 表格形式的调用堆栈文件写入最后一行
+                stackTableWriter.writeDataInLine(seqInFile, String.valueOf(stackLevel), lastCallerMethod, JavaCG2Constants.DEFAULT_LINE_NUMBER_STR);
+                // 向上生成时输出的汇总文件
+                stackSummaryWriter.writeDataInLine(seqInFile, callerMethod, keywordMethod, keywordMethodReturnType);
             }
             return true;
         } catch (Exception e) {

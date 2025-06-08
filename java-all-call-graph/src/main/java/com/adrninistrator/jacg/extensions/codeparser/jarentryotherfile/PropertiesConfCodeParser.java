@@ -4,7 +4,6 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,7 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
     }
 
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
+    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
         logger.info("处理{}文件 {}", JACGConstants.EXT_PROPERTIES, jarEntryPath);
         Properties properties = new Properties();
         try {
@@ -57,7 +56,7 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
                     value = JavaCG2Util.base64Encode(value);
                     useBase64 = JavaCG2YesNoEnum.YES;
                 }
-                JavaCG2FileUtil.write2FileWithTab(writer, jarEntryPath, useBase64.getStrValue(), key, value);
+                writeData2File(jarEntryPath, useBase64.getStrValue(), key, value);
             }
         } catch (Exception e) {
             logger.error("error ", e);

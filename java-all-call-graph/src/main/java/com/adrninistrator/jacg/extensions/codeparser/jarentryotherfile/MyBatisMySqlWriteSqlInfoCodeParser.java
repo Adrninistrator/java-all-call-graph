@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.mybatismysqltableparser.dto.MySqlWriteTableInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +30,12 @@ public class MyBatisMySqlWriteSqlInfoCodeParser extends AbstractSaveData2FilePar
 
     // 不需要处理文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
+    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
     }
 
     public void handleMySQLWriteTableInfo(String mapperInterfaceName, String methodName, MySqlWriteTableInfo mySqlWriteTableInfo, String mybatisXmlFilePath) {
         try {
-            JavaCG2FileUtil.write2FileWithTab(writer, mapperInterfaceName, methodName, mySqlWriteTableInfo.getMySqlStatementEnum().getInitials(),
+            writeData2File(mapperInterfaceName, methodName, mySqlWriteTableInfo.getMySqlStatementEnum().getInitials(),
                     mySqlWriteTableInfo.getTableName(), mybatisXmlFilePath);
         } catch (Exception e) {
             logger.error("error ", e);

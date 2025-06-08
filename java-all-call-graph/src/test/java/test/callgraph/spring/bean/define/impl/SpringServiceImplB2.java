@@ -10,6 +10,9 @@ import test.callgraph.spring.bean.define.SpringInterfaceB;
  */
 @Service
 public class SpringServiceImplB2 implements SpringInterfaceB {
+
+    public static final String BEAN_NAME = "springServiceImplB2";
+
     @Override
     public void test1() {
         System.setProperty(this.getClass().getName(), "");

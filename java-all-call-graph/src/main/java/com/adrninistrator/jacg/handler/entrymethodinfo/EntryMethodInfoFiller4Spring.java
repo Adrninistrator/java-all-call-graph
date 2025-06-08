@@ -15,24 +15,20 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class EntryMethodInfoFiller4Spring extends AbstractEntryMethodInfoFiller {
 
-    private SpringHandler springHandler;
+    private final SpringHandler springHandler;
 
     public EntryMethodInfoFiller4Spring(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
-        init();
+        springHandler = new SpringHandler(dbOperWrapper);
     }
 
     public EntryMethodInfoFiller4Spring(ConfigureWrapper configureWrapper, String tableSuffix) {
         super(configureWrapper, tableSuffix);
-        init();
+        springHandler = new SpringHandler(dbOperWrapper);
     }
 
     public EntryMethodInfoFiller4Spring(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
-        init();
-    }
-
-    private void init() {
         springHandler = new SpringHandler(dbOperWrapper);
     }
 
@@ -41,7 +37,7 @@ public class EntryMethodInfoFiller4Spring extends AbstractEntryMethodInfoFiller 
         String controllerUri = springHandler.queryControllerUri(entryMethod, entryMethodReturnType);
         if (StringUtils.isNotBlank(controllerUri)) {
             EntryMethodInfo4SpringController entryMethodInfo4SpringController = new EntryMethodInfo4SpringController();
-            entryMethodInfo4SpringController.setControllerUti(controllerUri);
+            entryMethodInfo4SpringController.setControllerUri(controllerUri);
             return entryMethodInfo4SpringController;
         }
 

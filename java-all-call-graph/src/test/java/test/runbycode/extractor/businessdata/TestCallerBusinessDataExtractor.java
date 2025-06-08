@@ -42,9 +42,9 @@ public class TestCallerBusinessDataExtractor extends TestRunByCodeBase implement
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 "\tjava.lang.System:"
         );
-        CallerGraphBusinessDataExtractor callerGraphBusinessDataExtractor = new CallerGraphBusinessDataExtractor();
+        CallerGraphBusinessDataExtractor callerGraphBusinessDataExtractor = new CallerGraphBusinessDataExtractor(configureWrapper);
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName);
-        Assert.assertTrue(callerGraphBusinessDataExtractor.extract(configureWrapper, this, DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType()));
+        Assert.assertTrue(callerGraphBusinessDataExtractor.extract(this, DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType()));
     }
 
     @Test
@@ -56,9 +56,9 @@ public class TestCallerBusinessDataExtractor extends TestRunByCodeBase implement
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 "nafdno32540324n0erinf0349j5324inogfwdngr329041h324n3214in3214oi21n4k321n4"
         );
-        CallerGraphBusinessDataExtractor callerGraphBusinessDataExtractor = new CallerGraphBusinessDataExtractor();
+        CallerGraphBusinessDataExtractor callerGraphBusinessDataExtractor = new CallerGraphBusinessDataExtractor(configureWrapper);
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName);
-        Assert.assertTrue(callerGraphBusinessDataExtractor.extract(configureWrapper, this, DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType()));
+        Assert.assertTrue(callerGraphBusinessDataExtractor.extract(this, DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType()));
     }
 
     @Test
@@ -69,10 +69,10 @@ public class TestCallerBusinessDataExtractor extends TestRunByCodeBase implement
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 "\tjava.io.PrintStream:"
         );
-        CallerGraphBusinessDataExtractor callerGraphBusinessDataExtractor = new CallerGraphBusinessDataExtractor();
+        CallerGraphBusinessDataExtractor callerGraphBusinessDataExtractor = new CallerGraphBusinessDataExtractor(configureWrapper);
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, currentClassName + JACGConstants.FLAG_AT + currentMethodName);
-        Assert.assertTrue(callerGraphBusinessDataExtractor.extract(configureWrapper, this,
-                DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(), DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType()));
+        Assert.assertTrue(callerGraphBusinessDataExtractor.extract(this, DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(),
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType()));
     }
 
     @Override

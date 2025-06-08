@@ -1,6 +1,9 @@
 package test.callgraph.field;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import test.callgraph.enums.DbStatementEnum;
 import test.callgraph.field.dto.TestFieldDto1;
 
 import java.math.BigDecimal;
@@ -13,6 +16,9 @@ import java.util.Map;
  * @description:
  */
 public class TestField1 {
+
+    private static final Logger logger = LoggerFactory.getLogger(TestField1.class);
+
     public TestField2 testField2a = new TestField2();
 
     public TestField2 testField2b = new TestField2();
@@ -25,7 +31,7 @@ public class TestField1 {
     @JsonProperty("data")
     private BigDecimal bigDecimal;
 
-    private int int1;
+    public int int1;
 
     private static String STRING1 = "111";
 
@@ -84,6 +90,15 @@ public class TestField1 {
             testField2.test1();
         }
         testField2.test1();
+    }
+
+    public void testStaticField1() {
+        System.out.println(logger.isDebugEnabled());
+    }
+
+    public void testStaticField2() {
+        logger.info("{}", DbStatementEnum.DSE_INSERT.getStatement());
+        logger.info("{} {} {}", 1, 2, DbStatementEnum.DSE_INSERT.getStatement());
     }
 
     public TestFieldDto1 getTestFieldDto1() {

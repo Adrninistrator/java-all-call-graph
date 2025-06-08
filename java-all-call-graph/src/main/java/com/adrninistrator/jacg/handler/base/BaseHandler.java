@@ -32,9 +32,13 @@ public abstract class BaseHandler implements Closeable {
 
     public static final String SQL_KEY_QUERY_END_ID_BY_PAGE = "@queryEndIdByPage@";
 
+    protected final boolean useH2Db;
+
     protected DbOperator dbOperator;
 
     protected DbOperWrapper dbOperWrapper;
+
+    protected ConfigureWrapper configureWrapper;
 
     /*
         数据库表名后缀
@@ -48,9 +52,6 @@ public abstract class BaseHandler implements Closeable {
     protected String appName;
 
     protected ApplicationContext applicationContext;
-
-    protected BaseHandler() {
-    }
 
     /**
      * 调用该构造函数时，[会]创建新的数据源，结束前[需要]手动关闭数据库操作对象
@@ -76,10 +77,12 @@ public abstract class BaseHandler implements Closeable {
 
         if (useNeo4j()) {
             applicationContext = SpringContextManager.getApplicationContext();
-            appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
             this.tableSuffix = null;
             // 完成需要使用的基础配置的初始化
             dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, true, this);
+            // 获取appName不能使用 dbOperWrapper.getDbOperator().getAppName(); 因为 dbOperWrapper.getDbOperator() 为null
+            appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
+            useH2Db = false;
             return;
         }
 
@@ -96,7 +99,9 @@ public abstract class BaseHandler implements Closeable {
         // 完成需要使用的基础配置的初始化
         dbOperWrapper = DbInitializer.genDbOperWrapper(usedConfigureWrapper, false, this);
         dbOperator = dbOperWrapper.getDbOperator();
-
+        appName = dbOperator.getAppName();
+        this.configureWrapper = usedConfigureWrapper;
+        useH2Db = dbOperator.isUseH2Db();
         logger.warn("调用该构造函数时，结束前[需要]手动关闭数据库操作对象");
         needCloseDb = true;
     }
@@ -114,7 +119,10 @@ public abstract class BaseHandler implements Closeable {
         }
 
         this.dbOperator = dbOperWrapper.getDbOperator();
+        appName = dbOperator.getAppName();
         this.dbOperWrapper = dbOperWrapper;
+        this.configureWrapper = dbOperWrapper.getConfigureWrapper();
+        useH2Db = dbOperator.isUseH2Db();
     }
 
     protected boolean useNeo4j() {

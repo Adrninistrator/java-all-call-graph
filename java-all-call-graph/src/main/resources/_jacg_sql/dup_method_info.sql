@@ -1,6 +1,6 @@
 CREATE TABLE if not exists jacg_dup_method_info_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
-  method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
+  method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   simple_class_name varchar(255) NOT NULL COMMENT '唯一类名',
   access_flags int NOT NULL COMMENT '方法的access_flags',
   method_name varchar(200) NOT NULL COMMENT '方法名',

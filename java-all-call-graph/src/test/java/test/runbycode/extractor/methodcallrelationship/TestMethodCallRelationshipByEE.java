@@ -35,8 +35,8 @@ public class TestMethodCallRelationshipByEE extends TestRunByCodeBase {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE,
                 CallMethodWithAnnotation.class.getName() + ":test1()");
 
-        CalleeGraphBaseExtractor calleeGraphBaseExtractor = new CalleeGraphBaseExtractor();
-        ListWithResult<CalleeExtractedFile> list = calleeGraphBaseExtractor.baseExtract(configureWrapper);
+        CalleeGraphBaseExtractor calleeGraphBaseExtractor = new CalleeGraphBaseExtractor(configureWrapper);
+        ListWithResult<CalleeExtractedFile> list = calleeGraphBaseExtractor.baseExtract();
         Assert.assertTrue(list.isSuccess());
         printListContent(list.getList());
     }
@@ -52,8 +52,8 @@ public class TestMethodCallRelationshipByEE extends TestRunByCodeBase {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE,
                 DbStatementEnum.class.getName() + ":getFromStatement()");
 
-        CalleeGraphBaseExtractor calleeGraphBaseExtractor = new CalleeGraphBaseExtractor();
-        ListWithResult<CalleeExtractedFile> list = calleeGraphBaseExtractor.baseExtract(configureWrapper);
+        CalleeGraphBaseExtractor calleeGraphBaseExtractor = new CalleeGraphBaseExtractor(configureWrapper);
+        ListWithResult<CalleeExtractedFile> list = calleeGraphBaseExtractor.baseExtract();
         Assert.assertTrue(list.isSuccess());
         printListContent(list.getList());
     }

@@ -15,6 +15,7 @@ import test.callgraph.array.TestReturnArray1;
 import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -36,13 +37,16 @@ public class TestGenCallGraphReturnArray extends TestRunByCodeBase {
         );
         RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee(configureWrapper);
         Assert.assertTrue(runnerGenAllGraph4Callee.run());
-        List<MethodCallLineData4Ee> list = runnerGenAllGraph4Callee.getAllMethodCallLineData4EeList();
-        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
+        Map<String, List<MethodCallLineData4Ee>> allMethodCallLineData4EeMap = runnerGenAllGraph4Callee.getAllMethodCallLineData4EeMap();
         boolean found = false;
-        for (MethodCallLineData4Ee methodCallLineData4Ee : list) {
-            if (methodCallLineData4Ee.getActualFullMethod().startsWith(TestReturnArray1.class.getName() + ":testUse1()")) {
-                found = true;
-                break;
+        for (Map.Entry<String, List<MethodCallLineData4Ee>> entry : allMethodCallLineData4EeMap.entrySet()) {
+            List<MethodCallLineData4Ee> methodCallLineData4EeList = entry.getValue();
+            Assert.assertFalse(JavaCG2Util.isCollectionEmpty(methodCallLineData4EeList));
+            for (MethodCallLineData4Ee methodCallLineData4Ee : methodCallLineData4EeList) {
+                if (methodCallLineData4Ee.getActualFullMethod().startsWith(TestReturnArray1.class.getName() + ":testUse1()")) {
+                    found = true;
+                    break;
+                }
             }
         }
         Assert.assertTrue(found);
@@ -55,13 +59,16 @@ public class TestGenCallGraphReturnArray extends TestRunByCodeBase {
         );
         RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
         Assert.assertTrue(runnerGenAllGraph4Caller.run());
-        List<MethodCallLineData4Er> list = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErList();
-        Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
+        Map<String, List<MethodCallLineData4Er>> allMethodCallLineData4ErMap = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErMap();
+        Assert.assertFalse(JavaCG2Util.isMapEmpty(allMethodCallLineData4ErMap));
         boolean found = false;
-        for (MethodCallLineData4Er methodCallLineData4Er : list) {
-            if (methodCallLineData4Er.getActualFullMethod().startsWith(TestReturnArray1.class.getName() + ":return3()")) {
-                found = true;
-                break;
+        for (Map.Entry<String, List<MethodCallLineData4Er>> entry : allMethodCallLineData4ErMap.entrySet()) {
+            List<MethodCallLineData4Er> methodCallLineData4ErList = entry.getValue();
+            for (MethodCallLineData4Er methodCallLineData4Er : methodCallLineData4ErList) {
+                if (methodCallLineData4Er.getActualFullMethod().startsWith(TestReturnArray1.class.getName() + ":return3()")) {
+                    found = true;
+                    break;
+                }
             }
         }
         Assert.assertTrue(found);

@@ -6,6 +6,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MyBatisMSFormatedSql;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMySqlFormatedSqlCodeParser;
 import com.adrninistrator.jacg.util.JACGFileUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 
 /**
  * @author adrninistrator
@@ -44,6 +45,7 @@ public class WriteDbHandler4MyBatisMSFormatedSql extends AbstractWriteDbHandler<
         writeDbData4MyBatisMSFormatedSql.setSqlSeq(sqlSeq);
         writeDbData4MyBatisMSFormatedSql.setXmlElementName(xmlElementName);
         writeDbData4MyBatisMSFormatedSql.setFormatedSql(formatedSql);
+        writeDbData4MyBatisMSFormatedSql.setSqlHash(JACGUtil.genHashWithLen(formatedSql));
         writeDbData4MyBatisMSFormatedSql.setMapperSimpleClassName(mapperSimpleInterfaceName);
         writeDbData4MyBatisMSFormatedSql.setMapperClassName(mapperInterfaceName);
         writeDbData4MyBatisMSFormatedSql.setXmlFilePath(xmlFilePath);
@@ -59,6 +61,7 @@ public class WriteDbHandler4MyBatisMSFormatedSql extends AbstractWriteDbHandler<
                 data.getSqlSeq(),
                 data.getXmlElementName(),
                 data.getFormatedSql(),
+                data.getSqlHash(),
                 data.getMapperSimpleClassName(),
                 data.getMapperClassName(),
                 data.getXmlFilePath()

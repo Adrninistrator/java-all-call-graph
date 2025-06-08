@@ -12,6 +12,7 @@ import test.callgraph.empty.TestEmptyClass1;
 import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -54,8 +55,11 @@ public class TestRBCRunnerGenAllGraph4CalleeNotFound extends TestRunByCodeBase {
             RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee(configureWrapper);
             Assert.assertTrue(runnerGenAllGraph4Callee.run());
             if (returnInMemory) {
-                List<MethodCallLineData4Ee> allMethodCallLineData4EeList = runnerGenAllGraph4Callee.getAllMethodCallLineData4EeList();
-                Assert.assertTrue(JavaCG2Util.isCollectionEmpty(allMethodCallLineData4EeList));
+                Map<String, List<MethodCallLineData4Ee>> allMethodCallLineData4EeMap = runnerGenAllGraph4Callee.getAllMethodCallLineData4EeMap();
+                for (Map.Entry<String, List<MethodCallLineData4Ee>> entry : allMethodCallLineData4EeMap.entrySet()) {
+                    List<MethodCallLineData4Ee> methodCallLineData4EeList = entry.getValue();
+                    Assert.assertTrue(JavaCG2Util.isCollectionEmpty(methodCallLineData4EeList));
+                }
             }
         }
     }

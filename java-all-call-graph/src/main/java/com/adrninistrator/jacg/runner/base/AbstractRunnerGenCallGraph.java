@@ -172,6 +172,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     // 生成向上/向下的完整方法调用链时，每个方法允许生成的方法调用数量限制，默认不限制
     protected int genCallGraphNumLimit;
 
+    // 生成向上/向下的完整方法调用链时，允许生成的方法调用链深度限制，默认不限制
+    protected int genCallGraphDepthLimit;
+
     public AbstractRunnerGenCallGraph() {
         super();
     }
@@ -232,6 +235,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return false;
         }
         genCallGraphNumLimit = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_GEN_CALL_GRAPH_NUM_LIMIT);
+        genCallGraphDepthLimit = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_GEN_CALL_GRAPH_DEPTH_LIMIT);
         return true;
     }
 
@@ -312,8 +316,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             logger.info("创建保存输出文件的目录 {}", currentOutputDirPath);
 
             if (StringUtils.isNotBlank(outputDirName) && currentOutputDir.exists()) {
-                logger.error("指定的输出目录已存在，若确实需要在该目录中输出，请先删除该目录\n{} {} {}\n{}", ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getFileName(),
-                        ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getConfigPrintInfo(), outputDirName, currentOutputDirPath);
+                logger.error("指定的输出目录已存在，若确实需要在该目录中输出，请先删除该目录 {} {} 对应配置参数为 {}", currentOutputDirPath, outputDirName,
+                        configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME));
                 return false;
             }
 
@@ -563,6 +567,9 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     // 打印提示信息
     protected void printNoticeInfo() {
+        if (!callGraphWriteToFile) {
+            return;
+        }
         printMultiMethodCall(itfMethodCallMap, itfMultiCallerMethodSet, JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS);
         printMultiMethodCall(sccMethodCallMap, sccMultiCallerMethodSet, JavaCG2CallTypeEnum.CTE_SUPER_CALL_CHILD);
         printDisabledMethodCall(disabledItfMethodCallMap, JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS);
@@ -678,17 +685,18 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             }
 
             DefaultBusinessDataTypeEnum businessDataTypeEnum = DefaultBusinessDataTypeEnum.getFromType(businessDataType);
-            if (businessDataTypeEnum == null) {
-                continue;
-            }
-            // 找到默认的业务功能数据类型
-            if (order4ee && !businessDataTypeEnum.isSupportEe()) {
-                logger.error("{} 当前指定的业务功能数据类型 {} 不支持在生成向上的完整方法调用链时显示，请删除", OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE, businessDataTypeEnum);
-                return false;
-            }
-            if (!order4ee && !businessDataTypeEnum.isSupportEr()) {
-                logger.error("{} 当前指定的业务功能数据类型 {} 不支持在生成向下的完整方法调用链时显示，请删除", OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER, businessDataTypeEnum);
-                return false;
+            if (DefaultBusinessDataTypeEnum.BDTE_ILLEGAL != businessDataTypeEnum) {
+                // 找到默认的业务功能数据类型
+                if (order4ee && !businessDataTypeEnum.isSupportEe()) {
+                    logger.error("当前指定的业务功能数据类型 {} 不支持在生成向上的完整方法调用链时显示，请删除 {}", businessDataTypeEnum,
+                            configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE));
+                    return false;
+                }
+                if (!order4ee && !businessDataTypeEnum.isSupportEr()) {
+                    logger.error("当前指定的业务功能数据类型 {} 不支持在生成向下的完整方法调用链时显示，请删除 {}", businessDataTypeEnum,
+                            configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER));
+                    return false;
+                }
             }
         }
 
@@ -798,11 +806,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     protected FindMethodTaskInfo findMethodByLineNumber(boolean isCallee, String simpleClassName, int methodLineNum) {
         WriteDbData4MethodLineNumber writeDbData4MethodLineNumber = dbOperWrapper.queryMethodLineNumber(simpleClassName, methodLineNum);
         if (writeDbData4MethodLineNumber == null) {
-            logger.warn("指定类的代码行号未查找到对应方法，请检查，可能因为以下原因\n" +
-                    "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
-                    "2. 指定的方法是接口中未实现的方法\n" +
-                    "3. 指定的方法是抽象方法\n" +
-                    "{} {}", JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo(), simpleClassName, methodLineNum);
+            logger.warn("指定类 {} 的代码行号 {} 未查找到对应方法，请检查，可能因为以下原因 " +
+                    "1. 指定的类所在的jar包未在配置文件中指定 {} " +
+                    "2. 指定的方法是接口中未实现的方法 " +
+                    "3. 指定的方法是抽象方法", simpleClassName, methodLineNum, configureWrapper.genConfigUsage(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR));
             return FindMethodTaskInfo.genFindMethodInfoGenNotFoundFile();
         }
 
@@ -1062,8 +1069,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        BaseBusinessData businessData = dbOperator.queryObject(sql, BaseBusinessData.class, methodCallId);
-        if (businessData == null) {
+        List<BaseBusinessData> businessDataList = dbOperator.queryList(sql, BaseBusinessData.class, methodCallId);
+        if (JavaCG2Util.isCollectionEmpty(businessDataList)) {
             if (callFlags == null) {
                 return true;
             }
@@ -1071,8 +1078,10 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             return false;
         }
 
-        // 将方法调用业务功能数据加入被调用方法信息中
-        addBusinessData2CallGraphInfo(businessData.getDataType(), businessData.getDataValue(), callGraphInfo, methodCallLineData);
+        for (BaseBusinessData businessData : businessDataList) {
+            // 将方法调用业务功能数据加入被调用方法信息中
+            addBusinessData2CallGraphInfo(businessData.getDataType(), businessData.getDataValue(), callGraphInfo, methodCallLineData);
+        }
         return true;
     }
 
@@ -1222,18 +1231,17 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     }
 
     /**
-     * 处理记录数已达到限制的方法
+     * 处理方法调用数量已达到限制的方法
      *
-     * @param entryMethod
-     * @param recordNum
+     * @param inputMethod
+     * @param callGraphNum
      * @param writer
      * @param methodCallLineDataList
      * @throws IOException
      */
-    protected void handleNumExceedMethod(String entryMethod, int recordNum, BufferedWriter writer,
-                                         List<? extends MethodCallLineData> methodCallLineDataList) throws IOException {
-        logger.warn("当前方法的记录数已达到限制，不再生成 {} {}", entryMethod, recordNum);
-        genCallGraphNumExceedMethodList.add(entryMethod);
+    protected void handleNumExceedMethod(String inputMethod, int callGraphNum, BufferedWriter writer, List<? extends MethodCallLineData> methodCallLineDataList) throws IOException {
+        logger.warn("当前方法调用数量已达到限制，不再生成 {} {}", inputMethod, callGraphNum);
+        genCallGraphNumExceedMethodList.add(inputMethod);
         if (JavaCG2Util.isCollectionEmpty(methodCallLineDataList)) {
             // 列表为空时，不需要写入文件
             return;
@@ -1261,18 +1269,6 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         if (!genCallGraphNumExceedMethodList.isEmpty()) {
             logger.warn("生成完整方法调用链时，生成的方法调用数量超过限制的方法 {} {}", genCallGraphNumLimit, StringUtils.join(genCallGraphNumExceedMethodList, " "));
         }
-    }
-
-    /**
-     * 提示需要在内存中返回调用链数据时，配置文件中只能指定一个需要处理的方法
-     *
-     * @param taskInfo
-     */
-    protected void noticeReturnInMemoryMultiTask(Object taskInfo) {
-        OtherConfigFileUseSetEnum otherConfigFileUseSetEnum = order4ee ? OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE :
-                OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER;
-        String taskInfoStr = taskInfo == null ? "" : JACGJsonUtil.getJsonStr(taskInfo);
-        logger.error("需要在内存中返回调用链数据时，配置文件 {} 中只能指定一个需要处理的方法 {}", otherConfigFileUseSetEnum.getKey(), taskInfoStr);
     }
 
     /**

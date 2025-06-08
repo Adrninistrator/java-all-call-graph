@@ -26,50 +26,36 @@ import java.util.Map;
  */
 public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
 
-    /**
-     * 查找Spring事务嵌套的调用情况，使用配置文件中的参数
-     *
-     * @return
-     */
-    public SpTxCallCombined extract() {
-        return extract(new ConfigureWrapper(false));
+    public SpringTxCallExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
     }
 
     /**
      * 查找Spring事务嵌套的调用情况，使用代码指定的参数
      *
-     * @param configureWrapper
      * @return
      */
-    public SpTxCallCombined extract(ConfigureWrapper configureWrapper) {
+    public SpTxCallCombined extract() {
         // 指定公共配置参数
-        setCommonConfig(configureWrapper);
+        setCommonConfig();
 
         // 创建数据库相关对象
         genDbObject(configureWrapper);
 
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
-            ConfigureWrapper usedConfigureWrapper;
             String outputDirName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME);
             if (!outputDirName.isEmpty()) {
-                // 有指定生成调用链文件的子目录名，需要生成新的配置对象，避免修改传入的配置对象
-                usedConfigureWrapper = configureWrapper.copy();
-            } else {
-                usedConfigureWrapper = configureWrapper;
-            }
-
-            if (!outputDirName.isEmpty()) {
                 // 有指定生成调用链文件的子目录名，以下会生成两次方法调用链文件，需要分别使用不同的输出子目录名，否则会输出到同一个目录中
-                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, outputDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
+                configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, outputDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
             }
             // 处理事务注解
-            ListWithResult<SpTxCallByAnnotationFile> spTxCallByAnnotationFileList = handleTxAnnotation(usedConfigureWrapper, annotationHandler);
+            ListWithResult<SpTxCallByAnnotationFile> spTxCallByAnnotationFileList = handleTxAnnotation(annotationHandler);
 
             if (!outputDirName.isEmpty()) {
-                usedConfigureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, outputDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_TEMPLATE);
+                configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, outputDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_TEMPLATE);
             }
             // 处理事务模板
-            ListWithResult<SpTxCallByTplFile> spTxCallByTplFileList = handleTxTpl(usedConfigureWrapper);
+            ListWithResult<SpTxCallByTplFile> spTxCallByTplFileList = handleTxTpl();
             return new SpTxCallCombined(spTxCallByAnnotationFileList, spTxCallByTplFileList);
         } finally {
             closeDs();
@@ -79,13 +65,12 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
     /**
      * 处理事务注解
      *
-     * @param configureWrapper
      * @param annotationHandler
      * @return
      */
-    private ListWithResult<SpTxCallByAnnotationFile> handleTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
+    private ListWithResult<SpTxCallByAnnotationFile> handleTxAnnotation(AnnotationHandler annotationHandler) {
         // 提取使用@Transactional注解的方法相关信息
-        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxAnnotation(configureWrapper, annotationHandler);
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxAnnotation(annotationHandler);
         if (!callerExtractedFileList.isSuccess()) {
             return ListWithResult.genFail();
         }
@@ -113,12 +98,11 @@ public class SpringTxCallExtractor extends AbstractSpringTxExtractor {
     /**
      * 处理事务模板
      *
-     * @param configureWrapper
      * @return
      */
-    private ListWithResult<SpTxCallByTplFile> handleTxTpl(ConfigureWrapper configureWrapper) {
+    private ListWithResult<SpTxCallByTplFile> handleTxTpl() {
         List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList = new ArrayList<>();
-        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxTpl(configureWrapper, spTxEntryMethodTxTplList);
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxTpl(spTxEntryMethodTxTplList);
         if (!callerExtractedFileList.isSuccess()) {
             return ListWithResult.genFail();
         }

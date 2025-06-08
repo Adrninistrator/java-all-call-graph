@@ -94,7 +94,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
 
         List<WriteDbData4MyBatisMSTable> list = dbOperator.queryList(sql, WriteDbData4MyBatisMSTable.class, mapperSimpleClassName, mapperMethodName);
         if (JavaCG2Util.isCollectionEmpty(list)) {
-            logger.warn("未查询到MyBatis Mapper对应的数据库表信息 {} {}", mapperClassName, mapperMethodName);
+            logger.error("未查询到MyBatis Mapper对应的数据库表信息 {} {}", mapperClassName, mapperMethodName);
             return null;
         }
 
@@ -160,7 +160,7 @@ public class MyBatisMSMapperEntityHandler extends BaseHandler {
         WriteDbData4MyBatisMSWriteTable writeDbData4MyBatisMSWriteTable = dbOperator.queryObject(sql, WriteDbData4MyBatisMSWriteTable.class, mapperSimpleClassName,
                 mapperMethodName);
         if (writeDbData4MyBatisMSWriteTable == null) {
-            logger.warn("未查询到MyBatis Mapper对应的写数据库表信息 {} {}", mapperClassName, mapperMethodName);
+            logger.error("未查询到MyBatis Mapper对应的写数据库表信息 {} {}", mapperClassName, mapperMethodName);
         }
         return writeDbData4MyBatisMSWriteTable;
     }

@@ -50,7 +50,7 @@ import java.util.List;
 /**
  * @author adrninistrator
  * @date 2023/10/31
- * @description: 写入数据库，MyBatis XML文件中sql脚本的字段与Java代码的关联关系（使用MySQL）
+ * @description: MyBatis XML文件中sql脚本的字段与Java代码的关联关系（使用MySQL）处理类
  */
 public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPageCallBack<WriteDbData4MybatisMSEntity> {
     private static final Logger logger = LoggerFactory.getLogger(MyBatisMSJavaColumnHandler.class);

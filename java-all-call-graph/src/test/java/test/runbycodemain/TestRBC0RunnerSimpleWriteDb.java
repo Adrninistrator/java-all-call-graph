@@ -16,7 +16,7 @@ import test.runbycode.base.TestRunByCodeBase;
         desc = {"处理方法调用时不解析被调用对象和参数可能的类型与值",
                 "仅解析.class文件，不解析.xml、.properties等其他类型的文件",
                 "需要先执行 unittest.gradle 中的命令，生成示例jar包： gradlew test_gen_jar",
-        "通过代码指定配置参数的主要功能示例"})
+                "通过代码指定配置参数的主要功能示例"})
 public class TestRBC0RunnerSimpleWriteDb extends TestRunByCodeBase {
     @Test
     public void test() {

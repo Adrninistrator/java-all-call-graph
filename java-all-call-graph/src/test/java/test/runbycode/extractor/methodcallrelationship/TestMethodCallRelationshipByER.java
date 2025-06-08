@@ -35,8 +35,8 @@ public class TestMethodCallRelationshipByER extends TestRunByCodeBase {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 MethodWithAnnotation.class.getName() + ":test1()");
 
-        CallerGraphBaseExtractor callerGraphBaseExtractor = new CallerGraphBaseExtractor();
-        ListWithResult<CallerExtractedFile> list = callerGraphBaseExtractor.baseExtract(configureWrapper);
+        CallerGraphBaseExtractor callerGraphBaseExtractor = new CallerGraphBaseExtractor(configureWrapper);
+        ListWithResult<CallerExtractedFile> list = callerGraphBaseExtractor.baseExtract();
         Assert.assertTrue(list.isSuccess());
         printListContent(list.getList());
     }
@@ -52,8 +52,8 @@ public class TestMethodCallRelationshipByER extends TestRunByCodeBase {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 MethodWithAnnotation.class.getName() + ":test1()");
 
-        CallerGraphBaseExtractor callerGraphBaseExtractor = new CallerGraphBaseExtractor();
-        ListWithResult<CallerExtractedFile> list = callerGraphBaseExtractor.baseExtract(configureWrapper);
+        CallerGraphBaseExtractor callerGraphBaseExtractor = new CallerGraphBaseExtractor(configureWrapper);
+        ListWithResult<CallerExtractedFile> list = callerGraphBaseExtractor.baseExtract();
         Assert.assertTrue(list.isSuccess());
         printListContent(list.getList());
     }

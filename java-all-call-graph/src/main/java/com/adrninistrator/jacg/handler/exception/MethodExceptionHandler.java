@@ -114,7 +114,7 @@ public class MethodExceptionHandler extends BaseHandler {
      * @return
      */
     public List<WriteDbData4MethodCatch> queryMethodCatchListBySimpleClassNameExcludeFlag(String simpleClassName) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCTH_QUERY_BY_SIMPLE_CLASS_NAME;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCTH_QUERY_BY_SIMPLE_CLASS_NAME_EXCLUDE_FLAG;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CATCH) +

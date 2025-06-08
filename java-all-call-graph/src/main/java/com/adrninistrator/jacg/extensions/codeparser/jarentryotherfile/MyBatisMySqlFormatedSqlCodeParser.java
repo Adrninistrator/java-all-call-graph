@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.mybatismysqltableparser.dto.MyBatisMySqlInfo;
 import com.adrninistrator.mybatismysqltableparser.dto.MyBatisXmlElement4Statement;
 import org.slf4j.Logger;
@@ -19,7 +18,7 @@ import java.util.Map;
  * @description: 从MyBatis的XML文件获取格式化后的sql文本（使用MySQL）
  */
 public class MyBatisMySqlFormatedSqlCodeParser extends AbstractSaveData2FileParser {
-    private static final Logger logger = LoggerFactory.getLogger(MyBatisMySqlSelectColumnCodeParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(MyBatisMySqlFormatedSqlCodeParser.class);
 
     public static final String FILE_NAME = "mybatis_ms_formated_sql";
 
@@ -36,7 +35,7 @@ public class MyBatisMySqlFormatedSqlCodeParser extends AbstractSaveData2FilePars
 
     // 不需要处理文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
+    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
     }
 
     public void handleMyBatisMySqlInfo(MyBatisMySqlInfo myBatisMySqlInfo, String mybatisXmlFilePath) {
@@ -51,7 +50,7 @@ public class MyBatisMySqlFormatedSqlCodeParser extends AbstractSaveData2FilePars
                 int sqlSeq = 0;
                 for (String formatedSql : statement.getFullSqlList()) {
                     formatedSql = formatedSql.replace('\r', ' ').replace('\n', ' ');
-                    JavaCG2FileUtil.write2FileWithTab(writer, mapperInterfaceName, sqlId, String.valueOf(sqlSeq), xmlElementName, formatedSql, mybatisXmlFilePath);
+                    writeData2File(mapperInterfaceName, sqlId, String.valueOf(sqlSeq), xmlElementName, formatedSql, mybatisXmlFilePath);
                     sqlSeq++;
                 }
             }

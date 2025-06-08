@@ -94,7 +94,7 @@ public class DbInitializer {
 
         // 当前配置类未创建数据库操作包装对象，进行创建
         DbOperator dbOperator = new DbOperator(dbConfInfo, callerClassNameAndHash);
-        DbOperWrapper dbOperWrapper = new DbOperWrapper(dbOperator);
+        DbOperWrapper dbOperWrapper = new DbOperWrapper(configureWrapper, dbOperator);
         // 记录数据库操作对象
         configureWrapper.setDbOperWrapper(dbOperWrapper);
         return dbOperWrapper;

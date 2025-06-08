@@ -69,6 +69,7 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
                     "_ITF",
                     "_SCC"}
             , null),
+    // todo 配置参数修改为表达式时考虑修改方式
     OCFUSE_IGNORE_METHOD_TYPE_4CALLER(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_method_type_4caller.properties",
             new String[]{"(作用) 生成指定类/方法调用的所有向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
                     "(内容) 指定忽略的方法类型",
@@ -158,7 +159,7 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
     }
 
     @Override
-    public String getEnumName() {
+    public String getEnumConstantsName() {
         return name();
     }
 
@@ -180,6 +181,11 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
     @Override
     public String getConfigPrintInfo() {
         return fileName + " " + OtherConfigFileUseSetEnum.class.getSimpleName() + "." + name();
+    }
+
+    @Override
+    public boolean isSetOrList() {
+        return true;
     }
 
     @Override

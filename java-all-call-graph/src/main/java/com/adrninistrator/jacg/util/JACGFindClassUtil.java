@@ -56,7 +56,7 @@ public class JACGFindClassUtil {
         try {
             // 以下getResource()方法参数需要指定为""，以获取到对应类所在目录
             classDirPathRaw = clazz.getResource("").getPath();
-            if (!classDirPathRaw.contains(".jar")) {
+            if (!classDirPathRaw.contains(JavaCG2Constants.EXT_JAR)) {
                 /*
                     当前类不在jar包中，本地项目执行的情况
                     示例：

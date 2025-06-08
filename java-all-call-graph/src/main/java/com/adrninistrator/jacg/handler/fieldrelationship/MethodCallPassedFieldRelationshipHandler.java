@@ -5,11 +5,11 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.methodcall.parsed.AbstractMethodCallInfoParsed;
+import com.adrninistrator.jacg.dto.methodcall.parsed.AbstractMethodCallInfoParsed4ClassField;
 import com.adrninistrator.jacg.dto.methodcall.parsed.MethodCallInfoParsed4Constant;
-import com.adrninistrator.jacg.dto.methodcall.parsed.MethodCallInfoParsed4Field;
 import com.adrninistrator.jacg.dto.methodcall.parsed.MethodCallInfoParsed4MCReturnCallId;
 import com.adrninistrator.jacg.dto.methodcall.parsed.MethodCallInfoParsed4MethodArg;
-import com.adrninistrator.jacg.dto.methodcall.parsed.MethodCallInfoParsed4StaticField;
+import com.adrninistrator.jacg.dto.methodcall.parsed.MethodCallInfoParsed4NonStaticField;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldRelationship;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
@@ -500,12 +500,12 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             MethodCallInfoParsed4Constant methodCallInfoParsed4Constant = (MethodCallInfoParsed4Constant) currentMethodCallInfoParsed;
             assignInfo = methodCallInfoParsed4Constant.getConstValue();
             setMethodAssignFlagEnum = SetMethodAssignFlagEnum.SMAFE_CONSTANT;
-        } else if (currentMethodCallInfoParsed instanceof MethodCallInfoParsed4Field) {
-            MethodCallInfoParsed4Field methodCallInfoParsed4Field = (MethodCallInfoParsed4Field) currentMethodCallInfoParsed;
-            assignInfo = methodCallInfoParsed4Field.getFieldName();
-            setMethodAssignFlagEnum = SetMethodAssignFlagEnum.SMAFE_FIELD;
-        } else if (currentMethodCallInfoParsed instanceof MethodCallInfoParsed4StaticField) {
-            MethodCallInfoParsed4StaticField methodCallInfoParsed4StaticField = (MethodCallInfoParsed4StaticField) currentMethodCallInfoParsed;
+        } else if (currentMethodCallInfoParsed instanceof MethodCallInfoParsed4NonStaticField) {
+            MethodCallInfoParsed4NonStaticField methodCallInfoParsed4NonStaticField = (MethodCallInfoParsed4NonStaticField) currentMethodCallInfoParsed;
+            assignInfo = methodCallInfoParsed4NonStaticField.getClassFieldName();
+            setMethodAssignFlagEnum = SetMethodAssignFlagEnum.SMAFE_NON_STATIC_FIELD;
+        } else if (currentMethodCallInfoParsed instanceof AbstractMethodCallInfoParsed4ClassField) {
+            AbstractMethodCallInfoParsed4ClassField methodCallInfoParsed4StaticField = (AbstractMethodCallInfoParsed4ClassField) currentMethodCallInfoParsed;
             assignInfo = methodCallInfoParsed4StaticField.getClassFieldName();
             setMethodAssignFlagEnum = SetMethodAssignFlagEnum.SMAFE_STATIC_FIELD;
         }

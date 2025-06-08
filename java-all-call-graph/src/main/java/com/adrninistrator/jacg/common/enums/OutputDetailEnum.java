@@ -38,7 +38,7 @@ public enum OutputDetailEnum {
         return OutputDetailEnum.ODE_ILLEGAL;
     }
 
-    public static String getValidValues(boolean inOneLine) {
+    public static String getValidValuesAndDesc(boolean inOneLine) {
         StringBuilder stringBuilder = new StringBuilder();
         for (OutputDetailEnum outputDetailEnum : OutputDetailEnum.values()) {
             if (OutputDetailEnum.ODE_ILLEGAL == outputDetailEnum) {
@@ -47,7 +47,7 @@ public enum OutputDetailEnum {
             if (stringBuilder.length() > 0) {
                 stringBuilder.append(inOneLine ? " " : "\n");
             }
-            stringBuilder.append(outputDetailEnum.getDetail());
+            stringBuilder.append(outputDetailEnum.getDetail()).append(": ").append(outputDetailEnum.getDesc());
         }
         return stringBuilder.toString();
     }

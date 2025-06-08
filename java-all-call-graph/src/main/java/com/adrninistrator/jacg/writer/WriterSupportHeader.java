@@ -31,6 +31,17 @@ public class WriterSupportHeader implements Closeable {
      */
     private boolean firstTime = false;
 
+
+    /**
+     * 默认不追加
+     *
+     * @param filePath 需要生成的文件路径
+     * @param header   文件头（第一行）内容
+     */
+    public WriterSupportHeader(String filePath, String header) throws FileNotFoundException {
+        this(filePath, header, false);
+    }
+
     /**
      * @param filePath 需要生成的文件路径
      * @param header   文件头（第一行）内容
@@ -72,6 +83,12 @@ public class WriterSupportHeader implements Closeable {
         }
     }
 
+    /**
+     * 向文件写入一行数据
+     *
+     * @param data
+     * @throws IOException
+     */
     public void writeLine(String data) throws IOException {
         if (firstTime) {
             // 向文件中写入文件头
@@ -80,5 +97,15 @@ public class WriterSupportHeader implements Closeable {
         }
 
         writer.write(data + JavaCG2Constants.NEW_LINE);
+    }
+
+    /**
+     * 向文件写入一行数据，输入数据使用可变长参数
+     *
+     * @param data
+     * @throws IOException
+     */
+    public void writeDataInLine(String... data) throws IOException {
+        writeLine(JavaCG2FileUtil.appendFileColumn(data));
     }
 }

@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="test.callgraph.mybatis.dao.TestTableGjcusdMapper">
+  <resultMap id="BaseResultMap" type="test.callgraph.mybatis.entity.TestTableGjcusd">
+    <id column="id_c" jdbcType="VARCHAR" property="idC" />
+    <result column="flag1_c" jdbcType="VARCHAR" property="flag1C" />
+    <result column="flag2_c" jdbcType="VARCHAR" property="flag2C" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id_c, flag1_c, flag2_c, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from test_table_gjcusd
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from test_table_gjcusd
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="test.callgraph.mybatis.entity.TestTableGjcusd">
+    insert into test_table_gjcusd (id_c, flag1_c, flag2_c, 
+      create_time, update_time)
+    values (#{idC,jdbcType=VARCHAR}, #{flag1C,jdbcType=VARCHAR}, #{flag2C,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="test.callgraph.mybatis.entity.TestTableGjcusd">
+    insert into test_table_gjcusd
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="idC != null">
+        id_c,
+      </if>
+      <if test="flag1C != null">
+        flag1_c,
+      </if>
+      <if test="flag2C != null">
+        flag2_c,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="idC != null">
+        #{idC,jdbcType=VARCHAR},
+      </if>
+      <if test="flag1C != null">
+        #{flag1C,jdbcType=VARCHAR},
+      </if>
+      <if test="flag2C != null">
+        #{flag2C,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="test.callgraph.mybatis.entity.TestTableGjcusd">
+    update test_table_gjcusd
+    <set>
+      <if test="flag1C != null">
+        flag1_c = #{flag1C,jdbcType=VARCHAR},
+      </if>
+      <if test="flag2C != null">
+        flag2_c = #{flag2C,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="test.callgraph.mybatis.entity.TestTableGjcusd">
+    update test_table_gjcusd
+    set flag1_c = #{flag1C,jdbcType=VARCHAR},
+      flag2_c = #{flag2C,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </update>
+
+  <!--  -->
+  <select id="selectByPrimaryKey2" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from test_table_gjcusd
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByOtherTable" parameterType="java.lang.String">
+    delete from test_table_gjcusd
+    where flag1_c in (select flag1_c from test_table_gjcusd2 where id_c = #{idC,jdbcType=VARCHAR})
+  </delete>
+
+  <select id="selectString1" parameterType="java.lang.String" resultType="java.lang.String">
+    select flag1_c
+    from test_table_gjcusd
+    where id_c = #{xxx,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectString2" parameterType="java.lang.String" resultType="java.lang.String">
+    select flag1_c
+    from test_table_gjcusd
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectDto1" parameterType="java.util.Map" resultType="test.callgraph.mybatis.dto.mq.send.SendRsp1">
+    select t1.id_c as id, t2.flag1_c as value
+    from test_table_gjcusd t1, test_table_gjcusd2 t2
+    where t1.id_c = #{idC,jdbcType=VARCHAR}
+    and t1.id_c = t2.id_c
+    and t2.flag1_c = #{flag1C,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectDto2" parameterType="java.util.Map" resultType="test.callgraph.mybatis.dto.mq.send.SendRsp1">
+    select id_c as id, flag1_c as value
+    from test_table_gjcusd
+    where id_c = #{arg0,jdbcType=VARCHAR}
+    and flag1_c = #{arg1,jdbcType=VARCHAR}
+    union all
+    select id_c, flag1_c
+    from test_table_gjcusd
+    where id_c = #{param1,jdbcType=VARCHAR}
+    and flag1_c = #{param2,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectByDto1" parameterType="test.callgraph.mybatis.dto.mq.send.SendReq1_1" resultType="test.callgraph.mybatis.dto.mq.send.SendRsp1">
+    select id_c as id, flag1_c as value
+    from test_table_gjcusd
+    where id_c = #{data,jdbcType=VARCHAR}
+    and flag2_c = #{data2,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectByOtherTable" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    t1.id_c, t1.flag1_c, t2.create_time, t2.update_time
+    from test_table_gjcusd as t1, test_table_gjcusd2 as t2
+    where t1.id_c = #{idC,jdbcType=VARCHAR} and t1.id_c = t2.id_c
+  </select>
+
+  <select id="selectUseParam" parameterType="test.callgraph.mybatis.entity.TestTableGjcusd" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from test_table_gjcusd
+    where id_c = #{record.idC,jdbcType=VARCHAR}
+    and flag1_c = #{record.flag1C,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectUseDftName" parameterType="test.callgraph.mybatis.entity.TestTableGjcusd" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from test_table_gjcusd
+    where id_c = #{idC,jdbcType=VARCHAR}
+    and flag1_c = #{flag1C,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectIdList" parameterType="java.lang.String" resultType="java.lang.String">
+    select id_c
+    from test_table_gjcusd
+    where flag1_c = #{flag1C,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectDtoList" parameterType="java.lang.String" resultType="test.callgraph.mybatis.dto.mq.send.SendRsp1">
+    select id_c, flag1_c
+    from test_table_gjcusd
+    where flag1_c = #{flag1C,jdbcType=VARCHAR}
+  </select>
+
+  <insert id="insertObject" parameterType="test.callgraph.mybatis.entity.TestTable">
+    insert into test_table_gjcusd (id_c, flag1_c, flag2_c, create_time,
+    update_time)
+    values (#{idC,jdbcType=VARCHAR}, #{flag1C,jdbcType=VARCHAR}, #{flag2C,jdbcType=VARCHAR}, #{create_time,jdbcType=TIMESTAMP},
+    #{update_time,jdbcType=TIMESTAMP})
+  </insert>
+
+  <select id="selectObject" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from test_table_gjcusd
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </select>
+
+  <update id="updateObject" parameterType="test.callgraph.mybatis.entity.TestTableGjcusd">
+    update test_table_gjcusd
+    set flag1_c = #{flag1C,jdbcType=VARCHAR},
+    flag2_c = #{flag2C,jdbcType=VARCHAR},
+    create_time = #{createTime,jdbcType=TIMESTAMP},
+    update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </update>
+
+  <update id="update1" parameterType="java.util.Map">
+    update test_table_gjcusd
+    set flag1_c = #{flag1C,jdbcType=VARCHAR}
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </update>
+
+  <update id="update2" parameterType="java.util.Map">
+    update test_table_gjcusd
+    set flag1_c = #{newFlag1C,jdbcType=VARCHAR}
+    where id_c = #{record.idC,jdbcType=VARCHAR}
+    and flag1_c = #{record.flag1C,jdbcType=VARCHAR}
+  </update>
+
+  <update id="update3" parameterType="java.util.Map">
+    update test_table_gjcusd
+    set flag1_c = #{other.data,jdbcType=VARCHAR}
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </update>
+
+  <update id="update4" parameterType="test.callgraph.mybatis.dto.mq.send.SendReq2">
+    update test_table_gjcusd
+    set flag1_c = #{data,jdbcType=VARCHAR}
+    where id_c = #{data1,jdbcType=VARCHAR}
+  </update>
+
+  <update id="update5" parameterType="java.util.Map">
+    update test_table_gjcusd
+    set flag1_c = #{param2,jdbcType=VARCHAR}
+    where id_c = #{arg0.idC,jdbcType=VARCHAR}
+    and flag1_c = #{param1.flag1C,jdbcType=VARCHAR}
+  </update>
+
+  <insert id="insert1" parameterType="java.lang.String">
+    insert into test_table_gjcusd (id_c, flag1_c, flag2_c, create_time, update_time)
+      select id_c, flag1_c, flag2_c, create_time, update_time
+      from test_table_gjcusd2
+      where id_c = #{idC,jdbcType=VARCHAR}
+  </insert>
+
+  <insert id="replaceInsert1" parameterType="test.callgraph.mybatis.entity.TestTableGjcusd">
+    replace into test_table_gjcusd (id_c, flag1_c, flag2_c, create_time, update_time)
+    select id_c, flag1_c, flag2_c, create_time, update_time
+    from test_table_gjcusd2
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </insert>
+
+  <insert id="insertList1" parameterType="java.util.List">
+    insert into test_table_gjcusd (id_c, flag1_c, flag2_c,
+    create_time, update_time)
+    values
+    <foreach collection="list" item="item" separator=",">
+    (
+      #{item.idC,jdbcType=VARCHAR},
+      #{item.flag1C,jdbcType=VARCHAR},
+      #{item.flag2C,jdbcType=VARCHAR},
+      #{item.createTime,jdbcType=TIMESTAMP},
+      #{item.updateTime,jdbcType=TIMESTAMP}
+    )
+    </foreach>
+  </insert>
+
+  <insert id="insertList2" parameterType="java.util.List">
+    insert into test_table_gjcusd (id_c, flag1_c, flag2_c,
+    create_time, update_time)
+    values
+    <foreach collection="recordList" item="item" separator=",">
+    (
+      #{item.idC,jdbcType=VARCHAR},
+      #{item.flag1C,jdbcType=VARCHAR},
+      #{item.flag2C,jdbcType=VARCHAR},
+      #{item.createTime,jdbcType=TIMESTAMP},
+      #{item.updateTime,jdbcType=TIMESTAMP}
+    )
+    </foreach>
+  </insert>
+
+  <insert id="insertList3" parameterType="java.util.List">
+    insert into test_table_gjcusd (id_c, flag1_c, flag2_c,
+    create_time, update_time)
+    values
+    <foreach collection="param1" item="item" separator=",">
+    (
+      #{item.idC,jdbcType=VARCHAR},
+      #{item.flag1C,jdbcType=VARCHAR},
+      #{item.flag2C,jdbcType=VARCHAR},
+      #{item.createTime,jdbcType=TIMESTAMP},
+      #{item.updateTime,jdbcType=TIMESTAMP}
+    )
+    </foreach>
+  </insert>
+
+  <insert id="insertList4" parameterType="java.util.List">
+    insert into test_table_gjcusd (id_c, flag1_c, flag2_c,
+    create_time, update_time)
+    values
+    <foreach collection="arg0" item="item" separator=",">
+      (
+      #{item.idC,jdbcType=VARCHAR},
+      #{item.flag1C,jdbcType=VARCHAR},
+      #{item.flag2C,jdbcType=VARCHAR},
+      #{item.createTime,jdbcType=TIMESTAMP},
+      #{item.updateTime,jdbcType=TIMESTAMP}
+      )
+    </foreach>
+  </insert>
+</mapper>

@@ -31,7 +31,7 @@ public class TestGenAllGraph4CallerByPackage extends TestRunByCodeBase {
         try (MethodInfoHandler methodInfoHandler = new MethodInfoHandler(configureWrapper)) {
             String packageName = JavaCG2ClassMethodUtil.getPackageName(TestMCCaller.class.getName());
             List<String> fullMethodList = methodInfoHandler.queryMethodByClassNamePrefix(packageName);
-            configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, fullMethodList.toArray(new String[0]));
+            configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, fullMethodList.toArray(new String[]{}));
             Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
         }
     }

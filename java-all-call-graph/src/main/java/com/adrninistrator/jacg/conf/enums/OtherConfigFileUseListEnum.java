@@ -57,8 +57,16 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
             new String[]{"java-all-call-graph 组件在处理方法调用时的扩展类（每行指定一项配置，可指定多行）",
                     "需要是 " + AbstractJACGMethodCallExtension.class.getName() + " 类的子类"}
             , null),
-    OCFULE_JAR_DIFF_DIR(InputDirEnum.IDE_JAR_DIFF_CALLEE_GRAPH.getDirName() + "/jar_diff_dir.properties",
-            new String[]{"(作用) 指定新旧两个目录，比较其中的不同版本jar包的方法修改情况，以及新目录中修改方法的影响范围",
+    OCFULE_JAR_DIFF_CALLEE_GRAPH_DIR(InputDirEnum.IDE_JAR_DIFF.getDirName() + "/jar_diff_callee_graph_dir.properties",
+            new String[]{"(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，获得发生变化的方法的影响范围（生成向上的完整方法调用链及调用堆栈）",
+                    "(内容) 第1行指定旧目录路径，第2行指定新目录路径",
+                    "(示例) build/jar-diff-version-1",
+                    "(示例) build/jar-diff-version-2",
+                    "(示例) D:/test/build/jar-diff-version-1",
+                    "(示例) D:/test/build/jar-diff-version-2"}
+            , null),
+    OCFULE_JAR_DIFF_CALLER_GRAPH_DIR(InputDirEnum.IDE_JAR_DIFF.getDirName() + "/jar_diff_caller_graph_dir.properties",
+            new String[]{"(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，向下的完整方法调用链",
                     "(内容) 第1行指定旧目录路径，第2行指定新目录路径",
                     "(示例) build/jar-diff-version-1",
                     "(示例) build/jar-diff-version-2",
@@ -81,7 +89,7 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
     }
 
     @Override
-    public String getEnumName() {
+    public String getEnumConstantsName() {
         return name();
     }
 
@@ -103,6 +111,11 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
     @Override
     public String getConfigPrintInfo() {
         return fileName + " " + OtherConfigFileUseListEnum.class.getSimpleName() + "." + name();
+    }
+
+    @Override
+    public boolean isSetOrList() {
+        return false;
     }
 
     @Override

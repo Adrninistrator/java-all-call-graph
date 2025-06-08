@@ -102,7 +102,7 @@ public class SpringTxNestedReporter extends AbstractReporter {
      * 生成报告
      */
     public boolean generate() {
-        SpringTxNestedExtractor springTxNestedExtractor = new SpringTxNestedExtractor();
+        SpringTxNestedExtractor springTxNestedExtractor = new SpringTxNestedExtractor(configureWrapper);
         // 公共预处理，包含写数据库步骤
         if (!commonPreHandle()) {
             return false;
@@ -116,7 +116,7 @@ public class SpringTxNestedReporter extends AbstractReporter {
         }
 
         // 查找Spring事务嵌套的调用情况
-        SpTxNestedCombined spTxNestedCombined = springTxNestedExtractor.extract(configureWrapper);
+        SpTxNestedCombined spTxNestedCombined = springTxNestedExtractor.extract();
         if (!spTxNestedCombined.getSpTxNestedByAnnotationFileList().isSuccess()) {
             logger.error("处理事务注解失败");
             return false;

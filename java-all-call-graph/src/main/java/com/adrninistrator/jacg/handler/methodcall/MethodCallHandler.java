@@ -223,6 +223,24 @@ public class MethodCallHandler extends BaseHandler {
     }
 
     /**
+     * 根据调用方完整方法HASH+长度，从方法调用表获取对应的方法调用
+     *
+     * @param methodHash 完整方法HASH+长度
+     * @return
+     */
+    public List<WriteDbData4MethodCall> queryMethodCallByCallerHash(String methodHash) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_METHOD_CALL_BY_CALLER_HASH;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLER_METHOD_HASH + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, methodHash);
+    }
+
+    /**
      * 根据被调用方完整方法HASH+长度，从方法调用表获取对应的完整方法
      *
      * @param methodHash 完整方法HASH+长度
@@ -299,7 +317,7 @@ public class MethodCallHandler extends BaseHandler {
      * @return
      */
     public List<WriteDbData4MethodCall> queryMethodCallByCalleeHashObjType(String calleeMethodHash, String calleeObjType) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_METHOD_CALL_BY_CALLEE_HASH;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_METHOD_CALL_BY_CALLEE_HASH_OBJ_TYPE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns(DC.MC_CALLER_FULL_METHOD, DC.MC_CALLER_LINE_NUMBER, DC.MC_CALLEE_FULL_METHOD) +
@@ -492,13 +510,14 @@ public class MethodCallHandler extends BaseHandler {
      */
     public List<WriteDbData4MethodCall> queryNormalMethodCallByCalleeFullMethod(String calleeFullMethod) {
         List<String> existsInstructionList = JavaCG2CallTypeEnum.getExistsInstructionList();
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_NORMAL_MC_BY_EEMH;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_NORMAL_MC_BY_CALLEE_CLASS_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
+            // 由于方法HASH中包含了方法返回类型，当前方法参数仅指定被调用方完整方法，因此不能通过方法HASH查找
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?" +
-                    " and " + DC.MC_CALLEE_FULL_METHOD + " like concat(?, '%')" +
+                    " and " + DC.MC_CALLEE_FULL_METHOD + " = ?" +
                     " and " + DC.MC_CALL_TYPE + " in " + JACGSqlUtil.genQuestionString(existsInstructionList.size());
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }

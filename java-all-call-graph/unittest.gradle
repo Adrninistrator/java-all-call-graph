@@ -14,38 +14,6 @@ void deleteDirsByPrefix(String dirName, String subDirPrefix) {
     }
 }
 
-test {
-    doFirst {
-        deleteDirsByPrefix("_jacg_o_ee", "test.runbycode.")
-        deleteDirsByPrefix("_jacg_o_er", "test.runbycode.")
-        delete "_unittest_output"
-        exclude('test/other', 'test/runbycode/targz', 'test/runlocal', 'test/runbycode/TestRBC*')
-        minHeapSize = "256m"
-        maxHeapSize = "1g"
-
-        maxParallelForks = 1
-
-        forkEvery = 5
-
-        def TEST_FLAG_RECORD_LOG_TO_FILE = "test.flag.record.log.to.file"
-        def testFlagRecordLogToFile = System.getProperty(TEST_FLAG_RECORD_LOG_TO_FILE)
-        jvmArgs "-Dfile.encoding=UTF-8", "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=256m", "-D" + TEST_FLAG_RECORD_LOG_TO_FILE + "=" + testFlagRecordLogToFile
-
-        testLogging {
-            events "PASSED", "STARTED", "FAILED", "SKIPPED"
-        }
-    }
-}
-
-jacocoTestReport {
-    reports {
-        xml.required.set(false)
-        csv.required.set(false)
-        html.required.set(true)
-        html.outputLocation.set(file("${buildDir}/jacocoReport"))
-    }
-}
-
 // 将测试代码生成jar包
 tasks.register('test_gen_jar', Jar) {
     archiveFileName.set('test.jar')
@@ -57,6 +25,10 @@ tasks.register('test_gen_jar', Jar) {
     }
     from('src/test/resources/') {
         include 'applicationContext.xml'
+        into 'resources/'
+    }
+    from('src/test/resources/') {
+        include 'mybatis/**', 'xml_example/**'
         into 'resources/'
     }
     doLast {
@@ -71,21 +43,41 @@ tasks.register('test_gen_jar', Jar) {
     }
 }
 
-// 拷贝对应的java代码
+jacocoTestReport {
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.required.set(true)
+        html.outputLocation.set(file("${buildDir}/jacocoReport"))
+    }
+}
+
+// 拷贝示例对应的java代码
 tasks.register('test_copy_example') {
     doFirst {
         def exampleFlag = project.properties.get("example_flag")
         if (exampleFlag != null) {
             println 'example_flag: ' + exampleFlag
             delete 'src/test/java/test/diffjar'
-            def exampleDir = 'src/test/resources/java_example/example_' + exampleFlag + '/diffjar'
-            def javaExampleDirs = new File("${exampleDir}").listFiles().findAll { File f -> (f.isDirectory()) }
+            def srcJavaExampleDir = 'src/test/resources/java_example/example_' + exampleFlag + '/diffjar'
+            def javaExampleDirs = new File("${srcJavaExampleDir}").listFiles().findAll { File f -> (f.isDirectory()) }
             javaExampleDirs.each { javaExampleDir ->
                 def dirName = javaExampleDir.getName()
                 println 'dir_name: ' + dirName
                 copy {
-                    from "${exampleDir}/" + dirName
+                    from "${srcJavaExampleDir}/" + dirName
                     into 'src/test/java/test/diffjar/' + dirName
+                }
+            }
+            delete 'src/src/test/resources/jardiff_mybatis'
+            def srcSqlExampleDir = 'src/test/resources/jardiff_mybatis_example/example_' + exampleFlag
+            def sqlExampleDirs = new File("${srcSqlExampleDir}").listFiles().findAll { File f -> (f.isDirectory()) }
+            sqlExampleDirs.each { javaExampleDir ->
+                def dirName = javaExampleDir.getName()
+                println 'dir_name: ' + dirName
+                copy {
+                    from "${srcSqlExampleDir}/" + dirName
+                    into 'src/test/resources/jardiff_mybatis/' + dirName
                 }
             }
         }
@@ -97,7 +89,7 @@ compileTestJava.dependsOn(test_copy_example)
 // 将用于比较的测试代码生成jar包
 tasks.register('test_gen_diff_jar', Jar) {
     def exampleFlag = project.properties.get("example_flag")
-    def jarName = 'jar-diff-version-' + exampleFlag + '/jar-diff.jar'
+    def jarName = 'jar-diff-version-' + exampleFlag + '/jar-diff-' + exampleFlag + '.0.0.jar'
     archiveFileName.set("${jarName}")
     destinationDirectory = file("${buildDir}")
     doFirst {
@@ -105,7 +97,7 @@ tasks.register('test_gen_diff_jar', Jar) {
         delete "${buildDir}/" + jarName
     }
     from(sourceSets.test.output) {
-        include 'test/diffjar/**'
+        include 'test/diffjar/**', 'xml_example/**', 'jardiff_mybatis/**'
         into '/'
     }
 }
@@ -113,20 +105,22 @@ tasks.register('test_gen_diff_jar', Jar) {
 // 将用于比较的测试代码生成jar包，包含一个相同的jar包
 tasks.register('test_gen_diff_jar_with_same', Jar) {
     def exampleFlag = project.properties.get("example_flag")
-    def jarName = 'jar-diff-with-same-' + exampleFlag + '/jar-diff.jar'
+    def jarName = 'jar-diff-with-same-' + exampleFlag + '/jar-diff-' + exampleFlag + '.0.0.jar'
     archiveFileName.set("${jarName}")
     destinationDirectory = file("${buildDir}")
     doFirst {
         println 'example_flag: ' + exampleFlag + ' jarName: ' + jarName
         delete "${buildDir}/" + jarName
     }
-    from(sourceSets.test.output) {
-        include 'test/diffjar/**'
-        into '/'
-    }
-    copy {
-        from "${buildDir}/test.jar"
-        into "${buildDir}/jar-diff-with-same-" + exampleFlag + "/"
+    if (exampleFlag != null) {
+        from(sourceSets.test.output) {
+            include 'test/diffjar/**', 'xml_example/**', 'jardiff_mybatis/**'
+            into '/'
+        }
+        copy {
+            from "${buildDir}/test.jar"
+            into "${buildDir}/jar-diff-with-same-" + exampleFlag + "/"
+        }
     }
 }
 
@@ -136,7 +130,7 @@ tasks.register('test_gen_diff_tar_gz', Tar) {
     compression = Compression.GZIP
     destinationDirectory = layout.buildDirectory.dir("${buildDir}")
     def exampleFlag = project.properties.get("example_flag")
-    // 若使用archiveBaseName，则生成的文件包中会包含“-当前版本号”
+    // 若使用archiveBaseName，则生成的文件包中会包含“-当前版本号
     archiveFileName.set("jar-diff-version-" + exampleFlag + ".tar.gz")
     destinationDirectory.set(file("${buildDir}/test_diff_tar_gz"))
     from("${buildDir}/jar-diff-version-" + exampleFlag)
@@ -179,6 +173,31 @@ tasks.register('gen_jar_in_war', Jar) {
 
     from(fileTree('jar_output_dir/lib')) {
         into 'WEB-INF/lib'
+    }
+}
+
+test {
+    dependsOn jar
+    doFirst {
+        println "需要通过 test_run.bat 执行"
+        deleteDirsByPrefix("_jacg_o_ee", "test.runbycode.")
+        deleteDirsByPrefix("_jacg_o_er", "test.runbycode.")
+        delete "_unittest_output"
+        exclude('test/other', 'test/runbycode/targz', 'test/runlocal', 'test/runbycode/TestRBC*')
+        minHeapSize = "256m"
+        maxHeapSize = "1g"
+
+        maxParallelForks = 1
+
+        forkEvery = 5
+
+        def TEST_FLAG_RECORD_LOG_TO_FILE = "test.flag.record.log.to.file"
+        def testFlagRecordLogToFile = System.getProperty(TEST_FLAG_RECORD_LOG_TO_FILE)
+        jvmArgs "-Dfile.encoding=UTF-8", "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=256m", "-D" + TEST_FLAG_RECORD_LOG_TO_FILE + "=" + testFlagRecordLogToFile
+
+        testLogging {
+            events "PASSED", "STARTED", "FAILED", "SKIPPED"
+        }
     }
 }
 

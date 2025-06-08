@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import test.callgraph.spring.bean.define.AbstractSpringServiceC;
 import test.callgraph.spring.bean.define.SpringInterfaceB;
 import test.callgraph.spring.bean.define.SpringInterfaceD;
+import test.callgraph.spring.bean.define.impl.SpringServiceImplB1;
 import test.callgraph.spring.bean.define.impl.SpringServiceImplB2;
 import test.callgraph.spring.bean.define.impl.SpringServiceImplD1;
 
@@ -18,10 +19,10 @@ import javax.annotation.Resource;
 public abstract class AbstractTestSpringBeanB {
 
     @Autowired
-    @Qualifier("test.callgraph.spring.bean.define.impl.SpringServiceImplB1")
+    @Qualifier(SpringServiceImplB1.BEAN_NAME)
     protected SpringInterfaceB springInterfaceB1;
 
-    @Resource(name = "springServiceImplB2")
+    @Resource(name = SpringServiceImplB2.BEAN_NAME)
     protected SpringInterfaceB springInterfaceB2A;
 
     @Resource(type = SpringServiceImplB2.class)

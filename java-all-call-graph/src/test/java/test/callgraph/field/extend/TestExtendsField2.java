@@ -7,7 +7,7 @@ package test.callgraph.field.extend;
  */
 public class TestExtendsField2 extends TestExtendsField3 {
 
-    private int i2;
+    protected int i2;
 
     public int getI2() {
         return i2;

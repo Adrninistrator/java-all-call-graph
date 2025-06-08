@@ -24,13 +24,13 @@ public class MethodCallInfo {
     @JsonProperty("sf")
     private String staticField;
 
-    // 可能的静态字段的方法调用
-    @JsonProperty("sfm")
-    private String staticFieldMethodCall;
+    // 可能的非静态字段
+    @JsonProperty("nsf")
+    private String nonStaticField;
 
-    // 可能的字段名称
-    @JsonProperty("nof")
-    private String nameOfField;
+    // 可能的静态字段的方法调用返回值
+    @JsonProperty("sfmcr")
+    private String staticFieldMCR;
 
     // 可能的变量名称
     @JsonProperty("nov")
@@ -84,20 +84,20 @@ public class MethodCallInfo {
         this.staticField = staticField;
     }
 
-    public String getStaticFieldMethodCall() {
-        return staticFieldMethodCall;
+    public String getNonStaticField() {
+        return nonStaticField;
     }
 
-    public void setStaticFieldMethodCall(String staticFieldMethodCall) {
-        this.staticFieldMethodCall = staticFieldMethodCall;
+    public void setNonStaticField(String nonStaticField) {
+        this.nonStaticField = nonStaticField;
     }
 
-    public String getNameOfField() {
-        return nameOfField;
+    public String getStaticFieldMCR() {
+        return staticFieldMCR;
     }
 
-    public void setNameOfField(String nameOfField) {
-        this.nameOfField = nameOfField;
+    public void setStaticFieldMCR(String staticFieldMCR) {
+        this.staticFieldMCR = staticFieldMCR;
     }
 
     public String getNameOfVariable() {
@@ -152,22 +152,22 @@ public class MethodCallInfo {
         if (staticField != null) {
             sb.append(", staticField='").append(staticField).append('\'');
         }
-        if (staticFieldMethodCall != null) {
-            sb.append(", staticFieldMethodCall='").append(staticFieldMethodCall).append('\'');
+        if (nonStaticField != null) {
+            sb.append(", nonStaticField='").append(nonStaticField).append('\'');
         }
-        if (nameOfField != null) {
-            sb.append(", nameOfField='").append(nameOfField).append('\'');
+        if (staticFieldMCR != null) {
+            sb.append(", staticFieldMCR='").append(staticFieldMCR).append('\'');
         }
         if (nameOfVariable != null) {
             sb.append(", nameOfVariable='").append(nameOfVariable).append('\'');
         }
-        if (methodArgSeq != 0) {
+        if (methodArgSeq != null && methodArgSeq != 0) {
             sb.append(", methodArgSeq='").append(methodArgSeq).append('\'');
         }
         if (methodCallReturnId != null) {
             sb.append(", methodCallReturnId='").append(methodCallReturnId).append('\'');
         }
-        if (methodArgSeqEQC != 0) {
+        if (methodArgSeqEQC != null && methodArgSeqEQC != 0) {
             sb.append(", methodArgSeqEQC='").append(methodArgSeqEQC).append('\'');
         }
         if (methodCallReturnIdEQC != null) {

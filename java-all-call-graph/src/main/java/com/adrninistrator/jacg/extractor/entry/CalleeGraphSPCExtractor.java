@@ -14,9 +14,13 @@ import java.util.List;
  */
 public class CalleeGraphSPCExtractor extends CalleeGraphEntryExtractor {
 
+    public CalleeGraphSPCExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
+    }
+
     // 指定生成方法调用堆栈时的关键字使用代表入口方法的标志
     @Override
-    protected boolean setFindStackKeyword4ee(ConfigureWrapper configureWrapper) {
+    protected boolean setFindStackKeyword4ee() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
             List<String> list = springHandler.queryAllControllerFullMethod();
             if (JavaCG2Util.isCollectionEmpty(list)) {

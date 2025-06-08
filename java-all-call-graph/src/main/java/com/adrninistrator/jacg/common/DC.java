@@ -121,6 +121,11 @@ public class DC {
     public static final String BD_DATA_TYPE = "data_type";
     public static final String BD_DATA_VALUE = "data_value";
 
+    public static final String PCD_RECORD_ID = "record_id";
+    public static final String PCD_DATA_TYPE = "data_type";
+    public static final String PCD_DATA_KEY = "data_key";
+    public static final String PCD_DATA_VALUE = "data_value";
+
     public static final String CI_RECORD_ID = "record_id";
     public static final String CI_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String CI_ACCESS_FLAGS = "access_flags";
@@ -220,6 +225,7 @@ public class DC {
     public static final String SPB_RECORD_ID = "record_id";
     public static final String SPB_SPRING_BEAN_NAME = "spring_bean_name";
     public static final String SPB_SEQ = "seq";
+    public static final String SPB_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String SPB_CLASS_NAME = "class_name";
     public static final String SPB_BEAN_TYPE = "bean_type";
 
@@ -599,16 +605,44 @@ public class DC {
     public static final String SMAI_ASSIGN_INFO = "assign_info";
     public static final String SMAI_EQUIVALENT_CONVERSION = "equivalent_conversion";
 
-    public static final String MCSF_RECORD_ID = "record_id";
-    public static final String MCSF_CALL_ID = "call_id";
-    public static final String MCSF_OBJ_ARGS_SEQ = "obj_args_seq";
-    public static final String MCSF_SEQ = "seq";
-    public static final String MCSF_CALLER_METHOD_HASH = "caller_method_hash";
-    public static final String MCSF_SIMPLE_CLASS_NAME = "simple_class_name";
-    public static final String MCSF_FIELD_NAME = "field_name";
-    public static final String MCSF_SIMPLE_FIELD_TYPE = "simple_field_type";
-    public static final String MCSF_CLASS_NAME = "class_name";
-    public static final String MCSF_FIELD_TYPE = "field_type";
+    public static final String MCF_RECORD_ID = "record_id";
+    public static final String MCF_CALL_ID = "call_id";
+    public static final String MCF_OBJ_ARGS_SEQ = "obj_args_seq";
+    public static final String MCF_SEQ = "seq";
+    public static final String MCF_CALLER_METHOD_HASH = "caller_method_hash";
+    public static final String MCF_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String MCF_FIELD_NAME = "field_name";
+    public static final String MCF_SIMPLE_FIELD_TYPE = "simple_field_type";
+    public static final String MCF_CLASS_NAME = "class_name";
+    public static final String MCF_FIELD_TYPE = "field_type";
+
+    public static final String[] METHOD_CALL_FIELD_COLUMNS = new String[]{
+            MCF_RECORD_ID,
+            MCF_CALL_ID,
+            MCF_OBJ_ARGS_SEQ,
+            MCF_SEQ,
+            MCF_CALLER_METHOD_HASH,
+            MCF_SIMPLE_CLASS_NAME,
+            MCF_FIELD_NAME,
+            MCF_SIMPLE_FIELD_TYPE,
+            MCF_CLASS_NAME,
+            MCF_FIELD_TYPE,
+    };
+
+    public static final String MCSFMCR_RECORD_ID = "record_id";
+    public static final String MCSFMCR_CALL_ID = "call_id";
+    public static final String MCSFMCR_OBJ_ARGS_SEQ = "obj_args_seq";
+    public static final String MCSFMCR_SEQ = "seq";
+    public static final String MCSFMCR_CALLER_METHOD_HASH = "caller_method_hash";
+    public static final String MCSFMCR_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String MCSFMCR_FIELD_NAME = "field_name";
+    public static final String MCSFMCR_SIMPLE_FIELD_TYPE = "simple_field_type";
+    public static final String MCSFMCR_CLASS_NAME = "class_name";
+    public static final String MCSFMCR_FIELD_TYPE = "field_type";
+    public static final String MCSFMCR_CALLEE_METHOD_HASH = "callee_method_hash";
+    public static final String MCSFMCR_CALLEE_METHOD_NAME = "callee_method_name";
+    public static final String MCSFMCR_CALLEE_FULL_METHOD = "callee_full_method";
+    public static final String MCSFMCR_CALLEE_RETURN_TYPE = "callee_return_type";
 
     public static final String MCMCR_RECORD_ID = "record_id";
     public static final String MCMCR_CALL_ID = "call_id";
@@ -628,6 +662,7 @@ public class DC {
     public static final String MMFS_SQL_SEQ = "sql_seq";
     public static final String MMFS_XML_ELEMENT_NAME = "xml_element_name";
     public static final String MMFS_FORMATED_SQL = "formated_sql";
+    public static final String MMFS_SQL_HASH = "sql_hash";
     public static final String MMFS_MAPPER_SIMPLE_CLASS_NAME = "mapper_simple_class_name";
     public static final String MMFS_MAPPER_CLASS_NAME = "mapper_class_name";
     public static final String MMFS_XML_FILE_PATH = "xml_file_path";

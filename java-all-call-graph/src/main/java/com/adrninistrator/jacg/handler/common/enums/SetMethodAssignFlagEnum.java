@@ -8,7 +8,7 @@ package com.adrninistrator.jacg.handler.common.enums;
 public enum SetMethodAssignFlagEnum {
     SMAFE_GET("get", "set方法都使用了get方法返回值作为参数"),
     SMAFE_CONSTANT("constant", "set方法赋值时使用常量"),
-    SMAFE_FIELD("field", "set方法赋值时使用字段"),
+    SMAFE_NON_STATIC_FIELD("non_static_field", "set方法赋值时使用非静态字段"),
     SMAFE_STATIC_FIELD("static_field", "set方法赋值时使用静态字段"),
     SMAFE_MC_NO_RETURN("mc_no_return", "set方法赋值时使用的方法调用返回的调用信息未找到"),
     SMAFE_MC_ENUM("mc_enum", "set方法赋值时使用的方法调用被调用类为枚举"),

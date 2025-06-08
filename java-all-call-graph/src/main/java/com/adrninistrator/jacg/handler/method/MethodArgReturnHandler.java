@@ -442,7 +442,8 @@ public class MethodArgReturnHandler extends BaseHandler {
             methodArgAndCommonFieldInfo.setCommonFieldInfoInClassList(commonFieldInfoInClassList);
             // 添加方法当前自定义类型参数中的全部常用数据类型的字段信息
             if (JavaCG2Constants.FILE_KEY_CATEGORY_CUSTOM.equals(methodArgument.getArgCategory())) {
-                List<CommonFieldInfoInClass> commonFieldInfoInClassListInArg = fieldInfoHandler.queryAllCommonFieldInfoInClass(methodArgument.getArgTypeNad(), true, true, true, null);
+                List<CommonFieldInfoInClass> commonFieldInfoInClassListInArg = fieldInfoHandler.queryAllCommonFieldInfoInClass(methodArgument.getArgTypeNad(), true, true, true,
+                        null);
                 if (!JavaCG2Util.isCollectionEmpty(commonFieldInfoInClassListInArg)) {
                     commonFieldInfoInClassList.addAll(commonFieldInfoInClassListInArg);
                 }

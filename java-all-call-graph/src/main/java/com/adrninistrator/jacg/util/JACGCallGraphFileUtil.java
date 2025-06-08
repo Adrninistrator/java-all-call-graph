@@ -432,13 +432,13 @@ public class JACGCallGraphFileUtil {
                 callGraphLineParsed.setCycleCallLevel(Integer.valueOf(level));
             } else if (JACGConstants.CALLEE_FLAG_ENTRY_NO_TAB.equals(column)) {
                 // 入口方法
-                callGraphLineParsed.setEntryMethod(true);
+                callGraphLineParsed.setEntryMethodFlag(true);
             } else if (JACGConstants.CALL_FLAG_RUN_IN_OTHER_THREAD_NO_TAB.equals(column)) {
                 // 在其他线程中执行
-                callGraphLineParsed.setRunInOtherThread(true);
+                callGraphLineParsed.setRunInOtherThreadFlag(true);
             } else if (JACGConstants.CALL_FLAG_RUN_IN_SPRING_TX_NO_TAB.equals(column)) {
                 // 在事务中执行
-                callGraphLineParsed.setRunInTransaction(true);
+                callGraphLineParsed.setRunInTransactionFlag(true);
             }
         }
         callGraphLineParsed.setBusinessDataList(businessDataList);

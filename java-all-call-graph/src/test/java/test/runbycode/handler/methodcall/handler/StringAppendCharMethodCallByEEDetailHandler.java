@@ -46,7 +46,8 @@ public class StringAppendCharMethodCallByEEDetailHandler extends BaseMethodCallB
     }
 
     @Override
-    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType, MethodDetailNoReturnType calleeMethodDetailNoReturnType,
+    protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
+                                        MethodDetailNoReturnType calleeMethodDetailNoReturnType,
                                         ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args) {
         List<String> argTypeList = Arrays.asList(
                 String.class.getName(),
@@ -56,7 +57,8 @@ public class StringAppendCharMethodCallByEEDetailHandler extends BaseMethodCallB
         );
 
         // 获取类型匹配的被调用对象及参数的用于人工查看的方法调用中使用的相关信息
-        Map<Integer, List<MethodCallInfo4Read>> methodCallInfo4ReadMap = JACGMethodCallInfoUtil.genMethodCallInfo4ReadMapByArgType(calleeMethodDetailNoReturnType, objArgsInfoInMethodCall,
+        Map<Integer, List<MethodCallInfo4Read>> methodCallInfo4ReadMap = JACGMethodCallInfoUtil.genMethodCallInfo4ReadMapByArgType(calleeMethodDetailNoReturnType,
+                objArgsInfoInMethodCall,
                 argTypeList);
         if (!methodCallInfo4ReadMap.isEmpty()) {
             List<Integer> seqList = new ArrayList<>(methodCallInfo4ReadMap.keySet());

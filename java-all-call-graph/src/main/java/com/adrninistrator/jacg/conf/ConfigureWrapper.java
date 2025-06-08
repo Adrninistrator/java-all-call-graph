@@ -105,7 +105,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     // 处理数据库里的表名后缀
     private String handleAppName(String appName) {
         if (!APP_NAME_PATTERN.matcher(appName).matches()) {
-            logger.error("属性只支持字母、数字及下划线\n{} {} {}", ConfigKeyEnum.CKE_APP_NAME.getFileName(), ConfigKeyEnum.CKE_APP_NAME.getConfigPrintInfo(), appName);
+            logger.error("属性只支持字母、数字及下划线 {} {}", appName, genConfigUsage(ConfigKeyEnum.CKE_APP_NAME));
             return null;
         }
         // 将app.name参数中的-替换为_
@@ -116,8 +116,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     private Integer handleThreadNum(String strThreadNum) {
         int threadNum = Integer.parseInt(strThreadNum);
         if (threadNum <= 0 || threadNum > JACGConstants.MAX_THREAD_NUM) {
-            logger.error("参数配置非法\n{} {}\n应在以下范围: (0,{}]", ConfigKeyEnum.CKE_THREAD_NUM.getFileName(), ConfigKeyEnum.CKE_THREAD_NUM.getConfigPrintInfo(),
-                    JACGConstants.MAX_THREAD_NUM);
+            logger.error("参数配置非法 {} 应在以下范围: (0,{}] {}", strThreadNum, JACGConstants.MAX_THREAD_NUM, genConfigUsage(ConfigKeyEnum.CKE_THREAD_NUM));
             return null;
         }
         return threadNum;
@@ -130,7 +129,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
         }
         // 使用指定的名称作为子目录名
         if (JavaCG2FileUtil.checkFilePathContainsSeparator(outputDirName)) {
-            logger.error("指定的目录名中不允许包含目录分隔符 {} {} {}", ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getFileName(), ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.getConfigPrintInfo(), outputDirName);
+            logger.error("指定的目录名中不允许包含目录分隔符 {} {}", outputDirName, genConfigUsage(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME));
             return null;
         }
         return outputDirName;
@@ -143,7 +142,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
         }
         // 使用指定的名称作为子目录名
         if (JavaCG2FileUtil.checkFilePathContainsSeparator(outputDirFlag)) {
-            logger.error("指定的目录标志中不允许包含目录分隔符 {} {} {}", ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.getFileName(), ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.getConfigPrintInfo(), outputDirFlag);
+            logger.error("指定的目录标志中不允许包含目录分隔符 {} {}", outputDirFlag, genConfigUsage(ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG));
             return null;
         }
         return outputDirFlag;
@@ -153,8 +152,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     private Integer handleBatchInsertSize(String strDbBatchInsertSize) {
         int dbInsertBatchSize = Integer.parseInt(strDbBatchInsertSize);
         if (dbInsertBatchSize <= 0 || dbInsertBatchSize > JACGConstants.MAX_DB_INSERT_BATCH_SIZE) {
-            logger.error("参数配置非法 {} {} 应在以下范围: (0,{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(), ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getConfigPrintInfo(),
-                    JACGConstants.MAX_DB_INSERT_BATCH_SIZE);
+            logger.error("参数配置非法 {} 应在以下范围: (0,{}] {}", strDbBatchInsertSize, JACGConstants.MAX_DB_INSERT_BATCH_SIZE, genConfigUsage(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE));
             return null;
         }
         return dbInsertBatchSize;
@@ -163,8 +161,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     // 处理生成调用链时的详细程度
     private String handleOutputDetail(String outputDetail) {
         if (OutputDetailEnum.ODE_ILLEGAL == OutputDetailEnum.getFromDetail(outputDetail)) {
-            logger.error("参数配置非法\n{} {} {}\n可选值如下: {}", ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getFileName(), ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.getConfigPrintInfo()
-                    , outputDetail, OutputDetailEnum.getValidValues(true));
+            logger.error("参数配置非法 {} 可选值如下 {} {}", outputDetail, OutputDetailEnum.getValidValuesAndDesc(true), genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL));
             return null;
         }
         return outputDetail;
@@ -173,8 +170,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     // 处理H2数据库文件路径
     private String handleDbH2FilePath(String dbH2FilePath) {
         if (StringUtils.endsWithIgnoreCase(dbH2FilePath, JACGConstants.H2_FILE_EXT)) {
-            logger.error("不需要指定H2数据库的后缀{}\n{} {}\n{}", JACGConstants.H2_FILE_EXT, ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH.getFileName(),
-                    ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH.getConfigPrintInfo(), dbH2FilePath);
+            logger.error("不需要指定H2数据库的后缀{} {} {}", JACGConstants.H2_FILE_EXT, dbH2FilePath, genConfigUsage(ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH));
             return null;
         }
         return dbH2FilePath;
@@ -195,9 +191,6 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
 
     @Override
     protected Object customGetDefaultConfig(MainConfigInterface mainConfig) {
-        if (ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE == mainConfig) {
-            return Boolean.TRUE;
-        }
         return null;
     }
 

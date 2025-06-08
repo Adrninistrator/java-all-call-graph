@@ -41,16 +41,20 @@ import java.util.Set;
  * @description: 对调用链结果文件进行数据提取，查找Spring事务相关调用情况的基类
  */
 public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor {
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractSpringTxExtractor.class);
+
+    protected AbstractSpringTxExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
+    }
 
     /**
      * 提取使用@Transactional注解的方法相关信息
      *
-     * @param configureWrapper
      * @param annotationHandler 外层需要使用try-with-resource的方式，确保使用完后close
      * @return
      */
-    protected ListWithResult<CallerExtractedFile> extractTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
+    protected ListWithResult<CallerExtractedFile> extractTxAnnotation(AnnotationHandler annotationHandler) {
         List<FullMethodWithReturnType> springTransactionalMethodList = annotationHandler.queryMethodsWithAnnotation(JACGCommonNameConstants.SPRING_TX_ANNOTATION);
         if (springTransactionalMethodList == null) {
             return ListWithResult.genFail();
@@ -66,7 +70,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, entryMethodSet);
 
         // 调用父类的方法生成调用堆栈文件，参数2设为false，使父类不关闭数据源
-        ListWithResult<CallerExtractedFile> callerExtractedFileList = baseExtract(configureWrapper, false);
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = baseExtract(false);
         if (!callerExtractedFileList.isSuccess()) {
             logger.info("未找到@Transactional注解对应的方法对应的调用堆栈文件");
         } else {
@@ -78,14 +82,13 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
     /**
      * 提取TransactionTemplate对应的方法相关信息
      *
-     * @param configureWrapper
      * @param spTxEntryMethodTxTplList
      * @return
      */
-    protected ListWithResult<CallerExtractedFile> extractTxTpl(ConfigureWrapper configureWrapper, List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList) {
+    protected ListWithResult<CallerExtractedFile> extractTxTpl(List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList) {
         List<String> txTplEntryMethodList = new ArrayList<>();
         // 查询事务模板对应的入口方法
-        queryTxTplEntryMethod(configureWrapper, spTxEntryMethodTxTplList, txTplEntryMethodList);
+        queryTxTplEntryMethod(spTxEntryMethodTxTplList, txTplEntryMethodList);
         if (txTplEntryMethodList.isEmpty()) {
             logger.info("未找到TransactionTemplate对应的方法");
             return ListWithResult.genEmpty();
@@ -96,7 +99,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, new HashSet<>(txTplEntryMethodList));
 
         // 调用父类的方法生成调用堆栈文件，参数2设为false，使父类不关闭数据源
-        ListWithResult<CallerExtractedFile> callerExtractedFileList = baseExtract(configureWrapper, false);
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = baseExtract(false);
         if (!callerExtractedFileList.isSuccess()) {
             logger.info("未找到TransactionTemplate对应的方法对应的调用堆栈文件");
         } else {
@@ -105,7 +108,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         return callerExtractedFileList;
     }
 
-    protected void queryTxTplEntryMethod(ConfigureWrapper configureWrapper, List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList, List<String> txTplEntryMethodList) {
+    protected void queryTxTplEntryMethod(List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList, List<String> txTplEntryMethodList) {
         // 查询TransactionTemplate使用匿名内部类的方法
         try (JACGExtendsImplHandler jacgExtendsImplHandler = new JACGExtendsImplHandler(configureWrapper)) {
             // 查询事务模板使用匿名内部类的信息
@@ -250,7 +253,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
     }
 
     // 指定公共配置参数
-    protected void setCommonConfig(ConfigureWrapper configureWrapper) {
+    protected void setCommonConfig() {
         // 添加方法注解处理类
         configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 SpringTransactionalFormatter.class.getName(),

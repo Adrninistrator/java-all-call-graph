@@ -14,9 +14,13 @@ import java.util.List;
  */
 public class CalleeGraphSPCFileUploadExtractor extends CalleeGraphEntryExtractor {
 
+    public CalleeGraphSPCFileUploadExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
+    }
+
     // 指定生成方法调用堆栈时的关键字使用代表入口方法的标志
     @Override
-    protected boolean setFindStackKeyword4ee(ConfigureWrapper configureWrapper) {
+    protected boolean setFindStackKeyword4ee() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
             List<String> fileUploadControllerFullMethodList = springHandler.queryFileUploadControllerOnlyMethod();
             // 对（可能的）Spring Controller文件上传方法的处理

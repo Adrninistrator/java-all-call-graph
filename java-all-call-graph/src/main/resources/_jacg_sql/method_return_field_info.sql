@@ -1,6 +1,6 @@
 CREATE TABLE if not exists jacg_method_return_field_info_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
-  method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
+  method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   seq int NOT NULL COMMENT '某个方法返回的字段信息序号，从0开始',
   static_field tinyint NOT NULL COMMENT '方法返回的字段是否为静态，1:是，0:否',
   field_of_this tinyint NOT NULL COMMENT '方法返回的字段是否属于this对象，1:是，0:否',

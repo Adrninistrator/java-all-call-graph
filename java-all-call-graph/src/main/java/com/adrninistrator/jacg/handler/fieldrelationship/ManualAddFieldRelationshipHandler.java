@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * manualAddFieldRelationship
  * afterAdd
  * <p>
- * 假如使用 manualAddFieldRelationship 方法人工增加记录，则按照以下顺序调用
+ * 假如使用 manualAddFieldRelationship 方法人工增加记录，则需要按照以下顺序调用
  * beforeAdd
  * manualAddFieldRelationship
  * afterAdd

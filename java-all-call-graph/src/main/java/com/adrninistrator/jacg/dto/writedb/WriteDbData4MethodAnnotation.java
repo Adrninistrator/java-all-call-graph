@@ -81,6 +81,7 @@ public class WriteDbData4MethodAnnotation implements BaseWriteDbData {
     public void setReturnType(String returnType) {
         this.returnType = returnType;
     }
+
     public String getSimpleClassName() {
         return simpleClassName;
     }

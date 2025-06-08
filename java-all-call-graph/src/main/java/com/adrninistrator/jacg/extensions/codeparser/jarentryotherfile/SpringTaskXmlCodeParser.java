@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGXmlUtil;
 import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
-import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,7 @@ public class SpringTaskXmlCodeParser extends AbstractSaveData2FileParser {
 
     // 处理.xml文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
+    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
         try {
             Element root = JACGXmlUtil.parseXmlRootElement(inputStream);
             if (!"beans".equals(root.getName())) {
@@ -54,7 +53,7 @@ public class SpringTaskXmlCodeParser extends AbstractSaveData2FileParser {
 
                     String beanName = element2.getAttributeValue("ref");
                     String methodName = element2.getAttributeValue("method");
-                    JavaCG2FileUtil.write2FileWithTab(writer, beanName, methodName);
+                    writeData2File(beanName, methodName);
                 }
             }
         } catch (Exception e) {

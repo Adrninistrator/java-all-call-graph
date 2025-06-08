@@ -133,6 +133,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     // 当前处理的文件行数组序号
     private int lineArrayIndex = 0;
 
+    // 是否跳过依赖的处理类写入顺序
+    private boolean skipDependsCheck = false;
+
     // 若当前实例不是从文件读取，则将获取的信息写入对应文件
     protected Writer fileWriter;
 
@@ -184,6 +187,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
                 throw new JavaCG2RuntimeException("类不需要读取文件但配置错误");
             }
         }
+
         if (ArrayUtils.isEmpty(dbTableInfoEnum.getColumns())) {
             return;
         }
@@ -428,7 +432,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
             logger.error("需要先调用 init 方法后再调用当前方法");
             throw new JavaCG2RuntimeException("需要先调用 init 方法后再调用当前方法");
         }
-        if (!useNeo4j()) {
+        if (!skipDependsCheck && !useNeo4j()) {
             // 检查依赖的其他数据库表有没有先写入
             DbTableInfoEnum[] dependsWriteDbTableEnums = jacgWriteDbHandler.dependsWriteDbTableEnums();
             if (ArrayUtils.isNotEmpty(dependsWriteDbTableEnums)) {
@@ -763,5 +767,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     public void setTaskQueueMaxSize(int taskQueueMaxSize) {
         this.taskQueueMaxSize = taskQueueMaxSize;
+    }
+
+    public void setSkipDependsCheck(boolean skipDependsCheck) {
+        this.skipDependsCheck = skipDependsCheck;
     }
 }

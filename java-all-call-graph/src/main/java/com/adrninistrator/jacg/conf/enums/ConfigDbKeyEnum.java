@@ -12,7 +12,10 @@ import com.mysql.cj.jdbc.Driver;
 public enum ConfigDbKeyEnum implements MainConfigInterface {
     CDKE_DB_USE_H2("db.use.h2", new String[]{"是否使用H2数据库，true: 使用，false: 不使用"},
             Boolean.class, true, Boolean.TRUE.toString()),
-    CDKE_DB_H2_FILE_PATH("db.h2.file.path", new String[]{"H2数据库文件路径（仅当使用H2数据库时需要指定），示例：./build/jacg_h2db，不需要指定“.mv.db”"},
+    CDKE_DB_H2_FILE_PATH("db.h2.file.path", new String[]{"H2数据库文件路径（仅当使用H2数据库时需要指定），不需要指定后缀“.mv.db”",
+            "需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头",
+            "示例：D:/build/jacg_h2db",
+            "示例：./build/jacg_h2db"},
             String.class, true, "./build/jacg_h2db"),
     CDKE_DB_DRIVER_NAME("db.driver.name", new String[]{"数据库配置（仅当使用非H2数据库时需要指定），驱动类名"},
             String.class, true, Driver.class.getName()),
@@ -47,7 +50,7 @@ public enum ConfigDbKeyEnum implements MainConfigInterface {
     }
 
     @Override
-    public String getEnumName() {
+    public String getEnumConstantsName() {
         return name();
     }
 

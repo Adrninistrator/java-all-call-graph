@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class JACGApacheCommonsChainMethodCallExtension extends AbstractJACGMethodCallExtension {
 
-    private static final Logger logger = LoggerFactory.getLogger(JACGObjInstanceMethodNameMCE.class);
+    private static final Logger logger = LoggerFactory.getLogger(JACGApacheCommonsChainMethodCallExtension.class);
 
     public static final String METHOD_NAME = "execute";
     public static final String ARG_TYPES = "(org.apache.commons.chain.Context)";

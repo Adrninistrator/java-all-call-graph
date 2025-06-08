@@ -4,11 +4,11 @@
 
 # 1. 使用案例
 
-[使用案例](use_cases.md)
+[使用案例](docs/use_cases.md)
 
 # 2. 加群讨论
 
-[加群讨论](group_discussions.md)
+[加群讨论](docs/group_discussions.md)
 
 # 3. DeepWiki 链接
 
@@ -38,56 +38,56 @@ IDEA 提供了显示调用指定 Java 方法向上的完整调用链的功能，
 
 # 5. 输出结果示例
 
-[输出结果示例](output_example.md)
+[输出结果示例](docs/output_example.md)
 
 # 6. 快速开始
 
-[快速开始](quick_start.md)
+[快速开始](docs/quick_start.md)
 
 # 7. 更新说明
 
-[更新说明](change_log.md)
+[更新说明](docs/change_log.md)
 
 # 8. 配置参数示例
 
-[配置参数示例](config_example.md)
+[配置参数示例](docs/config_example.md)
 
 # 9. 使用说明
 
-[使用说明](how_to_use.md)
+[使用说明](docs/how_to_use.md)
 
 # 10. 通过源码执行
 
-[通过源码执行](run_by_code.md)
+[通过源码执行](docs/run_by_code.md)
 
 # 11. 数据库表说明
 
-[数据库表说明](db_tables.md)
+[数据库表说明](docs/db_tables.md)
 
 # 12. 使用 Neo4j 图数据库
 
-[使用 Neo4j 图数据库](use_neo4j.md)
+[使用 Neo4j 图数据库](docs/use_neo4j.md)
 
 # 13. 通过代码执行的其他示例
 
-[通过代码执行的其他示例](run_by_code_example.md)
+[通过代码执行的其他示例](docs/run_by_code_example.md)
 
 # 14. 其他功能
 
-[其他功能](other_functions.md)
+[其他功能](docs/other_functions.md)
 
 # 15. 扩展功能
 
-[扩展功能](extensions.md)
+[扩展功能](docs/extensions.md)
 
 # 16. 原理说明
 
-[原理说明](how_to_implementation.md)
+[原理说明](docs/how_to_implementation.md)
 
 # 17. 其他说明
 
-[其他说明](other_instructions.md)
+[其他说明](docs/other_instructions.md)
 
 # 18. 常见问题
 
-[常见问题](question_answer.md)
+[常见问题](docs/question_answer.md)

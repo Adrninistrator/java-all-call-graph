@@ -1,6 +1,6 @@
 CREATE TABLE if not exists jacg_method_annotation_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
-  method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
+  method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   annotation_name varchar(255) NOT NULL COMMENT '注解类名',
   attribute_name varchar(200) NOT NULL COMMENT '注解属性名称，空字符串代表无注解属性',
   attribute_type varchar(5) DEFAULT NULL COMMENT '注解属性类型，参考AnnotationAttributesTypeEnum类',

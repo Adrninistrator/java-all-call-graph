@@ -8,11 +8,14 @@ import test.callgraph.spring.bean.define.SpringInterfaceB;
  * @date 2022/9/20
  * @description:
  */
-@Controller("test.callgraph.spring.bean.define.impl.SpringServiceImplB1")
+@Controller(SpringServiceImplB1.BEAN_NAME)
 public class SpringServiceImplB1 implements SpringInterfaceB {
+
+    public static final String BEAN_NAME = "test.callgraph.spring.bean.define.impl.SpringServiceImplB1";
+
     @Override
     public void test1() {
-        System.getProperty("");
+        System.getProperty("1");
     }
 
     @Override

@@ -46,6 +46,7 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
         writeDbData4SpringBean.setRecordId(genNextRecordId());
         writeDbData4SpringBean.setSpringBeanName(springBeanName);
         writeDbData4SpringBean.setSeq(Integer.parseInt(seq));
+        writeDbData4SpringBean.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4SpringBean.setClassName(className);
         writeDbData4SpringBean.setBeanType(beanType);
         return writeDbData4SpringBean;
@@ -57,6 +58,7 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
                 data.getRecordId(),
                 data.getSpringBeanName(),
                 data.getSeq(),
+                data.getSimpleClassName(),
                 data.getClassName(),
                 data.getBeanType()
         };

@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringBean;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
@@ -196,8 +197,7 @@ public class SpringHandler extends BaseHandler {
     private void checkParseMethodCallTypeValue() {
         if (!javaCG2ConfigHandler.checkParseMethodCallTypeValue()) {
             logger.error("使用 java-callgraph2 组件处理方法调用时未解析被调用对象和参数可能的类型与值，无法判断 Spring Controller 方法参数是否有被使用" +
-                            "需要将配置文件 {} 的参数 {} 值指定为 true，可参考 test.runbycode.example.TestSetJavaCG2Config 类", JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getFileName(),
-                    JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getKey());
+                    "需要将参数值指定为 {} {}", Boolean.TRUE, configureWrapper.genConfigUsage(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE));
             throw new JavaCG2RuntimeException("使用 java-callgraph2 组件处理方法调用时未解析被调用对象和参数可能的类型与值，无法判断 Spring Controller 方法参数是否有被使用，请按照日志提示处理");
         }
     }
@@ -330,5 +330,41 @@ public class SpringHandler extends BaseHandler {
         }
         String result = dbOperator.queryObjectOneColumn(sql, String.class, methodHash);
         return result != null;
+    }
+
+    /**
+     * 根据类名查询Spring Bean信息
+     *
+     * @param className
+     * @return
+     */
+    public List<WriteDbData4SpringBean> querySpringBeanByClassName(String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPB_QUERY_BY_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_SPRING_BEAN) +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_BEAN.getTableName() +
+                    " where " + DC.SPB_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4SpringBean.class, dbOperWrapper.querySimpleClassName(className));
+    }
+
+    /**
+     * 根据Bean名称查询Spring Bean信息
+     *
+     * @param className
+     * @return
+     */
+    public List<WriteDbData4SpringBean> querySpringBeanByBeanName(String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPB_QUERY_BY_BEAN_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_SPRING_BEAN) +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_BEAN.getTableName() +
+                    " where " + DC.SPB_SPRING_BEAN_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4SpringBean.class, dbOperWrapper.querySimpleClassName(className));
     }
 }

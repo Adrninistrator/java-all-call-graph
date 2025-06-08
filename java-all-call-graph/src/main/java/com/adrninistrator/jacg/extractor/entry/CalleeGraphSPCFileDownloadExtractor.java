@@ -16,13 +16,17 @@ import java.util.List;
  */
 public class CalleeGraphSPCFileDownloadExtractor extends CalleeGraphEntryExtractor {
 
+    public CalleeGraphSPCFileDownloadExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
+    }
+
     // 指定生成方法调用堆栈时的关键字使用代表入口方法的标志
     @Override
-    protected boolean setFindStackKeyword4ee(ConfigureWrapper configureWrapper) {
+    protected boolean setFindStackKeyword4ee() {
         try (SpringHandler springHandler = new SpringHandler(configureWrapper)) {
             List<FullMethodWithReturnType> fileDownloadControllerMethodList = springHandler.queryFileDownloadControllerMethod();
             // 对（可能的）Spring Controller文件下载方法的处理
-            fileDownloadControllerMethodList = handleFileDownloadControllerFullMethodList(fileDownloadControllerMethodList, configureWrapper);
+            fileDownloadControllerMethodList = handleFileDownloadControllerFullMethodList(fileDownloadControllerMethodList);
             if (JavaCG2Util.isCollectionEmpty(fileDownloadControllerMethodList)) {
                 return false;
             }
@@ -36,11 +40,9 @@ public class CalleeGraphSPCFileDownloadExtractor extends CalleeGraphEntryExtract
      * 对（可能的）Spring Controller文件下载方法的处理，可重载进行自定义处理
      *
      * @param fileDownloadControllerFullMethodList
-     * @param configureWrapper
      * @return
      */
-    protected List<FullMethodWithReturnType> handleFileDownloadControllerFullMethodList(List<FullMethodWithReturnType> fileDownloadControllerFullMethodList,
-                                                                                        ConfigureWrapper configureWrapper) {
+    protected List<FullMethodWithReturnType> handleFileDownloadControllerFullMethodList(List<FullMethodWithReturnType> fileDownloadControllerFullMethodList) {
         return fileDownloadControllerFullMethodList;
     }
 }

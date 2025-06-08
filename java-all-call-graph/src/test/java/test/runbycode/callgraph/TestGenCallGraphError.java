@@ -35,36 +35,4 @@ public class TestGenCallGraphError extends TestRunByCodeBase {
                 System.class.getName() + ":getProperties(");
         Assert.assertFalse(new RunnerGenAllGraph4Callee(configureWrapper).run());
     }
-
-    @Test
-    public void testError3() {
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE, Boolean.FALSE.toString());
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY, Boolean.TRUE.toString());
-
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
-                TestExtendComplex.class.getName() + ":test1()",
-                TestExtendComplex.class.getName() + ":test2()");
-        Assert.assertFalse(new RunnerGenAllGraph4Caller(configureWrapper).run());
-    }
-
-    @Test
-    public void testError4() {
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE, Boolean.FALSE.toString());
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY, Boolean.TRUE.toString());
-
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                System.class.getName() + ":getProperties(",
-                System.class.getName() + ":getProperty(java.lang.String)");
-        Assert.assertFalse(new RunnerGenAllGraph4Callee(configureWrapper).run());
-    }
-
-    @Test
-    public void testError5() {
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE, Boolean.FALSE.toString());
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY, Boolean.TRUE.toString());
-
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                System.class.getName());
-        Assert.assertFalse(new RunnerGenAllGraph4Callee(configureWrapper).run());
-    }
 }

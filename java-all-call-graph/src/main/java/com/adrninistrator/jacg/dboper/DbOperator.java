@@ -515,4 +515,8 @@ public class DbOperator implements AutoCloseable {
     public boolean isClosed() {
         return closed;
     }
+
+    public boolean isUseH2Db() {
+        return dbConfInfo.isUseH2Db();
+    }
 }

@@ -29,10 +29,10 @@ public class TestMyCalleeGraphSPCFileDownloadExtractor extends TestRunByCodeBase
     public void extract() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
                 System.class.getName());
-        MyCalleeGraphSPCFileDownloadExtractor myCalleeGraphSPCFileDownloadExtractor = new MyCalleeGraphSPCFileDownloadExtractor();
+        MyCalleeGraphSPCFileDownloadExtractor myCalleeGraphSPCFileDownloadExtractor = new MyCalleeGraphSPCFileDownloadExtractor(configureWrapper);
         // 设置需要解析任务指定的被调用方法的直接调用方法所在行的内容
         myCalleeGraphSPCFileDownloadExtractor.setParseDirectlyCallerLine(true);
-        ListWithResult<CalleeExtractedFile> list = myCalleeGraphSPCFileDownloadExtractor.extract(configureWrapper);
+        ListWithResult<CalleeExtractedFile> list = myCalleeGraphSPCFileDownloadExtractor.extract();
         Assert.assertTrue(list.isSuccess());
         printListContent(list.getList());
     }

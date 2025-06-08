@@ -26,24 +26,19 @@ import java.util.Map;
  * @description: 对调用链结果文件进行数据提取，查找Spring事务嵌套的调用情况，包括@Transactional、TransactionTemplate
  */
 public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
-    /**
-     * 查找Spring事务嵌套的调用情况，使用配置文件中的参数
-     *
-     * @return
-     */
-    public SpTxNestedCombined extract() {
-        return extract(new ConfigureWrapper(false));
+
+    public SpringTxNestedExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
     }
 
     /**
      * 查找Spring事务嵌套的调用情况，使用代码指定的参数
      *
-     * @param configureWrapper
      * @return
      */
-    public SpTxNestedCombined extract(ConfigureWrapper configureWrapper) {
+    public SpTxNestedCombined extract() {
         // 指定配置参数
-        setConfig(configureWrapper);
+        setConfig();
 
         // 创建数据库相关对象
         genDbObject(configureWrapper);
@@ -55,13 +50,13 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
                 configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, outputDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
             }
             // 处理事务注解
-            ListWithResult<SpTxNestedByAnnotationFile> spTxNestedByAnnotationFileList = handleTxAnnotation(configureWrapper, annotationHandler);
+            ListWithResult<SpTxNestedByAnnotationFile> spTxNestedByAnnotationFileList = handleTxAnnotation(annotationHandler);
 
             if (!outputDirName.isEmpty()) {
                 configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, outputDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_TEMPLATE);
             }
             // 处理事务模板
-            ListWithResult<SpTxNestedByTplFile> spTxNestedByTplFileList = handleTxTpl(configureWrapper, annotationHandler);
+            ListWithResult<SpTxNestedByTplFile> spTxNestedByTplFileList = handleTxTpl(annotationHandler);
 
             return new SpTxNestedCombined(spTxNestedByAnnotationFileList, spTxNestedByTplFileList);
         } finally {
@@ -72,13 +67,12 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
     /**
      * 处理事务注解
      *
-     * @param configureWrapper
      * @param annotationHandler
      * @return
      */
-    private ListWithResult<SpTxNestedByAnnotationFile> handleTxAnnotation(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
+    private ListWithResult<SpTxNestedByAnnotationFile> handleTxAnnotation(AnnotationHandler annotationHandler) {
         // 提取使用@Transactional注解的方法相关信息
-        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxAnnotation(configureWrapper, annotationHandler);
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxAnnotation(annotationHandler);
         if (!callerExtractedFileList.isSuccess()) {
             return ListWithResult.genFail();
         }
@@ -104,12 +98,11 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
     /**
      * 处理事务模板
      *
-     * @param configureWrapper
      * @return
      */
-    private ListWithResult<SpTxNestedByTplFile> handleTxTpl(ConfigureWrapper configureWrapper, AnnotationHandler annotationHandler) {
+    private ListWithResult<SpTxNestedByTplFile> handleTxTpl(AnnotationHandler annotationHandler) {
         List<SpTxEntryMethodTxTpl> spTxEntryMethodTxTplList = new ArrayList<>();
-        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxTpl(configureWrapper, spTxEntryMethodTxTplList);
+        ListWithResult<CallerExtractedFile> callerExtractedFileList = extractTxTpl(spTxEntryMethodTxTplList);
         if (!callerExtractedFileList.isSuccess()) {
             return ListWithResult.genFail();
         }
@@ -138,9 +131,9 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
     }
 
     // 指定配置参数
-    private void setConfig(ConfigureWrapper configureWrapper) {
+    private void setConfig() {
         // 指定公共配置参数
-        setCommonConfig(configureWrapper);
+        setCommonConfig();
 
         // 指定对完整调用链文件生成调用堆栈时使用的过滤器扩展类
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_FIND_STACK_KEYWORD_FILTER,

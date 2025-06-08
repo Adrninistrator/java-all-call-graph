@@ -7,9 +7,9 @@ import com.adrninistrator.jacg.extractor.callback.CallerExtractedFileCallback;
 import com.adrninistrator.jacg.extractor.callback.StackFileParsedCallback;
 import com.adrninistrator.jacg.extractor.dto.common.extract.CallerExtractedLine;
 import com.adrninistrator.jacg.extractor.dto.common.extractfile.CallerExtractedFile;
-import com.adrninistrator.jacg.extractor.parser.StackFileParser;
 import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGCallStackUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,28 +26,21 @@ import java.util.List;
  * @description: 对向下的方法调用链文件进行数据提取，获取方法调用业务功能数据
  */
 public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor implements StackFileParsedCallback {
+
     private static final Logger logger = LoggerFactory.getLogger(CallerGraphBusinessDataExtractor.class);
 
+    public CallerGraphBusinessDataExtractor(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
+    }
+
     /**
-     * 生成向下的完整调用链，根据关键字进行查找，获取方法调用业务功能数据并返回，使用配置文件中的参数
+     * 生成向下的完整调用链，根据关键字进行查找，获取方法调用业务功能数据并返回，使用代码指定的参数
      *
      * @param callerExtractedFileCallback 对处理后的文件进行自定义处理的回调类
      * @param businessDataTypes           需要处理的方法调用业务功能数据类型
      * @return true: 处理成功 false: 处理失败
      */
     public boolean extract(CallerExtractedFileCallback callerExtractedFileCallback, String... businessDataTypes) {
-        return extract(new ConfigureWrapper(false), callerExtractedFileCallback, businessDataTypes);
-    }
-
-    /**
-     * 生成向下的完整调用链，根据关键字进行查找，获取方法调用业务功能数据并返回，使用代码指定的参数
-     *
-     * @param configureWrapper
-     * @param callerExtractedFileCallback 对处理后的文件进行自定义处理的回调类
-     * @param businessDataTypes           需要处理的方法调用业务功能数据类型
-     * @return true: 处理成功 false: 处理失败
-     */
-    public boolean extract(ConfigureWrapper configureWrapper, CallerExtractedFileCallback callerExtractedFileCallback, String... businessDataTypes) {
         if (callerExtractedFileCallback == null) {
             logger.error("未指定 {} 实现类", CallerExtractedFileCallback.class);
             return false;
@@ -60,7 +53,7 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor i
 
         try {
             // 生成向下的方法完整调用链文件，并根据关键字生成调用堆栈文件
-            ListWithResult<String> stackFilePathList = genStackFiles(configureWrapper);
+            ListWithResult<String> stackFilePathList = genStackFiles();
             if (!stackFilePathList.isSuccess()) {
                 return false;
             }
@@ -97,7 +90,7 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor i
         List<CallerExtractedLine> callerExtractedLineList = new ArrayList<>();
 
         // 解析调用堆栈文件
-        if (!StackFileParser.parseStackFile(this, stackFilePath, callerExtractedLineList, businessDataTypes)) {
+        if (!JACGCallStackUtil.parseStackFile(this, stackFilePath, callerExtractedLineList, businessDataTypes)) {
             return null;
         }
 

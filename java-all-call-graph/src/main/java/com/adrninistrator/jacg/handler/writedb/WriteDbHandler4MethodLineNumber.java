@@ -33,7 +33,7 @@ public class WriteDbHandler4MethodLineNumber extends AbstractWriteDbHandler<Writ
         String returnType = readLineData();
         String minLineNumber = readLineData();
         String maxLineNumber = readLineData();
-        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod,returnType);
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);

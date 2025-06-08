@@ -48,7 +48,7 @@ public class SpringXmlBeanParser implements SpringXmlBeanParserInterface {
     }
 
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath) {
+    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
         try {
             Element root = JACGXmlUtil.parseXmlRootElement(inputStream);
             if (!"beans".equals(root.getName())) {

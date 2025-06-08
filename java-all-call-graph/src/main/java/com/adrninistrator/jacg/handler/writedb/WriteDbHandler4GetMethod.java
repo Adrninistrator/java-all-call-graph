@@ -40,9 +40,7 @@ public class WriteDbHandler4GetMethod extends AbstractWriteDbHandler4GetSetMetho
     protected WriteDbData4GetMethod genData(String[] array) {
         WriteDbData4GetMethod writeDbData4GetMethod = new WriteDbData4GetMethod();
         // 读取文件内容并填充对象
-        if (!fillInBaseWriteDbData4GetSetMethod(writeDbData4GetMethod, getMethodSimpleClassMap)) {
-            return null;
-        }
+        fillInBaseWriteDbData4GetSetMethod(writeDbData4GetMethod, getMethodSimpleClassMap);
         return writeDbData4GetMethod;
     }
 

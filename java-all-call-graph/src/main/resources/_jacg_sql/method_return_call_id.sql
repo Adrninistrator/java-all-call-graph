@@ -1,6 +1,6 @@
 CREATE TABLE if not exists jacg_method_return_call_id_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
-  method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
+  method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   return_call_id int NOT NULL COMMENT '方法返回值对应的方法调用序号，从1开始',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
   return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',

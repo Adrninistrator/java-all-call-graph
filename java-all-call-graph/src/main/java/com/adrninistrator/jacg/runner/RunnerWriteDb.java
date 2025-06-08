@@ -43,7 +43,9 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodArgument;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCall;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCallInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCallMethodCallReturn;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCallNonStaticField;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCallStaticField;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCallStaticFieldMCR;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCatch;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodFinally;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodInfo;
@@ -63,6 +65,7 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MyBatisMSWriteTabl
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MybatisMSColumn;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MybatisMSEntity;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MybatisMSGetSetDb;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ParsedCustomData;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4PropertiesConf;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SetMethod;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SetMethodAssignInfo;
@@ -108,9 +111,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
     // 写数据库的结果信息
     protected final WriteDbResult writeDbResult = new WriteDbResult();
-
-    // jar包及允许处理的类名或包名前缀没有变化时是否跳过写数据库操作，默认false，即不跳过
-    private boolean skipWhenNotModified = false;
 
     // 人工添加方法调用关系类列表
     private List<AbstractManualAddMethodCall1> manualAddMethodCall1List;
@@ -192,34 +192,33 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         useH2Db = dbConfInfo.isUseH2Db();
         if (!useH2Db && JACGSqlUtil.isMySQLDb(dbConfInfo.getDriverClassName())) {
             if (!dbConfInfo.getDbUrl().contains(JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS)) {
-                logger.error("使用MYSQL时，请在{}参数指定{}", ConfigDbKeyEnum.CDKE_DB_URL.getConfigPrintInfo(), JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS);
+                logger.error("使用MySQL时，需要在参数指定标志以开启批量插入 {} {}", JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS, configureWrapper.genConfigUsage(ConfigDbKeyEnum.CDKE_DB_URL));
                 return false;
             }
         }
         return true;
     }
 
-    // 获得需要处理的jar包列表
+    // 获得需要处理的jar文件列表
     private List<String> getJarPathList() {
         List<String> jarPathList = javaCG2ConfigureWrapper.getOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR);
-        logger.info("{} 需要处理的jar包或目录\n{}", currentSimpleClassName, StringUtils.join(jarPathList, "\n"));
+        logger.info("{} 需要处理的jar文件或目录 {}", currentSimpleClassName, StringUtils.join(jarPathList, " "));
         return jarPathList;
     }
 
     // 执行实际处理
     private boolean operate() {
-        List<String> jarPathList;
-
-        // 判断jar包及允许处理的类名或包名前缀没有变化时是否跳过写数据库操作
+        boolean skipWhenNotModified = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_SKIP_WRITE_DB_WHEN_JAR_NOT_MODIFIED);
+        // 判断需要解析的jar文件没有变化时是否跳过写数据库操作
         if (skipWhenNotModified) {
-            // 获得需要处理的jar包列表
-            jarPathList = getJarPathList();
+            // 获得需要处理的jar文件列表
+            List<String> jarPathList = getJarPathList();
             /*
-                检查配置文件中指定的jar包是否都在jar_info表中且未发生变化（用于判断是否可以跳过写数据库步骤）
+                检查配置文件中指定的jar文件是否都在jar_info表中且未发生变化（用于判断是否可以跳过写数据库步骤）
                 检查允许处理的类名或包名前缀是否有变化
              */
             if (checkAllJarExistsNotModified(jarPathList)) {
-                logger.warn("有通过参数指定，且jar包没有变化，跳过写数据库操作");
+                logger.warn("有通过参数指定，且jar文件没有变化，跳过写数据库操作");
                 return true;
             }
         }
@@ -255,9 +254,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         }
 
         if (skipCallJavaCG2) {
-            logger.info("已配置不调用java-callgraph2生成jar包的方法调用关系");
+            logger.info("已配置不调用java-callgraph2生成jar文件的方法调用关系");
         } else {
-            // 调用java-callgraph2生成jar包的方法调用关系
+            // 调用java-callgraph2生成jar文件的方法调用关系
             if (!callJavaCallGraph2()) {
                 return false;
             }
@@ -367,6 +366,11 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
+        // 处理解析jar文件时获取的自定义数据
+        if (!handleParsedCustomData()) {
+            return false;
+        }
+
         // 等待前面的其他文件写入数据库完毕
         wait4TPEDone();
 
@@ -400,7 +404,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
-        // 处理jar包信息，在所有其他表写完后再写入，这样可以通过jar包信息判断其他表有没有写入成功
+        // 处理jar文件信息，在所有其他表写完后再写入，这样可以通过jar文件信息判断其他表有没有写入成功
         if (!handleJarInfo()) {
             return false;
         }
@@ -424,7 +428,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private boolean addManualAddMethodCallExtensions() {
         List<String> manualAddMethodCallClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1);
         if (JavaCG2Util.isCollectionEmpty(manualAddMethodCallClassList)) {
-            logger.info("未指定用于人工添加方法调用关系的处理类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1.getConfigPrintInfo());
+            logger.info("未指定用于人工添加方法调用关系的处理类，跳过 {}", configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1));
             manualAddMethodCall1List = Collections.emptyList();
             return true;
         }
@@ -452,7 +456,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private boolean addJACGMethodCallExtensions() {
         List<String> jacgMethodCallExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL);
         if (JavaCG2Util.isCollectionEmpty(jacgMethodCallExtensionClassList)) {
-            logger.info("未指定 java-all-call-graph 组件处理方法调用的扩展类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL.getConfigPrintInfo());
+            logger.info("未指定 java-all-call-graph 组件处理方法调用的扩展类，跳过 {}", configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL));
             jacgMethodCallExtensionList = Collections.emptyList();
             return true;
         }
@@ -478,10 +482,10 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     }
 
     /**
-     * 检查配置文件中指定的jar包是否都在jar_info表中且未发生变化（用于判断是否可以跳过写数据库步骤）
+     * 检查配置文件中指定的jar文件是否都在jar_info表中且未发生变化（用于判断是否可以跳过写数据库步骤）
      *
      * @param jarPathList
-     * @return true: jar包未发生变化 false: jar包有发生变化
+     * @return true: jar文件未发生变化 false: jar文件有发生变化
      */
     private boolean checkAllJarExistsNotModified(List<String> jarPathList) {
         // 使用H2数据库时，检查数据库文件
@@ -636,7 +640,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         return dbOperWrapper.updateSimpleClassName2Full();
     }
 
-    // 处理jar包信息
+    // 处理jar文件信息
     private boolean handleJarInfo() {
         if (useNeo4j()) {
             return true;
@@ -763,6 +767,20 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         WriteDbHandler4MethodCallStaticField writeDbHandler4MethodCallStaticField = new WriteDbHandler4MethodCallStaticField(writeDbResult);
         initWriteDbHandler(writeDbHandler4MethodCallStaticField);
         if (!writeDbHandler4MethodCallStaticField.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        // 处理方法调用使用非静态字段信息
+        WriteDbHandler4MethodCallNonStaticField writeDbHandler4MethodCallNonStaticField = new WriteDbHandler4MethodCallNonStaticField(writeDbResult);
+        initWriteDbHandler(writeDbHandler4MethodCallNonStaticField);
+        if (!writeDbHandler4MethodCallNonStaticField.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        // 处理方法调用使用静态字段方法调用返回值
+        WriteDbHandler4MethodCallStaticFieldMCR writeDbHandler4MethodCallStaticFieldMcr = new WriteDbHandler4MethodCallStaticFieldMCR(writeDbResult);
+        initWriteDbHandler(writeDbHandler4MethodCallStaticFieldMcr);
+        if (!writeDbHandler4MethodCallStaticFieldMcr.handle(javaCG2OutputInfo)) {
             return false;
         }
 
@@ -1023,6 +1041,16 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         return writeDbHandler4PropertiesConf.handle(javaCG2OutputInfo);
     }
 
+    // 处理解析jar文件时获取的自定义数据
+    private boolean handleParsedCustomData() {
+        if (useNeo4j()) {
+            return true;
+        }
+        WriteDbHandler4ParsedCustomData writeDbHandler4ParsedCustomData = new WriteDbHandler4ParsedCustomData(writeDbResult);
+        initWriteDbHandler(writeDbHandler4ParsedCustomData);
+        return writeDbHandler4ParsedCustomData.handle(javaCG2OutputInfo);
+    }
+
     // 处理通过方法调用传递的get/set方法关联关系（需要在处理方法调用关系后面执行）
     private boolean handleMethodCallPassedGetSet() {
         if (useNeo4j()) {
@@ -1204,14 +1232,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         this.skipCallJavaCG2 = true;
         this.javaCG2OutputInfo = javaCG2OutputInfo;
         this.currentOutputDirPath = currentOutputDirPath;
-    }
-
-    public boolean isSkipWhenNotModified() {
-        return skipWhenNotModified;
-    }
-
-    public void setSkipWhenNotModified(boolean skipWhenNotModified) {
-        this.skipWhenNotModified = skipWhenNotModified;
     }
 
     public int getWriteDbTimes() {

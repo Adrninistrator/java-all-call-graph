@@ -65,8 +65,8 @@ public class MethodCalleeNotExistsHandler extends BaseHandler implements QueryBy
         if (ignoreClassInJdk) {
             ignoreCalleeClassPrefixSet.addAll(Arrays.asList(JavaCG2CommonNameConstants.PACKAGES_JDK));
         }
-        String[] ignoreCallerClassPrefixes = ignoreCallerClassPrefixSet.toArray(new String[0]);
-        String[] ignoreCalleeClassPrefixes = ignoreCalleeClassPrefixSet.toArray(new String[1]);
+        String[] ignoreCallerClassPrefixes = ignoreCallerClassPrefixSet.toArray(new String[]{});
+        String[] ignoreCalleeClassPrefixes = ignoreCalleeClassPrefixSet.toArray(new String[]{});
 
         QueryByPageHandler.queryAndHandle(this, 0, currentSimpleClassName, ignoreCallerClassPrefixes, ignoreCalleeClassPrefixes);
     }

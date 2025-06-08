@@ -234,7 +234,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
         }
 
         if (someTaskFail) {
-            logger.error("{} 有任务执行失败，请检查\n{}", currentSimpleClassName, StringUtils.join(failTaskList, "\n"));
+            logger.error("{} 有任务执行失败 {} 执行失败的任务\n{}", currentSimpleClassName, ERROR_LOG_NOTICE, StringUtils.join(failTaskList, "\n"));
         } else {
             logger.info("{} 任务执行完毕", currentSimpleClassName);
         }
@@ -364,7 +364,9 @@ public abstract class AbstractRunner extends AbstractExecutor {
                 return true;
             }
         }
-        logger.info("配置文件 {} 中指定的jar包都在 {} 表中且未发生变化", JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo(), DbTableInfoEnum.DTIE_JAR_INFO.getTableNameKeyword());
+        String logContent = String.format("配置文件 %s 中指定的jar包都在 %s 表中且未发生变化", JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getConfigPrintInfo(),
+                DbTableInfoEnum.DTIE_JAR_INFO.getTableNameKeyword());
+        logger.info("{}", logContent);
         return false;
     }
 

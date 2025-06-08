@@ -11,6 +11,7 @@ public class WriteDbData4SpringBean implements BaseWriteDbData {
     private int recordId;
     private String springBeanName;
     private int seq;
+    private String simpleClassName;
     private String className;
     private String beanType;
 
@@ -36,6 +37,14 @@ public class WriteDbData4SpringBean implements BaseWriteDbData {
 
     public void setSeq(int seq) {
         this.seq = seq;
+    }
+
+    public String getSimpleClassName() {
+        return simpleClassName;
+    }
+
+    public void setSimpleClassName(String simpleClassName) {
+        this.simpleClassName = simpleClassName;
     }
 
     public String getClassName() {

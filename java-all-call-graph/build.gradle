@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "3.1.0"
+version = "3.2.0"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -50,21 +50,11 @@ sourceSets {
     }
 }
 
-List apache_ant = ["org.apache.ant:ant:1.10.15"]
-
-List apache_common = [
-        'org.apache.commons:commons-lang3:3.17.0',
-        'commons-io:commons-io:2.14.0',
-        'org.apache.commons:commons-compress:1.27.1'
-]
-
 List druid = ['com.alibaba:druid:1.2.15']
 
 List mysql = ['com.mysql:mysql-connector-j:8.4.0']
 
 List h2database = ["com.h2database:h2:2.2.220"]
-
-List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
 List java_callgraph = ['com.github.adrninistrator:java-callgraph2:3.1.0']
 
@@ -78,6 +68,13 @@ def spring_version = "5.3.39"
 
 List spring_jdbc = ["org.springframework:spring-jdbc:$spring_version"]
 
+List spring = [
+        "org.springframework:spring-aspects:$spring_version",
+        "org.springframework:spring-context-support:$spring_version"
+]
+
+List spring_data_neo4j = ['org.springframework.data:spring-data-neo4j:5.3.9.RELEASE']
+
 List log4j = [
         'org.apache.logging.log4j:log4j-api:2.20.0',
         'org.apache.logging.log4j:log4j-core:2.20.0',
@@ -85,13 +82,6 @@ List log4j = [
 ]
 
 List disruptor = ['com.lmax:disruptor:3.3.7']
-
-List spring = [
-        "org.springframework:spring-aspects:$spring_version",
-        "org.springframework:spring-context-support:$spring_version"
-]
-
-List spring_data_neo4j = ['org.springframework.data:spring-data-neo4j:5.3.9.RELEASE']
 
 List junit = [
         'org.junit.platform:junit-platform-launcher:1.9.3',
@@ -118,10 +108,14 @@ List lombok = ['org.projectlombok:lombok:1.18.24']
 
 List commons_chain = ['commons-chain:commons-chain:1.2']
 
+List mybatis = [
+        'org.mybatis:mybatis:3.5.9'
+]
+
 dependencies {
-    api apache_ant, apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc, spring
+    api druid, mysql, h2database, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc, spring
     compileOnly spring_data_neo4j
-    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, servlet, commons_bean_utils, spring_data_neo4j, lombok, commons_chain
+    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, servlet, commons_bean_utils, spring_data_neo4j, lombok, commons_chain, mybatis
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
@@ -135,7 +129,7 @@ processTestResources {
     setDuplicatesStrategy(DuplicatesStrategy.INCLUDE)
 }
 
-task createProject {
+tasks.register('createProject') {
     doFirst {
         sourceSets*.java.srcDirs*.each { it.mkdirs() }
         sourceSets*.resources.srcDirs*.each { it.mkdirs() }
@@ -152,7 +146,7 @@ jar {
 }
 
 // 生成可以直接执行的jar包，并拷贝相关文件
-task gen_run_jar(type: Jar) {
+tasks.register('gen_run_jar', Jar) {
     archiveFileName.set('run_jacg.jar')
     from(sourceSets.main.output) {
         into '/'
@@ -232,7 +226,7 @@ task gen_run_jar(type: Jar) {
 }
 
 // 将gen_run_jar目录的文件生成tar.gz包
-task gen_tar_gz(type: Tar) {
+tasks.register('gen_tar_gz', Tar) {
     dependsOn gen_run_jar
     compression = Compression.GZIP
     // 若使用archiveBaseName，则生成的文件包中会包含“-当前版本号”

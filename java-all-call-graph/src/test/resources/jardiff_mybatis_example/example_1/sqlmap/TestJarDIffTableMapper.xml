@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="test.diffjar.dao.TestJarDiffTableMapper">
+  <resultMap id="BaseResultMap" type="test.callgraph.mybatis.entity.TestTable">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="value" jdbcType="VARCHAR" property="value" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="create_time" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="update_time" />
+  </resultMap>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    id_c, flag1_c, flag2_c, create_time, update_time
+    from test_table_gjcusd
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByFlag" parameterType="java.lang.String">
+    delete from test_table_gjcusd
+    where flag1_c = #{idC,jdbcType=VARCHAR}
+  </delete>
+</mapper>

@@ -1,11 +1,9 @@
 package test.runbycodemain;
 
-import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import com.adrninistrator.javacg2.el.enums.JavaCG2ElAllowedVariableEnum;
 import com.adrninistrator.javacg2.el.enums.JavaCG2ElConfigEnum;
-import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
 import test.runbycode.base.TestRunByCodeBase;
@@ -30,10 +28,7 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
             javaCG2ConfigureWrapper.setElConfigFixedTrue(javaCG2ElConfigEnum);
         }
 
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
-        // jar文件未发生变化时也强制重新解析后写入数据库
-        runnerWriteDb.setSkipWhenNotModified(false);
-        Assert.assertTrue(runnerWriteDb.run());
+        commonWriteDbForce();
     }
 
     @JACGExample(title = "仅解析指定包下的类",
@@ -46,10 +41,7 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
                 "!string.startsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + ", 'test.callgraph.methodcall.')"
         );
 
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
-        // jar文件未发生变化时也强制重新解析后写入数据库
-        runnerWriteDb.setSkipWhenNotModified(false);
-        Assert.assertTrue(runnerWriteDb.run());
+        commonWriteDbForce();
     }
 
     @JACGExample(title = "仅解析指定包下的类的方法调用",
@@ -62,10 +54,7 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
                 "!string.startsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_MC_ER_PACKAGE_NAME.getVariableName() + ", 'test.callgraph.methodcall.')"
         );
 
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
-        // jar文件未发生变化时也强制重新解析后写入数据库
-        runnerWriteDb.setSkipWhenNotModified(false);
-        Assert.assertTrue(runnerWriteDb.run());
+        commonWriteDbForce();
     }
 
     @JACGExample(title = "仅解析目录中指定路径下指定名称的jar文件",
@@ -82,10 +71,7 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
                         " || !string.startsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_NAME.getVariableName() + ", 'commons-')"
         );
 
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
-        // jar文件未发生变化时也强制重新解析后写入数据库
-        runnerWriteDb.setSkipWhenNotModified(false);
-        Assert.assertTrue(runnerWriteDb.run());
+        commonWriteDbForce();
     }
 
     @JACGExample(title = "仅解析jar文件中指定路径下的jar文件",
@@ -102,10 +88,7 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
                 JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_DIR_PATH_IN_JAR_WAR.getVariableName() + "=='lib'"
         );
 
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
-        // jar文件未发生变化时也强制重新解析后写入数据库
-        runnerWriteDb.setSkipWhenNotModified(false);
-        Assert.assertTrue(runnerWriteDb.run());
+        commonWriteDbForce();
     }
 
     @JACGExample(title = "仅解析war文件中指定路径下的jar文件",
@@ -122,9 +105,6 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
                 JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_DIR_PATH_IN_JAR_WAR.getVariableName() + "=='WEB-INF/lib'"
         );
 
-        RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
-        // jar文件未发生变化时也强制重新解析后写入数据库
-        runnerWriteDb.setSkipWhenNotModified(false);
-        Assert.assertTrue(runnerWriteDb.run());
+        commonWriteDbForce();
     }
 }

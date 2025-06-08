@@ -27,10 +27,10 @@ public class TestExtractCalleeGraphToSPCFileUpload extends TestRunByCodeBase {
     public void extract() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
                 System.class.getName());
-        CalleeGraphSPCFileUploadExtractor calleeGraphSPCFileUploadExtractor = new CalleeGraphSPCFileUploadExtractor();
+        CalleeGraphSPCFileUploadExtractor calleeGraphSPCFileUploadExtractor = new CalleeGraphSPCFileUploadExtractor(configureWrapper);
         // 设置需要解析任务指定的被调用方法的直接调用方法所在行的内容
         calleeGraphSPCFileUploadExtractor.setParseDirectlyCallerLine(true);
-        ListWithResult<CalleeExtractedFile> list = calleeGraphSPCFileUploadExtractor.extract(configureWrapper);
+        ListWithResult<CalleeExtractedFile> list = calleeGraphSPCFileUploadExtractor.extract();
         Assert.assertTrue(list.isSuccess());
         printListContent(list.getList());
     }
