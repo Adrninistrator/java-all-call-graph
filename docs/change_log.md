@@ -1325,3 +1325,7 @@ spring_bean 表增加字段 simple_class_name
 com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee:getAllMethodCallLineData4EeMap 方法返回类型修改为 `Map<String, List<MethodCallLineData4Ee>>`
 
 com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller#getAllMethodCallLineData4ErMap 方法返回类型修改为 `Map<String, List<MethodCallLineData4Er>>`
+
+## 1.36. (3.2.1)
+
+java-callgraph2 组件版本使用 3.2.0

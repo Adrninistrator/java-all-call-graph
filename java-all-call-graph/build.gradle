@@ -56,7 +56,7 @@ List mysql = ['com.mysql:mysql-connector-j:8.4.0']
 
 List h2database = ["com.h2database:h2:2.2.220"]
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:3.1.0']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:3.2.0']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.0']
 
