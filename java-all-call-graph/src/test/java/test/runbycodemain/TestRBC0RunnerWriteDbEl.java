@@ -80,7 +80,7 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
                     "gradlew gen_run_jar",
                     "gradlew gen_jar_in_jar"})
     @Test
-    public void testElOnlyParseSomeJarInJar() {
+    public void testElOnlyParseNonLibJarInJar() {
         javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, "build/jar_output_dir.jar");
         // java-callgraph2表达式开启调试
         javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_EL_DEBUG_MODE, Boolean.TRUE.toString());
@@ -97,7 +97,7 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
                     "gradlew gen_run_jar",
                     "gradlew gen_jar_in_war"})
     @Test
-    public void testElOnlyParseSomeJarInWar() {
+    public void testElOnlyParseNonLibJarInWar() {
         javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, "build/jar_output_dir.war");
         // java-callgraph2表达式开启调试
         javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_EL_DEBUG_MODE, Boolean.TRUE.toString());

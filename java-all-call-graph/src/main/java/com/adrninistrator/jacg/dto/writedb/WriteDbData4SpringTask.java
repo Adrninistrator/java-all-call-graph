@@ -16,6 +16,7 @@ public class WriteDbData4SpringTask implements BaseWriteDbData {
     private String type;
     private String fullMethod;
     private String returnType;
+    private String defineClassNameXmlPath;
 
     public int getRecordId() {
         return recordId;
@@ -79,5 +80,13 @@ public class WriteDbData4SpringTask implements BaseWriteDbData {
 
     public void setReturnType(String returnType) {
         this.returnType = returnType;
+    }
+
+    public String getDefineClassNameXmlPath() {
+        return defineClassNameXmlPath;
+    }
+
+    public void setDefineClassNameXmlPath(String defineClassNameXmlPath) {
+        this.defineClassNameXmlPath = defineClassNameXmlPath;
     }
 }

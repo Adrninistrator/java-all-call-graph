@@ -1329,3 +1329,198 @@ com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller#getAllMethodCallLineData
 ## 1.36. (3.2.1)
 
 java-callgraph2 组件版本使用 3.2.0
+
+## 1.37. (3.3.0)
+
+### 1.37.1. 修改处理 Spring XML 的类
+
+修改 com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.SpringTaskXmlCodeParser 类名为 SpringXmlCodeParser
+
+功能由获取 XML 中定义的 Spring 定时任务信息，修改为获取 XML 中定义的 Spring 信息，包括定时任务、AOP 信息，但不获取 Bean 信息
+
+### 1.37.2. jar_info 表增加记录最终解析的 jar 文件路径
+
+类型为 FJ
+
+### 1.37.3. JarDiff 生成的有修改的方法向上到入口方法的信息增加被调用方法信息
+
+在 com.adrninistrator.jacg.jardiff.runner.RunnerGenJarDiffCalleeGraph 类的构造函数增加参数 com.adrninistrator.jacg.handler.calleemethodinfo.AbstractCalleeMethodInfoFiller 数组
+
+假如需要在 JarDiff 生成的有修改的方法向上到入口方法的信息文件中 modified_methods_stack.md 显示被调用方法信息，需要实现 AbstractCalleeMethodInfoFiller 子类，并在调用 RunnerGenJarDiffCalleeGraph 类的构造函数时指定
+
+#### 1.37.3.1. 支持显示被调用方法对应的 MyBatis XML 文件路径（支持 MySQL）
+
+在调用 RunnerGenJarDiffCalleeGraph 类的构造函数时指定 AbstractCalleeMethodInfoFiller 的子类 com.adrninistrator.jacg.handler.calleemethodinfo.CalleeMethodInfoFiller4MyBatisMSXml
+
+输出示例如下
+
+```
+被调用完整方法	被调用方法信息
+test.diffjar.dao.TestJarDiffTableMapper:selectByPrimaryKey2(java.lang.String)	{"type":"myb_ms_xml","xmlFilePath":"0002@jar-diff-2.0.0.jar/jardiff_mybatis/sqlmap/TestJarDIffTableMapper.xml"}
+test.diffjar.dao.TestJarDiffTableMapper:selectByPrimaryKey(java.lang.String)	{"type":"myb_ms_xml","xmlFilePath":"0002@jar-diff-2.0.0.jar/jardiff_mybatis/sqlmap/TestJarDIffTableMapper.xml"}
+```
+
+示例代码可参考方法 test.runbycode.jardiffcallgraph.TestAbstractRunnerGenJarDiffCallGraph#doTestJarDiffCalleeGraph
+
+### 1.37.4. JarDiff 功能支持将 MyBatis XML resultMap 变化映射到 Mapper 方法（支持 MySQL）
+
+若某个 MyBatis XML resultMap 发生变化，JarDiff 功能会认为对应的 Mapper 方法也发生了变化，并生成对应的完整方法调用链（支持 MySQL）
+
+#### 1.37.4.1. 数据库表修改
+
+- mybatis_ms_formated_sql
+
+增加字段
+
+```
+result_map  XML 的 resultMap 元素值
+result_map_hash XML 对应的 resultMap 内容 hash+字节数
+```
+
+- mybatis_ms_column
+
+增加字段
+
+```
+result_map_id   XML 的 resultMap ID
+column_type 数据库字段类型
+```
+
+### 1.37.5. 支持生成 Spring AOP 影响的方法
+
+#### 1.37.5.1. 数据库表修改
+
+- spring_bean
+
+增加字段
+
+```
+annotation_class_name   在 Java 代码中定义时对应的注解类名
+define_class_name_xml_path  在 Java 代码中定义时所在的类名，或在 XML 中定义时对应的文件路径
+```
+
+- spring_task
+
+增加字段
+
+```
+define_class_name_xml_path  在 Java 代码中定义时所在的类名，或在 XML 中定义时对应的文件路径
+```
+
+#### 1.37.5.2. 增加数据库表
+
+- spring_scan_package
+
+Spring 的包扫描路径
+
+- spring_aop_advice
+
+Spring AOP advice 信息
+
+- spring_aop_aspect
+
+Spring AOP aspect 信息
+
+- spring_aop_pointcut
+
+Spring AOP pointcut 信息
+
+- spring_aop_advice_around
+
+Spring AOP advice 的 Around 信息
+
+- spring_aop_advice_affected_method
+
+Spring AOP advice 影响的方法
+
+#### 1.37.5.3. 配置参数写入数据库表修改
+
+- 修改 javacg2_config 数据库表名
+
+修改为 config
+
+保存内容增加 java-all-call-graph 组件解析 jar 文件并写入数据库时使用的配置参数
+
+- 配置参数写入文件
+
+在解析 jar 文件时，将配置参数写入文件 jacg_config
+
+#### 1.37.5.4. 增加配置参数
+
+_jacg_config/config.properties 增加以下配置参数
+
+- parse.spring.aop.info
+
+解析指定的 jar 文件时，是否需要对 Spring AOP 相关信息进行解析
+
+- call.graph.support.spring.aop
+
+生成方法调用链文件时，是否需要支持将 Spring AOP 相关的 advice 中的方法调用生成到方法调用链文件中
+
+#### 1.37.5.5. 增加配置文件
+
+- _jacg_config/parse_spring_aop_ignore_class_prefix.properties
+
+解析 Spring AOP advice 影响的方法时需要忽略的 Spring Bean 类名配置
+
+#### 1.37.5.6. 对 Spring AOP 支持的处理方式的限制
+
+- 包扫描路径
+
+包扫描路径中可以指定需要处理及忽略的包，暂不处理
+
+- org.springframework.context.annotation.Conditional 注解
+
+Conditional 注解可以指定 Spring Bean 有条件地创建，暂不处理
+
+- Spring AOP 不同方式支持的切面处理范围
+
+​Spring AOP 支持不同的实现方式，如​JDK 动态代理​、CGLIB、AspectJ 等，支持的切面处理范围不相同
+
+只支持静态切点，不支持动态切点（运行时才能够判断）
+
+目前只处理 public、非构造函数、非 static、非 final、非 abstract 方法的切面处理，不区分类是否有接口
+
+- 自调用
+
+不区分是否自调用
+
+- Around 通知中 ProceedingJoinPoint:proceed() 方法调用次数
+
+对于 Around 通知，只支持对 org.aspectj.lang.ProceedingJoinPoint:proceed() 方法调用一次，否则生成支持 Spring AOP 的方法调用链时，无法正确处理原有方法的调用
+
+- jar 文件需要添加到配置参数中
+
+需要解析的 Spring Bean 相关类的 jar 文件需要添加到需要解析的 jar 文件配置参数中
+
+在判断 Spring AOP advice 是否会影响某方法时，需要加载对应的类，因此需要将对应的 jar 文件添加到需要解析的 jar 文件配置参数中
+
+#### 1.37.5.7. 使用说明
+
+- 开启 Spring AOP 开关
+
+修改配置文件_jacg_config/config.properties，将 parse.spring.aop.info 参数设置为 true
+
+- 指定解析项目运行时的所有 jar 文件
+
+修改配置文件_javacg2_config/jar_dir.properties，在其中指定解析项目运行时的所有 jar 文件，可使用 jar 文件所在目录，避免在解析 Spring AOP advice 影响方法范围时需要解析的类有缺失
+
+对于 Web 项目，有可能需要指定 Tomcat 等 Web 服务器根目录的 jar 文件目录，避免项目中使用的相关类找不到，如以下错误
+
+```log
+java.lang.NoClassDefFoundError: javax/servlet/http/HttpSession
+```
+
+- 指定仅解析项目本身的代码
+
+修改配置文件_javacg2_parse_class_method_switch/parse_ignore_class.av，指定仅解析项目本身代码编译的类，以减少需要解析的范围
+
+以上配置文件支持使用 Aviator 表达式，可通过类名或包名等配置需要忽略对哪些类的解析
+
+可指定当包名不是项目本身代码时忽略对应类的解析
+
+```java
+!string.startsWith(package_name, 'a.b.c')
+
+!string.startsWithAny(package_name, 'a.b.c.d1', 'a.b.c.d2')
+```

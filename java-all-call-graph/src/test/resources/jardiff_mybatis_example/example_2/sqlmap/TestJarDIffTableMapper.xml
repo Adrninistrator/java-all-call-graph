@@ -7,10 +7,30 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="create_time" />
     <result column="update_time" jdbcType="TIMESTAMP" property="update_time" />
   </resultMap>
+  <resultMap id="TestResultMap" type="test.callgraph.mybatis.entity.TestTable">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="value" jdbcType="VARCHAR" property="value" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="create_time" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="update_time" />
+  </resultMap>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     select
     *
+    from test_table_gjcusd
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </select>
+
+  <select id="select2" parameterType="java.lang.String" resultMap="TestResultMap">
+    select
+    id_c, flag1_c, flag2_c, create_time, update_time
+    from test_table_gjcusd
+    where id_c = #{idC,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectByPrimaryKeySame" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    id_c, flag1_c, flag2_c, create_time, update_time
     from test_table_gjcusd
     where id_c = #{idC,jdbcType=VARCHAR}
   </select>

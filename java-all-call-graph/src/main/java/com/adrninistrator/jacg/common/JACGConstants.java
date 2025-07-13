@@ -17,6 +17,7 @@ public class JACGConstants {
     public static final String DIR_CALLEE_JAR_DIFF_SUMMARY = "_callee_jar_diff_summary";
     public static final String DIR_CALLER_JAR_DIFF_SUMMARY = "_caller_jar_diff_summary";
     public static final String DIR_OUTPUT_JSON = "_json";
+    public static final String DIR_SPRING_AOP_CONFIG = "_spring_aop_config";
 
     // 保存全部的配置参数信息文件
     public static final String FILE_JACG_ALL_CONFIG_MD = "_jacg_all_config.md";
@@ -162,11 +163,6 @@ public class JACGConstants {
     // Spring事务类型，使用事务模板
     public static final String SPRING_TX_TYPE_TEMPLATE = "template";
 
-    // Spring Task类型，通过XML定义
-    public static final String SPRING_TASK_TYPE_XML = "XML";
-    // Spring Task类型，通过注解定义
-    public static final String SPRING_TASK_TYPE_ANNOTATION = "annotation";
-
     // 代表类或方法为空的标志
     public static final String EMPTY_CLASS_METHOD = "#empty#";
 
@@ -179,6 +175,12 @@ public class JACGConstants {
     public static final String CLASS_PLACE_HOLDER = "@class_place_holder@";
     // 方法名占位符
     public static final String METHOD_PLACE_HOLDER = "@method_place_holder@";
+
+    // JVM参数，日志文件后缀
+    public static final String JVM_PROP_KEY_LOG_FILE_SUFFIX = "jacg.log.file.suffix";
+
+    // 代表方法返回类型占位符
+    public static final String RETURN_TYPE_FLAG_PLACE_HOLDER = "!return_type_place_holder!";
 
     private JACGConstants() {
         throw new IllegalStateException("illegal");

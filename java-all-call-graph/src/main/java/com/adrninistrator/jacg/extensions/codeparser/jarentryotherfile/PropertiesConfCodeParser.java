@@ -1,7 +1,6 @@
 package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -36,7 +35,7 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
     }
 
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+    public boolean parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
         logger.info("处理{}文件 {}", JACGConstants.EXT_PROPERTIES, jarEntryPath);
         Properties properties = new Properties();
         try {
@@ -51,8 +50,8 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
             for (String key : keyList) {
                 String value = properties.getProperty(key);
                 JavaCG2YesNoEnum useBase64 = JavaCG2YesNoEnum.NO;
-                if (JACGUtil.containsCRLF(value)) {
-                    // 假如properties文件的值中包含回车换行，则需要进行BASE64编码
+                if (JavaCG2Util.checkNeedBase64(value)) {
+                    // 假如properties文件的值中包含回车换行Tab，则需要进行BASE64编码
                     value = JavaCG2Util.base64Encode(value);
                     useBase64 = JavaCG2YesNoEnum.YES;
                 }
@@ -61,5 +60,7 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
         } catch (Exception e) {
             logger.error("error ", e);
         }
+        // 某些.properties文件会处理失败，都返回处理成功
+        return true;
     }
 }

@@ -1,6 +1,5 @@
 package test.callgraph.mybatis.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import test.callgraph.mybatis.service.AbstractService1;
 

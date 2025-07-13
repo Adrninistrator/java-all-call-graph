@@ -38,10 +38,17 @@ public class TestService1 {
         testJarDiffTableMapper.selectByPrimaryKey("");
     }
 
-    public void testMapperNotModified() {
-        testJarDiffTableMapper.deleteByFlag("");
+    public void testMapperModified2() {
+        testJarDiffTableMapper.select2("");
     }
 
+    public void testMapperNotModified1() {
+        testJarDiffTableMapper.selectByPrimaryKeySame("");
+    }
+
+    public void testMapperNotModified2() {
+        testJarDiffTableMapper.deleteByFlag("");
+    }
     public void testMapperNew() {
         testJarDiffTableMapper.selectByPrimaryKey2("");
     }

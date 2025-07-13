@@ -9,7 +9,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnGenericsType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
-import com.adrninistrator.jacg.handler.conf.JavaCG2ConfigHandler;
+import com.adrninistrator.jacg.handler.conf.ConfigHandler;
 import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler;
@@ -34,7 +34,7 @@ import java.util.List;
         dependsWriteDbTableEnums = {DbTableInfoEnum.DTIE_METHOD_INFO,
                 DbTableInfoEnum.DTIE_METHOD_RETURN_GENERICS_TYPE,
                 DbTableInfoEnum.DTIE_METHOD_CALL_INFO,
-                DbTableInfoEnum.DTIE_JAVACG2_CONFIG}
+                DbTableInfoEnum.DTIE_CONFIG}
 )
 public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<WriteDbData4SpringController> {
 
@@ -56,8 +56,8 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
         methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
         methodCallInfoHandler = new MethodCallInfoHandler(dbOperWrapper);
         // 判断使用 java-callgraph2 组件处理方法调用时是否解析被调用对象和参数可能的类型与值
-        try (JavaCG2ConfigHandler javaCG2ConfigHandler = new JavaCG2ConfigHandler(dbOperWrapper)) {
-            if (javaCG2ConfigHandler.checkParseMethodCallTypeValue()) {
+        try (ConfigHandler configHandler = new ConfigHandler(dbOperWrapper)) {
+            if (configHandler.checkParseMethodCallTypeValue()) {
                 javaCG2ParseMethodCallTypeValue = true;
             }
         }

@@ -26,9 +26,10 @@ public class TestCodeParserWithCustomData1 extends AbstractCodeParserWithCustomD
     }
 
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
-        if (StringUtils.endsWithIgnoreCase(jarEntryPath, JACGConstants.EXT_XML)) {
-            testParser4XmlCommand.handle(inputStream, jarEntryPath, jarEntryName);
+    public boolean parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+        if (!StringUtils.endsWithIgnoreCase(jarEntryPath, JACGConstants.EXT_XML)) {
+            return true;
         }
+        return testParser4XmlCommand.handle(inputStream, jarEntryPath, jarEntryName);
     }
 }

@@ -143,6 +143,14 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
                     DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType(),
                     DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_WRITE_TABLE.getType()}
             , null),
+    OCFUSE_PARSE_SPRING_AOP_IGNORE_CLASS_PREFIX(InputDirEnum.IDE_CONFIG.getDirName() + "/parse_spring_aop_ignore_class_prefix.properties",
+            new String[]{"(作用) 解析Spring AOP advice影响的方法时需要忽略的Spring Bean类名配置文件（每行指定一项配置，可指定多行）",
+                    "(内容) 指定需要忽略的Spring Bean类名前缀",
+                    "(格式) 可指定类名或包名",
+                    "(示例)",
+                    "com.test",
+                    "com.test.Test1"}
+            , null),
     ;
 
     // 参数配置文件名

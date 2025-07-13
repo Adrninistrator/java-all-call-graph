@@ -3,6 +3,8 @@ package test.runbycode.jardiffcallgraph;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.handler.calleemethodinfo.AbstractCalleeMethodInfoFiller;
+import com.adrninistrator.jacg.handler.calleemethodinfo.CalleeMethodInfoFiller4MyBatisMSXml;
 import com.adrninistrator.jacg.handler.entrymethodinfo.AbstractEntryMethodInfoFiller;
 import com.adrninistrator.jacg.handler.entrymethodinfo.EntryMethodInfoFiller4Spring;
 import com.adrninistrator.jacg.jardiff.dto.result.JarDiffResult;
@@ -27,16 +29,15 @@ import java.util.List;
 public abstract class TestAbstractRunnerGenJarDiffCallGraph extends TestRunByCodeBase {
 
     protected void testJarDiffCalleeGraph() {
-        doTestJarDiffCalleeGraph(false, false);
-        doTestJarDiffCalleeGraph(false, true);
-        doTestJarDiffCalleeGraph(true, false);
-        doTestJarDiffCalleeGraph(true, true);
+        doTestJarDiffCalleeGraph(false, false, false);
+        doTestJarDiffCalleeGraph(true, true, true);
     }
 
     /**
      * 执行jar diff功能，生成发生变化的方法向上的调用链
      */
-    protected void doTestJarDiffCalleeGraph(boolean useFiler4Spring, boolean useFiler4CommandXml, ModifiedMethodFilterInterface... modifiedMethodFilters) {
+    protected void doTestJarDiffCalleeGraph(boolean useCalleeFiler4MyBatisMSXml, boolean useEntryFiler4Spring, boolean useEntryFiler4CommandXml,
+                                            ModifiedMethodFilterInterface... modifiedMethodFilters) {
         ConfigureWrapper configureWrapper = TestConfigGenerator.genConfigureWrapper();
         // 使用本地的配置参数
         JACGTestUtil.useLocalConfig(configureWrapper);
@@ -44,22 +45,30 @@ public abstract class TestAbstractRunnerGenJarDiffCallGraph extends TestRunByCod
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLEE_GRAPH_DIR, chooseRootJarDir() + chooseDirNameOld(),
                 chooseRootJarDir() + chooseDirNameNew());
-        if (useFiler4CommandXml) {
+        if (useEntryFiler4CommandXml) {
             configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, TestCodeParserWithCustomData1.class.getName());
         }
 
-        try (EntryMethodInfoFiller4Spring entryMethodInfoFiller4Spring = new EntryMethodInfoFiller4Spring(configureWrapper);
+        try (CalleeMethodInfoFiller4MyBatisMSXml calleeMethodInfoFiller4MyBatisMSXml = new CalleeMethodInfoFiller4MyBatisMSXml(configureWrapper);
+             EntryMethodInfoFiller4Spring entryMethodInfoFiller4Spring = new EntryMethodInfoFiller4Spring(configureWrapper);
              EntryMethodInfoFiller4XmlCommand entryMethodInfoFiller4XmlCommand = new EntryMethodInfoFiller4XmlCommand(configureWrapper)) {
-            List<AbstractEntryMethodInfoFiller> fillerList = new ArrayList<>();
-            if (useFiler4Spring) {
-                fillerList.add(entryMethodInfoFiller4Spring);
+            List<AbstractCalleeMethodInfoFiller> calleeMethodInfoFillerList = new ArrayList<>();
+            if (useCalleeFiler4MyBatisMSXml) {
+                calleeMethodInfoFillerList.add(calleeMethodInfoFiller4MyBatisMSXml);
             }
-            if (useFiler4CommandXml) {
-                fillerList.add(entryMethodInfoFiller4XmlCommand);
-            }
-            AbstractEntryMethodInfoFiller[] fillers = fillerList.toArray(new AbstractEntryMethodInfoFiller[]{});
+            AbstractCalleeMethodInfoFiller[] calleeMethodInfoFillers = calleeMethodInfoFillerList.toArray(new AbstractCalleeMethodInfoFiller[]{});
 
-            RunnerGenJarDiffCalleeGraph genJarDiffCalleeGraph = new RunnerGenJarDiffCalleeGraph(javaCG2ConfigureWrapper, configureWrapper, fillers, modifiedMethodFilters);
+            List<AbstractEntryMethodInfoFiller> entryMethodInfoFillerList = new ArrayList<>();
+            if (useEntryFiler4Spring) {
+                entryMethodInfoFillerList.add(entryMethodInfoFiller4Spring);
+            }
+            if (useEntryFiler4CommandXml) {
+                entryMethodInfoFillerList.add(entryMethodInfoFiller4XmlCommand);
+            }
+            AbstractEntryMethodInfoFiller[] entryMethodInfoFillers = entryMethodInfoFillerList.toArray(new AbstractEntryMethodInfoFiller[]{});
+
+            RunnerGenJarDiffCalleeGraph genJarDiffCalleeGraph = new RunnerGenJarDiffCalleeGraph(javaCG2ConfigureWrapper, configureWrapper, calleeMethodInfoFillers,
+                    entryMethodInfoFillers, modifiedMethodFilters);
             JarDiffResult jarDiffResult = genJarDiffCalleeGraph.generate();
             Assert.assertTrue(jarDiffResult.isSuccess());
             printMapContent(jarDiffResult.getJarModifiedMethodInfoMap());

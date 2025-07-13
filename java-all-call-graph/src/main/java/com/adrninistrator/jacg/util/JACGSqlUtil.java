@@ -4,6 +4,9 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldRelationship;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopAdvice;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopAspect;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopPointcut;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
 import org.apache.commons.lang3.StringUtils;
 
@@ -149,7 +152,8 @@ public class JACGSqlUtil {
                 data.getMethodName(),
                 data.getType(),
                 data.getFullMethod(),
-                data.getReturnType()
+                data.getReturnType(),
+                data.getDefineClassNameXmlPath()
         };
     }
 
@@ -177,6 +181,47 @@ public class JACGSqlUtil {
                 data.getRelationshipFlags(),
                 data.getBeanUtilCallId(),
                 data.getBeanUtilMethod()
+        };
+    }
+
+    public static Object[] genSpringAopAspectArray(WriteDbData4SpringAopAspect data) {
+        return new Object[]{
+                data.getRecordId(),
+                data.getType(),
+                data.getXmlAspectId(),
+                data.getXmlAspectRef(),
+                data.getAspectOrder(),
+                data.getClassName(),
+                data.getDefineXmlPath()
+        };
+    }
+
+    public static Object[] genSpringAopPointcutArray(WriteDbData4SpringAopPointcut data) {
+        return new Object[]{
+                data.getRecordId(),
+                data.getType(),
+                data.getXmlPointcutId(),
+                data.getExpression(),
+                data.getFullMethod(),
+                data.getDefineXmlPath()
+        };
+    }
+
+    public static Object[] genSpringAopAdviceArray(WriteDbData4SpringAopAdvice data) {
+        return new Object[]{
+                data.getRecordId(),
+                data.getType(),
+                data.getXmlAspectId(),
+                data.getXmlAspectMethodName(),
+                data.getAdviceType(),
+                data.getXmlPointcutRef(),
+                data.getExpression(),
+                data.getAspectOrder(),
+                data.getAdviceFullMethod(),
+                data.getAdviceMethodReturnType(),
+                data.getAdviceMethodHash(),
+                data.getAspectClassName(),
+                data.getDefineXmlPath()
         };
     }
 

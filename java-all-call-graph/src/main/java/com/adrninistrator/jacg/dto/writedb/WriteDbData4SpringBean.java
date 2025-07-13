@@ -14,6 +14,8 @@ public class WriteDbData4SpringBean implements BaseWriteDbData {
     private String simpleClassName;
     private String className;
     private String beanType;
+    private String annotationClassName;
+    private String defineClassNameXmlPath;
 
     public int getRecordId() {
         return recordId;
@@ -61,5 +63,21 @@ public class WriteDbData4SpringBean implements BaseWriteDbData {
 
     public void setBeanType(String beanType) {
         this.beanType = beanType;
+    }
+
+    public String getAnnotationClassName() {
+        return annotationClassName;
+    }
+
+    public void setAnnotationClassName(String annotationClassName) {
+        this.annotationClassName = annotationClassName;
+    }
+
+    public String getDefineClassNameXmlPath() {
+        return defineClassNameXmlPath;
+    }
+
+    public void setDefineClassNameXmlPath(String defineClassNameXmlPath) {
+        this.defineClassNameXmlPath = defineClassNameXmlPath;
     }
 }

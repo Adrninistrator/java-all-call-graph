@@ -69,12 +69,12 @@ public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
 
     // 处理.xml文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+    public boolean parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
         try {
             // 尝试解析xml文件
             MyBatisMySqlInfo myBatisMySqlInfo = entry4ParseMyBatisMySqlTable.parseFile(inputStream, jarEntryPath);
             if (myBatisMySqlInfo == null) {
-                return;
+                return true;
             }
 
             // 处理Entity与Mapper、表名
@@ -118,8 +118,10 @@ public class MyBatisMySqlSqlInfoCodeParser extends AbstractSaveData2FileParser {
                     myBatisMySqlWriteSqlInfoCodeParser.handleMySQLWriteTableInfo(mapperInterfaceName, methodName, mySqlWriteTableInfo, jarEntryPath);
                 }
             }
+            return true;
         } catch (Exception e) {
             logger.error("error ", e);
+            return false;
         }
     }
 

@@ -241,6 +241,34 @@ public class MethodCallHandler extends BaseHandler {
     }
 
     /**
+     * 根据调用方完整方法HASH+长度、被调用方类名与方法名，从方法调用表获取对应的方法调用
+     *
+     * @param callerMethodHash 调用方完整方法HASH+长度
+     * @param calleeMethodName
+     * @param calleeClassNames
+     * @return
+     */
+    public List<WriteDbData4MethodCall> queryByErHashEeClassesMethod(String callerMethodHash, String calleeMethodName, String... calleeClassNames) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_BY_ER_HASH_EE_CLASSES_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum, calleeClassNames.length);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLER_METHOD_HASH + " = ?" +
+                    " and " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " in " + JACGSqlUtil.genQuestionString(calleeClassNames.length) +
+                    " and " + DC.MC_CALLEE_METHOD_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql, calleeClassNames.length);
+        }
+        List<Object> argList = new ArrayList<>(calleeClassNames.length + 2);
+        argList.add(callerMethodHash);
+        for (String calleeClassName : calleeClassNames) {
+            argList.add(dbOperWrapper.querySimpleClassName(calleeClassName));
+        }
+        argList.add(calleeMethodName);
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, argList.toArray());
+    }
+
+    /**
      * 根据被调用方完整方法HASH+长度，从方法调用表获取对应的完整方法
      *
      * @param methodHash 完整方法HASH+长度

@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "3.2.1"
+version = "3.3.0"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -56,7 +56,7 @@ List mysql = ['com.mysql:mysql-connector-j:8.4.0']
 
 List h2database = ["com.h2database:h2:2.2.220"]
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:3.2.0']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:3.3.0']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.0']
 
@@ -117,6 +117,7 @@ dependencies {
     compileOnly spring_data_neo4j
     testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, servlet, commons_bean_utils, spring_data_neo4j, lombok, commons_chain, mybatis
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
 compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -157,6 +158,7 @@ tasks.register('gen_run_jar', Jar) {
     }
 
     doFirst {
+        delete "${buildDir}/libs/run_jacg.jar"
         delete "${jar_output_dir}"
     }
 
@@ -216,7 +218,7 @@ tasks.register('gen_run_jar', Jar) {
             if (file.name.startsWith('java-callgraph2-')) {
                 copy {
                     from zipTree(file).matching {
-                        include '_javacg2_*/*'
+                        include '_javacg2_*/*', '_el_example/*'
                     }
                     into "${jar_output_dir}/"
                 }

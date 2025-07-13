@@ -370,8 +370,8 @@ public class MethodCallInfoHandler extends BaseHandler {
      * @param type
      * @return
      */
-    public WriteDbData4MethodCallInfo queryMethodCallInfoByCallIdType(int callId, int objArgsSeq, int seq, String type) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_BY_MC_ID_TYPE;
+    public WriteDbData4MethodCallInfo queryMethodCallInfoByCallIdSeqType(int callId, int objArgsSeq, int seq, String type) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_BY_MC_ID_SEQ_TYPE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL_INFO) +
@@ -383,6 +383,28 @@ public class MethodCallInfoHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObject(sql, WriteDbData4MethodCallInfo.class, callId, objArgsSeq, seq, type);
+    }
+
+    /**
+     * 根据方法调用ID、被调用对象或参数序号，及类型，查询方法调用信息
+     *
+     * @param callId
+     * @param objArgsSeq
+     * @param type
+     * @return
+     */
+    public List<WriteDbData4MethodCallInfo> queryMethodCallInfoByCallIdType(int callId, int objArgsSeq, String type) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_BY_MC_ID_TYPE;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName() +
+                    " where " + DC.MCI_CALL_ID + " = ?" +
+                    " and " + DC.MCI_OBJ_ARGS_SEQ + " = ?" +
+                    " and " + DC.MCI_TYPE + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, callId, objArgsSeq, type);
     }
 
     /**

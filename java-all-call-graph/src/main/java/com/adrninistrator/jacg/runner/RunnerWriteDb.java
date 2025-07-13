@@ -1,18 +1,26 @@
 package com.adrninistrator.jacg.runner;
 
+import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
+import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.DbConfInfo;
 import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.conf.writer.JACGConfigWriter;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MyBatisMSFormatedSql;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MybatisMSColumn;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.extensions.methodcall.AbstractJACGMethodCallExtension;
 import com.adrninistrator.jacg.handler.fieldrelationship.MethodCallPassedFieldRelationshipHandler;
+import com.adrninistrator.jacg.handler.jarinfo.JarInfoHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMSJavaColumnHandler;
 import com.adrninistrator.jacg.handler.writedb.AbstractWriteDbHandler;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassAnnotation;
@@ -70,20 +78,31 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4PropertiesConf;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SetMethod;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SetMethodAssignInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SfFieldMethodCall;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopAdviceAround;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopAdviceJava;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopAdviceXml;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopAspectJava;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopAspectXml;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopPointcutJava;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopPointcutXml;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringBean;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringController;
-import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringTaskAnnotation;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringScanPackageJava;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringScanPackageXml;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringTaskJava;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringTaskXml;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.RunProcessUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.dto.output.JavaCG2OutputInfo;
-import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
@@ -127,12 +146,8 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     // 跳过调用java-callgraph2的步骤
     private boolean skipCallJavaCG2 = false;
 
-    public static void main(String[] args) {
-        boolean success = new RunnerWriteDb().run();
-        if (!success) {
-            throw new JavaCG2RuntimeException("执行失败");
-        }
-    }
+    // 是否需要解析Spring AOP信息
+    private boolean parseSpringAopInfo;
 
     /**
      * 构造函数，使用配置文件中的参数
@@ -152,7 +167,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     }
 
     @Override
-    public boolean preHandle() {
+    protected boolean preHandle() {
         // 读取其他配置文件
         if (!useNeo4j()) {
             return initDb();
@@ -161,7 +176,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     }
 
     @Override
-    public void handle() {
+    protected void handle() {
         // 执行实际处理
         if (!operate()) {
             // 记录执行失败
@@ -171,19 +186,8 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
     @Override
     protected boolean checkH2DbFile() {
-        File h2DbFile = getH2DbFile();
-        if (!h2DbFile.exists()) {
-            return true;
-        }
-
-        // 数据库文件存在
-        if (!h2DbFile.isFile()) {
-            logger.error("H2数据库文件不是文件 {}", JavaCG2FileUtil.getCanonicalPath(h2DbFile));
-            return false;
-        }
-
-        // 检查H2数据库文件是否可写
-        return checkH2DbFileWritable(h2DbFile);
+        // 检查H2数据库文件是否可写，允许文件不存在
+        return checkH2DbFileWritable(true);
     }
 
     private boolean initDb() {
@@ -253,16 +257,32 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             }
         }
 
+        parseSpringAopInfo = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_PARSE_SPRING_AOP_INFO);
+        logger.info("{}需要解析Spring AOP信息", parseSpringAopInfo ? "" : "不");
+
         if (skipCallJavaCG2) {
+            if (parseSpringAopInfo) {
+                logger.error("需要解析Spring AOP信息时，不允许配置不调用java-callgraph2生成jar文件的方法调用关系");
+                return false;
+            }
             logger.info("已配置不调用java-callgraph2生成jar文件的方法调用关系");
         } else {
+            if (parseSpringAopInfo) {
+                /*
+                    需要解析Spring AOP信息时
+                    - 配置需要生成fat jar，以获得advice影响方法
+                    - 处理方法调用时需要解析被调用对象和参数可能的类型与值，以获得Spring Bean信息
+                 */
+                javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_MERGE_SEPARATE_FAT_JAR, Boolean.TRUE.toString());
+                javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.TRUE.toString());
+            }
             // 调用java-callgraph2生成jar文件的方法调用关系
             if (!callJavaCallGraph2()) {
                 return false;
             }
         }
 
-        // 创建线程，参数固定指定为10，即使用10个线程
+        // 创建线程池，参数固定指定为10，即使用10个线程
         createThreadPoolExecutor(10);
 
         // 处理java-callgraph2组件使用的配置参数
@@ -396,7 +416,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
-        // 等待写入方法调用数据完成
+        // 等待写入数据完成
         wait4TPEDone();
 
         // 人工添加方法调用关系（需要在方法调用关系文件处理完毕后执行）
@@ -412,6 +432,11 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         // 等待所有写入数据完成
         wait4TPEDone();
 
+        // 处理Spring AOP advice
+        if (!handleSpringAopAdvice()) {
+            return false;
+        }
+
         // 检查执行结果
         if (!checkResult()) {
             return false;
@@ -421,7 +446,92 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             // 显示H2数据库JDBC URL
             printH2JdbcUrl();
         }
-        return true;
+
+        // 处理Spring AOP advice影响的方法
+        return handleSpringAopAdviceAffectedMethod();
+    }
+
+    // 处理Spring AOP advice影响的方法
+    private boolean handleSpringAopAdviceAffectedMethod() {
+        if (useNeo4j() || !parseSpringAopInfo) {
+            return true;
+        }
+
+        // 将处理Spring AOP advice影响的方法需要的配置文件写到对应目录
+        String springAopConfigDirPath = currentOutputDirPath + JACGConstants.DIR_SPRING_AOP_CONFIG;
+        logger.info("处理Spring AOP advice影响的方法，保存配置文件的目录 {}", springAopConfigDirPath);
+        JACGConfigWriter jacgConfigWriter = new JACGConfigWriter(springAopConfigDirPath);
+        jacgConfigWriter.setBaseConfigureWrapper(configureWrapper);
+        boolean result1 = jacgConfigWriter.genMainConfig(ConfigKeyEnum.values());
+        boolean result2 = jacgConfigWriter.genMainConfig(ConfigDbKeyEnum.values());
+        boolean result3 = jacgConfigWriter.genOtherConfig(OtherConfigFileUseListEnum.values());
+        boolean result4 = jacgConfigWriter.genOtherConfig(OtherConfigFileUseSetEnum.values());
+        if (!result1 || !result2 || !result3 || !result4) {
+            return false;
+        }
+
+        // 启动新的进程处理Spring AOP advice影响的方法
+        return runSpringAopAdviceAffectedMethod(springAopConfigDirPath);
+    }
+
+    // 启动新的进程处理Spring AOP advice影响的方法
+    private boolean runSpringAopAdviceAffectedMethod(String springAopConfigDirPath) {
+        JarInfoHandler jarInfoHandler = new JarInfoHandler(dbOperWrapper);
+        WriteDbData4JarInfo fatJarInfo = jarInfoHandler.queryFatJarInfo();
+        if (fatJarInfo == null) {
+            logger.error("启动新的进程处理Spring AOP advice影响的方法时，未查询到fat jar信息");
+            return false;
+        }
+        logger.info("fat jar文件路径 {}", fatJarInfo.getJarFullPath());
+
+        String javaHome = System.getProperty("java.home");
+        logger.info("当前使用的 javaHome {}", javaHome);
+
+        // 获取classpath
+        String classpath = System.getProperty("java.class.path");
+        logger.info("当前使用的 classpath {}", classpath);
+
+        String osName = System.getProperty("os.name");
+        boolean windowsOs = StringUtils.startsWithIgnoreCase(osName, "Windows");
+
+        String javaPath;
+        String newClassPath;
+        if (windowsOs) {
+            javaPath = javaHome + "\\bin\\java.exe";
+            newClassPath = classpath + ";" + fatJarInfo.getJarFullPath();
+        } else {
+            javaPath = javaHome + "/bin/java";
+            newClassPath = classpath + ":" + fatJarInfo.getJarFullPath();
+        }
+
+        // 启动进程前，关闭当前使用的数据源
+        dbOperator.closeDs(this);
+
+        String[] args = new String[]{
+                RunProcessUtil.handleProcessArg(javaPath),
+                "-classpath", RunProcessUtil.handleProcessArg(newClassPath),
+                "-D" + JavaCG2Constants.JVM_PROP_KEY_INPUT_ROOT_PATH + "=" + RunProcessUtil.handleProcessArg(springAopConfigDirPath),
+                "-D" + JACGConstants.JVM_PROP_KEY_LOG_FILE_SUFFIX + "=" + JACGConstants.DIR_SPRING_AOP_CONFIG,
+                "-Dfile.encoding=UTF-8",
+                RunnerWriteSpringAopAdviceAffectedMethod.class.getName()
+        };
+        logger.info("启动进程时使用的参数 {}", StringUtils.join(args, " "));
+        ProcessBuilder processBuilder = new ProcessBuilder(args);
+        try {
+            Process childProcess = processBuilder.start();
+
+            // 等待子进程结束
+            int exitCode = RunProcessUtil.waitProcess(childProcess);
+            if (exitCode != 0) {
+                logger.error("子进程执行失败，返回码 {}", exitCode);
+                return false;
+            }
+            logger.info("子进程执行返回码 {}", exitCode);
+            return true;
+        } catch (Exception e) {
+            logger.error("error ", e);
+            return false;
+        }
     }
 
     // 添加用于根据方法调用信息添加方法调用关系的处理类
@@ -670,16 +780,16 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         initWriteDbHandler(writeDbHandler4SpringController);
 
         // 创建处理通过注解定义的Spring Task信息的类
-        WriteDbHandler4SpringTaskAnnotation writeDbHandler4SpringTaskAnnotation = new WriteDbHandler4SpringTaskAnnotation(writeDbResult);
-        initWriteDbHandler(writeDbHandler4SpringTaskAnnotation);
+        WriteDbHandler4SpringTaskJava writeDbHandler4SpringTaskJava = new WriteDbHandler4SpringTaskJava(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringTaskJava);
         // 由于spring_task会分别写入通过XML及注解定义的信息，因此这里需要修改recordId的值
-        writeDbHandler4SpringTaskAnnotation.setRecordId(springTaskAnnotationCounter.getCount());
+        writeDbHandler4SpringTaskJava.setRecordId(springTaskAnnotationCounter.getCount());
 
         // 处理方法注解信息，需要在类注解之后处理
         initWriteDbHandler(writeDbHandler4MethodAnnotation);
         writeDbHandler4MethodAnnotation.setClassRequestMappingMap(classRequestMappingMap);
         writeDbHandler4MethodAnnotation.setWriteDbHandler4SpringController(writeDbHandler4SpringController);
-        writeDbHandler4MethodAnnotation.setWriteDbHandler4SpringTaskAnnotation(writeDbHandler4SpringTaskAnnotation);
+        writeDbHandler4MethodAnnotation.setWriteDbHandler4SpringTaskJava(writeDbHandler4SpringTaskJava);
         writeDbHandler4MethodAnnotation.setWithAnnotationMethodHashSet(withAnnotationMethodHashSet);
         if (!writeDbHandler4MethodAnnotation.handle(javaCG2OutputInfo)) {
             return false;
@@ -912,7 +1022,70 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
         springTaskAnnotationCounter.setCount(writeDbHandler4SpringTask.getRecordId());
-        return true;
+
+        // 处理Spring包扫描路径
+        Set<String> scanPackageSet = new HashSet<>();
+        WriteDbHandler4SpringScanPackageXml writeDbHandler4SpringScanPackageXml = new WriteDbHandler4SpringScanPackageXml(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringScanPackageXml);
+        writeDbHandler4SpringScanPackageXml.setScanPackageSet(scanPackageSet);
+        if (!writeDbHandler4SpringScanPackageXml.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+        WriteDbHandler4SpringScanPackageJava writeDbHandler4SpringScanPackageJava = new WriteDbHandler4SpringScanPackageJava(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringScanPackageJava);
+        writeDbHandler4SpringScanPackageJava.setRecordId(writeDbHandler4SpringScanPackageXml.getRecordId());
+        writeDbHandler4SpringScanPackageJava.setScanPackageSet(scanPackageSet);
+        if (!writeDbHandler4SpringScanPackageJava.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        if (!parseSpringAopInfo) {
+            return true;
+        }
+
+        logger.info("对Spring AOP相关信息进行解析");
+
+        // 处理Spring AOP aspect
+        WriteDbHandler4SpringAopAspectJava writeDbHandler4SpringAopAspectJava = new WriteDbHandler4SpringAopAspectJava(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringAopAspectJava);
+        if (!writeDbHandler4SpringAopAspectJava.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+        WriteDbHandler4SpringAopAspectXml writeDbHandler4SpringAopAspectXml = new WriteDbHandler4SpringAopAspectXml(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringAopAspectXml);
+        writeDbHandler4SpringAopAspectXml.setRecordId(writeDbHandler4SpringAopAspectJava.getRecordId());
+        writeDbHandler4SpringAopAspectXml.setSpringBeanMap(springBeanMap);
+        if (!writeDbHandler4SpringAopAspectXml.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        // 处理Spring AOP pointcut
+        WriteDbHandler4SpringAopPointcutJava writeDbHandler4SpringAopPointcutJava = new WriteDbHandler4SpringAopPointcutJava(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringAopPointcutJava);
+        if (!writeDbHandler4SpringAopPointcutJava.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+        WriteDbHandler4SpringAopPointcutXml writeDbHandler4SpringAopPointcutXml = new WriteDbHandler4SpringAopPointcutXml(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringAopPointcutXml);
+        writeDbHandler4SpringAopPointcutXml.setRecordId(writeDbHandler4SpringAopPointcutJava.getRecordId());
+        if (!writeDbHandler4SpringAopPointcutXml.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        // 处理Spring AOP advice
+        WriteDbHandler4SpringAopAdviceJava writeDbHandler4SpringAopAdviceJava = new WriteDbHandler4SpringAopAdviceJava(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringAopAdviceJava);
+        if (!writeDbHandler4SpringAopAdviceJava.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        // 等待前面的Spring AOP数据写入完毕
+        wait4TPEDone();
+
+        WriteDbHandler4SpringAopAdviceXml writeDbHandler4SpringAopAdviceXml = new WriteDbHandler4SpringAopAdviceXml(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringAopAdviceXml);
+        writeDbHandler4SpringAopAdviceXml.setRecordId(writeDbHandler4SpringAopAdviceJava.getRecordId());
+        return writeDbHandler4SpringAopAdviceXml.handle(javaCG2OutputInfo);
     }
 
     // 处理MyBatis信息
@@ -974,7 +1147,15 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         // 处理MyBatis的select的字段信息
         WriteDbHandler4MyBatisMSSelectColumn writeDbHandler4MyBatisMSSelectColumn = new WriteDbHandler4MyBatisMSSelectColumn(writeDbResult);
         initWriteDbHandler(writeDbHandler4MyBatisMSSelectColumn);
-        return writeDbHandler4MyBatisMSSelectColumn.handle(javaCG2OutputInfo);
+        if (!writeDbHandler4MyBatisMSSelectColumn.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        // 等待MyBatis相关数据写入完毕
+        wait4TPEDone();
+
+        // 记录MyBatis XML中返回的resultMap内容的HASH值（支持MySQL）
+        return recordMyBatisMSReturnResultMapHash();
     }
 
     // 处理类的泛型相关信息
@@ -1057,6 +1238,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return true;
         }
 
+        boolean analyseFieldRelationship = javaCG2ConfigureWrapper.getMainConfig(JavaCG2ConfigKeyEnum.CKE_ANALYSE_FIELD_RELATIONSHIP);
+        if (!analyseFieldRelationship) {
+            logger.info("不解析dto的字段之间通过get/set方法的关联关系时，跳过对应处理");
+            return true;
+        }
+
+        logger.info("解析dto的字段之间通过get/set方法的关联关系，处理通过方法调用传递的字段关联关系");
         WriteDbHandler4SetMethodAssignInfo writeDbHandler4SetMethodAssignInfo = new WriteDbHandler4SetMethodAssignInfo(writeDbResult);
         initWriteDbHandler(writeDbHandler4SetMethodAssignInfo);
 
@@ -1076,6 +1264,18 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         MyBatisMSJavaColumnHandler myBatisMSJavaColumnHandler = new MyBatisMSJavaColumnHandler(dbOperWrapper);
         myBatisMSJavaColumnHandler.setWriteDbHandler4MybatisMSGetSetDb(writeDbHandler4MybatisMSGetSetDb);
         return myBatisMSJavaColumnHandler.handle(javaCG2OutputInfo.getOutputDirPath());
+    }
+
+    // 处理Spring AOP advice
+    private boolean handleSpringAopAdvice() {
+        if (useNeo4j() || !parseSpringAopInfo) {
+            return true;
+        }
+
+        // Spring AOP advice Around信息
+        WriteDbHandler4SpringAopAdviceAround writeDbHandler4SpringAopAdviceAround = new WriteDbHandler4SpringAopAdviceAround(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringAopAdviceAround);
+        return writeDbHandler4SpringAopAdviceAround.handle(javaCG2OutputInfo.getOutputDirPath());
     }
 
     // 处理方法调用关系文件
@@ -1172,7 +1372,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     }
 
     // 检查执行结果
-    private boolean checkResult() {
+    protected boolean checkResult() {
         int failTimes = 0;
         // 执行写入数据库的类执行完成之后的操作
         Map<String, AbstractWriteDbHandler<?>> writeDbHandlerMap = writeDbResult.getWriteDbHandlerMap();
@@ -1180,7 +1380,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         Collections.sort(writeDbHandlerNameList);
         for (String writeDbHandlerName : writeDbHandlerNameList) {
             AbstractWriteDbHandler<?> writeDbHandler = writeDbHandlerMap.get(writeDbHandlerName);
-            if (!writeDbHandler.finalCheck()) {
+            if (!writeDbHandler.finalCheck() || writeDbHandler.checkFailed()) {
                 failTimes++;
             }
         }
@@ -1211,6 +1411,71 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             if (entry.getValue().getCount() > 0) {
                 logger.error("写数据库操作失败 {}", entry.getKey());
                 return false;
+            }
+        }
+        return true;
+    }
+
+    // 记录MyBatis XML中返回的resultMap内容的HASH值（支持MySQL）
+    private boolean recordMyBatisMSReturnResultMapHash() {
+        // 从mybatis_ms_formated_sql表查询所有的XML文件名
+        String querySql1 = "select distinct " + DC.MMFS_XML_FILE_NAME +
+                " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_FORMATED_SQL.getTableName();
+        querySql1 = dbOperWrapper.cacheSql(SqlKeyEnum.MMFS_QUERY_ALL_XML_FILE_NAME, querySql1);
+        List<String> xmlFileNameList = dbOperator.queryListOneColumn(querySql1, String.class);
+        if (JavaCG2Util.isCollectionEmpty(xmlFileNameList)) {
+            logger.info("查询 {} 表记录为空", DbTableInfoEnum.DTIE_MYBATIS_MS_FORMATED_SQL.getTableName());
+            return true;
+        }
+
+        String querySql2 = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_MYBATIS_MS_FORMATED_SQL) +
+                " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_FORMATED_SQL.getTableName() +
+                " where " + DC.MMFS_XML_FILE_NAME + " = ?";
+        querySql2 = dbOperWrapper.cacheSql(SqlKeyEnum.MMFS_QUERY_BY_XML_FILE_NAME, querySql2);
+
+        String querySql3 = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_MYBATIS_MS_COLUMN) +
+                " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_COLUMN.getTableName() +
+                " where " + DC.MMC_XML_FILE_NAME + " = ?" +
+                "and " + DC.MMC_XML_FILE_PATH + " = ?" +
+                "and " + DC.MMC_RESULT_MAP_ID + " = ?";
+        querySql3 = dbOperWrapper.cacheSql(SqlKeyEnum.MMC_QUERY_BY_XML_RESULT_MAP_ID, querySql3);
+
+        String updateSql1 = "update " + DbTableInfoEnum.DTIE_MYBATIS_MS_FORMATED_SQL.getTableName() +
+                " set " + DC.MMFS_RESULT_MAP_HASH + " = ?" +
+                " where " + DC.MMFS_RECORD_ID + " = ?";
+        updateSql1 = dbOperWrapper.cacheSql(SqlKeyEnum.MMFS_UPDATE_RESULT_MAP_HASH, updateSql1);
+
+        for (String xmlFileName : xmlFileNameList) {
+            // 根据XML文件名从mybatis_ms_formated_sql表查询对应的记录
+            List<WriteDbData4MyBatisMSFormatedSql> myBatisMSFormatedSqlList = dbOperator.queryList(querySql2, WriteDbData4MyBatisMSFormatedSql.class, xmlFileName);
+            if (JavaCG2Util.isCollectionEmpty(xmlFileNameList)) {
+                continue;
+            }
+            for (WriteDbData4MyBatisMSFormatedSql myBatisMSFormatedSql : myBatisMSFormatedSqlList) {
+                if (StringUtils.isBlank(myBatisMSFormatedSql.getResultMapId())) {
+                    continue;
+                }
+                // 查询mybatis_ms_formated_sql表当前的XML元素返回的resultMap的信息
+                List<WriteDbData4MybatisMSColumn> mybatisMSColumnList = dbOperator.queryList(querySql3, WriteDbData4MybatisMSColumn.class,
+                        myBatisMSFormatedSql.getXmlFileName(), myBatisMSFormatedSql.getXmlFilePath(),
+                        myBatisMSFormatedSql.getResultMapId());
+                if (JavaCG2Util.isCollectionEmpty(mybatisMSColumnList)) {
+                    continue;
+                }
+                List<String> mybatisMSColumnValueList = new ArrayList<>(mybatisMSColumnList.size());
+                for (WriteDbData4MybatisMSColumn mybatisMSColumn : mybatisMSColumnList) {
+                    mybatisMSColumnValueList.add(StringUtils.joinWith(JACGConstants.FLAG_SPACE, mybatisMSColumn.getEntityFieldName(), mybatisMSColumn.getColumnName(),
+                            mybatisMSColumn.getColumnType()));
+                }
+                Collections.sort(mybatisMSColumnValueList);
+                String resultMapValue = StringUtils.join(mybatisMSColumnValueList, JavaCG2Constants.NEW_LINE);
+                String resultMapHash = JACGUtil.genHashWithLen(resultMapValue);
+                // 更新mybatis_ms_formated_sql表的resultMap内容hash+字节数
+                Integer updatedRowNum = dbOperator.update(updateSql1, resultMapHash, myBatisMSFormatedSql.getRecordId());
+                if (updatedRowNum != 1) {
+                    logger.error("更新 {} 表时返回行数不是1 {}", DbTableInfoEnum.DTIE_MYBATIS_MS_FORMATED_SQL.getTableName(), updatedRowNum);
+                    return false;
+                }
             }
         }
         return true;

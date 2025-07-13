@@ -12,6 +12,7 @@ import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.dto.accessflag.JavaCG2AccessFlags;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,25 @@ public class ClassInfoHandler extends BaseHandler {
 
     public ClassInfoHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
+    }
+
+    /**
+     * 检查指定的类名是否存在
+     *
+     * @param className 类名
+     * @return
+     */
+    public boolean checkClassNameExists(String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CI_CHECK_CLASS_NAME_EXISTS;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.CI_CLASS_NAME +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_INFO.getTableName() +
+                    " where " + DC.CI_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        String existedClassName = dbOperator.queryObjectOneColumn(sql, String.class, className);
+        return StringUtils.isNotBlank(existedClassName);
     }
 
     /**
@@ -142,6 +162,16 @@ public class ClassInfoHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObjectOneColumn(sql, Integer.class, simpleClassName);
+    }
+
+    /**
+     * 根据类名查询类的信息
+     *
+     * @param className
+     * @return
+     */
+    public WriteDbData4ClassInfo queryClassInfoByClassName(String className) {
+        return queryClassInfoBySCN(dbOperWrapper.querySimpleClassName(className));
     }
 
     /**

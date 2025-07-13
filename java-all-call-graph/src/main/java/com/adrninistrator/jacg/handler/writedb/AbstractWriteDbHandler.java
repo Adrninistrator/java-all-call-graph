@@ -526,7 +526,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     /**
      * 将数据写入数据库
      */
-    protected void insertDb() {
+    public void insertDb() {
         checkInited();
 
         if (dataList.isEmpty()) {
@@ -672,7 +672,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
      *
      * @return
      */
-    protected int genNextRecordId() {
+    public int genNextRecordId() {
         return ++recordId;
     }
 

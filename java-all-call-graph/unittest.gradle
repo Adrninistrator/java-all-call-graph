@@ -20,7 +20,8 @@ tasks.register('test_gen_jar', Jar) {
     destinationDirectory = file("${buildDir}")
     from(sourceSets.test.output) {
         include 'test/callgraph/**'
-        exclude 'test/callgraph/otherjar/**'
+        // test/java/test/callgraph/field/multi 目录中的类字段太多，解析时可能OOM，排除
+        exclude 'test/callgraph/otherjar/**','test/callgraph/field/multi/**'
         into '/'
     }
     from('src/test/resources/') {
@@ -146,6 +147,7 @@ tasks.register('gen_jar_in_jar', Jar) {
 
     from(sourceSets.test.output) {
         include 'test/**'
+        exclude 'test/callgraph/field/multi/**'
         into '/'
     }
 
@@ -168,6 +170,7 @@ tasks.register('gen_jar_in_war', Jar) {
 
     from(sourceSets.test.output) {
         include 'test/**'
+        exclude 'test/callgraph/field/multi/**'
         into 'WEB-INF/classes'
     }
 
@@ -185,7 +188,7 @@ test {
         delete "_unittest_output"
         exclude('test/other', 'test/runbycode/targz', 'test/runlocal', 'test/runbycode/TestRBC*')
         minHeapSize = "256m"
-        maxHeapSize = "1g"
+        maxHeapSize = "2g"
 
         maxParallelForks = 1
 
@@ -193,7 +196,9 @@ test {
 
         def TEST_FLAG_RECORD_LOG_TO_FILE = "test.flag.record.log.to.file"
         def testFlagRecordLogToFile = System.getProperty(TEST_FLAG_RECORD_LOG_TO_FILE)
-        jvmArgs "-Dfile.encoding=UTF-8", "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=256m", "-D" + TEST_FLAG_RECORD_LOG_TO_FILE + "=" + testFlagRecordLogToFile
+        jvmArgs "-Dfile.encoding=UTF-8", "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=256m",
+                "-XX:+HeapDumpOnOutOfMemoryError","-XX:HeapDumpPath=${buildDir}/heap_dump/",
+                "-D" + TEST_FLAG_RECORD_LOG_TO_FILE + "=" + testFlagRecordLogToFile
 
         testLogging {
             events "PASSED", "STARTED", "FAILED", "SKIPPED"

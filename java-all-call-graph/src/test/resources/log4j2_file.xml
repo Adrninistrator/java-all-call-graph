@@ -6,7 +6,7 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %C{1}.%M(%L) - %m%n"/>
         </Console>
 
-        <RollingFile name="file" fileName="log/jacg.log" filePattern="log/jacg.log.%d{yyyy-MM-dd}.%i.log.gz">
+        <RollingFile name="file" fileName="log/jacg${sys:jacg.log.file.suffix:-}.log" filePattern="log/jacg${sys:jacg.log.file.suffix:-}.log.%d{yyyy-MM-dd}.%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}.%M(%F:%L) - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>

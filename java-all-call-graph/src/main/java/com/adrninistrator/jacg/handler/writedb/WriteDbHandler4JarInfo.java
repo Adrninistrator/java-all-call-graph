@@ -99,7 +99,7 @@ public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4J
     @Override
     public String[] chooseFileColumnDesc() {
         return new String[]{
-                "jar文件类型，J: jar/war文件，D: 目录，JIJ: jar/war文件中的jar，R: 解析结果文件保存目录",
+                "jar文件类型，J: jar/war文件，D: 目录，JIJ: jar/war文件中的jar，R: 解析结果文件保存目录，FJ: 最终解析的jar文件",
                 "jar文件序号",
                 "外层jar文件完整路径",
                 "jar/war文件中的jar文件路径"

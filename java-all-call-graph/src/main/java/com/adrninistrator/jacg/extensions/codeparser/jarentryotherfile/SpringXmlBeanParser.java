@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.util.JACGXmlUtil;
+import com.adrninistrator.javacg2.dto.spring.SpringBeanInXml;
 import com.adrninistrator.javacg2.extensions.codeparser.SpringXmlBeanParserInterface;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
@@ -9,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,9 +30,13 @@ public class SpringXmlBeanParser implements SpringXmlBeanParserInterface {
      */
     private Map<String, String> beanMap;
 
+    // XML文件中定义的Spring Bean信息
+    private List<SpringBeanInXml> springBeanInXmlList;
+
     @Override
     public void initCodeParser() {
         beanMap = new HashMap<>();
+        springBeanInXmlList = new ArrayList<>();
     }
 
     @Override
@@ -38,8 +45,8 @@ public class SpringXmlBeanParser implements SpringXmlBeanParserInterface {
     }
 
     @Override
-    public Map<String, String> getBeanMap() {
-        return beanMap;
+    public List<SpringBeanInXml> getBeanInXml() {
+        return springBeanInXmlList;
     }
 
     @Override
@@ -48,11 +55,19 @@ public class SpringXmlBeanParser implements SpringXmlBeanParserInterface {
     }
 
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+    public boolean parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+        Element root;
         try {
-            Element root = JACGXmlUtil.parseXmlRootElement(inputStream);
+            root = JACGXmlUtil.parseXmlRootElement(inputStream);
+        } catch (Exception e) {
+            // 解析XML文件出错时不退出执行
+            logger.warn("解析XML文件出错 {} {}", jarEntryPath, e.getMessage());
+            return true;
+        }
+
+        try {
             if (!"beans".equals(root.getName())) {
-                return;
+                return true;
             }
 
             logger.info("处理Spring XML文件 {}", jarEntryPath);
@@ -66,10 +81,17 @@ public class SpringXmlBeanParser implements SpringXmlBeanParserInterface {
                 if (StringUtils.isNoneBlank(beanId, beanClass)) {
                     // Spring XML文件中定义的bean可不指定id属性，这种情况下不处理
                     beanMap.put(beanId, beanClass);
+                    SpringBeanInXml springBeanInXml = new SpringBeanInXml();
+                    springBeanInXml.setSpringBeanName(beanId);
+                    springBeanInXml.setClassName(beanClass);
+                    springBeanInXml.setXmlFilePath(jarEntryPath);
+                    springBeanInXmlList.add(springBeanInXml);
                 }
             }
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("error ", e);
+            return false;
         }
     }
 }

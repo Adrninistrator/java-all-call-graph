@@ -39,4 +39,3 @@ public class TestAnalyseJavaCG2JACG0WriteDb {
         Assert.assertTrue(runnerWriteDb.run());
     }
 }
-

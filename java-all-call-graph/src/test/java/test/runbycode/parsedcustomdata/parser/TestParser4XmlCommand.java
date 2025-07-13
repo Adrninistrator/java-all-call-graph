@@ -26,9 +26,9 @@ public class TestParser4XmlCommand {
         this.saveData2FileParser = saveData2FileParser;
     }
 
-    public void handle(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+    public boolean handle(InputStream inputStream, String jarEntryPath, String jarEntryName) {
         if (!"entry_command.xml".equals(jarEntryName)) {
-            return;
+            return true;
         }
 
         logger.info("开始处理XML文件 {}", jarEntryPath);
@@ -43,8 +43,10 @@ public class TestParser4XmlCommand {
                 String classAndMethod = JACGClassMethodUtil.genClassAndMethodName(className, methodName);
                 saveData2FileParser.writeData2File(DATA_TYPE, classAndMethod, key);
             }
+            return true;
         } catch (Exception e) {
             logger.error("error ", e);
+            return false;
         }
     }
 }

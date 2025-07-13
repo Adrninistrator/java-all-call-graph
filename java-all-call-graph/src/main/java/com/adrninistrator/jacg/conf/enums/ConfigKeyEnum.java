@@ -75,6 +75,12 @@ public enum ConfigKeyEnum implements MainConfigInterface {
             new String[]{"生成方法调用链文件时，文件名是否使用更短的模式，以避免超过Windows文件系统支持的长度",
                     "若是，则文件名仅包含对应方法的HASH+长度；若否，则文件名还会包含方法的唯一类名及方法名"},
             Boolean.class, false, Boolean.FALSE.toString()),
+    CKE_PARSE_SPRING_AOP_INFO("parse.spring.aop.info",
+            new String[]{"解析指定的jar文件时，是否需要对Spring AOP相关信息进行解析"},
+            Boolean.class, false, Boolean.FALSE.toString()),
+//    CKE_CALL_GRAPH_SUPPORT_SPRING_AOP("call.graph.support.spring.aop",
+//            new String[]{"生成方法调用链文件时，是否需要支持将Spring AOP相关的advice中的方法调用生成到方法调用链文件中"},
+//            Boolean.class, false, Boolean.FALSE.toString()),
     ;
 
     // 参数key

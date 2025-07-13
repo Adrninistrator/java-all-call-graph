@@ -28,6 +28,11 @@ public class FindStackUpAndDown {
         this.configureWrapper = configureWrapper;
     }
 
+    /**
+     * 用于执行的方法
+     *
+     * @return
+     */
     public boolean find() {
         ConfigureWrapper configureWrapper1 = configureWrapper.copy();
         configureWrapper1.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG, "_upward");

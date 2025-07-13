@@ -36,7 +36,8 @@ public class MyBatisMySqlWhereColumnCodeParser extends AbstractSaveData2FilePars
 
     // 不需要处理文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+    public boolean parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+        return true;
     }
 
     public void handleMyBatisMySqlInfo(MyBatisMySqlInfo myBatisMySqlInfo, String mybatisXmlFilePath) {

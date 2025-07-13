@@ -2,7 +2,6 @@ package com.adrninistrator.jacg.annotation.attributes;
 
 import com.adrninistrator.jacg.common.enums.AnnotationAttributesTypeEnum;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.extensions.annotationattributes.AnnotationAttributesFormatterInterface;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -60,8 +59,8 @@ public class AnnotationAttributesFormatter implements AnnotationAttributesFormat
     }
 
     private String handleStringValue(String value) {
-        if (JACGUtil.containsCRLF(value)) {
-            // 若字符串内容包含回车换行，则需要进行BASE64编码，避免写到文件后导致换行
+        if (JavaCG2Util.checkNeedBase64(value)) {
+            // 若字符串内容包含回车换行Tab，则需要进行BASE64编码，避免写到文件后导致读取失败
             return AnnotationAttributesTypeEnum.AATE_STRING_BASE64.getPrefix() + JavaCG2Constants.FLAG_TAB +
                     JavaCG2Util.base64Encode(value);
         }

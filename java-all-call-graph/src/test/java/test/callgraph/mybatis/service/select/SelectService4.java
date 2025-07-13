@@ -3,7 +3,6 @@ package test.callgraph.mybatis.service.select;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import test.callgraph.mybatis.dao.TestTableGjcusdMapper;
 import test.callgraph.mybatis.dto.mq.send.SendReq1_1;

@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.extensions.codeparser.methodannotation;
 
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
 import com.adrninistrator.javacg2.dto.call.MethodCall;
@@ -61,8 +62,8 @@ public class MyBatisAnnotationCodeParser implements MethodAnnotationParser {
         methodCall.setCalleeClassName(className);
         methodCall.setCalleeMethodName(methodName);
         methodCall.setCalleeMethodArgTypes(JavaCG2Constants.EMPTY_METHOD_ARGS);
-        methodCall.setRawReturnType("");
-        methodCall.setActualReturnType("");
+        methodCall.setRawReturnType(JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER);
+        methodCall.setActualReturnType(JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER);
         methodCallList.addMethodCallAutoCallId(methodCall);
     }
 }

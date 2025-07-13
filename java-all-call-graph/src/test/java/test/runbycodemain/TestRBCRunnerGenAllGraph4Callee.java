@@ -7,8 +7,6 @@ import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import test.annotation.JACGExample;
 import test.runbycode.base.TestRunByCodeBase;
 
@@ -23,8 +21,6 @@ import java.util.Map;
 @JACGExample(title = "生成指定方法向上的完整方法调用链",
         desc = {"通过代码指定配置参数的主要功能示例"})
 public class TestRBCRunnerGenAllGraph4Callee extends TestRunByCodeBase {
-
-    private static final Logger logger = LoggerFactory.getLogger(TestRBCRunnerGenAllGraph4Callee.class);
 
     @JACGExample(title = "方法调用链数据仅写入文件",
             desc = {"方法调用链数据不在内存中返回"})

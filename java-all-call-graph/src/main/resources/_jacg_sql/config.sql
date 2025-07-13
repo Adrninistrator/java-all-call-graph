@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_javacg2_config_{appName} (
+CREATE TABLE if not exists jacg_config_{appName} (
   config_file_name varchar(100) NOT NULL COMMENT '配置文件名',
   config_key varchar(100) NOT NULL COMMENT '配置参数名，List/Set类型的参数代表序号',
   config_value varchar(255) NOT NULL COMMENT '配置参数值',

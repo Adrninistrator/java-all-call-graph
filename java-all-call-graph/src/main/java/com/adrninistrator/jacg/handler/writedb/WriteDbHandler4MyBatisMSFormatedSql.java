@@ -11,13 +11,13 @@ import com.adrninistrator.jacg.util.JACGUtil;
 /**
  * @author adrninistrator
  * @date 2025/2/24
- * @description: 写入数据库，MyBatis XML中格式化后的sql文本（使用MySQL）
+ * @description: 写入数据库，MyBatis XML的sql、Mapper相关信息（使用MySQL）
  */
 @JACGWriteDbHandler(
         readFile = true,
         otherFileName = MyBatisMySqlFormatedSqlCodeParser.FILE_NAME,
-        minColumnNum = 6,
-        maxColumnNum = 6,
+        minColumnNum = 7,
+        maxColumnNum = 7,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_MYBATIS_MS_FORMATED_SQL
 )
 public class WriteDbHandler4MyBatisMSFormatedSql extends AbstractWriteDbHandler<WriteDbData4MyBatisMSFormatedSql> {
@@ -34,6 +34,7 @@ public class WriteDbHandler4MyBatisMSFormatedSql extends AbstractWriteDbHandler<
         String xmlElementName = readLineData();
         String formatedSql = readLineData();
         String xmlFilePath = readLineData();
+        String resultMapId = readLineData();
 
         String xmlFileName = JACGFileUtil.getFileNameFromPathInJar(xmlFilePath);
         String mapperSimpleInterfaceName = dbOperWrapper.querySimpleClassName(mapperInterfaceName);
@@ -49,6 +50,8 @@ public class WriteDbHandler4MyBatisMSFormatedSql extends AbstractWriteDbHandler<
         writeDbData4MyBatisMSFormatedSql.setMapperSimpleClassName(mapperSimpleInterfaceName);
         writeDbData4MyBatisMSFormatedSql.setMapperClassName(mapperInterfaceName);
         writeDbData4MyBatisMSFormatedSql.setXmlFilePath(xmlFilePath);
+        writeDbData4MyBatisMSFormatedSql.setResultMapId(resultMapId);
+        writeDbData4MyBatisMSFormatedSql.setResultMapHash("");
         return writeDbData4MyBatisMSFormatedSql;
     }
 
@@ -64,7 +67,9 @@ public class WriteDbHandler4MyBatisMSFormatedSql extends AbstractWriteDbHandler<
                 data.getSqlHash(),
                 data.getMapperSimpleClassName(),
                 data.getMapperClassName(),
-                data.getXmlFilePath()
+                data.getXmlFilePath(),
+                data.getResultMapId(),
+                data.getResultMapHash()
         };
     }
 
@@ -76,19 +81,20 @@ public class WriteDbHandler4MyBatisMSFormatedSql extends AbstractWriteDbHandler<
                 "sql文本序号，从0开始",
                 "XML元素名称，如select、insert、update等",
                 "格式化后的sql文本",
-                "MyBatis XML文件路径"
+                "MyBatis XML文件路径",
+                "XML的resultMap ID"
         };
     }
 
     @Override
     public String chooseNotMainFileDesc() {
-        return "MyBatis XML中格式化后的sql文本（使用MySQL）";
+        return "MyBatis XML的sql、Mapper相关信息（使用MySQL）";
     }
 
     @Override
     public String[] chooseFileDetailInfo() {
         return new String[]{
-                "使用MySQL时，MyBatis的XML中格式化后的sql文本，包括XML文件路径、Mapper类名等"
+                "使用MySQL时，MyBatis XML的sql、Mapper相关信息，包括XML文件路径、Mapper类名、resultMap的ID、hash等"
         };
     }
 }

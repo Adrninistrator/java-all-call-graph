@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
         http://www.springframework.org/schema/context
@@ -34,4 +37,112 @@
         <task:scheduled ref="test.callgraph.spring.bean.define.impl.SpringServiceImplA1" method="test1" cron="*/3 * * * * *"/>
         <task:scheduled ref="springServiceImplB2" method="test1" cron="*/5 * * * * *"/>
     </task:scheduled-tasks>
+
+    <!-- 定义切面 -->
+    <bean id="testSpringAOPXmlLoggingAspect1" class="test.callgraph.spring.aop.xml1.aspect.TestSpringAOPXmlLoggingAspect1"/>
+    <bean id="testSpringAOPXmlLoggingAspect2" class="test.callgraph.spring.aop.xml2.aspect.TestSpringAOPXmlLoggingAspect2"/>
+    <bean id="testSpringAOPXmlLoggingAspect3" class="test.callgraph.spring.aop.xml3.aspect.TestSpringAOPXmlLoggingAspect3"/>
+    <bean id="testSpringAOPXmlLoggingAspect4" class="test.callgraph.spring.aop.xml4.aspect.TestSpringAOPXmlLoggingAspect4"/>
+    <bean id="testSpringAOPXmlLoggingAspectMulti1" class="test.callgraph.spring.aop.multi.aspect.TestSpringAOPXmlLoggingAspectMulti1Order20"/>
+    <bean id="testSpringAOPXmlLoggingAspectMulti2" class="test.callgraph.spring.aop.multi.aspect.TestSpringAOPXmlLoggingAspectMulti2Order40"/>
+
+    <!-- AOP配置 -->
+    <aop:config>
+        <aop:pointcut id="serviceMethods2Common" expression="	execution(*			test.callgraph.spring.aop.xml2.service.*.*(..))	"/>
+
+        <aop:aspect id="loggingAspect1" ref="testSpringAOPXmlLoggingAspect1" order="2">
+            <!-- 后置通知 -->
+            <aop:after method="logAfter" pointcut="execution(* test.callgraph.spring.aop.xml1.service.*.*(..))"/>
+
+            <!-- 返回后通知 -->
+            <aop:after-returning method="logAfterReturning" pointcut="	execution(* test.callgraph.spring.aop.xml1.service.*.*(..))" returning="result"/>
+
+            <!-- 异常通知 -->
+            <aop:after-throwing method="logAfterThrowing" pointcut="execution(* test.callgraph.spring.aop.xml1.service.*.*(..))	" throwing="error"/>
+
+            <!-- 环绕通知 -->
+            <aop:around method="logAround" pointcut="execution(*			test.callgraph.spring.aop.xml1.service.*.*(..))"/>
+
+            <!-- 前置通知 -->
+            <aop:before method="logBefore" pointcut="execution(* test.callgraph.spring.aop.xml1.service.*.*(..))"/>
+        </aop:aspect>
+        <aop:aspect id="loggingAspect2" ref="testSpringAOPXmlLoggingAspect2">
+            <!-- 前置通知 -->
+            <aop:before method="logBefore" pointcut-ref="serviceMethods2"/>
+
+            <!-- 环绕通知 -->
+            <aop:around method="logAround" pointcut-ref="serviceMethods2Common"/>
+
+            <!-- 后置通知 -->
+            <aop:after method="logAfter" pointcut-ref="serviceMethods2"/>
+
+            <!-- 返回后通知 -->
+            <aop:after-returning method="logAfterReturning" pointcut-ref="serviceMethods2Common" returning="result"/>
+
+            <!-- 异常通知 -->
+            <aop:after-throwing method="logAfterThrowing" pointcut-ref="serviceMethods2" throwing="error"/>
+        </aop:aspect>
+        <aop:aspect id="loggingAspect3" ref="testSpringAOPXmlLoggingAspect3" order="3">
+            <!-- 定义其他aop:aspect中使用的切入点 -->
+            <aop:pointcut id="serviceMethods2"
+                          expression="test.callgraph.spring.aop.xml2.aspect.TestSpringAOPXmlLoggingJavaAspect2.classMethodCondition() &amp;&amp; test.callgraph.spring.aop.xml2.aspect.TestSpringAOPXmlLoggingJavaAspect2.methodCondition()"/>
+
+            <!-- 定义切入点 -->
+            <aop:pointcut id="serviceMethods3" expression="execution(* test.callgraph.spring.aop.xml3.service.*.*(..))"/>
+            <!-- 定义切入点 -->
+            <aop:pointcut id="serviceMethodsMulti1" expression="execution(* test.callgraph.spring.aop.multi.service.*.*(..))"/>
+
+            <!-- 异常通知 -->
+            <aop:after-throwing method="logAfterThrowing" pointcut-ref="serviceMethods3" throwing="error"/>
+
+            <!-- 返回后通知 -->
+            <aop:after-returning method="logAfterReturning" pointcut-ref="serviceMethods3" returning="result"/>
+
+            <!-- 前置通知 -->
+            <aop:before method="logBefore" pointcut-ref="serviceMethods3"/>
+
+            <!-- 后置通知 -->
+            <aop:after method="logAfter" pointcut-ref="serviceMethods3"/>
+        </aop:aspect>
+        <aop:aspect id="loggingAspect4" ref="testSpringAOPXmlLoggingAspect4" order="4">
+            <!-- 定义切入点 -->
+            <aop:pointcut id="serviceMethods4" expression="execution(* test.callgraph.spring.aop.xml4.service.*.*(..))"/>
+
+            <!-- 前置通知 -->
+            <aop:before method="logBefore" arg-names="joinPoint" pointcut-ref="serviceMethods4"/>
+        </aop:aspect>
+
+        <aop:aspect id="loggingAspectMulti1" ref="testSpringAOPXmlLoggingAspectMulti1" order="20">
+            <!-- 异常通知 -->
+            <aop:after-throwing method="logAfterThrowing" pointcut-ref="serviceMethodsMulti1" throwing="error"/>
+
+            <!-- 返回后通知 -->
+            <aop:after-returning method="logAfterReturning" pointcut-ref="serviceMethodsMulti1" returning="result"/>
+
+            <!-- 前置通知 -->
+            <aop:before method="logBefore" pointcut-ref="serviceMethodsMulti1"/>
+
+            <!-- 后置通知 -->
+            <aop:after method="logAfter" pointcut-ref="serviceMethodsMulti1"/>
+
+            <!-- 环绕通知 -->
+            <aop:around method="logAround" pointcut-ref="serviceMethodsMulti1"/>
+        </aop:aspect>
+        <aop:aspect id="loggingAspectMulti2" ref="testSpringAOPXmlLoggingAspectMulti2" order="40">
+            <!-- 定义切入点 -->
+            <aop:pointcut id="serviceMethodsMulti2" expression="execution(* test.callgraph.spring.aop.multi.service.*.*(..))"/>
+
+            <!-- 异常通知 -->
+            <aop:after-throwing method="logAfterThrowing" pointcut-ref="serviceMethodsMulti2" throwing="error"/>
+
+            <!-- 返回后通知 -->
+            <aop:after-returning method="logAfterReturning" pointcut-ref="serviceMethodsMulti2" returning="result"/>
+
+            <!-- 前置通知 -->
+            <aop:before method="logBefore" pointcut-ref="serviceMethodsMulti2"/>
+
+            <!-- 后置通知 -->
+            <aop:after method="logAfter" pointcut-ref="serviceMethodsMulti2"/>
+        </aop:aspect>
+    </aop:config>
 </beans>

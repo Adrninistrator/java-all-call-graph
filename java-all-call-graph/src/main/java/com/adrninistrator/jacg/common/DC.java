@@ -17,10 +17,10 @@ public class DC {
     public static final String COMMON_PARAM_NAME = "param_name";
     public static final String COMMON_PARAM_RAW_NAME = "param_raw_name";
 
-    public static final String JAVACG2C_CONFIG_FILE_NAME = "config_file_name";
-    public static final String JAVACG2C_CONFIG_KEY = "config_key";
-    public static final String JAVACG2C_CONFIG_VALUE = "config_value";
-    public static final String JAVACG2C_CONFIG_TYPE = "config_type";
+    public static final String CONFIG_FILE_NAME = "config_file_name";
+    public static final String CONFIG_KEY = "config_key";
+    public static final String CONFIG_VALUE = "config_value";
+    public static final String CONFIG_TYPE = "config_type";
 
     public static final String CN_RECORD_ID = "record_id";
     public static final String CN_CLASS_NAME = "class_name";
@@ -228,6 +228,8 @@ public class DC {
     public static final String SPB_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String SPB_CLASS_NAME = "class_name";
     public static final String SPB_BEAN_TYPE = "bean_type";
+    public static final String SPB_ANNOTATION_CLASS_NAME = "annotation_class_name";
+    public static final String SPB_DEFINE_CLASS_NAME_XML_PATH = "define_class_name_xml_path";
 
     public static final String SPC_RECORD_ID = "record_id";
     public static final String SPC_METHOD_HASH = "method_hash";
@@ -242,6 +244,12 @@ public class DC {
     public static final String SPC_FULL_METHOD = "full_method";
     public static final String SPC_RETURN_TYPE = "return_type";
 
+    public static final String SPSP_RECORD_ID = "record_id";
+    public static final String SPSP_TYPE = "type";
+    public static final String SPSP_SEQ = "seq";
+    public static final String SPSP_SCAN_PACKAGE = "scan_package";
+    public static final String SPSP_DEFINE_CLASS_NAME_XML_PATH = "define_class_name_xml_path";
+
     public static final String SPT_RECORD_ID = "record_id";
     public static final String SPT_METHOD_HASH = "method_hash";
     public static final String SPT_SPRING_BEAN_NAME = "spring_bean_name";
@@ -250,6 +258,60 @@ public class DC {
     public static final String SPT_TYPE = "type";
     public static final String SPT_FULL_METHOD = "full_method";
     public static final String SPT_RETURN_TYPE = "return_type";
+    public static final String SPT_DEFINE_CLASS_NAME_XML_PATH = "define_class_name_xml_path";
+
+    public static final String SAAS_RECORD_ID = "record_id";
+    public static final String SAAS_TYPE = "type";
+    public static final String SAAS_XML_ASPECT_ID = "xml_aspect_id";
+    public static final String SAAS_XML_ASPECT_REF = "xml_aspect_ref";
+    public static final String SAAS_ASPECT_ORDER = "aspect_order";
+    public static final String SAAS_CLASS_NAME = "class_name";
+    public static final String SAAS_DEFINE_XML_PATH = "define_xml_path";
+
+    public static final String SAP_RECORD_ID = "record_id";
+    public static final String SAP_TYPE = "type";
+    public static final String SAP_XML_POINTCUT_ID = "xml_pointcut_id";
+    public static final String SAP_EXPRESSION = "expression";
+    public static final String SAP_FULL_METHOD = "full_method";
+    public static final String SAP_DEFINE_XML_PATH = "define_xml_path";
+
+    public static final String SAAD_RECORD_ID = "record_id";
+    public static final String SAAD_TYPE = "type";
+    public static final String SAAD_XML_ASPECT_ID = "xml_aspect_id";
+    public static final String SAAD_XML_ASPECT_METHOD_NAME = "xml_aspect_method_name";
+    public static final String SAAD_ADVICE_TYPE = "advice_type";
+    public static final String SAAD_XML_POINTCUT_REF = "xml_pointcut_ref";
+    public static final String SAAD_EXPRESSION = "expression";
+    public static final String SAAD_ASPECT_ORDER = "aspect_order";
+    public static final String SAAD_ADVICE_FULL_METHOD = "advice_full_method";
+    public static final String SAAD_ADVICE_METHOD_RETURN_TYPE = "advice_method_return_type";
+    public static final String SAAD_ADVICE_METHOD_HASH = "advice_method_hash";
+    public static final String SAAD_ASPECT_CLASS_NAME = "aspect_class_name";
+    public static final String SAAD_DEFINE_XML_PATH = "define_xml_path";
+
+    public static final String SAADAM_RECORD_ID = "record_id";
+    public static final String SAADAM_TYPE = "type";
+    public static final String SAADAM_XML_ASPECT_ID = "xml_aspect_id";
+    public static final String SAADAM_XML_ASPECT_METHOD_NAME = "xml_aspect_method_name";
+    public static final String SAADAM_ADVICE_TYPE = "advice_type";
+    public static final String SAADAM_XML_POINTCUT_REF = "xml_pointcut_ref";
+    public static final String SAADAM_EXPRESSION = "expression";
+    public static final String SAADAM_ASPECT_ORDER = "aspect_order";
+    public static final String SAADAM_ADVICE_FULL_METHOD = "advice_full_method";
+    public static final String SAADAM_ADVICE_METHOD_RETURN_TYPE = "advice_method_return_type";
+    public static final String SAADAM_ADVICE_METHOD_HASH = "advice_method_hash";
+    public static final String SAADAM_ASPECT_CLASS_NAME = "aspect_class_name";
+    public static final String SAADAM_DEFINE_XML_PATH = "define_xml_path";
+    public static final String SAADAM_UNDERLYING_EXPRESSION = "underlying_expression";
+    public static final String SAADAM_AFFECTED_FULL_METHOD = "affected_full_method";
+    public static final String SAADAM_AFFECTED_METHOD_RETURN_TYPE = "affected_method_return_type";
+    public static final String SAADAM_AFFECTED_METHOD_HASH = "affected_method_hash";
+
+    public static final String SAADA_RECORD_ID = "record_id";
+    public static final String SAADA_ADVICE_FULL_METHOD = "advice_full_method";
+    public static final String SAADA_ADVICE_METHOD_RETURN_TYPE = "advice_method_return_type";
+    public static final String SAAVA_ADVICE_METHOD_HASH = "advice_method_hash";
+    public static final String SAADA_PROCEED_CALL_ID = "proceed_call_id";
 
     public static final String CEIGT_RECORD_ID = "record_id";
     public static final String CEIGT_SIMPLE_CLASS_NAME = "simple_class_name";
@@ -412,9 +474,11 @@ public class DC {
     public static final String FR_BEAN_UTIL_METHOD = "bean_util_method";
 
     public static final String MMC_RECORD_ID = "record_id";
+    public static final String MMC_RESULT_MAP_ID = "result_map_id";
     public static final String MMC_ENTITY_SIMPLE_CLASS_NAME = "entity_simple_class_name";
     public static final String MMC_ENTITY_FIELD_NAME = "entity_field_name";
     public static final String MMC_COLUMN_NAME = "column_name";
+    public static final String MMC_COLUMN_TYPE = "column_type";
     public static final String MMC_ENTITY_CLASS_NAME = "entity_class_name";
     public static final String MMC_XML_FILE_NAME = "xml_file_name";
     public static final String MMC_XML_FILE_PATH = "xml_file_path";
@@ -666,6 +730,8 @@ public class DC {
     public static final String MMFS_MAPPER_SIMPLE_CLASS_NAME = "mapper_simple_class_name";
     public static final String MMFS_MAPPER_CLASS_NAME = "mapper_class_name";
     public static final String MMFS_XML_FILE_PATH = "xml_file_path";
+    public static final String MMFS_RESULT_MAP_ID = "result_map_id";
+    public static final String MMFS_RESULT_MAP_HASH = "result_map_hash";
 
     private DC() {
         throw new IllegalStateException("illegal");

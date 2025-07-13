@@ -24,7 +24,7 @@ public class TestMyBatisMapperFindStackUpAndDown extends TestRunByCodeBase {
     }
 
     @Test
-    public void testCallStackUpAndDown() {
+    public void testCallStackUpAndDown1() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
                 TestTableMapper.class.getName(),
                 TestTable2Mapper.class.getName()
@@ -34,6 +34,18 @@ public class TestMyBatisMapperFindStackUpAndDown extends TestRunByCodeBase {
         );
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 JACGConstants.CALL_FLAG_BUSINESS_DATA + DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType()
+        );
+        FindStackUpAndDown findStackUpAndDown = new FindStackUpAndDown(configureWrapper);
+        Assert.assertTrue(findStackUpAndDown.find());
+    }
+
+    @Test
+    public void testCallStackUpAndDown2() {
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
+                TestTableMapper.class.getName()
+        );
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
+                TestTableMapper.class.getName() + ":"
         );
         FindStackUpAndDown findStackUpAndDown = new FindStackUpAndDown(configureWrapper);
         Assert.assertTrue(findStackUpAndDown.find());

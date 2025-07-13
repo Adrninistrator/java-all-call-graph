@@ -1,18 +1,24 @@
 package com.adrninistrator.jacg.handler.writedb;
 
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.extensions.methodcall.AbstractJACGMethodCallExtension;
+import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -45,11 +51,12 @@ import java.util.Set;
 )
 public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbData4MethodCall> {
 
+    private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4MethodCall.class);
     /*
-        涉及继承的唯一类名
-        key     子类唯一类名
-        value   对应的父类唯一类名
-     */
+            涉及继承的唯一类名
+            key     子类唯一类名
+            value   对应的父类唯一类名
+         */
     private Map<String, String> extendsSimpleClassNameMap;
 
     // 有注解的方法HASH+长度
@@ -95,8 +102,16 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     // 方法调用处理扩展类
     private List<AbstractJACGMethodCallExtension> jacgMethodCallExtensionList;
 
+    private MethodInfoHandler methodInfoHandler;
+
     public WriteDbHandler4MethodCall(WriteDbResult writeDbResult) {
         super(writeDbResult);
+    }
+
+    @Override
+    public void init(WriteDbResult writeDbResult) {
+        super.init(writeDbResult);
+        methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
     }
 
     @Override
@@ -124,6 +139,25 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
         Integer callerJarNum = (JavaCG2Constants.EMPTY_JAR_NUM.equals(callerJarNumStr) ? null : Integer.parseInt(callerJarNumStr));
         Integer calleeJarNum = (JavaCG2Constants.EMPTY_JAR_NUM.equals(calleeJarNumStr) ? null : Integer.parseInt(calleeJarNumStr));
+
+        if (JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER.equals(rawReturnType) || JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER.equals(actualReturnType)) {
+            // 被调用方法返回类型使用占位符，需要查询被调用方法的参数类型与返回类型
+            String calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
+            List<WriteDbData4MethodInfo> methodInfoList = methodInfoHandler.queryMethodInfoByClassMethod(calleeClassName, calleeMethodName);
+            if (JavaCG2Util.isCollectionEmpty(methodInfoList)) {
+                logger.error("根据类名与方法名查询到的方法预期为1个，实际为空 {} {}", calleeClassName, calleeMethodName);
+                throw new JavaCG2RuntimeException("根据类与方法名称查询到的方法预期为1个，实际为空");
+            }
+            if (methodInfoList.size() != 1) {
+                logger.error("根据类名与方法名查询到的方法预期为1个，实际存在多个 {} {} {}", calleeClassName, calleeMethodName, methodInfoList.size());
+                throw new JavaCG2RuntimeException("根据类与方法名称查询到的方法预期为1个，实际存在多个");
+            }
+            WriteDbData4MethodInfo methodInfo = methodInfoList.get(0);
+            logger.info("修改根据类名与方法名查询到的完整方法及返回类型 {} {} {} {}", calleeClassName, calleeMethodName, methodInfo.getFullMethod(), methodInfo.getReturnType());
+            calleeFullMethod = methodInfo.getFullMethod();
+            rawReturnType = methodInfo.getReturnType();
+            actualReturnType = methodInfo.getReturnType();
+        }
 
         WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(
                 callId,

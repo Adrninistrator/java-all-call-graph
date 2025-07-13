@@ -12,7 +12,7 @@ import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 public class TestRunnerGenJarDiffCalleeGraph {
 
     public static void main(String[] args) {
-        JarDiffResult jarDiffResult = new RunnerGenJarDiffCalleeGraph(null).generate();
+        JarDiffResult jarDiffResult = new RunnerGenJarDiffCalleeGraph(null, null).generate();
         if (!jarDiffResult.isSuccess()) {
             throw new JavaCG2RuntimeException("执行失败");
         }

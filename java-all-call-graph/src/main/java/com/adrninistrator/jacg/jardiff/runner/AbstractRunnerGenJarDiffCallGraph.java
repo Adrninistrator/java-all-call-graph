@@ -14,6 +14,7 @@ import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MyBatisMSFormatedSql;
 import com.adrninistrator.jacg.handler.mybatis.MybatisMsFormatedSqlHandler;
 import com.adrninistrator.jacg.jardiff.dto.method.ModifiedMethodInfo;
 import com.adrninistrator.jacg.jardiff.dto.result.JarDiffResult;
@@ -261,20 +262,17 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
         }
         List<ModifiedMethodInfo> modifiedMethodInfoList = new ArrayList<>();
         for (WriteDbData4ClassInfo classInfoNew : classInfoListNew) {
+            boolean isClassMyBatisMapper = mybatisMsFormatedSqlHandler.checkClassMyBatisMapper(classInfoNew.getClassName(), chooseTableSuffixNew());
             boolean oldClassExists = oldJarExists;
-            boolean isClassMyBatisMapper = false;
             if (oldJarExists) {
                 // 存在对应的旧jar文件，查询旧的class的HASH
                 String oldClassFileHash = queryClassFileHashOld(jarInfoOld.getJarNum(), classInfoNew.getClassName());
                 if (oldClassFileHash == null) {
                     logger.debug("不存在旧的class {} {}", jarInfoNew.getJarFileName(), classInfoNew.getClassName());
                     oldClassExists = false;
-                } else if (oldClassFileHash.equals(classInfoNew.getClassFileHash())) {
-                    isClassMyBatisMapper = mybatisMsFormatedSqlHandler.checkClassMyBatisMapper(classInfoNew.getClassName(), chooseTableSuffixNew());
-                    if (!isClassMyBatisMapper) {
-                        logger.debug("class文件HASH没有变化，且不是MyBatis Mapper，跳过 {} {}", jarInfoNew.getJarFileName(), classInfoNew.getClassName());
-                        continue;
-                    }
+                } else if (oldClassFileHash.equals(classInfoNew.getClassFileHash()) && !isClassMyBatisMapper) {
+                    logger.debug("class文件HASH没有变化，且不是MyBatis Mapper，跳过 {} {}", jarInfoNew.getJarFileName(), classInfoNew.getClassName());
+                    continue;
                 }
             }
             // class文件有变化，或旧class文件不存在
@@ -287,37 +285,15 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
                 continue;
             }
             for (WriteDbData4MethodInfo methodInfoNew : methodInfoListNew) {
-                String newMethodHash;
-                if (isClassMyBatisMapper) {
-                    // MyBatis Mapper，使用对应XML中的sql语句的HASH作为方法HASH
-                    newMethodHash = mybatisMsFormatedSqlHandler.queryMapperSqlHash(methodInfoNew.getClassName(), methodInfoNew.getMethodName(), chooseTableSuffixNew());
-                } else {
-                    newMethodHash = methodInfoNew.getMethodInstructionsHash();
-                }
-                if (StringUtils.isBlank(newMethodHash) || JavaCG2CommonNameConstants.METHOD_NAME_CLINIT.equals(methodInfoNew.getMethodName())) {
-                    // 新方法的方法指令HASH为空，或者方法名称为<clinit>（不会被直接调用），跳过
-                    logger.debug("跳过当前方法的处理 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
-                    continue;
-                }
-
-                boolean oldMethodExists = oldClassExists;
+                boolean oldMethodExists = false;
                 if (oldClassExists) {
-                    // 存在对应的旧jar文件，查询旧的方法的HASH
-                    String oldMethodHash;
-                    if (isClassMyBatisMapper) {
-                        // MyBatis Mapper，使用对应XML中的sql语句的HASH作为方法HASH
-                        oldMethodHash = mybatisMsFormatedSqlHandler.queryMapperSqlHash(methodInfoNew.getClassName(), methodInfoNew.getMethodName(),
-                                chooseTableSuffixOld());
-                    } else {
-                        oldMethodHash = queryMethodInstructionHashOld(methodInfoNew.getMethodHash());
-                    }
-                    if (oldMethodHash == null) {
-                        logger.debug("不存在旧的方法 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
-                        oldMethodExists = false;
-                    } else if (oldMethodHash.equals(newMethodHash)) {
-                        logger.debug("方法指令HASH没有变化，跳过 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
+                    // 检查方法是否发生变化
+                    Boolean checkResult = checkMethodModified(isClassMyBatisMapper, methodInfoNew, jarInfoNew);
+                    if (checkResult == null) {
+                        // 旧class存在且旧方法未发生变化时跳过
                         continue;
                     }
+                    oldMethodExists = checkResult;
                 }
                 ModifiedMethodInfo modifiedMethodInfo = new ModifiedMethodInfo(methodInfoNew.getFullMethod(), methodInfoNew.getReturnType(), oldMethodExists);
                 // 检查是否需要跳过发生变化的方法
@@ -343,6 +319,66 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
         }
         modifiedJarMap.put(jarInfoNew.getJarFileName(), usedJarInfoOld);
         jarModifiedMethodInfoMap.put(jarInfoNew.getJarFileName(), modifiedMethodInfoList);
+    }
+
+    /**
+     * 检查方法是否发生变化
+     *
+     * @param isClassMyBatisMapper
+     * @param methodInfoNew
+     * @param jarInfoNew
+     * @return null: 方法未发生变化 FALSE: 方法发生变化，且旧方法不存在 TRUE: 方法发生变化，且旧方法存在
+     */
+    private Boolean checkMethodModified(boolean isClassMyBatisMapper, WriteDbData4MethodInfo methodInfoNew, WriteDbData4JarInfo jarInfoNew) {
+        String newMethodHash;
+        String oldMethodHash = null;
+        String newMethodMyBatisResultMapHash = null;
+        String oldMethodMyBatisResultMapHash = null;
+        if (isClassMyBatisMapper) {
+            // MyBatis Mapper，使用对应XML中的sql语句的HASH作为方法HASH
+            WriteDbData4MyBatisMSFormatedSql myBatisMSFormatedSql = mybatisMsFormatedSqlHandler.queryMapperSqlHash(methodInfoNew.getClassName(), methodInfoNew.getMethodName(),
+                    chooseTableSuffixNew());
+            newMethodHash = myBatisMSFormatedSql.getSqlHash();
+            newMethodMyBatisResultMapHash = myBatisMSFormatedSql.getResultMapHash();
+        } else {
+            newMethodHash = methodInfoNew.getMethodInstructionsHash();
+        }
+        if (StringUtils.isBlank(newMethodHash) || JavaCG2CommonNameConstants.METHOD_NAME_CLINIT.equals(methodInfoNew.getMethodName())) {
+            // 新方法的方法指令HASH为空，或者方法名称为<clinit>（不会被直接调用），跳过
+            logger.debug("跳过当前方法的处理 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
+            return null;
+        }
+
+        // 查询旧的方法的HASH
+        if (isClassMyBatisMapper) {
+            // MyBatis Mapper，使用对应XML中的sql语句的HASH作为方法HASH
+            WriteDbData4MyBatisMSFormatedSql myBatisMSFormatedSql = mybatisMsFormatedSqlHandler.queryMapperSqlHash(methodInfoNew.getClassName(), methodInfoNew.getMethodName(),
+                    chooseTableSuffixOld());
+            if (myBatisMSFormatedSql != null) {
+                oldMethodHash = myBatisMSFormatedSql.getSqlHash();
+                oldMethodMyBatisResultMapHash = myBatisMSFormatedSql.getResultMapHash();
+            }
+        } else {
+            oldMethodHash = queryMethodInstructionHashOld(methodInfoNew.getMethodHash());
+        }
+        if (oldMethodHash == null) {
+            logger.debug("不存在旧的方法 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
+            return false;
+        }
+        if (!oldMethodHash.equals(newMethodHash)) {
+            logger.debug("方法指令HASH发生变化，存在旧的方法 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
+            return true;
+        }
+        if (!StringUtils.equals(newMethodMyBatisResultMapHash, oldMethodMyBatisResultMapHash)) {
+            logger.debug("方法指令HASH发生变化，属于返回resultMap的MyBatis Mapper方法（支持MySQL），存在旧的方法 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
+            return true;
+        }
+        if (StringUtils.isAllBlank(newMethodMyBatisResultMapHash, oldMethodMyBatisResultMapHash)) {
+            logger.debug("方法指令HASH未发生变化，存在旧的方法 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
+        } else {
+            logger.debug("方法指令HASH未发生变化，属于返回resultMap的MyBatis Mapper方法（支持MySQL），存在旧的方法 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
+        }
+        return null;
     }
 
     // 检查是否需要跳过发生变化的方法

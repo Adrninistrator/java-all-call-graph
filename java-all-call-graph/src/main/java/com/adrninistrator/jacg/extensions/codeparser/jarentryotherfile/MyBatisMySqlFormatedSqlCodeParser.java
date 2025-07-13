@@ -35,7 +35,8 @@ public class MyBatisMySqlFormatedSqlCodeParser extends AbstractSaveData2FilePars
 
     // 不需要处理文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+    public boolean parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+        return true;
     }
 
     public void handleMyBatisMySqlInfo(MyBatisMySqlInfo myBatisMySqlInfo, String mybatisXmlFilePath) {
@@ -50,7 +51,7 @@ public class MyBatisMySqlFormatedSqlCodeParser extends AbstractSaveData2FilePars
                 int sqlSeq = 0;
                 for (String formatedSql : statement.getFullSqlList()) {
                     formatedSql = formatedSql.replace('\r', ' ').replace('\n', ' ');
-                    writeData2File(mapperInterfaceName, sqlId, String.valueOf(sqlSeq), xmlElementName, formatedSql, mybatisXmlFilePath);
+                    writeData2File(mapperInterfaceName, sqlId, String.valueOf(sqlSeq), xmlElementName, formatedSql, mybatisXmlFilePath, statement.getResultMap());
                     sqlSeq++;
                 }
             }

@@ -13,16 +13,16 @@ import org.slf4j.LoggerFactory;
 /**
  * @author adrninistrator
  * @date 2024/11/17
- * @description: 查询java-callgraph2组件使用的配置参数的类
+ * @description: 查询java-callgraph2组件，及java-all-call-graph 组件解析 jar 文件并写入数据库时使用的配置参数的类
  */
-public class JavaCG2ConfigHandler extends BaseHandler {
-    private static final Logger logger = LoggerFactory.getLogger(JavaCG2ConfigHandler.class);
+public class ConfigHandler extends BaseHandler {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigHandler.class);
 
-    public JavaCG2ConfigHandler(ConfigureWrapper configureWrapper) {
+    public ConfigHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
     }
 
-    public JavaCG2ConfigHandler(DbOperWrapper dbOperWrapper) {
+    public ConfigHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
     }
 
@@ -34,13 +34,13 @@ public class JavaCG2ConfigHandler extends BaseHandler {
      * @return
      */
     public String queryConfigValue(String configFileName, String configKey) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.JAVACG2C_QUERY_VALUE;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CONFIG_QUERY_VALUE;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + DC.JAVACG2C_CONFIG_VALUE +
-                    " from " + DbTableInfoEnum.DTIE_JAVACG2_CONFIG.getTableName() +
-                    " where " + DC.JAVACG2C_CONFIG_FILE_NAME + " = ?"
-                    + " and " + DC.JAVACG2C_CONFIG_KEY + " = ?";
+            sql = "select " + DC.CONFIG_VALUE +
+                    " from " + DbTableInfoEnum.DTIE_CONFIG.getTableName() +
+                    " where " + DC.CONFIG_FILE_NAME + " = ?"
+                    + " and " + DC.CONFIG_KEY + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObjectOneColumn(sql, String.class, configFileName, configKey);

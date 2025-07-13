@@ -2,7 +2,7 @@ package com.adrninistrator.jacg.handler.writedb;
 
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
-import com.adrninistrator.jacg.dto.writedb.WriteDbData4JavaCG2Config;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4Config;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 
@@ -17,30 +17,30 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_JAVACG2_CONFIG,
         minColumnNum = 4,
         maxColumnNum = 4,
-        dbTableInfoEnum = DbTableInfoEnum.DTIE_JAVACG2_CONFIG
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_CONFIG
 )
-public class WriteDbHandler4JavaCG2Config extends AbstractWriteDbHandler<WriteDbData4JavaCG2Config> {
+public class WriteDbHandler4JavaCG2Config extends AbstractWriteDbHandler<WriteDbData4Config> {
     public WriteDbHandler4JavaCG2Config(WriteDbResult writeDbResult) {
         super(writeDbResult);
     }
 
     @Override
-    protected WriteDbData4JavaCG2Config genData(String[] array) {
+    protected WriteDbData4Config genData(String[] array) {
         String configFileName = readLineData();
         String configKey = readLineData();
         String configValue = readLineData();
         String configType = readLineData();
 
-        WriteDbData4JavaCG2Config writeDbData4JavaCG2Config = new WriteDbData4JavaCG2Config();
-        writeDbData4JavaCG2Config.setConfigFileName(configFileName);
-        writeDbData4JavaCG2Config.setConfigKey(configKey);
-        writeDbData4JavaCG2Config.setConfigValue(configValue);
-        writeDbData4JavaCG2Config.setConfigType(configType);
-        return writeDbData4JavaCG2Config;
+        WriteDbData4Config writeDbData4Config = new WriteDbData4Config();
+        writeDbData4Config.setConfigFileName(configFileName);
+        writeDbData4Config.setConfigKey(configKey);
+        writeDbData4Config.setConfigValue(configValue);
+        writeDbData4Config.setConfigType(configType);
+        return writeDbData4Config;
     }
 
     @Override
-    protected Object[] genObjectArray(WriteDbData4JavaCG2Config data) {
+    protected Object[] genObjectArray(WriteDbData4Config data) {
         return new Object[]{
                 data.getConfigFileName(),
                 data.getConfigKey(),
@@ -62,7 +62,7 @@ public class WriteDbHandler4JavaCG2Config extends AbstractWriteDbHandler<WriteDb
     @Override
     public String[] chooseFileDetailInfo() {
         return new String[]{
-                "java-callgraph2组件使用的配置参数信息表"
+                "java-callgraph2组件"
         };
     }
 }

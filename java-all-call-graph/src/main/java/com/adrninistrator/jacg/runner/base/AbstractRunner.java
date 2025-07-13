@@ -11,6 +11,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.handler.jarinfo.JarInfoHandler;
 import com.adrninistrator.jacg.neo4j.handler.extendsimpl.Neo4jExtendsImplHandler;
+import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
@@ -110,11 +111,17 @@ public abstract class AbstractRunner extends AbstractExecutor {
     protected abstract boolean checkH2DbFile();
 
     /**
-     * 打印当前使用的配置信息
+     * 打印所有的配置参数信息
      */
-    protected void printAllConfigInfo() {
-        // 打印所有的配置参数信息
-        configureWrapper.printAllConfigInfo(currentSimpleClassName, currentOutputDirPath, JACGConstants.FILE_JACG_ALL_CONFIG_MD);
+    protected boolean printAllConfigInfo() {
+        return configureWrapper.printAllConfigInfo(currentSimpleClassName, currentOutputDirPath, JACGConstants.FILE_JACG_ALL_CONFIG_MD);
+    }
+
+    /**
+     * 打印有使用的配置信息
+     */
+    protected boolean printUsedConfigInfo() {
+        return configureWrapper.printUsedConfigInfo(currentSimpleClassName, currentOutputDirPath, JACGConstants.FILE_JACG_USED_CONFIG_MD);
     }
 
     /**
@@ -161,11 +168,16 @@ public abstract class AbstractRunner extends AbstractExecutor {
                 return false;
             }
             // 执行完毕时打印当前使用的配置信息
+
             if (currentOutputDirPath != null) {
-                configureWrapper.printUsedConfigInfo(currentSimpleClassName, currentOutputDirPath, JACGConstants.FILE_JACG_USED_CONFIG_MD);
+                // 打印当前使用的配置信息
+                if (!printUsedConfigInfo()) {
+                    return false;
+                }
             } else {
                 logger.info("没有执行生成文件的操作，不打印当前使用的配置信息");
             }
+
             logger.info("{} 执行完毕，当前生成文件所在目录 {} ，耗时: {} 秒", currentSimpleClassName, currentOutputDirPath, JavaCG2Util.getSpendSeconds(startTime));
             return true;
         } catch (Exception e) {
@@ -249,10 +261,25 @@ public abstract class AbstractRunner extends AbstractExecutor {
      * 检查H2数据库文件是否可写
      * 需要进行同步控制，避免同时执行
      *
-     * @param h2DbFile
+     * @param allowNotExists 是否允许H2数据库文件不存在
      * @return
      */
-    protected boolean checkH2DbFileWritable(File h2DbFile) {
+    protected boolean checkH2DbFileWritable(boolean allowNotExists) {
+        File h2DbFile = getH2DbFile();
+        if (!h2DbFile.exists()) {
+            if (!allowNotExists) {
+                logger.error("H2数据库文件不存在，请先执行 {} 类导入数据库 {}", RunnerWriteDb.class.getSimpleName(), JavaCG2FileUtil.getCanonicalPath(h2DbFile));
+                return false;
+            }
+            return true;
+        }
+
+        // 数据库文件存在
+        if (!h2DbFile.isFile()) {
+            logger.error("H2数据库文件不是文件 {}", JavaCG2FileUtil.getCanonicalPath(h2DbFile));
+            return false;
+        }
+
         synchronized (AbstractRunner.class) {
             logger.info("{} 检查H2数据库文件是否可写", currentSimpleClassName);
             // 尝试以写方式打开，检查数据库文件是否被占用
@@ -321,7 +348,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
         Map<String, WriteDbData4JarInfo> rtnMap = new HashMap<>(list.size());
         for (WriteDbData4JarInfo writeDbData4JarInfo : list) {
-            if (!JavaCG2Constants.FILE_KEY_RESULT_DIR_INFO_PREFIX.equals(writeDbData4JarInfo.getJarType())) {
+            if (!JavaCG2Constants.FILE_KEY_RESULT_DIR.equals(writeDbData4JarInfo.getJarType())) {
                 // 跳过解析结果文件保存目录
                 rtnMap.put(writeDbData4JarInfo.getJarPathHash(), writeDbData4JarInfo);
             }

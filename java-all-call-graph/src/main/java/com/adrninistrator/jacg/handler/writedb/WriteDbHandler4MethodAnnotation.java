@@ -10,6 +10,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSpringUtil;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     private WriteDbHandler4SpringController writeDbHandler4SpringController;
 
     // 将通过注解定义的Spring Task信息写入数据库的类
-    private WriteDbHandler4SpringTaskAnnotation writeDbHandler4SpringTaskAnnotation;
+    private WriteDbHandler4SpringTaskJava writeDbHandler4SpringTaskJava;
 
     // 有注解的方法HASH+长度
     private Set<String> withAnnotationMethodHashSet = new HashSet<>();
@@ -59,7 +60,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         super.beforeHandle(javaCG2OutputPath);
 
         writeDbHandler4SpringController.beforeHandle(javaCG2OutputPath);
-        writeDbHandler4SpringTaskAnnotation.beforeHandle(javaCG2OutputPath);
+        writeDbHandler4SpringTaskJava.beforeHandle(javaCG2OutputPath);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         super.afterHandle();
 
         writeDbHandler4SpringController.afterHandle();
-        writeDbHandler4SpringTaskAnnotation.afterHandle();
+        writeDbHandler4SpringTaskJava.afterHandle();
     }
 
     @Override
@@ -224,16 +225,17 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethod);
         WriteDbData4SpringTask writeDbData4SpringTask = new WriteDbData4SpringTask();
-        writeDbData4SpringTask.setRecordId(writeDbHandler4SpringTaskAnnotation.genNextRecordId());
+        writeDbData4SpringTask.setRecordId(writeDbHandler4SpringTaskJava.genNextRecordId());
         writeDbData4SpringTask.setMethodHash(JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
         writeDbData4SpringTask.setSpringBeanName("");
         writeDbData4SpringTask.setClassName(className);
         writeDbData4SpringTask.setMethodName(methodName);
-        writeDbData4SpringTask.setType(JACGConstants.SPRING_TASK_TYPE_ANNOTATION);
+        writeDbData4SpringTask.setType(JavaCG2Constants.FILE_KEY_SPRING_DEFINE_IN_JAVA);
         writeDbData4SpringTask.setFullMethod(fullMethod);
         writeDbData4SpringTask.setReturnType(returnType);
-        writeDbHandler4SpringTaskAnnotation.addData(writeDbData4SpringTask);
-        writeDbHandler4SpringTaskAnnotation.tryInsertDb();
+        writeDbData4SpringTask.setDefineClassNameXmlPath(className);
+        writeDbHandler4SpringTaskJava.addData(writeDbData4SpringTask);
+        writeDbHandler4SpringTaskJava.tryInsertDb();
     }
 
     //
@@ -245,8 +247,8 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         this.writeDbHandler4SpringController = writeDbHandler4SpringController;
     }
 
-    public void setWriteDbHandler4SpringTaskAnnotation(WriteDbHandler4SpringTaskAnnotation writeDbHandler4SpringTaskAnnotation) {
-        this.writeDbHandler4SpringTaskAnnotation = writeDbHandler4SpringTaskAnnotation;
+    public void setWriteDbHandler4SpringTaskJava(WriteDbHandler4SpringTaskJava writeDbHandler4SpringTaskJava) {
+        this.writeDbHandler4SpringTaskJava = writeDbHandler4SpringTaskJava;
     }
 
     public void setWithAnnotationMethodHashSet(Set<String> withAnnotationMethodHashSet) {

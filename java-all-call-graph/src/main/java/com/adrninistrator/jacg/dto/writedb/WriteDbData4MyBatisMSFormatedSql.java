@@ -5,7 +5,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
 /**
  * @author adrninistrator
  * @date 2025/2/24
- * @description: 用于写入数据库的数据，MyBatis XML中格式化后的sql文本（使用MySQL）
+ * @description: 用于写入数据库的数据，MyBatis XML的sql、Mapper相关信息（使用MySQL）
  */
 public class WriteDbData4MyBatisMSFormatedSql implements BaseWriteDbData {
     private int recordId;
@@ -18,6 +18,8 @@ public class WriteDbData4MyBatisMSFormatedSql implements BaseWriteDbData {
     private String mapperSimpleClassName;
     private String mapperClassName;
     private String xmlFilePath;
+    private String resultMapId;
+    private String resultMapHash;
 
     public int getRecordId() {
         return recordId;
@@ -97,5 +99,21 @@ public class WriteDbData4MyBatisMSFormatedSql implements BaseWriteDbData {
 
     public void setXmlFilePath(String xmlFilePath) {
         this.xmlFilePath = xmlFilePath;
+    }
+
+    public String getResultMapId() {
+        return resultMapId;
+    }
+
+    public void setResultMapId(String resultMapId) {
+        this.resultMapId = resultMapId;
+    }
+
+    public String getResultMapHash() {
+        return resultMapHash;
+    }
+
+    public void setResultMapHash(String resultMapHash) {
+        this.resultMapHash = resultMapHash;
     }
 }

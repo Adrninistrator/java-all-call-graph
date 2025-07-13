@@ -130,7 +130,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             allMethodCallLineData4EeMap = new HashMap<>();
         }
 
-        // 创建线程，不指定任务数量，因为在对类进行处理时实际需要处理的方法数无法提前知道
+        // 创建线程池，不指定任务数量，因为在对类进行处理时实际需要处理的方法数无法提前知道
         createThreadPoolExecutor(null);
 
         // 遍历需要处理的任务

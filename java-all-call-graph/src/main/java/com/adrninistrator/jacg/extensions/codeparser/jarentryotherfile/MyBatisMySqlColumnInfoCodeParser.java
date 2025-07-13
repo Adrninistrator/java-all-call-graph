@@ -3,6 +3,8 @@ package com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile;
 import com.adrninistrator.javacg2.extensions.codeparser.AbstractSaveData2FileParser;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.adrninistrator.mybatismysqltableparser.dto.MyBatisMySqlInfo;
+import com.adrninistrator.mybatismysqltableparser.dto.MyBatisResultMap;
+import com.adrninistrator.mybatismysqltableparser.dto.MyBatisResultMapResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,20 +37,24 @@ public class MyBatisMySqlColumnInfoCodeParser extends AbstractSaveData2FileParse
 
     // 不需要处理文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+    public boolean parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+        return true;
     }
 
     public void handleMyBatisMySqlInfo(MyBatisMySqlInfo myBatisMySqlInfo, String mybatisXmlFilePath) {
         try {
             String entityClassName = myBatisMySqlInfo.getEntityClassName();
 
-            Map<String, String> entityAndColumnNameMap = myBatisMySqlInfo.getEntityAndColumnNameMap();
-            if (!JavaCG2Util.isMapEmpty(entityAndColumnNameMap)) {
-                List<String> entityColumnNameList = new ArrayList<>(entityAndColumnNameMap.keySet());
-                Collections.sort(entityColumnNameList);
-                for (String entityColumnName : entityColumnNameList) {
-                    String columnName = entityAndColumnNameMap.get(entityColumnName);
-                    writeData2File(entityClassName, entityColumnName, columnName, mybatisXmlFilePath);
+            Map<String, MyBatisResultMap> resultMapMap = myBatisMySqlInfo.getResultMapMap();
+            if (!JavaCG2Util.isMapEmpty(resultMapMap)) {
+                List<String> resultMapIdList = new ArrayList<>(resultMapMap.keySet());
+                Collections.sort(resultMapIdList);
+                for (String resultMapId : resultMapIdList) {
+                    MyBatisResultMap myBatisResultMap = resultMapMap.get(resultMapId);
+                    for (MyBatisResultMapResult myBatisResultMapResult : myBatisResultMap.getResultMapResultList()) {
+                        writeData2File(entityClassName, resultMapId, myBatisResultMapResult.getJavaEntityFieldName(), myBatisResultMapResult.getDbColumnName(),
+                                myBatisResultMapResult.getDbColumnType(), mybatisXmlFilePath);
+                    }
                 }
             }
         } catch (Exception e) {

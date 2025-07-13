@@ -1,7 +1,6 @@
 package test.callgraph.mybatis.service.update;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import test.callgraph.mybatis.dao.TestTableGjcusdMapper;
 import test.callgraph.mybatis.dto.mq.send.SendReq1_1;

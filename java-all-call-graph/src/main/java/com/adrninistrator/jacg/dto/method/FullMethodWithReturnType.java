@@ -62,4 +62,12 @@ public class FullMethodWithReturnType {
     public int hashCode() {
         return Objects.hash(fullMethod, returnType);
     }
+
+    @Override
+    public String toString() {
+        return "FullMethodWithReturnType{" +
+                "fullMethod='" + fullMethod + '\'' +
+                ", returnType='" + returnType + '\'' +
+                '}';
+    }
 }

@@ -9,9 +9,11 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
  */
 public class WriteDbData4MybatisMSColumn implements BaseWriteDbData {
     private int recordId;
+    private String resultMapId;
     private String entitySimpleClassName;
     private String entityFieldName;
     private String columnName;
+    private String columnType;
     private String entityClassName;
     private String xmlFileName;
     private String xmlFilePath;
@@ -22,6 +24,14 @@ public class WriteDbData4MybatisMSColumn implements BaseWriteDbData {
 
     public void setRecordId(int recordId) {
         this.recordId = recordId;
+    }
+
+    public String getResultMapId() {
+        return resultMapId;
+    }
+
+    public void setResultMapId(String resultMapId) {
+        this.resultMapId = resultMapId;
     }
 
     public String getEntitySimpleClassName() {
@@ -46,6 +56,14 @@ public class WriteDbData4MybatisMSColumn implements BaseWriteDbData {
 
     public void setColumnName(String columnName) {
         this.columnName = columnName;
+    }
+
+    public String getColumnType() {
+        return columnType;
+    }
+
+    public void setColumnType(String columnType) {
+        this.columnType = columnType;
     }
 
     public String getEntityClassName() {

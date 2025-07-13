@@ -6,11 +6,13 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.dto.calleemethodinfo.BaseCalleeMethodInfo;
 import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
 import com.adrninistrator.jacg.dto.callstack.CalleeStackSummary;
 import com.adrninistrator.jacg.dto.entrymethodinfo.BaseEntryMethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
+import com.adrninistrator.jacg.handler.calleemethodinfo.AbstractCalleeMethodInfoFiller;
 import com.adrninistrator.jacg.handler.entrymethodinfo.AbstractEntryMethodInfoFiller;
 import com.adrninistrator.jacg.jardiff.dto.method.ModifiedMethodInfo;
 import com.adrninistrator.jacg.jardiff.filter.ModifiedMethodFilterInterface;
@@ -49,6 +51,7 @@ public class RunnerGenJarDiffCalleeGraph extends AbstractRunnerGenJarDiffCallGra
             "调用堆栈在文件中的序号",
             "上层调用完整方法",
             "入口方法",
+            "被调用方法信息",
             "入口方法信息",
     };
 
@@ -57,13 +60,19 @@ public class RunnerGenJarDiffCalleeGraph extends AbstractRunnerGenJarDiffCallGra
     // 对入口方法信息进行填充的类
     private final AbstractEntryMethodInfoFiller[] entryMethodInfoFillers;
 
-    public RunnerGenJarDiffCalleeGraph(AbstractEntryMethodInfoFiller[] entryMethodInfoFillers, ModifiedMethodFilterInterface... modifiedMethodFilters) {
-        this(new JavaCG2ConfigureWrapper(false), new ConfigureWrapper(false), entryMethodInfoFillers, modifiedMethodFilters);
+    // 对被调用方法信息进行填充的类
+    private final AbstractCalleeMethodInfoFiller[] calleeMethodInfoFillers;
+
+    public RunnerGenJarDiffCalleeGraph(AbstractCalleeMethodInfoFiller[] calleeMethodInfoFillers, AbstractEntryMethodInfoFiller[] entryMethodInfoFillers,
+                                       ModifiedMethodFilterInterface... modifiedMethodFilters) {
+        this(new JavaCG2ConfigureWrapper(false), new ConfigureWrapper(false), calleeMethodInfoFillers, entryMethodInfoFillers, modifiedMethodFilters);
     }
 
     public RunnerGenJarDiffCalleeGraph(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper,
-                                       AbstractEntryMethodInfoFiller[] entryMethodInfoFillers, ModifiedMethodFilterInterface... modifiedMethodFilters) {
+                                       AbstractCalleeMethodInfoFiller[] calleeMethodInfoFillers, AbstractEntryMethodInfoFiller[] entryMethodInfoFillers,
+                                       ModifiedMethodFilterInterface... modifiedMethodFilters) {
         super(javaCG2ConfigureWrapper, configureWrapper, modifiedMethodFilters);
+        this.calleeMethodInfoFillers = calleeMethodInfoFillers;
         this.entryMethodInfoFillers = entryMethodInfoFillers;
     }
 
@@ -132,10 +141,14 @@ public class RunnerGenJarDiffCalleeGraph extends AbstractRunnerGenJarDiffCallGra
                 CalleeStackSummary calleeStackSummary = JACGCallStackUtil.parseCalleeStackSummaryFromLine(line);
                 String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeStackSummary.getCalleeMethod());
                 String jarName = modifiedClassJarMap.get(calleeClassName);
+
+                // 查询被调用方法的信息
+                String calleeMethodInfo = queryCalleeMethodInfo(calleeStackSummary.getCalleeMethod());
                 // 查询入口方法的信息
                 String entryMethodInfo = queryEntryMethodInfo(calleeStackSummary.getKeywordMethod(), calleeStackSummary.getKeywordMethodReturnType());
+
                 modifiedMethodsStackWriter.writeDataInLine(jarName, calleeStackSummary.getCalleeMethod(), calleeStackSummary.getStackSeq(),
-                        calleeStackSummary.getUpwardCallerMethod(), calleeStackSummary.getKeywordMethod(), entryMethodInfo);
+                        calleeStackSummary.getUpwardCallerMethod(), calleeStackSummary.getKeywordMethod(), calleeMethodInfo, entryMethodInfo);
             }
         }
     }
@@ -148,9 +161,25 @@ public class RunnerGenJarDiffCalleeGraph extends AbstractRunnerGenJarDiffCallGra
 
         // 使用指定的入口方法信息填充类进行处理
         for (AbstractEntryMethodInfoFiller entryMethodInfoFiller : entryMethodInfoFillers) {
-            BaseEntryMethodInfo baseEntryMethodInfo = entryMethodInfoFiller.query(entryMethod, entryMethodReturnType);
-            if (baseEntryMethodInfo != null) {
-                return JACGJsonUtil.getJsonStr(baseEntryMethodInfo);
+            BaseEntryMethodInfo entryMethodInfo = entryMethodInfoFiller.query(entryMethod, entryMethodReturnType);
+            if (entryMethodInfo != null) {
+                return JACGJsonUtil.getJsonStr(entryMethodInfo);
+            }
+        }
+        return "";
+    }
+
+    // 查询被调用方法的信息
+    private String queryCalleeMethodInfo(String calleeFullMethod) {
+        if (ArrayUtils.isEmpty(calleeMethodInfoFillers)) {
+            return "";
+        }
+
+        // 使用指定的入口方法信息填充类进行处理
+        for (AbstractCalleeMethodInfoFiller calleeMethodInfoFiller : calleeMethodInfoFillers) {
+            BaseCalleeMethodInfo calleeMethodInfo = calleeMethodInfoFiller.query(calleeFullMethod);
+            if (calleeMethodInfo != null) {
+                return JACGJsonUtil.getJsonStr(calleeMethodInfo);
             }
         }
         return "";

@@ -10,11 +10,11 @@ import com.adrninistrator.jacg.common.JACGConstants;
  */
 public enum DbTableInfoEnum {
     // todo el 后续补充
-    DTIE_JAVACG2_CONFIG("javacg2_config", new String[]{
-            DC.JAVACG2C_CONFIG_FILE_NAME,
-            DC.JAVACG2C_CONFIG_KEY,
-            DC.JAVACG2C_CONFIG_VALUE,
-            DC.JAVACG2C_CONFIG_TYPE,
+    DTIE_CONFIG("config", new String[]{
+            DC.CONFIG_FILE_NAME,
+            DC.CONFIG_KEY,
+            DC.CONFIG_VALUE,
+            DC.CONFIG_TYPE,
     }),
     DTIE_BUSINESS_DATA("business_data", new String[]{
             DC.BD_CALL_ID,
@@ -313,6 +313,8 @@ public enum DbTableInfoEnum {
             DC.SPB_SIMPLE_CLASS_NAME,
             DC.SPB_CLASS_NAME,
             DC.SPB_BEAN_TYPE,
+            DC.SPB_ANNOTATION_CLASS_NAME,
+            DC.SPB_DEFINE_CLASS_NAME_XML_PATH,
     }),
     DTIE_SPRING_CONTROLLER("spring_controller", new String[]{
             DC.SPC_RECORD_ID,
@@ -328,6 +330,13 @@ public enum DbTableInfoEnum {
             DC.SPC_FULL_METHOD,
             DC.SPC_RETURN_TYPE,
     }),
+    DTIE_SPRING_SCAN_PACKAGE("spring_scan_package", new String[]{
+            DC.SPSP_RECORD_ID,
+            DC.SPSP_TYPE,
+            DC.SPSP_SEQ,
+            DC.SPSP_SCAN_PACKAGE,
+            DC.SPSP_DEFINE_CLASS_NAME_XML_PATH,
+    }),
     DTIE_SPRING_TASK("spring_task", new String[]{
             DC.SPT_RECORD_ID,
             DC.SPT_METHOD_HASH,
@@ -337,6 +346,65 @@ public enum DbTableInfoEnum {
             DC.SPT_TYPE,
             DC.SPT_FULL_METHOD,
             DC.SPT_RETURN_TYPE,
+            DC.SPT_DEFINE_CLASS_NAME_XML_PATH,
+    }),
+    DTIE_SPRING_AOP_ASPECT("spring_aop_aspect", new String[]{
+            DC.SAAS_RECORD_ID,
+            DC.SAAS_TYPE,
+            DC.SAAS_XML_ASPECT_ID,
+            DC.SAAS_XML_ASPECT_REF,
+            DC.SAAS_ASPECT_ORDER,
+            DC.SAAS_CLASS_NAME,
+            DC.SAAS_DEFINE_XML_PATH,
+    }),
+    DTIE_SPRING_AOP_POINTCUT("spring_aop_pointcut", new String[]{
+            DC.SAP_RECORD_ID,
+            DC.SAP_TYPE,
+            DC.SAP_XML_POINTCUT_ID,
+            DC.SAP_EXPRESSION,
+            DC.SAP_FULL_METHOD,
+            DC.SAP_DEFINE_XML_PATH
+    }),
+    DTIE_SPRING_AOP_ADVICE("spring_aop_advice", new String[]{
+            DC.SAAD_RECORD_ID,
+            DC.SAAD_TYPE,
+            DC.SAAD_XML_ASPECT_ID,
+            DC.SAAD_XML_ASPECT_METHOD_NAME,
+            DC.SAAD_ADVICE_TYPE,
+            DC.SAAD_XML_POINTCUT_REF,
+            DC.SAAD_EXPRESSION,
+            DC.SAAD_ASPECT_ORDER,
+            DC.SAAD_ADVICE_FULL_METHOD,
+            DC.SAAD_ADVICE_METHOD_RETURN_TYPE,
+            DC.SAAD_ADVICE_METHOD_HASH,
+            DC.SAAD_ASPECT_CLASS_NAME,
+            DC.SAAD_DEFINE_XML_PATH
+    }),
+    DTIE_SPRING_AOP_ADVICE_AROUND("spring_aop_advice_around", new String[]{
+            DC.SAADA_RECORD_ID,
+            DC.SAADA_ADVICE_FULL_METHOD,
+            DC.SAADA_ADVICE_METHOD_RETURN_TYPE,
+            DC.SAAVA_ADVICE_METHOD_HASH,
+            DC.SAADA_PROCEED_CALL_ID,
+    }),
+    DTIE_SPRING_AOP_ADVICE_AFFECTED_METHOD("spring_aop_advice_affected_method", new String[]{
+            DC.SAADAM_RECORD_ID,
+            DC.SAADAM_TYPE,
+            DC.SAADAM_XML_ASPECT_ID,
+            DC.SAADAM_XML_ASPECT_METHOD_NAME,
+            DC.SAADAM_ADVICE_TYPE,
+            DC.SAADAM_XML_POINTCUT_REF,
+            DC.SAADAM_EXPRESSION,
+            DC.SAADAM_ASPECT_ORDER,
+            DC.SAADAM_ADVICE_FULL_METHOD,
+            DC.SAADAM_ADVICE_METHOD_RETURN_TYPE,
+            DC.SAADAM_ADVICE_METHOD_HASH,
+            DC.SAADAM_ASPECT_CLASS_NAME,
+            DC.SAADAM_DEFINE_XML_PATH,
+            DC.SAADAM_UNDERLYING_EXPRESSION,
+            DC.SAADAM_AFFECTED_FULL_METHOD,
+            DC.SAADAM_AFFECTED_METHOD_RETURN_TYPE,
+            DC.SAADAM_AFFECTED_METHOD_HASH,
     }),
     DTIE_FIELD_ANNOTATION("field_annotation", new String[]{
             DC.FA_RECORD_ID,
@@ -405,9 +473,11 @@ public enum DbTableInfoEnum {
     }),
     DTIE_MYBATIS_MS_COLUMN("mybatis_ms_column", new String[]{
             DC.MMC_RECORD_ID,
+            DC.MMC_RESULT_MAP_ID,
             DC.MMC_ENTITY_SIMPLE_CLASS_NAME,
             DC.MMC_ENTITY_FIELD_NAME,
             DC.MMC_COLUMN_NAME,
+            DC.MMC_COLUMN_TYPE,
             DC.MMC_ENTITY_CLASS_NAME,
             DC.MMC_XML_FILE_NAME,
             DC.MMC_XML_FILE_PATH,
@@ -607,6 +677,8 @@ public enum DbTableInfoEnum {
             DC.MMFS_MAPPER_SIMPLE_CLASS_NAME,
             DC.MMFS_MAPPER_CLASS_NAME,
             DC.MMFS_XML_FILE_PATH,
+            DC.MMFS_RESULT_MAP_ID,
+            DC.MMFS_RESULT_MAP_HASH,
     }),
     ;
 

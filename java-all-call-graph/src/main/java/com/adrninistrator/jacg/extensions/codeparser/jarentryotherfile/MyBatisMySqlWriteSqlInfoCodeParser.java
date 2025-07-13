@@ -30,7 +30,8 @@ public class MyBatisMySqlWriteSqlInfoCodeParser extends AbstractSaveData2FilePar
 
     // 不需要处理文件
     @Override
-    public void parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+    public boolean parseJarEntryOtherFile(InputStream inputStream, String jarEntryPath, String jarEntryName) {
+        return true;
     }
 
     public void handleMySQLWriteTableInfo(String mapperInterfaceName, String methodName, MySqlWriteTableInfo mySqlWriteTableInfo, String mybatisXmlFilePath) {

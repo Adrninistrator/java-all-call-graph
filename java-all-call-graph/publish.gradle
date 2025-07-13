@@ -3,7 +3,7 @@ apply plugin: 'signing'
 
 apply from: 'build.gradle'
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
     doFirst {
@@ -49,7 +49,7 @@ publishing {
     repositories {
         maven {
             name 'sonatypeRepository'
-            url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            url 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
             credentials {
                 username = "${NEXUS_USERNAME}"
                 password = "${NEXUS_PASSWORD}"
@@ -57,7 +57,7 @@ publishing {
         }
         maven {
             name = 'sonatypeSnapshotRepository'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = 'https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots/'
             credentials {
                 username = "${NEXUS_USERNAME}"
                 password = "${NEXUS_PASSWORD}"

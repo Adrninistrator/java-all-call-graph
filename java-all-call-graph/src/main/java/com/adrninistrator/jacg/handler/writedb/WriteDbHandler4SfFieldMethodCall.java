@@ -88,5 +88,4 @@ public class WriteDbHandler4SfFieldMethodCall extends AbstractWriteDbHandler<Wri
                 "也支持处理枚举中的字段"
         };
     }
-
 }

@@ -34,7 +34,6 @@ import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 import com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMSMapperEntityHandler;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
-import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
@@ -617,20 +616,8 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
 
     @Override
     protected boolean checkH2DbFile() {
-        File h2DbFile = getH2DbFile();
-        if (!h2DbFile.exists()) {
-            logger.error("H2数据库文件不存在，请先执行 {} 类导入数据库 {}", RunnerWriteDb.class.getSimpleName(), JavaCG2FileUtil.getCanonicalPath(h2DbFile));
-            return false;
-        }
-
-        // 数据库文件存在
-        if (!h2DbFile.isFile()) {
-            logger.error("H2数据库文件不是文件 {}", JavaCG2FileUtil.getCanonicalPath(h2DbFile));
-            return false;
-        }
-
-        // 检查H2数据库文件是否可写
-        return checkH2DbFileWritable(h2DbFile);
+        // 检查H2数据库文件是否可写，不允许文件不存在
+        return checkH2DbFileWritable(false);
     }
 
     /**

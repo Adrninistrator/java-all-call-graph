@@ -8,11 +8,12 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopAdvice;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringBean;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
-import com.adrninistrator.jacg.handler.conf.JavaCG2ConfigHandler;
+import com.adrninistrator.jacg.handler.conf.ConfigHandler;
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfo;
 import com.adrninistrator.jacg.handler.dto.spring.SpringControllerInfoDetail;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
@@ -23,6 +24,7 @@ import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
+import org.aspectj.weaver.AdviceKind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,18 +42,18 @@ public class SpringHandler extends BaseHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SpringHandler.class);
     private final MethodInfoHandler methodInfoHandler;
-    private final JavaCG2ConfigHandler javaCG2ConfigHandler;
+    private final ConfigHandler configHandler;
 
     public SpringHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
         methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
-        javaCG2ConfigHandler = new JavaCG2ConfigHandler(dbOperWrapper);
+        configHandler = new ConfigHandler(dbOperWrapper);
     }
 
     public SpringHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
         methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
-        javaCG2ConfigHandler = new JavaCG2ConfigHandler(dbOperWrapper);
+        configHandler = new ConfigHandler(dbOperWrapper);
     }
 
     /**
@@ -195,7 +197,7 @@ public class SpringHandler extends BaseHandler {
     }
 
     private void checkParseMethodCallTypeValue() {
-        if (!javaCG2ConfigHandler.checkParseMethodCallTypeValue()) {
+        if (!configHandler.checkParseMethodCallTypeValue()) {
             logger.error("使用 java-callgraph2 组件处理方法调用时未解析被调用对象和参数可能的类型与值，无法判断 Spring Controller 方法参数是否有被使用" +
                     "需要将参数值指定为 {} {}", Boolean.TRUE, configureWrapper.genConfigUsage(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE));
             throw new JavaCG2RuntimeException("使用 java-callgraph2 组件处理方法调用时未解析被调用对象和参数可能的类型与值，无法判断 Spring Controller 方法参数是否有被使用，请按照日志提示处理");
@@ -353,10 +355,10 @@ public class SpringHandler extends BaseHandler {
     /**
      * 根据Bean名称查询Spring Bean信息
      *
-     * @param className
+     * @param beanName
      * @return
      */
-    public List<WriteDbData4SpringBean> querySpringBeanByBeanName(String className) {
+    public List<WriteDbData4SpringBean> querySpringBeanByBeanName(String beanName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPB_QUERY_BY_BEAN_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -365,6 +367,113 @@ public class SpringHandler extends BaseHandler {
                     " where " + DC.SPB_SPRING_BEAN_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4SpringBean.class, dbOperWrapper.querySimpleClassName(className));
+        return dbOperator.queryList(sql, WriteDbData4SpringBean.class, beanName);
+    }
+
+    /**
+     * 根据Bean名称查询Spring Bean类名
+     *
+     * @param beanName
+     * @return
+     */
+    public String queryClassNameBySpringBeanName(String beanName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPB_QUERY_CLASS_NAME_BY_BEAN_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.SPB_CLASS_NAME +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_BEAN.getTableName() +
+                    " where " + DC.SPB_SPRING_BEAN_NAME + " = ?" +
+                    " limit 1";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryObjectOneColumn(sql, String.class, beanName);
+    }
+
+    /**
+     * 根据Bean名称查询Spring Bean类名
+     *
+     * @return
+     */
+    public List<String> queryDistinctBeanClassName() {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPB_QUERY_DISTINCT_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select distinct(" + DC.SPB_CLASS_NAME + ")" +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_BEAN.getTableName() +
+                    " order by " + DC.SPB_CLASS_NAME;
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryListOneColumn(sql, String.class);
+    }
+
+    /**
+     * 根据XML中定义的pointcut ID查询对应的表达式
+     *
+     * @param pointcutId
+     * @return
+     */
+    public String queryExpressionByPointcutId(String pointcutId) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SAP_QUERY_EXPRESSION_BY_POINTCUT_ID;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.SAP_EXPRESSION +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_AOP_POINTCUT.getTableName() +
+                    " where " + DC.SAP_XML_POINTCUT_ID + " = ?" +
+                    " limit 1";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryObjectOneColumn(sql, String.class, pointcutId);
+    }
+
+    /**
+     * 根据XML中定义的pointcut ID查询对应的表达式
+     *
+     * @param aspectId
+     * @return
+     */
+    public String queryBeanNameByAspectId(String aspectId) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SAAS_QUERY_BEAN_NAME_BY_ASPECT_ID;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.SAAS_XML_ASPECT_REF +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_AOP_ASPECT.getTableName() +
+                    " where " + DC.SAAS_XML_ASPECT_ID + " = ?" +
+                    " limit 1";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryObjectOneColumn(sql, String.class, aspectId);
+    }
+
+    /**
+     * 查询Spring AOP advice中的Around信息
+     *
+     * @return
+     */
+    public List<WriteDbData4SpringAopAdvice> querySpringAopAroundInAdvice() {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SAAD_QUERY_SPRING_AOP_AROUND_IN_ADVICE;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_SPRING_AOP_ADVICE) +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_AOP_ADVICE.getTableName() +
+                    " where " + DC.SAAD_ADVICE_TYPE + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4SpringAopAdvice.class, AdviceKind.Around.getName());
+    }
+
+    /**
+     * 查询所有的Spring AOP advice
+     *
+     * @return
+     */
+    public List<WriteDbData4SpringAopAdvice> querySpringAopAdvice() {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SAAD_QUERY_SPRING_AOP_ADVICE;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_SPRING_AOP_ADVICE) +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_AOP_ADVICE.getTableName();
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4SpringAopAdvice.class);
     }
 }

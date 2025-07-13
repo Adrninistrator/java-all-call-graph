@@ -6,7 +6,6 @@ import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,16 +143,6 @@ public class JACGUtil {
         }
 
         return (T) args[index];
-    }
-
-    /**
-     * 检查指定的字符串中是否包含回车换行
-     *
-     * @param data
-     * @return
-     */
-    public static boolean containsCRLF(String data) {
-        return StringUtils.containsAny(data, "\r", "\n");
     }
 
     /**

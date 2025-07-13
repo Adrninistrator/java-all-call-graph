@@ -22,11 +22,6 @@ public class TestRunnerGenJarDiffCallGraphOneJarDiff extends TestAbstractRunnerG
     }
 
     @Test
-    public void testJarDiffCalleeGraphPCD() {
-        doTestJarDiffCalleeGraph(false, true);
-    }
-
-    @Test
     public void testJarDiffCallerGraph() {
         super.testJarDiffCallerGraph();
     }
@@ -34,7 +29,7 @@ public class TestRunnerGenJarDiffCallGraphOneJarDiff extends TestAbstractRunnerG
     @Test
     public void testJarDiffCalleeGraphFilter() {
         TestModifiedMethodFilter4CalleeGraph1 testModifiedMethodFilter4CalleeGraph1 = new TestModifiedMethodFilter4CalleeGraph1();
-        doTestJarDiffCalleeGraph(false, false, testModifiedMethodFilter4CalleeGraph1);
+        doTestJarDiffCalleeGraph(false, false, false, testModifiedMethodFilter4CalleeGraph1);
     }
 
     @Test

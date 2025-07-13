@@ -5,9 +5,9 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
 /**
  * @author adrninistrator
  * @date 2024/11/17
- * @description: 用于写入数据库的数据，java-callgraph2组件使用的配置参数
+ * @description: 用于写入数据库的数据，java-callgraph2组件及java-all-call-graph 组件解析 jar 文件并写入数据库时使用的配置参数
  */
-public class WriteDbData4JavaCG2Config implements BaseWriteDbData {
+public class WriteDbData4Config implements BaseWriteDbData {
     private String configFileName;
     private String configKey;
     private String configValue;

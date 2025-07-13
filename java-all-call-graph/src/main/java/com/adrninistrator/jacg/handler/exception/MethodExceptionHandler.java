@@ -257,7 +257,7 @@ public class MethodExceptionHandler extends BaseHandler {
         }
 
         // 查询当前catch的异常对应变量名称
-        WriteDbData4MethodCallInfo methodCallInfo4NameOfVariable = methodCallInfoHandler.queryMethodCallInfoByCallIdType(methodCallInfo.getCallId(),
+        WriteDbData4MethodCallInfo methodCallInfo4NameOfVariable = methodCallInfoHandler.queryMethodCallInfoByCallIdSeqType(methodCallInfo.getCallId(),
                 methodCallInfo.getObjArgsSeq(), methodCallInfo.getSeq(), JavaCG2MethodCallInfoTypeEnum.MCIT_NAME_OF_VARIABLE.getType());
         String catchExceptionVariableName = (methodCallInfo4NameOfVariable == null ? "" : methodCallInfo4NameOfVariable.getTheValue());
 

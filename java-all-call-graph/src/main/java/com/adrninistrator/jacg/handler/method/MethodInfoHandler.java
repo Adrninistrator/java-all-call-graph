@@ -94,7 +94,8 @@ public class MethodInfoHandler extends BaseHandler {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_INFO) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
                     " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?" +
-                    " and " + DC.MI_METHOD_NAME + " = ?";
+                    " and " + DC.MI_METHOD_NAME + " = ?" +
+                    " order by " + DC.MI_RECORD_ID;
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryList(sql, WriteDbData4MethodInfo.class, simpleClassName, methodName);
