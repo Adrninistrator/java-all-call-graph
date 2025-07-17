@@ -46,7 +46,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailHandler {
     private static final Logger logger = LoggerFactory.getLogger(ManualAddFieldRelationshipHandler.class);
 
-    private static final AtomicBoolean RUNNING_FLAG = new AtomicBoolean(false);
+    // 不定义为static，避免在Web应用环境中执行时不同实例之间有影响
+    private final AtomicBoolean RUNNING_FLAG = new AtomicBoolean(false);
 
     private final FieldRelationshipHandler fieldRelationshipHandler;
 

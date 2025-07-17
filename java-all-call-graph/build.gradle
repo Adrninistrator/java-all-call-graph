@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "3.3.0"
+version = "3.3.1"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -58,7 +58,7 @@ List h2database = ["com.h2database:h2:2.2.220"]
 
 List java_callgraph = ['com.github.adrninistrator:java-callgraph2:3.3.0']
 
-List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.0']
+List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.1']
 
 List jackson = ["com.fasterxml.jackson.core:jackson-databind:2.14.0"]
 
