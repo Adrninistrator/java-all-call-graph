@@ -70,7 +70,9 @@ public class TestConfigGenerator {
 //        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD, "password");
 
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                TestMCCallee.class.getName() + ":20",
+                TestMCCallee.class.getName() + ":1",
+                TestMCCallee.class.getName() + ":22",
+                TestMCCallee.class.getName() + ":27",
                 TestMCCallee.class.getName() + ":run(",
                 TestMCCallee.class.getName() + ":test",
                 System.class.getName(),
@@ -86,7 +88,8 @@ public class TestConfigGenerator {
 
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 MethodWithAnnotation.class.getName(),
-                TestMCCaller.class.getName() + ":20",
+                TestMCCaller.class.getName() + ":1",
+                TestMCCaller.class.getName() + ":55",
                 TestArgument1.class.getName() + ":test",
                 TestArgument2.class.getName() + ":test(",
                 TestArgument2.class.getName() + ":test(",

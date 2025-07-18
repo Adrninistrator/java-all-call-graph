@@ -22,6 +22,7 @@ import com.adrninistrator.jacg.dto.multiple.MultiCallInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4LambdaMethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.dto.businessdata.BaseBusinessData;
@@ -823,6 +824,16 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
             writeDbData4MethodCall = new WriteDbData4MethodCall();
             writeDbData4MethodCall.setCallerReturnType("");
             writeDbData4MethodCall.setRawReturnType("");
+
+            // 未查询到方法调用时需要继续查方法信息
+            WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByMethodHash(methodHash);
+            if (methodInfo != null) {
+                if (isCallee) {
+                    writeDbData4MethodCall.setRawReturnType(methodInfo.getReturnType());
+                } else {
+                    writeDbData4MethodCall.setCallerReturnType(methodInfo.getReturnType());
+                }
+            }
         }
         return writeDbData4MethodCall;
     }

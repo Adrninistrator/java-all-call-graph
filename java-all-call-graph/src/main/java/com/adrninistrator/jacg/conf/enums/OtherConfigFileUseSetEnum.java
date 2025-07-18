@@ -151,6 +151,28 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
                     "com.test",
                     "com.test.Test1"}
             , null),
+    OCFUSE_JAR_DIFF_CALLEE_METHOD_PREFIX(InputDirEnum.IDE_JAR_DIFF.getDirName() + "/jar_diff_callee_method_prefix.properties",
+            new String[]{"(作用) JarDIff比较新旧两个目录的jar文件，获得发生变化的方法的影响范围（生成向上的完整方法调用链及调用堆栈）使用的配置文件（每行指定一项配置，可指定多行）",
+                    "(内容) 指定发生变化的方法中，需要进行处理的方法前缀（若未指定则不限制）",
+                    "(格式) 可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数",
+                    "(示例)",
+                    "com.test",
+                    "com.test.Test1",
+                    "com.test.Test1:func1",
+                    "com.test.Test1:func1(",
+                    "com.test.Test1:func1(java.lang.String)"}
+            , null),
+    OCFUSE_JAR_DIFF_CALLER_METHOD_PREFIX(InputDirEnum.IDE_JAR_DIFF.getDirName() + "/jar_diff_caller_method_prefix.properties",
+            new String[]{"(作用) JarDIff比较新旧两个目录的jar文件，获得发生变化的方法向下的完整方法调用链使用的配置文件（每行指定一项配置，可指定多行）",
+                    "(内容) 指定发生变化的方法中，需要进行处理的方法前缀（若未指定则不限制）",
+                    "(格式) 可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数",
+                    "(示例)",
+                    "com.test",
+                    "com.test.Test1",
+                    "com.test.Test1:func1",
+                    "com.test.Test1:func1(",
+                    "com.test.Test1:func1(java.lang.String)"}
+            , null),
     ;
 
     // 参数配置文件名

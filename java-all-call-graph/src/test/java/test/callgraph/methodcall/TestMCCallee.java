@@ -22,6 +22,12 @@ public class TestMCCallee {
         System.out.println(b);
     }
 
+    public void testNotCalled(String str1, String str2) {
+        int a;
+        int b = 3;
+        System.out.println(b);
+    }
+
     public static String test3(String str1, String str2, String str3) {
         return str1 + str2 + str3;
     }

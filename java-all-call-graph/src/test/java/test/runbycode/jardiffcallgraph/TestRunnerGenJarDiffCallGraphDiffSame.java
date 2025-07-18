@@ -1,5 +1,6 @@
 package test.runbycode.jardiffcallgraph;
 
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import org.junit.Test;
 
 /**
@@ -14,6 +15,7 @@ public class TestRunnerGenJarDiffCallGraphDiffSame extends TestAbstractRunnerGen
         gradlew test_gen_diff_jar_with_same -Pexample_flag=1
         gradlew test_gen_diff_jar_with_same -Pexample_flag=2
      */
+
     @Test
     public void testJarDiffCalleeGraph() {
         super.testJarDiffCalleeGraph();
@@ -21,6 +23,24 @@ public class TestRunnerGenJarDiffCallGraphDiffSame extends TestAbstractRunnerGen
 
     @Test
     public void testJarDiffCallerGraph() {
+        super.testJarDiffCallerGraph();
+    }
+
+    @Test
+    public void testJarDiffCalleeGraphChooseMethod() {
+        // 指定发生变化的方法中哪些需要处理
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_JAR_DIFF_CALLEE_METHOD_PREFIX,
+                "test.diffjar.service",
+                "test.diffjar.service.");
+        super.testJarDiffCalleeGraph();
+    }
+
+    @Test
+    public void testJarDiffCallerGraphChooseMethod() {
+        // 指定发生变化的方法中哪些需要处理
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_JAR_DIFF_CALLER_METHOD_PREFIX,
+                "test.diffjar.controller",
+                "test.diffjar.controller.");
         super.testJarDiffCallerGraph();
     }
 

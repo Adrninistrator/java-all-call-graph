@@ -38,7 +38,6 @@ public abstract class TestAbstractRunnerGenJarDiffCallGraph extends TestRunByCod
      */
     protected void doTestJarDiffCalleeGraph(boolean useCalleeFiler4MyBatisMSXml, boolean useEntryFiler4Spring, boolean useEntryFiler4CommandXml,
                                             ModifiedMethodFilterInterface... modifiedMethodFilters) {
-        ConfigureWrapper configureWrapper = TestConfigGenerator.genConfigureWrapper();
         // 使用本地的配置参数
         JACGTestUtil.useLocalConfig(configureWrapper);
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, chooseAppName());
@@ -80,7 +79,6 @@ public abstract class TestAbstractRunnerGenJarDiffCallGraph extends TestRunByCod
      * 执行jar diff功能，生成发生变化的方法向下的调用链
      */
     protected void testJarDiffCallerGraph(ModifiedMethodFilterInterface... modifiedMethodFilters) {
-        ConfigureWrapper configureWrapper = TestConfigGenerator.genConfigureWrapper();
         // 使用本地的配置参数
         JACGTestUtil.useLocalConfig(configureWrapper);
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, chooseAppName());

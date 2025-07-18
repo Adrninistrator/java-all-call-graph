@@ -171,6 +171,16 @@ public class MethodInfoHandler extends BaseHandler {
      * @return
      */
     public WriteDbData4MethodInfo queryMethodInfoByFullMethod(String fullMethod, String returnType) {
+        return queryMethodInfoByMethodHash(JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
+    }
+
+    /**
+     * 根据方法HASH+长度查询方法信息
+     *
+     * @param methodHash
+     * @return
+     */
+    public WriteDbData4MethodInfo queryMethodInfoByMethodHash(String methodHash) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_ALL_BY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -180,7 +190,7 @@ public class MethodInfoHandler extends BaseHandler {
                     " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryObject(sql, WriteDbData4MethodInfo.class, JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
+        return dbOperator.queryObject(sql, WriteDbData4MethodInfo.class, methodHash);
     }
 
     /**

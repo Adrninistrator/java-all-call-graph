@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
@@ -151,6 +152,11 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
                 recordModifiedJar(pair, modifiedJarMap, jarModifiedMethodInfoMap, modifiedClassJarMap);
             }
 
+            // 获得需要比较的方法前缀
+            OtherConfigFileUseSetEnum methodPrefixEnum = this instanceof RunnerGenJarDiffCalleeGraph ? OtherConfigFileUseSetEnum.OCFUSE_JAR_DIFF_CALLEE_METHOD_PREFIX :
+                    OtherConfigFileUseSetEnum.OCFUSE_JAR_DIFF_CALLER_METHOD_PREFIX;
+            Set<String> handleMethodPrefixSet = configureWrapper.getOtherConfigSet(methodPrefixEnum);
+
             // 获得发生变化的方法
             Set<String> modifiedMethodSet = new HashSet<>();
             List<String> jarFileNameListNew = new ArrayList<>(modifiedJarMap.keySet());
@@ -158,7 +164,10 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
             for (String jarFileNameNew : jarFileNameListNew) {
                 List<ModifiedMethodInfo> modifiedMethodInfoList = jarModifiedMethodInfoMap.get(jarFileNameNew);
                 for (ModifiedMethodInfo modifiedMethodInfo : modifiedMethodInfoList) {
-                    modifiedMethodSet.add(modifiedMethodInfo.getFullMethod());
+                    // 检查变化的方法是否需要处理
+                    if (checkHandleModifiedMethod(handleMethodPrefixSet, modifiedMethodInfo.getFullMethod())) {
+                        modifiedMethodSet.add(modifiedMethodInfo.getFullMethod());
+                    }
                 }
             }
 
@@ -180,6 +189,28 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
                 dbOperator.closeDs(this);
             }
         }
+    }
+
+    /**
+     * 检查变化的方法是否需要处理
+     *
+     * @param handleMethodPrefix
+     * @param fullMethod
+     * @return
+     */
+    private boolean checkHandleModifiedMethod(Set<String> handleMethodPrefix, String fullMethod) {
+        if (handleMethodPrefix.isEmpty()) {
+            return true;
+        }
+
+        for (String handleMethod : handleMethodPrefix) {
+            if (fullMethod.startsWith(handleMethod)) {
+                logger.info("当前变化的方法通过前缀判断需要处理 {} {}", fullMethod, handleMethod);
+                return true;
+            }
+        }
+        logger.info("当前变化的方法通过前缀判断不处理 {}", fullMethod);
+        return false;
     }
 
     /**
