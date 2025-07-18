@@ -1560,3 +1560,7 @@ java.lang.NoClassDefFoundError: javax/servlet/http/HttpSession
 ```
 
 示例见 test.runbycode.jardiffcallgraph.TestRunnerGenJarDiffCallGraphDiffSame:testJarDiffCallerGraphChooseMethod 方法
+
+## 1.39. (3.3.3)
+
+初始化时测试数据库连接，防止数据库无法连接（如数据库密码等信息错误）时死循环尝试连接

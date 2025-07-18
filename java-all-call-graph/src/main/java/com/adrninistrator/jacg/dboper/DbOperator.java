@@ -78,6 +78,15 @@ public class DbOperator implements AutoCloseable {
         dataSource.setProxyFilters(Collections.singletonList(new DruidMonitorFilter(dbConfInfo.isUseH2Db())));
         initDataSource();
 
+        // 测试数据库连接
+        try {
+            dataSource.init();
+            dataSource.createPhysicalConnection();
+        } catch (Exception e) {
+            logger.error("测试连接数据库失败，请检查数据库及配置参数 ", e);
+            throw new JavaCG2RuntimeException("测试连接数据库失败，请检查数据库及配置参数");
+        }
+
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
 
         // 在JVM关闭时检查当前数据库操作对象是否有关闭

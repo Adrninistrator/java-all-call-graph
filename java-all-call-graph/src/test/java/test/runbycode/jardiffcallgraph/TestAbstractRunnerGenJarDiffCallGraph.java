@@ -1,6 +1,5 @@
 package test.runbycode.jardiffcallgraph;
 
-import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.handler.calleemethodinfo.AbstractCalleeMethodInfoFiller;
@@ -13,7 +12,6 @@ import com.adrninistrator.jacg.jardiff.runner.RunnerGenJarDiffCalleeGraph;
 import com.adrninistrator.jacg.jardiff.runner.RunnerGenJarDiffCallerGraph;
 import org.junit.Assert;
 import test.runbycode.base.TestRunByCodeBase;
-import test.runbycode.config.TestConfigGenerator;
 import test.runbycode.jardiffcallgraph.filler.EntryMethodInfoFiller4XmlCommand;
 import test.runbycode.parsedcustomdata.parser.TestCodeParserWithCustomData1;
 import test.runbycode.util.JACGTestUtil;
