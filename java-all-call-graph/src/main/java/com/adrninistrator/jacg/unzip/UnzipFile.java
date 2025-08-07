@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.unzip;
 
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
+import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGFileUtilNoLogger;
 import com.adrninistrator.javacg2.common.enums.JavaCG2DirEnum;
@@ -27,7 +28,7 @@ public class UnzipFile {
     }
 
     private void unzipJACG() {
-        String jarFilePath = JACGFileUtil.getJarFilePathOfClass(UnzipFile.class);
+        String jarFilePath = JACGFileUtil.getJarFilePathOfClass(RunnerWriteDb.class);
         System.out.println("java-all-call-graph jar包路径: " + jarFilePath);
         if (!new File(jarFilePath).exists()) {
             System.out.println("文件路径不正确: " + jarFilePath);
