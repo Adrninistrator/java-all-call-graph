@@ -6,8 +6,7 @@ import com.adrninistrator.jacg.handler.calleemethodinfo.AbstractCalleeMethodInfo
 import com.adrninistrator.jacg.handler.calleemethodinfo.CalleeMethodInfoFiller4MyBatisMSXml;
 import com.adrninistrator.jacg.handler.entrymethodinfo.AbstractEntryMethodInfoFiller;
 import com.adrninistrator.jacg.handler.entrymethodinfo.EntryMethodInfoFiller4Spring;
-import com.adrninistrator.jacg.jardiff.dto.result.JarDiffResult;
-import com.adrninistrator.jacg.jardiff.filter.ModifiedMethodFilterInterface;
+import com.adrninistrator.jacg.jardiff.dto.method.ModifiedMethodInfo;
 import com.adrninistrator.jacg.jardiff.runner.RunnerGenJarDiffCalleeGraph;
 import com.adrninistrator.jacg.jardiff.runner.RunnerGenJarDiffCallerGraph;
 import org.junit.Assert;
@@ -18,6 +17,7 @@ import test.runbycode.util.JACGTestUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author adrninistrator
@@ -34,9 +34,8 @@ public abstract class TestAbstractRunnerGenJarDiffCallGraph extends TestRunByCod
     /**
      * 执行jar diff功能，生成发生变化的方法向上的调用链
      */
-    protected void doTestJarDiffCalleeGraph(boolean useCalleeFiler4MyBatisMSXml, boolean useEntryFiler4Spring, boolean useEntryFiler4CommandXml,
-                                            ModifiedMethodFilterInterface... modifiedMethodFilters) {
-        // 使用本地的配置参数
+    protected void doTestJarDiffCalleeGraph(boolean useCalleeFiler4MyBatisMSXml, boolean useEntryFiler4Spring, boolean useEntryFiler4CommandXml) {
+        // 尝试使用本地的配置参数
         JACGTestUtil.useLocalConfig(configureWrapper);
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, chooseAppName());
 
@@ -65,30 +64,32 @@ public abstract class TestAbstractRunnerGenJarDiffCallGraph extends TestRunByCod
             AbstractEntryMethodInfoFiller[] entryMethodInfoFillers = entryMethodInfoFillerList.toArray(new AbstractEntryMethodInfoFiller[]{});
 
             RunnerGenJarDiffCalleeGraph genJarDiffCalleeGraph = new RunnerGenJarDiffCalleeGraph(javaCG2ConfigureWrapper, configureWrapper, calleeMethodInfoFillers,
-                    entryMethodInfoFillers, modifiedMethodFilters);
-            JarDiffResult jarDiffResult = genJarDiffCalleeGraph.generate();
-            Assert.assertTrue(jarDiffResult.isSuccess());
-            printMapContent(jarDiffResult.getJarModifiedMethodInfoMap());
-            Assert.assertEquals(isResultEmpty(), jarDiffResult.getJarModifiedMethodInfoMap().isEmpty());
+                    entryMethodInfoFillers);
+            genJarDiffCalleeGraph.setSkipWriteDb(chooseSkipWriteDb());
+            Assert.assertTrue(genJarDiffCalleeGraph.run());
+            Map<String, List<ModifiedMethodInfo>> jarModifiedMethodInfoMap = genJarDiffCalleeGraph.getJarModifiedMethodInfoMap();
+            printMapContent(jarModifiedMethodInfoMap);
+            Assert.assertEquals(isResultEmpty(), jarModifiedMethodInfoMap.isEmpty());
         }
     }
 
     /**
      * 执行jar diff功能，生成发生变化的方法向下的调用链
      */
-    protected void testJarDiffCallerGraph(ModifiedMethodFilterInterface... modifiedMethodFilters) {
-        // 使用本地的配置参数
+    protected void testJarDiffCallerGraph() {
+        // 尝试使用本地的配置参数
         JACGTestUtil.useLocalConfig(configureWrapper);
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, chooseAppName());
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLER_GRAPH_DIR, chooseRootJarDir() + chooseDirNameOld(),
                 chooseRootJarDir() + chooseDirNameNew());
 
-        RunnerGenJarDiffCallerGraph genJarDiffCallerGraph = new RunnerGenJarDiffCallerGraph(javaCG2ConfigureWrapper, configureWrapper, modifiedMethodFilters);
-        JarDiffResult jarDiffResult = genJarDiffCallerGraph.generate();
-        Assert.assertTrue(jarDiffResult.isSuccess());
-        printMapContent(jarDiffResult.getJarModifiedMethodInfoMap());
-        Assert.assertEquals(isResultEmpty(), jarDiffResult.getJarModifiedMethodInfoMap().isEmpty());
+        RunnerGenJarDiffCallerGraph genJarDiffCallerGraph = new RunnerGenJarDiffCallerGraph(javaCG2ConfigureWrapper, configureWrapper);
+        genJarDiffCallerGraph.setSkipWriteDb(chooseSkipWriteDb());
+        Assert.assertTrue(genJarDiffCallerGraph.run());
+        Map<String, List<ModifiedMethodInfo>> jarModifiedMethodInfoMap = genJarDiffCallerGraph.getJarModifiedMethodInfoMap();
+        printMapContent(jarModifiedMethodInfoMap);
+        Assert.assertEquals(isResultEmpty(), jarModifiedMethodInfoMap.isEmpty());
     }
 
     protected abstract String chooseAppName();
@@ -100,4 +101,8 @@ public abstract class TestAbstractRunnerGenJarDiffCallGraph extends TestRunByCod
     protected abstract String chooseDirNameNew();
 
     protected abstract boolean isResultEmpty();
+
+    protected boolean chooseSkipWriteDb() {
+        return false;
+    }
 }

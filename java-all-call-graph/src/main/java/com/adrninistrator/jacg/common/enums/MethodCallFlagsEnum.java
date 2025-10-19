@@ -1,5 +1,10 @@
 package com.adrninistrator.jacg.common.enums;
 
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author adrninistrator
  * @date 2022/11/18
@@ -55,5 +60,31 @@ public enum MethodCallFlagsEnum {
 
     public String getDesc() {
         return desc;
+    }
+
+    /**
+     * 根据标志获得所有匹配的枚举常量名
+     *
+     * @param flags
+     * @return
+     */
+    public static List<String> getAllEnumNames(int flags) {
+        List<String> allEnumNames = new ArrayList<>();
+        for (MethodCallFlagsEnum methodCallFlagsEnum : MethodCallFlagsEnum.values()) {
+            if (!methodCallFlagsEnum.checkFlag(flags)) {
+                continue;
+            }
+            allEnumNames.add(methodCallFlagsEnum.name());
+        }
+        return allEnumNames;
+    }
+
+    // 生成用于显示的信息
+    public static String[] genShowInfo() {
+        List<String> showInfoList = new ArrayList<>();
+        for (MethodCallFlagsEnum methodCallFlagsEnum : MethodCallFlagsEnum.values()) {
+            showInfoList.add(methodCallFlagsEnum.name() + JavaCG2Constants.FLAG_TAB + methodCallFlagsEnum.getDesc());
+        }
+        return showInfoList.toArray(new String[]{});
     }
 }

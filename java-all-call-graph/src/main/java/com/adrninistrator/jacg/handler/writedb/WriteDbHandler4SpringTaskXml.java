@@ -115,7 +115,7 @@ public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDb
     @Override
     public String[] chooseFileDetailInfo() {
         return new String[]{
-                "包括Spring定时任务Bean的名称及方法名称、XML文件路径"
+                "包括Spring定时任务Bean的名称及方法名、XML文件路径"
         };
     }
 

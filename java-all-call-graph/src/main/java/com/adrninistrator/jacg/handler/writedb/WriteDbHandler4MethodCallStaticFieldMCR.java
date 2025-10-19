@@ -11,7 +11,7 @@ import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 /**
  * @author adrninistrator
  * @date 2025/6/1
- * @description: 写入数据库，方法调用使用静态字段方法调用返回值
+ * @description: 写入数据库，方法调用（的被调用对象或参数）中使用静态字段的方法调用返回值信息
  */
 
 @JACGWriteDbHandler(

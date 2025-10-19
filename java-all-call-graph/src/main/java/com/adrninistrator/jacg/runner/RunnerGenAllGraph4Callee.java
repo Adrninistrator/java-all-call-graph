@@ -18,7 +18,7 @@ import com.adrninistrator.jacg.dto.task.FindMethodTaskElement;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
-import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
+import com.adrninistrator.jacg.runner.base.AbstractRunnerGenAllCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
@@ -58,7 +58,7 @@ import java.util.Set;
  * @description: 生成调用指定类方法向上的完整调用链
  */
 
-public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
+public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
     private static final Logger logger = LoggerFactory.getLogger(RunnerGenAllGraph4Callee.class);
 
     /*
@@ -92,6 +92,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         if (!createOutputDir(JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLEE)) {
             return false;
         }
+        // 创建表达式管理类，需要在currentOutputDirPath赋值后执行
+        createElManager();
         return true;
     }
 
@@ -166,9 +168,15 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             }
 
             String className = taskArray[0];
-
+            if (!JACGClassMethodUtil.checkValidClassName(className)) {
+                logger.error("不是合法的类名 {}", task);
+                return null;
+            }
             // 获取唯一类名（简单类名或完整类名）
             String simpleClassName = dbOperWrapper.querySimpleClassNameInTask(className);
+            if (StringUtils.isBlank(simpleClassName)) {
+                logger.error("未查询到唯一类名 {}", task);
+            }
             CalleeTaskInfo calleeTaskInfo = calleeTaskInfoMap.computeIfAbsent(simpleClassName, k -> new CalleeTaskInfo());
             if (taskArray.length == 1) {
                 // 仅指定了类名，需要处理所有的方法
@@ -215,7 +223,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         List<FindMethodTaskElement> findMethodTaskElementList = Collections.emptyList();
 
         if (calleeTaskInfo.isGenAllMethods() || calleeTaskInfo.isFindMethodByName()) {
-            // 假如需要生成指定类的全部方法向上调用链，或需要根据方法名称查询方法时，需要查询被调用类的全部方法信息
+            // 假如需要生成指定类的全部方法向上调用链，或需要根据方法名查询方法时，需要查询被调用类的全部方法信息
             findMethodTaskElementList = queryMethodsOfCalleeClass(startCalleeSimpleClassName);
         }
 
@@ -346,7 +354,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                 callGraphWriter = JavaCG2FileUtil.genBufferedWriter(outputFilePath4Method);
             }
             // 判断配置文件中是否已指定忽略当前方法
-            if (ignoreCurrentMethod(null, startCalleeFullMethod)) {
+            if (ignoreCurrentMethodCall(null, null, startCalleeFullMethod, 0)) {
                 logger.info("配置文件中已指定忽略当前方法，不处理 {}", startCalleeFullMethod);
                 return true;
             }
@@ -406,7 +414,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
                                                 String methodInfoInTask) {
         List<FindMethodTaskElement> usedFindMethodTaskElementList = new ArrayList<>();
 
-        // 遍历从数据库中查找到的方法信息，查找当前指定的方法名称或参数匹配的方法
+        // 遍历从数据库中查找到的方法信息，查找当前指定的方法名或参数匹配的方法
         for (FindMethodTaskElement findMethodTaskElement : findMethodTaskElementList) {
             String methodNameAndArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(findMethodTaskElement.getFullMethod());
             if (StringUtils.startsWith(methodNameAndArgs, methodInfoInTask)) {
@@ -524,7 +532,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             int callFlags = methodCall.getCallFlags();
 
             // 处理被忽略的方法
-            if (handleIgnoredMethod(callType, actualCallerFullMethod, actualCallerMethodHash, rawCallerMethodHash, callGraphNode4CalleeStack, enabled, methodCallId)) {
+            if (handleIgnoredMethod(callType, actualCallerFullMethod, calleeFullMethod, actualCallerMethodHash, rawCallerMethodHash, callGraphNode4CalleeStack, enabled,
+                    methodCallId, callFlags)) {
                 continue;
             }
 
@@ -754,29 +763,33 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
      *
      * @param callType
      * @param callerFullMethod
+     * @param calleeFullMethod
      * @param actualCallerMethodHash
      * @param rawCallerMethodHash
      * @param callGraphNode4CalleeStack
      * @param enabled
      * @param methodCallId
+     * @param callFlags
      * @return true: 当前方法需要忽略 false: 当前方法不需要忽略
      */
     private boolean handleIgnoredMethod(String callType,
                                         String callerFullMethod,
+                                        String calleeFullMethod,
                                         String actualCallerMethodHash,
                                         String rawCallerMethodHash,
                                         ListAsStack<CallGraphNode4Callee> callGraphNode4CalleeStack,
                                         int enabled,
-                                        int methodCallId) {
+                                        int methodCallId,
+                                        int callFlags) {
         /*
             判断是否需要忽略
             - 调用方法与被调用方法HASH相同时忽略（bridge方法调用）
-            - 调用方法需要忽略
+            - 方法调用需要忽略
             - 当前方法调用被禁用
          */
         CallGraphNode4Callee callGraphNode4Callee = callGraphNode4CalleeStack.peek();
         if (actualCallerMethodHash.equals(callGraphNode4Callee.getCalleeMethodHash()) ||
-                ignoreCurrentMethod(callType, callerFullMethod) ||
+                ignoreCurrentMethodCall(callType, callerFullMethod, calleeFullMethod, callFlags) ||
                 !JavaCG2YesNoEnum.isYes(enabled)) {
             // 当前记录需要忽略
             // 更新当前处理节点的调用方方法HASH

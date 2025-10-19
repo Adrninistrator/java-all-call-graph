@@ -2,7 +2,7 @@ CREATE TABLE if not exists jacg_spring_aop_advice_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   type varchar(1) NOT NULL COMMENT '类型，j: 在Java代码中定义，x: 在XML文件中定义',
   xml_aspect_id varchar(255) NOT NULL COMMENT 'XML中定义的aspect的ID',
-  xml_aspect_method_name varchar(255) NOT NULL COMMENT 'XML中定义的aspect的方法名称',
+  xml_aspect_method_name varchar(255) NOT NULL COMMENT 'XML中定义的aspect的方法名',
   advice_type varchar(20) NOT NULL COMMENT 'advice类型',
   xml_pointcut_ref text NOT NULL COMMENT 'XML中的pointcut-ref名称',
   expression text NOT NULL COMMENT 'pointcut表达式',

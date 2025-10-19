@@ -25,7 +25,6 @@ public class TestMyBatisMapperGenAllGraph4Caller extends TestRunByCodeBase {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 ListenerService1Impl.class.getName()
         );
-        // todo 后续修改为通过el表达式指定
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType()
         );

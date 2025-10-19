@@ -125,7 +125,7 @@ public class WriteDbHandler4SpringAopAdviceXml extends AbstractWriteDbHandler<Wr
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "XML中定义的aspect的ID",
-                "XML中定义的aspect的方法名称",
+                "XML中定义的aspect的方法名",
                 "XML中定义的advice XML元素的名称",
                 "XML中的pointcut-ref名称",
                 "pointcut表达式是否为base64格式",
@@ -143,7 +143,7 @@ public class WriteDbHandler4SpringAopAdviceXml extends AbstractWriteDbHandler<Wr
     @Override
     public String[] chooseFileDetailInfo() {
         return new String[]{
-                "包括XML中定义的aspect的ID、aspect的方法名称、advice XML元素的名称表达式、pointcut-ref名称、pointcut表达式、XML文件路径等"
+                "包括XML中定义的aspect的ID、aspect的方法名、advice XML元素的名称表达式、pointcut-ref名称、pointcut表达式、XML文件路径等"
         };
     }
 }

@@ -455,7 +455,7 @@ public class DbOperWrapper {
 
     // 根据完整类名查询对应的唯一类名
     protected String querySimpleClassNameByFull(String className) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_SIMPLE_CLASS;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_SIMPLE_CLASS_NAME_BY_FULL;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.CN_SIMPLE_CLASS_NAME +
@@ -466,12 +466,25 @@ public class DbOperWrapper {
         return dbOperator.queryObjectOneColumn(sql, String.class, className);
     }
 
-    // 根据简单类名查询对应的唯一类名
+    // 查询唯一类名
     protected String querySimpleClassNameBySimple(String simpleCassName) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_CLASS;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_SIMPLE_CLASS_NAME;
         String sql = getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.CN_SIMPLE_CLASS_NAME +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName() +
+                    " where " + DC.CN_SIMPLE_CLASS_NAME + " = ?";
+            sql = cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryObjectOneColumn(sql, String.class, simpleCassName);
+    }
+
+    // 根据唯一类名查询完整类名
+    public String queryClassNameBySimple(String simpleCassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CN_QUERY_CLASS_NAME_BY_SIMPLE;
+        String sql = getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.CN_CLASS_NAME +
                     " from " + DbTableInfoEnum.DTIE_CLASS_NAME.getTableName() +
                     " where " + DC.CN_SIMPLE_CLASS_NAME + " = ?";
             sql = cacheSql(sqlKeyEnum, sql);
@@ -493,7 +506,7 @@ public class DbOperWrapper {
         return dbOperator.queryObjectOneColumn(sql, String.class, callerSimpleClassName);
     }
 
-    // 通过方法名称获取调用方方法
+    // 通过方法名获取调用方方法
     public List<WriteDbData4MethodCall> queryCallerMethodByName(String callerSimpleClassName, String fullMethodPrefix) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_TOP_METHOD;
         String sql = getCachedSql(sqlKeyEnum);

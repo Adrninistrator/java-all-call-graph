@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.util;
 
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -46,20 +47,6 @@ public class JACGUtil {
             return null;
         }
         return list.get(index);
-    }
-
-    /**
-     * 等待指定时间
-     *
-     * @param time
-     */
-    public static void sleep(long time) {
-        try {
-            Thread.sleep(time);
-        } catch (InterruptedException e) {
-            logger.error("error ", e);
-            Thread.currentThread().interrupt();
-        }
     }
 
     /**
@@ -168,6 +155,16 @@ public class JACGUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * 解析jar文件序号字符串
+     *
+     * @param jarNumStr
+     * @return
+     */
+    public static Integer parseJarNum(String jarNumStr) {
+        return JavaCG2Constants.EMPTY_JAR_NUM.equals(jarNumStr) ? null : Integer.parseInt(jarNumStr);
     }
 
     private JACGUtil() {

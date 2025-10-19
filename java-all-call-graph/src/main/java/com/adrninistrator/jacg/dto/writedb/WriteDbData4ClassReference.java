@@ -14,6 +14,7 @@ public class WriteDbData4ClassReference implements BaseWriteDbData {
     private String simpleClassName;
     private String referencedClassName;
     private String referencedSimpleClassName;
+    private int jarNum;
 
     public int getRecordId() {
         return recordId;
@@ -53,6 +54,14 @@ public class WriteDbData4ClassReference implements BaseWriteDbData {
 
     public void setReferencedSimpleClassName(String referencedSimpleClassName) {
         this.referencedSimpleClassName = referencedSimpleClassName;
+    }
+
+    public int getJarNum() {
+        return jarNum;
+    }
+
+    public void setJarNum(int jarNum) {
+        this.jarNum = jarNum;
     }
 }
 

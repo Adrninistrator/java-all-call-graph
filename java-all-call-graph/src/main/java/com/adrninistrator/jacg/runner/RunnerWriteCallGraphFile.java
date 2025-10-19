@@ -25,6 +25,7 @@ import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
 import com.adrninistrator.javacg2.dto.output.JavaCG2OtherRunResult;
 import com.adrninistrator.javacg2.dto.output.JavaCG2OutputInfo;
+import com.adrninistrator.javacg2.el.enums.interfaces.ElConfigInterface;
 import com.adrninistrator.javacg2.entry.JavaCG2Entry;
 import com.adrninistrator.javacg2.extensions.codeparser.CodeParserInterface;
 import com.adrninistrator.javacg2.extensions.manager.ExtensionsManager;
@@ -100,7 +101,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
 
     // 调用java-callgraph2生成jar包的方法调用关系
     protected boolean callJavaCallGraph2() {
-        // 生成java-callgraph2使用的配置信息
+        // 生成java-callgraph2使用的配置参数
         javaCG2Entry = new JavaCG2Entry(javaCG2ConfigureWrapper);
 
         ExtensionsManager extensionsManager = javaCG2Entry.getExtensionsManager();
@@ -135,12 +136,12 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         javaCG2OutputInfo = javaCG2Entry.getJavaCG2InputAndOutput().getJavaCG2OutputInfo();
         currentOutputDirPath = javaCG2OutputInfo.getOutputDirPath();
 
-        // 将所有的配置信息写入文件
+        // 将所有的配置参数写入文件
         if (!recordAllConfigToFile()) {
             return false;
         }
 
-        // 打印配置信息
+        // 打印配置参数
         return printAllConfigInfo();
     }
 
@@ -230,16 +231,21 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         return javaCG2Entry.getJavaCG2InputAndOutput().getJavaCG2OtherRunResult();
     }
 
-    // 将所有的配置信息写入文件
+    // 将所有的配置参数写入文件
     private boolean recordAllConfigToFile() {
         String filePath = JavaCG2FileUtil.genFilePath(javaCG2OutputInfo.getOutputDirPath(), JACG_CONFIG_FILE_NAME, javaCG2OutputInfo.getOutputFileExt());
         try (Writer writer = JavaCG2FileUtil.genBufferedWriter(filePath);) {
             MainConfigInterface[][] mainConfigs = new MainConfigInterface[][]{ConfigKeyEnum.values(), ConfigDbKeyEnum.values()};
-            return configureWrapper.recordAllConfigToFile(writer, mainConfigs, OtherConfigFileUseListEnum.values(), OtherConfigFileUseSetEnum.values());
+            if (!configureWrapper.recordAllConfigToFile(writer, mainConfigs, OtherConfigFileUseListEnum.values(), OtherConfigFileUseSetEnum.values(), new ElConfigInterface[]{})) {
+                return false;
+            }
         } catch (Exception e) {
             logger.error("error ", e);
             return false;
         }
+        // 增加其他文件信息
+        javaCG2OutputInfo.addOtherFileInfo(JACG_CONFIG_FILE_NAME);
+        return true;
     }
 
     @Override

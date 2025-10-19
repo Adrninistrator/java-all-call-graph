@@ -55,9 +55,9 @@ public class TestAnalyseJACG0WriteDb {
 
     @Test
     public void test() {
-        String jacgJarFilePath = getJACGJarFilePath();
+//        String jacgJarFilePath = getJACGJarFilePath();
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = new JavaCG2ConfigureWrapper();
-        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, jacgJarFilePath);
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, "out/");
 
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_SKIP_WRITE_DB_WHEN_JAR_NOT_MODIFIED, Boolean.FALSE.toString());

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * @author adrninistrator
  * @date 2025/2/16
  * @description: java-callgraph2 组件方法调用处理扩展类
- * 通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名称
+ * 通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名
  */
 public abstract class JavaCG2ObjInstanceMethodNameMCE implements JavaCG2MethodCallExtensionInterface {
 

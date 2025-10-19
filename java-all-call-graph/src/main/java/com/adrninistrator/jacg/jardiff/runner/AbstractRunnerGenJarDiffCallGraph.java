@@ -8,25 +8,23 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
-import com.adrninistrator.jacg.dboper.DbInitializer;
-import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MyBatisMSFormatedSql;
+import com.adrninistrator.jacg.el.enums.ElConfigEnum;
+import com.adrninistrator.jacg.el.manager.ElManager;
 import com.adrninistrator.jacg.handler.mybatis.MybatisMsFormatedSqlHandler;
 import com.adrninistrator.jacg.jardiff.dto.method.ModifiedMethodInfo;
-import com.adrninistrator.jacg.jardiff.dto.result.JarDiffResult;
-import com.adrninistrator.jacg.jardiff.filter.ModifiedMethodFilterInterface;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
+import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +47,7 @@ import java.util.Set;
  * @date 2025/5/12
  * @description: 比较新旧两个目录中不同版本jar文件的方法修改情况，并生成向上或向下的完整方法调用链，基类
  */
-public abstract class AbstractRunnerGenJarDiffCallGraph {
+public abstract class AbstractRunnerGenJarDiffCallGraph extends AbstractRunner {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunnerGenJarDiffCallGraph.class);
 
     public static final String[] FILE_HEADER_ARRAY_MODIFIED_METHODS_BASE = new String[]{
@@ -64,67 +62,84 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
 
     protected final JavaCG2ConfigureWrapper javaCG2ConfigureWrapper;
 
-    protected final ConfigureWrapper configureWrapper;
+    /*
+        保存各个jar文件中发生变化的方法信息
+        key     jar文件名称
+        value   发生变化的方法信息列表
+     */
+    protected final Map<String, List<ModifiedMethodInfo>> jarModifiedMethodInfoMap = new HashMap<>();
+
+    protected final MybatisMsFormatedSqlHandler mybatisMsFormatedSqlHandler;
+
+    private final OtherConfigFileUseListEnum compareDirEnum;
+
+    private final boolean genCalleeGraph;
+
+    private ElManager elManager;
 
     // 是否跳过写入数据库的步骤
     protected boolean skipWriteDb;
 
-    protected final DbOperator dbOperator;
-
-    protected final DbOperWrapper dbOperWrapper;
-
-    protected final MybatisMsFormatedSqlHandler mybatisMsFormatedSqlHandler;
-
-    protected final String appName;
-
-    private final OtherConfigFileUseListEnum compareDirEnum;
-
-    private final ModifiedMethodFilterInterface[] modifiedMethodFilters;
-
-    protected AbstractRunnerGenJarDiffCallGraph(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper,
-                                                ModifiedMethodFilterInterface... modifiedMethodFilters) {
+    protected AbstractRunnerGenJarDiffCallGraph(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
         this.javaCG2ConfigureWrapper = javaCG2ConfigureWrapper;
-        this.configureWrapper = configureWrapper;
-        this.modifiedMethodFilters = modifiedMethodFilters;
-        dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, this);
         mybatisMsFormatedSqlHandler = new MybatisMsFormatedSqlHandler(dbOperWrapper);
-        dbOperator = dbOperWrapper.getDbOperator();
-        appName = dbOperator.getAppName();
         compareDirEnum = chooseCompareDirEnum();
+        genCalleeGraph = this instanceof RunnerGenJarDiffCalleeGraph;
     }
 
     /**
-     * 获得jar文件发生变化的方法信息，并生成对应的方法调用堆栈
+     * 是否需要操作数据库
      *
-     * @return
+     * @return true: 需要操作数据库 false: 不需要操作数据库
      */
-    public JarDiffResult generate() {
+    @Override
+    protected boolean handleDb() {
+        return true;
+    }
+
+    @Override
+    protected boolean preHandle() {
+        String dirPathNew;
+        if (skipWriteDb) {
+            logger.info("跳过写入数据库步骤");
+            return true;
+        }
+        List<String> jarDiffDirPathList = configureWrapper.getOtherConfigList(compareDirEnum);
+        if (JavaCG2Util.isCollectionEmpty(jarDiffDirPathList) || jarDiffDirPathList.size() != 2) {
+            logger.error("请修改配置文件，或通过代码指定对应的参数，在其中指定两行内容，第一行为旧目录的路径，第二行为新目录的路径 {}", compareDirEnum.getConfigPrintInfo());
+            return false;
+        }
+
+        String dirPathOld = jarDiffDirPathList.get(0);
+        dirPathNew = jarDiffDirPathList.get(1);
+
+        // 解析新旧目录的jar文件并写入数据库
+        return writeDb(dirPathOld, dirPathNew);
+    }
+
+    @Override
+    protected void handle() {
         try {
-            String dirPathNew;
-            if (!skipWriteDb) {
-                List<String> jarDiffDirPathList = configureWrapper.getOtherConfigList(compareDirEnum);
-                if (JavaCG2Util.isCollectionEmpty(jarDiffDirPathList) || jarDiffDirPathList.size() != 2) {
-                    logger.error("请修改配置文件，或通过代码指定对应的参数，在其中指定两行内容，第一行为旧目录的路径，第二行为新目录的路径 {}", compareDirEnum.getConfigPrintInfo());
-                    return JarDiffResult.genFailResult();
-                }
-
-                String dirPathOld = jarDiffDirPathList.get(0);
-                dirPathNew = jarDiffDirPathList.get(1);
-
-                // 解析新旧目录的jar文件并写入数据库
-                if (!writeDb(dirPathOld, dirPathNew)) {
-                    return JarDiffResult.genFailResult();
-                }
-            } else {
-                logger.info("跳过与入数据库步骤");
-            }
-
             // 查询新的发生改变的jar文件
             List<Pair<WriteDbData4JarInfo, WriteDbData4JarInfo>> modifiedJarInfoList = queryModifiedJarInfo();
             if (JavaCG2Util.isCollectionEmpty(modifiedJarInfoList)) {
                 logger.warn("未查询到发生改变的jar文件");
-                return JarDiffResult.genSuccessResult(Collections.emptyMap());
+                return;
             }
+
+            String upwardDir = genCalleeGraph ? JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLEE : JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER;
+            String downwardDir = genCalleeGraph ? JACGConstants.DIR_CALLEE_JAR_DIFF_SUMMARY : JACGConstants.DIR_CALLER_JAR_DIFF_SUMMARY;
+            // 生成输出目录
+            if (!createOutputDir(upwardDir, downwardDir)) {
+                recordTaskFail();
+                return;
+            }
+
+            // 完整方法调用链生成目录，使用输出目录父目录
+            File currentOutputDir = new File(currentOutputDirPath);
+            String genAllCallGraphDir = JavaCG2FileUtil.getCanonicalPath(currentOutputDir.getParentFile());
+            elManager = new ElManager(configureWrapper, ElConfigEnum.values(), currentOutputDirPath);
 
             /*
                 发生变化的jar文件信息
@@ -132,13 +147,6 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
                 value   旧jar文件信息
              */
             Map<String, WriteDbData4JarInfo> modifiedJarMap = new HashMap<>();
-
-            /*
-                各个jar文件中发生变化的方法信息
-                key     jar文件名称
-                value   发生变化的方法信息列表
-             */
-            Map<String, List<ModifiedMethodInfo>> jarModifiedMethodInfoMap = new HashMap<>();
 
             /*
                 发生变化的方法的类所在的jar文件
@@ -149,13 +157,8 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
 
             for (Pair<WriteDbData4JarInfo, WriteDbData4JarInfo> pair : modifiedJarInfoList) {
                 // 获取发生变化的jar文件
-                recordModifiedJar(pair, modifiedJarMap, jarModifiedMethodInfoMap, modifiedClassJarMap);
+                recordModifiedJar(pair, modifiedJarMap, modifiedClassJarMap);
             }
-
-            // 获得需要比较的方法前缀
-            OtherConfigFileUseSetEnum methodPrefixEnum = this instanceof RunnerGenJarDiffCalleeGraph ? OtherConfigFileUseSetEnum.OCFUSE_JAR_DIFF_CALLEE_METHOD_PREFIX :
-                    OtherConfigFileUseSetEnum.OCFUSE_JAR_DIFF_CALLER_METHOD_PREFIX;
-            Set<String> handleMethodPrefixSet = configureWrapper.getOtherConfigSet(methodPrefixEnum);
 
             // 获得发生变化的方法
             Set<String> modifiedMethodSet = new HashSet<>();
@@ -164,69 +167,63 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
             for (String jarFileNameNew : jarFileNameListNew) {
                 List<ModifiedMethodInfo> modifiedMethodInfoList = jarModifiedMethodInfoMap.get(jarFileNameNew);
                 for (ModifiedMethodInfo modifiedMethodInfo : modifiedMethodInfoList) {
-                    // 检查变化的方法是否需要处理
-                    if (checkHandleModifiedMethod(handleMethodPrefixSet, modifiedMethodInfo.getFullMethod())) {
+                    // 检查变化的方法是否需要跳过处理
+                    if (!checkSkipModifiedMethod(modifiedMethodInfo.getFullMethod())) {
                         modifiedMethodSet.add(modifiedMethodInfo.getFullMethod());
                     }
                 }
+            }
+
+            if (modifiedMethodSet.isEmpty()) {
+                logger.info("未查询到发生变化的方法");
+                return;
             }
 
             ConfigureWrapper configureWrapperNew = configureWrapper.copy();
             // 指定数据库表名后缀使用代表新的
             configureWrapperNew.setMainConfig(ConfigDbKeyEnum.CDKE_DB_TABLE_SUFFIX, JACGConstants.TABLE_SUFFIX_NEW);
             // 处理发生变化的jar文件
-            boolean success = handleModifiedJarAndMethods(configureWrapperNew, modifiedJarMap, jarModifiedMethodInfoMap, modifiedClassJarMap, modifiedMethodSet,
-                    jarFileNameListNew);
+            boolean success = handleModifiedJarAndMethods(configureWrapperNew, modifiedJarMap, modifiedClassJarMap, modifiedMethodSet,
+                    jarFileNameListNew, genAllCallGraphDir);
             if (!success) {
-                return JarDiffResult.genFailResult();
+                recordTaskFail();
             }
-            return JarDiffResult.genSuccessResult(jarModifiedMethodInfoMap);
         } catch (Exception e) {
             logger.error("error ", e);
-            return JarDiffResult.genFailResult();
-        } finally {
-            if (dbOperator != null) {
-                dbOperator.closeDs(this);
-            }
+            recordTaskFail();
         }
     }
 
+    @Override
+    protected boolean checkH2DbFile() {
+        // 检查H2数据库文件是否可写，不允许文件不存在
+        return checkH2DbFileWritable(false);
+    }
+
     /**
-     * 检查变化的方法是否需要处理
+     * 检查变化的方法是否需要跳过处理
      *
-     * @param handleMethodPrefix
      * @param fullMethod
      * @return
      */
-    private boolean checkHandleModifiedMethod(Set<String> handleMethodPrefix, String fullMethod) {
-        if (handleMethodPrefix.isEmpty()) {
-            return true;
-        }
-
-        for (String handleMethod : handleMethodPrefix) {
-            if (fullMethod.startsWith(handleMethod)) {
-                logger.info("当前变化的方法通过前缀判断需要处理 {} {}", fullMethod, handleMethod);
-                return true;
-            }
-        }
-        logger.info("当前变化的方法通过前缀判断不处理 {}", fullMethod);
-        return false;
+    private boolean checkSkipModifiedMethod(String fullMethod) {
+        return elManager.checkJarDiffGenAllCallGraphIgnore(genCalleeGraph, fullMethod);
     }
 
     /**
      * 处理发生变化的jar文件与方法
      *
-     * @param configureWrapperNew      配置包装类
-     * @param modifiedJarMap           发生变化的jar文件信息
-     * @param jarModifiedMethodInfoMap 各个jar文件中发生变化的方法信息
-     * @param modifiedClassJarMap      发生变化的方法的类所在的jar文件
-     * @param modifiedMethodSet        发生变化的方法Set
-     * @param jarFileNameListNew       新jar文件名称列表
+     * @param configureWrapperNew 配置包装类
+     * @param modifiedJarMap      发生变化的jar文件信息
+     * @param modifiedClassJarMap 发生变化的方法的类所在的jar文件
+     * @param modifiedMethodSet   发生变化的方法Set
+     * @param jarFileNameListNew  新jar文件名称列表
+     * @param genAllCallGraphDir  生成完整方法调用链的目录
      * @return
      */
     protected abstract boolean handleModifiedJarAndMethods(ConfigureWrapper configureWrapperNew, Map<String, WriteDbData4JarInfo> modifiedJarMap,
-                                                           Map<String, List<ModifiedMethodInfo>> jarModifiedMethodInfoMap, Map<String, String> modifiedClassJarMap,
-                                                           Set<String> modifiedMethodSet, List<String> jarFileNameListNew);
+                                                           Map<String, String> modifiedClassJarMap, Set<String> modifiedMethodSet, List<String> jarFileNameListNew,
+                                                           String genAllCallGraphDir);
 
     /**
      * 选择保存用于需要比较的目录的枚举类
@@ -281,7 +278,7 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
 
     // 获取发生变化的jar文件
     protected void recordModifiedJar(Pair<WriteDbData4JarInfo, WriteDbData4JarInfo> pair, Map<String, WriteDbData4JarInfo> modifiedJarMap,
-                                     Map<String, List<ModifiedMethodInfo>> jarModifiedMethodInfoMap, Map<String, String> modifiedClassJarMap) {
+                                     Map<String, String> modifiedClassJarMap) {
         WriteDbData4JarInfo jarInfoNew = pair.getLeft();
         WriteDbData4JarInfo jarInfoOld = pair.getRight();
         boolean oldJarExists = jarInfoOld != null;
@@ -328,12 +325,11 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
                 }
                 ModifiedMethodInfo modifiedMethodInfo = new ModifiedMethodInfo(methodInfoNew.getFullMethod(), methodInfoNew.getReturnType(), oldMethodExists);
                 // 检查是否需要跳过发生变化的方法
-                if (checkSkipModifiedMethod(modifiedMethodInfo)) {
-                    continue;
+                if (!checkSkipModifiedMethod(modifiedMethodInfo.getFullMethod())) {
+                    logger.info("找到发生变化的方法 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
+                    // 方法指令有变化，或旧方法不存在，记录对应方法
+                    modifiedMethodInfoList.add(modifiedMethodInfo);
                 }
-                logger.debug("方法发生变化 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
-                // 方法指令有变化，或旧方法不存在，记录对应方法
-                modifiedMethodInfoList.add(modifiedMethodInfo);
             }
         }
         if (modifiedMethodInfoList.isEmpty()) {
@@ -375,7 +371,7 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
             newMethodHash = methodInfoNew.getMethodInstructionsHash();
         }
         if (StringUtils.isBlank(newMethodHash) || JavaCG2CommonNameConstants.METHOD_NAME_CLINIT.equals(methodInfoNew.getMethodName())) {
-            // 新方法的方法指令HASH为空，或者方法名称为<clinit>（不会被直接调用），跳过
+            // 新方法的方法指令HASH为空，或者方法名为<clinit>（不会被直接调用），跳过
             logger.debug("跳过当前方法的处理 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
             return null;
         }
@@ -410,20 +406,6 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
             logger.debug("方法指令HASH未发生变化，属于返回resultMap的MyBatis Mapper方法（支持MySQL），存在旧的方法 {} {}", jarInfoNew.getJarFileName(), methodInfoNew.getFullMethod());
         }
         return null;
-    }
-
-    // 检查是否需要跳过发生变化的方法
-    private boolean checkSkipModifiedMethod(ModifiedMethodInfo modifiedMethodInfo) {
-        if (modifiedMethodFilters == null) {
-            return false;
-        }
-        for (ModifiedMethodFilterInterface modifiedMethodFilter : modifiedMethodFilters) {
-            if (modifiedMethodFilter.skipMethod(modifiedMethodInfo)) {
-                logger.debug("当前发生变化的方法需要跳过 {} {} {}", modifiedMethodFilter.getClass().getName(), modifiedMethodInfo.getFullMethod(), modifiedMethodInfo.getMethodReturnType());
-                return true;
-            }
-        }
-        return false;
     }
 
     // 查询新的class信息
@@ -526,12 +508,18 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
         // 指定数据库表名后缀使用代表新的
         configureWrapperNew.setMainConfig(ConfigDbKeyEnum.CDKE_DB_TABLE_SUFFIX, JACGConstants.TABLE_SUFFIX_NEW);
         javaCG2ConfigureWrapperNew.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, dirPathNew);
-        return new RunnerWriteDb(javaCG2ConfigureWrapperNew, configureWrapperNew).run();
+        boolean success = new RunnerWriteDb(javaCG2ConfigureWrapperNew, configureWrapperNew).run();
+        // 复制有使用的参数
+        configureWrapperOld.baseCopyUsedConfigTo(configureWrapper);
+        configureWrapperNew.baseCopyUsedConfigTo(configureWrapper);
+        javaCG2ConfigureWrapperOld.baseCopyUsedConfigTo(javaCG2ConfigureWrapper);
+        javaCG2ConfigureWrapperNew.baseCopyUsedConfigTo(javaCG2ConfigureWrapper);
+
+        return success;
     }
 
     // 生成jar文件中发生变化的方法基本信息
-    protected boolean writeModifiedMethodsBaseFile(String jarDiffDirPath, List<String> jarFileNameListNew, Map<String, WriteDbData4JarInfo> modifiedJarMap, Map<String,
-            List<ModifiedMethodInfo>> jarModifiedMethodInfoMap) {
+    protected boolean writeModifiedMethodsBaseFile(String jarDiffDirPath, List<String> jarFileNameListNew, Map<String, WriteDbData4JarInfo> modifiedJarMap) {
         String modifiedMethodsBaseFilePath = jarDiffDirPath + File.separator + JACGConstants.FILE_JAR_DIFF_MODIFIED_METHODS_BASE;
         try (WriterSupportHeader modifiedMethodsBaseWriter = new WriterSupportHeader(modifiedMethodsBaseFilePath, FILE_HEADER_MODIFIED_METHODS_BASE)) {
             for (String jarFileNameNew : jarFileNameListNew) {
@@ -542,11 +530,11 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
                             modifiedMethodInfo.isOldMethodExists() ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
                 }
             }
-            return true;
         } catch (Exception e) {
             logger.error("error ", e);
             return false;
         }
+        return textFileToExcel(modifiedMethodsBaseFilePath);
     }
 
     // 获取当前使用的数据库表名后缀
@@ -562,7 +550,26 @@ public abstract class AbstractRunnerGenJarDiffCallGraph {
         return chooseTableSuffix(false);
     }
 
+    /**
+     * 需要生成excel文件
+     *
+     * @return
+     */
+    @Override
+    protected boolean needGenerateExcel() {
+        return true;
+    }
+
     public void setSkipWriteDb(boolean skipWriteDb) {
         this.skipWriteDb = skipWriteDb;
+    }
+
+    public Map<String, List<ModifiedMethodInfo>> getJarModifiedMethodInfoMap() {
+        return jarModifiedMethodInfoMap;
+    }
+
+    @Override
+    public void setCurrentOutputDirPath(String currentOutputDirPath) {
+        throw new JavaCG2RuntimeException(this.getClass().getName() + " 类不允许设置当前的输出目录");
     }
 }

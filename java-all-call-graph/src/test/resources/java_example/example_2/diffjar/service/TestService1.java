@@ -49,6 +49,7 @@ public class TestService1 {
     public void testMapperNotModified2() {
         testJarDiffTableMapper.deleteByFlag("");
     }
+
     public void testMapperNew() {
         testJarDiffTableMapper.selectByPrimaryKey2("");
     }

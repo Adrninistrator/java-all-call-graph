@@ -11,7 +11,7 @@ public class TestArray1 {
 
     private void test1() {
         DbStatementEnum[] dbStatementEnums = DbStatementEnum.values();
-        DbStatementEnum[] newDbStatementEnums = dbStatementEnums.clone();
+        DbStatementEnum[] newDbStatementEnums = dbStatementEnums;
         System.out.println(newDbStatementEnums);
         DbStatementEnum[] dbStatementEnums2 = new DbStatementEnum[]{};
         System.out.println(dbStatementEnums2);
@@ -19,14 +19,14 @@ public class TestArray1 {
 
     private void test2() {
         DbStatementEnum[][] dbStatementEnums = new DbStatementEnum[][]{};
-        DbStatementEnum[][] newDbStatementEnums = dbStatementEnums.clone();
+        DbStatementEnum[][] newDbStatementEnums = null;
         System.out.println(newDbStatementEnums);
         dbStatementEnums.notify();
     }
 
     private void test3() {
         DbStatementEnum[][][] dbStatementEnums = new DbStatementEnum[][][]{};
-        DbStatementEnum[][][] newDbStatementEnums = dbStatementEnums.clone();
+        DbStatementEnum[][][] newDbStatementEnums = null;
         System.out.println(newDbStatementEnums);
         dbStatementEnums.notify();
     }

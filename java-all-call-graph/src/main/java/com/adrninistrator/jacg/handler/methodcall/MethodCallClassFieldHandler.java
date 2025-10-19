@@ -128,6 +128,26 @@ public class MethodCallClassFieldHandler extends BaseHandler {
         return dbOperator.queryList(sql, WriteDbData4MethodCallStaticFieldMCR.class, dbOperWrapper.querySimpleClassName(className), fieldName);
     }
 
+    /**
+     * 查询指定方法调用（的被调用对象或参数）使用的静态字段方法调用返回值
+     *
+     * @param callId
+     * @param objArgSeq
+     * @return
+     */
+    public List<WriteDbData4MethodCallStaticFieldMCR> queryMethodCallStaticFieldMCR4MethodCall(int callId, int objArgSeq) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCSFMCR_QUERY_BY_METHOD_CALL;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL_STATIC_FIELD_MCR) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL_STATIC_FIELD_MCR.getTableName() +
+                    " where " + DC.MCF_CALL_ID + " = ?" +
+                    " and " + DC.MCF_OBJ_ARGS_SEQ + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodCallStaticFieldMCR.class, callId, objArgSeq);
+    }
+
     private DbTableInfoEnum chooseDbTableInfoEnum(boolean queryStaticField) {
         return queryStaticField ? DbTableInfoEnum.DTIE_METHOD_CALL_STATIC_FIELD : DbTableInfoEnum.DTIE_METHOD_CALL_NON_STATIC_FIELD;
     }

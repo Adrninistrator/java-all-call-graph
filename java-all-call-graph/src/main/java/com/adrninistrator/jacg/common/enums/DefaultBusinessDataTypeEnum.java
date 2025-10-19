@@ -1,5 +1,10 @@
 package com.adrninistrator.jacg.common.enums;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author adrninistrator
  * @date 2023/3/21
@@ -37,6 +42,20 @@ public enum DefaultBusinessDataTypeEnum {
             }
         }
         return DefaultBusinessDataTypeEnum.BDTE_ILLEGAL;
+    }
+
+    public static String getSupportTypeStr(boolean supportEe) {
+        List<String> list = new ArrayList<>();
+        for (DefaultBusinessDataTypeEnum defaultBusinessDataTypeEnum : DefaultBusinessDataTypeEnum.values()) {
+            if (supportEe) {
+                if (defaultBusinessDataTypeEnum.isSupportEe()) {
+                    list.add(defaultBusinessDataTypeEnum.getType());
+                }
+            } else if (defaultBusinessDataTypeEnum.isSupportEr()) {
+                list.add(defaultBusinessDataTypeEnum.getType());
+            }
+        }
+        return StringUtils.join(list, " ");
     }
 
     public String getType() {

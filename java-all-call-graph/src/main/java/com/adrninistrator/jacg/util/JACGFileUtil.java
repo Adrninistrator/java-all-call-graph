@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -190,11 +189,12 @@ public class JACGFileUtil {
         }
     }
 
-    public static boolean isFileExists(String filePath) {
-        File file = new File(filePath);
-        return file.exists() && file.isFile();
-    }
-
+    /**
+     * 获取文件MD5
+     *
+     * @param filePath
+     * @return
+     */
     public static String getFileMd5(String filePath) {
         try (InputStream input = new FileInputStream(filePath)) {
             return DigestUtils.md5Hex(input);
@@ -252,60 +252,6 @@ public class JACGFileUtil {
             logger.error("error ", e);
             return false;
         }
-    }
-
-    /**
-     * 从目录中查找需要处理的文件
-     *
-     * @param dirPath         需要查找的目录
-     * @param subDirPathSet   保存查找到的目录，可为空
-     * @param subFilePathList 保存查找到的文件列表
-     * @param fileExts        需要查找的文件后缀，可为空
-     */
-    public static void searchDir(String dirPath, Set<String> subDirPathSet, List<String> subFilePathList, String... fileExts) {
-        File dir = new File(dirPath);
-        File[] files = dir.listFiles();
-        if (files == null) {
-            return;
-        }
-
-        for (File file : files) {
-            if (file.isDirectory()) {
-                // 目录，递归
-                searchDir(file.getAbsolutePath(), subDirPathSet, subFilePathList, fileExts);
-            } else {
-                // 文件
-                String filePath = file.getAbsolutePath();
-                if (fileExts == null || checkFileExt(filePath, fileExts)) {
-                    // 若未指定文件后缀，则允许任意文件后缀；若有指定文件后缀，则需要判断是否符合预期
-                    if (subDirPathSet != null) {
-                        subDirPathSet.add(dirPath);
-                    }
-                    subFilePathList.add(filePath);
-                }
-            }
-        }
-    }
-
-    /**
-     * 判断文件后缀是否符合预期
-     *
-     * @param filePath
-     * @param fileExts
-     * @return
-     */
-    public static boolean checkFileExt(String filePath, String... fileExts) {
-        if (fileExts == null) {
-            // 未指定文件后缀时认为符合
-            return true;
-        }
-
-        for (String fileExt : fileExts) {
-            if (StringUtils.endsWithIgnoreCase(filePath, fileExt)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -477,16 +423,6 @@ public class JACGFileUtil {
             logger.error("error ", e);
             return null;
         }
-    }
-
-    /**
-     * 获得类所在的jar文件路径
-     *
-     * @param clazz
-     * @return
-     */
-    public static String getJarFilePathOfClass(Class<?> clazz) {
-        return clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
     }
 
     private JACGFileUtil() {

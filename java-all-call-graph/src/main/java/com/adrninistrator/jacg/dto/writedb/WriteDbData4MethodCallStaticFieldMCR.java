@@ -5,7 +5,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
 /**
  * @author adrninistrator
  * @date 2025/6/1
- * @description: 用于写入数据库的数据，方法调用使用静态字段方法调用返回值
+ * @description: 用于写入数据库的数据，方法调用（的被调用对象或参数）中使用静态字段的方法调用返回值信息
  */
 public class WriteDbData4MethodCallStaticFieldMCR implements BaseWriteDbData {
 
@@ -134,5 +134,25 @@ public class WriteDbData4MethodCallStaticFieldMCR implements BaseWriteDbData {
 
     public void setCalleeReturnType(String calleeReturnType) {
         this.calleeReturnType = calleeReturnType;
+    }
+
+    @Override
+    public String toString() {
+        return "WriteDbData4MethodCallStaticFieldMCR{" +
+                "recordId=" + recordId +
+                ", callId=" + callId +
+                ", objArgsSeq=" + objArgsSeq +
+                ", seq=" + seq +
+                ", callerMethodHash='" + callerMethodHash + '\'' +
+                ", simpleClassName='" + simpleClassName + '\'' +
+                ", fieldName='" + fieldName + '\'' +
+                ", simpleFieldType='" + simpleFieldType + '\'' +
+                ", className='" + className + '\'' +
+                ", fieldType='" + fieldType + '\'' +
+                ", calleeMethodHash='" + calleeMethodHash + '\'' +
+                ", calleeMethodName='" + calleeMethodName + '\'' +
+                ", calleeFullMethod='" + calleeFullMethod + '\'' +
+                ", calleeReturnType='" + calleeReturnType + '\'' +
+                '}';
     }
 }

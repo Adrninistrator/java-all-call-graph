@@ -1,5 +1,6 @@
 package test.runbycodemain;
 
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallLineData4Ee;
@@ -9,6 +10,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
 import test.runbycode.base.TestRunByCodeBase;
+import test.runbycode.config.TestConfigGenerator;
+import test.runbycode.util.JACGTestUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,18 @@ public class TestRBCRunnerGenAllGraph4Callee extends TestRunByCodeBase {
     @Test
     public void testWriteToFile() {
         int callGraphDirNumBefore = getCallGraphDirNum4Ee();
+
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        // 设置基本的配置参数
+        TestConfigGenerator.setBaseConfig(configureWrapper);
+        // 使用H2数据库
+        TestConfigGenerator.useH2Db(configureWrapper);
+        // 设置需要生成向上的方法完整调用链的类或方法
+        TestConfigGenerator.setGenCalleeGraphMethodClass(configureWrapper);
+
+        // 尝试使用本地的配置参数
+        JACGTestUtil.useLocalConfig(configureWrapper);
+
         Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapper).run());
         int callGraphDirNumAfter = getCallGraphDirNum4Ee();
         Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore + 1);
@@ -57,7 +72,7 @@ public class TestRBCRunnerGenAllGraph4Callee extends TestRunByCodeBase {
         int callGraphDirNumBefore = getCallGraphDirNum4Ee();
         Assert.assertTrue(runnerGenAllGraph4Callee.run());
         int callGraphDirNumAfter = getCallGraphDirNum4Ee();
-        Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore);
+        Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore + 1);
         Map<String, List<MethodCallLineData4Ee>> allMethodCallLineData4EeMap = runnerGenAllGraph4Callee.getAllMethodCallLineData4EeMap();
         printMapContent(allMethodCallLineData4EeMap);
         for (Map.Entry<String, List<MethodCallLineData4Ee>> entry : allMethodCallLineData4EeMap.entrySet()) {

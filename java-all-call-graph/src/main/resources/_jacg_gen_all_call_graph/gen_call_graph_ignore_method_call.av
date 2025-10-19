@@ -1,0 +1,24 @@
+## 对应的枚举类名: ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL
+## （作用）在 生成方法完整调用链时 使用的配置参数
+## （作用）表达式配置参数的说明如下：
+## （作用）若当前配置文件中的表达式执行结果为 true，则跳过在方法完整调用链中生成对应的方法
+## （作用）若表达式执行结果为 false，或未指定表达式，则当前配置不会跳过对应的方法
+## （范围）指定生成完整方法调用链时是否跳过解析特定的方法调用，支持通过方法调用类型、调用方法或被调用方法等判断
+## （表达式使用通用说明文档）请参考 _el_example/el_usage.md
+## （表达式字符串比较说明文档）请参考 _el_example/string_compare.md
+## （当前表达式使用示例文档）请参考 _el_example/_jacg_gen_all_call_graph/gen_call_graph_ignore_method_call.av.md
+## （允许使用的变量）{变量名称} {变量类型} {变量描述} {变量值示例}
+## {method_call_type} {String} {方法调用类型, 参考 JavaCG2CallTypeEnum 类} {VIR INT SPE STA DYN _SPR_ACT_I _SPR_ACT_C _ACT_I _ACT_C _ITF _BSM _LM _RIR1 _RIR2 _CIC1 _CIC2 _TCID1 _TCID2 _TCWRID1 _TCWRID2 _TSR _SCC _CCS _CCS_SPE _CCS_I _CCID _ICID _MA _MAA ILLEGAL}
+## {er_class_name} {String} {调用方完整类名} {a.b.Class1}
+## {er_package_name} {String} {调用方完整包名, 不会以.结束} {a.b}
+## {er_simple_class_name} {String} {调用方简单类名} {Class1}
+## {er_method_name} {String} {调用方方法名, 不包括括号及方法参数} {method1}
+## {er_method_arg_num} {int} {调用方方法参数数量} {0, 1}
+## {er_full_method} {String} {调用方完整方法, 包括括号及方法参数} {a.b.Class1:method1(int)}
+## {ee_class_name} {String} {被调用方完整类名} {a.b.Class1}
+## {ee_package_name} {String} {被调用方完整包名, 不会以.结束} {a.b}
+## {ee_simple_class_name} {String} {被调用方简单类名} {Class1}
+## {ee_method_name} {String} {被调用方方法名, 不包括括号及方法参数} {method1}
+## {ee_method_arg_num} {int} {被调用方方法参数数量} {0, 1}
+## {ee_full_method} {String} {被调用方完整方法, 包括括号及方法参数} {a.b.Class1:method1(int)}
+## {flags_enum} {List<String>} {方法调用标志枚举, 指定 MethodCallFlagsEnum 类的常量名称，代表需要处理包含/不包含哪些标志的方法调用, 如 MCFE_ER_METHOD_ANNOTATION} {MCFE_ER_METHOD_ANNOTATION	调用方法有注解, MCFE_EE_METHOD_ANNOTATION	被调用方法有注解, MCFE_METHOD_CALL_INFO	存在方法调用信息, MCFE_EE_ARGS_WITH_GENERICS_TYPE	被调用方法参数存在泛型类型, MCFE_ER_ARGS_WITH_GENERICS_TYPE	调用方法参数存在泛型类型, MCFE_EE_MYBATIS_MAPPER	被调用方法为Mybatis Mapper, MCFE_EE_MYBATIS_MAPPER_WRITE	被调用方法为Mybatis写数据库的Mapper方法, MCFE_EE_BUSINESS_DATA	被调用方法存在业务功能数据, MCFE_EE_RETURN_WITH_GENERICS_TYPE	被调用方法返回存在泛型类型, MCFE_ER_RETURN_WITH_GENERICS_TYPE	调用方法返回存在泛型类型, MCFE_EE_DTO_GET_SET_METHOD	被调用方法属于dto的get/set方法}

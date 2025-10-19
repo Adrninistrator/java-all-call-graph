@@ -15,6 +15,7 @@ import com.adrninistrator.jacg.dto.methodcall.parsed.MethodCallInfoParsed4NonSta
 import com.adrninistrator.jacg.dto.methodcall.parsed.MethodCallInfoParsed4StaticField;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.jacg.handler.dto.methodcall.MethodCallObjArgValueAndSource;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGMethodCallInfoUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
@@ -31,8 +32,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -362,6 +365,29 @@ public class MethodCallInfoHandler extends BaseHandler {
     }
 
     /**
+     * 查询指定方法中使用指定序号的参数作为方法调用被调用对象的方法调用序号
+     *
+     * @param callerMethodHash
+     * @param argSeq
+     * @return
+     */
+    public List<Integer> queryCallId4MethodCalleeObjUseArg(String callerMethodHash, int argSeq) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_CALL_ID_4_METHOD_CALLEE_OBJ_USE_ARG;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.MCI_CALL_ID +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName() +
+                    " where " + DC.MCI_CALLER_METHOD_HASH + " = ?" +
+                    " and " + DC.MCI_OBJ_ARGS_SEQ + " = ? " +
+                    " and " + DC.MCI_TYPE + " = ? " +
+                    " and " + DC.MCI_THE_VALUE + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryListOneColumn(sql, Integer.class, callerMethodHash, JavaCG2Constants.METHOD_CALL_OBJECT_SEQ,
+                JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType(), String.valueOf(argSeq));
+    }
+
+    /**
      * 根据方法调用ID、被调用对象或参数序号、序号，及类型，查询方法调用信息
      *
      * @param callId
@@ -393,18 +419,60 @@ public class MethodCallInfoHandler extends BaseHandler {
      * @param type
      * @return
      */
-    public List<WriteDbData4MethodCallInfo> queryMethodCallInfoByCallIdType(int callId, int objArgsSeq, String type) {
+    public List<String> queryMethodCallInfoByCallIdType(int callId, int objArgsSeq, String type) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_BY_MC_ID_TYPE;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.MCI_THE_VALUE +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName() +
+                    " where " + DC.MCI_CALL_ID + " = ?" +
+                    " and " + DC.MCI_OBJ_ARGS_SEQ + " = ?" +
+                    " and " + DC.MCI_TYPE + " = ?" +
+                    " order by " + DC.MCI_SEQ;
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryListOneColumn(sql, String.class, callId, objArgsSeq, type);
+    }
+
+    /**
+     * 根据方法调用ID，查询方法调用信息
+     *
+     * @param callId
+     * @return
+     */
+    public List<WriteDbData4MethodCallInfo> queryMethodCallInfoByCallId(int callId) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_BY_MC_ID;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL_INFO) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName() +
                     " where " + DC.MCI_CALL_ID + " = ?" +
-                    " and " + DC.MCI_OBJ_ARGS_SEQ + " = ?" +
-                    " and " + DC.MCI_TYPE + " = ?";
+                    " order by " + DC.MCI_OBJ_ARGS_SEQ + ", " + DC.MCI_SEQ;
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        return dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, callId, objArgsSeq, type);
+        return dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, callId);
+    }
+
+    /**
+     * 根据方法调用ID，查询方法调用信息，Map格式
+     *
+     * @param callId
+     * @return 外层key: 被调用对象或参数序号，0代表被调用对象，从1开始是参数
+     * 内层key: 方法调用信息类型，对应 JavaCG2MethodCallInfoTypeEnum 枚举 type 字段值
+     * value: 对应类型的数据列表
+     */
+    public Map<Integer, Map<String, List<String>>> queryMethodCallInfoMapByCallId(int callId) {
+        Map<Integer, Map<String, List<String>>> map = new HashMap<>();
+        List<WriteDbData4MethodCallInfo> list = queryMethodCallInfoByCallId(callId);
+        if (JavaCG2Util.isCollectionEmpty(list)) {
+            return map;
+        }
+        for (WriteDbData4MethodCallInfo methodCallInfo : list) {
+            Map<String, List<String>> innerMap = map.computeIfAbsent(methodCallInfo.getObjArgsSeq(), k -> new HashMap<>());
+            List<String> valueList = innerMap.computeIfAbsent(methodCallInfo.getType(), k -> new ArrayList<>());
+            valueList.add(methodCallInfo.getTheValue());
+        }
+        return map;
     }
 
     /**
@@ -536,5 +604,62 @@ public class MethodCallInfoHandler extends BaseHandler {
             }
         }
         return dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, argList.toArray());
+    }
+
+    /**
+     * 查询方法调用中被调用对象与参数对应的常量值或来源（包括使用方法调用的返回值，或方法参数）
+     *
+     * @param callId    方法调用ID
+     * @param objArgSeq 被调用对象或参数序号，0代表被调用对象，1开始为参数
+     * @return
+     */
+    public MethodCallObjArgValueAndSource queryMethodCallObjArgValueAndSource(int callId, int objArgSeq) {
+        MethodCallObjArgValueAndSource methodCallObjArgValueAndSource = new MethodCallObjArgValueAndSource();
+        // 查询指定方法调用指定的被调用对象或参数的信息
+        List<WriteDbData4MethodCallInfo> methodCallInfoList = queryMethodCallInfoObjArg(callId, objArgSeq);
+        if (JavaCG2Util.isCollectionEmpty(methodCallInfoList)) {
+            logger.warn("通过方法调用ID未查询到对应的方法调用信息 {}", callId);
+            return methodCallObjArgValueAndSource;
+        }
+
+        Set<String> typeSet = new HashSet<>();
+        // 对应的常量值列表
+        List<String> constantValueList = new ArrayList<>();
+        // 对应的使用方法调用的返回值的方法调用ID列表
+        List<Integer> useMethodCallReturnCallIdList = new ArrayList<>();
+        // 对应的使用方法参数序号列表
+        List<Integer> useMethodArgSeqList = new ArrayList<>();
+        methodCallObjArgValueAndSource.setConstantValueList(constantValueList);
+        methodCallObjArgValueAndSource.setUseMethodCallReturnCallIdList(useMethodCallReturnCallIdList);
+        methodCallObjArgValueAndSource.setUseMethodArgSeqList(useMethodArgSeqList);
+
+        for (WriteDbData4MethodCallInfo methodCallInfo : methodCallInfoList) {
+            if (JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE.getType().equals(methodCallInfo.getType())) {
+                typeSet.add(methodCallInfo.getType());
+                constantValueList.add(methodCallInfo.getTheValue());
+                methodCallObjArgValueAndSource.setMethodCallInfoTypeEnum(JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE);
+            } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType().equals(methodCallInfo.getType())) {
+                typeSet.add(methodCallInfo.getType());
+                useMethodCallReturnCallIdList.add(Integer.valueOf(methodCallInfo.getTheValue()));
+                methodCallObjArgValueAndSource.setMethodCallInfoTypeEnum(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID);
+            } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType().equals(methodCallInfo.getType())) {
+                typeSet.add(methodCallInfo.getType());
+                useMethodArgSeqList.add(Integer.valueOf(methodCallInfo.getTheValue()));
+                methodCallObjArgValueAndSource.setMethodCallInfoTypeEnum(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ);
+            }
+        }
+        if (typeSet.size() > 1) {
+            methodCallObjArgValueAndSource.setContainsMultiType(true);
+            methodCallObjArgValueAndSource.setMethodCallInfoTypeEnum(null);
+            return methodCallObjArgValueAndSource;
+        }
+        if (!constantValueList.isEmpty()) {
+            methodCallObjArgValueAndSource.setOneTypeDataNum(constantValueList.size());
+        } else if (!useMethodCallReturnCallIdList.isEmpty()) {
+            methodCallObjArgValueAndSource.setOneTypeDataNum(useMethodCallReturnCallIdList.size());
+        } else if (!useMethodArgSeqList.isEmpty()) {
+            methodCallObjArgValueAndSource.setOneTypeDataNum(useMethodArgSeqList.size());
+        }
+        return methodCallObjArgValueAndSource;
     }
 }

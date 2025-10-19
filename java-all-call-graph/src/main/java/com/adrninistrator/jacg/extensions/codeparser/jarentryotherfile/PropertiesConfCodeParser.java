@@ -58,7 +58,7 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
                 writeData2File(jarEntryPath, useBase64.getStrValue(), key, value);
             }
         } catch (Exception e) {
-            logger.error("error ", e);
+            logger.warn("error ", e);
         }
         // 某些.properties文件会处理失败，都返回处理成功
         return true;

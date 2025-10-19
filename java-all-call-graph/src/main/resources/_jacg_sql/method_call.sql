@@ -17,12 +17,13 @@ CREATE TABLE if not exists jacg_method_call_{appName} (
   raw_return_type varchar(255) NOT NULL COMMENT '被调用方法原始的返回类型',
   actual_return_type varchar(255) NOT NULL COMMENT '被调用方法实际的返回类型',
   call_flags int NOT NULL COMMENT '方法调用标志',
-  caller_jar_num int DEFAULT NULL COMMENT '调用方法Jar包序号',
-  callee_jar_num int DEFAULT NULL COMMENT '被调用方法Jar包序号',
+  caller_jar_num int DEFAULT NULL COMMENT '调用方法jar文件序号',
+  callee_jar_num int DEFAULT NULL COMMENT '被调用方法jar文件序号',
   description varchar(255) NOT NULL COMMENT '描述信息，默认为空',
   PRIMARY KEY (call_id),
   INDEX idx_mc_rmh_{appName}(caller_method_hash),
   INDEX idx_mc_hash_{appName}(callee_method_hash, caller_method_hash),
   INDEX idx_mc_rscn_{appName}(caller_simple_class_name),
+  -- 需要使用的单列索引
   INDEX idx_mc_escn_{appName}(callee_simple_class_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用关系表';

@@ -95,7 +95,7 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
                 "返回类型分类，J:JDK中的类型，C:自定义类型",
                 "返回类型是否存在泛型类型，1:是，0:否",
                 "方法指令的HASH值（MD5），可能为空字符串",
-                "方法所在的Jar包序号"
+                "方法所在的jar文件序号"
         };
     }
 

@@ -133,7 +133,7 @@ public abstract class AbstractSpringTxExtractor extends CallerGraphBaseExtractor
         try (LambdaMethodHandlerByClassMethodName lambdaMethodHandlerByClassMethodName = new LambdaMethodHandlerByClassMethodName(configureWrapper)) {
             // 查询通过Lambda表达式使用TransactionTemplate的情况
             List<LambdaMethodCall> lambdaMethodCallList = lambdaMethodHandlerByClassMethodName.queryDetailByLambdaCallee(
-                    JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK, JavaCG2CommonNameConstants.METHOD_DO_IN_TRANSACTION);
+                    JavaCG2CommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK, JavaCG2CommonNameConstants.METHOD_NAME_DO_IN_TRANSACTION);
             if (!JavaCG2Util.isCollectionEmpty(lambdaMethodCallList)) {
                 List<String> lambdaEntryMethodList = new ArrayList<>(lambdaMethodCallList.size());
 

@@ -13,7 +13,7 @@ import test.diffjar.service.TestService1;
  */
 public class TestTask1 {
 
-    private static final Logger logger = LoggerFactory.getLogger(test.diffjar.task.TestTask1.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestTask1.class);
 
     @Autowired
     private TestService1 testService1;

@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * @author adrninistrator
  * @date 2024/3/16
- * @description: 数据库相关配置信息
+ * @description: 数据库相关配置参数
  */
 
 public class DbConfInfo {
@@ -18,10 +18,14 @@ public class DbConfInfo {
     private String password;
     private String appName;
     private String tableSuffix;
+    private boolean slowQuerySwitch;
+    private int slowQueryTime;
+    private int slowQueryRowNum;
     private int maxActive;
     private int dbInsertBatchSize;
+    private boolean h2DbReadOnly = false;
 
-    // equals不比较 maxActive、dbInsertBatchSize
+    // equals不比较 slowQuerySwitch、slowQueryTime、slowQueryRowNum、maxActive、dbInsertBatchSize
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -36,6 +40,14 @@ public class DbConfInfo {
                 && Objects.equals(tableSuffix, that.tableSuffix);
     }
 
+    // 获取用于显示的数据库信息
+    public String getShowDbInfo() {
+        if (useH2Db) {
+            return dbH2FilePath;
+        }
+        return dbUrl + " " + username;
+    }
+
     @Override
     public String toString() {
         return "DbConfInfo{" +
@@ -48,6 +60,7 @@ public class DbConfInfo {
                 ", tableSuffix='" + tableSuffix + '\'' +
                 ", maxActive=" + maxActive +
                 ", dbInsertBatchSize=" + dbInsertBatchSize +
+                ", h2DbReadOnly=" + h2DbReadOnly +
                 '}';
     }
 
@@ -115,6 +128,30 @@ public class DbConfInfo {
         this.tableSuffix = tableSuffix;
     }
 
+    public boolean isSlowQuerySwitch() {
+        return slowQuerySwitch;
+    }
+
+    public void setSlowQuerySwitch(boolean slowQuerySwitch) {
+        this.slowQuerySwitch = slowQuerySwitch;
+    }
+
+    public int getSlowQueryTime() {
+        return slowQueryTime;
+    }
+
+    public void setSlowQueryTime(int slowQueryTime) {
+        this.slowQueryTime = slowQueryTime;
+    }
+
+    public int getSlowQueryRowNum() {
+        return slowQueryRowNum;
+    }
+
+    public void setSlowQueryRowNum(int slowQueryRowNum) {
+        this.slowQueryRowNum = slowQueryRowNum;
+    }
+
     public int getMaxActive() {
         return maxActive;
     }
@@ -129,5 +166,13 @@ public class DbConfInfo {
 
     public void setDbInsertBatchSize(int dbInsertBatchSize) {
         this.dbInsertBatchSize = dbInsertBatchSize;
+    }
+
+    public boolean isH2DbReadOnly() {
+        return h2DbReadOnly;
+    }
+
+    public void setH2DbReadOnly(boolean h2DbReadOnly) {
+        this.h2DbReadOnly = h2DbReadOnly;
     }
 }

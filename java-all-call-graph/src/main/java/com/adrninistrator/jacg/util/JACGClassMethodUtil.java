@@ -5,11 +5,14 @@ import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
+import com.adrninistrator.javacg2.dto.accessflag.JavaCG2AccessFlags;
 import com.adrninistrator.javacg2.exceptions.JavaCG2Error;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
@@ -490,6 +493,73 @@ public class JACGClassMethodUtil {
      */
     public static String genJavaFullMethod(String className, Method method) {
         return JavaCG2ClassMethodUtil.formatFullMethod(className, method.getName(), method.getParameterTypes());
+    }
+
+    /**
+     * 根据方法信息生成用于检查Jar兼容性的字符串
+     *
+     * @param methodInfo
+     * @return
+     */
+    public static String genMethodCompatibilityStr(WriteDbData4MethodInfo methodInfo) {
+        StringBuilder stringBuilder = new StringBuilder();
+        JavaCG2AccessFlags javaCG2AccessFlags = new JavaCG2AccessFlags(methodInfo.getAccessFlags());
+        stringBuilder.append(JavaCG2ByteCodeUtil.getModifiersString(methodInfo.getAccessFlags())).append(JavaCG2Constants.FLAG_COLON)
+                .append(javaCG2AccessFlags.isStatic()).append(JavaCG2Constants.FLAG_COLON)
+                .append(methodInfo.getReturnType()).append(JavaCG2Constants.FLAG_COLON)
+                .append(methodInfo.getFullMethod());
+        return stringBuilder.toString();
+    }
+
+    /**
+     * 根据字段信息生成用于检查Jar兼容性的字符串
+     *
+     * @param fieldInfo
+     * @return
+     */
+    public static String genFieldCompatibilityStr(WriteDbData4FieldInfo fieldInfo) {
+        return fieldInfo.getModifiers() + JavaCG2Constants.FLAG_COLON +
+                fieldInfo.getStaticFlag() + JavaCG2Constants.FLAG_COLON +
+                fieldInfo.getClassName() + JavaCG2Constants.FLAG_COLON +
+                fieldInfo.getFieldType() + JavaCG2Constants.FLAG_COLON +
+                fieldInfo.getFieldName();
+    }
+
+    /**
+     * 检查是否为合法的类名
+     *
+     * @param className
+     * @return
+     */
+    public static boolean checkValidClassName(String className) {
+        if (StringUtils.isBlank(className)) {
+            return false;
+        }
+
+        if (className.contains("..")) {
+            logger.error("类名不允许出现连续的{} {}", JavaCG2Constants.FLAG_DOT, className);
+            return false;
+        }
+
+        String newClassName = StringUtils.replace(className, ".", "");
+        // 检查是否包含非法字符
+        for (int i = 0; i < newClassName.length(); i++) {
+            char c = newClassName.charAt(i);
+            if (i == 0) {
+                // 首字符必须是字母、下划线或美元符号
+                if (!Character.isJavaIdentifierStart(c)) {
+                    logger.error("类名非法首字符 {} [{}]", className, c);
+                    return false;
+                }
+            } else {
+                // 后续字符可以是字母、数字、下划线或美元符号
+                if (!Character.isJavaIdentifierPart(c)) {
+                    logger.error("类名非法字符 {} [{}]", className, c);
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private JACGClassMethodUtil() {

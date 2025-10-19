@@ -69,7 +69,7 @@ public abstract class BaseExtractor {
         }
         List<String> callStackFilePathList = callStackFileResult.getStackFilePathList();
 
-        // 执行完毕时打印当前使用的配置信息
+        // 执行完毕时打印当前使用的配置参数
         configureWrapper.printUsedConfigInfo(currentSimpleClassName, findCallStackTrace.getCallGraphOutputDirPath(), JACGConstants.FILE_JACG_USED_CONFIG_MD);
         return new ListWithResult<>(callStackFilePathList);
     }

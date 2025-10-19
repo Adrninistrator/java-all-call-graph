@@ -1,5 +1,6 @@
 package test.runbycode.handler.methodcall.handler;
 
+import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
@@ -37,8 +38,8 @@ public class StringAppendCharMethodCallByEEDetailHandler extends BaseMethodCallB
     @Override
     protected boolean chooseHandleMethod(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
                                          MethodDetailNoReturnType calleeMethodDetailNoReturnType) {
-        if (StringBuilder.class.getName().equals(calleeMethodDetailNoReturnType.getClassName())
-                && "append".equals(calleeMethodDetailNoReturnType.getMethodName())
+        if (JACGCommonNameConstants.CLASS_NAME_STRING_BUILDER.equals(calleeMethodDetailNoReturnType.getClassName())
+                && JACGCommonNameConstants.METHOD_NAME_APPEND.equals(calleeMethodDetailNoReturnType.getMethodName())
                 && !JavaCG2ConstantTypeEnum.CONSTTE_CHAR.getType().equals(calleeMethodDetailNoReturnType.getArgTypeStr())) {
             return false;
         }
@@ -53,7 +54,7 @@ public class StringAppendCharMethodCallByEEDetailHandler extends BaseMethodCallB
                 String.class.getName(),
                 CharSequence.class.getName(),
                 JavaCG2ConstantTypeEnum.CONSTTE_CHAR.getType(),
-                StringBuilder.class.getName()
+                JACGCommonNameConstants.CLASS_NAME_STRING_BUILDER
         );
 
         // 获取类型匹配的被调用对象及参数的用于人工查看的方法调用中使用的相关信息
@@ -66,8 +67,8 @@ public class StringAppendCharMethodCallByEEDetailHandler extends BaseMethodCallB
             for (Integer seq : seqList) {
                 List<MethodCallInfo4Read> methodCallInfo4ReadList = methodCallInfo4ReadMap.get(seq);
                 for (MethodCallInfo4Read methodCallInfo4Read : methodCallInfo4ReadList) {
-                    logger.info("###\n{} {} {}\n{} {} {}", methodCall.getCallerFullMethod(), methodCall.getCalleeFullMethod(), methodCall.getCallerLineNumber(),
-                            JACGMethodCallInfoUtil.genObjArgDesc(seq), methodCallInfo4Read.getMethodCallInfoTypeEnum().getDesc(), methodCallInfo4Read.getInfo());
+                    logger.info("### {} {} {} {}", methodCall.genPrintInfo(), JACGMethodCallInfoUtil.genObjArgDesc(seq),
+                            methodCallInfo4Read.getMethodCallInfoTypeEnum().getDesc(), methodCallInfo4Read.getInfo());
                 }
             }
         }

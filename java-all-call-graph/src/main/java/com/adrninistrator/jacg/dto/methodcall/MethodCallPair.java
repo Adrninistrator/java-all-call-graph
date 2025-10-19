@@ -6,7 +6,7 @@ package com.adrninistrator.jacg.dto.methodcall;
  * @description: 包含调用方与被调用方的方法调用信息
  */
 public class MethodCallPair {
-    // 调用方方法名称+类型
+    // 调用方方法名+类型
     protected final String callerMethodAndArgs;
 
     // 调用方方法返回类型

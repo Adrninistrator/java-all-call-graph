@@ -11,6 +11,7 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.spring.context.SpringContextManager;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.texttoexcel.entry.TextToExcelEntry;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,13 +33,15 @@ public abstract class BaseHandler implements Closeable {
 
     public static final String SQL_KEY_QUERY_END_ID_BY_PAGE = "@queryEndIdByPage@";
 
-    protected final boolean useH2Db;
-
     protected DbOperator dbOperator;
 
     protected DbOperWrapper dbOperWrapper;
 
     protected ConfigureWrapper configureWrapper;
+
+    protected String appName;
+
+    protected ApplicationContext applicationContext;
 
     /*
         数据库表名后缀
@@ -49,9 +52,7 @@ public abstract class BaseHandler implements Closeable {
     // 记录是否需要关闭数据库操作对象
     private boolean needCloseDb = false;
 
-    protected String appName;
-
-    protected ApplicationContext applicationContext;
+    private Integer excelWidthPx;
 
     /**
      * 调用该构造函数时，[会]创建新的数据源，结束前[需要]手动关闭数据库操作对象
@@ -82,7 +83,6 @@ public abstract class BaseHandler implements Closeable {
             dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, true, this);
             // 获取appName不能使用 dbOperWrapper.getDbOperator().getAppName(); 因为 dbOperWrapper.getDbOperator() 为null
             appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
-            useH2Db = false;
             return;
         }
 
@@ -97,11 +97,11 @@ public abstract class BaseHandler implements Closeable {
 
         this.tableSuffix = tableSuffix;
         // 完成需要使用的基础配置的初始化
-        dbOperWrapper = DbInitializer.genDbOperWrapper(usedConfigureWrapper, false, this);
-        dbOperator = dbOperWrapper.getDbOperator();
-        appName = dbOperator.getAppName();
+        dbOperWrapper = DbInitializer.genDbOperWrapper(usedConfigureWrapper, false, useReadOnlyMode(), this);
         this.configureWrapper = usedConfigureWrapper;
-        useH2Db = dbOperator.isUseH2Db();
+
+        commonInit();
+
         logger.warn("调用该构造函数时，结束前[需要]手动关闭数据库操作对象");
         needCloseDb = true;
     }
@@ -118,14 +118,45 @@ public abstract class BaseHandler implements Closeable {
             throw new JavaCG2RuntimeException("参数不允许为空");
         }
 
-        this.dbOperator = dbOperWrapper.getDbOperator();
-        appName = dbOperator.getAppName();
         this.dbOperWrapper = dbOperWrapper;
         this.configureWrapper = dbOperWrapper.getConfigureWrapper();
-        useH2Db = dbOperator.isUseH2Db();
+
+        commonInit();
     }
 
+    /**
+     * 是否需要生成excel文件
+     *
+     * @return
+     */
+    protected boolean needGenerateExcel() {
+        return false;
+    }
+
+    private void commonInit() {
+        this.dbOperator = dbOperWrapper.getDbOperator();
+        appName = dbOperator.getAppName();
+
+        if (needGenerateExcel()) {
+            excelWidthPx = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_TEXT_TO_EXCEL_WIDTH_PX);
+        }
+    }
+
+    /**
+     * 是否使用neo4j，默认不使用
+     *
+     * @return
+     */
     protected boolean useNeo4j() {
+        return false;
+    }
+
+    /**
+     * 使用H2数据库时是否使用只读模式，默认否
+     *
+     * @return
+     */
+    protected boolean useReadOnlyMode() {
         return false;
     }
 
@@ -138,7 +169,7 @@ public abstract class BaseHandler implements Closeable {
      * @return
      */
     protected int queryEndIdByPage(int startRecordId, DbTableInfoEnum dbTableInfoEnum, String idColumnName) {
-        logger.debug("从数据库表分页查询当前处理的结束ID {} {} {}", dbTableInfoEnum.getTableName(), idColumnName, startRecordId);
+        logger.debug("从数据库表分页查询当前处理的结束ID {} {} {}", dbTableInfoEnum.getTableNameKeyword(), idColumnName, startRecordId);
         String sqlKey = dbTableInfoEnum.getTableNameKeyword() + SQL_KEY_QUERY_END_ID_BY_PAGE + idColumnName;
         String sql = dbOperWrapper.getCachedSql(sqlKey);
         if (sql == null) {
@@ -210,7 +241,7 @@ public abstract class BaseHandler implements Closeable {
             throw new JavaCG2RuntimeException("用于查询的字段名称数组与用于查询的字段对应的值数组数量不同");
         }
         String combinedColumnName = StringUtils.join(queryColumnNames, ",");
-        logger.debug("从数据库表分页查询当前处理的结束ID，多字段 {} {} {} {}", dbTableInfoEnum.getTableName(), idColumnName, startRecordId, combinedColumnName);
+        logger.debug("从数据库表分页查询当前处理的结束ID，多字段 {} {} {} {}", dbTableInfoEnum.getTableNameKeyword(), idColumnName, startRecordId, combinedColumnName);
         String sqlKey = dbTableInfoEnum.getTableNameKeyword() + SQL_KEY_QUERY_END_ID_BY_PAGE + idColumnName + JACGConstants.FLAG_AT + combinedColumnName;
         String sql = dbOperWrapper.getCachedSql(sqlKey);
         if (sql == null) {
@@ -257,12 +288,29 @@ public abstract class BaseHandler implements Closeable {
         return queryEndIdOneColumn(startCallId, DbTableInfoEnum.DTIE_METHOD_CALL, DC.MC_CALL_ID, DC.MC_CALLER_METHOD_HASH, callerMethodHash);
     }
 
+    /**
+     * 根据文本文件生成Excel文件
+     *
+     * @param textFilePath
+     * @return
+     */
+    public boolean textFileToExcel(String textFilePath) {
+        if (excelWidthPx == null) {
+            throw new JavaCG2RuntimeException("当前类初始化时未获取生成excel文件宽度像素参数 " + this.getClass().getSimpleName());
+        }
+        return new TextToExcelEntry(textFilePath, excelWidthPx, true).convertTextToExcel();
+    }
+
     @Override
     public void close() {
         if (needCloseDb && dbOperator != null) {
             // 关闭数据源
             dbOperator.closeDs(this);
         }
+    }
+
+    public DbOperWrapper getDbOperWrapper() {
+        return dbOperWrapper;
     }
 
     public String getTableSuffix() {

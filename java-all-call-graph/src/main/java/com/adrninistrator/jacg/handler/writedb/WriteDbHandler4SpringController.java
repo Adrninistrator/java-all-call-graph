@@ -16,7 +16,7 @@ import com.adrninistrator.jacg.handler.methodcall.MethodCallInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
-import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
     private MethodArgReturnHandler methodArgReturnHandler;
     private MethodCallInfoHandler methodCallInfoHandler;
 
-    // 使用 java-callgraph2 组件处理方法调用时是否解析被调用对象和参数可能的类型与值
+    // 使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
     private boolean javaCG2ParseMethodCallTypeValue = false;
 
     public WriteDbHandler4SpringController(WriteDbResult writeDbResult) {
@@ -55,7 +55,7 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
         methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
         methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
         methodCallInfoHandler = new MethodCallInfoHandler(dbOperWrapper);
-        // 判断使用 java-callgraph2 组件处理方法调用时是否解析被调用对象和参数可能的类型与值
+        // 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
         try (ConfigHandler configHandler = new ConfigHandler(dbOperWrapper)) {
             if (configHandler.checkParseMethodCallTypeValue()) {
                 javaCG2ParseMethodCallTypeValue = true;
@@ -131,12 +131,12 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
         List<String> argTypeList = methodDetailNoReturnType.getArgTypeList();
         for (int argSeq = 0; argSeq < argTypeList.size(); argSeq++) {
             String argType = argTypeList.get(argSeq);
-            String argTypeStr = JavaCG2ByteCodeUtil.removeAllArrayFlag(argType);
+            String argTypeStr = JavaCG2ClassMethodUtil.removeAllArrayFlag(argType);
             // 判断当前方法参数是否为 MultipartFile
             if (!StringUtils.equalsAny(argTypeStr, JACGCommonNameConstants.SPRING_MULTI_PART_FILE_CLASS, JACGCommonNameConstants.SPRING_COMMONS_MULTI_PART_FILE_CLASS)) {
                 continue;
             }
-            // 判断使用 java-callgraph2 组件处理方法调用时是否解析被调用对象和参数可能的类型与值
+            // 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
             if (!javaCG2ParseMethodCallTypeValue) {
                 return JavaCG2YesNoEnum.NOT_SURE;
             }
@@ -161,12 +161,12 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
         List<String> argTypeList = methodDetailNoReturnType.getArgTypeList();
         for (int argSeq = 0; argSeq < argTypeList.size(); argSeq++) {
             String argType = argTypeList.get(argSeq);
-            String argTypeStr = JavaCG2ByteCodeUtil.removeAllArrayFlag(argType);
+            String argTypeStr = JavaCG2ClassMethodUtil.removeAllArrayFlag(argType);
             // 判断当前方法参数是否为 HttpServletResponse
             if (!StringUtils.equals(argTypeStr, JACGCommonNameConstants.JAVAX_HTTP_SERVLET_RESPONSE)) {
                 continue;
             }
-            // 判断使用 java-callgraph2 组件处理方法调用时是否解析被调用对象和参数可能的类型与值
+            // 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
             if (!javaCG2ParseMethodCallTypeValue) {
                 return JavaCG2YesNoEnum.NOT_SURE;
             }

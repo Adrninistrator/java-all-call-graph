@@ -6,6 +6,7 @@ import test.callgraph.fieldrelationships.frc.FRCDtoB;
 import test.callgraph.fieldrelationships.frd.FRDClass1;
 import test.callgraph.methodcall.TestMCCallee;
 import test.callgraph.reflection1.util.TestReflectionUtil1;
+import test.callgraph.reflection1.util.TestReflectionUtilWrapper1;
 import test.callgraph.spring.bean.define.SpringInterfaceC;
 
 import javax.annotation.Resource;
@@ -62,6 +63,11 @@ public class TestRunByReflection1 {
 
     public String test3Arg(FRCDtoA frcDtoA) {
         TestReflectionUtil1.runByReflection(frcDtoA, "testStrFRCDtoA", "test3Arg");
+        return Thread.currentThread().getName();
+    }
+
+    public String test3ArgWrapper(FRCDtoA frcDtoA) {
+        TestReflectionUtilWrapper1.runByReflection(frcDtoA, "testStrFRCDtoA", "test3Arg");
         return Thread.currentThread().getName();
     }
 }

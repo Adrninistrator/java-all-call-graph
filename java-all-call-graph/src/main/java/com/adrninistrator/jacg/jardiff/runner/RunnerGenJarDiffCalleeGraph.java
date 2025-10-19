@@ -14,8 +14,6 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.jacg.handler.calleemethodinfo.AbstractCalleeMethodInfoFiller;
 import com.adrninistrator.jacg.handler.entrymethodinfo.AbstractEntryMethodInfoFiller;
-import com.adrninistrator.jacg.jardiff.dto.method.ModifiedMethodInfo;
-import com.adrninistrator.jacg.jardiff.filter.ModifiedMethodFilterInterface;
 import com.adrninistrator.jacg.util.JACGCallStackUtil;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
@@ -63,29 +61,28 @@ public class RunnerGenJarDiffCalleeGraph extends AbstractRunnerGenJarDiffCallGra
     // 对被调用方法信息进行填充的类
     private final AbstractCalleeMethodInfoFiller[] calleeMethodInfoFillers;
 
-    public RunnerGenJarDiffCalleeGraph(AbstractCalleeMethodInfoFiller[] calleeMethodInfoFillers, AbstractEntryMethodInfoFiller[] entryMethodInfoFillers,
-                                       ModifiedMethodFilterInterface... modifiedMethodFilters) {
-        this(new JavaCG2ConfigureWrapper(false), new ConfigureWrapper(false), calleeMethodInfoFillers, entryMethodInfoFillers, modifiedMethodFilters);
+    public RunnerGenJarDiffCalleeGraph() {
+        this(new JavaCG2ConfigureWrapper(false), new ConfigureWrapper(false), null, null);
     }
 
     public RunnerGenJarDiffCalleeGraph(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper,
-                                       AbstractCalleeMethodInfoFiller[] calleeMethodInfoFillers, AbstractEntryMethodInfoFiller[] entryMethodInfoFillers,
-                                       ModifiedMethodFilterInterface... modifiedMethodFilters) {
-        super(javaCG2ConfigureWrapper, configureWrapper, modifiedMethodFilters);
+                                       AbstractCalleeMethodInfoFiller[] calleeMethodInfoFillers, AbstractEntryMethodInfoFiller[] entryMethodInfoFillers) {
+        super(javaCG2ConfigureWrapper, configureWrapper);
         this.calleeMethodInfoFillers = calleeMethodInfoFillers;
         this.entryMethodInfoFillers = entryMethodInfoFillers;
     }
 
     // 处理发生变化的jar文件与方法
     @Override
-    protected boolean handleModifiedJarAndMethods(ConfigureWrapper configureWrapperNew, Map<String, WriteDbData4JarInfo> modifiedJarMap,
-                                                  Map<String, List<ModifiedMethodInfo>> jarModifiedMethodInfoMap, Map<String, String> modifiedClassJarMap,
-                                                  Set<String> modifiedMethodSet, List<String> jarFileNameListNew) {
+    protected boolean handleModifiedJarAndMethods(ConfigureWrapper configureWrapperNew, Map<String, WriteDbData4JarInfo> modifiedJarMap, Map<String, String> modifiedClassJarMap,
+                                                  Set<String> modifiedMethodSet, List<String> jarFileNameListNew, String genAllCallGraphDir) {
         configureWrapperNew.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_0.getDetail());
         configureWrapperNew.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_STACK_OTHER_FORMS, Boolean.TRUE.toString());
         configureWrapperNew.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, modifiedMethodSet);
         configureWrapperNew.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, JACGConstants.CALLEE_FLAG_ENTRY);
         FindCallStackTrace findCallStackTrace = new FindCallStackTrace(true, configureWrapperNew);
+        // 设置生成完整方法调用链目录
+        findCallStackTrace.setCurrentOutputDirPath(genAllCallGraphDir);
         // 生成发生变化的方法到入口方法的调用堆栈文件
         CallStackFileResult callStackFileResult = findCallStackTrace.find();
         if (!callStackFileResult.isSuccess()) {
@@ -97,28 +94,23 @@ public class RunnerGenJarDiffCalleeGraph extends AbstractRunnerGenJarDiffCallGra
             logger.warn("生成发生变化的方法到入口方法的其他形式的调用堆栈文件为空");
             return true;
         }
-        // 在本次生成目录的根目录创建目录，作为输出以下文件的目录
-        String jarDiffDirPath = callStackFileResult.getCallGraphOutputDirPath() + File.separator + JACGConstants.DIR_CALLEE_JAR_DIFF_SUMMARY;
-        if (!JavaCG2FileUtil.isDirectoryExists(jarDiffDirPath)) {
-            return false;
-        }
-        // 生成jar文件中发生变化的方法基本信息
-        if (!writeModifiedMethodsBaseFile(jarDiffDirPath, jarFileNameListNew, modifiedJarMap, jarModifiedMethodInfoMap)) {
+        // 生成jar文件中发生变化的方法基本信息，当前的输出目录作为输出以下文件的目录
+        if (!writeModifiedMethodsBaseFile(currentOutputDirPath, jarFileNameListNew, modifiedJarMap)) {
             return false;
         }
 
-        String modifiedMethodsStackFilePath = jarDiffDirPath + File.separator + JACGConstants.FILE_JAR_DIFF_MODIFIED_METHODS_STACK;
+        String modifiedMethodsStackFilePath = currentOutputDirPath + File.separator + JACGConstants.FILE_JAR_DIFF_MODIFIED_METHODS_STACK;
         try (WriterSupportHeader modifiedMethodsStackWriter = new WriterSupportHeader(modifiedMethodsStackFilePath, FILE_HEADER_MODIFIED_METHODS_STACK)) {
             // 生成jar文件中发生变化的方法的调用堆栈信息
             for (String otherFormsStackDirPath : otherFormsStackDirPathList) {
                 // 处理其他形式的调用堆栈文件目录
                 handleOtherFormsStackDir(modifiedMethodsStackWriter, otherFormsStackDirPath, modifiedClassJarMap);
             }
-            return true;
         } catch (Exception e) {
             logger.error("error ", e);
             return false;
         }
+        return textFileToExcel(modifiedMethodsStackFilePath);
     }
 
     @Override

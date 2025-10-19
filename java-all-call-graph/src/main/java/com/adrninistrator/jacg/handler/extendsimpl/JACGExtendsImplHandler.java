@@ -532,7 +532,7 @@ public class JACGExtendsImplHandler extends BaseHandler {
      * 从指定的类开始向上查询所有对应的超类与实现的接口
      *
      * @param startClassName 指定的类名
-     * @return key 子类类名 value 当前类/接口的类型，及父类与实现接口的信息
+     * @return
      */
     public List<ClassNameAndType> queryAllSuperClassesAndInterfaces(String startClassName) {
         List<ClassNameAndType> superClassAndInterfaceList = new ArrayList<>();
@@ -542,6 +542,26 @@ public class JACGExtendsImplHandler extends BaseHandler {
             for (ClassNameAndType superClassOrInterface : extendsImplInfo.getExtendsImplClassInfoList()) {
                 if (!superClassAndInterfaceList.contains(superClassOrInterface)) {
                     superClassAndInterfaceList.add(superClassOrInterface);
+                }
+            }
+        }
+        return superClassAndInterfaceList;
+    }
+
+    /**
+     * 从指定的类开始向上查询所有对应的超类与实现的接口，仅获取类名
+     *
+     * @param startClassName 指定的类名
+     * @return
+     */
+    public List<String> queryAllSuperClassesAndInterfacesName(String startClassName) {
+        List<String> superClassAndInterfaceList = new ArrayList<>();
+        LinkedHashMap<String, ExtendsImplInfo> resultMap = queryAllExtendsImplInfoUpDownward(startClassName, null, true);
+        for (Map.Entry<String, ExtendsImplInfo> entry : resultMap.entrySet()) {
+            ExtendsImplInfo extendsImplInfo = entry.getValue();
+            for (ClassNameAndType superClassOrInterface : extendsImplInfo.getExtendsImplClassInfoList()) {
+                if (!superClassAndInterfaceList.contains(superClassOrInterface.getClassName())) {
+                    superClassAndInterfaceList.add(superClassOrInterface.getClassName());
                 }
             }
         }

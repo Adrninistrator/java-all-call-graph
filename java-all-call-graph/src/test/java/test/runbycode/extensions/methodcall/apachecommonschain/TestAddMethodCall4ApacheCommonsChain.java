@@ -6,11 +6,11 @@ import com.adrninistrator.jacg.extensions.methodcall.JACGApacheCommonsChainMetho
 import com.adrninistrator.jacg.extensions.methodcall.JavaCG2ApacheCommonsChainMethodCallExtension;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
-import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
 import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
-import com.adrninistrator.javacg2.el.enums.JavaCG2ElAllowedVariableEnum;
+import com.adrninistrator.javacg2.el.enums.CommonElAllowedVariableEnum;
 import com.adrninistrator.javacg2.el.enums.JavaCG2ElConfigEnum;
+import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import org.apache.commons.chain.Command;
 import org.apache.commons.chain.impl.ChainBase;
 import org.junit.Assert;
@@ -37,15 +37,15 @@ public class TestAddMethodCall4ApacheCommonsChain extends TestRunByCodeBase {
 
     @Test
     public void $test0RunnerWriteDbAddLib() {
-        String apacheCommonsChainJarPath = JACGFileUtil.getJarFilePathOfClass(ChainBase.class);
+        String apacheCommonsChainJarPath = JavaCG2FileUtil.getJarFilePathOfClass(ChainBase.class);
         logger.info("apacheCommonsChain jar文件路径 {}", apacheCommonsChainJarPath);
 
         javaCG2ConfigureWrapper.addOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, apacheCommonsChainJarPath);
         // 由于解析了commons-chain-xx.jar，因此需要忽略 org.apache.commons.chain.Command:execute() 方法调用实现类方法的调用
-        javaCG2ConfigureWrapper.setElConfigText(JavaCG2ElConfigEnum.ECE_PARSE_IGNORE_METHOD_CALL_ER,
-                JavaCG2ElAllowedVariableEnum.EAVE_METHOD_CALL_TYPE.getVariableName() + "=='" + JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS.getType() + "'" +
-                        " && " + JavaCG2ElAllowedVariableEnum.EAVE_MC_ER_CLASS_NAME.getVariableName() + "=='" + Command.class.getName() + "'" +
-                        " && " + JavaCG2ElAllowedVariableEnum.EAVE_MC_ER_METHOD_NAME.getVariableName() + "=='execute'");
+        javaCG2ConfigureWrapper.setElConfigText(JavaCG2ElConfigEnum.ECE_PARSE_IGNORE_METHOD_CALL,
+                CommonElAllowedVariableEnum.EAVE_METHOD_CALL_TYPE.getVariableName() + "=='" + JavaCG2CallTypeEnum.CTE_INTERFACE_CALL_IMPL_CLASS.getType() + "'" +
+                        " && " + CommonElAllowedVariableEnum.EAVE_MC_ER_CLASS_NAME.getVariableName() + "=='" + Command.class.getName() + "'" +
+                        " && " + CommonElAllowedVariableEnum.EAVE_MC_ER_METHOD_NAME.getVariableName() + "=='execute'");
         testWriteDb();
     }
 

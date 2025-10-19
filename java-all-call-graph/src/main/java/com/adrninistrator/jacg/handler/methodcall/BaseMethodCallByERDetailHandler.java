@@ -49,8 +49,8 @@ public abstract class BaseMethodCallByERDetailHandler extends BaseHandler implem
      * 处理方法调用及对应的调用对象与参数信息
      *
      * @param methodCall                     方法调用
-     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名称、方法参数等
-     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名称、方法参数等
+     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名、方法参数等
+     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名、方法参数等
      * @param objArgsInfoInMethodCall        方法调用中被调用对象与参数使用的信息
      */
     protected abstract void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,

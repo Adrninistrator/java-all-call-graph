@@ -29,7 +29,6 @@ public class ShowAllMethodCallByERDetailHandler extends BaseMethodCallByERDetail
     @Override
     protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
                                         MethodDetailNoReturnType calleeMethodDetailNoReturnType, ObjArgsInfoInMethodCall objArgsInfoInMethodCall) {
-        logger.info("###\n{} {} {} {}\n{}", methodCall.getCallId(), methodCall.getCallerFullMethod(), methodCall.getCalleeFullMethod(), methodCall.getCallerLineNumber(),
-                JACGJsonUtil.getJsonStr(objArgsInfoInMethodCall));
+        logger.info("### {} {}", methodCall.genPrintInfo(), JACGJsonUtil.getJsonStr(objArgsInfoInMethodCall));
     }
 }

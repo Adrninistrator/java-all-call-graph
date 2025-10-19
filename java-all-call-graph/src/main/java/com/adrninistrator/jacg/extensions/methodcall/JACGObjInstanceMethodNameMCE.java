@@ -17,7 +17,7 @@ import java.util.List;
  * @author adrninistrator
  * @date 2025/2/16
  * @description: java-all-call-graph 组件方法调用处理扩展类
- * 通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名称
+ * 通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名
  */
 public abstract class JACGObjInstanceMethodNameMCE extends AbstractJACGMethodCallExtension {
 
@@ -51,12 +51,12 @@ public abstract class JACGObjInstanceMethodNameMCE extends AbstractJACGMethodCal
             logger.warn("查询到被调用对象类型存在多种 {} {}", rawMethodCallId, StringUtils.join(calleeClassNameList, " "));
         }
 
-        // 查询被调用方法名称值列表
+        // 查询被调用方法名值列表
         List<String> calleeMethodNameList = methodCallInfoHandler.queryMethodCallObjArgValues(rawMethodCallId, chooseCalleeMethodNameArgSeq());
         if (JavaCG2Util.isCollectionEmpty(calleeMethodNameList)) {
-            logger.warn("未查询到被调用方法名称 {}", rawMethodCallId);
+            logger.warn("未查询到被调用方法名 {}", rawMethodCallId);
         } else if (calleeMethodNameList.size() > 1) {
-            logger.warn("查询到被调用方法名称存在多种 {} {}", rawMethodCallId, StringUtils.join(calleeMethodNameList, " "));
+            logger.warn("查询到被调用方法名存在多种 {} {}", rawMethodCallId, StringUtils.join(calleeMethodNameList, " "));
         }
 
         if (!JavaCG2Util.isCollectionEmpty(calleeClassNameList) && !JavaCG2Util.isCollectionEmpty(calleeMethodNameList)) {
@@ -81,14 +81,14 @@ public abstract class JACGObjInstanceMethodNameMCE extends AbstractJACGMethodCal
 
         // 修改方法调用类型及描述
         methodCall.setCallType(JavaCG2CallTypeEnum.CTE_MANUAL_ADDED.getType());
-        methodCall.setDescription("通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名称 " + chooseMethodCallType() + " " + rawMethodCallId);
+        methodCall.setDescription("通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名 " + chooseMethodCallType() + " " + rawMethodCallId);
         return true;
     }
 
     // 选择被调用对象对应的参数序号，从1开始
     protected abstract int chooseCalleeObjArgSeq();
 
-    // 选择被调用方法名称对应的参数序号，从1开始
+    // 选择被调用方法名对应的参数序号，从1开始
     protected abstract int chooseCalleeMethodNameArgSeq();
 
     /**

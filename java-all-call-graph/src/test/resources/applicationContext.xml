@@ -145,4 +145,36 @@
             <aop:after method="logAfter" pointcut-ref="serviceMethodsMulti2"/>
         </aop:aspect>
     </aop:config>
+
+    <!-- profile相关测试 -->
+    <!-- 默认的bean配置 -->
+    <bean id="messageService1" class="test.callgraph.spring.profile.bean.DefaultMessageService1">
+        <property name="message" value="这是默认消息 DefaultMessageService1"/>
+    </bean>
+
+    <!-- dev profile 的配置 -->
+    <beans profile="dev">
+        <bean id="messageService1" class="test.callgraph.spring.profile.bean.DevMessageService1">
+            <property name="message" value="这是开发环境消息 DevMessageService1"/>
+        </bean>
+
+        <beans profile="dev2A">
+            <bean id="messageService2" class="test.callgraph.spring.profile.bean.DevMessageService2A">
+                <property name="message" value="这是开发环境消息dev2A DevMessageService2A"/>
+            </bean>
+        </beans>
+
+        <beans profile="dev2B">
+            <bean id="messageService2" class="test.callgraph.spring.profile.bean.DevMessageService2B">
+                <property name="message" value="这是开发环境消息dev2B DevMessageService2B"/>
+            </bean>
+        </beans>
+    </beans>
+
+    <!-- prod profile 的配置 -->
+    <beans profile="prod">
+        <bean id="messageService1" class="test.callgraph.spring.profile.bean.ProdMessageService1">
+            <property name="message" value="这是生产环境消息 ProdMessageService1"/>
+        </bean>
+    </beans>
 </beans>

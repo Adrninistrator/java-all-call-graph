@@ -12,7 +12,7 @@ import com.adrninistrator.jacg.handler.dto.classes.ClassNameAndType;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.dto.stack.ListAsStack;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
@@ -78,6 +78,37 @@ public class MethodInfoHandler extends BaseHandler {
     public List<WriteDbData4MethodInfo> queryMethodInfoByClassMethod(String className, String methodName) {
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         return queryMethodInfoBySimpleClassMethod(simpleClassName, methodName);
+    }
+
+    /**
+     * 根据完整类名与方法名查询方法信息，若在当前类中未查询到，则从父类/接口中查询
+     *
+     * @param className
+     * @param methodName
+     * @return
+     */
+    public List<WriteDbData4MethodInfo> queryMethodInfoByClassMethodSuperInterface(String className, String methodName) {
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
+        List<WriteDbData4MethodInfo> methodInfoList = queryMethodInfoBySimpleClassMethod(simpleClassName, methodName);
+        if (!JavaCG2Util.isCollectionEmpty(methodInfoList)) {
+            // 从当前类中查询到，返回
+            return methodInfoList;
+        }
+
+        // 从当前类中未查询到，从父类/接口中查询
+        List<ClassNameAndType> superClassNameAndTypeList = jacgExtendsImplHandler.queryAllSuperClassesAndInterfaces(className);
+        if (JavaCG2Util.isCollectionEmpty(superClassNameAndTypeList)) {
+            return null;
+        }
+
+        for (ClassNameAndType superClassNameAndType : superClassNameAndTypeList) {
+            String superSimpleClassName = dbOperWrapper.querySimpleClassName(superClassNameAndType.getClassName());
+            methodInfoList = queryMethodInfoBySimpleClassMethod(superSimpleClassName, methodName);
+            if (!JavaCG2Util.isCollectionEmpty(methodInfoList)) {
+                return methodInfoList;
+            }
+        }
+        return null;
     }
 
     /**
@@ -164,7 +195,7 @@ public class MethodInfoHandler extends BaseHandler {
     }
 
     /**
-     * 根据完整方法查询方法信息
+     * 根据完整方法及返回类型查询方法信息
      *
      * @param fullMethod
      * @param returnType
@@ -194,35 +225,57 @@ public class MethodInfoHandler extends BaseHandler {
     }
 
     /**
-     * 根据完整方法判断方法是否存在于解析的jar包中，若在当前类中未查找到，则在父类与接口中查找
+     * 根据完整方法与返回类型判断方法是否存在，若在当前类中未查找到，则在父类与接口中查找
      *
-     * @param fullMethod
-     * @param returnType
+     * @param fullMethod 完整方法
+     * @param returnType 返回类型
      * @return
      */
     public boolean checkExistsMethodByFullMethodSuperInterface(String fullMethod, String returnType) {
+        WriteDbData4MethodInfo methodInfo = queryMethodByFullMethodSuperInterface(fullMethod, returnType, null);
+        return methodInfo != null;
+    }
+
+    /**
+     * 根据完整方法与返回类型查询方法，若在当前类中未查找到，则在父类与接口中查找
+     *
+     * @param fullMethod         完整方法
+     * @param returnType         返回类型
+     * @param superClassNameList 用于记录本次查询到的父类与接口类名，可为null
+     * @return
+     */
+    public WriteDbData4MethodInfo queryMethodByFullMethodSuperInterface(String fullMethod, String returnType, List<String> superClassNameList) {
+        // 在当前类查询方法
         WriteDbData4MethodInfo methodInfo = queryMethodInfoByFullMethod(fullMethod, returnType);
         if (methodInfo != null) {
             // 指定的方法在当前类中存在
-            return true;
+            return methodInfo;
         }
         // 指定的方法在当前类中不存在，从超类及实现的接口中查找
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         // 根据类名向上查询对应的父类、实现的接口信息
-        List<ClassNameAndType> superClassNameAndTypeList = jacgExtendsImplHandler.queryAllSuperClassesAndInterfaces(className);
-        if (JavaCG2Util.isCollectionEmpty(superClassNameAndTypeList)) {
-            return false;
+        List<ClassNameAndType> tmpSuperClassNameAndTypeList = jacgExtendsImplHandler.queryAllSuperClassesAndInterfaces(className);
+        if (JavaCG2Util.isCollectionEmpty(tmpSuperClassNameAndTypeList)) {
+            return null;
+        }
+        if (superClassNameList != null) {
+            // 当参数指定的父类/接口列表非空时，记录本次查询到的父类/接口
+            for (ClassNameAndType superClassNameAndType : tmpSuperClassNameAndTypeList) {
+                if (!superClassNameList.contains(superClassNameAndType.getClassName())) {
+                    superClassNameList.add(superClassNameAndType.getClassName());
+                }
+            }
         }
         String methodNameWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(fullMethod);
-        for (ClassNameAndType superClassNameAndType : superClassNameAndTypeList) {
+        for (ClassNameAndType superClassNameAndType : tmpSuperClassNameAndTypeList) {
             String superFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(superClassNameAndType.getClassName(), methodNameWithArgs);
             WriteDbData4MethodInfo superMethodInfo = queryMethodInfoByFullMethod(superFullMethod, returnType);
             if (superMethodInfo != null) {
                 // 在当前类的超类或实现的接口中找到了对应的方法，返回存在
-                return true;
+                return superMethodInfo;
             }
         }
-        return false;
+        return null;
     }
 
     // 根据类名与方法名，查找对应的完整方法，假如当前类没有查找到，则从实现的接口中查找，执行查询操作
@@ -312,33 +365,73 @@ public class MethodInfoHandler extends BaseHandler {
     }
 
     /**
-     * 查询方法返回的字段名称
+     * 根据jar文件序号与类名查询重复同名类方法信息
      *
-     * @param fullMethod
-     * @param returnType
-     * @return null: 方法未返回字段，或返回了多个字段
+     * @param jarNum
+     * @param className
+     * @return
      */
-    public String queryMethodReturnFieldName(String fullMethod, String returnType) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MRFI_QUERY_METHOD_RETURN_FIELD;
+    public List<WriteDbData4MethodInfo> queryDupMethodInfoByClass(int jarNum, String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.DMI_QUERY_ALL_BY_JAR_CLASS;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select distinct " + DC.MRFI_FIELD_NAME +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_RETURN_FIELD_INFO.getTableName() +
-                    " where " + DC.MRFI_METHOD_HASH + " = ?" +
-                    " and " + DC.MRFI_STATIC_FIELD + " = ?" +
-                    " and " + DC.MRFI_FIELD_OF_THIS + " = ?";
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_DUP_METHOD_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_DUP_METHOD_INFO.getTableName() +
+                    " where " + DC.MI_JAR_NUM + " = ?" +
+                    " and " + DC.MI_SIMPLE_CLASS_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<String> list = dbOperator.queryListOneColumn(sql, String.class, JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType), JavaCG2YesNoEnum.NO.getIntValue(),
-                JavaCG2YesNoEnum.YES.getIntValue());
-        if (JavaCG2Util.isCollectionEmpty(list)) {
-            logger.debug("未查询到方法返回的字段名称 {} {}", fullMethod, returnType);
+        return dbOperator.queryList(sql, WriteDbData4MethodInfo.class, jarNum, dbOperWrapper.querySimpleClassName(className));
+    }
+
+    /**
+     * 查询方法信息，支持完整方法，或完整方法+方法返回类型
+     *
+     * @param fullMethodSupportReturnType
+     * @return
+     */
+    public WriteDbData4MethodInfo queryMethodInfoSupportReturnType(String fullMethodSupportReturnType) {
+        String[] array = StringUtils.splitPreserveAllTokens(fullMethodSupportReturnType, JavaCG2Constants.FLAG_COLON);
+        if (array.length != 2 && array.length != 3) {
+            logger.error("查询的方法非法 {} 使用 {} 拆分后的数量为 {}", fullMethodSupportReturnType, JavaCG2Constants.FLAG_COLON, array.length);
             return null;
         }
-        if (list.size() > 1) {
-            logger.warn("查询到多个方法返回的字段名称 {} {} {}", fullMethod, returnType, StringUtils.join(list, " "));
+        if (array.length == 2) {
+            // 指定的是完整方法
+            String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethodSupportReturnType);
+            String methodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(fullMethodSupportReturnType);
+            List<WriteDbData4MethodInfo> methodInfoList = queryMethodInfoByClassMethod(className, methodName);
+            if (JavaCG2Util.isCollectionEmpty(methodInfoList)) {
+                logger.error("未查询到相同名称的方法 {}", fullMethodSupportReturnType);
+                return null;
+            }
+            StringBuilder stringBuilder = new StringBuilder();
+            List<WriteDbData4MethodInfo> matchedMethodInfoList = new ArrayList<>();
+            for (WriteDbData4MethodInfo methodInfo : methodInfoList) {
+                if (fullMethodSupportReturnType.equals(methodInfo.getFullMethod())) {
+                    matchedMethodInfoList.add(methodInfo);
+                    if (stringBuilder.length() > 0) {
+                        stringBuilder.append(" ");
+                    }
+                    stringBuilder.append(methodInfo.getFullMethod()).append(JavaCG2Constants.CONFIG_LIST);
+                }
+            }
+            if (JavaCG2Util.isCollectionEmpty(matchedMethodInfoList)) {
+                logger.error("未查询到指定的方法 {}", fullMethodSupportReturnType);
+                return null;
+            }
+            if (matchedMethodInfoList.size() > 1) {
+                logger.error("查询到多个完整方法相同的方法，假如需要唯一确定，需要使用{完整方法}:{方法返回类型}的形式 {}", stringBuilder);
+            }
+            return matchedMethodInfoList.get(0);
+        }
+
+        // 指定的是完整方法+方法返回类型
+        WriteDbData4MethodInfo methodInfo = queryMethodInfoByFullMethod(array[0], array[1]);
+        if (methodInfo == null) {
+            logger.error("通过完整方法+方法返回类型未查询到对应方法信息 {}", fullMethodSupportReturnType);
             return null;
         }
-        return list.get(0);
+        return methodInfo;
     }
 }

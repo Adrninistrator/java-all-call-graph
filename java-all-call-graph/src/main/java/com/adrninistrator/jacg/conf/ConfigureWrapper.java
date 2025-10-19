@@ -14,6 +14,7 @@ import com.adrninistrator.jacg.el.enums.ElConfigEnum;
 import com.adrninistrator.javacg2.conf.BaseConfigureWrapper;
 import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
 import com.adrninistrator.javacg2.conf.enums.interfaces.OtherConfigInterface;
+import com.adrninistrator.javacg2.el.enums.interfaces.ElConfigInterface;
 import com.adrninistrator.javacg2.exceptions.JavaCG2Error;
 import com.adrninistrator.javacg2.markdown.writer.MarkdownWriter;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
@@ -170,8 +171,9 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     // 处理H2数据库文件路径
     private String handleDbH2FilePath(String dbH2FilePath) {
         if (StringUtils.endsWithIgnoreCase(dbH2FilePath, JACGConstants.H2_FILE_EXT)) {
-            logger.error("不需要指定H2数据库的后缀{} {} {}", JACGConstants.H2_FILE_EXT, dbH2FilePath, genConfigUsage(ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH));
-            return null;
+            String newDbH2FilePath = StringUtils.substringBeforeLast(dbH2FilePath, JACGConstants.H2_FILE_EXT);
+            logger.info("原有的H2数据库文件路径 {} 修改为 {}", dbH2FilePath, newDbH2FilePath);
+            return newDbH2FilePath;
         }
         return dbH2FilePath;
     }
@@ -199,11 +201,14 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
         printMainConfigInfo(markdownWriter, ConfigKeyEnum.values(), printAllConfigInfo);
         printMainConfigInfo(markdownWriter, ConfigDbKeyEnum.values(), printAllConfigInfo);
 
-        // 打印Set格式的其他配置信息
+        // 打印Set格式的其他配置参数
         printOtherSetConfigInfo(markdownWriter, OtherConfigFileUseSetEnum.values(), printAllConfigInfo);
 
-        // 打印List格式的其他配置信息
+        // 打印List格式的其他配置参数
         printOtherListConfigInfo(markdownWriter, OtherConfigFileUseListEnum.values(), printAllConfigInfo);
+
+        // 打印表达式配置参数
+        printElConfigInfo(markdownWriter, ElConfigEnum.values(), printAllConfigInfo);
     }
 
     // 获取主要配置的简单类名
@@ -216,13 +221,18 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     }
 
     @Override
-    protected OtherConfigInterface chooseOtherConfigFileUseSetEnum() {
-        return OtherConfigFileUseSetEnum.values()[0];
+    public OtherConfigInterface[] chooseOtherConfigFileUseSetEnums() {
+        return OtherConfigFileUseSetEnum.values();
     }
 
     @Override
-    protected OtherConfigInterface chooseOtherConfigFileUseListEnum() {
-        return OtherConfigFileUseListEnum.values()[0];
+    public OtherConfigInterface[] chooseOtherConfigFileUseListEnums() {
+        return OtherConfigFileUseListEnum.values();
+    }
+
+    @Override
+    public ElConfigInterface[] chooseElConfigEnums() {
+        return ElConfigEnum.values();
     }
 
     @Override
@@ -255,6 +265,13 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
                 SpringTransactionalFormatter.class.getName(),
                 DefaultAnnotationFormatter.class.getName()
         );
+    }
+
+    // 使用固定app.name的H2数据库文件
+    public void useFixedAppNameH2Db() {
+        logger.info("使用H2数据库时，使用固定的参数 {} {}", genConfigUsage(ConfigKeyEnum.CKE_APP_NAME), JACGConstants.FIXED_APP_NAME);
+        setMainConfig(ConfigKeyEnum.CKE_APP_NAME, JACGConstants.FIXED_APP_NAME);
+        setMainConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.TRUE.toString());
     }
 
     // 记录数据库操作对象

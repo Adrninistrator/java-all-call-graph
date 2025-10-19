@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.dto.callgraph;
 
+import java.util.Map;
+
 /**
  * @author adrninistrator
  * @date 2021/6/18
@@ -19,6 +21,12 @@ public class CallGraphNode4Caller {
     // 当前调用方法的被调用方法数量
     private int calleeMethodNum = 0;
 
+    /*
+        key 需要将被调用对象类型替换为方法参数类型的方法参数序号
+        value   需要将被调用对象类型替换为方法参数类型的方法参数类型
+     */
+    private Map<Integer, String> replaceCalleeTypeArgSeqTypeMap;
+
     public CallGraphNode4Caller(String callerMethodHash, int methodCallId, String callerFullMethod) {
         this.callerMethodHash = callerMethodHash;
         this.methodCallId = methodCallId;
@@ -35,13 +43,16 @@ public class CallGraphNode4Caller {
         calleeMethodNum++;
     }
 
-    // get
     public String getCallerMethodHash() {
         return callerMethodHash;
     }
 
     public int getMethodCallId() {
         return methodCallId;
+    }
+
+    public void setMethodCallId(int methodCallId) {
+        this.methodCallId = methodCallId;
     }
 
     public String getCallerFullMethod() {
@@ -52,8 +63,15 @@ public class CallGraphNode4Caller {
         return calleeMethodNum;
     }
 
-    // set
-    public void setMethodCallId(int methodCallId) {
-        this.methodCallId = methodCallId;
+    public void setCalleeMethodNum(int calleeMethodNum) {
+        this.calleeMethodNum = calleeMethodNum;
+    }
+
+    public Map<Integer, String> getReplaceCalleeTypeArgSeqTypeMap() {
+        return replaceCalleeTypeArgSeqTypeMap;
+    }
+
+    public void setReplaceCalleeTypeArgSeqTypeMap(Map<Integer, String> replaceCalleeTypeArgSeqTypeMap) {
+        this.replaceCalleeTypeArgSeqTypeMap = replaceCalleeTypeArgSeqTypeMap;
     }
 }

@@ -47,7 +47,7 @@ public class JarInfoHandler extends BaseHandler {
     }
 
     /**
-     * 查询当前解析的jar包信息的解析文件输出目录
+     * 查询当前解析的jar文件信息的解析文件输出目录
      *
      * @return
      */

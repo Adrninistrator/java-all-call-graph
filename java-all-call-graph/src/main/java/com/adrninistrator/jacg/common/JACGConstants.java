@@ -13,15 +13,16 @@ public class JACGConstants {
     public static final String DIR_OUTPUT_GRAPH_FOR_CALLER = "_jacg_o_er";
     public static final String DIR_OUTPUT_STACK = "_stack";
     public static final String DIR_OUTPUT_STACK_OTHER_FORMS = "_other_forms";
+    public static final String DIR_OUTPUT_JAR_COMPATIBILITY = "_jacg_jar_compatibility";
     public static final String DIR_KEYWORDS_NOT_FOUND = "_keywords_not_found";
     public static final String DIR_CALLEE_JAR_DIFF_SUMMARY = "_callee_jar_diff_summary";
     public static final String DIR_CALLER_JAR_DIFF_SUMMARY = "_caller_jar_diff_summary";
     public static final String DIR_OUTPUT_JSON = "_json";
     public static final String DIR_SPRING_AOP_CONFIG = "_spring_aop_config";
 
-    // 保存全部的配置参数信息文件
+    // 保存全部的配置参数文件
     public static final String FILE_JACG_ALL_CONFIG_MD = "_jacg_all_config.md";
-    // 保存当前有使用的配置参数信息文件
+    // 保存当前有使用的配置参数文件
     public static final String FILE_JACG_USED_CONFIG_MD = "_jacg_used_config.md";
     public static final String FILE_CALLEE_STACK_TABLE = "callee_stack_table.md";
     public static final String FILE_CALLER_STACK_TABLE = "caller_stack_table.md";
@@ -111,8 +112,6 @@ public class JACGConstants {
 
     // 代表未获取到代码行号
     public static final int LINE_NUM_NONE = -1;
-    // 调用链搜索文件文件中，代表未处理数据序号值
-    public static final int DATA_SEQ_NONE = -1;
 
     // 向下的方法完整调用链文件名，使用"@"进行分隔后的列数，1列
     public static final int CALL_GRAPH_FILE_NAME_COLUMNS_1 = 1;
@@ -152,6 +151,8 @@ public class JACGConstants {
     // 输出的注解信息文件，多一列其他信息，不包含属性时的列数
     public static final int ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_4 = 4;
 
+    public static final String FIXED_APP_NAME = "jacg";
+
     public static final String H2_PROTOCOL = "jdbc:h2:file:";
     public static final String H2_SCHEMA = "jacg";
     public static final String H2_FILE_EXT = ".mv.db";
@@ -181,6 +182,9 @@ public class JACGConstants {
 
     // 代表方法返回类型占位符
     public static final String RETURN_TYPE_FLAG_PLACE_HOLDER = "!return_type_place_holder!";
+
+    public static final String DESC_METHOD = "方法";
+    public static final String DESC_FIELD = "字段";
 
     private JACGConstants() {
         throw new IllegalStateException("illegal");

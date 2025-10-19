@@ -16,8 +16,8 @@ import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_CLASS_REFERENCE,
-        minColumnNum = 2,
-        maxColumnNum = 2,
+        minColumnNum = 3,
+        maxColumnNum = 3,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_CLASS_REFERENCE
 )
 public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteDbData4ClassReference> {
@@ -35,16 +35,18 @@ public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteD
 
     @Override
     protected WriteDbData4ClassReference genData(String[] array) {
-        String className = array[0];
-        String referenceClassName = array[1];
+        String className = readLineData();
+        String referenceClassName = readLineData();
         String simpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(className);
         String referencedSimpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(referenceClassName);
+        int jarNum = Integer.parseInt(readLineData());
         WriteDbData4ClassReference writeDbData4ClassReference = new WriteDbData4ClassReference();
         writeDbData4ClassReference.setRecordId(genNextRecordId());
         writeDbData4ClassReference.setClassName(className);
         writeDbData4ClassReference.setSimpleClassName(simpleClassName);
         writeDbData4ClassReference.setReferencedClassName(referenceClassName);
         writeDbData4ClassReference.setReferencedSimpleClassName(referencedSimpleClassName);
+        writeDbData4ClassReference.setJarNum(jarNum);
 
         writeDbHandler4ClassName.addClassReference(writeDbData4ClassReference);
         writeDbHandler4ClassName.tryInsertDb();
@@ -58,7 +60,8 @@ public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteD
                 data.getClassName(),
                 data.getSimpleClassName(),
                 data.getReferencedClassName(),
-                data.getReferencedSimpleClassName()
+                data.getReferencedSimpleClassName(),
+                data.getJarNum()
         };
     }
 
@@ -66,14 +69,15 @@ public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteD
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "引用的完整类名",
-                "被引用的完整类名"
+                "被引用的完整类名",
+                "类所在的jar文件序号"
         };
     }
 
     @Override
     public String[] chooseFileDetailInfo() {
         return new String[]{
-                "项目中所有的类所引用的其他类关系"
+                "类所引用的其他类关系"
         };
     }
 

@@ -13,6 +13,7 @@ import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import com.alibaba.druid.pool.DataSourceClosedException;
+import com.alibaba.druid.pool.DruidAbstractDataSource;
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -81,13 +82,14 @@ public class DbOperator implements AutoCloseable {
         // 测试数据库连接
         try {
             dataSource.init();
-            dataSource.createPhysicalConnection();
+            DruidAbstractDataSource.PhysicalConnectionInfo physicalConnectionInfo = dataSource.createPhysicalConnection();
+            physicalConnectionInfo.getPhysicalConnection().close();
         } catch (Exception e) {
             logger.error("测试连接数据库失败，请检查数据库及配置参数 ", e);
             throw new JavaCG2RuntimeException("测试连接数据库失败，请检查数据库及配置参数");
         }
 
-        jdbcTemplate = new JdbcTemplateQuiet(dataSource);
+        jdbcTemplate = new JdbcTemplateQuiet(dataSource, dbConfInfo);
 
         // 在JVM关闭时检查当前数据库操作对象是否有关闭
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -109,9 +111,18 @@ public class DbOperator implements AutoCloseable {
 
     private void initH2Db() {
         dataSource.setDriverClassName("org.h2.Driver");
-        String h2DbJdbcUrl = JACGConstants.H2_PROTOCOL + dbConfInfo.getDbH2FilePath() +
-                ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS " +
-                JACGConstants.H2_SCHEMA + "\\;SET SCHEMA " + JACGConstants.H2_SCHEMA;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(JACGConstants.H2_PROTOCOL)
+                .append(dbConfInfo.getDbH2FilePath());
+        if (dbConfInfo.isH2DbReadOnly()) {
+            // H2数据库只读模式
+            stringBuilder.append(";ACCESS_MODE_DATA=r");
+        }
+        stringBuilder.append(";MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS ")
+                .append(JACGConstants.H2_SCHEMA)
+                .append("\\;SET SCHEMA ")
+                .append(JACGConstants.H2_SCHEMA);
+        String h2DbJdbcUrl = stringBuilder.toString();
         logger.info("[{}] 初始化H2数据源 URL: {}", objSeq, h2DbJdbcUrl);
 
         dataSource.setUrl(h2DbJdbcUrl);
@@ -367,13 +378,13 @@ public class DbOperator implements AutoCloseable {
      */
     public <T> List<T> queryListOneColumn(String sql, Class<T> type, Object... arguments) {
         if (!JACGUtil.checkJavaBasicWrapperType(type)) {
-            throw new JavaCG2RuntimeException("查询返回类型需要使用Java基本类型 " + type.getName());
+            throw new JavaCG2RuntimeException("当前方法只支持查询返回Java基本类型 " + type.getName());
         }
         try {
             return jdbcTemplate.queryForList(sql, type, arguments);
         } catch (Exception e) {
             if (!handleSpecialException(e, sql)) {
-                logger.error("查询失败 [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+                logger.error("查询失败 [{}] [{}] [{}] ", sql, StringUtils.join(arguments, " "), dbConfInfo.getShowDbInfo(), e);
             }
             throw new JACGSQLException("查询失败");
         }
@@ -390,7 +401,7 @@ public class DbOperator implements AutoCloseable {
     @SuppressWarnings("unchecked")
     public <T> List<T> queryList(String sql, Class<T> type, Object... arguments) {
         if (JACGUtil.checkJavaBasicWrapperType(type)) {
-            throw new JavaCG2RuntimeException("查询返回类型不允许使用Java基本类型 " + type.getName());
+            throw new JavaCG2RuntimeException("当前方法不支持查询返回Java基本类型 " + type.getName());
         }
         try {
             BeanPropertyRowMapper<?> beanPropertyRowMapper = beanPropertyRowMapperMap.computeIfAbsent(type.getName(),
@@ -398,7 +409,7 @@ public class DbOperator implements AutoCloseable {
             return jdbcTemplate.query(sql, (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
         } catch (Exception e) {
             if (!handleSpecialException(e, sql)) {
-                logger.error("查询失败 [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+                logger.error("查询失败 [{}] [{}] [{}] ", sql, StringUtils.join(arguments, " "), dbConfInfo.getShowDbInfo(), e);
             }
             throw new JACGSQLException("查询失败");
         }
@@ -414,13 +425,13 @@ public class DbOperator implements AutoCloseable {
      */
     public <T> T queryObjectOneColumn(String sql, Class<T> type, Object... arguments) {
         if (!JACGUtil.checkJavaBasicWrapperType(type)) {
-            throw new JavaCG2RuntimeException("查询返回类型需要使用Java基本类型 " + type.getName());
+            throw new JavaCG2RuntimeException("当前方法只支持查询返回Java基本类型 " + type.getName());
         }
         try {
             return jdbcTemplate.queryForObject(sql, type, arguments);
         } catch (Exception e) {
             if (!handleSpecialException(e, sql)) {
-                logger.error("查询失败 [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+                logger.error("查询失败 [{}] [{}] [{}] ", sql, StringUtils.join(arguments, " "), dbConfInfo.getShowDbInfo(), e);
             }
             throw new JACGSQLException("查询失败");
         }
@@ -437,7 +448,7 @@ public class DbOperator implements AutoCloseable {
     @SuppressWarnings("unchecked")
     public <T> T queryObject(String sql, Class<T> type, Object... arguments) {
         if (JACGUtil.checkJavaBasicWrapperType(type)) {
-            throw new JavaCG2RuntimeException("查询返回类型不允许使用Java基本类型 " + type.getName());
+            throw new JavaCG2RuntimeException("当前方法不支持查询返回Java基本类型 " + type.getName());
         }
         try {
             BeanPropertyRowMapper<?> beanPropertyRowMapper = beanPropertyRowMapperMap.computeIfAbsent(type.getName(),
@@ -445,7 +456,7 @@ public class DbOperator implements AutoCloseable {
             return jdbcTemplate.queryForObject(sql, (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
         } catch (Exception e) {
             if (!handleSpecialException(e, sql)) {
-                logger.error("查询失败 [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
+                logger.error("查询失败 [{}] [{}] [{}] ", sql, StringUtils.join(arguments, " "), dbConfInfo.getShowDbInfo(), e);
             }
             throw new JACGSQLException("查询失败");
         }
@@ -468,8 +479,9 @@ public class DbOperator implements AutoCloseable {
                     "\n1. 请检查数据库表是否有成功创建" +
                     "\n2. 再检查数据库表是否需要使用最新版本重新创建，可先drop对应的数据库表" +
                     "\n请重新执行 com.adrninistrator.jacg.unzip.UnzipFile 类释放最新的SQL语句（需要先删除现有的SQL语句）" +
-                    "\n若使用H2数据库，需要删除对应的数据库文件 {}" +
-                    "\n[{}] ", objSeq, dataSource.getUrl(), sql, e);
+                    "\n若使用H2数据库，需要删除对应的数据库文件" +
+                    "\nsql语句 [{}]" +
+                    "\n数据库信息 [{}] ", objSeq, sql, dbConfInfo.getShowDbInfo(), e);
             return true;
         }
         if (ExceptionUtils.indexOfType(e, DataSourceClosedException.class) != -1) {

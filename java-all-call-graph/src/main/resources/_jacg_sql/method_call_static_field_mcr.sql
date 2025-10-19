@@ -15,4 +15,4 @@ CREATE TABLE if not exists jacg_method_call_static_field_mcr_{appName} (
   callee_return_type varchar(255) NOT NULL COMMENT '被调用方（静态字段所在类），方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
   INDEX idx_mcsfmcr_scnfn_{appName}(simple_class_name, field_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用使用静态字段方法调用返回值';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用（的被调用对象或参数）中使用静态字段的方法调用返回值信息表';

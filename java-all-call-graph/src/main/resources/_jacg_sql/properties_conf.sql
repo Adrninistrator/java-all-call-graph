@@ -7,4 +7,4 @@ CREATE TABLE if not exists jacg_properties_conf_{appName} (
   PRIMARY KEY (record_id),
   INDEX idx_pc_pk_{appName}(properties_key),
   INDEX idx_pc_pfn_{appName}(properties_file_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='properties文件配置信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='properties文件配置内容表';

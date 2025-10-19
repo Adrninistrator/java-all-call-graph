@@ -141,7 +141,7 @@ public class FindMethodCallInfoHandler extends BaseHandler {
      * 查询方法调用，及对应的被调用对象、参数的值（支持枚举）
      *
      * @param calleeClassName  被调用类名
-     * @param calleeMethodName 被调用方法名称
+     * @param calleeMethodName 被调用方法名
      * @param objArgSeqs       需要查询的被调用对象或参数序号，若为空则查询全部被调用对象及参数，0代表被调用对象，1开始为参数
      * @return
      */

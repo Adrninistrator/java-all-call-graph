@@ -7,8 +7,10 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldGenericsType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldInfo;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldUsageOther;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.jacg.handler.dto.classes.ClassNameAndType;
 import com.adrninistrator.jacg.handler.dto.field.CommonFieldInfoInClass;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
@@ -166,7 +168,8 @@ public class FieldInfoHandler extends BaseHandler {
         List<WriteDbData4FieldInfo> fieldInfoList = new ArrayList<>();
 
         String currentClassName = className;
-        while (true) {
+        // 未查询到父类
+        do {
             // 查询类的字段信息，根据类名查询
             List<WriteDbData4FieldInfo> tmpList = queryFieldInfoByClassName(currentClassName);
             if (!JavaCG2Util.isCollectionEmpty(tmpList)) {
@@ -175,11 +178,7 @@ public class FieldInfoHandler extends BaseHandler {
 
             // 需要查询父类中的字段
             currentClassName = jacgExtendsImplHandler.querySuperClassNameByFull(currentClassName);
-            if (currentClassName == null) {
-                // 未查询到父类
-                break;
-            }
-        }
+        } while (currentClassName != null);
         return fieldInfoList;
     }
 
@@ -370,5 +369,129 @@ public class FieldInfoHandler extends BaseHandler {
                 }
             }
         }
+    }
+
+    /**
+     * 查询重复类的字段信息，根据类名查询
+     *
+     * @param jarNum
+     * @param className
+     * @return
+     */
+    public List<WriteDbData4FieldInfo> queryDupFieldInfoByClassName(int jarNum, String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.DFI_QUERY_BY_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_DUP_FIELD_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_DUP_FIELD_INFO.getTableName() +
+                    " where " + DC.FI_JAR_NUM + " = ?" +
+                    " and " + DC.FI_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4FieldInfo.class, jarNum, dbOperWrapper.querySimpleClassName(className));
+    }
+
+    /**
+     * 分页查询使用其他类中字段的使用情况，使用字段所在的唯一类名查询
+     *
+     * @param fieldInSimpleClassName 字段所在的唯一类名
+     * @param startRecordId          起始的record_id
+     * @param pageSize               分页查询数量
+     * @return
+     */
+    public List<WriteDbData4FieldUsageOther> queryFieldUsageOtherByPageSCN(String fieldInSimpleClassName, Integer startRecordId, int pageSize) {
+        String sql;
+        List<Object> argList = new ArrayList<>();
+        argList.add(fieldInSimpleClassName);
+        SqlKeyEnum sqlKeyEnum;
+        if (startRecordId == null) {
+            // 首次查询
+            sqlKeyEnum = SqlKeyEnum.FUO_QUERY_ALL_FIRST;
+            sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+            if (sql == null) {
+                sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_FIELD_USAGE_OTHER) +
+                        " from " + DbTableInfoEnum.DTIE_FIELD_USAGE_OTHER.getTableName() +
+                        " where " + DC.FUO_FIELD_IN_SIMPLE_CLASS_NAME + " = ?" +
+                        " limit ?";
+                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            }
+        } else {
+            // 非首次查询
+            sqlKeyEnum = SqlKeyEnum.FUO_QUERY_ALL_BY_PAGE;
+            sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+            if (sql == null) {
+                sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_FIELD_USAGE_OTHER) +
+                        " from " + DbTableInfoEnum.DTIE_FIELD_USAGE_OTHER.getTableName() +
+                        " where " + DC.FUO_FIELD_IN_SIMPLE_CLASS_NAME + " = ?" +
+                        " and " + DC.FUO_RECORD_ID + " > ?" +
+                        " limit ?";
+                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            }
+            argList.add(startRecordId);
+        }
+        argList.add(pageSize);
+        return dbOperator.queryList(sql, WriteDbData4FieldUsageOther.class, argList.toArray());
+    }
+
+    /**
+     * 根据类名、字段名、字段类型查询字段信息
+     *
+     * @param className
+     * @param fieldName
+     * @param fieldType
+     * @return
+     */
+    public WriteDbData4FieldInfo queryFieldExact(String className, String fieldName, String fieldType) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.FI_QUERY_EXACT;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_FIELD_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_FIELD_INFO.getTableName() +
+                    " where " + DC.FI_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.FI_FIELD_NAME + " = ?" +
+                    " and " + DC.FI_FIELD_TYPE + " = ?" +
+                    " limit 1";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryObject(sql, WriteDbData4FieldInfo.class, dbOperWrapper.querySimpleClassName(className), fieldName, fieldType);
+    }
+
+    /**
+     * 根据类名、字段名、字段类型查询字段信息，若在当前类中未查找到，则在父类与接口中查找
+     *
+     * @param className                 类名
+     * @param fieldName                 字段名
+     * @param fieldType                 字段类型
+     * @param superClassNameAndTypeList 用于记录本次查询到的父类与接口类名，可为null
+     * @return
+     */
+    public WriteDbData4FieldInfo queryFieldExactSuperInterface(String className, String fieldName, String fieldType, List<ClassNameAndType> superClassNameAndTypeList) {
+        WriteDbData4FieldInfo fieldInfo = queryFieldExact(className, fieldName, fieldType);
+        if (fieldInfo != null) {
+            // 指定的字段在当前类中存在
+            return fieldInfo;
+        }
+        // 指定的字段在当前类中不存在，从超类及实现的接口中查找
+        // 根据类名向上查询对应的父类、实现的接口信息
+        List<ClassNameAndType> tmpSuperClassNameAndTypeList = jacgExtendsImplHandler.queryAllSuperClassesAndInterfaces(className);
+        if (JavaCG2Util.isCollectionEmpty(tmpSuperClassNameAndTypeList)) {
+            return null;
+        }
+        if (superClassNameAndTypeList != null) {
+            // 当参数指定的父类/接口列表非空时，记录本次查询到的父类/接口
+            for (ClassNameAndType superClassNameAndType : tmpSuperClassNameAndTypeList) {
+                if (!superClassNameAndTypeList.contains(superClassNameAndType)) {
+                    superClassNameAndTypeList.add(superClassNameAndType);
+                }
+            }
+        }
+        for (ClassNameAndType superClassNameAndType : tmpSuperClassNameAndTypeList) {
+            WriteDbData4FieldInfo superFieldInfo = queryFieldExact(superClassNameAndType.getClassName(), fieldName, fieldType);
+            if (superFieldInfo != null) {
+                // 在当前类的超类或实现的接口中找到了对应的字段，返回存在
+                return superFieldInfo;
+            }
+        }
+        return null;
     }
 }

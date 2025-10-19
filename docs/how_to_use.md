@@ -29,7 +29,7 @@ unzipfile
 - Gradle
 
 ```
-testImplementation 'com.github.adrninistrator:java-all-call-graph:3.3.3'
+testImplementation 'com.github.adrninistrator:java-all-call-graph:4.0.0'
 ```
 
 - Maven
@@ -38,7 +38,7 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:3.3.3'
 <dependency>
   <groupId>com.github.adrninistrator</groupId>
   <artifactId>java-all-call-graph</artifactId>
-  <version>3.3.3</version>
+  <version>4.0.0</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -48,11 +48,9 @@ testImplementation 'com.github.adrninistrator:java-all-call-graph:3.3.3'
 `由于 Maven 间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定 java-all-call-graph 依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过 java-all-call-graph 与 java-callgraph2 的 pom 文件的 dependencies 元素查看依赖组件版本`
 
 ```
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/3.3.3/java-all-call-graph-3.3.3.pom
-https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/3.3.0/java-callgraph2-3.3.0.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-all-call-graph/4.0.0/java-all-call-graph-4.0.0.pom
+https://repo1.maven.org/maven2/com/github/adrninistrator/java-callgraph2/4.0.0/java-callgraph2-4.0.0.pom
 ```
-
-以上版本号可能需要替换为最新版本
 
 java-all-call-graph 最新版本号可查看 [https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph](https://search.maven.org/artifact/com.github.adrninistrator/java-all-call-graph)。
 

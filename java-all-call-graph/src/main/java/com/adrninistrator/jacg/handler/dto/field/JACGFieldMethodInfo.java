@@ -10,7 +10,7 @@ public class JACGFieldMethodInfo {
     // 字段名称
     private final String fieldName;
 
-    // get/set方法名称
+    // get/set方法名
     private final String methodName;
 
     // 字段是否在当前类中（否则字段在超类中）

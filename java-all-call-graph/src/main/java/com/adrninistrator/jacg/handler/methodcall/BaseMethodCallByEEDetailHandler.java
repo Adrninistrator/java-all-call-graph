@@ -53,8 +53,8 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
      * 处理方法调用及对应的调用对象与参数信息
      *
      * @param methodCall                     方法调用
-     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名称、方法参数等
-     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名称、方法参数等
+     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名、方法参数等
+     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名、方法参数等
      * @param objArgsInfoInMethodCall        方法调用中被调用对象与参数使用的信息
      * @param args                           传递其他参数，若不需要使用则不指定
      */
@@ -101,8 +101,8 @@ public abstract class BaseMethodCallByEEDetailHandler extends BaseHandler implem
      * 选择是否需要处理当前方法调用
      *
      * @param methodCall                     方法调用
-     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名称、方法参数等
-     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名称、方法参数等
+     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名、方法参数等
+     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名、方法参数等
      * @return true: 需要处理 false: 不需要处理
      */
     protected boolean chooseHandleMethod(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,

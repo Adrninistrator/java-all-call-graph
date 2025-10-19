@@ -1,10 +1,12 @@
 package com.adrninistrator.jacg.runner;
 
-import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.comparator.Comparator4Method;
 import com.adrninistrator.jacg.dto.spring.SpringAopAdviceAndPointcut;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopAdvice;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopAdviceAffectedMethod;
+import com.adrninistrator.jacg.el.enums.ElConfigEnum;
+import com.adrninistrator.jacg.el.manager.ElManager;
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.handler.spring.SpringHandler;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopAdviceAffectedMethod;
@@ -23,10 +25,10 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -38,6 +40,9 @@ public class RunnerWriteSpringAopAdviceAffectedMethod extends RunnerWriteDb {
     private static final Logger logger = LoggerFactory.getLogger(RunnerWriteSpringAopAdviceAffectedMethod.class);
 
     private String inputRootPath;
+
+    // 表达式管理类
+    private ElManager elManager;
 
     public static void main(String[] args) {
         RunnerWriteSpringAopAdviceAffectedMethod runnerWriteSpringAopAdviceAffectedMethod = new RunnerWriteSpringAopAdviceAffectedMethod();
@@ -56,6 +61,8 @@ public class RunnerWriteSpringAopAdviceAffectedMethod extends RunnerWriteDb {
             return false;
         }
         logger.info("当前使用的输入目录 {}", inputRootPath);
+        currentOutputDirPath = inputRootPath;
+        elManager = new ElManager(configureWrapper, ElConfigEnum.values(), currentOutputDirPath);
         return true;
     }
 
@@ -78,7 +85,6 @@ public class RunnerWriteSpringAopAdviceAffectedMethod extends RunnerWriteDb {
         }
 
         // 打印使用的配置参数
-        currentOutputDirPath = inputRootPath;
         printAllConfigInfo();
         printUsedConfigInfo();
     }
@@ -125,13 +131,10 @@ public class RunnerWriteSpringAopAdviceAffectedMethod extends RunnerWriteDb {
                 springAopAdviceAndPointcutList.add(springAopAdviceAndPointcut);
             }
 
-            // 获取需要忽略的Spring Bean类名前缀
-            Set<String> ignoreSpringBeanClassPrefixSet = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_PARSE_SPRING_AOP_IGNORE_CLASS_PREFIX);
-
             // 遍历Spring Bean类名
             for (String springBeanClassName : springBeanClassNameList) {
                 // 根据Spring Bean类名前缀判断是否需要忽略
-                if (checkIgnoreBySpringBeanClassName(ignoreSpringBeanClassPrefixSet, springBeanClassName)) {
+                if (checkIgnoreBySpringBeanClassName(springBeanClassName)) {
                     continue;
                 }
 
@@ -157,7 +160,9 @@ public class RunnerWriteSpringAopAdviceAffectedMethod extends RunnerWriteDb {
                 logger.info("尝试加载Spring Bean类 {}", springBeanClassName);
                 Class<?> springBeanClass = Class.forName(springBeanClassName, false, this.getClass().getClassLoader());
 
-                for (Method springBeanMethod : springBeanClass.getMethods()) {
+                List<Method> springBeanClassList = new ArrayList<>(Arrays.asList(springBeanClass.getMethods()));
+                springBeanClassList.sort(Comparator4Method.getInstance());
+                for (Method springBeanMethod : springBeanClassList) {
                     String fullMethod = JACGClassMethodUtil.genJavaFullMethod(springBeanClassName, springBeanMethod);
                     String methodReturnType = springBeanMethod.getGenericReturnType().getTypeName();
                     logger.debug("当前处理的方法 {} {} {}", springBeanClassName, fullMethod, methodReturnType);
@@ -186,14 +191,8 @@ public class RunnerWriteSpringAopAdviceAffectedMethod extends RunnerWriteDb {
     }
 
     // 根据Spring Bean类名前缀判断是否需要忽略
-    private boolean checkIgnoreBySpringBeanClassName(Set<String> ignoreSpringBeanClassPrefixSet, String springBeanClassName) {
-        for (String ignoreSpringBeanClassPrefix : ignoreSpringBeanClassPrefixSet) {
-            if (springBeanClassName.startsWith(ignoreSpringBeanClassPrefix)) {
-                logger.info("忽略当前Spring Bean类名 {} {}", springBeanClassName, ignoreSpringBeanClassPrefix);
-                return true;
-            }
-        }
-        return false;
+    private boolean checkIgnoreBySpringBeanClassName(String springBeanClassName) {
+        return elManager.checkIgnoreSpringBean4AOP(springBeanClassName);
     }
 
     // 记录每个Spring Aop advice匹配的方法

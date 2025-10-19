@@ -11,6 +11,7 @@ public class WriteDbData4FieldInfo implements BaseWriteDbData {
     private int recordId;
     private String simpleClassName;
     private String fieldName;
+    private String fieldType;
     private String fieldTypeNad;
     private int arrayDimensions;
     private String fieldCategory;
@@ -22,13 +23,14 @@ public class WriteDbData4FieldInfo implements BaseWriteDbData {
     private int existsSetMethod;
     private int existsGenericsType;
     private String className;
+    private int jarNum;
 
     @Override
     public String toString() {
         return "recordId=" + recordId +
                 ", simpleClassName=" + simpleClassName +
                 ", fieldName=" + fieldName +
-                ", fieldTypeNad=" + fieldTypeNad;
+                ", fieldType=" + fieldType;
     }
 
     public int getRecordId() {
@@ -53,6 +55,14 @@ public class WriteDbData4FieldInfo implements BaseWriteDbData {
 
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
+    }
+
+    public String getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(String fieldType) {
+        this.fieldType = fieldType;
     }
 
     public String getFieldTypeNad() {
@@ -141,5 +151,13 @@ public class WriteDbData4FieldInfo implements BaseWriteDbData {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public int getJarNum() {
+        return jarNum;
+    }
+
+    public void setJarNum(int jarNum) {
+        this.jarNum = jarNum;
     }
 }

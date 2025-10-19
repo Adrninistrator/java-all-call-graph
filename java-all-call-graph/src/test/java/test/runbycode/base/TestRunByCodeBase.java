@@ -10,7 +10,11 @@ import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
 import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
+import com.adrninistrator.jacg.dto.methodcall.MethodCallLineData4Ee;
+import com.adrninistrator.jacg.dto.methodcall.MethodCallLineData4Er;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
+import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
+import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
@@ -18,7 +22,6 @@ import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -66,17 +69,14 @@ public abstract class TestRunByCodeBase {
         currentMethodName = name.getMethodName();
         logger.info("当前执行的测试方法 {} {}", currentClassName, currentMethodName);
 
-        // 生成通用的参数配置
+        logger.info("生成参数配置");
         configureWrapper = TestConfigGenerator.genConfigureWrapper();
         javaCG2ConfigureWrapper = TestConfigGenerator.genJavaCG2ConfigureWrapper();
 
-        // 使用本地的配置参数
+        // 尝试使用本地的配置参数
         JACGTestUtil.useLocalConfig(configureWrapper);
     }
 
-    @After
-    public void afterMethod() {
-    }
 
     // 将jar包解析结果写入数据库，若需要解析的jar文件未发生变化不则不执行
     protected void commonWriteDb() {
@@ -109,7 +109,7 @@ public abstract class TestRunByCodeBase {
                 sql = dbOperWrapper.formatSql(sql);
                 String id = dbOperator.queryObjectOneColumn(sql, String.class);
                 if (id != null) {
-                    commonWriteDb(true);
+                    commonWriteDbForce();
                     return;
                 }
             }
@@ -274,6 +274,64 @@ public abstract class TestRunByCodeBase {
             }
         }
         return false;
+    }
+
+    /**
+     * 生成向上的方法完整调用链，仅指定一个方法
+     */
+    protected List<MethodCallLineData4Ee> genOneCalleeGraph(int expectedNum) {
+        RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee(configureWrapper);
+        Assert.assertTrue(runnerGenAllGraph4Callee.run());
+        Map<String, List<MethodCallLineData4Ee>> methodCallLineData4EeMap = runnerGenAllGraph4Callee.getAllMethodCallLineData4EeMap();
+        Assert.assertNotNull(methodCallLineData4EeMap);
+        Assert.assertEquals(expectedNum, methodCallLineData4EeMap.size());
+        if (methodCallLineData4EeMap.isEmpty()) {
+            return null;
+        }
+        Assert.assertEquals(1, methodCallLineData4EeMap.size());
+        for (List<MethodCallLineData4Ee> methodCallLineData4EeList : methodCallLineData4EeMap.values()) {
+            return methodCallLineData4EeList;
+        }
+        throw new RuntimeException("不会执行到这里");
+    }
+
+    /**
+     * 生成向下的方法完整调用链，仅指定一个方法
+     */
+    protected List<MethodCallLineData4Er> genOneCallerGraph(int expectedNum) {
+        RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
+        Assert.assertTrue(runnerGenAllGraph4Caller.run());
+        Map<String, List<MethodCallLineData4Er>> methodCallLineData4ErMap = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErMap();
+        Assert.assertNotNull(methodCallLineData4ErMap);
+        Assert.assertEquals(expectedNum, methodCallLineData4ErMap.size());
+        if (methodCallLineData4ErMap.isEmpty()) {
+            return null;
+        }
+        for (List<MethodCallLineData4Er> methodCallLineData4ErList : methodCallLineData4ErMap.values()) {
+            return methodCallLineData4ErList;
+        }
+        throw new RuntimeException("不会执行到这里");
+    }
+
+    protected boolean checkCallerGraphContainsCallee(List<MethodCallLineData4Er> methodCallLineData4ErList, String calleeFullMethod) {
+        for (MethodCallLineData4Er methodCallLineData4Er : methodCallLineData4ErList) {
+            if (methodCallLineData4Er.getActualFullMethod().equals(calleeFullMethod)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected void checkCallerGraphContainsCalleeAll(List<MethodCallLineData4Er> methodCallLineData4ErList, String... calleeFullMethods) {
+        for (String calleeFullMethod : calleeFullMethods) {
+            Assert.assertTrue(calleeFullMethod, checkCallerGraphContainsCallee(methodCallLineData4ErList, calleeFullMethod));
+        }
+    }
+
+    protected void checkCallerGraphContainsCalleeNone(List<MethodCallLineData4Er> methodCallLineData4ErList, String... calleeFullMethods) {
+        for (String calleeFullMethod : calleeFullMethods) {
+            Assert.assertFalse(calleeFullMethod, checkCallerGraphContainsCallee(methodCallLineData4ErList, calleeFullMethod));
+        }
     }
 
     public void setJavaCG2ConfigureWrapper(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper) {

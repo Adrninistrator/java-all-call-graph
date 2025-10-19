@@ -20,7 +20,7 @@ import java.util.Date;
 /**
  * @author adrninistrator
  * @date 2022/11/15
- * @description: 写入数据库，jar包信息
+ * @description: 写入数据库，jar文件信息
  */
 @JACGWriteDbHandler(
         readFile = true,
@@ -48,7 +48,7 @@ public class WriteDbHandler4JarInfo extends AbstractWriteDbHandler<WriteDbData4J
         String jarFileHash = "";
 
         if (JavaCG2Constants.FILE_KEY_JAR.equals(jarType)) {
-            if (!JACGFileUtil.isFileExists(jarFilePath)) {
+            if (!JavaCG2FileUtil.isFileExists(jarFilePath)) {
                 logger.error("jar/war文件不存在: {}", jarFilePath);
                 throw new JavaCG2RuntimeException("jar/war文件不存在");
             }

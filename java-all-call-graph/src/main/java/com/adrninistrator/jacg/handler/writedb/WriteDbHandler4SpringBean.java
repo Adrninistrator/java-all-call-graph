@@ -17,8 +17,8 @@ import java.util.Map;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_SPRING_BEAN,
-        minColumnNum = 6,
-        maxColumnNum = 6,
+        minColumnNum = 7,
+        maxColumnNum = 7,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_SPRING_BEAN
 )
 public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbData4SpringBean> {
@@ -40,6 +40,7 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
         String springBeanName = readLineData();
         String seq = readLineData();
         String className = readLineData();
+        String profile = readLineData();
         String beanType = readLineData();
         String annotationClassName = readLineData();
         String defineClassNameXmlPath = readLineData();
@@ -50,6 +51,7 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
         writeDbData4SpringBean.setSeq(Integer.parseInt(seq));
         writeDbData4SpringBean.setSimpleClassName(dbOperWrapper.querySimpleClassName(className));
         writeDbData4SpringBean.setClassName(className);
+        writeDbData4SpringBean.setProfile(profile);
         writeDbData4SpringBean.setBeanType(beanType);
         writeDbData4SpringBean.setAnnotationClassName(annotationClassName);
         writeDbData4SpringBean.setDefineClassNameXmlPath(defineClassNameXmlPath);
@@ -64,6 +66,7 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
                 data.getSeq(),
                 data.getSimpleClassName(),
                 data.getClassName(),
+                data.getProfile(),
                 data.getBeanType(),
                 data.getAnnotationClassName(),
                 data.getDefineClassNameXmlPath()
@@ -76,6 +79,7 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
                 "Spring Bean的名称",
                 "序号，从0开始，大于0代表有多种可能",
                 "完整类名",
+                "profile",
                 "Spring Bean的定义方式，j: 在Java代码中定义，x: 在XML文件中定义",
                 "在Java代码中定义时对应的注解类名",
                 "在Java代码中定义时所在的类名，或在XML中定义时对应的文件路径"

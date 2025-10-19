@@ -19,7 +19,7 @@ import test.diffjar.service.TestService1;
 @RequestMapping("test1")
 public class TestController1 {
 
-    private static final Logger logger = LoggerFactory.getLogger(test.diffjar.controller.TestController1.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestController1.class);
 
     @Autowired
     private TestService1 testService1;

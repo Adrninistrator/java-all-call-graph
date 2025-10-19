@@ -1,8 +1,6 @@
 package test.runbycode.jardiffcallgraph;
 
 import org.junit.Test;
-import test.runbycode.jardiffcallgraph.filter.TestModifiedMethodFilter4CalleeGraph1;
-import test.runbycode.jardiffcallgraph.filter.TestModifiedMethodFilter4CallerGraph1;
 
 /**
  * @author adrninistrator
@@ -28,14 +26,12 @@ public class TestRunnerGenJarDiffCallGraphOneJarDiff extends TestAbstractRunnerG
 
     @Test
     public void testJarDiffCalleeGraphFilter() {
-        TestModifiedMethodFilter4CalleeGraph1 testModifiedMethodFilter4CalleeGraph1 = new TestModifiedMethodFilter4CalleeGraph1();
-        doTestJarDiffCalleeGraph(false, false, false, testModifiedMethodFilter4CalleeGraph1);
+        doTestJarDiffCalleeGraph(false, false, false);
     }
 
     @Test
     public void testJarDiffCallerGraphFilter() {
-        TestModifiedMethodFilter4CallerGraph1 testModifiedMethodFilter4CallerGraph1 = new TestModifiedMethodFilter4CallerGraph1();
-        testJarDiffCallerGraph(testModifiedMethodFilter4CallerGraph1);
+        testJarDiffCallerGraph();
     }
 
     @Override

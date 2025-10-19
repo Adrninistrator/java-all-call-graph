@@ -29,4 +29,11 @@ public class SpringAopAdviceAndPointcut {
     public void setAspectJExpressionPointcut(AspectJExpressionPointcut aspectJExpressionPointcut) {
         this.aspectJExpressionPointcut = aspectJExpressionPointcut;
     }
+
+    @Override
+    public String toString() {
+        return "SpringAopAdviceAndPointcut{" +
+                "springAopAdvice=" + springAopAdvice +
+                '}';
+    }
 }

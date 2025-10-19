@@ -7,7 +7,7 @@ import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
-import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
+import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -17,16 +17,16 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class EnumsHandler extends BaseHandler {
 
-    private final MethodInfoHandler methodInfoHandler;
+    private final MethodArgReturnHandler methodArgReturnHandler;
 
     public EnumsHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
-        methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
+        methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
     }
 
     public EnumsHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
-        methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
+        methodArgReturnHandler = new MethodArgReturnHandler(dbOperWrapper);
     }
 
     /**
@@ -70,7 +70,8 @@ public class EnumsHandler extends BaseHandler {
             return enumConstName;
         }
 
-        String methodReturnFieldName = methodInfoHandler.queryMethodReturnFieldName(enumFullMethod, enumReturnType);
+        // 查询方法返回的字段名称
+        String methodReturnFieldName = methodArgReturnHandler.queryMethodReturnThisNonStaticFieldName(enumFullMethod, enumReturnType);
         if (StringUtils.isBlank(methodReturnFieldName)) {
             return null;
         }

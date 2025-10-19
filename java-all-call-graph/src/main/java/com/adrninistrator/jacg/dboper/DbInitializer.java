@@ -31,7 +31,7 @@ public class DbInitializer {
     }
 
     /**
-     * 创建数据库操作包装类DbOperWrapper实例
+     * 创建数据库操作包装类DbOperWrapper实例，使用H2数据库时不使用只读模式
      *
      * @param configureWrapper 配置参数类
      * @param useNeo4j         是否使用neo4j
@@ -39,13 +39,26 @@ public class DbInitializer {
      * @return
      */
     public static DbOperWrapper genDbOperWrapper(ConfigureWrapper configureWrapper, boolean useNeo4j, Object callerObject) {
+        return genDbOperWrapper(configureWrapper, useNeo4j, false, callerObject);
+    }
+
+    /**
+     * 创建数据库操作包装类DbOperWrapper实例
+     *
+     * @param configureWrapper 配置参数类
+     * @param useNeo4j         是否使用neo4j
+     * @param useNeo4j         使用H2数据库时是否使用只读模式
+     * @param callerObject     调用当前方法的对象
+     * @return
+     */
+    public static DbOperWrapper genDbOperWrapper(ConfigureWrapper configureWrapper, boolean useNeo4j, boolean h2DbReadOnly, Object callerObject) {
         if (!useNeo4j) {
-            return genDbOperWrapperDb(configureWrapper, callerObject);
+            return genDbOperWrapperDb(configureWrapper, h2DbReadOnly, callerObject);
         }
         return genDbOperWrapperNeo4j(configureWrapper);
     }
 
-    private static DbOperWrapper genDbOperWrapperDb(ConfigureWrapper configureWrapper, Object callerObject) {
+    private static DbOperWrapper genDbOperWrapperDb(ConfigureWrapper configureWrapper, boolean h2DbReadOnly, Object callerObject) {
         String callerSimpleClassName = callerObject.getClass().getSimpleName();
         DbConfInfo dbConfInfo = new DbConfInfo();
         String appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
@@ -53,15 +66,23 @@ public class DbInitializer {
         int dbInsertBatchSize = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE);
         boolean useH2Db = configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2);
         String tableSuffix = configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_TABLE_SUFFIX);
+        boolean slowQuerySwitch = configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_SLOW_QUERY_SWITCH);
+        int slowQueryTime = configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_SLOW_QUERY_TIME);
+        int slowQueryRowNum = configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_SLOW_QUERY_ROW_NUM);
+
         dbConfInfo.setAppName(appName);
         dbConfInfo.setMaxActive(maxActive);
         dbConfInfo.setDbInsertBatchSize(dbInsertBatchSize);
         dbConfInfo.setUseH2Db(useH2Db);
         dbConfInfo.setTableSuffix(tableSuffix);
+        dbConfInfo.setSlowQuerySwitch(slowQuerySwitch);
+        dbConfInfo.setSlowQueryTime(slowQueryTime);
+        dbConfInfo.setSlowQueryRowNum(slowQueryRowNum);
 
         if (useH2Db) {
             String dbH2FilePath = configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH);
             dbConfInfo.setDbH2FilePath(dbH2FilePath);
+            dbConfInfo.setH2DbReadOnly(h2DbReadOnly);
         } else {
             String driverClassName = configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME);
             String dbUrl = configureWrapper.getMainConfig(ConfigDbKeyEnum.CDKE_DB_URL);

@@ -65,9 +65,6 @@ public class FullMethodWithReturnType {
 
     @Override
     public String toString() {
-        return "FullMethodWithReturnType{" +
-                "fullMethod='" + fullMethod + '\'' +
-                ", returnType='" + returnType + '\'' +
-                '}';
+        return fullMethod;
     }
 }

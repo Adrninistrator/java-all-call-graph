@@ -26,6 +26,7 @@ import java.util.Set;
  * @author adrninistrator
  * @date 2025/6/2
  * @description: 检查java-callgraph2、java-all-call-graph组件是否在日志中直接打印配置参数
+ * 提示配置参数时，需要使用的方法为 com.adrninistrator.javacg2.conf.BaseConfigureWrapper#genConfigUsage
  */
 public class TestAnalyseJavaCG2JACG2CheckLogConfigKey {
 

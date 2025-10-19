@@ -51,7 +51,7 @@ public class WriteDbHandler4SpringAopAdviceAffectedMethod extends AbstractWriteD
                 "记录id，从1开始",
                 "类型，j: 在Java代码中定义，x: 在XML文件中定义",
                 "XML中定义的aspect的ID",
-                "XML中定义的aspect的方法名称",
+                "XML中定义的aspect的方法名",
                 "advice类型",
                 "XML中的pointcut-ref名称",
                 "pointcut表达式",

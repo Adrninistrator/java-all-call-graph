@@ -8,7 +8,7 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 /**
  * @author adrninistrator
  * @date 2024/12/5
- * @description: 写入数据库，重复同名类的方法的信息
+ * @description: 写入数据库，重复同名类的方法信息
  */
 @JACGWriteDbHandler(
         readFile = true,
@@ -28,7 +28,7 @@ public class WriteDbHandler4DupMethodInfo extends WriteDbHandler4MethodInfo {
         String[] parentInfo = super.chooseFileDetailInfo();
         String[] result = new String[parentInfo.length + 1];
 
-        result[0] = "重复同名类的方法的信息";
+        result[0] = "重复同名类的方法信息";
         System.arraycopy(parentInfo, 0, result, 1, parentInfo.length);
         return result;
     }

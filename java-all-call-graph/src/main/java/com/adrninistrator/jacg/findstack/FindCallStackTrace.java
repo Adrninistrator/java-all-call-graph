@@ -13,7 +13,7 @@ import com.adrninistrator.jacg.extensions.findstackfilter.FindStackKeywordFilter
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import com.adrninistrator.jacg.runner.base.AbstractExecutor;
-import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
+import com.adrninistrator.jacg.runner.base.AbstractRunnerGenAllCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGCallStackUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
@@ -77,7 +77,7 @@ public class FindCallStackTrace extends AbstractExecutor {
     private final boolean order4ee;
 
     // 用于生成方法完整调用链的对象
-    private final AbstractRunnerGenCallGraph runnerGenCallGraph;
+    private final AbstractRunnerGenAllCallGraph runnerGenAllCallGraph;
 
     // 记录当前生成完整方法调用链的目录
     private String callGraphOutputDirPath;
@@ -97,9 +97,6 @@ public class FindCallStackTrace extends AbstractExecutor {
     // 根据关键字生成调用堆栈过滤器扩展类列表
     private List<FindStackKeywordFilterInterface> findStackKeywordFilterList;
 
-    // 指定已存在的完整方法调用链文件保存目录（不生成完整方法调用链文件）
-    private String existedCallGraphDirPath;
-
     /**
      * 使用配置文件中的参数
      *
@@ -117,10 +114,11 @@ public class FindCallStackTrace extends AbstractExecutor {
      * @return
      */
     public FindCallStackTrace(boolean order4ee, ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
         if (order4ee) {
-            runnerGenCallGraph = new RunnerGenAllGraph4Callee(configureWrapper);
+            runnerGenAllCallGraph = new RunnerGenAllGraph4Callee(configureWrapper);
         } else {
-            runnerGenCallGraph = new RunnerGenAllGraph4Caller(configureWrapper);
+            runnerGenAllCallGraph = new RunnerGenAllGraph4Caller(configureWrapper);
         }
 
         // 初始化根据关键字生成调用堆栈过滤器扩展类
@@ -129,7 +127,6 @@ public class FindCallStackTrace extends AbstractExecutor {
         }
 
         this.order4ee = order4ee;
-        this.configureWrapper = configureWrapper;
     }
 
     // 初始化根据关键字生成调用堆栈过滤器扩展类
@@ -199,23 +196,23 @@ public class FindCallStackTrace extends AbstractExecutor {
             return CallStackFileResult.FAIL;
         }
 
-        if (StringUtils.isBlank(existedCallGraphDirPath)) {
-            // 生成完整方法调用链文件
-            boolean success = runnerGenCallGraph.run();
-            callGraphOutputDirPath = runnerGenCallGraph.getCurrentOutputDirPath();
-            if (!success) {
-                logger.error("生成方法完整调用链失败，请检查");
-                return CallStackFileResult.FAIL;
-            }
-        } else {
-            logger.info("指定已存在的完整方法调用链文件保存目录（不生成完整方法调用链文件） {}", existedCallGraphDirPath);
-            callGraphOutputDirPath = existedCallGraphDirPath;
+        if (currentOutputDirPath != null) {
+            logger.info("已在外部指定当前的输出目录 {} 设置到 {} 对象中", currentOutputDirPath, runnerGenAllCallGraph.getClass().getSimpleName());
+            runnerGenAllCallGraph.setCurrentOutputDirPath(currentOutputDirPath);
+        }
+
+        // 生成完整方法调用链文件
+        boolean success = runnerGenAllCallGraph.run();
+        callGraphOutputDirPath = runnerGenAllCallGraph.getCurrentOutputDirPath();
+        if (!success) {
+            logger.error("生成方法完整调用链失败，请检查");
+            return CallStackFileResult.FAIL;
         }
 
         // 处理目录
         CallStackFileResult callStackFileResult = handleDir(usedKeywordList);
 
-        // 执行完毕时打印当前使用的配置信息
+        // 执行完毕时打印当前使用的配置参数
         configureWrapper.printUsedConfigInfo(currentSimpleClassName, callGraphOutputDirPath, JACGConstants.FILE_JACG_USED_CONFIG_MD);
         return callStackFileResult;
     }
@@ -282,7 +279,7 @@ public class FindCallStackTrace extends AbstractExecutor {
     // 处理目录
     private CallStackFileResult handleDir(List<String> keywordList) {
         // 目录路径后增加分隔符
-        String finalCallGraphDirPath = JavaCG2Util.addSeparator4FilePath(callGraphOutputDirPath);
+        String finalCallGraphDirPath = JavaCG2FileUtil.addSeparator4FilePath(callGraphOutputDirPath);
 
         // 记录当前处理的目录
         stackOutputDirPath = finalCallGraphDirPath + JACGConstants.DIR_OUTPUT_STACK;
@@ -302,7 +299,7 @@ public class FindCallStackTrace extends AbstractExecutor {
         List<String> subFilePathList = new ArrayList<>();
 
         // 从目录中查找需要处理的文件
-        JACGFileUtil.searchDir(finalCallGraphDirPath, subDirPathSet, subFilePathList, JavaCG2Constants.EXT_TXT);
+        JavaCG2FileUtil.searchDir(finalCallGraphDirPath, subDirPathSet, subFilePathList, JavaCG2Constants.EXT_TXT);
 
         if (subFilePathList.isEmpty()) {
             logger.warn("{} 目录中未找到后缀为[{}]的文件", finalCallGraphDirPath, JavaCG2Constants.EXT_TXT);
@@ -365,16 +362,18 @@ public class FindCallStackTrace extends AbstractExecutor {
 
         // 用于写其他形式的调用堆栈文件
         WriterSupportHeader stackTableWriter = null;
+        String otherFormsCallStackFilePath = null;
         // 用于写汇总文件
         WriterSupportHeader stackSummaryWriter = null;
+        String summaryFilePath = null;
         try (BufferedReader br = JavaCG2FileUtil.genBufferedReader(txtFilePath);
              MarkdownWriter markdownWriter = new MarkdownWriter(stackFilePath, true)) {
 
             if (genStackOtherForms) {
-                String otherFormsCallStackFilePath = otherFormsDirPath + File.separator + (order4ee ? JACGConstants.FILE_CALLEE_STACK_TABLE :
+                otherFormsCallStackFilePath = otherFormsDirPath + File.separator + (order4ee ? JACGConstants.FILE_CALLEE_STACK_TABLE :
                         JACGConstants.FILE_CALLER_STACK_TABLE);
                 stackTableWriter = new WriterSupportHeader(otherFormsCallStackFilePath, FILE_HEADER_STACK_TABLE);
-                String summaryFilePath = otherFormsDirPath + File.separator + (order4ee ? JACGConstants.FILE_CALLEE_STACK_SUMMARY : JACGConstants.FILE_CALLER_STACK_SUMMARY);
+                summaryFilePath = otherFormsDirPath + File.separator + (order4ee ? JACGConstants.FILE_CALLEE_STACK_SUMMARY : JACGConstants.FILE_CALLER_STACK_SUMMARY);
                 stackSummaryWriter = new WriterSupportHeader(summaryFilePath, order4ee ? FILE_HEADER_CALLEE_STACK_SUMMARY : FILE_HEADER_CALLER_STACK_SUMMARY);
             }
 
@@ -425,6 +424,8 @@ public class FindCallStackTrace extends AbstractExecutor {
                 if (stackSummaryWriter != null) {
                     IOUtils.closeQuietly(stackSummaryWriter);
                 }
+                textFileToExcel(otherFormsCallStackFilePath);
+                textFileToExcel(summaryFilePath);
             }
         }
     }
@@ -701,6 +702,16 @@ public class FindCallStackTrace extends AbstractExecutor {
         return false;
     }
 
+    /**
+     * 需要生成excel文件
+     *
+     * @return
+     */
+    @Override
+    protected boolean needGenerateExcel() {
+        return true;
+    }
+
     //
     public String getCallGraphOutputDirPath() {
         return callGraphOutputDirPath;
@@ -708,9 +719,5 @@ public class FindCallStackTrace extends AbstractExecutor {
 
     public ConfigureWrapper getConfigureWrapper() {
         return configureWrapper;
-    }
-
-    public void setExistedCallGraphDirPath(String existedCallGraphDirPath) {
-        this.existedCallGraphDirPath = existedCallGraphDirPath;
     }
 }

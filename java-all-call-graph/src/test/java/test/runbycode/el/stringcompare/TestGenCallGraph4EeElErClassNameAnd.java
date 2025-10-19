@@ -1,0 +1,45 @@
+package test.runbycode.el.stringcompare;
+
+import com.adrninistrator.jacg.el.enums.ElConfigEnum;
+import com.adrninistrator.javacg2.el.enums.CommonElAllowedVariableEnum;
+import org.junit.Test;
+import test.callgraph.elexample.caller.TestElExampleCaller1;
+import test.runbycode.base.TestElRunByCodeBase;
+
+/**
+ * @author adrninistrator
+ * @date 2025/10/2
+ * @description:
+ */
+public class TestGenCallGraph4EeElErClassNameAnd extends TestElRunByCodeBase {
+    @Override
+    protected ElConfigEnum chooseElConfigEnum() {
+        return ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL;
+    }
+
+    @Override
+    protected boolean example4StringCompare() {
+        return true;
+    }
+
+    @Override
+    protected String chooseElText() {
+        return "string.startsWith(" + CommonElAllowedVariableEnum.EAVE_MC_ER_CLASS_NAME.getVariableName() + ", 'test.callgraph.elexample.caller.') && " +
+                "string.endsWith(" + CommonElAllowedVariableEnum.EAVE_MC_ER_CLASS_NAME.getVariableName() + ", '" + TestElExampleCaller1.class.getSimpleName() + "')";
+    }
+
+    @Override
+    protected String chooseTitle() {
+        return "判断多个条件使用与";
+    }
+
+    @Override
+    protected String chooseDesc() {
+        return "在生成向上完整方法调用链时，多个条件使用与运算，判断调用类名是否以指定关键字开头，且以指定关键字结尾，忽略匹配的类";
+    }
+
+    @Test
+    public void test() {
+        genCalleeGraphAndCheckNoEr();
+    }
+}

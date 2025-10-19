@@ -9,7 +9,6 @@ import com.adrninistrator.jacg.common.JACGConstants;
  * @description: 数据库表信息枚举
  */
 public enum DbTableInfoEnum {
-    // todo el 后续补充
     DTIE_CONFIG("config", new String[]{
             DC.CONFIG_FILE_NAME,
             DC.CONFIG_KEY,
@@ -44,13 +43,8 @@ public enum DbTableInfoEnum {
             DC.CN_SIMPLE_CLASS_NAME,
             DC.CN_DUPLICATE_CLASS,
     }),
-    DTIE_CLASS_REFERENCE("class_reference", new String[]{
-            DC.CR_RECORD_ID,
-            DC.CR_CLASS_NAME,
-            DC.CR_SIMPLE_CLASS_NAME,
-            DC.CR_REFERENCED_CLASS_NAME,
-            DC.CR_REFERENCED_SIMPLE_CLASS_NAME,
-    }),
+    DTIE_CLASS_REFERENCE("class_reference", DC.CLASS_REFERENCE_COLUMNS),
+    DTIE_DUP_CLASS_REFERENCE("dup_class_reference", DC.CLASS_REFERENCE_COLUMNS),
     DTIE_CLASS_SIGNATURE_GENERICS_TYPE("class_signature_generics_type", new String[]{
             DC.CSGT_RECORD_ID,
             DC.CSGT_SIMPLE_CLASS_NAME,
@@ -216,6 +210,10 @@ public enum DbTableInfoEnum {
             DC.MC_CALLEE_JAR_NUM,
             DC.MC_DESCRIPTION,
     }),
+    DTIE_METHOD_CALL_RAW_CALLEE("method_call_raw_callee", new String[]{
+            DC.MCRC_CALL_ID,
+            DC.MCRC_RAW_CALLEE_CLASS_NAME,
+    }),
     DTIE_METHOD_CALL_INFO("method_call_info", new String[]{
             DC.MCI_RECORD_ID,
             DC.MCI_CALL_ID,
@@ -312,6 +310,7 @@ public enum DbTableInfoEnum {
             DC.SPB_SEQ,
             DC.SPB_SIMPLE_CLASS_NAME,
             DC.SPB_CLASS_NAME,
+            DC.SPB_PROFILE,
             DC.SPB_BEAN_TYPE,
             DC.SPB_ANNOTATION_CLASS_NAME,
             DC.SPB_DEFINE_CLASS_NAME_XML_PATH,
@@ -416,21 +415,24 @@ public enum DbTableInfoEnum {
             DC.FA_ATTRIBUTE_VALUE,
             DC.FA_CLASS_NAME,
     }),
-    DTIE_FIELD_INFO("field_info", new String[]{
-            DC.FI_RECORD_ID,
-            DC.FI_SIMPLE_CLASS_NAME,
-            DC.FI_FIELD_NAME,
-            DC.FI_FIELD_TYPE_NAD,
-            DC.FI_ARRAY_DIMENSIONS,
-            DC.FI_FIELD_CATEGORY,
-            DC.FI_MODIFIERS,
-            DC.FI_PRIMITIVE_TYPE,
-            DC.FI_STATIC_FLAG,
-            DC.FI_FINAL_FLAG,
-            DC.FI_EXISTS_GET_METHOD,
-            DC.FI_EXISTS_SET_METHOD,
-            DC.FI_EXISTS_GENERICS_TYPE,
-            DC.FI_CLASS_NAME,
+    DTIE_FIELD_INFO("field_info", DC.FIELD_INFO_COLUMNS),
+    DTIE_DUP_FIELD_INFO("dup_field_info", DC.FIELD_INFO_COLUMNS),
+    DTIE_FIELD_USAGE_OTHER("field_usage_other", new String[]{
+            DC.FUO_RECORD_ID,
+            DC.FUO_FULL_METHOD,
+            DC.FUO_METHOD_RETURN_TYPE,
+            DC.FUO_STATIC_FLAG,
+            DC.FUO_GET_OR_PUT,
+            DC.FUO_FIELD_IN_SIMPLE_CLASS_NAME,
+            DC.FUO_FIELD_NAME,
+            DC.FUO_FIELD_TYPE,
+            DC.FUO_LINE_NUMBER,
+            DC.FUO_SIMPLE_CLASS_NAME,
+            DC.FUO_CLASS_NAME,
+            DC.FUO_METHOD_HASH,
+            DC.FUO_FIELD_IN_CLASS_NAME,
+            DC.FUO_CLASS_JAR_NUM,
+            DC.FUO_FIELD_JAR_NUM
     }),
     DTIE_GET_METHOD("get_method", DC.GET_SET_METHOD_COLUMNS),
     DTIE_SET_METHOD("set_method", DC.GET_SET_METHOD_COLUMNS),
@@ -679,6 +681,13 @@ public enum DbTableInfoEnum {
             DC.MMFS_XML_FILE_PATH,
             DC.MMFS_RESULT_MAP_ID,
             DC.MMFS_RESULT_MAP_HASH,
+    }),
+    DTIE_PACKAGE_INFO("package_info", new String[]{
+            DC.PI_RECORD_ID,
+            DC.PI_PACKAGE_NAME,
+            DC.PI_PACKAGE_LEVEL,
+            DC.PI_JAR_NUM,
+            DC.PI_JAR_FILE_NAME
     }),
     ;
 

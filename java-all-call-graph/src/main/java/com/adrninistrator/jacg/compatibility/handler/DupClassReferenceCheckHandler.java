@@ -1,0 +1,127 @@
+package com.adrninistrator.jacg.compatibility.handler;
+
+import com.adrninistrator.jacg.common.DC;
+import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassReference;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
+import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
+import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
+import com.adrninistrator.jacg.util.JACGSqlUtil;
+import com.adrninistrator.jacg.writer.WriterSupportHeader;
+import com.adrninistrator.javacg2.util.JavaCG2Util;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author adrninistrator
+ * @date 2025/8/10
+ * @description: 检查重复同名类中被引用的类处理类
+ */
+public class DupClassReferenceCheckHandler extends BaseCompatibilityCheckHandler implements QueryByPageCallBack<WriteDbData4ClassReference> {
+
+    // 代表当前查询的唯一类名
+    private String currentSimpleClassName = null;
+
+    private Map<Integer, WriteDbData4JarInfo> jarInfoMap;
+
+    private WriterSupportHeader writer;
+
+    public DupClassReferenceCheckHandler(ConfigureWrapper configureWrapper) {
+        super(configureWrapper);
+    }
+
+    // 检查类中引用的类是否存在
+    public boolean check() {
+        return QueryByPageHandler.queryAndHandle(this, 0);
+    }
+
+    @Override
+    public int queryCurrentEndId(int currentStartId, Object... argsByPage) {
+        // 当前方法的返回值不使用，返回任意值
+        return 0;
+    }
+
+    @Override
+    public List<WriteDbData4ClassReference> queryDataByPage(int currentStartId, int currentEndId, boolean lastQuery, Object... argsByPage) {
+        List<WriteDbData4ClassReference> list;
+        if (currentSimpleClassName == null) {
+            // 首次查询
+            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.DCR_QUERY_SIMPLE_CLASS_NAME_FIRST;
+            String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+            if (sql == null) {
+                sql = "select distinct " + JACGSqlUtil.joinColumns(DC.CR_SIMPLE_CLASS_NAME, DC.CR_JAR_NUM) +
+                        " from " + DbTableInfoEnum.DTIE_DUP_CLASS_REFERENCE.getTableName() +
+                        " order by " + DC.CR_SIMPLE_CLASS_NAME +
+                        " limit ?";
+                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            }
+            list = dbOperator.queryList(sql, WriteDbData4ClassReference.class, JACGConstants.DB_PAGE_HANDLE_SIZE);
+        } else {
+            // 非首次查询
+            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.DCR_QUERY_SIMPLE_CLASS_NAME_BY_PAGE;
+            String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+            if (sql == null) {
+                sql = "select distinct " + JACGSqlUtil.joinColumns(DC.CR_SIMPLE_CLASS_NAME, DC.CR_JAR_NUM) +
+                        " from " + DbTableInfoEnum.DTIE_DUP_CLASS_REFERENCE.getTableName() +
+                        " where " + DC.CR_SIMPLE_CLASS_NAME + " > ?" +
+                        " order by " + DC.CR_SIMPLE_CLASS_NAME +
+                        " limit ?";
+                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            }
+            list = dbOperator.queryList(sql, WriteDbData4ClassReference.class, currentSimpleClassName, JACGConstants.DB_PAGE_HANDLE_SIZE);
+        }
+
+        if (!JavaCG2Util.isCollectionEmpty(list)) {
+            // 查询结果非空，修改当前查询的唯一类名
+            currentSimpleClassName = list.get(list.size() - 1).getSimpleClassName();
+        }
+        return list;
+    }
+
+    @Override
+    public boolean handleDataList(List<WriteDbData4ClassReference> dataList, Object... argsByPage) throws Exception {
+        for (WriteDbData4ClassReference currentClassReference : dataList) {
+            // 查询完整类名
+            String className = dbOperWrapper.queryClassNameBySimple(currentClassReference.getSimpleClassName());
+            // 通过类名查询被引用的类名
+            List<WriteDbData4ClassReference> classReferenceList = classInfoHandler.queryReferencedClassInfo(className);
+            if (classReferenceList.isEmpty()) {
+                continue;
+            }
+            for (WriteDbData4ClassReference classReference : classReferenceList) {
+                // 检查指定的类是否存在
+                if (checkClassExists(classReference.getReferencedClassName())) {
+                    continue;
+                }
+                // 被引用的类不存在
+                WriteDbData4ClassInfo classInfo = classInfoHandler.queryClassInfoByClassName(className);
+                WriteDbData4JarInfo jarInfo = jarInfoMap.get(classReference.getJarNum());
+                writer.writeDataInLine(className,
+                        classInfo.getClassPathInJar(),
+                        jarInfo.getJarFullPath(),
+                        jarInfo.getInnerJarPath(),
+                        classReference.getReferencedClassName());
+            }
+        }
+        return true;
+    }
+
+    // 查询结果为空时需要结束循环查询
+    @Override
+    public boolean exitWhenQueryEmpty() {
+        return true;
+    }
+
+    public void setJarInfoMap(Map<Integer, WriteDbData4JarInfo> jarInfoMap) {
+        this.jarInfoMap = jarInfoMap;
+    }
+
+    public void setWriter(WriterSupportHeader writer) {
+        this.writer = writer;
+    }
+}

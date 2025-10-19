@@ -136,7 +136,7 @@ public class Neo4jDbOperWrapper extends DbOperWrapper {
         return jacgMethodInMCRepository.queryOneFullMethodByCallerSCN(appName, callerSimpleClassName);
     }
 
-    // 通过方法名称获取调用方方法
+    // 通过方法名获取调用方方法
     @Override
     public List<WriteDbData4MethodCall> queryCallerMethodByName(String callerSimpleClassName, String fullMethodPrefix) {
         List<Map<String, Object>> methodCallList = jacgMethodCallRepository.queryCallerMethodByName(appName, callerSimpleClassName, fullMethodPrefix);

@@ -5,7 +5,6 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.WriteDbHandlerWriteFileEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
-import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCallInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopAdvice;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopAdviceAround;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
@@ -81,13 +80,12 @@ public class WriteDbHandler4SpringAopAdviceAround extends AbstractWriteDbHandler
         List<Integer> proceedCallIdList = new ArrayList<>();
         for (WriteDbData4MethodCall methodCall : methodCallList) {
             // 处理查询到的每个方法调用，查询方法调用信息
-            List<WriteDbData4MethodCallInfo> methodCallInfoList = methodCallInfoHandler.queryMethodCallInfoByCallIdType(methodCall.getCallId(), 0,
+            List<String> argSeqStrList = methodCallInfoHandler.queryMethodCallInfoByCallIdType(methodCall.getCallId(), 0,
                     JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType());
-            for (WriteDbData4MethodCallInfo methodCallInfo : methodCallInfoList) {
-                int methodArgSeq = Integer.parseInt(methodCallInfo.getTheValue());
+            for (String argSeqStr : argSeqStrList) {
+                int methodArgSeq = Integer.parseInt(argSeqStr);
                 if (methodArgSeq > 0) {
-                    logger.info("找到Around类型的Spring AOP advice方法调用ProceedingJoinPoint.proceed方法 {} {} {}", methodCall.getCallId(), methodCall.getCallerFullMethod(),
-                            methodCall.getCallerLineNumber());
+                    logger.info("找到Around类型的Spring AOP advice方法调用ProceedingJoinPoint.proceed方法 {}", methodCall.genPrintInfo());
                     proceedCallIdList.add(methodCall.getCallId());
                     break;
                 }

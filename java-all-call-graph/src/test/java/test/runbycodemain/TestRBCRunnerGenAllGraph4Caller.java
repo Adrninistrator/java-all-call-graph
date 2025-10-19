@@ -1,5 +1,6 @@
 package test.runbycodemain;
 
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallLineData4Er;
@@ -10,6 +11,8 @@ import org.junit.Test;
 import test.annotation.JACGExample;
 import test.callgraph.extendcomplex.TestExtendComplex;
 import test.runbycode.base.TestRunByCodeBase;
+import test.runbycode.config.TestConfigGenerator;
+import test.runbycode.util.JACGTestUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,20 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
     @Test
     public void testWriteToFile() {
         int callGraphDirNumBefore = getCallGraphDirNum4Er();
+
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        // 设置基本的配置参数
+        TestConfigGenerator.setBaseConfig(configureWrapper);
+        // 使用H2数据库
+        TestConfigGenerator.useH2Db(configureWrapper);
+        // 设置需要生成向下的方法完整调用链的类或方法
+        TestConfigGenerator.setGenCallerGraphMethodClass(configureWrapper);
+        // 设置生成向下的方法完整调用链文件后，从最顶层调用方法开始向下查找包含指定关键字的方法的调用堆栈时，使用的关键字
+        TestConfigGenerator.setFindStackKeyword4er(configureWrapper);
+
+        // 尝试使用本地的配置参数
+        JACGTestUtil.useLocalConfig(configureWrapper);
+
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
         int callGraphDirNumAfter = getCallGraphDirNum4Er();
         Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore + 1);
@@ -65,7 +82,7 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
         int callGraphDirNumBefore = getCallGraphDirNum4Er();
         Assert.assertTrue(runnerGenAllGraph4Caller.run());
         int callGraphDirNumAfter = getCallGraphDirNum4Er();
-        Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore);
+        Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore + 1);
 
         Map<String, List<MethodCallLineData4Er>> allMethodCallLineData4ErMap = runnerGenAllGraph4Caller.getAllMethodCallLineData4ErMap();
         printMapContent(allMethodCallLineData4ErMap);

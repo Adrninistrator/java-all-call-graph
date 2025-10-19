@@ -1,8 +1,10 @@
 package com.adrninistrator.jacg.dto.methodcall;
 
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.method.MethodDetail;
 import com.adrninistrator.jacg.handler.dto.genericstype.GenericsTypeValue;
 import com.adrninistrator.jacg.handler.dto.genericstype.MethodArgGenericsTypeInfo;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 
 import java.util.Map;
 
@@ -25,6 +27,9 @@ public abstract class MethodCallLineData {
     // 以下为调用方（向上的方法调用）或被调用方法（向下的方法调用）相关数据
     // 实际（替换后的）的完整方法
     private final String actualFullMethod;
+
+    // 调用或被调用方法详情
+    private final MethodDetail methodDetail;
 
     // 实际（替换后的）方法HASH+长度
     private final String rawMethodHash;
@@ -86,6 +91,8 @@ public abstract class MethodCallLineData {
         this.methodCallId = methodCallId;
         this.callFlags = callFlags;
         this.callType = callType;
+
+        this.methodDetail = JACGClassMethodUtil.genMethodDetail(actualFullMethod, methodReturnType);
     }
 
     public int getMethodCallLevel() {
@@ -102,6 +109,10 @@ public abstract class MethodCallLineData {
 
     public String getActualFullMethod() {
         return actualFullMethod;
+    }
+
+    public MethodDetail getMethodDetail() {
+        return methodDetail;
     }
 
     public String getRawMethodHash() {

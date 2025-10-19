@@ -126,4 +126,23 @@ public class WriteDbData4SpringAopAdvice implements BaseWriteDbData {
     public void setDefineXmlPath(String defineXmlPath) {
         this.defineXmlPath = defineXmlPath;
     }
+
+    @Override
+    public String toString() {
+        return "WriteDbData4SpringAopAdvice{" +
+                "recordId=" + recordId +
+                ", type='" + type + '\'' +
+                ", xmlAspectId='" + xmlAspectId + '\'' +
+                ", xmlAspectMethodName='" + xmlAspectMethodName + '\'' +
+                ", adviceType='" + adviceType + '\'' +
+                ", xmlPointcutRef='" + xmlPointcutRef + '\'' +
+                ", expression='" + expression + '\'' +
+                ", aspectOrder=" + aspectOrder +
+                ", adviceFullMethod='" + adviceFullMethod + '\'' +
+                ", adviceMethodReturnType='" + adviceMethodReturnType + '\'' +
+                ", adviceMethodHash='" + adviceMethodHash + '\'' +
+                ", aspectClassName='" + aspectClassName + '\'' +
+                ", defineXmlPath='" + defineXmlPath + '\'' +
+                '}';
+    }
 }

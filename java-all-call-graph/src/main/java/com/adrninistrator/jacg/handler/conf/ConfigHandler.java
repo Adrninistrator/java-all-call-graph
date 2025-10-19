@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,18 +48,27 @@ public class ConfigHandler extends BaseHandler {
     }
 
     /**
-     * 判断使用 java-callgraph2 组件处理方法调用时是否解析被调用对象和参数可能的类型与值
+     * 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
      *
      * @return true: 解析 false: 不解析
      */
     public boolean checkParseMethodCallTypeValue() {
-        String parseMethodCallTypeValue = queryConfigValue(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getFileName(),
+        String parseMethodCallTypeValue = queryConfigValue(JavaCG2ConfigKeyEnum.values()[0].getFileName(),
                 JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getKey());
         if (Boolean.parseBoolean(parseMethodCallTypeValue)) {
-            logger.info("使用 java-callgraph2 组件处理方法调用时有解析被调用对象和参数可能的类型与值");
+            logger.info("使用 java-callgraph2 组件解析方法调用时有解析被调用对象和参数可能的类型与值");
             return true;
         }
-        logger.warn("使用 java-callgraph2 组件处理方法调用时未解析被调用对象和参数可能的类型与值");
+        logger.info("使用 java-callgraph2 组件解析方法调用时未解析被调用对象和参数可能的类型与值");
         return false;
+    }
+
+    /**
+     * 提示使用 java-callgraph2 组件解析方法调用时未解析被调用对象和参数可能的类型与值
+     */
+    public void noticeParseMethodCallTypeValue() {
+        logger.error("使用 java-callgraph2 组件解析方法调用时未解析被调用对象和参数可能的类型与值，" +
+                "需要将 {} 参数值指定为 {}", configureWrapper.genConfigUsage(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE), Boolean.TRUE);
+        throw new JavaCG2RuntimeException("使用 java-callgraph2 组件解析方法调用时未解析被调用对象和参数可能的类型与值，请按照日志提示处理");
     }
 }

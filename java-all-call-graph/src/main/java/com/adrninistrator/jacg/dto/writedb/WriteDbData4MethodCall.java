@@ -101,6 +101,11 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
         return writeDbData4MethodCall;
     }
 
+    // 打印用于显示的信息
+    public String genPrintInfo() {
+        return "callId [" + callId + "] callerFullMethod [" + callerFullMethod + "] callerLineNumber [" + callerLineNumber + "] calleeFullMethod [" + calleeFullMethod + "]";
+    }
+
     //
     public int getCallId() {
         return callId;
@@ -273,10 +278,11 @@ public class WriteDbData4MethodCall implements BaseWriteDbData {
     @Override
     public String toString() {
         return "callId=" + callId +
-                ", callerSimpleClassName='" + callerSimpleClassName + '\'' +
-                ", callerMethodName='" + callerMethodName + '\'' +
+                ", callType='" + callType + '\'' +
+                ", callerFullMethod='" + callerFullMethod + '\'' +
+                ", callerReturnType='" + callerReturnType + '\'' +
                 ", callerLineNumber=" + callerLineNumber +
-                ", calleeSimpleClassName='" + calleeSimpleClassName + '\'' +
-                ", calleeMethodName='" + calleeMethodName + '\'';
+                ", calleeFullMethod='" + calleeFullMethod + '\'' +
+                ", rawReturnType='" + rawReturnType + '\'';
     }
 }

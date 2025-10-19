@@ -13,6 +13,7 @@ public class WriteDbData4SpringBean implements BaseWriteDbData {
     private int seq;
     private String simpleClassName;
     private String className;
+    private String profile;
     private String beanType;
     private String annotationClassName;
     private String defineClassNameXmlPath;
@@ -55,6 +56,14 @@ public class WriteDbData4SpringBean implements BaseWriteDbData {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
     }
 
     public String getBeanType() {

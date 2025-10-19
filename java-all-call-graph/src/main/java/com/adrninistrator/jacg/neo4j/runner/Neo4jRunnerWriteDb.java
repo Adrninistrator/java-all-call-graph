@@ -214,10 +214,10 @@ public class Neo4jRunnerWriteDb extends RunnerWriteDb {
         RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
         runnerWriteDb.configSkipCallJavaCG2(javaCG2OutputInfo, currentOutputDirPath);
         if (!runnerWriteDb.run()) {
-            this.setSomeTaskFail(true);
+            this.recordTaskFail();
         }
         if (runnerWriteDb.isSomeTaskFail()) {
-            this.setSomeTaskFail(true);
+            this.recordTaskFail();
         }
     }
 

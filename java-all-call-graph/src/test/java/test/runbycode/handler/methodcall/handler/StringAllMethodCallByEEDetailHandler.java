@@ -33,6 +33,6 @@ public class StringAllMethodCallByEEDetailHandler extends BaseMethodCallByEEDeta
     @Override
     protected void handleMethodWithArgs(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
                                         MethodDetailNoReturnType calleeMethodDetailNoReturnType, ObjArgsInfoInMethodCall objArgsInfoInMethodCall, Object... args) {
-        logger.info("### {} {} {}", methodCall.getCallerFullMethod(), methodCall.getCalleeFullMethod(), methodCall.getCallerLineNumber());
+        logger.info("### {}", methodCall.genPrintInfo());
     }
 }

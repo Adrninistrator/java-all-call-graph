@@ -5,7 +5,7 @@ import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
 /**
  * @author adrninistrator
  * @date 2023/9/18
- * @description: 用于写入数据库的数据，properties文件配置信息
+ * @description: 用于写入数据库的数据，properties文件配置内容
  */
 public class WriteDbData4PropertiesConf implements BaseWriteDbData {
 

@@ -61,7 +61,7 @@ public class PropertiesConfHandler extends BaseHandler {
     }
 
     /**
-     * 查询properties文件中指定名称的配置信息
+     * 查询properties文件中指定名称的配置参数
      *
      * @param propKey   properties文件配置的名称
      * @param usePrefix true: 配置名称使用前缀匹配 false: 配置名称完整匹配
@@ -84,7 +84,7 @@ public class PropertiesConfHandler extends BaseHandler {
     }
 
     /**
-     * 查询指定properties文件的配置信息
+     * 查询指定properties文件的配置参数
      *
      * @param propFileName properties文件名称，不包含目录
      * @return
@@ -122,7 +122,7 @@ public class PropertiesConfHandler extends BaseHandler {
     }
 
     /**
-     * 向数据库表插入properties文件配置信息
+     * 向数据库表插入properties文件配置内容
      * 当前方法不允许并发调用
      *
      * @param propertiesConfList 需要插入的记录

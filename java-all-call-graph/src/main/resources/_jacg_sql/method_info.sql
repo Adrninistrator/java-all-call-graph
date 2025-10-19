@@ -13,7 +13,7 @@ CREATE TABLE if not exists jacg_method_info_{appName} (
   class_name varchar(255) NOT NULL COMMENT '完整类名',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
   method_instructions_hash varchar(32) NOT NULL COMMENT '方法指令的HASH值（MD5），可能为空字符串',
-  jar_num int NOT NULL COMMENT '方法所在的Jar包序号',
+  jar_num int NOT NULL COMMENT '方法所在的jar文件序号',
   PRIMARY KEY (record_id),
   INDEX idx_mi_mh_{appName}(method_hash),
   INDEX idx_mi_cm_{appName}(simple_class_name, method_name),

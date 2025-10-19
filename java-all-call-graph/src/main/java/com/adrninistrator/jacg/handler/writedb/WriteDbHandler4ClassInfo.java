@@ -29,8 +29,11 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
     // 枚举唯一类名集合
     private Set<String> enumSimpleClassNameSet;
 
+    private final boolean isHandler4ClassInfo;
+
     public WriteDbHandler4ClassInfo(WriteDbResult writeDbResult) {
         super(writeDbResult);
+        isHandler4ClassInfo = this.getClass().getName().equals(WriteDbHandler4ClassInfo.class.getName());
     }
 
     @Override
@@ -38,7 +41,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
         String className = readLineData();
         String simpleClassName = dbOperWrapper.querySimpleClassName(className);
         int accessFlags = Integer.parseInt(readLineData());
-        if (JavaCG2ByteCodeUtil.isEnumFlag(accessFlags) && enumSimpleClassNameSet != null) {
+        if (isHandler4ClassInfo && JavaCG2ByteCodeUtil.isEnumFlag(accessFlags) && enumSimpleClassNameSet != null) {
             // 记录枚举唯一类名
             enumSimpleClassNameSet.add(simpleClassName);
         }
@@ -83,7 +86,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
                 "完整类名",
                 "类的access_flags",
                 "类文件的HASH值（MD5）",
-                "类所在的Jar包序号",
+                "类所在的jar文件序号",
                 "类在jar包中的路径"
         };
     }
@@ -91,7 +94,7 @@ public class WriteDbHandler4ClassInfo extends AbstractWriteDbHandler<WriteDbData
     @Override
     public String[] chooseFileDetailInfo() {
         return new String[]{
-                "类的信息，包括类名、access_flags、类文件的HASH值（MD5）、类所在的Jar包序号等"
+                "类的信息，包括类名、access_flags、类文件的HASH值（MD5）、类所在的jar文件序号等"
         };
     }
 

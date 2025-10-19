@@ -11,6 +11,7 @@ import com.adrninistrator.jacg.extensions.methodcall.AbstractJACGMethodCallExten
 import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
@@ -82,7 +83,7 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         key
             唯一类名
         value
-            get方法名称Set
+            get方法名Set
      */
     private Map<String, Set<String>> getMethodSimpleClassMap;
 
@@ -92,7 +93,7 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         key
             唯一类名
         value
-            set方法名称Set
+            set方法名Set
      */
     private Map<String, Set<String>> setMethodSimpleClassMap;
 
@@ -137,20 +138,20 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         String callType = tmpCalleeFullMethod.substring(indexCalleeLeftBracket + JavaCG2Constants.FILE_KEY_CALL_TYPE_FLAG1.length(), indexCalleeRightBracket);
         String callerClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(callerFullMethod);
         String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
-        Integer callerJarNum = (JavaCG2Constants.EMPTY_JAR_NUM.equals(callerJarNumStr) ? null : Integer.parseInt(callerJarNumStr));
-        Integer calleeJarNum = (JavaCG2Constants.EMPTY_JAR_NUM.equals(calleeJarNumStr) ? null : Integer.parseInt(calleeJarNumStr));
+        Integer callerJarNum = JACGUtil.parseJarNum(callerJarNumStr);
+        Integer calleeJarNum = JACGUtil.parseJarNum(calleeJarNumStr);
 
         if (JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER.equals(rawReturnType) || JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER.equals(actualReturnType)) {
             // 被调用方法返回类型使用占位符，需要查询被调用方法的参数类型与返回类型
             String calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
-            List<WriteDbData4MethodInfo> methodInfoList = methodInfoHandler.queryMethodInfoByClassMethod(calleeClassName, calleeMethodName);
+            List<WriteDbData4MethodInfo> methodInfoList = methodInfoHandler.queryMethodInfoByClassMethodSuperInterface(calleeClassName, calleeMethodName);
             if (JavaCG2Util.isCollectionEmpty(methodInfoList)) {
-                logger.error("根据类名与方法名查询到的方法预期为1个，实际为空 {} {}", calleeClassName, calleeMethodName);
-                throw new JavaCG2RuntimeException("根据类与方法名称查询到的方法预期为1个，实际为空");
+                logger.error("获取被调用方法返回类型，根据类名与方法名查询到的方法预期为1个，实际为空 {} {} {} {}", callerFullMethod, callerLineNum, calleeClassName, calleeMethodName);
+                throw new JavaCG2RuntimeException("获取被调用方法返回类型，根据类与方法名查询到的方法预期为1个，实际为空");
             }
             if (methodInfoList.size() != 1) {
-                logger.error("根据类名与方法名查询到的方法预期为1个，实际存在多个 {} {} {}", calleeClassName, calleeMethodName, methodInfoList.size());
-                throw new JavaCG2RuntimeException("根据类与方法名称查询到的方法预期为1个，实际存在多个");
+                logger.error("获取被调用方法返回类型，根据类名与方法名查询到的方法预期为1个，实际存在多个 {} {} {} {} {}", callerFullMethod, callerLineNum, calleeClassName, calleeMethodName, methodInfoList.size());
+                throw new JavaCG2RuntimeException("获取被调用方法返回类型，根据类与方法名查询到的方法预期为1个，实际存在多个");
             }
             WriteDbData4MethodInfo methodInfo = methodInfoList.get(0);
             logger.info("修改根据类名与方法名查询到的完整方法及返回类型 {} {} {} {}", calleeClassName, calleeMethodName, methodInfo.getFullMethod(), methodInfo.getReturnType());
@@ -215,8 +216,8 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
                 "被调用对象类型，t:调用当前实例的方法，sf:调用静态字段的方法，f:调用字段的方法，v:调用其他变量的方法",
                 "被调用方法原始的返回类型",
                 "被调用方法实际的返回类型",
-                "调用方法Jar包序号",
-                "被调用方法Jar包序号",
+                "调用方法jar文件序号",
+                "被调用方法jar文件序号",
                 "描述信息，默认为空"
         };
     }

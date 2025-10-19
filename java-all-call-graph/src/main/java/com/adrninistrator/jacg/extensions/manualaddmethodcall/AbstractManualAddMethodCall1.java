@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author adrninistrator
  * @date 2023/3/24
- * @description: 人工添加方法调用关系，处理特定的子类与实现类，当前类仅判断了方法名称，未判断方法参数
+ * @description: 人工添加方法调用关系，处理特定的子类与实现类，当前类仅判断了方法名，未判断方法参数
  */
 public abstract class AbstractManualAddMethodCall1 {
     private static final Logger logger = LoggerFactory.getLogger(AbstractManualAddMethodCall1.class);

@@ -12,7 +12,7 @@ import com.adrninistrator.javacg2.util.JavaCG2Util;
 /**
  * @author adrninistrator
  * @date 2023/9/18
- * @description: 写入数据库，properties文件配置信息
+ * @description: 写入数据库，properties文件配置内容
  */
 @JACGWriteDbHandler(
         readFile = true,
@@ -71,11 +71,11 @@ public class WriteDbHandler4PropertiesConf extends AbstractWriteDbHandler<WriteD
 
     @Override
     public String chooseNotMainFileDesc() {
-        return "properties文件配置信息";
+        return "properties文件配置内容";
     }
 
     @Override
     public String[] chooseFileDetailInfo() {
-        return new String[]{"保存properties文件名，及其中的配置信息"};
+        return new String[]{"保存properties文件名，及其中的配置参数"};
     }
 }

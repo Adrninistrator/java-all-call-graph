@@ -10,11 +10,19 @@
 
 [加群讨论](docs/group_discussions.md)
 
-# 3. DeepWiki 链接
+# 3. 让大模型基于项目回答问题
+
+## 3.1. DeepWiki
 
 [https://deepwiki.com/Adrninistrator/java-all-call-graph](https://deepwiki.com/Adrninistrator/java-all-call-graph)
 
 通过大模型分析项目代码，可向大模型提出关于项目的问题，包括使用方法等
+
+## 3.2. zread.ai
+
+[https://zread.ai/Adrninistrator/java-all-call-graph](https://zread.ai/Adrninistrator/java-all-call-graph)
+
+作用同上
 
 # 4. 前言
 
@@ -48,9 +56,27 @@ IDEA 提供了显示调用指定 Java 方法向上的完整调用链的功能，
 
 [更新说明](docs/change_log.md)
 
-# 8. 配置参数示例
+# 8. 配置参数说明
 
-[配置参数示例](docs/config_example.md)
+## 8.1. 配置参数示例
+
+[配置参数示例](docs/_jacg_all_config.md)
+
+## 8.2. 表达式使用通用说明文档
+
+[表达式使用通用说明文档](src/main/resources/_el_example/el_usage.md)
+
+## 8.3. 表达式字符串比较说明文档
+
+[表达式字符串比较说明文档](src/main/resources/_el_example/string_compare.md)
+
+## 8.4. 各表达式对应的使用示例文档
+
+见 src/main/resources/_el_example 目录下各目录中表达式配置文件对应的文档
+
+## 8.5. 各入口类使用的配置参数
+
+参考 docs/class_use_config 目录中的对应文档
 
 # 9. 使用说明
 

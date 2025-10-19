@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.conf.enums;
 
 import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 import com.adrninistrator.javacg2.conf.enums.interfaces.OtherConfigInterface;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 
@@ -11,8 +12,8 @@ import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
  * @description:
  */
 public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
-    OCFUSE_METHOD_CLASS_4CALLEE(InputDirEnum.IDE_CONFIG.getDirName() + "/method_class_4callee.properties",
-            new String[]{"(作用) 生成调用指定类的所有向上的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
+    OCFUSE_METHOD_CLASS_4CALLEE(InputDirEnum.IDE_GEN_ALL_CALL_GRAPH.getDirName() + "/method_class_4callee.properties",
+            new String[]{"(作用) 生成调用指定类或方法向上的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
                     "(内容) 指定需要生成的类名，或类名+方法前缀/代码行号",
                     "(格式1) {类名}",
                     "(格式2) {类名}:{方法名}",
@@ -34,8 +35,8 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
                     "Test1:234",
                     "Test1:test(java.lang.String):java.lang.String"}
             , null),
-    OCFUSE_METHOD_CLASS_4CALLER(InputDirEnum.IDE_CONFIG.getDirName() + "/method_class_4caller.properties",
-            new String[]{"(作用) 生成指定类调用的所有向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
+    OCFUSE_METHOD_CLASS_4CALLER(InputDirEnum.IDE_GEN_ALL_CALL_GRAPH.getDirName() + "/method_class_4caller.properties",
+            new String[]{"(作用) 生成指定类调用或方法向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
                     "(内容) 指定需要生成的类名+方法前缀/代码行号，可指定起始代码行号、结束代码行号",
                     "(格式1) {类名}",
                     "(格式2) {类名}:{方法名} {起始代码行号}-{结束代码行号}",
@@ -61,117 +62,27 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
                     "Test1:139",
                     "Test1:139 139-492"}
             , null),
-    OCFUSE_IGNORE_CALL_TYPE(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_call_type.properties",
-            new String[]{"(作用) 生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
-                    "(内容) 指定忽略的方法调用类型",
-                    "(格式) 指定 JavaCG2CallTypeEnum 枚举中的type",
+    OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM(InputDirEnum.IDE_GEN_ALL_CALL_GRAPH.getDirName() + "/caller_graph_callee_arg_type_polymorphism.properties",
+            new String[]{"(作用) 生成向下完整方法调用链时，指定哪些方法参数作为被调用对象涉及多态时的类型替换（每行指定一项配置，可指定多行）",
+                    "(作用) 即对被调用类型使用实际传入的子类类型替换方法参数定义的父类类型",
+                    "(前提) 使用 java-callgraph2 组件解析方法调用时需要将" + JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getType() + " 参数值设置为 " + Boolean.TRUE,
+                    "(限制) 仅支持获取被调用方法被直接调用（没有嵌套多层调用）时的子类类型",
+                    "(限制) 仅支持调用被调用方法时使用一种子类类型，不支持多种",
+                    "(格式1) {参数作为被调用对象时需要替换被调用类型的完整方法}={对应的参数序号，从1开始}",
+                    "(格式2) {参数作为被调用对象时需要替换被调用类型的完整方法}:{方法返回类型}={对应的参数序号，从1开始}",
                     "(示例)",
-                    "_ITF",
-                    "_SCC"}
-            , null),
-    // todo 配置参数修改为表达式时考虑修改方式
-    OCFUSE_IGNORE_METHOD_TYPE_4CALLER(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_method_type_4caller.properties",
-            new String[]{"(作用) 生成指定类/方法调用的所有向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
-                    "(内容) 指定忽略的方法类型",
-                    "(格式) 指定 JACGMethodTypeEnum 枚举中的type",
-                    "(示例)",
-                    "dto.get.set"}
-            , null),
-    OCFUSE_IGNORE_CLASS_KEYWORD(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_class_keyword.properties",
-            new String[]{"(作用) 生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
-                    "(内容) 指定忽略的类名关键字",
-                    "(格式) 可指定包名中的关键字，或类名中的关键字",
-                    "(示例)",
-                    ".dto.",
-                    ".entity.",
-                    "Enum",
-                    "Constant"}
-            , null),
-    OCFUSE_IGNORE_FULL_METHOD_PREFIX(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_full_method_prefix.properties",
-            new String[]{"(作用) 生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
-                    "(内容) 指定忽略的完整方法前缀",
-                    "(格式) 可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数",
-                    "(示例)",
-                    "com.test",
-                    "com.test.Test1",
-                    "com.test.Test1:func1",
-                    "com.test.Test1:func1(",
-                    "com.test.Test1:func1(java.lang.String)"}
-            , null),
-    OCFUSE_IGNORE_METHOD_PREFIX(InputDirEnum.IDE_CONFIG.getDirName() + "/ignore_method_prefix.properties",
-            new String[]{"(作用) 生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
-                    "(内容) 指定忽略的方法名前缀",
-                    "(示例)",
-                    "func1",
-                    "func1(",
-                    "func1()",
-                    "func1(java.lang.String)",
-                    "toString()",
-                    "hashCode()",
-                    "equals(java.lang.Object)",
-                    "<init>(",
-                    "<clinit>(",
-                    "name()",
-                    "clone()"}
-            , null),
-    OCFUSE_INCLUDE_FULL_METHOD_PREFIX(InputDirEnum.IDE_CONFIG.getDirName() + "/include_full_method_prefix.properties",
-            new String[]{"(作用) 生成指定类/方法调用的所有向上/向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）",
-                    "(内容) 指定需要包含的完整方法前缀",
-                    "(优先级低于) allowed_class_prefix.properties、ignore_call_type.properties",
-                    "(优先级高于) ignore_class_keyword.properties、ignore_full_method_prefix.properties、ignore_method_prefix.properties",
-                    "(格式) 可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数",
-                    "(示例)",
-                    "com.test",
-                    "com.test.Test1",
-                    "com.test.Test1:func1",
-                    "com.test.Test1:func1(",
-                    "com.test.Test1:func1(java.lang.String)"}
+                    "a.b.C:f1(int,a.b.Super)=2",
+                    "a.b.C:f1(int,a.b.Super):java.lang.String=1"}
             , null),
     OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE(InputDirEnum.IDE_BUSINESS_DATA_TYPE.getDirName() + "/business_data_type_show_4ee.properties",
             new String[]{"生成向上的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据",
                     "默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEe=true的type",
-                    DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
-                    DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(),
-                    DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType()}
+                    DefaultBusinessDataTypeEnum.getSupportTypeStr(true)}
             , null),
     OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER(InputDirEnum.IDE_BUSINESS_DATA_TYPE.getDirName() + "/business_data_type_show_4er.properties",
             new String[]{"生成向下的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据",
                     "默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEr=true的type",
-                    DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
-                    DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(),
-                    DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType(),
-                    DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType(),
-                    DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_WRITE_TABLE.getType()}
-            , null),
-    OCFUSE_PARSE_SPRING_AOP_IGNORE_CLASS_PREFIX(InputDirEnum.IDE_CONFIG.getDirName() + "/parse_spring_aop_ignore_class_prefix.properties",
-            new String[]{"(作用) 解析Spring AOP advice影响的方法时需要忽略的Spring Bean类名配置文件（每行指定一项配置，可指定多行）",
-                    "(内容) 指定需要忽略的Spring Bean类名前缀",
-                    "(格式) 可指定类名或包名",
-                    "(示例)",
-                    "com.test",
-                    "com.test.Test1"}
-            , null),
-    OCFUSE_JAR_DIFF_CALLEE_METHOD_PREFIX(InputDirEnum.IDE_JAR_DIFF.getDirName() + "/jar_diff_callee_method_prefix.properties",
-            new String[]{"(作用) JarDIff比较新旧两个目录的jar文件，获得发生变化的方法的影响范围（生成向上的完整方法调用链及调用堆栈）使用的配置文件（每行指定一项配置，可指定多行）",
-                    "(内容) 指定发生变化的方法中，需要进行处理的方法前缀（若未指定则不限制）",
-                    "(格式) 可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数",
-                    "(示例)",
-                    "com.test",
-                    "com.test.Test1",
-                    "com.test.Test1:func1",
-                    "com.test.Test1:func1(",
-                    "com.test.Test1:func1(java.lang.String)"}
-            , null),
-    OCFUSE_JAR_DIFF_CALLER_METHOD_PREFIX(InputDirEnum.IDE_JAR_DIFF.getDirName() + "/jar_diff_caller_method_prefix.properties",
-            new String[]{"(作用) JarDIff比较新旧两个目录的jar文件，获得发生变化的方法向下的完整方法调用链使用的配置文件（每行指定一项配置，可指定多行）",
-                    "(内容) 指定发生变化的方法中，需要进行处理的方法前缀（若未指定则不限制）",
-                    "(格式) 可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数",
-                    "(示例)",
-                    "com.test",
-                    "com.test.Test1",
-                    "com.test.Test1:func1",
-                    "com.test.Test1:func1(",
-                    "com.test.Test1:func1(java.lang.String)"}
+                    DefaultBusinessDataTypeEnum.getSupportTypeStr(false)}
             , null),
     ;
 
@@ -189,7 +100,7 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
     }
 
     @Override
-    public String getEnumConstantsName() {
+    public String getEnumConstantName() {
         return name();
     }
 

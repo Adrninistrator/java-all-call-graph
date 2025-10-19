@@ -114,6 +114,8 @@ public class JACGCommonNameConstants {
 
     public static final String SPRING_TASK_ANNOTATION = "org.springframework.scheduling.annotation.Scheduled";
 
+    public static final String SPRING_BOOT_CONDITIONAL_ON_CLASS = "org.springframework.boot.autoconfigure.condition.ConditionalOnClass";
+
     public static final String JAVAX_HTTP_SERVLET_RESPONSE = "javax.servlet.http.HttpServletResponse";
 
     public static final String JSON_PROPERTY_ANNOTATION_NAME_ = JsonProperty.class.getName();
@@ -121,6 +123,7 @@ public class JACGCommonNameConstants {
     public static final String MYBATIS_PARAM_ANNOTATION_NAME = "org.apache.ibatis.annotations.Param";
 
     public static final String ANNOTATION_ATTRIBUTE_NAME_VALUE = "value";
+    public static final String ANNOTATION_ATTRIBUTE_NAME_NAME = "name";
 
     public static final String ENUM_METHOD_NAME = JavaCG2Constants.FLAG_COLON + "name()";
 
@@ -129,7 +132,19 @@ public class JACGCommonNameConstants {
             MethodInvocationProceedingJoinPoint.class.getName()
     };
 
+    public static final String CLASS_NAME_STRING_BUILDER = StringBuilder.class.getName();
+    public static final String CLASS_NAME_STRING_BUFFER = StringBuffer.class.getName();
+
     public static final String METHOD_NAME_PROCEED = "proceed";
+    public static final String METHOD_NAME_CLONE = "clone";
+    public static final String METHOD_NAME_APPEND = "append";
+    public static final String METHOD_NAME_TO_STRING = "toString";
+    public static final String METHOD_NAME_GET_NAME = "getName";
+    public static final String METHOD_NAME_GET_SIMPLE_NAME = "getSimpleName";
+
+    public static final String METHOD_NAME_WITH_ARG_TYPE_CLONE = METHOD_NAME_CLONE + JavaCG2Constants.FLAG_LEFT_RIGHT_BRACKET;
+    public static final String METHOD_NAME_WITH_ARG_TYPE_GET_NAME = METHOD_NAME_GET_NAME + JavaCG2Constants.FLAG_LEFT_RIGHT_BRACKET;
+    public static final String METHOD_NAME_WITH_ARG_TYPE_GET_SIMPLE_NAME = METHOD_NAME_GET_SIMPLE_NAME + JavaCG2Constants.FLAG_LEFT_RIGHT_BRACKET;
 
     private JACGCommonNameConstants() {
         throw new IllegalStateException("illegal");

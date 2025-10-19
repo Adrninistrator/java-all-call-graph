@@ -7,13 +7,13 @@ package com.adrninistrator.jacg.dto.method;
  */
 public class MethodAndHash {
     // 完整方法
-    private final String fullMethod;
+    private  String fullMethod;
 
     // 方法返回类型
-    private final String methodReturnType;
+    private  String methodReturnType;
 
     // 方法HASH
-    private final String methodHash;
+    private  String methodHash;
 
     public MethodAndHash(String fullMethod, String methodReturnType, String methodHash) {
         this.fullMethod = fullMethod;
@@ -34,11 +34,23 @@ public class MethodAndHash {
         return fullMethod;
     }
 
+    public void setFullMethod(String fullMethod) {
+        this.fullMethod = fullMethod;
+    }
+
     public String getMethodReturnType() {
         return methodReturnType;
     }
 
+    public void setMethodReturnType(String methodReturnType) {
+        this.methodReturnType = methodReturnType;
+    }
+
     public String getMethodHash() {
         return methodHash;
+    }
+
+    public void setMethodHash(String methodHash) {
+        this.methodHash = methodHash;
     }
 }

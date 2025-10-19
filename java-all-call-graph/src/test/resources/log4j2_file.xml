@@ -15,8 +15,22 @@
             <DefaultRolloverStrategy max="512"/>
         </RollingFile>
 
+        <RollingFile name="slow_query_file" fileName="log/jacg_slow_query${sys:jacg.log.file.suffix:-}.log"
+                     filePattern="log/jacg_slow_query${sys:jacg.log.file.suffix:-}.log.%d{yyyy-MM-dd}.%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}.%M(%F:%L) - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="1024 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="512"/>
+        </RollingFile>
+
         <Async name="async" bufferSize="512" includeLocation="true">
             <AppenderRef ref="file"/>
+        </Async>
+
+        <Async name="slow_query" bufferSize="512" includeLocation="true">
+            <AppenderRef ref="slow_query_file"/>
         </Async>
 
     </Appenders>
@@ -26,16 +40,21 @@
             <AppenderRef ref="async"/>
         </Root>
 
+        <AsyncLogger name="jacg_slow_query" level="info" additivity="false" includeLocation="true">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="slow_query"/>
+        </AsyncLogger>
+
         <AsyncLogger name="com.adrninistrator" level="info" additivity="false" includeLocation="true">
-            <AppenderRef ref="console" />
-            <AppenderRef ref="async" />
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="async"/>
         </AsyncLogger>
 
         <Logger name="org.neo4j.ogm.drivers.bolt.response.BoltResponse" level="off" additivity="false"/>
 
-<!--        <Logger name="org.springframework.data.neo4j" level="info" additivity="false">-->
-<!--            <AppenderRef ref="console"/>-->
-<!--            <AppenderRef ref="async" />-->
-<!--        </Logger>-->
+        <!--        <Logger name="org.springframework.data.neo4j" level="info" additivity="false">-->
+        <!--            <AppenderRef ref="console"/>-->
+        <!--            <AppenderRef ref="async" />-->
+        <!--        </Logger>-->
     </Loggers>
 </Configuration>

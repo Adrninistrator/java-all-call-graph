@@ -56,7 +56,8 @@ public class CharsetMethodCallByArgsHandler extends BaseMethodCallByArgsHandler 
             return StringUtils.equalsAnyIgnoreCase(methodCallInfo.getTheValue(),
                     "US-ASCII", "ISO-8859-1", "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16", "ASCII", "BIG5", "UTF-32", "GBK", "GB2312");
         }
-        return StringUtils.equalsAnyIgnoreCase(methodCallInfo.getTheValue(), STANDARD_CHARSETS_ALL);
+        return JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD.getType().equals(methodCallInfo.getType()) &&
+                StringUtils.equalsAnyIgnoreCase(methodCallInfo.getTheValue(), STANDARD_CHARSETS_ALL);
     }
 
     @Override

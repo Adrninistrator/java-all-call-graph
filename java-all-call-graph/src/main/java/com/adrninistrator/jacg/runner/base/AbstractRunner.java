@@ -46,9 +46,6 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
     private final AtomicBoolean runFlag = new AtomicBoolean(false);
 
-    // 当前的输出目录
-    protected String currentOutputDirPath;
-
     protected DbOperator dbOperator;
 
     protected DbOperWrapper dbOperWrapper;
@@ -74,21 +71,31 @@ public abstract class AbstractRunner extends AbstractExecutor {
     }
 
     public AbstractRunner(ConfigureWrapper configureWrapper) {
-        this.configureWrapper = configureWrapper;
+        super(configureWrapper);
+        // 对当前使用的配置进行自定义设置，适用于在构造函数中需要修改的场景
+        configConfigureWrapper(this.configureWrapper);
+
+        appName = this.configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
         // 判断当前的子类是否需要操作数据库，RunnerWriteCallGraphFile 类不需要
         if (useNeo4j()) {
-            dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, true, this);
-            appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
-            jacgExtendsImplHandler = new Neo4jExtendsImplHandler(configureWrapper);
+            dbOperWrapper = DbInitializer.genDbOperWrapper(this.configureWrapper, true, this);
+            jacgExtendsImplHandler = new Neo4jExtendsImplHandler(this.configureWrapper);
         } else if (handleDb()) {
             // 完成需要使用的基础配置的初始化
-            dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, false, this);
+            dbOperWrapper = DbInitializer.genDbOperWrapper(this.configureWrapper, false, this);
             dbOperator = dbOperWrapper.getDbOperator();
-            appName = dbOperator.getAppName();
             tableSuffix = dbOperator.getTableSuffix();
             jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
             jarInfoHandler = new JarInfoHandler(dbOperWrapper);
         }
+    }
+
+    /**
+     * 对当前使用的配置进行自定义设置，适用于在构造函数中需要修改的场景
+     *
+     * @param configureWrapper
+     */
+    protected void configConfigureWrapper(ConfigureWrapper configureWrapper) {
     }
 
     /**
@@ -111,14 +118,14 @@ public abstract class AbstractRunner extends AbstractExecutor {
     protected abstract boolean checkH2DbFile();
 
     /**
-     * 打印所有的配置参数信息
+     * 打印所有的配置参数
      */
     protected boolean printAllConfigInfo() {
         return configureWrapper.printAllConfigInfo(currentSimpleClassName, currentOutputDirPath, JACGConstants.FILE_JACG_ALL_CONFIG_MD);
     }
 
     /**
-     * 打印有使用的配置信息
+     * 打印有使用的配置参数
      */
     protected boolean printUsedConfigInfo() {
         return configureWrapper.printUsedConfigInfo(currentSimpleClassName, currentOutputDirPath, JACGConstants.FILE_JACG_USED_CONFIG_MD);
@@ -158,7 +165,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
             if (threadFactory4TPE != null) {
                 int threadPoolExceptionCount = threadFactory4TPE.getExceptionCount();
                 if (threadPoolExceptionCount > 0) {
-                    logger.error("线程池执行的任务失败次数为 {}", threadPoolExceptionCount);
+                    logger.error("线程池执行的任务失败次数为 {} {}", currentSimpleClassName, threadPoolExceptionCount);
                     someTaskFail = true;
                 }
             }
@@ -167,15 +174,14 @@ public abstract class AbstractRunner extends AbstractExecutor {
                 logger.error("{} 执行失败 {}", currentSimpleClassName, ERROR_LOG_NOTICE);
                 return false;
             }
-            // 执行完毕时打印当前使用的配置信息
 
             if (currentOutputDirPath != null) {
-                // 打印当前使用的配置信息
+                // 打印当前使用的配置参数
                 if (!printUsedConfigInfo()) {
                     return false;
                 }
             } else {
-                logger.info("没有执行生成文件的操作，不打印当前使用的配置信息");
+                logger.info("没有执行生成文件的操作，不打印当前使用的配置参数 {}", currentSimpleClassName);
             }
 
             logger.info("{} 执行完毕，当前生成文件所在目录 {} ，耗时: {} 秒", currentSimpleClassName, currentOutputDirPath, JavaCG2Util.getSpendSeconds(startTime));
@@ -196,7 +202,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
     // 执行检查使用的组件版本
     private void doCheckJarVersion(Class<?> clazz, String expectedJarName) {
-        String jarFilePath = JACGFileUtil.getJarFilePathOfClass(clazz);
+        String jarFilePath = JavaCG2FileUtil.getJarFilePathOfClass(clazz);
         /*
             spring-boot中的jar格式如下，需要兼容：
             file:/D:/java-all-call-graph/build/spring-boot/java-all-call-graph.jar!/BOOT-INF/lib/druid-1.2.15.jar!/
@@ -337,12 +343,82 @@ public abstract class AbstractRunner extends AbstractExecutor {
         return false;
     }
 
+    /**
+     * 创建输出文件所在目录
+     *
+     * @param upwardDir 上层目录名
+     * @return
+     */
+    protected boolean createOutputDir(String upwardDir) {
+        return createOutputDir(upwardDir, null);
+    }
+
+    /**
+     * 创建输出文件所在目录
+     *
+     * @param upwardDir   上层目录名
+     * @param downwardDir 下层目录名，可为空
+     * @return
+     */
+    protected boolean createOutputDir(String upwardDir, String downwardDir) {
+        if (currentOutputDirPath != null) {
+            logger.info("已在外部指定当前的输出目录 {}", currentOutputDirPath);
+        } else {
+            logger.info("未在外部指定当前的输出目录");
+            String outputDirPrefix;
+            String outputRootPathInProperties = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH);
+            if (StringUtils.isNotBlank(outputRootPathInProperties)) {
+                // 使用指定的生成结果文件根目录，并指定当前应用名称
+                outputDirPrefix = JavaCG2FileUtil.addSeparator4FilePath(outputRootPathInProperties) + upwardDir + File.separator;
+            } else {
+                // 使用当前目录作为生成结果文件根目录
+                outputDirPrefix = upwardDir + File.separator;
+            }
+
+            String outputDirName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME);
+            if (StringUtils.isNotBlank(outputDirName)) {
+                // 使用指定的名称作为目录名
+                outputDirPrefix += outputDirName;
+            } else {
+                // 完整目录名使用{app.name}{output.dir.flag}_{当前时间}
+                String outputDirFlag = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG);
+                // 需要进行同步控制，避免创建同名目录
+                synchronized (AbstractRunner.class) {
+                    outputDirPrefix = outputDirPrefix + appName + outputDirFlag + JACGConstants.FLAG_UNDER_LINE + JavaCG2Util.currentTime();
+                }
+            }
+
+            if (downwardDir != null) {
+                outputDirPrefix = outputDirPrefix + File.separator + downwardDir;
+            }
+
+            File currentOutputDir = new File(outputDirPrefix);
+            currentOutputDirPath = currentOutputDir.getAbsolutePath();
+            logger.info("创建当前的输出目录 {}", currentOutputDirPath);
+
+            if (StringUtils.isNotBlank(outputDirName) && currentOutputDir.exists()) {
+                logger.error("输出目录已存在，若确实需要在该目录中输出，请先删除该目录 {} {} 对应配置参数为 {}", currentOutputDirPath, outputDirName,
+                        configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME));
+                return false;
+            }
+        }
+
+        // 判断目录是否存在，不存在时尝试创建
+        if (!JavaCG2FileUtil.isDirectoryExists(currentOutputDirPath)) {
+            return false;
+        }
+
+        // 打印当前使用的配置参数
+        printAllConfigInfo();
+        return true;
+    }
+
     // 查询jar包与目录信息
     protected Map<String, WriteDbData4JarInfo> queryJarFileInfo() {
         // 查询所有的jar包和目录信息
         List<WriteDbData4JarInfo> list = jarInfoHandler.queryAllJarInfo();
         if (JavaCG2Util.isCollectionEmpty(list)) {
-            logger.warn("查询到jar包信息为空");
+            logger.warn("查询到jar文件信息为空");
             return null;
         }
 
@@ -385,7 +461,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
                 return true;
             }
 
-            if (JACGFileUtil.isFileExists(jarPath) && checkJarFileModified(jarFilePath, jarInfo)) {
+            if (JavaCG2FileUtil.isFileExists(jarPath) && checkJarFileModified(jarFilePath, jarInfo)) {
                 // 对文件检查HASH
                 logger.info("指定的jar包文件内容有变化 {} {}", jarPath, jarFilePath);
                 return true;
@@ -423,10 +499,6 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
     public boolean isSomeTaskFail() {
         return someTaskFail;
-    }
-
-    public void setSomeTaskFail(boolean someTaskFail) {
-        this.someTaskFail = someTaskFail;
     }
 
     /**

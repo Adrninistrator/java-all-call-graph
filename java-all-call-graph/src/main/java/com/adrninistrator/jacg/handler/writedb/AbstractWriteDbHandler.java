@@ -11,7 +11,6 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.dto.writedb.base.BaseWriteDbData;
 import com.adrninistrator.jacg.neo4j.util.JACGNeo4jUtil;
 import com.adrninistrator.jacg.spring.context.SpringContextManager;
-import com.adrninistrator.jacg.util.JACGThreadUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
@@ -19,6 +18,7 @@ import com.adrninistrator.javacg2.dto.output.JavaCG2OutputInfo;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2ThreadUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -537,7 +537,10 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
             logger.error("记录写入数据库记录数量的对象未生成，需要先调用 beforeHandle 方法创建 {}", currentSimpleClassName);
             throw new JavaCG2RuntimeException("记录写入数据库记录数量的对象未生成，需要先调用 beforeHandle 方法创建");
         }
-        writeDbNum.addAndGet(dataList.size());
+        int writtenNum = writeDbNum.addAndGet(dataList.size());
+        if (writtenNum % 50000 == 0) {
+            logger.info("{} 写入数据库数量达到 {}", dbTableInfoEnum.getTableNameKeyword(), writtenNum);
+        }
 
         if (writeFile) {
             if (writeFileNum == null) {
@@ -557,7 +560,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         }
 
         // 等待直到允许任务执行
-        JACGThreadUtil.wait4TPEAllowExecute(currentSimpleClassName, threadPoolExecutor, taskQueueMaxSize);
+        JavaCG2ThreadUtil.wait4TPEAllowExecute(currentSimpleClassName, threadPoolExecutor, taskQueueMaxSize);
 
         if (!useNeo4j() || writeFile) {
             // 不使用neo4j，或需要写文件时，处理相关数据
@@ -596,7 +599,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         // 生成用于插入数据的sql语句
         String sql = dbOperWrapper.genAndCacheInsertSql(dbTableInfoEnum, DbInsertMode.DIME_INSERT);
 
-        JACGThreadUtil.executeByTPE(currentSimpleClassName, threadPoolExecutor, runningTaskNum, () -> {
+        JavaCG2ThreadUtil.executeByTPE(currentSimpleClassName, threadPoolExecutor, runningTaskNum, () -> {
             // 批量写入数据库
             try {
                 if (!dbOperator.batchInsert(sql, objectList)) {
@@ -609,12 +612,11 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         });
     }
 
-    @SuppressWarnings("unchecked")
     private void doInsertNeo4j() {
         List<T> usedDataList = new ArrayList<>(dataList);
 
         // 在线程池中执行插入neo4j数据操作
-        JACGThreadUtil.executeByTPE(currentSimpleClassName, threadPoolExecutor, runningTaskNum, () -> {
+        JavaCG2ThreadUtil.executeByTPE(currentSimpleClassName, threadPoolExecutor, runningTaskNum, () -> {
             try {
                 if (handleNeo4jDataList(usedDataList)) {
                     // 写入neo4j的数据的自定义处理
@@ -693,7 +695,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
     protected boolean checkDtoGetSetMethod(boolean getMethod, String simpleClassName, String getSetMethodName, Map<String, Set<String>> getSetMethodSimpleClassMap, Map<String,
             String> extendsSimpleClassNameMap) {
         if ((getMethod && !JavaCG2ClassMethodUtil.matchesGetMethod(getSetMethodName)) || (!getMethod && !JavaCG2ClassMethodUtil.matchesSetMethod(getSetMethodName))) {
-            // 根据方法名称判断不是get/set方法
+            // 根据方法名判断不是get/set方法
             return false;
         }
 

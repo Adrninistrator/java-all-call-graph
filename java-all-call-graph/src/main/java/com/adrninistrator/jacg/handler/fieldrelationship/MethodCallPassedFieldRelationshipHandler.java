@@ -313,8 +313,7 @@ public class MethodCallPassedFieldRelationshipHandler extends BaseHandler implem
             WriteDbData4MethodCall upperMethodCall = methodCallPassedFRNode.getCurrentMethodCall();
             if (currentMethodCall.getCallId() == upperMethodCall.getCallId()) {
                 // 出现了方法循环调用，当前节点不处理
-                logger.warn("出现了方法循环调用，当前节点不处理 {} {} {} {}", currentMethodCall.getCallId(), currentMethodCall.getCallerFullMethod(), currentMethodCall.getCallerLineNumber(),
-                        currentMethodCall.getCalleeFullMethod());
+                logger.warn("出现了方法循环调用，当前节点不处理 {}", currentMethodCall.genPrintInfo());
                 return false;
             }
 

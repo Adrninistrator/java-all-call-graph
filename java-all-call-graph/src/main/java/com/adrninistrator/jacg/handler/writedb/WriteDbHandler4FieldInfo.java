@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
+import com.adrninistrator.javacg2.util.JavaCG2ByteCodeUtil;
 
 /**
  * @author adrninistrator
@@ -15,8 +16,8 @@ import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCG2OutPutFileTypeEnum.OPFTE_FIELD_INFO,
-        minColumnNum = 12,
-        maxColumnNum = 12,
+        minColumnNum = 13,
+        maxColumnNum = 13,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_FIELD_INFO
 )
 public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData4FieldInfo> {
@@ -40,10 +41,12 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
         int existsGetMethod = Integer.parseInt(readLineData());
         int existsSetMethod = Integer.parseInt(readLineData());
         int existsGenericsType = Integer.parseInt(readLineData());
+        int jarNum = Integer.parseInt(readLineData());
         WriteDbData4FieldInfo writeDbData4FieldInfo = new WriteDbData4FieldInfo();
         writeDbData4FieldInfo.setRecordId(genNextRecordId());
         writeDbData4FieldInfo.setSimpleClassName(simpleClassName);
         writeDbData4FieldInfo.setFieldName(fieldName);
+        writeDbData4FieldInfo.setFieldType(JavaCG2ByteCodeUtil.addArrayFlag(fieldTypeNad, arrayDimensions));
         writeDbData4FieldInfo.setFieldTypeNad(fieldTypeNad);
         writeDbData4FieldInfo.setArrayDimensions(arrayDimensions);
         writeDbData4FieldInfo.setFieldCategory(fieldCategory);
@@ -55,6 +58,7 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
         writeDbData4FieldInfo.setExistsSetMethod(existsSetMethod);
         writeDbData4FieldInfo.setExistsGenericsType(existsGenericsType);
         writeDbData4FieldInfo.setClassName(className);
+        writeDbData4FieldInfo.setJarNum(jarNum);
         return writeDbData4FieldInfo;
     }
 
@@ -64,6 +68,7 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
                 data.getRecordId(),
                 data.getSimpleClassName(),
                 data.getFieldName(),
+                data.getFieldType(),
                 data.getFieldTypeNad(),
                 data.getArrayDimensions(),
                 data.getFieldCategory(),
@@ -74,7 +79,8 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
                 data.getExistsGetMethod(),
                 data.getExistsSetMethod(),
                 data.getExistsGenericsType(),
-                data.getClassName()
+                data.getClassName(),
+                data.getJarNum()
         };
     }
 
@@ -92,7 +98,8 @@ public class WriteDbHandler4FieldInfo extends AbstractWriteDbHandler<WriteDbData
                 "final标志，1:是，0:否",
                 "是否存在对应的get方法，1:是，0:否",
                 "是否存在对应的set方法，1:是，0:否",
-                "是否存在泛型类型，1:是，0:否"
+                "是否存在泛型类型，1:是，0:否",
+                "字段所在的jar文件序号"
         };
     }
 

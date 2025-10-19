@@ -3,8 +3,10 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.util.JACGThreadUtil;
+import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.thread.ThreadFactory4TPE;
+import com.adrninistrator.javacg2.util.JavaCG2ThreadUtil;
+import com.adrninistrator.texttoexcel.entry.TextToExcelEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +25,10 @@ public abstract class AbstractExecutor {
 
     protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
-    // 配置信息包装类
+    // 当前的输出目录
+    protected String currentOutputDirPath;
+
+    // 配置参数包装类
     protected ConfigureWrapper configureWrapper;
 
     protected ThreadFactory4TPE threadFactory4TPE;
@@ -35,6 +40,24 @@ public abstract class AbstractExecutor {
 
     // 正在执行的任务数量
     protected AtomicInteger runningTaskNum;
+
+    private Integer excelWidthPx;
+
+    public AbstractExecutor(ConfigureWrapper configureWrapper) {
+        this.configureWrapper = configureWrapper;
+        if (needGenerateExcel()) {
+            excelWidthPx = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_TEXT_TO_EXCEL_WIDTH_PX);
+        }
+    }
+
+    /**
+     * 是否需要生成excel文件
+     *
+     * @return
+     */
+    protected boolean needGenerateExcel() {
+        return false;
+    }
 
     /**
      * 创建线程池
@@ -59,7 +82,7 @@ public abstract class AbstractExecutor {
 
     // 等待直到任务执行完毕
     protected void wait4TPEDone() {
-        JACGThreadUtil.wait4TPEDone(currentSimpleClassName, threadPoolExecutor, runningTaskNum);
+        JavaCG2ThreadUtil.wait4TPEDone(currentSimpleClassName, threadPoolExecutor, runningTaskNum);
     }
 
     /**
@@ -68,12 +91,12 @@ public abstract class AbstractExecutor {
      * @param runnable
      */
     public void executeByTPE(Runnable runnable) {
-        JACGThreadUtil.executeByTPE(currentSimpleClassName, threadPoolExecutor, runningTaskNum, runnable);
+        JavaCG2ThreadUtil.executeByTPE(currentSimpleClassName, threadPoolExecutor, runningTaskNum, runnable);
     }
 
     // 等待直到允许任务执行
     protected void wait4TPEAllowExecute() {
-        JACGThreadUtil.wait4TPEAllowExecute(currentSimpleClassName, threadPoolExecutor, taskQueueMaxSize);
+        JavaCG2ThreadUtil.wait4TPEAllowExecute(currentSimpleClassName, threadPoolExecutor, taskQueueMaxSize);
     }
 
     // 关闭并等待线程池
@@ -86,5 +109,26 @@ public abstract class AbstractExecutor {
             logger.error("error ", e);
             Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * 根据文本文件生成Excel文件
+     *
+     * @param textFilePath
+     * @return
+     */
+    public boolean textFileToExcel(String textFilePath) {
+        if (excelWidthPx == null) {
+            throw new JavaCG2RuntimeException("当前类初始化时未获取生成excel文件宽度像素参数 " + currentSimpleClassName);
+        }
+        return new TextToExcelEntry(textFilePath, excelWidthPx, true).convertTextToExcel();
+    }
+
+    public String getCurrentOutputDirPath() {
+        return currentOutputDirPath;
+    }
+
+    public void setCurrentOutputDirPath(String currentOutputDirPath) {
+        this.currentOutputDirPath = currentOutputDirPath;
     }
 }

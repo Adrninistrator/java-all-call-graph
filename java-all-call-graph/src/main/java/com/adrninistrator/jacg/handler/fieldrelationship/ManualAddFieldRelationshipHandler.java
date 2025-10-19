@@ -141,30 +141,28 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
         Integer setClassArgSeq = JACGUtil.getArgAt(0, args);
         Integer getClassArgSeq = JACGUtil.getArgAt(1, args);
         if (objArgsInfoInMethodCall == null) {
-            logger.warn("未获取到方法调用信息 {} {} {}", methodCall.getCallerFullMethod(), methodCall.getCallerLineNumber(), methodCall.getCalleeFullMethod());
+            logger.warn("未获取到方法调用信息 {}", methodCall.genPrintInfo());
             return;
         }
 
         // 获取set方法对应类在方法调用参数信息中的类型
         MethodCallInfo setMethodCallInfo = objArgsInfoInMethodCall.getSingleArgMethodCallInfo(setClassArgSeq);
         if (setMethodCallInfo == null) {
-            logger.warn("未获取到set方法对应类在方法调用信息 {} {} {} {}", methodCall.getCallerFullMethod(), methodCall.getCallerLineNumber(), methodCall.getCalleeFullMethod(),
-                    setClassArgSeq);
+            logger.warn("未获取到set方法对应类在方法调用信息 {} {}", methodCall.genPrintInfo(), setClassArgSeq);
             return;
         }
 
         // 获取get方法对应类在方法调用参数信息中的类型
         MethodCallInfo getMethodCallInfo = objArgsInfoInMethodCall.getSingleArgMethodCallInfo(getClassArgSeq);
         if (getMethodCallInfo == null) {
-            logger.warn("未获取到get方法对应类在方法调用信息 {} {} {} {}", methodCall.getCallerFullMethod(), methodCall.getCallerLineNumber(), methodCall.getCalleeFullMethod(),
-                    getClassArgSeq);
+            logger.warn("未获取到get方法对应类在方法调用信息 {} {}", methodCall.genPrintInfo(), getClassArgSeq);
             return;
         }
 
         String getClassName = getMethodCallInfo.getType();
         String setClassName = setMethodCallInfo.getType();
         if (getClassName == null || setClassName == null) {
-            logger.warn("未获取到set/get方法对应类在方法调用参数信息中的类型 {} {} {}", methodCall.getCallerFullMethod(), methodCall.getCallerLineNumber(), methodCall.getCalleeFullMethod());
+            logger.warn("未获取到set/get方法对应类在方法调用参数信息中的类型 {}", methodCall.genPrintInfo());
             return;
         }
 

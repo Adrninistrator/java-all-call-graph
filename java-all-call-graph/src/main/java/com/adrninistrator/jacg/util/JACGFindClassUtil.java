@@ -68,7 +68,7 @@ public class JACGFindClassUtil {
                 String rootPath = StringUtils.substringBeforeLast(newClassDirPath, classDirPathTail);
                 List<String> filePathList = new ArrayList<>();
                 // 在对应目录查找class文件
-                JACGFileUtil.searchDir(classDirPathRaw, null, filePathList, JACGConstants.EXT_CLASS);
+                JavaCG2FileUtil.searchDir(classDirPathRaw, null, filePathList, JACGConstants.EXT_CLASS);
                 for (String filePath : filePathList) {
                     String newFilePath = JavaCG2FileUtil.replaceFilePath2Slash(filePath);
                     String filePathTail = StringUtils.substringAfter(newFilePath, rootPath);

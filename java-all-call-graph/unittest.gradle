@@ -14,14 +14,14 @@ void deleteDirsByPrefix(String dirName, String subDirPrefix) {
     }
 }
 
-// 将测试代码生成jar包
+// 将test.callgraph包测试代码生成jar包
 tasks.register('test_gen_jar', Jar) {
     archiveFileName.set('test.jar')
     destinationDirectory = file("${buildDir}")
     from(sourceSets.test.output) {
         include 'test/callgraph/**'
         // test/java/test/callgraph/field/multi 目录中的类字段太多，解析时可能OOM，排除
-        exclude 'test/callgraph/otherjar/**','test/callgraph/field/multi/**'
+        exclude 'test/callgraph/otherjar/**', 'test/callgraph/field/multi/**'
         into '/'
     }
     from('src/test/resources/') {
@@ -41,6 +41,17 @@ tasks.register('test_gen_jar', Jar) {
             from "${buildDir}/test.jar"
             into "${buildDir}/test_jar_2/"
         }
+    }
+}
+
+// 将所有测试代码生成jar包
+tasks.register('test_gen_all_jar', Jar) {
+    archiveFileName.set('test_all.jar')
+    destinationDirectory = file("${buildDir}")
+    from(sourceSets.test.output) {
+        // test/java/test/callgraph/field/multi 目录中的类字段太多，解析时可能OOM，排除
+        exclude 'test/callgraph/otherjar/**', 'test/callgraph/field/multi/**'
+        into '/'
     }
 }
 
@@ -139,10 +150,11 @@ tasks.register('test_gen_diff_tar_gz', Tar) {
 
 /*
     生成包含jar文件的jar文件
-    需要先执行 gradlew gen_run_jar 命令
+    需要先执行 gen_run_jar 命令
+    gradlew gen_run_jar gen_jar_in_jar
  */
 tasks.register('gen_jar_in_jar', Jar) {
-    archiveFileName = 'jar_output_dir.jar'
+    archiveFileName = 'jar_output.jar'
     destinationDirectory = file("${buildDir}")
 
     from(sourceSets.test.output) {
@@ -162,10 +174,11 @@ tasks.register('gen_jar_in_jar', Jar) {
 
 /*
     生成包含jar文件的war文件
-    需要先执行 gradlew gen_run_jar 命令
+    需要先执行 gen_run_jar 命令
+    gradlew gen_run_jar gen_jar_in_war
  */
 tasks.register('gen_jar_in_war', Jar) {
-    archiveFileName = 'jar_output_dir.war'
+    archiveFileName = 'jar_output.war'
     destinationDirectory = file("${buildDir}")
 
     from(sourceSets.test.output) {
@@ -186,7 +199,13 @@ test {
         deleteDirsByPrefix("_jacg_o_ee", "test.runbycode.")
         deleteDirsByPrefix("_jacg_o_er", "test.runbycode.")
         delete "_unittest_output"
-        exclude('test/other', 'test/runbycode/targz', 'test/runlocal', 'test/runbycode/TestRBC*')
+        // neo4j 目前无执行环境，跳过执行
+        exclude('test/neo4j',
+                'test/other',
+                'test/runbycode/targz',
+                'test/runlocal',
+                'test/runbycode/TestRBC*'
+        )
         minHeapSize = "256m"
         maxHeapSize = "2g"
 
@@ -197,7 +216,7 @@ test {
         def TEST_FLAG_RECORD_LOG_TO_FILE = "test.flag.record.log.to.file"
         def testFlagRecordLogToFile = System.getProperty(TEST_FLAG_RECORD_LOG_TO_FILE)
         jvmArgs "-Dfile.encoding=UTF-8", "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=256m",
-                "-XX:+HeapDumpOnOutOfMemoryError","-XX:HeapDumpPath=${buildDir}/heap_dump/",
+                "-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=${buildDir}/heap_dump/",
                 "-D" + TEST_FLAG_RECORD_LOG_TO_FILE + "=" + testFlagRecordLogToFile
 
         testLogging {
@@ -223,12 +242,10 @@ test {
     gradlew test_gen_diff_jar_with_same -Pexample_flag=2
 
     生成包含jar文件的jar文件
-    gradlew gen_run_jar
-    gradlew gen_jar_in_jar
+    gradlew gen_run_jar gen_jar_in_jar
 
     生成包含jar文件的war文件
-    gradlew gen_run_jar
-    gradlew gen_jar_in_war
+    gradlew gen_run_jar gen_jar_in_war
 
     使用Gradle执行单元测试时，假如需要将日志中的输出记录到文件，使用以下命令：
     gradlew test -Dtest.flag.record.log.to.file=1

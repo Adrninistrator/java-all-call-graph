@@ -10,6 +10,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgGenericsType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodArgument;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnArgSeq;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnCallId;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnConstValue;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnFieldInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnGenericsType;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.dto.field.CommonFieldInfoInClass;
@@ -21,6 +23,9 @@ import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +41,7 @@ import java.util.Set;
  * @description: 处理方法参数与返回的类
  */
 public class MethodArgReturnHandler extends BaseHandler {
+    private static final Logger logger = LoggerFactory.getLogger(MethodArgReturnHandler.class);
 
     private final FieldInfoHandler fieldInfoHandler;
 
@@ -283,13 +289,24 @@ public class MethodArgReturnHandler extends BaseHandler {
     }
 
     /**
-     * 查询指定方法的返回值对应的方法调用序号
+     * 查询指定方法返回的方法调用序号
      *
      * @param fullMethod
      * @param returnType
      * @return
      */
     public List<WriteDbData4MethodReturnCallId> queryMethodReturnCallId(String fullMethod, String returnType) {
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
+        return queryMethodReturnCallId(methodHash);
+    }
+
+    /**
+     * 查询指定方法返回的方法调用序号
+     *
+     * @param methodHash
+     * @return
+     */
+    public List<WriteDbData4MethodReturnCallId> queryMethodReturnCallId(String methodHash) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MRCI_QUERY;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -299,7 +316,6 @@ public class MethodArgReturnHandler extends BaseHandler {
                     " order by " + DC.MRCI_RETURN_CALL_ID;
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
         return dbOperator.queryList(sql, WriteDbData4MethodReturnCallId.class, methodHash);
     }
 
@@ -463,5 +479,86 @@ public class MethodArgReturnHandler extends BaseHandler {
             methodArgAndCommonFieldInfoList.add(methodArgAndCommonFieldInfo);
         }
         return methodArgAndCommonFieldInfoList;
+    }
+
+    /**
+     * 查询方法返回的常量，使用完整方法与返回类型
+     *
+     * @param fullMethod
+     * @param returnType
+     * @return
+     */
+    public List<WriteDbData4MethodReturnConstValue> queryMethodReturnConstValue(String fullMethod, String returnType) {
+        String methodHash = JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType);
+        return queryMethodReturnConstValue(methodHash);
+    }
+
+    /**
+     * 查询方法返回的常量，使用方法HASH
+     *
+     * @param methodHash
+     * @return
+     */
+    public List<WriteDbData4MethodReturnConstValue> queryMethodReturnConstValue(String methodHash) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MRCV_QUERY;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_RETURN_CONST_VALUE) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_RETURN_CONST_VALUE.getTableName() +
+                    " where " + DC.MRCV_METHOD_HASH + " = ?" +
+                    " order by " + DC.MRCV_SEQ;
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodReturnConstValue.class, methodHash);
+    }
+
+    /**
+     * 查询方法返回的当前对象的非静态字段名称
+     *
+     * @param fullMethod
+     * @param returnType
+     * @return null: 方法未返回字段，或返回了多个字段
+     */
+    public String queryMethodReturnThisNonStaticFieldName(String fullMethod, String returnType) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MRFI_QUERY_METHOD_RETURN_THIS_NON_STATIC_FIELD_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select distinct " + DC.MRFI_FIELD_NAME +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_RETURN_FIELD_INFO.getTableName() +
+                    " where " + DC.MRFI_METHOD_HASH + " = ?" +
+                    " and " + DC.MRFI_STATIC_FIELD + " = ?" +
+                    " and " + DC.MRFI_FIELD_OF_THIS + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        List<String> list = dbOperator.queryListOneColumn(sql, String.class, JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType), JavaCG2YesNoEnum.NO.getIntValue(),
+                JavaCG2YesNoEnum.YES.getIntValue());
+        if (JavaCG2Util.isCollectionEmpty(list)) {
+            logger.debug("未查询到方法返回的字段名称 {} {}", fullMethod, returnType);
+            return null;
+        }
+        if (list.size() > 1) {
+            logger.warn("查询到多个方法返回的字段名称 {} {} {}", fullMethod, returnType, StringUtils.join(list, " "));
+            return null;
+        }
+        return list.get(0);
+    }
+
+    /**
+     * 查询方法返回的字段信息
+     *
+     * @param fullMethod
+     * @param returnType
+     * @return
+     */
+    public List<WriteDbData4MethodReturnFieldInfo> queryMethodReturnFieldInfo(String fullMethod, String returnType) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MRFI_QUERY_METHOD_RETURN_FIELD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_RETURN_FIELD_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_RETURN_FIELD_INFO.getTableName() +
+                    " where " + DC.MRFI_METHOD_HASH + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodReturnFieldInfo.class, JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
     }
 }

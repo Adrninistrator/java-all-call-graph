@@ -32,6 +32,16 @@ public class DC {
     public static final String CR_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String CR_REFERENCED_CLASS_NAME = "referenced_class_name";
     public static final String CR_REFERENCED_SIMPLE_CLASS_NAME = "referenced_simple_class_name";
+    public static final String CR_JAR_NUM = "jar_num";
+
+    public static final String[] CLASS_REFERENCE_COLUMNS = {
+            CR_RECORD_ID,
+            CR_CLASS_NAME,
+            CR_SIMPLE_CLASS_NAME,
+            CR_REFERENCED_CLASS_NAME,
+            CR_REFERENCED_SIMPLE_CLASS_NAME,
+            CR_JAR_NUM
+    };
 
     public static final String CA_RECORD_ID = "record_id";
     public static final String CA_SIMPLE_CLASS_NAME = "simple_class_name";
@@ -83,6 +93,9 @@ public class DC {
     public static final String MC_CALLER_JAR_NUM = "caller_jar_num";
     public static final String MC_CALLEE_JAR_NUM = "callee_jar_num";
     public static final String MC_DESCRIPTION = "description";
+
+    public static final String MCRC_CALL_ID = "call_id";
+    public static final String MCRC_RAW_CALLEE_CLASS_NAME = "raw_callee_class_name";
 
     public static final String LMI_CALL_ID = "call_id";
     public static final String LMI_LAMBDA_CALLEE_CLASS_NAME = "lambda_callee_class_name";
@@ -182,6 +195,25 @@ public class DC {
             MI_JAR_NUM
     };
 
+    public static final String[] FIELD_INFO_COLUMNS = new String[]{
+            DC.FI_RECORD_ID,
+            DC.FI_SIMPLE_CLASS_NAME,
+            DC.FI_FIELD_NAME,
+            DC.FI_FIELD_TYPE,
+            DC.FI_FIELD_TYPE_NAD,
+            DC.FI_ARRAY_DIMENSIONS,
+            DC.FI_FIELD_CATEGORY,
+            DC.FI_MODIFIERS,
+            DC.FI_PRIMITIVE_TYPE,
+            DC.FI_STATIC_FLAG,
+            DC.FI_FINAL_FLAG,
+            DC.FI_EXISTS_GET_METHOD,
+            DC.FI_EXISTS_SET_METHOD,
+            DC.FI_EXISTS_GENERICS_TYPE,
+            DC.FI_CLASS_NAME,
+            DC.FI_JAR_NUM,
+    };
+
     public static final String EI_RECORD_ID = "record_id";
     public static final String EI_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String EI_CLASS_NAME = "class_name";
@@ -227,6 +259,7 @@ public class DC {
     public static final String SPB_SEQ = "seq";
     public static final String SPB_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String SPB_CLASS_NAME = "class_name";
+    public static final String SPB_PROFILE = "profile";
     public static final String SPB_BEAN_TYPE = "bean_type";
     public static final String SPB_ANNOTATION_CLASS_NAME = "annotation_class_name";
     public static final String SPB_DEFINE_CLASS_NAME_XML_PATH = "define_class_name_xml_path";
@@ -415,6 +448,7 @@ public class DC {
     public static final String FI_RECORD_ID = "record_id";
     public static final String FI_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String FI_FIELD_NAME = "field_name";
+    public static final String FI_FIELD_TYPE = "field_type";
     public static final String FI_FIELD_TYPE_NAD = "field_type_nad";
     public static final String FI_ARRAY_DIMENSIONS = "array_dimensions";
     public static final String FI_FIELD_CATEGORY = "field_category";
@@ -426,6 +460,23 @@ public class DC {
     public static final String FI_EXISTS_SET_METHOD = "exists_set_method";
     public static final String FI_EXISTS_GENERICS_TYPE = "exists_generics_type";
     public static final String FI_CLASS_NAME = "class_name";
+    public static final String FI_JAR_NUM = "jar_num";
+
+    public static final String FUO_RECORD_ID = "record_id";
+    public static final String FUO_FULL_METHOD = "full_method";
+    public static final String FUO_METHOD_RETURN_TYPE = "method_return_type";
+    public static final String FUO_STATIC_FLAG = "static_flag";
+    public static final String FUO_GET_OR_PUT = "get_or_put";
+    public static final String FUO_FIELD_IN_SIMPLE_CLASS_NAME = "field_in_simple_class_name";
+    public static final String FUO_FIELD_NAME = "field_name";
+    public static final String FUO_FIELD_TYPE = "field_type";
+    public static final String FUO_LINE_NUMBER = "line_number";
+    public static final String FUO_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String FUO_CLASS_NAME = "class_name";
+    public static final String FUO_METHOD_HASH = "method_hash";
+    public static final String FUO_FIELD_IN_CLASS_NAME = "field_in_class_name";
+    public static final String FUO_CLASS_JAR_NUM = "class_jar_num";
+    public static final String FUO_FIELD_JAR_NUM = "field_jar_num";
 
     public static final String GSM_RECORD_ID = "record_id";
     public static final String GSM_SIMPLE_CLASS_NAME = "simple_class_name";
@@ -732,6 +783,12 @@ public class DC {
     public static final String MMFS_XML_FILE_PATH = "xml_file_path";
     public static final String MMFS_RESULT_MAP_ID = "result_map_id";
     public static final String MMFS_RESULT_MAP_HASH = "result_map_hash";
+
+    public static final String PI_RECORD_ID = "record_id";
+    public static final String PI_PACKAGE_NAME = "package_name";
+    public static final String PI_PACKAGE_LEVEL = "package_level";
+    public static final String PI_JAR_NUM = "jar_num";
+    public static final String PI_JAR_FILE_NAME = "jar_file_name";
 
     private DC() {
         throw new IllegalStateException("illegal");

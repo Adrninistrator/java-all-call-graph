@@ -9,6 +9,7 @@ CREATE TABLE if not exists jacg_method_call_info_{appName} (
   value_type varchar(30) DEFAULT NULL COMMENT '值的类型，含义参考 JavaCG2ConstantTypeEnum 类',
   the_value text COLLATE utf8mb4_bin NOT NULL COMMENT '对应的值',
   PRIMARY KEY (record_id),
-  INDEX idx_mci_cos_{appName}(call_id, obj_args_seq, seq),
-  INDEX idx_mci_value_{appName}(the_value(191))
+  INDEX idx_mci_cios_{appName}(call_id, obj_args_seq, seq),
+  INDEX idx_mci_value_{appName}(the_value(191)),
+  INDEX idx_mci_ermhos_{appName}(caller_method_hash, obj_args_seq, seq)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用信息表';

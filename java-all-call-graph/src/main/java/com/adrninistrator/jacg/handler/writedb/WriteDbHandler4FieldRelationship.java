@@ -39,7 +39,7 @@ public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<Wri
         key
             唯一类名
         value
-            get方法名称Set
+            get方法名Set
     */
     private Map<String, Set<String>> getMethodSimpleClassMap;
 
@@ -48,7 +48,7 @@ public class WriteDbHandler4FieldRelationship extends AbstractWriteDbHandler<Wri
         key
             唯一类名
         value
-            set方法名称Set
+            set方法名Set
     */
     private Map<String, Set<String>> setMethodSimpleClassMap;
 

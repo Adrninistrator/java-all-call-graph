@@ -2,7 +2,6 @@ package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
-import com.adrninistrator.jacg.common.enums.JACGMethodTypeEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
@@ -12,6 +11,7 @@ import com.adrninistrator.jacg.dto.callgraph.CallGraphJson;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphJsonMethod;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphJsonMethodCall;
 import com.adrninistrator.jacg.dto.callgraph.CallGraphNode4Caller;
+import com.adrninistrator.jacg.dto.callgraph.CalleeArgTypePolymorphismInfo;
 import com.adrninistrator.jacg.dto.callgraph.ChildCallSuperInfo;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.method.MethodAndHash;
@@ -25,8 +25,9 @@ import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MyBatisMSWriteTable;
+import com.adrninistrator.jacg.handler.conf.ConfigHandler;
 import com.adrninistrator.jacg.handler.dto.mybatis.MyBatisMSTableInfo;
-import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
+import com.adrninistrator.jacg.runner.base.AbstractRunnerGenAllCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
@@ -34,6 +35,7 @@ import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2CallTypeEnum;
+import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.dto.stack.ListAsStack;
@@ -66,8 +68,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @description: 生成指定方法向下完整调用链
  */
 
-public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
+public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
     private static final Logger logger = LoggerFactory.getLogger(RunnerGenAllGraph4Caller.class);
+
+    private final ConfigHandler configHandler;
 
     // 简单类名及对应的完整类名Map
     private final Map<String, String> simpleAndClassNameMap = new ConcurrentHashMap<>();
@@ -78,9 +82,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
     // 生成向下的方法调用链时，是否需要输出JSON格式的内容
     private boolean callGraphGenJsonCaller;
 
-    // 当方法类型在以下Set中时，生成方法完整调用链时忽略
-    private Set<String> ignoreMethodTypeSet;
-
     /*
         当前生成的完整方法调用链数据列表
         key {调用方完整方法}:{调用方方法返回类型}
@@ -88,18 +89,35 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
      */
     private Map<String, List<MethodCallLineData4Er>> allMethodCallLineData4ErMap;
 
+    // 方法参数作为被调用对象涉及多态时是否需要进行类型替换
+    private boolean calleeArgTypePolymorphismFlag;
+
+    /*
+        方法参数作为被调用对象涉及多态时的类型替换时使用的Map
+        key 参数作为被调用对象时需要替换被调用类型的方法HASH
+        value   方法参数序号与方法参数作为被调用对象的方法调用ID
+     */
+    private Map<String, CalleeArgTypePolymorphismInfo> calleeArgTypePolymorphismMap;
+
     public RunnerGenAllGraph4Caller() {
         super();
+        configHandler = new ConfigHandler(dbOperWrapper);
     }
 
     public RunnerGenAllGraph4Caller(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
+        configHandler = new ConfigHandler(dbOperWrapper);
     }
 
     @Override
     public boolean preHandle() {
         // 公共预处理
         if (!commonPreHandle()) {
+            return false;
+        }
+
+        // 方法参数作为被调用对象涉及多态时的类型替换时使用的配置
+        if (!handleCalleeArgTypePolymorphismConfig()) {
             return false;
         }
 
@@ -112,6 +130,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         if (!createOutputDir(JACGConstants.DIR_OUTPUT_GRAPH_FOR_CALLER)) {
             return false;
         }
+        // 创建表达式管理类，需要在currentOutputDirPath赋值后执行
+        createElManager();
 
         ignoreDupCalleeInOneCaller = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER);
         callGraphGenJsonCaller = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_JSON_CALLER);
@@ -120,11 +140,6 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             String logContent = String.format("%s=%s 时 %s=%s 不会生效", ConfigKeyEnum.CKE_CALL_GRAPH_GEN_JSON_CALLER.getKey(), Boolean.FALSE,
                     ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE.getKey(), Boolean.TRUE);
             logger.error("{}", logContent);
-            return false;
-        }
-
-        ignoreMethodTypeSet = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IGNORE_METHOD_TYPE_4CALLER, true);
-        if (ignoreMethodTypeSet == null) {
             return false;
         }
         return true;
@@ -179,6 +194,99 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         // 等待直到任务执行完毕
         wait4TPEDone();
+        return true;
+    }
+
+    // 方法参数作为被调用对象涉及多态时的类型替换时使用的配置
+    private boolean handleCalleeArgTypePolymorphismConfig() {
+        if (useNeo4j()) {
+            // 使用neo4j时不支持
+            calleeArgTypePolymorphismFlag = false;
+            return true;
+        }
+
+        Set<String> configSet = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM);
+        if (JavaCG2Util.isCollectionEmpty(configSet)) {
+            calleeArgTypePolymorphismFlag = false;
+            return true;
+        }
+
+        // 需要处理
+        // 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
+        if (!configHandler.checkParseMethodCallTypeValue()) {
+            configHandler.noticeParseMethodCallTypeValue();
+        }
+
+        calleeArgTypePolymorphismFlag = true;
+        calleeArgTypePolymorphismMap = new HashMap<>(configSet.size());
+
+        // 处理指定的配置
+        for (String config : configSet) {
+            String[] array = StringUtils.splitPreserveAllTokens(config, JavaCG2Constants.FLAG_EQUAL);
+            if (array.length != 2) {
+                logger.error("{} 配置参数非法，不是 xxx=yyy 格式 {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM), config);
+                return false;
+            }
+            if (!JavaCG2Util.isNumStr(array[1])) {
+                logger.error("{} 配置参数非法，不是合法的参数序号 {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM), config);
+                return false;
+            }
+            int argSeq = Integer.parseInt(array[1]);
+            if (argSeq < JavaCG2Constants.METHOD_CALL_ARGUMENTS_START_SEQ) {
+                logger.error("{} 配置参数非法，参数序号应大于等于 {} {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM),
+                        JavaCG2Constants.METHOD_CALL_ARGUMENTS_START_SEQ, config);
+                return false;
+            }
+
+            String calleeFullMethodSupportReturnType = array[0];
+            // 查询方法信息，支持完整方法，或完整方法+方法返回类型
+            WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoSupportReturnType(calleeFullMethodSupportReturnType);
+            if (methodInfo == null) {
+                return false;
+            }
+
+            CalleeArgTypePolymorphismInfo calleeArgTypePolymorphismInfo = calleeArgTypePolymorphismMap.computeIfAbsent(methodInfo.getMethodHash(),
+                    k -> new CalleeArgTypePolymorphismInfo());
+            if (calleeArgTypePolymorphismInfo.getCalleeMethodHash() == null) {
+                calleeArgTypePolymorphismInfo.setCalleeMethodHash(methodInfo.getMethodHash());
+                calleeArgTypePolymorphismInfo.setCalleeFullMethod(methodInfo.getFullMethod());
+                calleeArgTypePolymorphismInfo.setCalleeReturnType(methodInfo.getReturnType());
+            }
+
+            Set<Integer> argSeqSet = calleeArgTypePolymorphismInfo.getArgSeqSet();
+            if (argSeqSet == null) {
+                argSeqSet = new HashSet<>();
+                calleeArgTypePolymorphismInfo.setArgSeqSet(argSeqSet);
+            }
+            if (!argSeqSet.add(argSeq)) {
+                logger.error("{} 配置参数非法，每个被调用方法的每个方法参数序号只允许指定一次 {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM),
+                        config);
+                return false;
+            }
+        }
+
+        // 方法参数作为被调用对象涉及多态时的类型替换时使用的配置，处理对应的方法调用ID
+        return handleCalleeArgTypePolymorphismCallIds();
+    }
+
+    // 方法参数作为被调用对象涉及多态时的类型替换时使用的配置，处理对应的方法调用ID
+    private boolean handleCalleeArgTypePolymorphismCallIds() {
+        for (CalleeArgTypePolymorphismInfo calleeArgTypePolymorphismInfo : calleeArgTypePolymorphismMap.values()) {
+            for (Integer argSeq : calleeArgTypePolymorphismInfo.getArgSeqSet()) {
+                // 查询被调用方法中使用指定序号的参数作为方法调用被调用对象的方法调用序号
+                List<Integer> callIdList = methodCallInfoHandler.queryCallId4MethodCalleeObjUseArg(calleeArgTypePolymorphismInfo.getCalleeMethodHash(), argSeq);
+                if (!JavaCG2Util.isCollectionEmpty(callIdList)) {
+                    Map<Integer, Integer> callIdArgSeqMap = calleeArgTypePolymorphismInfo.getCallIdArgSeqMap();
+                    if (callIdArgSeqMap == null) {
+                        callIdArgSeqMap = new HashMap<>();
+                        calleeArgTypePolymorphismInfo.setCallIdArgSeqMap(callIdArgSeqMap);
+                    }
+                    for (Integer callId : callIdList) {
+                        callIdArgSeqMap.put(callId, argSeq);
+                    }
+                }
+            }
+        }
         return true;
     }
 
@@ -240,6 +348,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             }
 
             String callerClassName = arrayLeft[0];
+            if (!JACGClassMethodUtil.checkValidClassName(callerClassName)) {
+                logger.error("不是合法的类名 {}", task);
+                return null;
+            }
+
             String arg2InTask = arrayLeft[1];
 
             if (StringUtils.isAnyBlank(callerClassName, arg2InTask)) {
@@ -261,7 +374,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 // 任务中指定的第二个参数为全数字，作为代码行号处理
                 callerTaskInfo.setMethodLineNumber(Integer.parseInt(arg2InTask));
             } else {
-                // 任务中指定的第二个参数不是全数字，作为方法名称处理
+                // 任务中指定的第二个参数不是全数字，作为方法名处理
                 callerTaskInfo.setCallerMethodName(arg2InTask);
             }
             callerTaskInfo.setLineNumStart(lineNumStart);
@@ -302,7 +415,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         for (FullMethodWithReturnType fullMethodWithReturnType : methodList) {
             String methodNameWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(fullMethodWithReturnType.getFullMethod());
             CallerTaskInfo callerTaskInfo = new CallerTaskInfo();
-            callerTaskInfo.setOrigText(null);
+            callerTaskInfo.setOrigText(fullMethodWithReturnType.genFullMethodWithReturnType());
             callerTaskInfo.setCallerSimpleClassName(simpleClassName);
             callerTaskInfo.setCallerMethodName(methodNameWithArgs);
             callerTaskInfo.setCallerReturnType(fullMethodWithReturnType.getReturnType());
@@ -331,7 +444,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         FindMethodTaskInfo findMethodTaskInfo = null;
         if (callerTaskInfo.getCallerMethodName() != null) {
-            // 通过方法名称获取调用方方法
+            // 通过方法名获取调用方方法
             findMethodTaskInfo = findCallerMethodByName(startCallerClassName, callerTaskInfo);
         } else if (callerTaskInfo.getMethodLineNumber() != 0) {
             findMethodTaskInfo = findCallerMethodByLineNumber(callerTaskInfo);
@@ -421,7 +534,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 }
             }
             // 判断配置文件中是否已指定忽略当前方法
-            if (ignoreCurrentMethod(null, startCallerFullMethod)) {
+            if (ignoreCurrentMethodCall(null, startCallerFullMethod, null, 0)) {
                 logger.info("配置文件中已指定忽略当前方法，不处理 {}", startCallerFullMethod);
                 return true;
             }
@@ -469,7 +582,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         }
     }
 
-    // 通过方法名称获取调用方方法
+    // 通过方法名获取调用方方法
     private FindMethodTaskInfo findCallerMethodByName(String callerClassName, CallerTaskInfo callerTaskInfo) {
         String callerMethodNameInTask = callerTaskInfo.getCallerMethodName();
         String callerSimpleClassName = callerTaskInfo.getCallerSimpleClassName();
@@ -477,7 +590,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
 
         Set<String> handledCallerMethodHashSet = new HashSet<>();
         FindMethodTaskInfo findMethodTaskInfo = FindMethodTaskInfo.genFindMethodInfoSuccess();
-        // 通过方法名称获取调用方方法
+        // 通过方法名获取调用方方法
         List<WriteDbData4MethodCall> callerMethodList = dbOperWrapper.queryCallerMethodByName(callerSimpleClassName, fullMethodPrefix);
         if (!JavaCG2Util.isCollectionEmpty(callerMethodList)) {
             // 遍历找到的方法
@@ -624,12 +737,17 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 return false;
             }
 
+            if (calleeArgTypePolymorphismFlag && callGraphNode4CallerStack.getHead() >= 1) {
+                // 方法参数作为被调用对象涉及多态时的类型替换，执行处理
+                handleCalleeArgTypePolymorphism(callGraphNode4Caller, callGraphNode4CallerStack, methodCallId, calleeMethodAndHash);
+            }
+
             String actualCalleeFullMethod = calleeMethodAndHash.getFullMethod();
             String actualCalleeMethodHash = calleeMethodAndHash.getMethodHash();
             int callFlags = methodCall.getCallFlags();
 
             // 处理被忽略的方法
-            if (handleIgnoredMethod(callType, actualCalleeFullMethod, actualCalleeMethodHash, callGraphNode4CallerStack, enabled, methodCallId, callFlags)) {
+            if (handleIgnoredMethod(callType, callerFullMethod, actualCalleeFullMethod, actualCalleeMethodHash, callGraphNode4CallerStack, enabled, methodCallId, callFlags)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("当前被忽略的方法调用 {} {} -> {} {}", methodCall.getCallId(), callerFullMethod, actualCalleeFullMethod, methodCall.getCallerLineNumber());
                 }
@@ -637,6 +755,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
             }
 
             // 当前记录需要处理
+            if (calleeArgTypePolymorphismFlag) {
+                // 方法参数作为被调用对象涉及多态时的类型替换，准备工作
+                prepareCalleeArgTypePolymorphism(rawCalleeMethodHash, methodCallId, callGraphNode4Caller, callerFullMethod, methodCall);
+            }
+
             // 获取方法调用层级
             int methodCallLevel = callGraphNode4CallerStack.getHead() + 1;
             if (genCallGraphDepthLimit > 0 && methodCallLevel > genCallGraphDepthLimit) {
@@ -712,6 +835,76 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
                 recordedCalleeStack.push(new HashSet<>());
             }
         }
+    }
+
+    // 方法参数作为被调用对象涉及多态时的类型替换，准备工作
+    private void prepareCalleeArgTypePolymorphism(String rawCalleeMethodHash, int methodCallId, CallGraphNode4Caller callGraphNode4Caller, String callerFullMethod,
+                                                  WriteDbData4MethodCall methodCall) {
+        // 判断被调用方法是否需要处理
+        CalleeArgTypePolymorphismInfo calleeArgTypePolymorphismInfo = calleeArgTypePolymorphismMap.get(rawCalleeMethodHash);
+        if (calleeArgTypePolymorphismInfo == null) {
+            return;
+        }
+
+        // 当前方法需要处理
+        Set<Integer> argSeqSet = calleeArgTypePolymorphismInfo.getArgSeqSet();
+        // 遍历需要处理的方法参数序号
+        for (Integer argSeq : argSeqSet) {
+            List<String> argTypeList = methodCallInfoHandler.queryMethodCallInfoByCallIdType(methodCallId, argSeq, JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType());
+            if (!JavaCG2Util.isCollectionEmpty(argTypeList)) {
+                if (argTypeList.size() > 1) {
+                    logger.error("只支持替换包含一种类型的方法参数类型 调用方法 {} 调用方法代码行号 {} 被调用方法 {} 方法参数类型{}", callerFullMethod, methodCall.getCallerLineNumber(), methodCall.getCalleeFullMethod(),
+                            StringUtils.join(argTypeList, " "));
+                    throw new JavaCG2RuntimeException("只支持替换包含一种类型的方法参数类型");
+                }
+                Map<Integer, String> replaceCalleeTypeArgSeqTypeMap = callGraphNode4Caller.getReplaceCalleeTypeArgSeqTypeMap();
+                if (replaceCalleeTypeArgSeqTypeMap == null) {
+                    replaceCalleeTypeArgSeqTypeMap = new HashMap<>();
+                    callGraphNode4Caller.setReplaceCalleeTypeArgSeqTypeMap(replaceCalleeTypeArgSeqTypeMap);
+                }
+                // 记录当前方法被调用时某个参数序号对应的参数类型
+                replaceCalleeTypeArgSeqTypeMap.put(argSeq, argTypeList.get(0));
+            }
+        }
+    }
+
+    // 方法参数作为被调用对象涉及多态时的类型替换，执行处理
+    private void handleCalleeArgTypePolymorphism(CallGraphNode4Caller callGraphNode4Caller, ListAsStack<CallGraphNode4Caller> callGraphNode4CallerStack, int methodCallId,
+                                                 MethodAndHash calleeMethodAndHash) {
+        // 判断调用方法是否需要处理
+        CalleeArgTypePolymorphismInfo calleeArgTypePolymorphismInfo = calleeArgTypePolymorphismMap.get(callGraphNode4Caller.getCallerMethodHash());
+        if (calleeArgTypePolymorphismInfo == null) {
+            return;
+        }
+        Map<Integer, Integer> callIdArgSeqMap = calleeArgTypePolymorphismInfo.getCallIdArgSeqMap();
+        if (callIdArgSeqMap == null) {
+            return;
+        }
+        // 根据被调用对象为方法参数的方法调用序号获取对应的方法参数序号
+        Integer argSeq = callIdArgSeqMap.get(methodCallId);
+        if (argSeq == null) {
+            return;
+        }
+
+        // 当前调用方法需要处理
+        // 获取栈中上层节点
+        CallGraphNode4Caller upperCallGraphNode4Caller = callGraphNode4CallerStack.getElementAt(callGraphNode4CallerStack.getHead() - 1);
+        Map<Integer, String> replaceCalleeTypeArgSeqTypeMap = upperCallGraphNode4Caller.getReplaceCalleeTypeArgSeqTypeMap();
+        if (replaceCalleeTypeArgSeqTypeMap == null) {
+            return;
+        }
+        // 栈中上层节点对应Map非空，尝试根据方法参数序号获取对应的类型
+        String argType = replaceCalleeTypeArgSeqTypeMap.get(argSeq);
+        if (argType == null) {
+            return;
+        }
+
+        // 获取方法参数序号对应的类型
+        String actualCalleeMethodWithArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(calleeMethodAndHash.getFullMethod());
+        String actualCalleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(argType, actualCalleeMethodWithArgs);
+        calleeMethodAndHash.setFullMethod(actualCalleeFullMethod);
+        String actualCalleeMethodHash = JACGClassMethodUtil.genMethodHashWithLen(actualCalleeFullMethod, calleeMethodAndHash.getMethodReturnType());
+        calleeMethodAndHash.setMethodHash(actualCalleeMethodHash);
     }
 
     /**
@@ -834,6 +1027,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
      * 处理被忽略的方法
      *
      * @param callType
+     * @param callerFullMethod
      * @param calleeFullMethod
      * @param calleeMethodHash
      * @param callGraphNode4CallerStack
@@ -843,6 +1037,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
      * @return true: 当前方法需要忽略 false: 当前方法不需要忽略
      */
     private boolean handleIgnoredMethod(String callType,
+                                        String callerFullMethod,
                                         String calleeFullMethod,
                                         String calleeMethodHash,
                                         ListAsStack<CallGraphNode4Caller> callGraphNode4CallerStack,
@@ -852,15 +1047,13 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenCallGraph {
         /*
             判断是否需要忽略
             - 调用方法与被调用方法HASH相同时忽略（bridge方法调用）
-            - 调用方法需要忽略
+            - 方法调用需要忽略
             - 当前方法调用被禁用
-            - 不显示dto的get/set方法
          */
         CallGraphNode4Caller callGraphNode4Caller = callGraphNode4CallerStack.peek();
         if (calleeMethodHash.equals(callGraphNode4Caller.getCallerMethodHash()) ||
-                ignoreCurrentMethod(callType, calleeFullMethod) ||
-                !JavaCG2YesNoEnum.isYes(enabled) ||
-                (ignoreMethodTypeSet.contains(JACGMethodTypeEnum.MTE_DTO_GET_SET.getType()) && MethodCallFlagsEnum.MCFE_EE_DTO_GET_SET_METHOD.checkFlag(callFlags))) {
+                ignoreCurrentMethodCall(callType, callerFullMethod, calleeFullMethod, callFlags) ||
+                !JavaCG2YesNoEnum.isYes(enabled)) {
             // 更新当前处理节点的id
             callGraphNode4Caller.setMethodCallId(methodCallId);
 

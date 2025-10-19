@@ -1330,7 +1330,7 @@ com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller#getAllMethodCallLineData
 
 java-callgraph2 组件版本使用 3.2.0
 
-## 1.37. (3.3.1)
+## 1.37. (3.3.0)
 
 ### 1.37.1. 修改处理 Spring XML 的类
 
@@ -1561,6 +1561,296 @@ java.lang.NoClassDefFoundError: javax/servlet/http/HttpSession
 
 示例见 test.runbycode.jardiffcallgraph.TestRunnerGenJarDiffCallGraphDiffSame:testJarDiffCallerGraphChooseMethod 方法
 
-## 1.39. (3.3.3)
+## 1.39. (4.0.0)
+
+### 1.39.1. 数据库连接优化
 
 初始化时测试数据库连接，防止数据库无法连接（如数据库密码等信息错误）时死循环尝试连接
+
+### 1.39.2. 配置文件移动目录
+
+以下配置文件从 _jacg_config 目录移动到 _jacg_gen_all_call_graph 目录
+
+```
+method_class_4callee.properties
+method_class_4caller.properties
+```
+
+### 1.39.3. _jacg_config/config.properties 配置文件增加参数
+
+```
+# 表达式执行时是否开启调试模式，若开启会在应用日志中输出表达式执行时的详细信息
+el.debug.mode=false
+```
+
+### 1.39.4. _jacg_config/config_db.properties 配置参数修改
+
+- db.h2.file.path
+
+当前参数在指定 H2 数据库文件路径时，支持指定后缀“.mv.db”，也支持不指定
+
+### 1.39.5. 数据库表修改
+
+- class_reference 表增加字段
+
+jar_num	类所在的 jar 文件序号
+
+- field_info 表增加字段
+
+```
+field_type	字段类型（包含数组标志）
+jar_num		字段所在的 jar 文件序号
+```
+
+- spring_bean 表增加字段
+
+profile	Spring Bean 的 profile
+
+- config 表修改字段类型
+
+config_value 字段类型由 VARCHAR(255) 修改为 TEXT
+
+- 增加数据库表 dup_class_reference
+
+重复同名类的引用关系表
+
+- 增加数据库表 dup_field_info
+
+重复同名类的字段信息表
+
+- 增加数据库表 field_usage_other
+
+使用其他类中字段的使用情况表
+
+- 增加数据库表 method_call_raw_callee
+
+方法调用被调用对象的原始类型表
+
+- 增加数据库表 package_info
+
+包名信息表
+
+- 删除数据库表 javacg2_config
+
+替代为数据库表 config
+
+### 1.39.6. 增加慢查询日志配置
+
+ _jacg_config/config_db.properties 配置文件增加以下参数
+
+- slow.query.switch
+
+数据库慢查询监控开关，若开启，会在应用日志中打印慢查询相关信息，可搜索“出现慢查询”
+
+- slow.query.time
+
+数据库慢查询监控，时间阈值，单位为毫秒，查询耗时大于该值时记录慢查询日志
+
+- slow.query.row.num
+
+数据库慢查询监控，查询结果数量阈值，查询结果数量大于该值时记录慢查询日志
+
+### 1.39.7. JarDiff 功能修改
+
+#### 1.39.7.1. AbstractRunnerGenJarDiffCallGraph 类修改为继承 AbstractRunner
+
+com.adrninistrator.jacg.jardiff.runner.AbstractRunnerGenJarDiffCallGraph 类修改为继承 com.adrninistrator.jacg.runner.base.AbstractRunner
+
+入口修改由 generate() 变成 run()
+
+获取执行结果需要调用 getJarModifiedMethodInfoMap() 方法
+
+### 1.39.8. 输出的文本文件支持生成 Excel 格式的对应文件
+
+JarDiff 等功能生成的以“\t”作为固定分隔符的文本文件，支持生成对应的 Excel 文件，根据每列的文本内容调整列的宽度
+
+_jacg_config/config.properties 配置文件增加对应参数
+
+text.to.excel.width.px  将生成的文本文件转换为 Excel 文件时的宽度像素
+
+### 1.39.9. 配置参数写入数据库 config 表
+
+java-all-call-graph 在解析 jar 文件时，将 java-all-call-graph 组件使用的配置参数写入数据库 config 表
+
+### 1.39.10. 用于过滤的配置参数替换为表达式
+
+#### 1.39.10.1. 生成完整方法调用链过滤相关的配置文件
+
+- 删除的配置文件
+
+```
+_jacg_config/ignore_call_type.properties
+_jacg_config/ignore_class_keyword.properties
+_jacg_config/ignore_full_method_prefix.properties
+_jacg_config/ignore_method_prefix.properties
+_jacg_config/ignore_method_type_4caller.properties
+_jacg_config/include_full_method_prefix.properties
+```
+
+- 增加的表达式配置文件
+
+```
+_jacg_gen_all_call_graph/gen_call_graph_ignore_method_call.av
+```
+
+#### 1.39.10.2. Spring AOP 过滤相关的配置文件
+
+- 删除的配置文件
+
+```
+_jacg_config/parse_spring_aop_ignore_class_prefix.properties
+```
+
+- 增加的表达式配置文件
+
+```
+_jacg_spring_aop/spring_aop_ignore_spring_bean_class.av
+```
+
+#### 1.39.10.3. JarDiff 过滤相关的配置文件
+
+- 删除的配置文件
+
+```
+_jacg_jar_diff/jar_diff_callee_method_prefix.properties
+_jacg_jar_diff/jar_diff_caller_method_prefix.properties
+```
+
+- 增加的表达式配置文件
+
+```
+_jacg_jar_diff/jar_diff_gen_all_call_graph_ignore_callee.av
+_jacg_jar_diff/jar_diff_gen_all_call_graph_ignore_caller.av
+```
+
+### 1.39.11. 增加 Java JDK 及依赖库兼容问题扫描功能
+
+见 [Java JDK 及依赖库兼容问题扫描工具](usage_scenarios/jar_compatibility_check.md)
+
+### 1.39.12. 增加解析字符串拼接功能
+
+见 [解析字符串拼接](usage_scenarios/parse_string_append.md)
+
+### 1.39.13. 支持输出方法调用参数类型或值到文件
+
+支持获得指定的方法被调用时，指定的参数所使用的类型或常量值，并写入到文本文件，支持生成 Excel 文件
+
+可继承 com.adrninistrator.jacg.handler.methodcallargs.BaseMethodCallArgInfoRecordHandler 类
+
+参考 test.runbycode.handler.methodcallargs.handler.TestReflectionUtil1MethodCallArgInfoRecordHandler 类
+
+可执行 test.runbycode.handler.methodcallargs.TestMethodCallArgInfoRecordHandler 类上进行验证
+
+### 1.39.14. 支持生成向下完整方法调用链时，方法参数作为被调用对象涉及多态时的类型替换
+
+- 增加配置文件
+
+_jacg_gen_all_call_graph/caller_graph_callee_arg_type_polymorphism.properties
+
+- 背景
+
+在日常开发中，有时可能将某个公共方法的参数类型使用父类/接口的类型，在调用当前公共方法时，传入子类/实现类类型
+
+在这种情况下生成向下的完整方法调用链，需要专门进行处理，才能使方法调用中识别到的被调用类型，使用传入的子类/实现类的类型，而不是方法参数定义的父类/接口的类型
+
+- 示例代码
+
+```java
+// 接口
+public interface CalleeArgTypePolymorphismInterface1 {
+    void cmd1();
+
+    void cmd2();
+}
+
+// 实现类
+@Service(value = CalleeArgTypePolymorphismChild1A.NAME)
+public class CalleeArgTypePolymorphismChild1A extends CalleeArgTypePolymorphismAbstract1 {
+    public static final String NAME = "calleeArgTypePolymorphismChild1A";
+
+    @Override
+    public void cmd1() {
+        System.setProperty("", "");
+    }
+
+    @Override
+    public void cmd2() {
+        System.setIn(null);
+    }
+}
+
+// 方法参数使用以上接口作为被调用对象
+public class CalleeArgTypePolymorphismTool1 {
+    public void run1(String str1, CalleeArgTypePolymorphismInterface1 arg1, String str2) {
+        System.out.println(str1);
+
+        arg1.cmd1();
+
+        System.getProperty(str2);
+
+        arg1.cmd2();
+
+        System.currentTimeMillis();
+    }
+}
+
+// 调用以上方法
+@Service
+public class CalleeArgTypePolymorphismService1 {
+
+    @Resource(name = CalleeArgTypePolymorphismChild1A.NAME)
+    private CalleeArgTypePolymorphismInterface1 calleeArgTypePolymorphismInterface1;
+
+    public void testRun1Use1A() {
+        CalleeArgTypePolymorphismTool1 calleeArgTypePolymorphismTool1 = new CalleeArgTypePolymorphismTool1();
+        calleeArgTypePolymorphismTool1.run1("1", calleeArgTypePolymorphismInterface1, "2");
+        System.out.println("test1");
+    }
+}
+```
+
+- 生成的完整方法调用链示例-不进行专门处理
+
+以下为 CalleeArgTypePolymorphismService1:testRun1Use1A() 方法向下的完整方法调用链，仅显示方法调用层级为 1~3 的 CalleeArgTypePolymorphismTool1:run1 方法相关调用链
+
+没有进行专门处理，解析到的 CalleeArgTypePolymorphismTool1:run1 方法中调用的 arg1.cmd1(); 、 arg1.cmd2(); 被调用对象类型都是接口 CalleeArgTypePolymorphismInterface1 ，之后关联到了该接口所有实现类的对应方法
+
+```log
+[1]#  [CalleeArgTypePolymorphismService1:25]	test.callgraph.calleeargtypepolymorphism.CalleeArgTypePolymorphismTool1:run1(java.lang.String,test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismInterface1,java.lang.String)
+[2]#    [CalleeArgTypePolymorphismTool1:21]	test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismInterface1:cmd1()
+[3]#      [CalleeArgTypePolymorphismInterface1:0]	test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismAbstract1:cmd1()
+[3]#      [CalleeArgTypePolymorphismInterface1:0]	test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismChild1B:cmd1()
+[2]#    [CalleeArgTypePolymorphismTool1:23]	java.lang.System:getProperty(java.lang.String)	!no_callee!
+[2]#    [CalleeArgTypePolymorphismTool1:25]	test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismInterface1:cmd2()
+[3]#      [CalleeArgTypePolymorphismInterface1:0]	test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismAbstract1:cmd2()
+[3]#      [CalleeArgTypePolymorphismInterface1:0]	test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismChild1B:cmd2()
+```
+
+- 生成的完整方法调用链示例-进行专门处理
+
+以下为 CalleeArgTypePolymorphismService1:testRun1Use1A() 方法向下的完整方法调用链，仅显示方法调用层级为 1~3 的 CalleeArgTypePolymorphismTool1:run1 方法相关调用链
+
+对 CalleeArgTypePolymorphismTool1:run1 方法进行了专门处理，解析到的 CalleeArgTypePolymorphismTool1:run1 方法中调用的 arg1.cmd1(); 、 arg1.cmd2(); 被调用对象类型是实现类 CalleeArgTypePolymorphismChild1A
+
+```log
+[1]#  [CalleeArgTypePolymorphismService1:25]	test.callgraph.calleeargtypepolymorphism.CalleeArgTypePolymorphismTool1:run1(java.lang.String,test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismInterface1,java.lang.String)
+[2]#    [CalleeArgTypePolymorphismTool1:21]	test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismChild1A:cmd1()
+[3]#      [CalleeArgTypePolymorphismChild1A:17]	java.lang.System:setProperty(java.lang.String,java.lang.String)	!no_callee!
+[2]#    [CalleeArgTypePolymorphismTool1:23]	java.lang.System:getProperty(java.lang.String)	!no_callee!
+[2]#    [CalleeArgTypePolymorphismTool1:25]	test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismChild1A:cmd2()
+[3]#      [CalleeArgTypePolymorphismChild1A:22]	java.lang.System:setIn(java.io.InputStream)	!no_callee!
+```
+
+- 使用方式
+
+在调用 RunnerGenAllGraph4Caller 类生成向下的完整方法调用前，在配置文件 _jacg_gen_all_call_graph/caller_graph_callee_arg_type_polymorphism.properties 中指定哪些方法参数作为被调用对象涉及多态时的类型替换，或者在代码中使用对应的枚举设置参数
+
+- 示例执行方式
+
+参考以下方法
+
+```
+test.runbycode.callgraph.calleeargtypepolymorphism.TestGenCallerGraphCalleeArgTypePolymorphism:testRun1Use1A
+test.runbycode.callgraph.calleeargtypepolymorphism.TestGenCallerGraphCalleeArgTypePolymorphism:testRun1Use1B
+test.runbycode.callgraph.calleeargtypepolymorphism.TestGenCallerGraphCalleeArgTypePolymorphism:testRun2Use1B23
+```

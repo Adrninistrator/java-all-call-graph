@@ -50,6 +50,16 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
     }
 
     /**
+     * 分页查询方法调用信息表，找到指定的参数并处理
+     *
+     * @return true: 处理成功 false: 处理失败
+     */
+    public boolean handleMethodCallByArgs() {
+        // 分页查询并处理
+        return QueryByPageHandler.queryAndHandle(this, JavaCG2Constants.RECORD_ID_MIN_BEFORE);
+    }
+
+    /**
      * 选择需要查询的方法调用信息表中的类型
      *
      * @return
@@ -68,8 +78,8 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
      * 处理方法调用及对应的方法调用参数信息
      *
      * @param methodCall                     方法调用
-     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名称、方法参数等
-     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名称、方法参数等
+     * @param callerMethodDetailNoReturnType 调用方法详细信息，包含了方法名、方法参数等
+     * @param calleeMethodDetailNoReturnType 被调用方法详细信息，包含了方法名、方法参数等
      * @param methodCallInfo                 方法调用信息
      */
     protected abstract void handleMethodCallWithInfo(WriteDbData4MethodCall methodCall, MethodDetailNoReturnType callerMethodDetailNoReturnType,
@@ -145,15 +155,5 @@ public abstract class BaseMethodCallByArgsHandler extends BaseHandler implements
         for (JavaCG2MethodCallInfoTypeEnum javaCG2MethodCallInfoTypeEnum : methodCallInfoTypes) {
             methodCallInfoTypeList.add(javaCG2MethodCallInfoTypeEnum.getType());
         }
-    }
-
-    /**
-     * 分页查询方法调用信息表，找到指定的参数并处理
-     *
-     * @return true: 处理成功 false: 处理失败
-     */
-    public boolean handleMethodCallByArgs() {
-        // 分页查询并处理
-        return QueryByPageHandler.queryAndHandle(this, JavaCG2Constants.RECORD_ID_MIN_BEFORE);
     }
 }

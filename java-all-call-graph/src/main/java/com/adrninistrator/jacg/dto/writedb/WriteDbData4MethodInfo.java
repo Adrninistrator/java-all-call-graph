@@ -25,11 +25,6 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
     private String methodInstructionsHash;
     private int jarNum;
 
-    @Override
-    public String toString() {
-        return fullMethod;
-    }
-
     public int getRecordId() {
         return recordId;
     }
@@ -148,5 +143,26 @@ public class WriteDbData4MethodInfo implements BaseWriteDbData {
 
     public void setJarNum(int jarNum) {
         this.jarNum = jarNum;
+    }
+
+    @Override
+    public String toString() {
+        return "WriteDbData4MethodInfo{" +
+                "recordId=" + recordId +
+                ", methodHash='" + methodHash + '\'' +
+                ", simpleClassName='" + simpleClassName + '\'' +
+                ", accessFlags=" + accessFlags +
+                ", methodName='" + methodName + '\'' +
+                ", simpleReturnTypeNad='" + simpleReturnTypeNad + '\'' +
+                ", returnTypeNad='" + returnTypeNad + '\'' +
+                ", returnArrayDimensions=" + returnArrayDimensions +
+                ", returnType='" + returnType + '\'' +
+                ", returnCategory='" + returnCategory + '\'' +
+                ", returnExistsGenericsType=" + returnExistsGenericsType +
+                ", className='" + className + '\'' +
+                ", fullMethod='" + fullMethod + '\'' +
+                ", methodInstructionsHash='" + methodInstructionsHash + '\'' +
+                ", jarNum=" + jarNum +
+                '}';
     }
 }

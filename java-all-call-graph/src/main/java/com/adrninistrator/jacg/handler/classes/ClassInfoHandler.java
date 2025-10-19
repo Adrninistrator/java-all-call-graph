@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassName;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassReference;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.common.enums.ClassInterfaceEnum;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
@@ -36,13 +37,13 @@ public class ClassInfoHandler extends BaseHandler {
     }
 
     /**
-     * 检查指定的类名是否存在
+     * 根据类名判断类是否存在
      *
      * @param className 类名
      * @return
      */
-    public boolean checkClassNameExists(String className) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CI_CHECK_CLASS_NAME_EXISTS;
+    public boolean checkExistsByClassName(String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CI_CHECK_EXISTS_BY_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + DC.CI_CLASS_NAME +
@@ -171,7 +172,16 @@ public class ClassInfoHandler extends BaseHandler {
      * @return
      */
     public WriteDbData4ClassInfo queryClassInfoByClassName(String className) {
-        return queryClassInfoBySCN(dbOperWrapper.querySimpleClassName(className));
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CI_QUERY_BY_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_CLASS_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_INFO.getTableName() +
+                    " where " + DC.CI_CLASS_NAME + " = ?" +
+                    " limit 1";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryObject(sql, WriteDbData4ClassInfo.class, className);
     }
 
     /**
@@ -191,24 +201,6 @@ public class ClassInfoHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObject(sql, WriteDbData4ClassInfo.class, simpleClassName);
-    }
-
-    /**
-     * 根据唯一类名查询重复类的信息
-     *
-     * @param simpleClassName 唯一类名
-     * @return 可能为null
-     */
-    public List<WriteDbData4ClassInfo> queryDupClassInfoBySCN(String simpleClassName) {
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.DCI_QUERY_BY_SIMPLE_CLASS_NAME;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_DUP_CLASS_INFO) +
-                    " from " + DbTableInfoEnum.DTIE_DUP_CLASS_INFO.getTableName() +
-                    " where " + DC.CI_SIMPLE_CLASS_NAME + " = ?";
-            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
-        return dbOperator.queryList(sql, WriteDbData4ClassInfo.class, simpleClassName);
     }
 
     /**
@@ -277,5 +269,117 @@ public class ClassInfoHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryListOneColumn(sql, String.class, packagePrefix);
+    }
+
+    /**
+     * 通过类名查询被引用的类名信息
+     *
+     * @param className
+     * @return
+     */
+    public List<WriteDbData4ClassReference> queryReferencedClassInfo(String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CR_QUERY_REFERENCED_CLASS;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_CLASS_REFERENCE) +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_REFERENCE.getTableName() +
+                    " where " + DC.CR_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4ClassReference.class, dbOperWrapper.querySimpleClassName(className));
+    }
+
+    /**
+     * 通过类名查询重复同名类信息
+     *
+     * @param className
+     * @return
+     */
+    public List<WriteDbData4ClassInfo> queryDupClasByClassName(String className) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.DCI_QUERY_BY_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_DUP_CLASS_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_DUP_CLASS_INFO.getTableName() +
+                    " where " + DC.CI_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4ClassInfo.class, className);
+    }
+
+    /**
+     * 查询内部类所在的外部类名
+     *
+     * @param innerClassName
+     * @return
+     */
+    public String queryOuterClass(String innerClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.IC_QUERY_BY_INNER;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + DC.IC_OUTER_CLASS_NAME +
+                    " from " + DbTableInfoEnum.DTIE_INNER_CLASS.getTableName() +
+                    " where " + DC.IC_INNER_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryObjectOneColumn(sql, String.class, dbOperWrapper.querySimpleClassName(innerClassName));
+    }
+
+    /**
+     * 查询内部类所在的所有外部类名
+     *
+     * @param innerClassName
+     * @return
+     */
+    public List<String> queryAllOuterClass(String innerClassName) {
+        List<String> allOuterClassNameList = new ArrayList<>();
+        String currentClassName = innerClassName;
+        while (true) {
+            String outerClassName = queryOuterClass(currentClassName);
+            if (outerClassName == null) {
+                break;
+            }
+            allOuterClassNameList.add(outerClassName);
+            currentClassName = outerClassName;
+        }
+        return allOuterClassNameList;
+    }
+
+    /**
+     * 检查outerClassName是否是innerClassName直接或间接的外部类
+     *
+     * @param innerClassName
+     * @param outerClassName
+     * @return
+     */
+    public boolean checkInnerOuterClass(String innerClassName, String outerClassName) {
+        List<String> allOuterClassNameList = queryAllOuterClass(innerClassName);
+        return allOuterClassNameList.contains(outerClassName);
+    }
+
+    /**
+     * 检查是否满足以下条件
+     * 1. className1是否是className2直接或间接的外部类
+     * 2. className2是否是className1直接或间接的外部类
+     * 3. className1、className2是否是同一个类的内部类
+     *
+     * @param className1
+     * @param className2
+     * @return
+     */
+    public boolean checkInnerClassAny(String className1, String className2) {
+        // 检查两个类是否是直接或间接的外部类/内部类
+        if (checkInnerOuterClass(className1, className2) || checkInnerOuterClass(className2, className1)) {
+            return true;
+        }
+        // 检查两个类是否是同一个类的内部类
+        List<String> allOuterClassNameList1 = queryAllOuterClass(className1);
+        List<String> allOuterClassNameList2 = queryAllOuterClass(className2);
+        for (String outerClassName1 : allOuterClassNameList1) {
+            if (allOuterClassNameList2.contains(outerClassName1)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -12,8 +12,10 @@ import com.mysql.cj.jdbc.Driver;
 public enum ConfigDbKeyEnum implements MainConfigInterface {
     CDKE_DB_USE_H2("db.use.h2", new String[]{"是否使用H2数据库，true: 使用，false: 不使用"},
             Boolean.class, true, Boolean.TRUE.toString()),
-    CDKE_DB_H2_FILE_PATH("db.h2.file.path", new String[]{"H2数据库文件路径（仅当使用H2数据库时需要指定），不需要指定后缀“.mv.db”",
+    CDKE_DB_H2_FILE_PATH("db.h2.file.path", new String[]{"H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.mv.db”支持指定，也支持不指定",
             "需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头",
+            "示例：D:/build/jacg_h2db.mv.db",
+            "示例：./build/jacg_h2db.mv.db",
             "示例：D:/build/jacg_h2db",
             "示例：./build/jacg_h2db"},
             String.class, true, "./build/jacg_h2db"),
@@ -28,6 +30,12 @@ public enum ConfigDbKeyEnum implements MainConfigInterface {
             String.class, true, ""),
     CDKE_DB_TABLE_SUFFIX("db.table.suffix", new String[]{"数据库表后缀，默认使用空不需要指定"},
             String.class, false, ""),
+    CDKE_SLOW_QUERY_SWITCH("slow.query.switch", new String[]{"数据库慢查询监控开关，若开启，会在应用日志中打印慢查询相关信息，可搜索“出现慢查询”"},
+            Boolean.class, false, Boolean.TRUE.toString()),
+    CDKE_SLOW_QUERY_TIME("slow.query.time", new String[]{"数据库慢查询监控，时间阈值，单位为毫秒，查询耗时大于该值时记录慢查询日志"},
+            Integer.class, false, "200"),
+    CDKE_SLOW_QUERY_ROW_NUM("slow.query.row.num", new String[]{"数据库慢查询监控，查询结果数量阈值，查询结果数量大于该值时记录慢查询日志"},
+            Integer.class, false, "5000"),
     ;
 
     // 参数key
@@ -50,7 +58,7 @@ public enum ConfigDbKeyEnum implements MainConfigInterface {
     }
 
     @Override
-    public String getEnumConstantsName() {
+    public String getEnumConstantName() {
         return name();
     }
 

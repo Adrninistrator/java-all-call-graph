@@ -147,7 +147,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             return;
         }
 
-        // 保存MyBatis Mapper不同操作的方法名称
+        // 保存MyBatis Mapper不同操作的方法名
         List<String> insertMapperMethodNameList = new ArrayList<>();
         List<String> updateMapperMethodNameList = new ArrayList<>();
         List<String> deleteMapperMethodNameList = new ArrayList<>();
@@ -366,8 +366,7 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             return;
         }
 
-        logger.info("当前方法是MyBatis用于插入Entity数据的方法 {} {} {} {}", methodCall.getCallerFullMethod(), methodCall.getCallerLineNumber(),
-                methodCall.getCalleeFullMethod(), entityClassName);
+        logger.info("当前方法是MyBatis用于插入Entity数据的方法 {} {}", methodCall.genPrintInfo(), entityClassName);
         for (WriteDbData4MethodCallInfo methodCallInfo : methodCallInfoList) {
             // 查询以Mapper接口的方法参数作为被调用对象的方法调用序号
             List<Integer> mapperArgAsObjCallIdList = queryMapperArgAsObjCallIdList(methodCall, methodCallInfo);
@@ -407,14 +406,12 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             for (WriteDbData4MethodCall selectMethodCall : selectMethodCallList) {
                 if (returnTypeIsEntity || StringUtils.equals(entityClassName, selectMethodCall.getActualReturnType())) {
                     // 若方法返回类型为Entity，或当前处理的方法调用实际返回类型为Entity时的处理
-                    logger.info("当前方法是MyBatis用于查询Entity数据的方法 {} {} {} {}", selectMethodCall.getCallerFullMethod(), selectMethodCall.getCallerLineNumber(),
-                            selectMethodCall.getCalleeFullMethod(), selectMethodCall.getActualReturnType());
+                    logger.info("当前方法是MyBatis用于查询Entity数据的方法 {} {}", selectMethodCall.genPrintInfo(), selectMethodCall.getActualReturnType());
                     // 处理MyBatis select Entity操作相关的方法调用
                     handleSelectEntityMethodCall(selectMethodCall);
                 } else if (JavaCG2ClassMethodUtil.isCustomType(mapperMethodInfo.getReturnType())) {
                     // 返回类型非Entity，属于自定义对象时的处理
-                    logger.info("当前方法是MyBatis用于查询自定义对象的方法 {} {} {} {}", selectMethodCall.getCallerFullMethod(), selectMethodCall.getCallerLineNumber(),
-                            selectMethodCall.getCalleeFullMethod(), mapperMethodInfo.getReturnType());
+                    logger.info("当前方法是MyBatis用于查询自定义对象的方法 {} {}", selectMethodCall.genPrintInfo(), mapperMethodInfo.getReturnType());
                     handleSelectObjectMethodCall(mapperMethodInfo, selectMethodCall);
                 }
 
@@ -449,8 +446,8 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             }
 
             for (WriteDbData4FieldRelationship fieldRelationship : fieldRelationshipList) {
-                logger.info("修改字段关联关系表的标志 {} {} {} {} {}", FieldRelationshipFlagsEnum.FRF_GET_MYBATIS_SELECT_ENTITY, selectReturnCallId, fieldRelationship.getFldRelationshipId(),
-                        selectMethodCall.getCallerFullMethod(), selectMethodCall.getCallerLineNumber());
+                logger.info("修改字段关联关系表的标志 {} {} {} {}", FieldRelationshipFlagsEnum.FRF_GET_MYBATIS_SELECT_ENTITY, selectReturnCallId, fieldRelationship.getFldRelationshipId(),
+                        selectMethodCall.genPrintInfo());
                 fieldRelationshipHandler.updateFieldRelationshipAddFlag(fieldRelationship.getFldRelationshipId(), fieldRelationship.getRelationshipFlags(),
                         FieldRelationshipFlagsEnum.FRF_GET_MYBATIS_SELECT_ENTITY);
             }
@@ -500,8 +497,8 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
             }
 
             for (WriteDbData4FieldRelationship fieldRelationship : fieldRelationshipList) {
-                logger.info("修改字段关联关系表的标志 {} {} {} {} {}", FieldRelationshipFlagsEnum.FRF_GET_MYBATIS_SELECT_OBJECT, selectReturnCallId, fieldRelationship.getFldRelationshipId(),
-                        selectMethodCall.getCallerFullMethod(), selectMethodCall.getCallerLineNumber());
+                logger.info("修改字段关联关系表的标志 {} {} {} {}", FieldRelationshipFlagsEnum.FRF_GET_MYBATIS_SELECT_OBJECT, selectReturnCallId, fieldRelationship.getFldRelationshipId(),
+                        selectMethodCall.genPrintInfo());
                 fieldRelationshipHandler.updateFieldRelationshipAddFlag(fieldRelationship.getFldRelationshipId(), fieldRelationship.getRelationshipFlags(),
                         FieldRelationshipFlagsEnum.FRF_GET_MYBATIS_SELECT_OBJECT);
 
@@ -649,8 +646,8 @@ public class MyBatisMSJavaColumnHandler extends BaseHandler implements QueryByPa
 
     // 处理MyBatis的Mapper方法参数，使用对象的情况
     private void handleMapperArgUseObject(boolean updateOrSelect, boolean mapperArgIsEntity, WriteDbData4MethodCallInfo methodCallInfo,
-                                          WriteDbData4MethodCall updateOrSelectMethodCall,
-                                          MyBatisMapperArgAndParamDbInfo myBatisMapperArgAndParamDbInfo4Where, MyBatisMapperArgAndParamDbInfo myBatisMapperArgAndParamDbInfo4Set) {
+                                          WriteDbData4MethodCall updateOrSelectMethodCall, MyBatisMapperArgAndParamDbInfo myBatisMapperArgAndParamDbInfo4Where,
+                                          MyBatisMapperArgAndParamDbInfo myBatisMapperArgAndParamDbInfo4Set) {
         // 查询以Mapper接口的方法参数作为被调用对象的方法调用序号
         List<Integer> mapperArgAsObjCallIdList = queryMapperArgAsObjCallIdList(updateOrSelectMethodCall, methodCallInfo);
         if (JavaCG2Util.isCollectionEmpty(mapperArgAsObjCallIdList)) {

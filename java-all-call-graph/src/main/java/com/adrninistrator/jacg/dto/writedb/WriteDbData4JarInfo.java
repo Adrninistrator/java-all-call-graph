@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * @author adrninistrator
  * @date 2022/11/15
- * @description: 用于写入数据库的数据，jar包信息
+ * @description: 用于写入数据库的数据，jar文件信息
  */
 public class WriteDbData4JarInfo implements BaseWriteDbData {
     private int jarNum;

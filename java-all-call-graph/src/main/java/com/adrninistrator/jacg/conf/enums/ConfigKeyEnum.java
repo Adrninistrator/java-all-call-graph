@@ -1,7 +1,9 @@
 package com.adrninistrator.jacg.conf.enums;
 
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
+import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
 
 /**
@@ -12,8 +14,9 @@ import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
 public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_APP_NAME("app.name",
             new String[]{"当前应用的调用关系写入数据库里的表名后缀",
+                    "使用 H2 数据库时，固定为“jacg”",
                     "不能使用-作为分隔符，可使用_"},
-            String.class, true, "test"),
+            String.class, true, JACGConstants.FIXED_APP_NAME),
     CKE_THREAD_NUM("thread.num",
             new String[]{"并发处理线程数量/数据源连接池数量",
                     "若超过了需要处理的任务数量，会使用任务数量作为线程数量"},
@@ -53,7 +56,7 @@ public enum ConfigKeyEnum implements MainConfigInterface {
                     "true: 忽略，false: 不忽略"},
             Boolean.class, false, Boolean.FALSE.toString()),
     CKE_CALL_GRAPH_GEN_STACK_OTHER_FORMS("call.graph.gen.stack.other.forms",
-            new String[]{"生成方法调用链文件时，是否生成其他形式的调用堆栈文件，仅当 " + CKE_CALL_GRAPH_OUTPUT_DETAIL.getKey() + "=" + OutputDetailEnum.ODE_0.getDetail() + " 时支持"},
+            new String[]{"使用 " + FindCallStackTrace.class.getSimpleName() + " 类生成方法调用堆栈文件时，是否生成其他形式的调用堆栈文件，仅当 " + CKE_CALL_GRAPH_OUTPUT_DETAIL.getKey() + "=" + OutputDetailEnum.ODE_0.getDetail() + " 时支持"},
             Boolean.class, false, Boolean.FALSE.toString()),
     CKE_CALL_GRAPH_GEN_JSON_CALLER("call.graph.gen.json.caller",
             new String[]{"生成向下的方法调用链文件时，是否输出JSON格式的方法调用链文件"},
@@ -77,6 +80,12 @@ public enum ConfigKeyEnum implements MainConfigInterface {
             Boolean.class, false, Boolean.FALSE.toString()),
     CKE_PARSE_SPRING_AOP_INFO("parse.spring.aop.info",
             new String[]{"解析指定的jar文件时，是否需要对Spring AOP相关信息进行解析"},
+            Boolean.class, false, Boolean.FALSE.toString()),
+    CKE_TEXT_TO_EXCEL_WIDTH_PX("text.to.excel.width.px",
+            new String[]{"将生成的文本文件转换为 Excel 文件时的宽度像素"},
+            Integer.class, false, "1920"),
+    CKE_EL_DEBUG_MODE("el.debug.mode",
+            new String[]{"是否开启表达式执行调试模式，若开启会在应用日志中输出表达式执行时的详细信息"},
             Boolean.class, false, Boolean.FALSE.toString()),
 //    CKE_CALL_GRAPH_SUPPORT_SPRING_AOP("call.graph.support.spring.aop",
 //            new String[]{"生成方法调用链文件时，是否需要支持将Spring AOP相关的advice中的方法调用生成到方法调用链文件中"},
@@ -103,7 +112,7 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     }
 
     @Override
-    public String getEnumConstantsName() {
+    public String getEnumConstantName() {
         return name();
     }
 

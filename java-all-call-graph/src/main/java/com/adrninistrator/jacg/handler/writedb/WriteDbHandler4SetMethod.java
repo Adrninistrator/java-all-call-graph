@@ -28,7 +28,7 @@ public class WriteDbHandler4SetMethod extends AbstractWriteDbHandler4GetSetMetho
         key
             唯一类名
         value
-            set方法名称Set
+            set方法名Set
     */
     private Map<String, Set<String>> setMethodSimpleClassMap;
 

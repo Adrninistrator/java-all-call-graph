@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopAdvice;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringAopAdviceAffectedMethod;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringBean;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringController;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4SpringTask;
@@ -20,13 +21,9 @@ import com.adrninistrator.jacg.handler.method.MethodInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
-import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
-import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.aspectj.weaver.AdviceKind;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +37,6 @@ import java.util.List;
  */
 public class SpringHandler extends BaseHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(SpringHandler.class);
     private final MethodInfoHandler methodInfoHandler;
     private final ConfigHandler configHandler;
 
@@ -196,11 +192,10 @@ public class SpringHandler extends BaseHandler {
         return uriList.get(0);
     }
 
+    // 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
     private void checkParseMethodCallTypeValue() {
         if (!configHandler.checkParseMethodCallTypeValue()) {
-            logger.error("使用 java-callgraph2 组件处理方法调用时未解析被调用对象和参数可能的类型与值，无法判断 Spring Controller 方法参数是否有被使用" +
-                    "需要将参数值指定为 {} {}", Boolean.TRUE, configureWrapper.genConfigUsage(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE));
-            throw new JavaCG2RuntimeException("使用 java-callgraph2 组件处理方法调用时未解析被调用对象和参数可能的类型与值，无法判断 Spring Controller 方法参数是否有被使用，请按照日志提示处理");
+            configHandler.noticeParseMethodCallTypeValue();
         }
     }
 
@@ -210,6 +205,7 @@ public class SpringHandler extends BaseHandler {
      * @return
      */
     public List<WriteDbData4SpringController> queryFileUploadControllerMethod() {
+        // 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
         checkParseMethodCallTypeValue();
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY_FILE_UPLOAD;
@@ -275,6 +271,7 @@ public class SpringHandler extends BaseHandler {
      * @return
      */
     public List<WriteDbData4SpringController> queryFileDownloadControllerInfo() {
+        // 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
         checkParseMethodCallTypeValue();
 
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY_FILE_DOWNLOAD;
@@ -350,6 +347,22 @@ public class SpringHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryList(sql, WriteDbData4SpringBean.class, dbOperWrapper.querySimpleClassName(className));
+    }
+
+    /**
+     * 查询全部的Spring Bean
+     *
+     * @return
+     */
+    public List<WriteDbData4SpringBean> queryAllSpringBean() {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPB_QUERY_ALL;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_SPRING_BEAN) +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_BEAN.getTableName();
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4SpringBean.class);
     }
 
     /**
@@ -471,9 +484,28 @@ public class SpringHandler extends BaseHandler {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_SPRING_AOP_ADVICE) +
-                    " from " + DbTableInfoEnum.DTIE_SPRING_AOP_ADVICE.getTableName();
+                    " from " + DbTableInfoEnum.DTIE_SPRING_AOP_ADVICE.getTableName() +
+                    " order by " + DC.SAAD_RECORD_ID;
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryList(sql, WriteDbData4SpringAopAdvice.class);
+    }
+
+    /**
+     * 通过Spring Bean类名查询Spring AOP advice影响的方法
+     *
+     * @param springBeanClassName
+     * @return
+     */
+    public List<WriteDbData4SpringAopAdviceAffectedMethod> querySpringAopAdviceAffectedMethodBySPC(String springBeanClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SAADAM_QUERY_BY_AFFECTED_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_SPRING_AOP_ADVICE_AFFECTED_METHOD) +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_AOP_ADVICE_AFFECTED_METHOD.getTableName() +
+                    " where " + DC.SAADAM_AFFECTED_FULL_METHOD + " like concat(?, '%')";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4SpringAopAdviceAffectedMethod.class, springBeanClassName);
     }
 }

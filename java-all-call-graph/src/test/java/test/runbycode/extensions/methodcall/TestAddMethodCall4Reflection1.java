@@ -15,7 +15,7 @@ import test.runbycode.base.TestRunByCodeBase;
  * @author adrninistrator
  * @date 2025/2/16
  * @description: 为通过反射工具类方法调用的被调用方法添加调用关系
- * 通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名称
+ * 通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名
  * 对应的反射工具类方法为 test.callgraph.reflection1.util.TestReflectionUtil1:runByReflection(java.lang.Object, java.lang.String, java.lang.Object...)
  */
 public class TestAddMethodCall4Reflection1 extends TestRunByCodeBase {
