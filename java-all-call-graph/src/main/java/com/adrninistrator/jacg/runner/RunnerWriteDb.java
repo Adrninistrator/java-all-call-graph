@@ -660,23 +660,15 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
     // 对建表sql语句进行转换
     private String transformCreateTableSql(String sql, boolean useH2Db) {
-        if (StringUtils.startsWithIgnoreCase(sql, JACGConstants.SQL_CREATE_TABLE_HEAD)) {
-            // CREATE TABLE if not exists开头
-            return JACGSqlUtil.replaceFlagInSql(sql, appName, tableSuffix);
-        }
-
+        String newSql = JACGSqlUtil.replaceFlagInSql(sql, appName, tableSuffix);
         String trimSql = sql.trim();
-        if (StringUtils.startsWithAny(trimSql, "PRIMARY KEY", "INDEX", "UNIQUE INDEX")) {
-            // PRIMARY KEY、INDEX、UNIQUE INDEX开头
-            if (useH2Db) {
-                return JACGSqlUtil.replaceFlagInSql(sql, appName, tableSuffix)
-                        .replaceAll("\\([0-9]+\\)", "");
-            }
-            return JACGSqlUtil.replaceFlagInSql(sql, appName, tableSuffix);
+        if (useH2Db && StringUtils.startsWithAny(trimSql, "PRIMARY KEY", "INDEX", "UNIQUE INDEX")) {
+            // 使用H2数据库，且以PRIMARY KEY、INDEX、UNIQUE INDEX开头，去掉索引中指定的字段长度
+            return newSql.replaceAll("\\([0-9]+\\)", "");
         }
 
-        // 其他情况
-        return sql;
+        // 其他情况，每行都替换appName
+        return newSql;
     }
 
     // 清理数据库表
