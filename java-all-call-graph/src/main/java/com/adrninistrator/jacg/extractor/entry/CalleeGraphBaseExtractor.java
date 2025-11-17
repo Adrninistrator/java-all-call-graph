@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * @author adrninistrator
  * @date 2022/8/29
- * @description: 对向上的方法调用链文件进行数据提取，基础类
+ * @description: 对向上的方法完整调用链文件进行数据提取，基础类
  */
 public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFileParsedCallback {
     private static final Logger logger = LoggerFactory.getLogger(CalleeGraphBaseExtractor.class);

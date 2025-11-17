@@ -11,9 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import test.callgraph.awt.TestActionListener;
-import test.callgraph.manualaddmethodcall.fixed.TestFixedManualAddMethodCall;
 import test.callgraph.manualaddmethodcall.issue74.TestManualAddMethodCallIssue74;
-import test.callgraph.manualaddmethodcall.unfixed.TestUnfixedManualAddMethodCall;
 import test.runbycode.base.TestRunByCodeBase;
 import test.runbycode.manualaddmethodcall.extensions.MAMCExt4ActionListener;
 import test.runbycode.manualaddmethodcall.extensions.MAMCExt4FixedService1;
@@ -35,8 +33,6 @@ public class TestManualAddMethodCall extends TestRunByCodeBase {
         );
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 TestActionListener.class.getName(),
-                TestFixedManualAddMethodCall.class.getName(),
-                TestUnfixedManualAddMethodCall.class.getName(),
                 TestManualAddMethodCallIssue74.class.getName()
         );
     }

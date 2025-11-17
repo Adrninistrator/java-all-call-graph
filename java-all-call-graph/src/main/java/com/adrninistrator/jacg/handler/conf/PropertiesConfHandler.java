@@ -110,7 +110,8 @@ public class PropertiesConfHandler extends BaseHandler {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.PC_QUERY_MAX_RECORD_ID;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select ifnull(max(" + DC.PC_RECORD_ID + "),?) from " + DbTableInfoEnum.DTIE_PROPERTIES_CONF.getTableName();
+            // pg不支持ifnull，使用COALESCE
+            sql = "select COALESCE(max(" + DC.PC_RECORD_ID + "),?) from " + DbTableInfoEnum.DTIE_PROPERTIES_CONF.getTableName();
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         Integer maxId = dbOperator.queryObjectOneColumn(sql, Integer.class, JavaCG2Constants.RECORD_ID_MIN_BEFORE);

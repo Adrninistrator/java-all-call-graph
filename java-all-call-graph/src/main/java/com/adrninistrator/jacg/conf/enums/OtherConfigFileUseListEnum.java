@@ -32,20 +32,18 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
                     "若向下的方法完整调用链文件的某行包含当前配置文件中的某个关键字，则认为找到需要生成调用堆栈的方法"}
             , null),
     OCFULE_EXTENSIONS_CODE_PARSER(InputDirEnum.IDE_EXTENSIONS.getDirName() + "/code_parser.properties",
-            new String[]{"在此定义用于对代码进行解析的扩展类完整类名（每行指定一项配置，可指定多行）",
+            new String[]{"定义用于对代码进行解析的扩展类完整类名（每行指定一项配置，可指定多行）",
                     "需要是 " + CodeParserInterface.class.getName() + " 接口的实现类"}
             , null),
     OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER(InputDirEnum.IDE_EXTENSIONS.getDirName() + "/method_annotation_formatter.properties",
-            new String[]{"在此定义处理方法上的注解生成用于显示信息的扩展类完整类名（每行指定一项配置，可指定多行）",
+            new String[]{"定义在生成方法完整调用链时，显示方法注解信息的扩展类完整类名（每行指定一项配置，可指定多行）",
                     "需要是 " + AbstractAnnotationFormatter.class.getName() + " 类的子类",
                     "假如需要显示方法上的注解，请将默认的方法注解处理类 " + DefaultAnnotationFormatter.class.getSimpleName() + " 在最后指定",
                     "假如不需要显示方法上的注解，请只指定不显示方法注解的处理类 " + HideAnnotationFormatter.class.getSimpleName(),
                     HideAnnotationFormatter.class.getName()}
-            , new String[]{
-            SpringMvcRequestMappingFormatter.class.getName(),
+            , new String[]{SpringMvcRequestMappingFormatter.class.getName(),
             SpringTransactionalFormatter.class.getName(),
-            DefaultAnnotationFormatter.class.getName(),
-    }),
+            DefaultAnnotationFormatter.class.getName()}),
     OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1(InputDirEnum.IDE_EXTENSIONS.getDirName() + "/manual_add_method_call1.properties",
             new String[]{"在此定义人工添加方法调用关系的扩展类完整类名，处理特定的子类与实现类（每行指定一项配置，可指定多行）",
                     "需要是 " + AbstractManualAddMethodCall1.class.getName() + " 类的子类"}
@@ -63,7 +61,7 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
                     "需要是 " + AbstractJACGMethodCallExtension.class.getName() + " 类的子类"}
             , null),
     OCFULE_JAR_DIFF_CALLEE_GRAPH_DIR(InputDirEnum.IDE_JAR_DIFF.getDirName() + "/jar_diff_callee_graph_dir.properties",
-            new String[]{"(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，获得发生变化的方法的影响范围（生成向上的完整方法调用链及调用堆栈）",
+            new String[]{"(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，获得发生变化的方法的影响范围（生成向上的方法完整调用链及调用堆栈）",
                     "(内容) 第1行指定旧目录路径，第2行指定新目录路径",
                     "(示例) build/jar-diff-version-1",
                     "(示例) build/jar-diff-version-2",
@@ -71,7 +69,7 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
                     "(示例) D:/test/build/jar-diff-version-2"}
             , null),
     OCFULE_JAR_DIFF_CALLER_GRAPH_DIR(InputDirEnum.IDE_JAR_DIFF.getDirName() + "/jar_diff_caller_graph_dir.properties",
-            new String[]{"(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，向下的完整方法调用链",
+            new String[]{"(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，向下的方法完整调用链",
                     "(内容) 第1行指定旧目录路径，第2行指定新目录路径",
                     "(示例) build/jar-diff-version-1",
                     "(示例) build/jar-diff-version-2",

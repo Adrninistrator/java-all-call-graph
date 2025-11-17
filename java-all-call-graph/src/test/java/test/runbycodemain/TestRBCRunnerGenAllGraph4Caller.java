@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
 import test.callgraph.extendcomplex.TestExtendComplex;
+import test.callgraph.methodcall.TestMCCaller;
 import test.runbycode.base.TestRunByCodeBase;
 import test.runbycode.config.TestConfigGenerator;
 import test.runbycode.util.JACGTestUtil;
@@ -22,12 +23,25 @@ import java.util.Map;
  * @date 2025/2/16
  * @description:
  */
-@JACGExample(title = "生成指定方法向下的完整方法调用链",
+@JACGExample(title = "生成指定方法向下的方法完整调用链",
         desc = {"通过代码指定配置参数的主要功能示例"})
 public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
 
-    @JACGExample(title = "方法调用链数据仅写入文件",
-            desc = {"方法调用链数据不在内存中返回"})
+    @JACGExample(title = "方法完整调用链数据仅写入文件，示例代码",
+            desc = {"方法完整调用链数据不在内存中返回"})
+    @Test
+    public void testExampleWriteToFile() {
+        // 解析指定的Java代码，并将结果写入数据库
+        new TestRBC1RunnerWriteDb().$test0WriteDb();
+
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, TestMCCaller.class.getName());
+
+        Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
+    }
+
+    @JACGExample(title = "方法完整调用链数据仅写入文件",
+            desc = {"方法完整调用链数据不在内存中返回"})
     @Test
     public void testWriteToFile() {
         int callGraphDirNumBefore = getCallGraphDirNum4Er();
@@ -50,16 +64,16 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
         Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore + 1);
     }
 
-    @JACGExample(title = "方法调用链数据仅写入文件，生成文件名使用更短的模式",
-            desc = {"方法调用链数据不在内存中返回"})
+    @JACGExample(title = "方法完整调用链数据仅写入文件，生成文件名使用更短的模式",
+            desc = {"方法完整调用链数据不在内存中返回"})
     @Test
     public void testWriteToFileShortName() {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_FILE_SHORT_MODE, Boolean.TRUE.toString());
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
     }
 
-    @JACGExample(title = "方法调用链数据仅在内存中返回",
-            desc = {"方法调用链数据不写入文件"})
+    @JACGExample(title = "方法完整调用链数据仅在内存中返回",
+            desc = {"方法完整调用链数据不写入文件"})
     @Test
     public void testReturnInMemory() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
@@ -67,7 +81,7 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
         doTestReturnInMemory();
     }
 
-    @JACGExample(title = "方法调用链数据写入文件，也在内存中返回",
+    @JACGExample(title = "方法完整调用链数据写入文件，也在内存中返回",
             desc = {})
     @Test
     public void testBoth() {
@@ -110,9 +124,8 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
         return allMethodCallLineData4ErMap;
     }
 
-
-    @JACGExample(title = "方法调用链数据仅在内存中返回，返回多个方法",
-            desc = {"方法调用链数据不写入文件"})
+    @JACGExample(title = "方法完整调用链数据仅在内存中返回，返回多个方法",
+            desc = {"方法完整调用链数据不写入文件"})
     @Test
     public void testReturnInMemoryMulti() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,

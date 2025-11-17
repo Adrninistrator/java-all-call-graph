@@ -26,10 +26,15 @@ public class ElConstants {
                         "若当前配置文件中的表达式执行结果为 true，则跳过处理对应的Spring Bean",
                         "若表达式执行结果为 false，或未指定表达式，则当前配置不会跳过对应的Spring Bean"});
         EL_DIR_USAGE_MAP.put(InputDirEnum.IDE_JAR_DIFF.getDirName(),
-                new String[]{"在 对JarDiff找到发生变化的方法生成向上/向下完整方法调用链 使用的配置参数",
+                new String[]{"在 对JarDiff找到发生变化的方法生成向上/向下方法完整调用链时 使用的配置参数",
                         "表达式配置参数的说明如下：",
-                        "若当前配置文件中的表达式执行结果为 true，则跳过为对应的方法生成完整方法调用链",
+                        "若当前配置文件中的表达式执行结果为 true，则跳过为对应的方法生成方法完整调用链",
                         "若表达式执行结果为 false，或未指定表达式，则当前配置不会跳过对应的方法"});
+        EL_DIR_USAGE_MAP.put(InputDirEnum.IDE_COMPATIBILITY.getDirName(),
+                new String[]{"在 Jar兼容性检查时 使用的配置参数",
+                        "表达式配置参数的说明如下：",
+                        "若当前配置文件中的表达式执行结果为 true，则跳过将对应的数据写入Jar兼容性检查结果",
+                        "若表达式执行结果为 false，或未指定表达式，则当前配置不会跳过对应的数据"});
     }
 
     public static Map<String, String[]> getElDirUsageMap() {

@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * @author adrninistrator
  * @date 2025/5/17
- * @description: 比较新旧两个目录中不同版本jar文件的方法修改情况，以及向下的完整方法调用链
+ * @description: 比较新旧两个目录中不同版本jar文件的方法修改情况，以及向下的方法完整调用链
  */
 public class RunnerGenJarDiffCallerGraph extends AbstractRunnerGenJarDiffCallGraph {
 
@@ -35,7 +35,7 @@ public class RunnerGenJarDiffCallerGraph extends AbstractRunnerGenJarDiffCallGra
         configureWrapperNew.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_0.getDetail());
         configureWrapperNew.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, modifiedMethodSet);
         RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapperNew);
-        // 设置生成完整方法调用链目录
+        // 设置生成方法完整调用链目录
         runnerGenAllGraph4Caller.setCurrentOutputDirPath(genAllCallGraphDir);
         // 生成发生变化的方法向下的方法完整调用链
         boolean success = runnerGenAllGraph4Caller.run();

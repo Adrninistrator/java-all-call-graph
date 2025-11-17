@@ -29,7 +29,7 @@ public class TestAnalyseJavaCG2JACG0WriteDb {
 //        String jacgJarFilePath = testAnalyseJACG0WriteDb.getJACGJarFilePath();
 //        logger.info("找到jar文件 {} {}", javaCG2JarFilePath, jacgJarFilePath);
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = new JavaCG2ConfigureWrapper();
-        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, javaCG2JarFilePath, "out/");
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, javaCG2JarFilePath, "out/production/classes");
 
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_SKIP_WRITE_DB_WHEN_JAR_NOT_MODIFIED, Boolean.FALSE.toString());

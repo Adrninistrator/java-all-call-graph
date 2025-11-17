@@ -1,5 +1,7 @@
 package test.callgraph.awt;
 
+import org.junit.Test;
+
 import java.awt.Button;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,18 +12,21 @@ import java.awt.event.ActionListener;
  * @description:
  */
 public class TestActionListener {
+    @Test
     public void test1a() {
         ActionListener1 testActionListener = new ActionListener1();
         new Button().addActionListener(testActionListener);
         new Button().addActionListener(testActionListener);
     }
 
+    @Test
     public void test1b() {
         ActionListener1 testActionListener = new ActionListener1("a");
         new Button().addActionListener(testActionListener);
         new Button().addActionListener(testActionListener);
     }
 
+    @Test
     public void test2() {
         new Button().addActionListener(new ActionListener() {
             @Override
@@ -31,6 +36,7 @@ public class TestActionListener {
         });
     }
 
+    @Test
     public void test3() {
         new Button().addActionListener(new ActionListener() {
             @Override
@@ -47,6 +53,7 @@ public class TestActionListener {
         });
     }
 
+    @Test
     public void test4() {
         new Thread() {
             @Override
@@ -63,8 +70,8 @@ public class TestActionListener {
         }.start();
     }
 
-    public String test5() {
+    @Test
+    public void test5() {
         new Button().addActionListener(e -> System.setProperty("", ""));
-        return "";
     }
 }

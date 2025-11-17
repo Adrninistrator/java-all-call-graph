@@ -1,7 +1,7 @@
-CREATE TABLE if not exists jacg_method_catch_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_method_catch_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
-  simple_class_name varchar(255) NOT NULL COMMENT '唯一类名',
+  simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
   method_name varchar(300) NOT NULL COMMENT '方法名',
   simple_catch_exception_type varchar(255) NOT NULL COMMENT 'catch捕获的异常类型唯一类名',
   catch_exception_type varchar(255) NOT NULL COMMENT 'catch捕获的异常类型',
@@ -20,6 +20,6 @@ CREATE TABLE if not exists jacg_method_catch_{appName} (
   return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
   INDEX idx_mcth_mh_{appName}(method_hash),
-  INDEX idx_mcth_scn_{appName}(simple_class_name),
+  INDEX idx_mcth_scn_{appName}(simple_class_name(255)),
   INDEX idx_mcth_sct_{appName}(simple_catch_exception_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法的catch信息';

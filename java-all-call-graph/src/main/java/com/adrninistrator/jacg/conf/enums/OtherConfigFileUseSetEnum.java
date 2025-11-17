@@ -63,7 +63,7 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
                     "Test1:139 139-492"}
             , null),
     OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM(InputDirEnum.IDE_GEN_ALL_CALL_GRAPH.getDirName() + "/caller_graph_callee_arg_type_polymorphism.properties",
-            new String[]{"(作用) 生成向下完整方法调用链时，指定哪些方法参数作为被调用对象涉及多态时的类型替换（每行指定一项配置，可指定多行）",
+            new String[]{"(作用) 生成向下方法完整调用链时，指定哪些方法参数作为被调用对象涉及多态时的类型替换（每行指定一项配置，可指定多行）",
                     "(作用) 即对被调用类型使用实际传入的子类类型替换方法参数定义的父类类型",
                     "(前提) 使用 java-callgraph2 组件解析方法调用时需要将" + JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.getType() + " 参数值设置为 " + Boolean.TRUE,
                     "(限制) 仅支持获取被调用方法被直接调用（没有嵌套多层调用）时的子类类型",
@@ -75,12 +75,12 @@ public enum OtherConfigFileUseSetEnum implements OtherConfigInterface {
                     "a.b.C:f1(int,a.b.Super):java.lang.String=1"}
             , null),
     OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE(InputDirEnum.IDE_BUSINESS_DATA_TYPE.getDirName() + "/business_data_type_show_4ee.properties",
-            new String[]{"生成向上的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据",
+            new String[]{"生成向上的方法完整调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据",
                     "默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEe=true的type",
                     DefaultBusinessDataTypeEnum.getSupportTypeStr(true)}
             , null),
     OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER(InputDirEnum.IDE_BUSINESS_DATA_TYPE.getDirName() + "/business_data_type_show_4er.properties",
-            new String[]{"生成向下的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据",
+            new String[]{"生成向下的方法完整调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据",
                     "默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEr=true的type",
                     DefaultBusinessDataTypeEnum.getSupportTypeStr(false)}
             , null),

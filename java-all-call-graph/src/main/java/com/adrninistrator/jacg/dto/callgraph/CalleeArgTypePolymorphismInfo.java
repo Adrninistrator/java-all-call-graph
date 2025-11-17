@@ -6,7 +6,7 @@ import java.util.Set;
 /**
  * @author adrninistrator
  * @date 2025/10/15
- * @description: 生成向下完整方法调用链时，指定哪些方法参数作为被调用对象涉及多态时的类型替换使用的信息
+ * @description: 生成向下方法完整调用链时，指定哪些方法参数作为被调用对象涉及多态时的类型替换使用的信息
  */
 public class CalleeArgTypePolymorphismInfo {
 

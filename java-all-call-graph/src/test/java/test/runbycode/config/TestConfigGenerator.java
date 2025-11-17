@@ -29,6 +29,8 @@ import test.callgraph.interfaces.interfaces.InterfaceSuper2;
 import test.callgraph.interfacesdefault.TestUseInterfaceDefault1;
 import test.callgraph.interfacesgeneric.TestInterfacesGeneric1;
 import test.callgraph.lambda.TestLambda;
+import test.callgraph.manualaddmethodcall.fixed.TestFixedManualAddMethodCall;
+import test.callgraph.manualaddmethodcall.unfixed.TestUnfixedManualAddMethodCall;
 import test.callgraph.methodargument.TestArgument1;
 import test.callgraph.methodargument.TestArgument2;
 import test.callgraph.methodargument.TestArgumentGenerics1;
@@ -133,6 +135,8 @@ public class TestConfigGenerator {
                 TestUseInterfaceDefault1.class.getName(),
                 TestEmptyClass1.class.getName(),
                 TestNoMethodClass1.class.getName(),
+                TestFixedManualAddMethodCall.class.getName(),
+                TestUnfixedManualAddMethodCall.class.getName(),
                 TEST_NOT_EXISTS_CLASS_NAME
         );
     }
@@ -199,7 +203,7 @@ public class TestConfigGenerator {
         return configureWrapper;
     }
 
-    // 生成使用 java-callgraph2 的配置参数包装类
+    // 生成 java-callgraph2 使用的配置参数包装类
     public static JavaCG2ConfigureWrapper genJavaCG2ConfigureWrapper() {
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = new JavaCG2ConfigureWrapper();
         javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.TRUE.toString());

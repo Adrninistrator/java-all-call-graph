@@ -15,7 +15,6 @@ import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
-import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.slf4j.Logger;
@@ -147,11 +146,11 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
             List<WriteDbData4MethodInfo> methodInfoList = methodInfoHandler.queryMethodInfoByClassMethodSuperInterface(calleeClassName, calleeMethodName);
             if (JavaCG2Util.isCollectionEmpty(methodInfoList)) {
                 logger.error("获取被调用方法返回类型，根据类名与方法名查询到的方法预期为1个，实际为空 {} {} {} {}", callerFullMethod, callerLineNum, calleeClassName, calleeMethodName);
-                throw new JavaCG2RuntimeException("获取被调用方法返回类型，根据类与方法名查询到的方法预期为1个，实际为空");
+                return null;
             }
             if (methodInfoList.size() != 1) {
                 logger.error("获取被调用方法返回类型，根据类名与方法名查询到的方法预期为1个，实际存在多个 {} {} {} {} {}", callerFullMethod, callerLineNum, calleeClassName, calleeMethodName, methodInfoList.size());
-                throw new JavaCG2RuntimeException("获取被调用方法返回类型，根据类与方法名查询到的方法预期为1个，实际存在多个");
+                return null;
             }
             WriteDbData4MethodInfo methodInfo = methodInfoList.get(0);
             logger.info("修改根据类名与方法名查询到的完整方法及返回类型 {} {} {} {}", calleeClassName, calleeMethodName, methodInfo.getFullMethod(), methodInfo.getReturnType());

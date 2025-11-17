@@ -1,7 +1,7 @@
-CREATE TABLE if not exists jacg_method_arg_generics_type_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_method_arg_generics_type_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
-  simple_class_name varchar(255) NOT NULL COMMENT '唯一类名',
+  simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
   seq int NOT NULL COMMENT '参数序号，从0开始',
   type varchar(5)  NOT NULL COMMENT '类型，t:参数类型，gt:参数中的泛型类型',
   type_seq tinyint NOT NULL COMMENT '类型序号，参数类型固定为0，参数中的泛型类型从0开始',
@@ -16,6 +16,6 @@ CREATE TABLE if not exists jacg_method_arg_generics_type_{appName} (
   return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
   INDEX idx_magt_matt_{appName}(method_hash, seq, type, type_seq),
-  INDEX idx_magt_scn_{appName}(simple_class_name),
+  INDEX idx_magt_scn_{appName}(simple_class_name(255)),
   INDEX idx_magt_sgt_{appName}(simple_generics_type_nad)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法参数泛型类型';

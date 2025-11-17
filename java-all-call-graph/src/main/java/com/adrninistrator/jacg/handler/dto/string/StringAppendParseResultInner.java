@@ -2,6 +2,9 @@ package com.adrninistrator.jacg.handler.dto.string;
 
 import com.adrninistrator.jacg.handler.dto.string.element.BaseStringElement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author adrninistrator
  * @date 2025/9/19
@@ -9,14 +12,14 @@ import com.adrninistrator.jacg.handler.dto.string.element.BaseStringElement;
  */
 public class StringAppendParseResultInner {
 
-    // 原始字符串，对于枚举常量方法调用返回值，使用 {简单类名}.{枚举常量}.{被调用方法}() 形式
+    // 原始字符串，对于枚举常量方法调用返回值，使用 {简单类名}.{枚举常量}.{被调用方法}() 形式。存在多种可能时，代表第一种可能的值
     private String rawString;
 
-    // 解析后的字符串，对于枚举常量方法调用返回值，使用对应方法返回的常量值
+    // 解析后的字符串，对于枚举常量方法调用返回值，使用对应方法返回的常量值。存在多种可能时，代表第一种可能的值
     private String parsedValue;
 
-    // 字符串元素
-    private BaseStringElement stringElement;
+    // 字符串元素列表，存在多种可能性
+    private final List<BaseStringElement> stringElementList = new ArrayList<>();
 
     public String getRawString() {
         return rawString;
@@ -34,11 +37,7 @@ public class StringAppendParseResultInner {
         this.parsedValue = parsedValue;
     }
 
-    public BaseStringElement getStringElement() {
-        return stringElement;
-    }
-
-    public void setStringElement(BaseStringElement stringElement) {
-        this.stringElement = stringElement;
+    public List<BaseStringElement> getStringElementList() {
+        return stringElementList;
     }
 }

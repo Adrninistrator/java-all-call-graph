@@ -51,6 +51,8 @@ public abstract class BaseMethodCallArgInfoRecordHandler extends BaseHandler imp
 
     private final MethodCallInfoHandler methodCallInfoHandler;
 
+    private int writeDataNum = 0;
+
     public BaseMethodCallArgInfoRecordHandler(ConfigureWrapper configureWrapper, List<String> calleeClassNameList, String outputTextFilePath, boolean genExcel) {
         super(configureWrapper);
         this.calleeClassNameList = calleeClassNameList;
@@ -66,7 +68,7 @@ public abstract class BaseMethodCallArgInfoRecordHandler extends BaseHandler imp
         methodCallInfoHandler = new MethodCallInfoHandler(dbOperWrapper);
         ConfigHandler configHandler = new ConfigHandler(dbOperWrapper);
         // 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
-        if(!configHandler.checkParseMethodCallTypeValue()){
+        if (!configHandler.checkParseMethodCallTypeValue()) {
             configHandler.noticeParseMethodCallTypeValue();
         }
     }
@@ -136,6 +138,7 @@ public abstract class BaseMethodCallArgInfoRecordHandler extends BaseHandler imp
      * @param data
      */
     protected void writeData(String... data) {
+        writeDataNum++;
         try {
             writer.writeDataInLine(data);
         } catch (Exception e) {
@@ -200,5 +203,9 @@ public abstract class BaseMethodCallArgInfoRecordHandler extends BaseHandler imp
     @Override
     public boolean exitWhenQueryEmpty() {
         return true;
+    }
+
+    public int getWriteDataNum() {
+        return writeDataNum;
     }
 }

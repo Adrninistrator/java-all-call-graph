@@ -77,7 +77,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunnerGenAllCallGraph.class);
 
-    // 当前生成的完整方法调用链方向是否为向上
+    // 当前生成的方法完整调用链方向是否为向上
     protected final boolean order4ee = this instanceof RunnerGenAllGraph4Callee;
 
     /*
@@ -114,7 +114,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
      */
     private final Map<String, MultiCallInfo> disabledSccMethodCallMap = new ConcurrentHashMap<>();
 
-    // 生成向上/向下的完整方法调用链时，生成的方法调用数量超过限制的方法
+    // 生成向上/向下的方法完整调用链时，生成的方法调用数量超过限制的方法
     protected final List<String> genCallGraphNumExceedMethodList = new ArrayList<>();
 
     // 是否将生成的调用链数据写入文件的开关
@@ -158,10 +158,10 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
     // 输出结果展示详细程度枚举
     protected OutputDetailEnum outputDetailEnum;
 
-    // 生成向上/向下的完整方法调用链时，每个方法允许生成的方法调用数量限制，默认不限制
+    // 生成向上/向下的方法完整调用链时，每个方法允许生成的方法调用数量限制，默认不限制
     protected int genCallGraphNumLimit;
 
-    // 生成向上/向下的完整方法调用链时，允许生成的方法调用链深度限制，默认不限制
+    // 生成向上/向下的方法完整调用链时，允许生成的方法完整调用链深度限制，默认不限制
     protected int genCallGraphDepthLimit;
 
     public AbstractRunnerGenAllCallGraph() {
@@ -173,9 +173,9 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
     }
 
     /**
-     * 根据方法调用链每行的数据生成对应字符串，调用链不写入文件时也需要调用，否则内存中的相关数据也不会被写入
+     * 根据方法完整调用链每行的数据生成对应字符串，调用链不写入文件时也需要调用，否则内存中的相关数据也不会被写入
      *
-     * @param methodCallLineData 方法调用链当前行的数据
+     * @param methodCallLineData 方法完整调用链当前行的数据
      * @return
      */
     protected abstract String genMethodCallLineStr(MethodCallLineData methodCallLineData);
@@ -389,7 +389,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
             for (FullMethodWithReturnType multiCallerMethod : multiCallerFullMethodList) {
                 MultiCallInfo multiCallInfo = methodCallMap.get(multiCallerMethod);
                 if (multiCallInfo == null || JavaCG2Util.isCollectionEmpty(multiCallInfo.getCalleeMethodSet())) {
-                    logger.error("未查找到对应的一对多方法调用关系 {}", multiCallerMethod);
+                    logger.warn("未查找到对应的一对多方法调用关系 {}", multiCallerMethod);
                     continue;
                 }
 
@@ -576,12 +576,12 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
             if (DefaultBusinessDataTypeEnum.BDTE_ILLEGAL != businessDataTypeEnum) {
                 // 找到默认的业务功能数据类型
                 if (order4ee && !businessDataTypeEnum.isSupportEe()) {
-                    logger.error("当前指定的业务功能数据类型 {} 不支持在生成向上的完整方法调用链时显示，请删除 {}", businessDataTypeEnum,
+                    logger.error("当前指定的业务功能数据类型 {} 不支持在生成向上的方法完整调用链时显示，请删除 {}", businessDataTypeEnum,
                             configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE));
                     return false;
                 }
                 if (!order4ee && !businessDataTypeEnum.isSupportEr()) {
-                    logger.error("当前指定的业务功能数据类型 {} 不支持在生成向下的完整方法调用链时显示，请删除 {}", businessDataTypeEnum,
+                    logger.error("当前指定的业务功能数据类型 {} 不支持在生成向下的方法完整调用链时显示，请删除 {}", businessDataTypeEnum,
                             configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER));
                     return false;
                 }
@@ -624,8 +624,8 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
             if ((order4ee && !MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.checkFlag(callFlags)) ||
                     (!order4ee && !MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags))) {
                  /*
-                    生成向上的完整方法调用链时，判断调用方法是否存在注解
-                    生成向下的完整方法调用链时，判断被调用方法是否存在注解
+                    生成向上的方法完整调用链时，判断调用方法是否存在注解
+                    生成向下的方法完整调用链时，判断被调用方法是否存在注解
                  */
                 return;
             }
@@ -687,7 +687,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
     /**
      * 通过代码行号获取对应方法
      *
-     * @param isCallee        true: 生成向上的方法调用链 false: 生成向下的方法调用链
+     * @param isCallee        true: 生成向上的方法完整调用链 false: 生成向下的方法完整调用链
      * @param simpleClassName
      * @param methodLineNum
      * @return
@@ -714,7 +714,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
     /**
      * 查询方法调用额外信息，包括调用方法返回类型、方法调用标志、被调用方法原始返回类型等
      *
-     * @param isCallee   true: 生成向上的方法调用链 false: 生成向下的方法调用链
+     * @param isCallee   true: 生成向上的方法完整调用链 false: 生成向下的方法完整调用链
      * @param methodHash
      * @return
      */
@@ -837,7 +837,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
      * @param callFlags          方法调用标志
      * @param methodHash         对应的方法HASH+长度
      * @param callGraphInfo      调用信息
-     * @param methodCallLineData 方法调用链当前行的数据
+     * @param methodCallLineData 方法完整调用链当前行的数据
      * @return
      */
     protected boolean addBusinessData(int methodCallId,
@@ -929,7 +929,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
      * @param callFlags          方法调用标志
      * @param methodHash         完整方法HASH+长度
      * @param callGraphInfo      调用链信息
-     * @param methodCallLineData 方法调用链当前行的数据
+     * @param methodCallLineData 方法完整调用链当前行的数据
      * @return
      */
     protected boolean addMethodArgsGenericsTypeInfo(Integer callFlags, String methodHash, StringBuilder callGraphInfo, MethodCallLineData methodCallLineData) {
@@ -938,8 +938,8 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
             if ((order4ee && !MethodCallFlagsEnum.MCFE_ER_ARGS_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
                     (!order4ee && !MethodCallFlagsEnum.MCFE_EE_ARGS_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
                  /*
-                    生成向上的完整方法调用链时，判断调用方法是否存在参数泛型类型
-                    生成向下的完整方法调用链时，判断被调用方法是否存在参数泛型类型
+                    生成向上的方法完整调用链时，判断调用方法是否存在参数泛型类型
+                    生成向下的方法完整调用链时，判断被调用方法是否存在参数泛型类型
                  */
                 return true;
             }
@@ -974,8 +974,8 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
             if ((order4ee && !MethodCallFlagsEnum.MCFE_ER_RETURN_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
                     (!order4ee && !MethodCallFlagsEnum.MCFE_EE_RETURN_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
                  /*
-                    生成向上的完整方法调用链时，判断调用方法是否存在返回泛型类型
-                    生成向下的完整方法调用链时，判断被调用方法是否存在返回泛型类型
+                    生成向上的方法完整调用链时，判断调用方法是否存在返回泛型类型
+                    生成向下的方法完整调用链时，判断被调用方法是否存在返回泛型类型
                  */
                 return true;
             }
@@ -1000,7 +1000,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
      * @param dataType           方法调用业务功能数据类型
      * @param dataValue          方法调用业务功能数据值
      * @param callGraphInfo      方法调用信息
-     * @param methodCallLineData 方法调用链当前行信息
+     * @param methodCallLineData 方法完整调用链当前行信息
      */
     protected void addBusinessData2CallGraphInfo(String dataType, Object dataValue, StringBuilder callGraphInfo, MethodCallLineData methodCallLineData) {
         String jsonStr = JACGJsonUtil.getJsonStr(dataValue);
@@ -1013,7 +1013,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
      * @param dataType           方法调用业务功能数据类型
      * @param dataValue          方法调用业务功能数据值
      * @param callGraphInfo      方法调用信息
-     * @param methodCallLineData 方法调用链当前行信息
+     * @param methodCallLineData 方法完整调用链当前行信息
      */
     protected void addBusinessData2CallGraphInfo(String dataType, String dataValue, StringBuilder callGraphInfo, MethodCallLineData methodCallLineData) {
         callGraphInfo.append(JavaCG2Constants.FLAG_TAB)
@@ -1045,7 +1045,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
 
         StringBuilder callGraphInfo = callGraphWriteToFile ? new StringBuilder() : null;
         for (MethodCallLineData methodCallLineData : methodCallLineDataList) {
-            // 生成方法调用链每行数据字符串
+            // 生成方法完整调用链每行数据字符串
             String lineData = genMethodCallLineStr(methodCallLineData);
             if (callGraphInfo != null) {
                 callGraphInfo.append(lineData).append(JavaCG2Constants.NEW_LINE);
@@ -1063,7 +1063,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
         super.beforeExit();
 
         if (!genCallGraphNumExceedMethodList.isEmpty()) {
-            logger.warn("生成完整方法调用链时，生成的方法调用数量超过限制的方法 {} {}", genCallGraphNumLimit, StringUtils.join(genCallGraphNumExceedMethodList, " "));
+            logger.warn("生成方法完整调用链时，生成的方法调用数量超过限制的方法 {} {}", genCallGraphNumLimit, StringUtils.join(genCallGraphNumExceedMethodList, " "));
         }
 
         // 关闭表达式管理类
@@ -1100,7 +1100,7 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
         return JACGCallGraphFileUtil.genCallGraphMethodFileName(startCallSimpleClassName, startMethodName, startCallMethodHash);
     }
 
-    // 获取生成向上/向下的完整方法调用链时，生成的方法调用数量超过限制的方法
+    // 获取生成向上/向下的方法完整调用链时，生成的方法调用数量超过限制的方法
     public List<String> getGenCallGraphNumExceedMethodListReadOnly() {
         return Collections.unmodifiableList(genCallGraphNumExceedMethodList);
     }

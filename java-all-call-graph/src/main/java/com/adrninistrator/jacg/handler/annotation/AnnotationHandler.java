@@ -10,6 +10,7 @@ import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.annotation.AnnotationAttributeInfo;
 import com.adrninistrator.jacg.dto.annotation.AnnotationWithAttributeInfo;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.OuterClassWithAnnotation;
 import com.adrninistrator.jacg.dto.annotation.StringAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
@@ -18,6 +19,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4FieldAnnotation;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodAnnotation;
 import com.adrninistrator.jacg.extractor.common.enums.SpTxPropagationEnum;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.jacg.handler.classes.ClassInfoHandler;
 import com.adrninistrator.jacg.handler.extendsimpl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
@@ -44,15 +46,18 @@ public class AnnotationHandler extends BaseHandler {
             DC.COMMON_ANNOTATION_ATTRIBUTE_VALUE);
 
     private final JACGExtendsImplHandler jacgExtendsImplHandler;
+    private final ClassInfoHandler classInfoHandler;
 
     public AnnotationHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
         jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
+        classInfoHandler = new ClassInfoHandler(dbOperWrapper);
     }
 
     public AnnotationHandler(DbOperWrapper dbOperWrapper) {
         super(dbOperWrapper);
         jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
+        classInfoHandler = new ClassInfoHandler(dbOperWrapper);
     }
 
     /**
@@ -357,6 +362,32 @@ public class AnnotationHandler extends BaseHandler {
             currentClassName = superClassName;
         }
         return superClassWithAnnotationList;
+    }
+
+    /**
+     * 查询指定类的所有外部类上指定的注解属性
+     *
+     * @param className      指定类名
+     * @param annotationName 指定的注解类名
+     * @return
+     */
+    public List<OuterClassWithAnnotation> queryOuterClassesInfo(String className, String annotationName) {
+        List<OuterClassWithAnnotation> outerClassWithAnnotationList = new ArrayList<>();
+        String currentClassName = className;
+        while (true) {
+            // 查询当前类的外部类名称
+            String outerClassName = classInfoHandler.queryOuterClass(currentClassName);
+            if (outerClassName == null) {
+                break;
+            }
+            // 获取指定类上指定注解对应的注解属性
+            Map<String, BaseAnnotationAttribute> annotationAttributeMap = queryAnnotationAttributes4Class(outerClassName, annotationName);
+            OuterClassWithAnnotation outerClassWithAnnotation = new OuterClassWithAnnotation(outerClassName, annotationAttributeMap);
+            outerClassWithAnnotationList.add(outerClassWithAnnotation);
+            // 继续查询当前外部类的外部类
+            currentClassName = outerClassName;
+        }
+        return outerClassWithAnnotationList;
     }
 
     /**

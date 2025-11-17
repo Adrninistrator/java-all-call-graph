@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.handler.methodcall;
 
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
@@ -16,6 +17,7 @@ import com.adrninistrator.jacg.handler.dto.string.StringAppendParseResultInner;
 import com.adrninistrator.jacg.handler.dto.string.element.BaseStringElement;
 import com.adrninistrator.jacg.handler.dto.string.element.StringElementClassGetName;
 import com.adrninistrator.jacg.handler.dto.string.element.StringElementConstant;
+import com.adrninistrator.jacg.handler.dto.string.element.StringElementMethodCallReturn;
 import com.adrninistrator.jacg.handler.dto.string.element.StringElementStaticFieldMethodCallReturn;
 import com.adrninistrator.jacg.handler.enums.EnumsHandler;
 import com.adrninistrator.jacg.handler.method.MethodArgReturnHandler;
@@ -32,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -80,43 +81,43 @@ public class StringAppendHandler extends BaseHandler {
      * @param objArgSeq                需要解析的被调用对象或参数序号，0代表被调用对象，1开始为参数
      * @return
      */
-    public StringAppendParseResult parseStringAppend4MethodArg(int useArgStringMethodCallId, int objArgSeq) {
-        StringAppendParseResult stringAppendParseResult = new StringAppendParseResult();
+    public List<StringAppendParseResult> parseStringAppend4MethodArg(int useArgStringMethodCallId, int objArgSeq) {
+        List<StringAppendParseResult> stringAppendParseResultList = new ArrayList<>();
         // 查询指定序号的方法调用
         WriteDbData4MethodCall useArgStringMethodCall = methodCallHandler.queryMethodCallByCallId(useArgStringMethodCallId);
         if (useArgStringMethodCall == null) {
             logger.warn("通过方法调用ID未查询到对应的方法调用 {}", useArgStringMethodCallId);
-            return stringAppendParseResult;
+            return stringAppendParseResultList;
         }
 
         // 查询方法调用中被调用对象与参数对应的常量值或来源（包括使用方法调用的返回值，或方法参数）
         MethodCallObjArgValueAndSource methodCallObjArgValueAndSource = methodCallInfoHandler.queryMethodCallObjArgValueAndSource(useArgStringMethodCallId, objArgSeq);
-        if (methodCallObjArgValueAndSource.isContainsMultiType() || methodCallObjArgValueAndSource.getOneTypeDataNum() > 1) {
-            logger.warn("方法调用参数存在多种情况，不支持识别对应的字符串拼接 {} {}", objArgSeq, useArgStringMethodCall.genPrintInfo());
-            return stringAppendParseResult;
-        }
-        if (methodCallObjArgValueAndSource.getOneTypeDataNum() == 0) {
+        if (methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().isEmpty()) {
             logger.warn("方法调用参数信息未查询到，不支持识别对应的字符串拼接 {} {}", objArgSeq, useArgStringMethodCall.genPrintInfo());
-            return stringAppendParseResult;
+            return stringAppendParseResultList;
         }
 
-        if (JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE == methodCallObjArgValueAndSource.getMethodCallInfoTypeEnum()) {
-            // 方法调用参数为常量，直接返回
-            String stringValue = methodCallObjArgValueAndSource.getConstantValueList().get(0);
-            stringAppendParseResult.setRawString(JavaCG2Util.wrapWithQuotes(stringValue));
-            stringAppendParseResult.setParsedValue(stringValue);
-            return stringAppendParseResult;
+        if (methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().contains(JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE.getType())) {
+            // 方法调用参数为常量
+            // 处理字符串拼接结果，使用常量
+            for (String constantValue : methodCallObjArgValueAndSource.getConstantValueList()) {
+                StringAppendParseResult tmpStringAppendParseResult = new StringAppendParseResult();
+                handleStringAppendParseResultInnerConstant(tmpStringAppendParseResult, constantValue);
+                stringAppendParseResultList.add(tmpStringAppendParseResult);
+            }
         }
 
-        if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID == methodCallObjArgValueAndSource.getMethodCallInfoTypeEnum()) {
+        if (methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().contains(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType())) {
             // 方法调用参数为方法调用返回值
-            Integer argMethodCallReturnId = methodCallObjArgValueAndSource.getUseMethodCallReturnCallIdList().get(0);
-            parseStringAppendMethodCallReturn(useArgStringMethodCallId, argMethodCallReturnId, stringAppendParseResult);
-            return stringAppendParseResult;
+            List<Integer> useMethodCallReturnCallIdList = methodCallObjArgValueAndSource.getUseMethodCallReturnCallIdList();
+            for (Integer argMethodCallReturnId : useMethodCallReturnCallIdList) {
+                StringAppendParseResult tmpStringAppendParseResult = new StringAppendParseResult();
+                parseStringAppendMethodCallReturn(useArgStringMethodCallId, argMethodCallReturnId, tmpStringAppendParseResult);
+                stringAppendParseResultList.add(tmpStringAppendParseResult);
+            }
         }
 
-        logger.warn("方法调用参数不支持识别对应的字符串拼接 {}", useArgStringMethodCall.genPrintInfo());
-        return stringAppendParseResult;
+        return stringAppendParseResultList;
     }
 
     /**
@@ -126,17 +127,17 @@ public class StringAppendHandler extends BaseHandler {
      * @param returnType
      * @return
      */
-    public StringAppendParseResult parseStringAppend4MethodReturn(String fullMethod, String returnType) {
-        StringAppendParseResult stringAppendParseResult = new StringAppendParseResult();
+    public List<StringAppendParseResult> parseStringAppend4MethodReturn(String fullMethod, String returnType) {
+        List<StringAppendParseResult> stringAppendParseResultList = new ArrayList<>();
         if (!JavaCG2CommonNameConstants.CLASS_NAME_STRING.equals(returnType)) {
             logger.warn("只支持返回 {} 类型的方法 {} {}", JavaCG2CommonNameConstants.CLASS_NAME_STRING, fullMethod, returnType);
-            return stringAppendParseResult;
+            return stringAppendParseResultList;
         }
         // 查找对应的方法
         WriteDbData4MethodInfo methodInfo = methodInfoHandler.queryMethodInfoByFullMethod(fullMethod, returnType);
         if (methodInfo == null) {
             logger.warn("未找到指定的方法 {} {}", fullMethod, returnType);
-            return stringAppendParseResult;
+            return stringAppendParseResultList;
         }
 
         List<String> returnConstantList = new ArrayList<>();
@@ -152,27 +153,28 @@ public class StringAppendHandler extends BaseHandler {
         for (WriteDbData4MethodReturnCallId methodReturnCallId : methodReturnCallIdList) {
             returnMethodCallIdList.add(methodReturnCallId.getReturnCallId());
         }
-        if (returnConstantList.size() > 1 || returnMethodCallIdList.size() > 1) {
-            logger.error("方法返回的常量或方法调用包含多种情况，不支持处理 {} {}", fullMethod, returnType);
-            return stringAppendParseResult;
-        }
         if (returnConstantList.isEmpty() && returnMethodCallIdList.isEmpty()) {
             logger.error("未查询到方法返回的常量或方法调用，不支持处理 {} {}", fullMethod, returnType);
-            return stringAppendParseResult;
+            return stringAppendParseResultList;
         }
-
-        if (returnConstantList.size() == 1) {
-            // 方法返回为常量，直接返回
-            String stringValue = returnConstantList.get(0);
-            stringAppendParseResult.setRawString(JavaCG2Util.wrapWithQuotes(stringValue));
-            stringAppendParseResult.setParsedValue(stringValue);
-            return stringAppendParseResult;
+        if (!returnConstantList.isEmpty()) {
+            // 方法返回为常量
+            // 处理字符串拼接结果，使用常量
+            for (String returnConstant : returnConstantList) {
+                StringAppendParseResult tmpStringAppendParseResult = new StringAppendParseResult();
+                handleStringAppendParseResultInnerConstant(tmpStringAppendParseResult, returnConstant);
+                stringAppendParseResultList.add(tmpStringAppendParseResult);
+            }
         }
-
-        // 方法返回为方法调用返回值
-        Integer argMethodCallReturnId = returnMethodCallIdList.get(0);
-        parseStringAppendMethodCallReturn(argMethodCallReturnId, argMethodCallReturnId, stringAppendParseResult);
-        return stringAppendParseResult;
+        if (!returnMethodCallIdList.isEmpty()) {
+            // 方法返回为方法调用返回值
+            for (Integer argMethodCallReturnId : returnMethodCallIdList) {
+                StringAppendParseResult tmpStringAppendParseResult = new StringAppendParseResult();
+                parseStringAppendMethodCallReturn(argMethodCallReturnId, argMethodCallReturnId, tmpStringAppendParseResult);
+                stringAppendParseResultList.add(tmpStringAppendParseResult);
+            }
+        }
+        return stringAppendParseResultList;
     }
 
     /**
@@ -188,18 +190,24 @@ public class StringAppendHandler extends BaseHandler {
         if (!StringUtils.equalsAny(methodDetailNoReturnType.getClassName(), JACGCommonNameConstants.CLASS_NAME_STRING_BUILDER, JACGCommonNameConstants.CLASS_NAME_STRING_BUFFER)
                 && !StringUtils.equalsAny(methodDetailNoReturnType.getMethodName(), JavaCG2CommonNameConstants.METHOD_NAME_INIT, JACGCommonNameConstants.METHOD_NAME_APPEND,
                 JACGCommonNameConstants.METHOD_NAME_TO_STRING)) {
+            // StringBuilder、StringBuffer类的方法被调用时，且不是构造函数、append、toString方法，尝试解析获取类名的字符串
             StringAppendParseResultInner stringAppendParseResultInner = new StringAppendParseResultInner();
-            // 尝试解析获取类名的字符串
             if (!parseClassGetName(useStringMethodCall, stringAppendParseResultInner)) {
                 return;
             }
-            if (stringAppendParseResultInner.getStringElement() != null) {
-                stringAppendParseResult.setRawString(stringAppendParseResultInner.getRawString());
-                stringAppendParseResult.setParsedValue(stringAppendParseResultInner.getParsedValue());
-                stringAppendParseResult.setStringElementList(Collections.singletonList(stringAppendParseResultInner.getStringElement()));
+            if (!stringAppendParseResultInner.getStringElementList().isEmpty()) {
+                // 获取类名的字符串，有解析到
+                if (stringAppendParseResult.getStringElementListList().isEmpty()) {
+                    stringAppendParseResult.setRawString(stringAppendParseResultInner.getRawString());
+                    stringAppendParseResult.setParsedValue(stringAppendParseResultInner.getParsedValue());
+                }
+                stringAppendParseResult.getStringElementListList().add(stringAppendParseResultInner.getStringElementList());
                 return;
             }
-            logger.warn("被调用方法不是字符串拼接，不支持处理 {} {}", methodCallReturnId, useStringMethodCall.getCalleeFullMethod());
+
+            // 获取类名的字符串，未解析到
+            // 处理方法调用的被调用方法
+            handleMethodCallCalleeFullMethod(useStringMethodCall.getCalleeFullMethod(), stringAppendParseResultInner);
             return;
         }
 
@@ -227,18 +235,15 @@ public class StringAppendHandler extends BaseHandler {
             // 查询当前StringBuilder/StringBuffer对象方法调用中被调用对象的信息
             MethodCallObjArgValueAndSource methodCallObjArgValueAndSource = methodCallInfoHandler.queryMethodCallObjArgValueAndSource(currentMethodCall.getCallId(),
                     JavaCG2Constants.METHOD_CALL_OBJECT_SEQ);
-            if (methodCallObjArgValueAndSource.isContainsMultiType() || methodCallObjArgValueAndSource.getOneTypeDataNum() > 1) {
-                logger.warn("StringBuilder/StringBuffer对象方法调用参数存在多种情况，不支持识别对应的字符串拼接 {} {}", JavaCG2Constants.METHOD_CALL_OBJECT_SEQ, currentMethodCall.genPrintInfo());
-                return null;
-            }
-            if (methodCallObjArgValueAndSource.getOneTypeDataNum() == 0) {
+            if (methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().isEmpty()) {
                 logger.warn("StringBuilder/StringBuffer对象方法调用参数信息未查询到，不支持识别对应的字符串拼接 {} {}", JavaCG2Constants.METHOD_CALL_OBJECT_SEQ, currentMethodCall.genPrintInfo());
                 return null;
             }
-            if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID != methodCallObjArgValueAndSource.getMethodCallInfoTypeEnum()) {
+            if (!methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().contains(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType())) {
                 // 被调用对象不属于方法调用返回值时跳过
                 return null;
             }
+
             // 被调用对象属于方法调用返回值时，进行处理
             currentMethodCall = methodCallHandler.queryMethodCallByCallId(methodCallObjArgValueAndSource.getUseMethodCallReturnCallIdList().get(0));
             if (!calleeSimpleClassName.equals(currentMethodCall.getCalleeSimpleClassName())) {
@@ -269,7 +274,7 @@ public class StringAppendHandler extends BaseHandler {
                                         StringAppendParseResult stringAppendParseResult) {
         List<String> rawStringList = new ArrayList<>();
         List<String> parsedValueList = new ArrayList<>();
-        List<BaseStringElement> stringElementList = new ArrayList<>();
+        List<List<BaseStringElement>> stringElementListList = stringAppendParseResult.getStringElementListList();
 
         StringAppendParseResultInner initStringAppendParseResultInner = new StringAppendParseResultInner();
         // 查询StringBuilder/StringBuffer对象创建时的初始化字符串
@@ -294,7 +299,7 @@ public class StringAppendHandler extends BaseHandler {
             // 查询被调用的StringBuilder/StringBuffer对象信息
             MethodCallObjArgValueAndSource methodCallObjArgValueAndSource = methodCallInfoHandler.queryMethodCallObjArgValueAndSource(stringInstanceMethodCall.getCallId(),
                     JavaCG2Constants.METHOD_CALL_OBJECT_SEQ);
-            if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID != methodCallObjArgValueAndSource.getMethodCallInfoTypeEnum()) {
+            if (!methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().contains(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType())) {
                 // 当对StringBuilder/StringBuffer对象的方法调用的被调用对象不属于方法调用返回值时，跳过
                 continue;
             }
@@ -308,16 +313,10 @@ public class StringAppendHandler extends BaseHandler {
             // 记录StringBuilder/StringBuffer对象调用append方法时的方法调用ID
             methodCallIdSet.add(stringInstanceMethodCall.getCallId());
 
-            if (methodCallObjArgValueAndSource.isContainsMultiType() || methodCallObjArgValueAndSource.getOneTypeDataNum() > 1) {
-                logger.warn("StringBuilder/StringBuffer对象调用append方法调用参数存在多种情况，不支持识别对应的字符串拼接 {} {}", JavaCG2Constants.METHOD_CALL_OBJECT_SEQ,
-                        stringInstanceMethodCall.genPrintInfo());
-                return;
-            }
-
-            if (methodCallObjArgValueAndSource.getOneTypeDataNum() == 0) {
+            if (methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().isEmpty()) {
                 logger.warn("StringBuilder/StringBuffer对象调用append方法调用参数信息未查询到，不支持识别对应的字符串拼接 {} {}", JavaCG2Constants.METHOD_CALL_OBJECT_SEQ,
                         stringInstanceMethodCall.genPrintInfo());
-                return;
+                continue;
             }
 
             if (!JACGCommonNameConstants.METHOD_NAME_APPEND.equals(stringInstanceMethodCall.getCalleeMethodName())) {
@@ -333,87 +332,111 @@ public class StringAppendHandler extends BaseHandler {
             // 记录StringBuilder/StringBuffer对象append的值
             rawStringList.add(stringAppendParseResultInner.getRawString());
             parsedValueList.add(stringAppendParseResultInner.getParsedValue());
-            stringElementList.add(stringAppendParseResultInner.getStringElement());
+            stringElementListList.add(stringAppendParseResultInner.getStringElementList());
         }
         String rawString = StringUtils.join(rawStringList, " + ");
         String parsedValue = StringUtils.join(parsedValueList, "");
         stringAppendParseResult.setRawString(rawString);
         stringAppendParseResult.setParsedValue(parsedValue);
-        stringAppendParseResult.setStringElementList(stringElementList);
     }
 
-    // 查询调用指定方法时指定参数的值，支持常量或枚举常量方法调用返回值
+    // 查询调用指定方法时指定参数的值，支持常量或枚举常量方法调用返回e值
     private boolean queryStringInstanceArgValue(WriteDbData4MethodCall useArgMethodCall, StringAppendParseResultInner stringAppendParseResultInner, int argSeq,
                                                 boolean allowEmpty) {
         // 查询指定参数
         MethodCallObjArgValueAndSource methodCallObjArgValueAndSource = methodCallInfoHandler.queryMethodCallObjArgValueAndSource(useArgMethodCall.getCallId(), argSeq);
-        if (methodCallObjArgValueAndSource.isContainsMultiType() || methodCallObjArgValueAndSource.getOneTypeDataNum() > 1) {
-            logger.warn("参数{}存在多种情况，不支持识别对应的字符串拼接 {}", argSeq, useArgMethodCall.genPrintInfo());
-            return false;
-        }
-        if (methodCallObjArgValueAndSource.getOneTypeDataNum() == 0) {
+        if (methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().isEmpty()) {
             if (allowEmpty) {
                 return true;
             }
-            logger.warn("未查询到参数{}相关信息，不支持处理 {}", argSeq, useArgMethodCall.genPrintInfo());
+            logger.warn("未查询到参数 {} 相关信息，不支持处理 {}", argSeq, useArgMethodCall.genPrintInfo());
             return false;
         }
-        if (JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE == methodCallObjArgValueAndSource.getMethodCallInfoTypeEnum()) {
-            // 对应参数是常量
-            String value = methodCallObjArgValueAndSource.getConstantValueList().get(0);
-            stringAppendParseResultInner.setRawString(JavaCG2Util.wrapWithQuotes(value));
-            stringAppendParseResultInner.setParsedValue(value);
+
+        // 处理常量格式的参数
+        handleStringConstant(stringAppendParseResultInner, methodCallObjArgValueAndSource);
+
+        // 处理方法调用返回值类型的字符串
+        return handleStringMethodCallReturn(useArgMethodCall, stringAppendParseResultInner, methodCallObjArgValueAndSource, argSeq);
+    }
+
+    // 处理常量格式的参数
+    private void handleStringConstant(StringAppendParseResultInner stringAppendParseResultInner, MethodCallObjArgValueAndSource methodCallObjArgValueAndSource) {
+        if (!methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().contains(JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE.getType())) {
+            return;
+        }
+        // 对应参数是常量
+        List<BaseStringElement> stringElementList = stringAppendParseResultInner.getStringElementList();
+        for (String value : methodCallObjArgValueAndSource.getConstantValueList()) {
+            if (stringElementList.isEmpty()) {
+                stringAppendParseResultInner.setRawString(JavaCG2Util.wrapWithQuotes(value));
+                stringAppendParseResultInner.setParsedValue(value);
+            }
             StringElementConstant stringElementConstant = new StringElementConstant();
             stringElementConstant.setConstantValue(value);
-            stringAppendParseResultInner.setStringElement(stringElementConstant);
+            stringElementList.add(stringElementConstant);
+        }
+    }
+
+    // 处理方法调用返回值类型的字符串
+    private boolean handleStringMethodCallReturn(WriteDbData4MethodCall useArgMethodCall, StringAppendParseResultInner stringAppendParseResultInner,
+                                                 MethodCallObjArgValueAndSource methodCallObjArgValueAndSource, int argSeq) {
+        if (!methodCallObjArgValueAndSource.getMethodCallInfoTypeSet().contains(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType())) {
             return true;
         }
-        if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID == methodCallObjArgValueAndSource.getMethodCallInfoTypeEnum()) {
-            // 对应参数是方法调用返回值
-            // 查询对应参数使用的静态字段方法调用返回值
-            List<WriteDbData4MethodCallStaticFieldMCR> methodCallStaticFieldMCRList =
-                    methodCallClassFieldHandler.queryMethodCallStaticFieldMCR4MethodCall(useArgMethodCall.getCallId(), 1);
-            if (JavaCG2Util.isCollectionEmpty(methodCallStaticFieldMCRList)) {
-                Integer argMethodCallReturnId = methodCallObjArgValueAndSource.getUseMethodCallReturnCallIdList().get(0);
+        // 对应参数是方法调用返回值
+        // 查询对应参数使用的静态字段方法调用返回值
+        List<WriteDbData4MethodCallStaticFieldMCR> methodCallStaticFieldMCRList =
+                methodCallClassFieldHandler.queryMethodCallStaticFieldMCR4MethodCall(useArgMethodCall.getCallId(), argSeq);
+        if (JavaCG2Util.isCollectionEmpty(methodCallStaticFieldMCRList)) {
+            // 未查询到参数包含静态态字段方法调用返回值，处理对应的方法调用
+            List<Integer> useMethodCallReturnCallIdList = methodCallObjArgValueAndSource.getUseMethodCallReturnCallIdList();
+            for (Integer argMethodCallReturnId : useMethodCallReturnCallIdList) {
                 WriteDbData4MethodCall argMethodCall = methodCallHandler.queryMethodCallByCallId(argMethodCallReturnId);
                 if (argMethodCall == null) {
-                    logger.error("未查询到参数{}对应的方法调用 {} {}", argSeq, useArgMethodCall.genPrintInfo(), argMethodCallReturnId);
-                    return true;
+                    logger.error("未查询到参数 {} 对应的方法调用 {} {}", argSeq, useArgMethodCall.genPrintInfo(), argMethodCallReturnId);
+                    return false;
                 }
                 // 尝试解析获取类名的字符串
                 if (!parseClassGetName(argMethodCall, stringAppendParseResultInner)) {
                     return false;
                 }
-                if (stringAppendParseResultInner.getStringElement() != null) {
-                    return true;
+                if (stringAppendParseResultInner.getStringElementList().isEmpty()) {
+                    // 未获取类名的字符串，处理方法调用的被调用方法
+                    handleMethodCallCalleeFullMethod(argMethodCall.getCalleeFullMethod(), stringAppendParseResultInner);
                 }
+            }
+            return true;
+        }
+        // 处理类的静态字段的方法调用返回值类型的字符串
+        handleStringStaticFieldMethodCallReturn(useArgMethodCall, stringAppendParseResultInner, methodCallStaticFieldMCRList, argSeq);
+        return true;
+    }
 
-                logger.warn("未查询到参数{}对应的静态字段方法调用返回值，不支持处理 {}", argSeq, useArgMethodCall.genPrintInfo());
-                return false;
-            }
-            if (methodCallStaticFieldMCRList.size() > 1) {
-                logger.warn("查询到参数{}包含多种静态字段方法调用返回值，不支持处理 {} {}", argSeq, methodCallStaticFieldMCRList.size(), useArgMethodCall.genPrintInfo());
-                return false;
-            }
-            WriteDbData4MethodCallStaticFieldMCR methodCallStaticFieldMCR = methodCallStaticFieldMCRList.get(0);
+    // 处理类的静态字段的方法调用返回值类型的字符串
+    private void handleStringStaticFieldMethodCallReturn(WriteDbData4MethodCall useArgMethodCall, StringAppendParseResultInner stringAppendParseResultInner,
+                                                         List<WriteDbData4MethodCallStaticFieldMCR> methodCallStaticFieldMCRList, int argSeq) {
+        for (WriteDbData4MethodCallStaticFieldMCR methodCallStaticFieldMCR : methodCallStaticFieldMCRList) {
             // 尝试查询方法调用对应的枚举常量方法返回值
             String enumConstantMethodReturnValue = enumsHandler.queryEnumConstantFieldMethodReturnValue(methodCallStaticFieldMCR.getFieldType(),
                     methodCallStaticFieldMCR.getFieldName(), methodCallStaticFieldMCR.getCalleeFullMethod(), methodCallStaticFieldMCR.getCalleeReturnType());
             if (enumConstantMethodReturnValue == null) {
-                logger.warn("参数{}对应的方法调用未查询到枚举常量方法返回值，不支持处理 {} {}", argSeq, useArgMethodCall.genPrintInfo(), methodCallStaticFieldMCR);
-                return false;
+                logger.warn("参数 {} 对应的方法调用未查询到枚举常量方法返回值，不支持处理 {} {}", argSeq, useArgMethodCall.genPrintInfo(), methodCallStaticFieldMCR);
+                // 处理方法调用的被调用方法
+                handleMethodCallCalleeFullMethod(methodCallStaticFieldMCR.getCalleeFullMethod(), stringAppendParseResultInner);
+                continue;
             }
             // 记录字符串
             String rawString = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(methodCallStaticFieldMCR.getFieldType()) + JavaCG2Constants.FLAG_DOT +
                     methodCallStaticFieldMCR.getFieldName() + JavaCG2Constants.FLAG_DOT + methodCallStaticFieldMCR.getCalleeMethodName() + JavaCG2Constants.FLAG_LEFT_RIGHT_BRACKET;
-            stringAppendParseResultInner.setRawString(rawString);
-            stringAppendParseResultInner.setParsedValue(enumConstantMethodReturnValue);
+            List<BaseStringElement> stringElementList = stringAppendParseResultInner.getStringElementList();
+            if (stringElementList.isEmpty()) {
+                stringAppendParseResultInner.setRawString(rawString);
+                stringAppendParseResultInner.setParsedValue(enumConstantMethodReturnValue);
+            }
             StringElementStaticFieldMethodCallReturn stringElementStaticFieldMethodCallReturn = genStringElementStaticFieldMethodCallReturn(methodCallStaticFieldMCR);
-            stringAppendParseResultInner.setStringElement(stringElementStaticFieldMethodCallReturn);
-            return true;
+            stringElementList.add(stringElementStaticFieldMethodCallReturn);
         }
-        logger.warn("参数{}不支持处理 {}", argSeq, useArgMethodCall.genPrintInfo());
-        return false;
     }
 
     private StringElementStaticFieldMethodCallReturn genStringElementStaticFieldMethodCallReturn(WriteDbData4MethodCallStaticFieldMCR methodCallStaticFieldMCR) {
@@ -429,25 +452,25 @@ public class StringAppendHandler extends BaseHandler {
     /**
      * 尝试解析获取类名的字符串
      *
-     * @param classGetNameMethodCall
+     * @param methodCall
      * @param stringAppendParseResultInner
      * @return true: 解析成功 false: 解析失败
      */
-    private boolean parseClassGetName(WriteDbData4MethodCall classGetNameMethodCall, StringAppendParseResultInner stringAppendParseResultInner) {
-        if (!JavaCG2CallTypeEnum.isCalleeReplaceType(classGetNameMethodCall.getCallType())) {
+    private boolean parseClassGetName(WriteDbData4MethodCall methodCall, StringAppendParseResultInner stringAppendParseResultInner) {
+        if (!JavaCG2CallTypeEnum.isCalleeReplaceType(methodCall.getCallType())) {
             // 方法调用中被调用类未被替换，返回
             return true;
         }
-        String calleeMethodNameWithArgType = JACGClassMethodUtil.getMethodNameWithArgsFromFull(classGetNameMethodCall.getCalleeFullMethod());
+        String calleeMethodNameWithArgType = JACGClassMethodUtil.getMethodNameWithArgsFromFull(methodCall.getCalleeFullMethod());
         if (!StringUtils.equalsAny(calleeMethodNameWithArgType, JACGCommonNameConstants.METHOD_NAME_WITH_ARG_TYPE_GET_NAME,
                 JACGCommonNameConstants.METHOD_NAME_WITH_ARG_TYPE_GET_SIMPLE_NAME)) {
             // 被调用方法不是获取类名的方法，返回
             return true;
         }
         // 查询被调用类被替换前的类名
-        String rawCalleeClassName = methodCallHandler.queryRawCalleeClassName(classGetNameMethodCall.getCallId());
+        String rawCalleeClassName = methodCallHandler.queryRawCalleeClassName(methodCall.getCallId());
         if (StringUtils.isBlank(rawCalleeClassName)) {
-            logger.error("未查询到方法调用中被调用类被替换前的类名 {}", classGetNameMethodCall.genPrintInfo());
+            logger.error("未查询到方法调用中被调用类被替换前的类名 {}", methodCall.genPrintInfo());
             return false;
         }
         if (!JavaCG2CommonNameConstants.CLASS_NAME_CLASS.equals(rawCalleeClassName)) {
@@ -455,18 +478,50 @@ public class StringAppendHandler extends BaseHandler {
             return true;
         }
         StringElementClassGetName stringElementClassGetName = new StringElementClassGetName();
-        String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(classGetNameMethodCall.getCalleeFullMethod());
+        String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(methodCall.getCalleeFullMethod());
         stringElementClassGetName.setClassName(calleeClassName);
-        stringElementClassGetName.setMethodName(classGetNameMethodCall.getCalleeMethodName());
+        stringElementClassGetName.setMethodName(methodCall.getCalleeMethodName());
 
-        stringAppendParseResultInner.setRawString(calleeClassName + ".class." + calleeMethodNameWithArgType);
-        if (JACGCommonNameConstants.METHOD_NAME_WITH_ARG_TYPE_GET_NAME.equals(calleeMethodNameWithArgType)) {
-            stringAppendParseResultInner.setParsedValue(calleeClassName);
-        } else {
-            String calleeSimpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(calleeClassName);
-            stringAppendParseResultInner.setParsedValue(calleeSimpleClassName);
+        if (stringAppendParseResultInner.getStringElementList().isEmpty()) {
+            stringAppendParseResultInner.setRawString(calleeClassName + ".class." + calleeMethodNameWithArgType);
+            if (JACGCommonNameConstants.METHOD_NAME_WITH_ARG_TYPE_GET_NAME.equals(calleeMethodNameWithArgType)) {
+                stringAppendParseResultInner.setParsedValue(calleeClassName);
+            } else {
+                String calleeSimpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(calleeClassName);
+                stringAppendParseResultInner.setParsedValue(calleeSimpleClassName);
+            }
         }
-        stringAppendParseResultInner.setStringElement(stringElementClassGetName);
+        stringAppendParseResultInner.getStringElementList().add(stringElementClassGetName);
         return true;
+    }
+
+    /**
+     * 处理方法调用的被调用方法
+     *
+     * @param calleeFullMethod
+     * @param stringAppendParseResultInner
+     * @return true: 解析成功 false: 解析失败
+     */
+    private void handleMethodCallCalleeFullMethod(String calleeFullMethod, StringAppendParseResultInner stringAppendParseResultInner) {
+        String parsedCalleeFullMethod = JACGConstants.FLAG_LEFT_BIG_PARENTHESES + calleeFullMethod + JACGConstants.FLAG_RIGHT_BIG_PARENTHESES;
+        if (stringAppendParseResultInner.getStringElementList().isEmpty()) {
+            stringAppendParseResultInner.setRawString(calleeFullMethod);
+            stringAppendParseResultInner.setParsedValue(parsedCalleeFullMethod);
+        }
+        StringElementMethodCallReturn stringElementMethodCallReturn = new StringElementMethodCallReturn();
+        stringElementMethodCallReturn.setCalleeFullMethod(calleeFullMethod);
+        stringAppendParseResultInner.getStringElementList().add(stringElementMethodCallReturn);
+    }
+
+    // 处理字符串拼接结果，使用常量
+    private void handleStringAppendParseResultInnerConstant(StringAppendParseResult stringAppendParseResult, String constantValue) {
+        List<BaseStringElement> stringElementList = new ArrayList<>();
+        stringAppendParseResult.setRawString(JavaCG2Util.wrapWithQuotes(constantValue));
+        stringAppendParseResult.setParsedValue(constantValue);
+
+        StringElementConstant stringElementConstant = new StringElementConstant();
+        stringElementConstant.setConstantValue(constantValue);
+        stringElementList.add(stringElementConstant);
+        stringAppendParseResult.getStringElementListList().add(stringElementList);
     }
 }

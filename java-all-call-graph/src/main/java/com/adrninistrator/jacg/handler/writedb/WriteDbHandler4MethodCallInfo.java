@@ -45,6 +45,10 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
             // bv类型数据需要进行base64解码
             value = JavaCG2Util.base64Decode(value);
         }
+        if (usePg) {
+            // 使用PostgreSQL数据库时，不支持插入的字符串数据包含0x00
+            value = value.replace("\u0000", "");
+        }
 
         String callerFullMethod = readLineData();
         String returnType = readLineData();

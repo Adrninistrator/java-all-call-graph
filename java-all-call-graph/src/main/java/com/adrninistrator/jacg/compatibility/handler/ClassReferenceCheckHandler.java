@@ -8,6 +8,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassReference;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
+import com.adrninistrator.jacg.el.manager.ElManager;
 import com.adrninistrator.jacg.handler.querybypage.QueryByPageHandler;
 import com.adrninistrator.jacg.handler.querybypage.callback.QueryByPageCallBack;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
@@ -29,6 +30,8 @@ public class ClassReferenceCheckHandler extends BaseCompatibilityCheckHandler im
     private Map<Integer, WriteDbData4JarInfo> jarInfoMap;
 
     private WriterSupportHeader writer;
+
+    private ElManager elManager;
 
     public ClassReferenceCheckHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
@@ -98,8 +101,13 @@ public class ClassReferenceCheckHandler extends BaseCompatibilityCheckHandler im
                     continue;
                 }
                 // 被引用的类不存在
-                String conditionalOnClassValue = queryConditionalOnClassValueStr(className);
                 WriteDbData4ClassInfo classInfo = classInfoHandler.queryClassInfoByClassName(className);
+                if (elManager.checkIgnoreJCCClassReference(className, classReference.getReferencedClassName())) {
+                    // 忽略当前类引用关系
+                    continue;
+                }
+
+                String conditionalOnClassValue = queryConditionalOnClassValueStr(className);
                 WriteDbData4JarInfo jarInfo = jarInfoMap.get(classReference.getJarNum());
                 writer.writeDataInLine(className,
                         conditionalOnClassValue,
@@ -124,5 +132,9 @@ public class ClassReferenceCheckHandler extends BaseCompatibilityCheckHandler im
 
     public void setWriter(WriterSupportHeader writer) {
         this.writer = writer;
+    }
+
+    public void setElManager(ElManager elManager) {
+        this.elManager = elManager;
     }
 }

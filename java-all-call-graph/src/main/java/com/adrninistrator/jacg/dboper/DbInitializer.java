@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.neo4j.dboper.Neo4jDbOperWrapper;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +93,9 @@ public class DbInitializer {
             dbConfInfo.setDbUrl(dbUrl);
             dbConfInfo.setUsername(username);
             dbConfInfo.setPassword(password);
+            if (StringUtils.containsIgnoreCase(driverClassName, "postgresql")) {
+                dbConfInfo.setUsePgDb(true);
+            }
         }
 
         String callerClassNameAndHash = JACGUtil.getObjSimpleClassNameAndHash(callerObject);

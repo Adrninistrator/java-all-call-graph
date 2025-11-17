@@ -653,7 +653,7 @@ public class TestExceptions {
             throw new RuntimeException("1");
         } catch (ArithmeticException e) {
             logger.error("error1 ", e);
-            throw new RuntimeException("2");
+            throw new RuntimeException(e);
         } catch (Exception e) {
             logger.error("error2 ", e);
             // 以下写法不会识别出有使用catch的异常对象

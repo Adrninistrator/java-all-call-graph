@@ -177,7 +177,7 @@ public abstract class BaseHandler implements Closeable {
                     " from " + dbTableInfoEnum.getTableName() +
                     " where " + idColumnName + " > ?" +
                     " order by " + idColumnName +
-                    " limit ?, 1";
+                    " limit 1 OFFSET ?";
             sql = dbOperWrapper.cacheSql(sqlKey, sql, sqlKey);
         }
 
@@ -255,7 +255,7 @@ public abstract class BaseHandler implements Closeable {
                 stringBuilder.append(queryColumnNames[i]).append(" = ?");
             }
             stringBuilder.append(" and ").append(idColumnName).append(" > ?")
-                    .append(" limit ?, 1");
+                    .append(" limit 1 OFFSET ?");
             sql = dbOperWrapper.cacheSql(sqlKey, stringBuilder.toString(), sqlKey);
         }
         List<Object> argList = new ArrayList<>(queryValues.length + 2);

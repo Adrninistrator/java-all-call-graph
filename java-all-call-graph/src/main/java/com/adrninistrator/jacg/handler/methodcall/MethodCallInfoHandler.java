@@ -615,6 +615,7 @@ public class MethodCallInfoHandler extends BaseHandler {
      */
     public MethodCallObjArgValueAndSource queryMethodCallObjArgValueAndSource(int callId, int objArgSeq) {
         MethodCallObjArgValueAndSource methodCallObjArgValueAndSource = new MethodCallObjArgValueAndSource();
+        Set<String> methodCallInfoTypeSet = methodCallObjArgValueAndSource.getMethodCallInfoTypeSet();
         // 查询指定方法调用指定的被调用对象或参数的信息
         List<WriteDbData4MethodCallInfo> methodCallInfoList = queryMethodCallInfoObjArg(callId, objArgSeq);
         if (JavaCG2Util.isCollectionEmpty(methodCallInfoList)) {
@@ -637,28 +638,16 @@ public class MethodCallInfoHandler extends BaseHandler {
             if (JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE.getType().equals(methodCallInfo.getType())) {
                 typeSet.add(methodCallInfo.getType());
                 constantValueList.add(methodCallInfo.getTheValue());
-                methodCallObjArgValueAndSource.setMethodCallInfoTypeEnum(JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE);
+                methodCallInfoTypeSet.add(JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE.getType());
             } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType().equals(methodCallInfo.getType())) {
                 typeSet.add(methodCallInfo.getType());
                 useMethodCallReturnCallIdList.add(Integer.valueOf(methodCallInfo.getTheValue()));
-                methodCallObjArgValueAndSource.setMethodCallInfoTypeEnum(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID);
+                methodCallInfoTypeSet.add(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_CALL_RETURN_CALL_ID.getType());
             } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType().equals(methodCallInfo.getType())) {
                 typeSet.add(methodCallInfo.getType());
                 useMethodArgSeqList.add(Integer.valueOf(methodCallInfo.getTheValue()));
-                methodCallObjArgValueAndSource.setMethodCallInfoTypeEnum(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ);
+                methodCallInfoTypeSet.add(JavaCG2MethodCallInfoTypeEnum.MCIT_METHOD_ARG_SEQ.getType());
             }
-        }
-        if (typeSet.size() > 1) {
-            methodCallObjArgValueAndSource.setContainsMultiType(true);
-            methodCallObjArgValueAndSource.setMethodCallInfoTypeEnum(null);
-            return methodCallObjArgValueAndSource;
-        }
-        if (!constantValueList.isEmpty()) {
-            methodCallObjArgValueAndSource.setOneTypeDataNum(constantValueList.size());
-        } else if (!useMethodCallReturnCallIdList.isEmpty()) {
-            methodCallObjArgValueAndSource.setOneTypeDataNum(useMethodCallReturnCallIdList.size());
-        } else if (!useMethodArgSeqList.isEmpty()) {
-            methodCallObjArgValueAndSource.setOneTypeDataNum(useMethodArgSeqList.size());
         }
         return methodCallObjArgValueAndSource;
     }

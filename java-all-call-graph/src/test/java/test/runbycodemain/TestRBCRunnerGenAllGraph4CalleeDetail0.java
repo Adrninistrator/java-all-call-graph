@@ -13,8 +13,8 @@ import test.runbycode.base.TestRunByCodeBase;
  * @date 2025/4/6
  * @description:
  */
-@JACGExample(title = "生成指定方法向上的完整方法调用链",
-        desc = {"输出方法调用链格式使用最详细，包含返回类型",
+@JACGExample(title = "生成指定方法向上的方法完整调用链",
+        desc = {"输出方法完整调用链格式使用最详细，包含返回类型",
                 "通过代码指定配置参数的主要功能示例"})
 public class TestRBCRunnerGenAllGraph4CalleeDetail0 extends TestRunByCodeBase {
 

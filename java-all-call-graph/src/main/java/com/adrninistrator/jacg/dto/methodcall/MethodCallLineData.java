@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * @author adrninistrator
  * @date 2025/2/25
- * @description: 方法调用链当前行的数据
+ * @description: 方法完整调用链当前行的数据
  */
 public abstract class MethodCallLineData {
 

@@ -62,9 +62,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
     private static final Logger logger = LoggerFactory.getLogger(RunnerGenAllGraph4Callee.class);
 
     /*
-        当前生成的完整方法调用链数据Map
+        当前生成的方法完整调用链数据Map
         key {被调用方完整方法}:{被调用方方法返回类型}
-        value   向上的完整方法调用链数据
+        value   向上的方法完整调用链数据
      */
     private Map<String, List<MethodCallLineData4Ee>> allMethodCallLineData4EeMap;
 
@@ -230,7 +230,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
         if (calleeTaskInfo.isGenAllMethods()) {
             // 需要生成指定类的全部方法向上调用链
             if (findMethodTaskElementList.isEmpty()) {
-                logger.warn("以下类需要为所有方法生成向上方法调用链，但未查找到其他方法调用该类的方法\n{}", startCalleeSimpleClassName);
+                logger.warn("以下类需要为所有方法生成向上方法完整调用链，但未查找到其他方法调用该类的方法\n{}", startCalleeSimpleClassName);
                 return genNotFoundFile(startCalleeSimpleClassName, "");
             }
 
@@ -393,13 +393,13 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
             return false;
         }
 
-        // 生成方法调用链每行数据字符串
+        // 生成方法完整调用链每行数据字符串
         if (callGraphWriter != null) {
             // 起始方法不在此时写入文件，在后续加入List处理时再写入文件，使起使方法未被其他方法调用时也能加上入口方法标志
             callGraphWriter.write(methodCallLineStr.toString());
         }
         if (callGraphReturnInMemory) {
-            // 方法调用链当前行的数据记录到用于返回的列表
+            // 方法完整调用链当前行的数据记录到用于返回的列表
             String startCalleeMethod = JavaCG2ClassMethodUtil.genFullMethodWithReturnType(startCalleeFullMethod, startCalleeMethodReturnType);
             List<MethodCallLineData4Ee> methodCallLineData4EeList = allMethodCallLineData4EeMap.computeIfAbsent(startCalleeMethod, k -> new ArrayList<>());
             methodCallLineData4EeList.add(startMethodCallLineData4Ee);
@@ -490,7 +490,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
         ListAsStack<CallGraphNode4Callee> callGraphNode4CalleeStack = new ListAsStack<>();
         // 记录父类方法调用子类方法对应信息的栈
         ListAsStack<SuperCallChildInfo> superCallChildInfoStack = new ListAsStack<>();
-        // 记录需要写入文件的方法调用链内容
+        // 记录需要写入文件的方法完整调用链内容
         List<MethodCallLineData4Ee> methodCallLineData4EeList = new ArrayList<>();
         methodCallLineData4EeList.add(startMethodCallLineData4Ee);
 
@@ -548,7 +548,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
                 continue;
             }
 
-            // 生成方法调用链当前行的数据
+            // 生成方法完整调用链当前行的数据
             MethodCallLineData4Ee methodCallLineData4Ee = new MethodCallLineData4Ee(methodCallLevel, methodCall.getCallerSimpleClassName(), methodCall.getCallerLineNumber(),
                     actualCallerFullMethod, rawCallerMethodHash, actualCallerMethodHash, methodCall.getCallerReturnType(), methodCallId, callFlags, callType);
 
@@ -557,10 +557,10 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
             methodCallLineData4Ee.setCycleCallLevel(cycleCallLevel);
 
             // 生成调用方法信息（包含方法注解信息等）
-            // 无论方法调用链是否写文件，都需要添加
+            // 无论方法完整调用链是否写文件，都需要添加
             methodCallLineData4EeList.add(methodCallLineData4Ee);
             if (callGraphReturnInMemory) {
-                // 方法调用链当前行的数据记录到用于返回的列表
+                // 方法完整调用链当前行的数据记录到用于返回的列表
                 String startCalleeMethod = JavaCG2ClassMethodUtil.genFullMethodWithReturnType(startCalleeFullMethod, startCalleeMethodReturnType);
                 List<MethodCallLineData4Ee> tmpMethodCallLineData4EeList = allMethodCallLineData4EeMap.computeIfAbsent(startCalleeMethod, k -> new ArrayList<>());
                 tmpMethodCallLineData4EeList.add(methodCallLineData4Ee);
@@ -879,7 +879,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
             }
             String lineData = genMethodCallLineStr(methodCallLineData4Ee);
             if (callGraphInfo != null) {
-                // 生成方法调用链每行数据字符串
+                // 生成方法完整调用链每行数据字符串
                 callGraphInfo.append(lineData).append(JavaCG2Constants.NEW_LINE);
             }
         }
@@ -1046,7 +1046,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
         markdownWriter.addCodeBlock();
     }
 
-    // 生成方法调用链每行数据字符串
+    // 生成方法完整调用链每行数据字符串
     @Override
     protected String genMethodCallLineStr(MethodCallLineData methodCallLineData) {
         MethodCallLineData4Ee methodCallLineData4Ee = (MethodCallLineData4Ee) methodCallLineData;
@@ -1058,7 +1058,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
     }
 
     /**
-     * 获取内存中保存的所有方法调用链当前行的数据，包含起始方法的信息
+     * 获取内存中保存的所有方法完整调用链当前行的数据，包含起始方法的信息
      * 因此实际调用链的数量需要减一
      *
      * @return

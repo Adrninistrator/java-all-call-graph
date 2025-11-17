@@ -23,7 +23,7 @@ import test.runbycode.util.JACGTestUtil;
 public class TestRBC0RunnerSimpleWriteDb extends TestRunByCodeBase {
     @Test
     public void test() {
-        // 生成使用 java-callgraph2 的配置参数包装类
+        // 生成 java-callgraph2 使用的配置参数包装类
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = TestConfigGenerator.genJavaCG2ConfigureWrapper();
         javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.FALSE.toString());
 

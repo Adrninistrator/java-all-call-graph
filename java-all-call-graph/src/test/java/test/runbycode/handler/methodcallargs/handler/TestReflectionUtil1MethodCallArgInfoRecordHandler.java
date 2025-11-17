@@ -6,8 +6,8 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.methodcallargs.BaseMethodCallArgInfoRecordHandler;
 import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
-import test.callgraph.reflection1.util.TestReflectionUtil1;
-import test.callgraph.reflection1.util.TestReflectionUtilWrapper1;
+import test.callgraph.reflectioncustom.util.TestReflectionCustomUtil1;
+import test.callgraph.reflectioncustom.util.TestReflectionCustomUtilWrapper1;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,13 +71,13 @@ public class TestReflectionUtil1MethodCallArgInfoRecordHandler extends BaseMetho
     }
 
     private boolean checkTestReflectionUtil1Method(MethodDetailNoReturnType calleeMethodDetailNoReturnType) {
-        return TestReflectionUtil1.class.getName().equals(calleeMethodDetailNoReturnType.getClassName()) &&
+        return TestReflectionCustomUtil1.class.getName().equals(calleeMethodDetailNoReturnType.getClassName()) &&
                 "runByReflection".equals(calleeMethodDetailNoReturnType.getMethodName()) &&
                 calleeMethodDetailNoReturnType.getArgTypeList().size() == 3;
     }
 
     private boolean checkTestReflectionUtilWrapper1Method(MethodDetailNoReturnType calleeMethodDetailNoReturnType) {
-        return TestReflectionUtilWrapper1.class.getName().equals(calleeMethodDetailNoReturnType.getClassName()) &&
+        return TestReflectionCustomUtilWrapper1.class.getName().equals(calleeMethodDetailNoReturnType.getClassName()) &&
                 "runByReflection".equals(calleeMethodDetailNoReturnType.getMethodName());
     }
 }

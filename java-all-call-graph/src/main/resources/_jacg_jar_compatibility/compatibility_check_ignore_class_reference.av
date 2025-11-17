@@ -1,0 +1,16 @@
+## 对应的枚举类名: ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE
+## （作用）在 Jar兼容性检查时 使用的配置参数
+## （作用）表达式配置参数的说明如下：
+## （作用）若当前配置文件中的表达式执行结果为 true，则跳过将对应的数据写入Jar兼容性检查结果
+## （作用）若表达式执行结果为 false，或未指定表达式，则当前配置不会跳过对应的数据
+## （范围）指定Jar兼容性检查快速模式时是否跳过记录特定的类引用关系
+## （表达式使用通用说明文档）请参考 _el_example/el_usage.md
+## （表达式字符串比较说明文档）请参考 _el_example/string_compare.md
+## （当前表达式使用示例文档）请参考 _el_example/_jacg_jar_compatibility/compatibility_check_ignore_class_reference.av.md
+## （允许使用的变量）{变量名称} {变量类型} {变量描述} {变量值示例}
+## {er_class_name} {String} {调用方完整类名} {a.b.Class1}
+## {er_package_name} {String} {调用方完整包名, 不会以.结束} {a.b}
+## {er_simple_class_name} {String} {调用方简单类名} {Class1}
+## {ee_class_name} {String} {被调用方完整类名} {a.b.Class1}
+## {ee_package_name} {String} {被调用方完整包名, 不会以.结束} {a.b}
+## {ee_simple_class_name} {String} {被调用方简单类名} {Class1}

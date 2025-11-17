@@ -25,12 +25,12 @@ public class TestGenCallGraph4EeElErSimpleClassName extends TestElRunByCodeBase 
 
     @Override
     protected String chooseTitle() {
-        return "生成向上完整方法调用链判断调用类简单类名";
+        return "生成向上方法完整调用链判断调用类简单类名";
     }
 
     @Override
     protected String chooseDesc() {
-        return "在生成向上完整方法调用链时，判断调用类简单类名是否等于指定值，忽略匹配的方法调用";
+        return "在生成向上方法完整调用链时，判断调用类简单类名是否等于指定值，忽略匹配的方法调用";
     }
 
     @Test

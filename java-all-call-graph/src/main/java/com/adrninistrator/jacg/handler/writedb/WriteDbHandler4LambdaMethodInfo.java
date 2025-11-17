@@ -52,9 +52,9 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
         writeDbData4LambdaMethodInfo.setLambdaNextClassName(lambdaNextClassName);
         writeDbData4LambdaMethodInfo.setLambdaNextMethodName(lambdaNextMethodName);
         writeDbData4LambdaMethodInfo.setLambdaNextFullMethod(lambdaNextFullMethod);
-        writeDbData4LambdaMethodInfo.setLambdaNextIsStream(JACGStreamUtil.isStreamClass(lambdaNextClassName));
-        writeDbData4LambdaMethodInfo.setLambdaNextIsIntermediate(JACGStreamUtil.isStreamIntermediateMethod(lambdaNextMethodName));
-        writeDbData4LambdaMethodInfo.setLambdaNextIsTerminal(JACGStreamUtil.isStreamTerminalMethod(lambdaNextMethodName));
+        writeDbData4LambdaMethodInfo.setLambdaNextIsStream(JavaCG2YesNoEnum.parseIntValue(JACGStreamUtil.isStreamClass(lambdaNextClassName)));
+        writeDbData4LambdaMethodInfo.setLambdaNextIsIntermediate(JavaCG2YesNoEnum.parseIntValue(JACGStreamUtil.isStreamIntermediateMethod(lambdaNextMethodName)));
+        writeDbData4LambdaMethodInfo.setLambdaNextIsTerminal(JavaCG2YesNoEnum.parseIntValue(JACGStreamUtil.isStreamTerminalMethod(lambdaNextMethodName)));
 
         return writeDbData4LambdaMethodInfo;
     }
@@ -84,9 +84,9 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
                 data.getLambdaNextClassName(),
                 data.getLambdaNextMethodName(),
                 data.getLambdaNextFullMethod(),
-                JavaCG2YesNoEnum.parseIntValue(data.getLambdaNextIsStream()),
-                JavaCG2YesNoEnum.parseIntValue(data.getLambdaNextIsIntermediate()),
-                JavaCG2YesNoEnum.parseIntValue(data.getLambdaNextIsTerminal())
+                data.getLambdaNextIsStream(),
+                data.getLambdaNextIsIntermediate(),
+                data.getLambdaNextIsTerminal()
         };
     }
 

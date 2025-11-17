@@ -46,7 +46,7 @@ public class SpringTxNestedExtractor extends AbstractSpringTxExtractor {
         try (AnnotationHandler annotationHandler = new AnnotationHandler(configureWrapper)) {
             String outputDirName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME);
             if (!outputDirName.isEmpty()) {
-                // 有指定生成调用链文件的子目录名，以下会生成两次方法调用链文件，需要分别使用不同的输出子目录名，否则会输出到同一个目录中
+                // 有指定生成调用链文件的子目录名，以下会生成两次方法完整调用链文件，需要分别使用不同的输出子目录名，否则会输出到同一个目录中
                 configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, outputDirName + JACGConstants.FLAG_AT + JACGConstants.SPRING_TX_TYPE_ANNOTATION);
             }
             // 处理事务注解

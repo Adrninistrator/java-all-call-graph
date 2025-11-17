@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_spring_aop_pointcut_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_spring_aop_pointcut_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   type varchar(1) NOT NULL COMMENT '类型，j: 在Java代码中定义，x: 在XML文件中定义',
   xml_pointcut_id varchar(100) NOT NULL COMMENT 'XML中定义的pointcut的ID',

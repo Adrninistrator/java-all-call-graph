@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_mybatis_ms_get_set_db_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_get_set_db_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   fld_relationship_id int NOT NULL COMMENT '通过get/set方法关联的字段关系id，从1开始',
   get_or_set varchar(3) NOT NULL COMMENT '对应get方法还是set方法',

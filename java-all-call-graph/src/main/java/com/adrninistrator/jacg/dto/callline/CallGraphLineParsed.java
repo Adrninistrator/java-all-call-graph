@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author adrninistrator
  * @date 2022/12/10
- * @description: 方法调用链文件中每行解析后的内容
+ * @description: 方法完整调用链文件中每行解析后的内容
  */
 public class CallGraphLineParsed {
     // 方法级别
@@ -30,7 +30,7 @@ public class CallGraphLineParsed {
     // 循环调用对应的方法级别，非空时代表出现循环调用
     private Integer cycleCallLevel;
 
-    // 是否入口方法（向上的完整方法调用链有效）
+    // 是否入口方法（向上的方法完整调用链有效）
     private boolean entryMethodFlag;
 
     // 是否在其他线程执行

@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.writedb;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassName;
-import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassReference;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
@@ -29,12 +28,12 @@ public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData
     private final Set<String> classNameSet = new HashSet<>();
 
     // 增加数据
-    public void addClassReference(WriteDbData4ClassReference data) {
-        if (classNameSet.add(data.getClassName())) {
-            recordOneClass(data.getClassName());
+    public void addClassReference(String className,String referencedClassName) {
+        if (classNameSet.add(className)) {
+            recordOneClass(className);
         }
-        if (classNameSet.add(data.getReferencedClassName())) {
-            recordOneClass(data.getReferencedClassName());
+        if (classNameSet.add(referencedClassName)) {
+            recordOneClass(referencedClassName);
         }
     }
 

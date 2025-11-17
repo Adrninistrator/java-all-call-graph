@@ -51,8 +51,8 @@ public class ElManager extends CommonElManager {
         }
         Map<String, Object> displayMap = new HashMap<>();
         methodCallAddData4Type(elHandler, methodCallType, usedVariableMap, displayMap);
-        methodCallAddData4Caller(elHandler, callerFullMethod, usedVariableMap, displayMap);
-        methodCallAddData4Callee(elHandler, calleeFullMethod, usedVariableMap, displayMap);
+        methodCallAddData4CallerMethod(elHandler, callerFullMethod, usedVariableMap, displayMap);
+        methodCallAddData4CalleeMethod(elHandler, calleeFullMethod, usedVariableMap, displayMap);
         List<String> methodCallFlagEnumNameList = MethodCallFlagsEnum.getAllEnumNames(methodCallFlags);
         methodCallAddData4Flags(elHandler, methodCallFlagEnumNameList, usedVariableMap, displayMap);
 
@@ -101,7 +101,7 @@ public class ElManager extends CommonElManager {
     /**
      * JarDiff生成方法完整调用链时判断是否需要跳过方法
      *
-     * @param genCalleeGraph 生成向上的完整方法调用链还是生成向下的
+     * @param genCalleeGraph 生成向上的方法完整调用链还是生成向下的
      * @param fullMethod     完整方法
      * @return
      */
@@ -114,6 +114,26 @@ public class ElManager extends CommonElManager {
         }
         Map<String, Object> displayMap = new HashMap<>();
         addData4Method(elHandler, usedVariableMap, displayMap, fullMethod);
+        return elHandler.runExpression(usedVariableMap, displayMap);
+    }
+
+    /**
+     * Jar兼容性检查快速模式时判断是否跳过记录特定的类引用关系
+     *
+     * @param callerClassName
+     * @param calleeClassName
+     * @return
+     */
+    public boolean checkIgnoreJCCClassReference(String callerClassName, String calleeClassName) {
+        ElHandler elHandler = getElHandlerMap(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE);
+        Map<String, Object> usedVariableMap = elHandler.genMap4ElExecute();
+        if (usedVariableMap == null) {
+            return false;
+        }
+        Map<String, Object> displayMap = new HashMap<>();
+        methodCallAddData4CallerClass(elHandler, callerClassName, usedVariableMap, displayMap);
+        methodCallAddData4CalleeClass(elHandler, calleeClassName, usedVariableMap, displayMap);
+
         return elHandler.runExpression(usedVariableMap, displayMap);
     }
 }

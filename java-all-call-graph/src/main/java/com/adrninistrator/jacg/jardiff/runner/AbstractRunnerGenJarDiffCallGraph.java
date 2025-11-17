@@ -45,7 +45,7 @@ import java.util.Set;
 /**
  * @author adrninistrator
  * @date 2025/5/12
- * @description: 比较新旧两个目录中不同版本jar文件的方法修改情况，并生成向上或向下的完整方法调用链，基类
+ * @description: 比较新旧两个目录中不同版本jar文件的方法修改情况，并生成向上或向下的方法完整调用链，基类
  */
 public abstract class AbstractRunnerGenJarDiffCallGraph extends AbstractRunner {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunnerGenJarDiffCallGraph.class);
@@ -136,7 +136,7 @@ public abstract class AbstractRunnerGenJarDiffCallGraph extends AbstractRunner {
                 return;
             }
 
-            // 完整方法调用链生成目录，使用输出目录父目录
+            // 方法完整调用链生成目录，使用输出目录父目录
             File currentOutputDir = new File(currentOutputDirPath);
             String genAllCallGraphDir = JavaCG2FileUtil.getCanonicalPath(currentOutputDir.getParentFile());
             elManager = new ElManager(configureWrapper, ElConfigEnum.values(), currentOutputDirPath);
@@ -192,6 +192,9 @@ public abstract class AbstractRunnerGenJarDiffCallGraph extends AbstractRunner {
             logger.error("error ", e);
             recordTaskFail();
         }
+        if (elManager != null) {
+            elManager.close();
+        }
     }
 
     @Override
@@ -218,7 +221,7 @@ public abstract class AbstractRunnerGenJarDiffCallGraph extends AbstractRunner {
      * @param modifiedClassJarMap 发生变化的方法的类所在的jar文件
      * @param modifiedMethodSet   发生变化的方法Set
      * @param jarFileNameListNew  新jar文件名称列表
-     * @param genAllCallGraphDir  生成完整方法调用链的目录
+     * @param genAllCallGraphDir  生成方法完整调用链的目录
      * @return
      */
     protected abstract boolean handleModifiedJarAndMethods(ConfigureWrapper configureWrapperNew, Map<String, WriteDbData4JarInfo> modifiedJarMap,

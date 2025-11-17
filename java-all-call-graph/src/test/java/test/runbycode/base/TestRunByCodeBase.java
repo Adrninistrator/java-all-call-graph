@@ -228,7 +228,7 @@ public abstract class TestRunByCodeBase {
     }
 
     /**
-     * 获取保存向下的方法调用链目录中的直接子目录数量
+     * 获取保存向下的方法完整调用链目录中的直接子目录数量
      *
      * @return
      */
@@ -237,7 +237,7 @@ public abstract class TestRunByCodeBase {
     }
 
     /**
-     * 获取保存向上的方法调用链目录中的直接子目录数量
+     * 获取保存向上的方法完整调用链目录中的直接子目录数量
      *
      * @return
      */

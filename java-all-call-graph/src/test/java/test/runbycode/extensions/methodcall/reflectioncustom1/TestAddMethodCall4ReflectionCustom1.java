@@ -1,4 +1,4 @@
-package test.runbycode.extensions.methodcall;
+package test.runbycode.extensions.methodcall.reflectioncustom1;
 
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
@@ -7,35 +7,31 @@ import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import org.junit.Assert;
 import org.junit.Test;
-import test.callgraph.reflection1.methodcall.TestRunByReflection1;
-import test.callgraph.reflection1.methodcall.TestRunByReflection2;
+import test.callgraph.reflectioncustom.methodcall.TestRunByReflectionCustom1;
 import test.runbycode.base.TestRunByCodeBase;
 
 /**
  * @author adrninistrator
  * @date 2025/2/16
  * @description: 为通过反射工具类方法调用的被调用方法添加调用关系
- * 通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名
- * 对应的反射工具类方法为 test.callgraph.reflection1.util.TestReflectionUtil1:runByReflection(java.lang.Object, java.lang.String, java.lang.Object...)
+ * 通过指定方法的调用参数添加方法调用，使用被调用对象，及被调用方法名
+ * 对应的反射工具类方法为 test.callgraph.reflectioncustom.util.TestReflectionCustomUtil1:runByReflection(java.lang.Object, java.lang.String, java.lang.Object...)
  */
-public class TestAddMethodCall4Reflection1 extends TestRunByCodeBase {
+public class TestAddMethodCall4ReflectionCustom1 extends TestRunByCodeBase {
 
     @Test
     public void $test0RunnerWriteDb() {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JAVACG2_METHOD_CALL,
-                JavaCG2Reflection1MethodCallExtension.class.getName(),
-                JavaCG2Reflection2MethodCallExtension.class.getName());
+                JavaCG2ReflectionCustom1MethodCallExtension.class.getName());
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL,
-                JACGReflection1MethodCallExtension.class.getName(),
-                JACGReflection2MethodCallExtension.class.getName());
+                JACGReflectionCustom1MethodCallExtension.class.getName());
         Assert.assertTrue(new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper).run());
     }
 
     @Test
     public void testRunnerGenAllGraph4Caller() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
-                TestRunByReflection1.class.getName(),
-                TestRunByReflection2.class.getName());
+                TestRunByReflectionCustom1.class.getName());
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
     }
 

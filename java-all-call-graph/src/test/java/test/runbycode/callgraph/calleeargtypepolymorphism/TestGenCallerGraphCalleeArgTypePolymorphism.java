@@ -28,7 +28,7 @@ import java.util.List;
  * @date 2025/10/12
  * @description:
  */
-@JACGExample(title = "生成向下完整方法调用链时，验证方法参数作为被调用对象涉及多态时的类型替换", desc = {})
+@JACGExample(title = "生成向下方法完整调用链时，验证方法参数作为被调用对象涉及多态时的类型替换", desc = {})
 public class TestGenCallerGraphCalleeArgTypePolymorphism extends TestRunByCodeBase {
 
     private final static String CALLEE_METHOD1_WITH_ARG_TYPES = JavaCG2ClassMethodUtil.formatMethodWithArgTypesStr("run1", String.class.getName(),
@@ -65,7 +65,7 @@ public class TestGenCallerGraphCalleeArgTypePolymorphism extends TestRunByCodeBa
         };
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 CalleeArgTypePolymorphismService1.class.getName() + ":testRun1Use1A()");
-        // 指定参数后，生成向下完整方法调用链时，方法参数作为被调用对象涉及多态时的类型完成替换
+        // 指定参数后，生成向下方法完整调用链时，方法参数作为被调用对象涉及多态时的类型完成替换
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM,
                 CALLEE_FULL_METHOD1 + JavaCG2Constants.FLAG_EQUAL + "2"
         );
@@ -73,7 +73,7 @@ public class TestGenCallerGraphCalleeArgTypePolymorphism extends TestRunByCodeBa
         checkCallerGraphContainsCalleeAll(methodCallLineData4ErList, methodArray);
         checkCallerGraphContainsCalleeNone(methodCallLineData4ErList, INTERFACE_FULL_METHODS);
 
-        // 未指定参数时，生成向下完整方法调用链时，方法参数作为被调用对象涉及多态时的类型未替换
+        // 未指定参数时，生成向下方法完整调用链时，方法参数作为被调用对象涉及多态时的类型未替换
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM);
         List<MethodCallLineData4Er> methodCallLineData4ErList2 = genOneCallerGraph(1);
         checkCallerGraphContainsCalleeAll(methodCallLineData4ErList2, INTERFACE_FULL_METHODS);
@@ -87,7 +87,7 @@ public class TestGenCallerGraphCalleeArgTypePolymorphism extends TestRunByCodeBa
         };
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 CalleeArgTypePolymorphismService1.class.getName() + ":testRun1Use1B()");
-        // 指定参数后，生成向下完整方法调用链时，方法参数作为被调用对象涉及多态时的类型完成替换
+        // 指定参数后，生成向下方法完整调用链时，方法参数作为被调用对象涉及多态时的类型完成替换
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM,
                 CALLEE_FULL_METHOD1 + JavaCG2Constants.FLAG_EQUAL + "2"
         );
@@ -95,7 +95,7 @@ public class TestGenCallerGraphCalleeArgTypePolymorphism extends TestRunByCodeBa
         checkCallerGraphContainsCalleeAll(methodCallLineData4ErList, methodArray);
         checkCallerGraphContainsCalleeNone(methodCallLineData4ErList, INTERFACE_FULL_METHODS);
 
-        // 未指定参数时，生成向下完整方法调用链时，方法参数作为被调用对象涉及多态时的类型未替换
+        // 未指定参数时，生成向下方法完整调用链时，方法参数作为被调用对象涉及多态时的类型未替换
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM);
         List<MethodCallLineData4Er> methodCallLineData4ErList2 = genOneCallerGraph(1);
         checkCallerGraphContainsCalleeAll(methodCallLineData4ErList2, INTERFACE_FULL_METHODS);
@@ -118,7 +118,7 @@ public class TestGenCallerGraphCalleeArgTypePolymorphism extends TestRunByCodeBa
         };
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 CalleeArgTypePolymorphismService1.class.getName() + ":testRun2Use1B23()");
-        // 指定参数后，生成向下完整方法调用链时，方法参数作为被调用对象涉及多态时的类型完成替换
+        // 指定参数后，生成向下方法完整调用链时，方法参数作为被调用对象涉及多态时的类型完成替换
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM,
                 CALLEE_FULL_METHOD2 + JavaCG2Constants.FLAG_EQUAL + "1",
                 CALLEE_FULL_METHOD2 + JavaCG2Constants.FLAG_EQUAL + "2",
@@ -129,7 +129,7 @@ public class TestGenCallerGraphCalleeArgTypePolymorphism extends TestRunByCodeBa
         checkCallerGraphContainsCalleeNone(methodCallLineData4ErList, methodArrayNotContains);
         checkCallerGraphContainsCalleeNone(methodCallLineData4ErList, INTERFACE_FULL_METHODS);
 
-        // 未指定参数时，生成向下完整方法调用链时，方法参数作为被调用对象涉及多态时的类型未替换
+        // 未指定参数时，生成向下方法完整调用链时，方法参数作为被调用对象涉及多态时的类型未替换
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM);
         List<MethodCallLineData4Er> methodCallLineData4ErList2 = genOneCallerGraph(1);
         checkCallerGraphContainsCalleeAll(methodCallLineData4ErList2, INTERFACE_FULL_METHODS);
@@ -146,7 +146,7 @@ public class TestGenCallerGraphCalleeArgTypePolymorphism extends TestRunByCodeBa
         Assert.assertThrows(AssertionError.class, () -> genOneCallerGraph(1));
     }
 
-    // 测试为被调用方法生成向下的完整方法调用链
+    // 测试为被调用方法生成向下的方法完整调用链
     @Test
     public void testCalleeMethod1() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,

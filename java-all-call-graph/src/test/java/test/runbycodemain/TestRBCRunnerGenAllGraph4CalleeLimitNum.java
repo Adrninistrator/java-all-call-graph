@@ -17,21 +17,21 @@ import java.util.Map;
  * @date 2025/2/16
  * @description:
  */
-@JACGExample(title = "生成指定方法向上的完整方法调用链",
+@JACGExample(title = "生成指定方法向上的方法完整调用链",
         desc = {"限制每个方法允许生成的方法调用数量限制",
                 "通过代码指定配置参数的主要功能示例"})
 public class TestRBCRunnerGenAllGraph4CalleeLimitNum extends TestRunByCodeBase {
 
-    @JACGExample(title = "方法调用链数据仅写入文件",
-            desc = {"方法调用链数据不在内存中返回"})
+    @JACGExample(title = "方法完整调用链数据仅写入文件",
+            desc = {"方法完整调用链数据不在内存中返回"})
     @Test
     public void testWriteToFile() {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_GEN_CALL_GRAPH_NUM_LIMIT, "10");
         Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapper).run());
     }
 
-    @JACGExample(title = "方法调用链数据仅在内存中返回",
-            desc = {"方法调用链数据不写入文件"})
+    @JACGExample(title = "方法完整调用链数据仅在内存中返回",
+            desc = {"方法完整调用链数据不写入文件"})
     @Test
     public void testReturnInMemory() {
         int limitNum = 10;

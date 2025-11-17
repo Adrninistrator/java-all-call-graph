@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_set_method_assign_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_set_method_assign_info_{appName} (
   set_record_id int NOT NULL COMMENT 'set方法记录id，从1开始',
   set_method_call_id int NOT NULL COMMENT 'set方法被调用时的方法调用序号，从1开始',
   seq int NOT NULL COMMENT 'set方法当前被调用时被赋值情况的序号，从0开始',

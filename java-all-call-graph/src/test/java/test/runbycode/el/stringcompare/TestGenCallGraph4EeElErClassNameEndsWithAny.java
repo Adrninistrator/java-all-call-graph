@@ -36,7 +36,7 @@ public class TestGenCallGraph4EeElErClassNameEndsWithAny extends TestElRunByCode
 
     @Override
     protected String chooseDesc() {
-        return "在生成向上完整方法调用链时，判断调用类名是否以指定多个关键字之一结尾，忽略匹配的方法调用";
+        return "在生成向上方法完整调用链时，判断调用类名是否以指定多个关键字之一结尾，忽略匹配的方法调用";
     }
 
     @Test

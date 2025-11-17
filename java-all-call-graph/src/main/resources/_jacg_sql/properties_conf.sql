@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_properties_conf_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_properties_conf_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   properties_key varchar(255) NOT NULL COMMENT 'properties配置名称',
   properties_file_path varchar(500) NOT NULL COMMENT 'properties配置文件路径',

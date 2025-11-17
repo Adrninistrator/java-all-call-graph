@@ -35,7 +35,7 @@ public class TestGenCallGraph4EeElErPackageNameStartsWithIC extends TestElRunByC
 
     @Override
     protected String chooseDesc() {
-        return "在生成向上完整方法调用链时，判断调用类包名是否以指定关键字开头（忽略大小写），忽略匹配的方法调用";
+        return "在生成向上方法完整调用链时，判断调用类包名是否以指定关键字开头（忽略大小写），忽略匹配的方法调用";
     }
 
     @Test

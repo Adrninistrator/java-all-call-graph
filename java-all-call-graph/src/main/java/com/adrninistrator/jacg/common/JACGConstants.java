@@ -37,7 +37,7 @@ public class JACGConstants {
     // sql语句中用于替换的appName
     public static final String REPLACE_SQL_FLAG_APP_NAME = "{appName}";
 
-    public static final String SQL_CREATE_TABLE_HEAD = "CREATE TABLE if not exists";
+    public static final String SQL_CREATE_TABLE_HEAD = "CREATE TABLE IF NOT EXISTS";
 
     public static final String FLAG_LEFT_PARENTHESES = "[";
     public static final String FLAG_RIGHT_PARENTHESES = "]";

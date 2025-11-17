@@ -27,12 +27,12 @@ public class TestGenCallGraph4EeElFlagsExcludeAll extends TestElRunByCodeBase {
 
     @Override
     protected String chooseTitle() {
-        return "生成向上完整方法调用链忽略所有调用标志";
+        return "生成向上方法完整调用链忽略所有调用标志";
     }
 
     @Override
     protected String chooseDesc() {
-        return "在生成向上完整方法调用链时，忽略所有存在调用标志的方法调用";
+        return "在生成向上方法完整调用链时，忽略所有存在调用标志的方法调用";
     }
 
     @Test

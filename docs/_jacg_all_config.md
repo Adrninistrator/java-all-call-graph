@@ -84,7 +84,7 @@ ConfigKeyEnum
 - 参数说明
 
 ```
-生成方法调用链文件的根目录路径，以"/"或"\\"作为分隔符，末尾是否为分隔符不影响
+生成方法完整调用链文件的根目录路径，以"/"或"\\"作为分隔符，末尾是否为分隔符不影响
 默认为当前目录
 ```
 
@@ -101,7 +101,7 @@ ConfigKeyEnum
 - 参数说明
 
 ```
-生成方法调用链文件的目录名中的标志
+生成方法完整调用链文件的目录名中的标志
 完整目录名使用{app.name}{output.dir.flag}_{当前时间}
 默认为空
 ```
@@ -119,7 +119,7 @@ ConfigKeyEnum
 - 参数说明
 
 ```
-生成方法调用链文件的目录名
+生成方法完整调用链文件的目录名
 非空时目录名使用当前参数值
 默认为空，使用 output.dir.flag 参数说明的格式
 ```
@@ -137,7 +137,7 @@ ConfigKeyEnum
 - 参数说明
 
 ```
-生成方法调用链文件时，若发现jar文件内容发生变化是否退出生成，true: 退出生成，false: 继续生成
+生成方法完整调用链文件时，若发现jar文件内容发生变化是否退出生成，true: 退出生成，false: 继续生成
 ```
 
 |描述|内容|
@@ -160,7 +160,7 @@ ConfigKeyEnum
 |---|---|
 |参数类型|Boolean|
 |参数值是否必填|否|
-|当前使用参数值|true|
+|当前使用参数值|false|
 |参数默认值|false|
 |参数枚举名|CKE_SKIP_WRITE_DB_WHEN_JAR_NOT_MODIFIED|
 
@@ -169,8 +169,11 @@ ConfigKeyEnum
 - 参数说明
 
 ```
-生成方法调用链文件时的详细程度
-0: 最详细 完整类名+方法名+方法参数+返回类型 1: 详细 完整类名+方法名+方法参数 2: 中等 完整类名+方法名 3: 最简单 简单类名（对于同名类展示完整类名）+方法名
+生成方法完整调用链文件时的详细程度
+0: 最详细 完整类名+方法名+方法参数+返回类型
+1: 详细 完整类名+方法名+方法参数
+2: 中等 完整类名+方法名
+3: 最简单 简单类名（对于同名类展示完整类名）+方法名
 ```
 
 |描述|内容|
@@ -186,7 +189,7 @@ ConfigKeyEnum
 - 参数说明
 
 ```
-生成向下的方法调用链文件时，在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否忽略
+生成向下的方法完整调用链文件时，在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否忽略
 true: 忽略，false: 不忽略
 ```
 
@@ -210,7 +213,7 @@ true: 忽略，false: 不忽略
 |---|---|
 |参数类型|Boolean|
 |参数值是否必填|否|
-|当前使用参数值|true|
+|当前使用参数值|false|
 |参数默认值|false|
 |参数枚举名|CKE_CALL_GRAPH_GEN_STACK_OTHER_FORMS|
 
@@ -219,7 +222,7 @@ true: 忽略，false: 不忽略
 - 参数说明
 
 ```
-生成向下的方法调用链文件时，是否输出JSON格式的方法调用链文件
+生成向下的方法完整调用链文件时，是否输出JSON格式的方法完整调用链文件
 ```
 
 |描述|内容|
@@ -235,7 +238,7 @@ true: 忽略，false: 不忽略
 - 参数说明
 
 ```
-生成方法调用链文件时，每个方法允许生成的方法调用数量限制，默认为0，小于等于0代表不限制
+生成方法完整调用链文件时，每个方法允许生成的方法调用数量限制，默认为0，小于等于0代表不限制
 ```
 
 |描述|内容|
@@ -251,7 +254,7 @@ true: 忽略，false: 不忽略
 - 参数说明
 
 ```
-生成方法调用链文件时，允许生成的方法调用链深度限制，默认为0，小于等于0代表不限制
+生成方法完整调用链文件时，允许生成的方法完整调用链深度限制，默认为0，小于等于0代表不限制
 ```
 
 |描述|内容|
@@ -267,7 +270,7 @@ true: 忽略，false: 不忽略
 - 参数说明
 
 ```
-生成方法调用链文件时，是否将调用链数据写入文件
+生成方法完整调用链文件时，是否将调用链数据写入文件
 ```
 
 |描述|内容|
@@ -283,7 +286,7 @@ true: 忽略，false: 不忽略
 - 参数说明
 
 ```
-生成方法调用链文件时，是否在内存中返回调用链数据
+生成方法完整调用链文件时，是否在内存中返回调用链数据
 不能与 call.graph.write.to.file 开关同时设置为false
 ```
 
@@ -300,7 +303,7 @@ true: 忽略，false: 不忽略
 - 参数说明
 
 ```
-生成方法调用链文件时，文件名是否使用更短的模式，以避免超过Windows文件系统支持的长度
+生成方法完整调用链文件时，文件名是否使用更短的模式，以避免超过Windows文件系统支持的长度
 若是，则文件名仅包含对应方法的HASH+长度；若否，则文件名还会包含方法的唯一类名及方法名
 ```
 
@@ -411,6 +414,8 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 
 ```
 数据库配置（仅当使用非H2数据库时需要指定），驱动类名
+MySQL 使用 com.mysql.cj.jdbc.Driver
+PostgreSQL 使用 org.postgresql.Driver
 ```
 
 |描述|内容|
@@ -427,7 +432,9 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 
 ```
 数据库配置（仅当使用非H2数据库时需要指定），URL
-使用MySQL时，url需要指定rewriteBatchedStatements=true，开启批量插入，提高效率，默认未开启
+使用 MySQL 时，url需要指定 rewriteBatchedStatements=true ，开启批量插入，提高效率，默认未开启
+使用 PostgreSQL 时，需要指定通过 currentSchema 指定 schema ，如 jdbc:postgresql://x.x.x.x:5432/database?currentSchema=schema&useUnicode=true&characterEncoding=UTF-8
+使用 PostgreSQL 时，假如偶尔出现异常“org.postgresql.util.PSQLException: 尝试连线已失败。”，可以在 URL 中指定“sslmode=disable”以禁用 SSL
 ```
 
 |描述|内容|
@@ -589,21 +596,6 @@ Test1:test(java.lang.String):java.lang.String
 - 当前使用参数值
 
 ```
-java.lang.System
-test.callgraph.annotation.MethodWithAnnotation
-test.callgraph.cyclecall.TestCycleCall1
-test.callgraph.empty.TestEmptyClass1
-test.callgraph.empty.TestNoMethodClass1
-test.callgraph.methodargument.TestArgument1
-test.callgraph.methodargument.TestArgument2:testNoCaller(
-test.callgraph.methodargument.TestArgument2:testNotExist(
-test.callgraph.methodcall.TestMCCallee:1
-test.callgraph.methodcall.TestMCCallee:22
-test.callgraph.methodcall.TestMCCallee:27
-test.callgraph.methodcall.TestMCCallee:run(
-test.callgraph.methodcall.TestMCCallee:test
-test.callgraph.spring.mvc.TestSpringController1:get(
-test_not_exists_class
 ```
 
 ## 4.2. _jacg_gen_all_call_graph/method_class_4caller.properties
@@ -667,32 +659,6 @@ Test1:139 139-492
 - 当前使用参数值
 
 ```
-test.callgraph.annotation.CallMethodWithAnnotation:test1(
-test.callgraph.annotation.MethodWithAnnotation
-test.callgraph.cyclecall.TestCycleCall1
-test.callgraph.empty.TestEmptyClass1
-test.callgraph.empty.TestNoMethodClass1
-test.callgraph.extendcomplex.ChildClassA1
-test.callgraph.extendcomplex.ChildClassA2
-test.callgraph.extendcomplex.ChildClassB1
-test.callgraph.extendcomplex.ChildClassB2
-test.callgraph.extendcomplex.TestExtendComplex
-test.callgraph.future.CallableImpl:call(
-test.callgraph.interfaces.interfaces.InterfaceSuper1:testSuper1(
-test.callgraph.interfaces.interfaces.InterfaceSuper2:testSuper2(
-test.callgraph.interfacesdefault.TestUseInterfaceDefault1
-test.callgraph.interfacesgeneric.TestInterfacesGeneric1
-test.callgraph.lambda.TestLambda
-test.callgraph.methodargument.TestArgument1:test
-test.callgraph.methodargument.TestArgument2:test(
-test.callgraph.methodargument.TestArgument2:testNoCallee(
-test.callgraph.methodargument.TestArgument2:testNotExist(
-test.callgraph.methodargument.TestArgumentGenerics1
-test.callgraph.methodcall.TestMCCaller:1
-test.callgraph.methodcall.TestMCCaller:55
-test.callgraph.spring.bean.use.complex.TestUseComplexService
-test.callgraph.spring.mvc.TestSpringController1
-test_not_exists_class
 ```
 
 ## 4.3. _jacg_gen_all_call_graph/caller_graph_callee_arg_type_polymorphism.properties
@@ -703,7 +669,7 @@ OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM
 
 - 参数说明
 
-(作用) 生成向下完整方法调用链时，指定哪些方法参数作为被调用对象涉及多态时的类型替换（每行指定一项配置，可指定多行）
+(作用) 生成向下方法完整调用链时，指定哪些方法参数作为被调用对象涉及多态时的类型替换（每行指定一项配置，可指定多行）
 
 (作用) 即对被调用类型使用实际传入的子类类型替换方法参数定义的父类类型
 
@@ -736,7 +702,7 @@ OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE
 
 - 参数说明
 
-生成向上的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据
+生成向上的方法完整调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据
 
 默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEe=true的type
 
@@ -755,7 +721,7 @@ OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER
 
 - 参数说明
 
-生成向下的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据
+生成向下的方法完整调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据
 
 默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEr=true的type
 
@@ -785,8 +751,6 @@ OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE
 - 当前使用参数值
 
 ```
-!entry!
-<init>
 ```
 
 ## 5.2. _jacg_find_stack_keyword/find_stack_keyword_4er.properties
@@ -806,8 +770,6 @@ OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER
 - 当前使用参数值
 
 ```
-System:
-java.lang.Deprecated
 ```
 
 ## 5.3. _jacg_extensions/code_parser.properties
@@ -818,7 +780,7 @@ OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER
 
 - 参数说明
 
-在此定义用于对代码进行解析的扩展类完整类名（每行指定一项配置，可指定多行）
+定义用于对代码进行解析的扩展类完整类名（每行指定一项配置，可指定多行）
 
 需要是 com.adrninistrator.javacg2.extensions.codeparser.CodeParserInterface 接口的实现类
 
@@ -835,7 +797,7 @@ OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER
 
 - 参数说明
 
-在此定义处理方法上的注解生成用于显示信息的扩展类完整类名（每行指定一项配置，可指定多行）
+定义在生成方法完整调用链时，显示方法注解信息的扩展类完整类名（每行指定一项配置，可指定多行）
 
 需要是 com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter 类的子类
 
@@ -929,7 +891,7 @@ OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLEE_GRAPH_DIR
 
 - 参数说明
 
-(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，获得发生变化的方法的影响范围（生成向上的完整方法调用链及调用堆栈）
+(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，获得发生变化的方法的影响范围（生成向上的方法完整调用链及调用堆栈）
 
 (内容) 第1行指定旧目录路径，第2行指定新目录路径
 
@@ -954,7 +916,7 @@ OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLER_GRAPH_DIR
 
 - 参数说明
 
-(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，向下的完整方法调用链
+(作用) 指定新旧两个目录，比较其中的不同版本jar文件的方法修改情况，向下的方法完整调用链
 
 (内容) 第1行指定旧目录路径，第2行指定新目录路径
 
@@ -969,8 +931,6 @@ OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLER_GRAPH_DIR
 - 当前使用参数值
 
 ```
-build/jar-diff-version-1
-build/jar-diff-version-2
 ```
 
 ## 5.11. _jacg_jar_compatibility/other_h2_db_path.properties
@@ -1010,7 +970,7 @@ ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL
 
 - 参数说明
 
-指定生成完整方法调用链时是否跳过解析特定的方法调用，支持通过方法调用类型、调用方法或被调用方法等判断
+指定生成方法完整调用链时是否跳过解析特定的方法调用，支持通过方法调用类型、调用方法或被调用方法等判断
 
 - 允许使用的变量
 
@@ -1069,7 +1029,7 @@ ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLEE
 
 - 参数说明
 
-JarDiff获得发生变化的方法的影响范围时（生成向上的完整方法调用链及调用堆栈），指定发生变化的方法中，需要忽略的方法
+JarDiff获得发生变化的方法的影响范围时（生成向上的方法完整调用链及调用堆栈），指定发生变化的方法中，需要忽略的方法
 
 - 允许使用的变量
 
@@ -1096,7 +1056,7 @@ ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER
 
 - 参数说明
 
-JarDiff获得发生变化的方法向下的完整方法调用链时，指定发生变化的方法中，需要忽略的方法
+JarDiff获得发生变化的方法向下的方法完整调用链时，指定发生变化的方法中，需要忽略的方法
 
 - 允许使用的变量
 
@@ -1108,6 +1068,33 @@ JarDiff获得发生变化的方法向下的完整方法调用链时，指定发�
 |method_name|String|方法名<br>不包括括号及方法参数|method1|
 |method_arg_num|int|方法参数数量|0<br>1|
 |full_method|String|完整方法|a.b.Class1:f1()<br>a.b.Class1:f2(int,java.lang.String)|
+
+- 当前使用参数值
+
+```
+
+```
+
+## 6.5. _jacg_jar_compatibility/compatibility_check_ignore_class_reference.av
+
+- 配置文件枚举类名与常量名
+
+ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE
+
+- 参数说明
+
+指定Jar兼容性检查快速模式时是否跳过记录特定的类引用关系
+
+- 允许使用的变量
+
+|变量名称|变量类型|变量描述|变量值示例|
+|---|---|---|---|
+|er_class_name|String|调用方完整类名|a.b.Class1|
+|er_package_name|String|调用方完整包名<br>不会以.结束|a.b|
+|er_simple_class_name|String|调用方简单类名|Class1|
+|ee_class_name|String|被调用方完整类名|a.b.Class1|
+|ee_package_name|String|被调用方完整包名<br>不会以.结束|a.b|
+|ee_simple_class_name|String|被调用方简单类名|Class1|
 
 - 当前使用参数值
 

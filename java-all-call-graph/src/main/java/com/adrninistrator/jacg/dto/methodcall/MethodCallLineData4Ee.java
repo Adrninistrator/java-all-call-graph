@@ -3,7 +3,7 @@ package com.adrninistrator.jacg.dto.methodcall;
 /**
  * @author adrninistrator
  * @date 2025/2/24
- * @description: 方法调用链当前行的数据，对应生成向下的完整调用链
+ * @description: 方法完整调用链当前行的数据，对应生成向下的完整调用链
  */
 public class MethodCallLineData4Ee extends MethodCallLineData {
 

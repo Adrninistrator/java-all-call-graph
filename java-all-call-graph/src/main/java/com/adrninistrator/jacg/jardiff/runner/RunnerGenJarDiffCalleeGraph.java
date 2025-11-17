@@ -37,7 +37,7 @@ import java.util.Set;
 /**
  * @author adrninistrator
  * @date 2024/3/9
- * @description: 比较新旧两个目录中不同版本jar文件的方法修改情况，以及发生变化的方法的影响范围（生成向上的完整方法调用链及调用堆栈）
+ * @description: 比较新旧两个目录中不同版本jar文件的方法修改情况，以及发生变化的方法的影响范围（生成向上的方法完整调用链及调用堆栈）
  */
 public class RunnerGenJarDiffCalleeGraph extends AbstractRunnerGenJarDiffCallGraph {
 
@@ -81,7 +81,7 @@ public class RunnerGenJarDiffCalleeGraph extends AbstractRunnerGenJarDiffCallGra
         configureWrapperNew.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, modifiedMethodSet);
         configureWrapperNew.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, JACGConstants.CALLEE_FLAG_ENTRY);
         FindCallStackTrace findCallStackTrace = new FindCallStackTrace(true, configureWrapperNew);
-        // 设置生成完整方法调用链目录
+        // 设置生成方法完整调用链目录
         findCallStackTrace.setCurrentOutputDirPath(genAllCallGraphDir);
         // 生成发生变化的方法到入口方法的调用堆栈文件
         CallStackFileResult callStackFileResult = findCallStackTrace.find();

@@ -25,12 +25,12 @@ public class TestGenCallGraph4ErElErFullMethod extends TestElRunByCodeBase {
 
     @Override
     protected String chooseTitle() {
-        return "生成向下完整方法调用链判断调用完整方法";
+        return "生成向下方法完整调用链判断调用完整方法";
     }
 
     @Override
     protected String chooseDesc() {
-        return "在生成向下完整方法调用链时，判断调用完整方法是否等于指定关键字，忽略匹配的方法调用";
+        return "在生成向下方法完整调用链时，判断调用完整方法是否等于指定关键字，忽略匹配的方法调用";
     }
 
     @Test

@@ -148,6 +148,11 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     // 是否使用H2数据库
     private boolean useH2Db;
 
+    // 是否使用PostgreSQL数据库
+    private boolean usePgDb;
+
+    private boolean delNumberInIndex;
+
     // 写数据库次数
     private int writeDbTimes = 0;
 
@@ -202,7 +207,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         DbConfInfo dbConfInfo = dbOperator.getDbConfInfo();
         // 是否使用H2数据库
         useH2Db = dbConfInfo.isUseH2Db();
-        if (!useH2Db && JACGSqlUtil.isMySQLDb(dbConfInfo.getDriverClassName())) {
+        usePgDb = dbConfInfo.isUsePgDb();
+        delNumberInIndex = useH2Db || usePgDb;
+        if (!useH2Db && !usePgDb && JACGSqlUtil.isMySQLDb(dbConfInfo.getDriverClassName())) {
             if (!dbConfInfo.getDbUrl().contains(JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS)) {
                 logger.error("使用MySQL时，需要在参数指定标志以开启批量插入 {} {}", JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS, configureWrapper.genConfigUsage(ConfigDbKeyEnum.CDKE_DB_URL));
                 return false;
@@ -299,7 +306,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         }
 
         // 处理引用的类信息，需要先处理
-        if (!handleClassName()) {
+        if (!handleClassReferenceAndName()) {
             return false;
         }
 
@@ -651,24 +658,16 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
                 stringBuilder.append(JavaCG2Constants.NEW_LINE);
             }
             // 对建表sql语句进行转换
-            stringBuilder.append(transformCreateTableSql(sql, useH2Db));
+            stringBuilder.append(JACGSqlUtil.transformCreateTableSql(sql, delNumberInIndex, appName, tableSuffix));
         }
         String createTableSql = stringBuilder.toString();
-        logger.debug("建表sql: {}", createTableSql);
-        return createTableSql;
-    }
+        logger.debug("建表 sql: {}", createTableSql);
 
-    // 对建表sql语句进行转换
-    private String transformCreateTableSql(String sql, boolean useH2Db) {
-        String newSql = JACGSqlUtil.replaceFlagInSql(sql, appName, tableSuffix);
-        String trimSql = sql.trim();
-        if (useH2Db && StringUtils.startsWithAny(trimSql, "PRIMARY KEY", "INDEX", "UNIQUE INDEX")) {
-            // 使用H2数据库，且以PRIMARY KEY、INDEX、UNIQUE INDEX开头，去掉索引中指定的字段长度
-            return newSql.replaceAll("\\([0-9]+\\)", "");
+        if (usePgDb) {
+            // 转换为 postgresql 格式的建表语句
+            createTableSql = JACGSqlUtil.transformCreateTableSqlToPg(createTableSql);
         }
-
-        // 其他情况，每行都替换appName
-        return newSql;
+        return createTableSql;
     }
 
     // 清理数据库表
@@ -720,14 +719,33 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         return writeDbHandler4JACGConfig.handle(javaCG2OutputInfo);
     }
 
-    // 处理引用的类信息，需要先处理
-    private boolean handleClassName() {
+    // 处理引用的类信息与类名，需要先处理
+    private boolean handleClassReferenceAndName() {
         WriteDbHandler4ClassName writeDbHandler4ClassName = genWriteDbHandler4ClassName();
         initWriteDbHandler(writeDbHandler4ClassName);
 
+        // 第一次处理类名
         WriteDbHandler4ClassReference writeDbHandler4ClassReference = genWriteDbHandler4ClassReference();
         initWriteDbHandler(writeDbHandler4ClassReference);
+        writeDbHandler4ClassReference.setOnlyHandleClassName(true);
         writeDbHandler4ClassReference.setWriteDbHandler4ClassName(writeDbHandler4ClassName);
+        if (!writeDbHandler4ClassReference.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        // 等待直到任务执行完毕，等待类名写入完毕，后面需要使用
+        wait4TPEDone();
+
+        if (writeDbHandler4ClassName.checkFailed()) {
+            return false;
+        }
+        // 将类名表中的同名类更新为使用完整类名，并记录同名类
+        if (!dbOperWrapper.updateSimpleClassName2Full()) {
+            return false;
+        }
+
+        // 第二次处理引用的类名
+        writeDbHandler4ClassReference.setOnlyHandleClassName(false);
         if (!writeDbHandler4ClassReference.handle(javaCG2OutputInfo)) {
             return false;
         }
@@ -735,21 +753,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         if (!useNeo4j()) {
             WriteDbHandler4DupClassReference writeDbHandler4DupClassReference = new WriteDbHandler4DupClassReference(writeDbResult);
             initWriteDbHandler(writeDbHandler4DupClassReference);
+            writeDbHandler4DupClassReference.setOnlyHandleClassName(false);
             writeDbHandler4DupClassReference.setWriteDbHandler4ClassName(writeDbHandler4ClassName);
-            if (!writeDbHandler4DupClassReference.handle(javaCG2OutputInfo)) {
-                return false;
-            }
+            return writeDbHandler4DupClassReference.handle(javaCG2OutputInfo);
         }
-
-        // 等待直到任务执行完毕，等待引用的类信息写入完毕，后面需要使用
-        wait4TPEDone();
-
-        if (writeDbHandler4ClassName.checkFailed()) {
-            return false;
-        }
-        // 将类名表中的同名类更新为使用完整类名，并记录同名类
-        return dbOperWrapper.updateSimpleClassName2Full();
+        return true;
     }
+
 
     // 处理jar文件信息
     private boolean handleJarInfo() {
@@ -1465,8 +1475,8 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         String querySql3 = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_MYBATIS_MS_COLUMN) +
                 " from " + DbTableInfoEnum.DTIE_MYBATIS_MS_COLUMN.getTableName() +
                 " where " + DC.MMC_XML_FILE_NAME + " = ?" +
-                "and " + DC.MMC_XML_FILE_PATH + " = ?" +
-                "and " + DC.MMC_RESULT_MAP_ID + " = ?";
+                " and " + DC.MMC_XML_FILE_PATH + " = ?" +
+                " and " + DC.MMC_RESULT_MAP_ID + " = ?";
         querySql3 = dbOperWrapper.cacheSql(SqlKeyEnum.MMC_QUERY_BY_XML_RESULT_MAP_ID, querySql3);
 
         String updateSql1 = "update " + DbTableInfoEnum.DTIE_MYBATIS_MS_FORMATED_SQL.getTableName() +

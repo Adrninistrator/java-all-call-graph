@@ -404,7 +404,8 @@ public class MethodCallHandler extends BaseHandler {
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             // call_id最小值为1，因此默认使用0
-            sql = "select ifnull(max(" + DC.MC_CALL_ID + "),?) from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName();
+            // pg不支持ifnull，使用COALESCE
+            sql = "select COALESCE(max(" + DC.MC_CALL_ID + "),?) from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName();
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
@@ -799,7 +800,8 @@ public class MethodCallHandler extends BaseHandler {
                     " where " + DC.MC_CALLER_METHOD_HASH + " = ?" +
                     " and " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?" +
                     " and " + DC.MC_CALL_ID + " > ?" +
-                    " and " + DC.MC_CALL_ID + " < ?";
+                    " and " + DC.MC_CALL_ID + " < ?" +
+                    " order by " + DC.MC_CALL_ID;
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryList(sql, WriteDbData4MethodCall.class, callerMethodHash, calleeSimpleClassName, startCallId, endCallId);

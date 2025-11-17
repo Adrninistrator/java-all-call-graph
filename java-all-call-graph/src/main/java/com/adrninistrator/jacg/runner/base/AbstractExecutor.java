@@ -74,7 +74,7 @@ public abstract class AbstractExecutor {
         // 任务队列最大长度，设置为线程数2倍
         taskQueueMaxSize = threadNum * 2;
         logger.info("任务数量 {} 创建的线程池线程数 {}", (taskNum == null ? "-" : taskNum), threadNum);
-        threadFactory4TPE = new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER);
+        threadFactory4TPE = new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER, false);
         threadPoolExecutor = new ThreadPoolExecutor(threadNum, threadNum, 10L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(taskQueueMaxSize), threadFactory4TPE);
         runningTaskNum = new AtomicInteger(0);

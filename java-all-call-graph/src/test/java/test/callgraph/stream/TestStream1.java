@@ -25,8 +25,10 @@ public class TestStream1 {
         testStream1.test1b();
         System.out.println("\ntest2");
         testStream1.test2();
-        System.out.println("\ntest3");
-        testStream1.test3();
+        System.out.println("\ntest3A");
+        testStream1.test3A();
+        System.out.println("\ntest3B");
+        testStream1.test3B();
         System.out.println("\ntest4");
         testStream1.test4();
     }
@@ -63,7 +65,7 @@ public class TestStream1 {
         });
     }
 
-    public void test3() {
+    public void test3A() {
         Map<String, Double> map = new HashMap<>();
         map.put("a", 1.0D);
         map.put("b", 2.0D);
@@ -77,6 +79,13 @@ public class TestStream1 {
             return d > 4.0D;
         });
         System.out.println("matches1 " + matches1);
+    }
+
+    public void test3B() {
+        Map<String, Double> map = new HashMap<>();
+        map.put("a", 1.0D);
+        map.put("b", 2.0D);
+        map.put("c", 3.0D);
 
         boolean matches2 = map.values().stream().filter(Objects::nonNull).mapToDouble(value -> {
             System.out.println("mapToDouble2 " + value);

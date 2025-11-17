@@ -18,7 +18,7 @@ public class CallStackFileResult {
     // 处理是否成功
     private final boolean success;
 
-    // 记录当前生成完整方法调用链的目录
+    // 记录当前生成方法完整调用链的目录
     private final String callGraphOutputDirPath;
 
     // 生成的调用堆栈文件路径列表

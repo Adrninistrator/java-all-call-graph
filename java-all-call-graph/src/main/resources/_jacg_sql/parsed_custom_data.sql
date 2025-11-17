@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_parsed_custom_data_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_parsed_custom_data_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   data_type varchar(30) NOT NULL COMMENT '数据类型，代表当前数据的类型，格式没有限制',
   data_key varchar(300) NOT NULL COMMENT '数据的key，格式没有限制',

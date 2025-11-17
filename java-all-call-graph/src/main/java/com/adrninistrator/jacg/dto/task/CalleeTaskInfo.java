@@ -12,7 +12,7 @@ public class CalleeTaskInfo {
     private boolean genAllMethods;
 
     /*
-        需要生成向上方法调用链的方法信息
+        需要生成向上方法完整调用链的方法信息
         key: 配置文件中指定的任务原始文本
         value: 配置文件中指定的方法名或代码行号
      */

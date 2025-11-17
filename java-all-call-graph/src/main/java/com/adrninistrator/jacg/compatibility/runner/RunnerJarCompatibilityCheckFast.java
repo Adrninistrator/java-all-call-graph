@@ -3,6 +3,8 @@ package com.adrninistrator.jacg.compatibility.runner;
 import com.adrninistrator.jacg.compatibility.handler.ClassReferenceCheckHandler;
 import com.adrninistrator.jacg.compatibility.handler.DupClassReferenceCheckHandler;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.el.enums.ElConfigEnum;
+import com.adrninistrator.jacg.el.manager.ElManager;
 import com.adrninistrator.jacg.runner.RunnerWriteDbOnlyClassMode;
 import com.adrninistrator.jacg.writer.WriterSupportHeader;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
@@ -26,7 +28,7 @@ public class RunnerJarCompatibilityCheckFast extends RunnerJarCompatibilityCheck
     public static final String FILE_NAME = "1.被引用的不存在的类信息" + JavaCG2Constants.EXT_MD;
     public static final String[] FILE_HEADER_ARRAY = new String[]{
             "引用类名",
-            "引用类上的@ConditionalOnClass注解属性",
+            "引用类（及对应外部类）上的@ConditionalOnClass注解属性",
             "引用类在jar文件中的路径",
             "引用类所在jar文件路径",
             "引用类所在jar文件内部路径",
@@ -66,7 +68,8 @@ public class RunnerJarCompatibilityCheckFast extends RunnerJarCompatibilityCheck
          */
         Map<String, Boolean> classNameExistsMap = new HashMap<>();
         String outputFilePath = currentOutputDirPath + File.separator + FILE_NAME;
-        try (WriterSupportHeader writer = new WriterSupportHeader(outputFilePath, FILE_HEADER);
+        try (ElManager elManager = new ElManager(configureWrapper, ElConfigEnum.values(), currentOutputDirPath);
+             WriterSupportHeader writer = new WriterSupportHeader(outputFilePath, FILE_HEADER);
              ClassReferenceCheckHandler classReferenceCheckHandler = new ClassReferenceCheckHandler(configureWrapper);
              DupClassReferenceCheckHandler dupClassReferenceCheckHandler = new DupClassReferenceCheckHandler(configureWrapper)) {
             classReferenceCheckHandler.setOtherDbOperWrapperList(otherDbOperWrapperList);
@@ -74,6 +77,7 @@ public class RunnerJarCompatibilityCheckFast extends RunnerJarCompatibilityCheck
             classReferenceCheckHandler.setCurrentOutputDirPath(currentOutputDirPath);
             classReferenceCheckHandler.setJarInfoMap(jarInfoMap);
             classReferenceCheckHandler.setWriter(writer);
+            classReferenceCheckHandler.setElManager(elManager);
             classReferenceCheckHandler.init();
             if (!classReferenceCheckHandler.check()) {
                 recordTaskFail();

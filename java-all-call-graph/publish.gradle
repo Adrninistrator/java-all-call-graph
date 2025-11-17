@@ -4,13 +4,13 @@ apply plugin: 'signing'
 apply from: 'build.gradle'
 
 // 指定编译时源码仅使用以下目录的
-sourceSets {
-    main {
-        java {
-            include 'com/adrninistrator/jacg/**'
-        }
-    }
-}
+//sourceSets {
+//    main {
+//        java {
+//            include 'com/adrninistrator/jacg/**'
+//        }
+//    }
+//}
 
 tasks.register('sourcesJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE

@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.common.enums;
 
+import com.adrninistrator.javacg2.common.JavaCG2Constants;
+
 /**
  * @author adrninistrator
  * @date 2022/4/20
@@ -45,7 +47,7 @@ public enum OutputDetailEnum {
                 continue;
             }
             if (stringBuilder.length() > 0) {
-                stringBuilder.append(inOneLine ? " " : "\n");
+                stringBuilder.append(inOneLine ? JavaCG2Constants.FLAG_TAB : JavaCG2Constants.NEW_LINE_WINDOWS);
             }
             stringBuilder.append(outputDetailEnum.getDetail()).append(": ").append(outputDetailEnum.getDesc());
         }

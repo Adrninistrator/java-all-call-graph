@@ -63,7 +63,7 @@ public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDb
         String springBeanClassName = JACGSpringUtil.getSpringBeanClassName(springBeanMap, springBeanName);
         if (springBeanClassName == null) {
             logger.warn("根据Spring Bean名称未获取到类名 {}", springBeanName);
-            springBeanClassName = "";
+            return null;
         }
 
         String methodName = readLineData();
@@ -72,7 +72,7 @@ public class WriteDbHandler4SpringTaskXml extends AbstractWriteDbHandler<WriteDb
 
         List<WriteDbData4MethodInfo> methodInfoList = methodInfoHandler.queryMethodInfoByClassMethod(springBeanClassName, methodName);
         if (JavaCG2Util.isCollectionEmpty(methodInfoList)) {
-            logger.error("Spring Task对应方法未查询到 {} {}", springBeanClassName, methodName);
+            logger.warn("Spring Task对应方法未查询到 {} {}", springBeanClassName, methodName);
             return null;
         }
         if (methodInfoList.size() > 1) {

@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_spring_aop_advice_affected_method_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_spring_aop_advice_affected_method_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   type varchar(1) NOT NULL COMMENT '类型，j: 在Java代码中定义，x: 在XML文件中定义',
   xml_aspect_id varchar(255) NOT NULL COMMENT 'XML中定义的aspect的ID',
@@ -10,7 +10,7 @@ CREATE TABLE if not exists jacg_spring_aop_advice_affected_method_{appName} (
   advice_full_method text NOT NULL COMMENT 'advice的完整方法',
   advice_method_return_type varchar(255) NOT NULL COMMENT 'advice方法的返回类型',
   advice_method_hash varchar(32) NOT NULL COMMENT 'advice方法hash+字节数',
-  aspect_class_name varchar(255) NOT NULL COMMENT '对应aspect的类名',
+  aspect_class_name varchar(300) NOT NULL COMMENT '对应aspect的类名',
   define_xml_path varchar(255) NOT NULL COMMENT '在XML中定义时对应的文件路径',
   underlying_expression text NOT NULL COMMENT '底层的pointcut表达式',
   affected_full_method text NOT NULL COMMENT '影响的完整方法',

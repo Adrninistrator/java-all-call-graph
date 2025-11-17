@@ -55,6 +55,10 @@ public class TestBranch2 {
 
     private void test4() {
         DbStatementEnum dbStatementEnum = DbStatementEnum.getFromStatement(String.valueOf(System.currentTimeMillis()));
+        if (dbStatementEnum == DbStatementEnum.DSE_SELECT) {
+            System.getenv("");
+        }
+
         switch (dbStatementEnum) {
             case DSE_SELECT:
                 System.out.println("1");

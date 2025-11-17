@@ -1,6 +1,6 @@
-CREATE TABLE if not exists jacg_field_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_field_info_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
-  simple_class_name varchar(255) NOT NULL COMMENT '唯一类名',
+  simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
   field_name varchar(350) NOT NULL COMMENT '字段名称',
   field_type varchar(255) NOT NULL COMMENT '字段类型（包含数组标志）',
   field_type_nad varchar(255) NOT NULL COMMENT '字段类型（不包含数组标志）',
@@ -13,9 +13,9 @@ CREATE TABLE if not exists jacg_field_info_{appName} (
   exists_get_method tinyint NOT NULL COMMENT '是否存在对应的get方法，1:是，0:否',
   exists_set_method tinyint NOT NULL COMMENT '是否存在对应的set方法，1:是，0:否',
   exists_generics_type tinyint NOT NULL COMMENT '是否存在泛型类型，1:是，0:否',
-  class_name varchar(255) NOT NULL COMMENT '完整类名',
+  class_name varchar(300) NOT NULL COMMENT '完整类名',
   jar_num int NOT NULL COMMENT '字段所在的jar文件序号',
   PRIMARY KEY (record_id),
-  INDEX idx_fi_scnftn_{appName}(simple_class_name, field_type_nad),
-  INDEX idx_fi_scnfn_{appName}(simple_class_name, field_name)
+  INDEX idx_fi_scnftn_{appName}(simple_class_name(255), field_type_nad),
+  INDEX idx_fi_scnfn_{appName}(simple_class_name(255), field_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='字段信息表';

@@ -25,12 +25,12 @@ public class TestGenJarDiffCalleeGraph4ClassName extends TestElRunByCodeBase {
 
     @Override
     protected String chooseTitle() {
-        return "JarDiff生成向上完整方法调用链判断发生变化的方法类名";
+        return "JarDiff生成向上方法完整调用链判断发生变化的方法类名";
     }
 
     @Override
     protected String chooseDesc() {
-        return "通过JarDiff生成向上完整方法调用链时，判断发生变化的方法类名是否等于指定关键字，忽略匹配的方法";
+        return "通过JarDiff生成向上方法完整调用链时，判断发生变化的方法类名是否等于指定关键字，忽略匹配的方法";
     }
 
     @Test

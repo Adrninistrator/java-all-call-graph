@@ -13,7 +13,7 @@ public enum InputDirEnum {
     IDE_BUSINESS_DATA_TYPE("_jacg_business_data_type", "保存业务功能数据类型配置文件的目录"),
     IDE_JAR_DIFF("_jacg_jar_diff", "比较新旧两个目录中不同版本jar文件相关配置文件的目录"),
     IDE_COMPATIBILITY("_jacg_jar_compatibility", "Jar兼容性检查相关配置文件的目录"),
-    IDE_GEN_ALL_CALL_GRAPH("_jacg_gen_all_call_graph", "生成完整方法调用链相关开关配置文件所在目录"),
+    IDE_GEN_ALL_CALL_GRAPH("_jacg_gen_all_call_graph", "生成方法完整调用链相关开关配置文件所在目录"),
     IDE_SPRING_AOP("_jacg_spring_aop", "处理Spring AOP相关开关配置文件所在目录"),
     IDE_EL_EXAMPLE("_el_example", "el表达式配置说明文件所在目录"),
     ;

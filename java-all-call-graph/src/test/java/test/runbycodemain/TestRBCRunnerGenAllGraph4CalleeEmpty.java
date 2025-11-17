@@ -14,7 +14,7 @@ import test.runbycode.base.TestRunByCodeBase;
  * @date 2025/3/8
  * @description:
  */
-@JACGExample(title = "生成指定方法向上的完整方法调用链",
+@JACGExample(title = "生成指定方法向上的方法完整调用链",
         desc = {"指定的方法未被其他方法调用",
                 "通过代码指定配置参数的主要功能示例"})
 public class TestRBCRunnerGenAllGraph4CalleeEmpty extends TestRunByCodeBase {

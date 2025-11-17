@@ -15,7 +15,7 @@ import test.runbycode.base.TestRunByCodeBase;
  * @description:
  */
 @JACGExample(title = "获取直接或间接调用指定方法的Spring Controller方法",
-        desc = {"首先生成指定方法向上的完整方法链，即获取指定方法的被调用情况", "再从这些完整方法调用链向上找到Spring Controller方法"})
+        desc = {"首先生成指定方法向上的完整方法链，即获取指定方法的被调用情况", "再从这些方法完整调用链向上找到Spring Controller方法"})
 public class TestExtractCalleeGraphToSPC extends TestRunByCodeBase {
 
     @Test

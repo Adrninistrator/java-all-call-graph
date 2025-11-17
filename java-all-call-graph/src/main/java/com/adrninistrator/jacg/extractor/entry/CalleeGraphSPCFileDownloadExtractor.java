@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author adrninistrator
  * @date 2024/11/19
- * @description: 对向上的方法调用链文件进行数据提取，提取从指定被调用方法到（可能的）Spring Controller文件下载方法的信息
+ * @description: 对向上的方法完整调用链文件进行数据提取，提取从指定被调用方法到（可能的）Spring Controller文件下载方法的信息
  */
 public class CalleeGraphSPCFileDownloadExtractor extends CalleeGraphEntryExtractor {
 

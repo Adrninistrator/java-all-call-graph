@@ -79,7 +79,7 @@ public class FindCallStackTrace extends AbstractExecutor {
     // 用于生成方法完整调用链的对象
     private final AbstractRunnerGenAllCallGraph runnerGenAllCallGraph;
 
-    // 记录当前生成完整方法调用链的目录
+    // 记录当前生成方法完整调用链的目录
     private String callGraphOutputDirPath;
 
     // 记录当前生成调用堆栈的目录
@@ -100,7 +100,7 @@ public class FindCallStackTrace extends AbstractExecutor {
     /**
      * 使用配置文件中的参数
      *
-     * @param order4ee true: 处理向上的方法调用链 false: 处理向下的方法调用链
+     * @param order4ee true: 处理向上的方法完整调用链 false: 处理向下的方法完整调用链
      */
     public FindCallStackTrace(boolean order4ee) {
         this(order4ee, new ConfigureWrapper(false));
@@ -109,7 +109,7 @@ public class FindCallStackTrace extends AbstractExecutor {
     /**
      * 通过代码指定配置参数
      *
-     * @param order4ee         true: 处理向上的方法调用链 false: 处理向下的方法调用链
+     * @param order4ee         true: 处理向上的方法完整调用链 false: 处理向下的方法完整调用链
      * @param configureWrapper 配置参数
      * @return
      */
@@ -153,7 +153,7 @@ public class FindCallStackTrace extends AbstractExecutor {
     }
 
     /**
-     * 在生成的方法调用链文件中搜索指定关键字，生成方法调用堆栈，通过代码指定配置参数
+     * 在生成的方法完整调用链文件中搜索指定关键字，生成方法调用堆栈，通过代码指定配置参数
      *
      * @return 生成调用堆栈文件结果
      */
@@ -201,7 +201,7 @@ public class FindCallStackTrace extends AbstractExecutor {
             runnerGenAllCallGraph.setCurrentOutputDirPath(currentOutputDirPath);
         }
 
-        // 生成完整方法调用链文件
+        // 生成方法完整调用链文件
         boolean success = runnerGenAllCallGraph.run();
         callGraphOutputDirPath = runnerGenAllCallGraph.getCurrentOutputDirPath();
         if (!success) {
@@ -436,7 +436,7 @@ public class FindCallStackTrace extends AbstractExecutor {
                                          AtomicReference<FileContentNode> lastNodeReference) throws IOException {
         if (!JACGCallGraphFileUtil.isCallGraphLine(line)) {
             // 不属于调用链信息的行，不处理
-            // 对于向上的方法调用链，类对应的文件中包含多个方法的信息，需要将上次处理的数据清空
+            // 对于向上的方法完整调用链，类对应的文件中包含多个方法的信息，需要将上次处理的数据清空
             lastNodeReference.set(null);
             fileContentNodeList.clear();
             return true;

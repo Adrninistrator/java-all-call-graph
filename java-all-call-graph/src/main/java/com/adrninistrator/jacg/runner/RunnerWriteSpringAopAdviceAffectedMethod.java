@@ -79,6 +79,10 @@ public class RunnerWriteSpringAopAdviceAffectedMethod extends RunnerWriteDb {
         // 等待线程池执行完毕
         wait4TPEDone();
 
+        if (elManager != null) {
+            elManager.close();
+        }
+
         // 检查执行结果
         if (!checkResult()) {
             recordTaskFail();

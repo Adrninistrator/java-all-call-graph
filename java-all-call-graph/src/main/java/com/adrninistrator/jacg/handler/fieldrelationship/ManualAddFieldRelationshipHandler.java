@@ -336,7 +336,8 @@ public class ManualAddFieldRelationshipHandler extends BaseMethodCallByEEDetailH
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             // 记录id从1开始，因此默认使用0
-            sql = "select ifnull(max(" + DC.FR_FLD_RELATIONSHIP_ID + "),?) from " + DbTableInfoEnum.DTIE_FIELD_RELATIONSHIP.getTableName();
+            // pg不支持ifnull，使用COALESCE
+            sql = "select COALESCE(max(" + DC.FR_FLD_RELATIONSHIP_ID + "),?) from " + DbTableInfoEnum.DTIE_FIELD_RELATIONSHIP.getTableName();
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 

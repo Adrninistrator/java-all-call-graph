@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * @author adrninistrator
  * @date 2021/10/16
- * @description: 对向下的方法调用链文件进行数据提取，获取方法调用业务功能数据
+ * @description: 对向下的方法完整调用链文件进行数据提取，获取方法调用业务功能数据
  */
 public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor implements StackFileParsedCallback {
 

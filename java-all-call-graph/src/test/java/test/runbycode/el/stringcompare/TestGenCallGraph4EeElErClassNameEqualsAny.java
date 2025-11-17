@@ -36,7 +36,7 @@ public class TestGenCallGraph4EeElErClassNameEqualsAny extends TestElRunByCodeBa
 
     @Override
     protected String chooseDesc() {
-        return "在生成向上完整方法调用链时，判断调用类名是否等于指定多个关键字之一，忽略匹配的方法调用";
+        return "在生成向上方法完整调用链时，判断调用类名是否等于指定多个关键字之一，忽略匹配的方法调用";
     }
 
     @Test

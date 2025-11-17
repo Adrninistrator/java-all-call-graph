@@ -6,7 +6,6 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodReturnFieldInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
-import com.adrninistrator.javacg2.common.enums.JavaCG2YesNoEnum;
 
 /**
  * @author adrninistrator
@@ -35,8 +34,8 @@ public class WriteDbHandler4MethodReturnFieldInfo extends AbstractWriteDbHandler
         methodReturnFieldInfo.setRecordId(genNextRecordId());
         methodReturnFieldInfo.setMethodHash(JACGClassMethodUtil.genMethodHashWithLen(fullMethod, returnType));
         methodReturnFieldInfo.setSeq(Integer.parseInt(readLineData()));
-        methodReturnFieldInfo.setStaticField(JavaCG2YesNoEnum.isYes(readLineData()));
-        methodReturnFieldInfo.setFieldOfThis(JavaCG2YesNoEnum.isYes(readLineData()));
+        methodReturnFieldInfo.setStaticField(Integer.parseInt(readLineData()));
+        methodReturnFieldInfo.setFieldOfThis(Integer.parseInt(readLineData()));
         String fieldInClassName = readLineData();
         String fieldTypeNad = readLineData();
         methodReturnFieldInfo.setFieldInSimpleClassName(dbOperWrapper.querySimpleClassName(fieldInClassName));
@@ -56,8 +55,8 @@ public class WriteDbHandler4MethodReturnFieldInfo extends AbstractWriteDbHandler
                 data.getRecordId(),
                 data.getMethodHash(),
                 data.getSeq(),
-                data.isStaticField(),
-                data.isFieldOfThis(),
+                data.getStaticField(),
+                data.getFieldOfThis(),
                 data.getFieldInSimpleClassName(),
                 data.getSimpleFieldTypeNad(),
                 data.getFieldArrayDimensions(),

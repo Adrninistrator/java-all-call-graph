@@ -17,7 +17,7 @@ import java.util.List;
  * @author adrninistrator
  * @date 2025/2/16
  * @description: java-all-call-graph 组件方法调用处理扩展类
- * 通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名
+ * 通过指定方法的调用参数添加方法调用，使用被调用对象，及被调用方法名
  */
 public abstract class JACGObjInstanceMethodNameMCE extends AbstractJACGMethodCallExtension {
 
@@ -81,7 +81,7 @@ public abstract class JACGObjInstanceMethodNameMCE extends AbstractJACGMethodCal
 
         // 修改方法调用类型及描述
         methodCall.setCallType(JavaCG2CallTypeEnum.CTE_MANUAL_ADDED.getType());
-        methodCall.setDescription("通过方法调用参数添加方法调用，使用被调用对象，及被调用方法名 " + chooseMethodCallType() + " " + rawMethodCallId);
+        methodCall.setDescription("通过指定方法的调用参数添加方法调用，使用被调用对象，及被调用方法名 " + chooseMethodCallType() + " " + rawMethodCallId);
         return true;
     }
 

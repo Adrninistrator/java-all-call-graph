@@ -1,8 +1,8 @@
 package com.adrninistrator.jacg.handler.dto.methodcall;
 
-import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
-
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author adrninistrator
@@ -11,14 +11,8 @@ import java.util.List;
  */
 public class MethodCallObjArgValueAndSource {
 
-    // 是否包含以下多种类型的数据
-    private boolean containsMultiType;
-
-    // 仅包含以下一种类型的数据时，对应的数据类型
-    private JavaCG2MethodCallInfoTypeEnum methodCallInfoTypeEnum;
-
-    // 仅包含以下一种类型的数据时的数量
-    private int oneTypeDataNum;
+    // 包含的数据类型Set
+    private final Set<String> methodCallInfoTypeSet = new HashSet<>();
 
     // 对应的常量值列表
     private List<String> constantValueList;
@@ -29,28 +23,8 @@ public class MethodCallObjArgValueAndSource {
     // 对应的使用方法参数序号列表
     private List<Integer> useMethodArgSeqList;
 
-    public boolean isContainsMultiType() {
-        return containsMultiType;
-    }
-
-    public void setContainsMultiType(boolean containsMultiType) {
-        this.containsMultiType = containsMultiType;
-    }
-
-    public JavaCG2MethodCallInfoTypeEnum getMethodCallInfoTypeEnum() {
-        return methodCallInfoTypeEnum;
-    }
-
-    public void setMethodCallInfoTypeEnum(JavaCG2MethodCallInfoTypeEnum methodCallInfoTypeEnum) {
-        this.methodCallInfoTypeEnum = methodCallInfoTypeEnum;
-    }
-
-    public int getOneTypeDataNum() {
-        return oneTypeDataNum;
-    }
-
-    public void setOneTypeDataNum(int oneTypeDataNum) {
-        this.oneTypeDataNum = oneTypeDataNum;
+    public Set<String> getMethodCallInfoTypeSet() {
+        return methodCallInfoTypeSet;
     }
 
     public List<String> getConstantValueList() {

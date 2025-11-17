@@ -1,9 +1,9 @@
 ## 对应的枚举类名: ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER
-## （作用）在 对JarDiff找到发生变化的方法生成向上/向下完整方法调用链 使用的配置参数
+## （作用）在 对JarDiff找到发生变化的方法生成向上/向下方法完整调用链时 使用的配置参数
 ## （作用）表达式配置参数的说明如下：
-## （作用）若当前配置文件中的表达式执行结果为 true，则跳过为对应的方法生成完整方法调用链
+## （作用）若当前配置文件中的表达式执行结果为 true，则跳过为对应的方法生成方法完整调用链
 ## （作用）若表达式执行结果为 false，或未指定表达式，则当前配置不会跳过对应的方法
-## （范围）JarDiff获得发生变化的方法向下的完整方法调用链时，指定发生变化的方法中，需要忽略的方法
+## （范围）JarDiff获得发生变化的方法向下的方法完整调用链时，指定发生变化的方法中，需要忽略的方法
 ## （表达式使用通用说明文档）请参考 _el_example/el_usage.md
 ## （表达式字符串比较说明文档）请参考 _el_example/string_compare.md
 ## （当前表达式使用示例文档）请参考 _el_example/_jacg_jar_diff/jar_diff_gen_all_call_graph_ignore_caller.av.md

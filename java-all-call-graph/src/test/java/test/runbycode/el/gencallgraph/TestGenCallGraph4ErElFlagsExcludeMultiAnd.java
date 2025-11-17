@@ -30,12 +30,12 @@ public class TestGenCallGraph4ErElFlagsExcludeMultiAnd extends TestElRunByCodeBa
 
     @Override
     protected String chooseTitle() {
-        return "生成向下完整方法调用链判断调用标志多个条件使用与";
+        return "生成向下方法完整调用链判断调用标志多个条件使用与";
     }
 
     @Override
     protected String chooseDesc() {
-        return "在生成向下完整方法调用链时，判断调用标志是否包括指定的多个标志中的每一个，忽略匹配的方法调用";
+        return "在生成向下方法完整调用链时，判断调用标志是否包括指定的多个标志中的每一个，忽略匹配的方法调用";
     }
 
     @Test

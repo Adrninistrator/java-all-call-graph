@@ -24,12 +24,12 @@ public class TestGenJarDiffCalleeGraphFixedFalse extends TestElRunByCodeBase {
 
     @Override
     protected String chooseTitle() {
-        return "JarDiff生成向上完整方法调用链固定全部不忽略";
+        return "JarDiff生成向上方法完整调用链固定全部不忽略";
     }
 
     @Override
     protected String chooseDesc() {
-        return "通过JarDiff生成向上完整方法调用链时，使用固定的表达式，方法全部不忽略";
+        return "通过JarDiff生成向上方法完整调用链时，使用固定的表达式，方法全部不忽略";
     }
 
     @Test

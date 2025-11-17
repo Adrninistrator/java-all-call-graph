@@ -18,7 +18,7 @@ import java.util.List;
  * @description:
  */
 @JACGExample(title = "为指定包中的全部方法生成完整调用链",
-        desc = {"首先查询指定包中的类的全部方法", "再为这些方法生成向下的完整方法调用链"})
+        desc = {"首先查询指定包中的类的全部方法", "再为这些方法生成向下的方法完整调用链"})
 public class TestGenAllGraph4CallerByPackage extends TestRunByCodeBase {
 
     @Test

@@ -14,7 +14,7 @@ import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 /**
  * @author adrninistrator
  * @date 2023/4/22
- * @description: 对向上的方法调用链文件进行数据提取，提取从指定被调用方法到对应的入口方法的信息
+ * @description: 对向上的方法完整调用链文件进行数据提取，提取从指定被调用方法到对应的入口方法的信息
  */
 public class CalleeGraphEntryExtractor extends CalleeGraphBaseExtractor {
 

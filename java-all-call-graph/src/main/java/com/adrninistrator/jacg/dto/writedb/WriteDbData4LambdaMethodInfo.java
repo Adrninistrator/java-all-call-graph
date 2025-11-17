@@ -18,9 +18,9 @@ public class WriteDbData4LambdaMethodInfo implements BaseWriteDbData {
     private String lambdaNextClassName;
     private String lambdaNextMethodName;
     private String lambdaNextFullMethod;
-    private Boolean lambdaNextIsStream;
-    private Boolean lambdaNextIsIntermediate;
-    private Boolean lambdaNextIsTerminal;
+    private int lambdaNextIsStream;
+    private int lambdaNextIsIntermediate;
+    private int lambdaNextIsTerminal;
 
     public int getCallId() {
         return callId;
@@ -78,27 +78,27 @@ public class WriteDbData4LambdaMethodInfo implements BaseWriteDbData {
         this.lambdaNextFullMethod = lambdaNextFullMethod;
     }
 
-    public Boolean getLambdaNextIsStream() {
+    public int getLambdaNextIsStream() {
         return lambdaNextIsStream;
     }
 
-    public void setLambdaNextIsStream(Boolean lambdaNextIsStream) {
+    public void setLambdaNextIsStream(int lambdaNextIsStream) {
         this.lambdaNextIsStream = lambdaNextIsStream;
     }
 
-    public Boolean getLambdaNextIsIntermediate() {
+    public int getLambdaNextIsIntermediate() {
         return lambdaNextIsIntermediate;
     }
 
-    public void setLambdaNextIsIntermediate(Boolean lambdaNextIsIntermediate) {
+    public void setLambdaNextIsIntermediate(int lambdaNextIsIntermediate) {
         this.lambdaNextIsIntermediate = lambdaNextIsIntermediate;
     }
 
-    public Boolean getLambdaNextIsTerminal() {
+    public int getLambdaNextIsTerminal() {
         return lambdaNextIsTerminal;
     }
 
-    public void setLambdaNextIsTerminal(Boolean lambdaNextIsTerminal) {
+    public void setLambdaNextIsTerminal(int lambdaNextIsTerminal) {
         this.lambdaNextIsTerminal = lambdaNextIsTerminal;
     }
 }

@@ -104,6 +104,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
     protected DbOperWrapper dbOperWrapper;
 
+    // 是否使用PostgreSQL数据库
+    protected boolean usePg;
+
     // 每次批量写入的数量
     protected int dbInsertBatchSize;
 
@@ -282,6 +285,8 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
         }
 
         writeDbResult.getWriteDbHandlerMap().put(currentSimpleClassName, this);
+
+        usePg = dbOperator.getDbConfInfo().isUsePgDb();
     }
 
     /**

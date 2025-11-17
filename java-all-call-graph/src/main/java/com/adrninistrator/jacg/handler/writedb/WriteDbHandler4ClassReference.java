@@ -5,7 +5,6 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassReference;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
 import com.adrninistrator.javacg2.common.enums.JavaCG2OutPutFileTypeEnum;
-import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 
 /**
  * @author adrninistrator
@@ -23,6 +22,9 @@ import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteDbData4ClassReference> {
     private WriteDbHandler4ClassName writeDbHandler4ClassName;
 
+    // 是否仅处理类名
+    private boolean onlyHandleClassName;
+
     public WriteDbHandler4ClassReference(WriteDbResult writeDbResult) {
         super(writeDbResult);
     }
@@ -30,15 +32,24 @@ public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteD
     @Override
     public void afterHandle() {
         super.afterHandle();
-        writeDbHandler4ClassName.afterHandle();
+        if (onlyHandleClassName) {
+            writeDbHandler4ClassName.afterHandle();
+        }
     }
 
     @Override
     protected WriteDbData4ClassReference genData(String[] array) {
         String className = readLineData();
         String referenceClassName = readLineData();
-        String simpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(className);
-        String referencedSimpleClassName = JavaCG2ClassMethodUtil.getSimpleClassNameFromFull(referenceClassName);
+
+        if (onlyHandleClassName) {
+            writeDbHandler4ClassName.addClassReference(className, referenceClassName);
+            writeDbHandler4ClassName.tryInsertDb();
+            return null;
+        }
+
+        String simpleClassName = dbOperWrapper.querySimpleClassName(className);
+        String referencedSimpleClassName = dbOperWrapper.querySimpleClassName(referenceClassName);
         int jarNum = Integer.parseInt(readLineData());
         WriteDbData4ClassReference writeDbData4ClassReference = new WriteDbData4ClassReference();
         writeDbData4ClassReference.setRecordId(genNextRecordId());
@@ -47,9 +58,6 @@ public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteD
         writeDbData4ClassReference.setReferencedClassName(referenceClassName);
         writeDbData4ClassReference.setReferencedSimpleClassName(referencedSimpleClassName);
         writeDbData4ClassReference.setJarNum(jarNum);
-
-        writeDbHandler4ClassName.addClassReference(writeDbData4ClassReference);
-        writeDbHandler4ClassName.tryInsertDb();
         return writeDbData4ClassReference;
     }
 
@@ -79,6 +87,10 @@ public class WriteDbHandler4ClassReference extends AbstractWriteDbHandler<WriteD
         return new String[]{
                 "类所引用的其他类关系"
         };
+    }
+
+    public void setOnlyHandleClassName(boolean onlyHandleClassName) {
+        this.onlyHandleClassName = onlyHandleClassName;
     }
 
     public void setWriteDbHandler4ClassName(WriteDbHandler4ClassName writeDbHandler4ClassName) {

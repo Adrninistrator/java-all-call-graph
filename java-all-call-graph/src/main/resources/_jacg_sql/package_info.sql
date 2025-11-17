@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_package_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_package_info_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   package_name varchar(255) NOT NULL COMMENT '包名',
   package_level int NOT NULL COMMENT '包名层级，等于包名中的.数量+1',

@@ -1,15 +1,15 @@
-CREATE TABLE if not exists jacg_method_call_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_method_call_{appName} (
   call_id int NOT NULL COMMENT '方法调用序号，从1开始',
   enabled tinyint NOT NULL COMMENT '是否启用，1:启用，0:未启用',
   call_type varchar(10) NOT NULL COMMENT '调用类型，参考 JavaCG2CallTypeEnum 枚举类',
   caller_method_hash varchar(32) NOT NULL COMMENT '调用方，方法hash+字节数',
-  caller_simple_class_name varchar(255) NOT NULL COMMENT '调用方，唯一类名（完整类名或简单类名）',
+  caller_simple_class_name varchar(300) NOT NULL COMMENT '调用方，唯一类名（完整类名或简单类名）',
   caller_method_name varchar(300) NOT NULL COMMENT '调用方，方法名',
   caller_full_method text NOT NULL COMMENT '调用方，完整方法（类名+方法名+参数）',
   caller_line_number int NOT NULL COMMENT '调用方法源代码行号',
   caller_return_type varchar(255) NOT NULL COMMENT '调用方法的返回类型',
   callee_method_hash varchar(32) NOT NULL COMMENT '被调用方，方法hash+字节数',
-  callee_simple_class_name varchar(255) NOT NULL COMMENT '被调用方，唯一类名（完整类名或简单类名），需要有单列索引',
+  callee_simple_class_name varchar(300) NOT NULL COMMENT '被调用方，唯一类名（完整类名或简单类名），需要有单列索引',
   callee_method_name varchar(300) NOT NULL COMMENT '被调用方，方法名',
   callee_full_method text NOT NULL COMMENT '被调用方，完整方法（类名+方法名+参数）',
   callee_array_dimensions tinyint NOT NULL COMMENT '被调用方，对象数组的维度，为0代表不是数组类型',
@@ -23,7 +23,7 @@ CREATE TABLE if not exists jacg_method_call_{appName} (
   PRIMARY KEY (call_id),
   INDEX idx_mc_rmh_{appName}(caller_method_hash),
   INDEX idx_mc_hash_{appName}(callee_method_hash, caller_method_hash),
-  INDEX idx_mc_rscn_{appName}(caller_simple_class_name),
+  INDEX idx_mc_rscn_{appName}(caller_simple_class_name(255)),
   -- 需要使用的单列索引
-  INDEX idx_mc_escn_{appName}(callee_simple_class_name)
+  INDEX idx_mc_escn_{appName}(callee_simple_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用关系表';

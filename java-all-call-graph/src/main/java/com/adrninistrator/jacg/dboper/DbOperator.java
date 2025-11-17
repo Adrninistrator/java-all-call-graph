@@ -79,16 +79,16 @@ public class DbOperator implements AutoCloseable {
         dataSource.setProxyFilters(Collections.singletonList(new DruidMonitorFilter(dbConfInfo.isUseH2Db())));
         initDataSource();
 
-        // 测试数据库连接
+        logger.info("测试数据库连接-开始 {}", objSeq);
         try {
             dataSource.init();
             DruidAbstractDataSource.PhysicalConnectionInfo physicalConnectionInfo = dataSource.createPhysicalConnection();
             physicalConnectionInfo.getPhysicalConnection().close();
         } catch (Exception e) {
-            logger.error("测试连接数据库失败，请检查数据库及配置参数 ", e);
+            logger.error("测试连接数据库失败，请检查数据库及配置参数 {} ", objSeq, e);
             throw new JavaCG2RuntimeException("测试连接数据库失败，请检查数据库及配置参数");
         }
-
+        logger.info("测试数据库连接-完成 {}", objSeq);
         jdbcTemplate = new JdbcTemplateQuiet(dataSource, dbConfInfo);
 
         // 在JVM关闭时检查当前数据库操作对象是否有关闭
@@ -260,7 +260,12 @@ public class DbOperator implements AutoCloseable {
      * @return
      */
     private boolean checkTableExistsNonH2(String tableName) {
-        List<String> list = queryListOneColumn("show tables like ?", String.class, tableName);
+        List<String> list;
+        if (dbConfInfo.isUsePgDb()) {
+            list = queryListOneColumn("select table_name from information_schema.tables where table_schema = current_schema() and table_name = ?", String.class, tableName);
+        } else {
+            list = queryListOneColumn("show tables like ?", String.class, tableName);
+        }
         if (JavaCG2Util.isCollectionEmpty(list)) {
             logger.error("数据库表不存在 [{}]", tableName);
             return false;

@@ -24,6 +24,10 @@ tasks.register('test_gen_jar', Jar) {
         exclude 'test/callgraph/otherjar/**', 'test/callgraph/field/multi/**'
         into '/'
     }
+    from('src/main/resources/_jacg_config') {
+        include '**/*.properties'
+        into 'resources/_jacg_config'
+    }
     from('src/test/resources/') {
         include 'applicationContext.xml'
         into 'resources/'
@@ -206,12 +210,12 @@ test {
                 'test/runlocal',
                 'test/runbycode/TestRBC*'
         )
-        minHeapSize = "256m"
-        maxHeapSize = "2g"
+        minHeapSize = "512m"
+        maxHeapSize = "4g"
 
         maxParallelForks = 1
 
-        forkEvery = 5
+        forkEvery = 1
 
         def TEST_FLAG_RECORD_LOG_TO_FILE = "test.flag.record.log.to.file"
         def testFlagRecordLogToFile = System.getProperty(TEST_FLAG_RECORD_LOG_TO_FILE)

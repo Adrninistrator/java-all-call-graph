@@ -16,7 +16,7 @@ _jacg_gen_all_call_graph/gen_call_graph_ignore_method_call.av
 
 若表达式执行结果为 false，或未指定表达式，则当前配置不会跳过对应的方法
 
-指定生成完整方法调用链时是否跳过解析特定的方法调用，支持通过方法调用类型、调用方法或被调用方法等判断
+指定生成方法完整调用链时是否跳过解析特定的方法调用，支持通过方法调用类型、调用方法或被调用方法等判断
 
 - 表达式配置文件对应的枚举常量名
 
@@ -32,7 +32,7 @@ ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，多个条件使用与运算，判断调用类名是否以指定关键字开头，且以指定关键字结尾，忽略匹配的类
+在生成向上方法完整调用链时，多个条件使用与运算，判断调用类名是否以指定关键字开头，且以指定关键字结尾，忽略匹配的类
 
 - 表达式示例文本
 
@@ -58,7 +58,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameAnd
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类名是否包含指定关键字，忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类名是否包含指定关键字，忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -84,7 +84,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameContains
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类名是否包含指定多个关键字之一，忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类名是否包含指定多个关键字之一，忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -110,7 +110,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameContainsAny
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类名是否以指定关键字结尾，忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类名是否以指定关键字结尾，忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -136,7 +136,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameEndsWith
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类名是否以指定多个关键字之一结尾，忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类名是否以指定多个关键字之一结尾，忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -162,7 +162,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameEndsWithAny
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类名是否等于指定关键字，忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类名是否等于指定关键字，忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -188,7 +188,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameEquals
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类名是否等于指定多个关键字之一，忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类名是否等于指定多个关键字之一，忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -214,7 +214,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameEqualsAny
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，多个条件使用或运算，判断调用类名是否等于指定多个关键字中的任意一个，忽略匹配的类
+在生成向上方法完整调用链时，多个条件使用或运算，判断调用类名是否等于指定多个关键字中的任意一个，忽略匹配的类
 
 - 表达式示例文本
 
@@ -240,7 +240,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameOr
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类名是否以指定关键字开头，忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类名是否以指定关键字开头，忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -266,7 +266,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameStartsWith
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类名是否以指定多个关键字之一开头，忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类名是否以指定多个关键字之一开头，忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -294,7 +294,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameStartsWithAny
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类包名是否包含指定关键字（忽略大小写），忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类包名是否包含指定关键字（忽略大小写），忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -322,7 +322,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErPackageNameContainsIC
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类包名是否以指定关键字结尾（忽略大小写），忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类包名是否以指定关键字结尾（忽略大小写），忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -350,7 +350,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErPackageNameEndsWithIC
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类包名是否等于指定关键字（忽略大小写），忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类包名是否等于指定关键字（忽略大小写），忽略匹配的方法调用
 
 - 表达式示例文本
 
@@ -378,7 +378,7 @@ test.runbycode.el.stringcompare.TestGenCallGraph4EeElErPackageNameEqualsIC
 
 - 表达式示例说明
 
-在生成向上完整方法调用链时，判断调用类包名是否以指定关键字开头（忽略大小写），忽略匹配的方法调用
+在生成向上方法完整调用链时，判断调用类包名是否以指定关键字开头（忽略大小写），忽略匹配的方法调用
 
 - 表达式示例文本
 

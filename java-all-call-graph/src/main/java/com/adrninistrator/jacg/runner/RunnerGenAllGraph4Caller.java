@@ -79,13 +79,13 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
     // 在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否需要忽略
     private boolean ignoreDupCalleeInOneCaller;
 
-    // 生成向下的方法调用链时，是否需要输出JSON格式的内容
+    // 生成向下的方法完整调用链时，是否需要输出JSON格式的内容
     private boolean callGraphGenJsonCaller;
 
     /*
-        当前生成的完整方法调用链数据列表
+        当前生成的方法完整调用链数据列表
         key {调用方完整方法}:{调用方方法返回类型}
-        value   向下的完整方法调用链数据
+        value   向下的方法完整调用链数据
      */
     private Map<String, List<MethodCallLineData4Er>> allMethodCallLineData4ErMap;
 
@@ -553,13 +553,13 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
                 return false;
             }
 
-            // 生成方法调用链每行数据字符串
+            // 生成方法完整调用链每行数据字符串
             methodCallLineStr.append(genMethodCallLineStr(methodCallLineData4Er)).append(JavaCG2Constants.NEW_LINE);
             if (callGraphWriter != null) {
                 callGraphWriter.write(methodCallLineStr.toString());
             }
             if (callGraphReturnInMemory) {
-                // 方法调用链当前行的数据记录到用于返回的列表
+                // 方法完整调用链当前行的数据记录到用于返回的列表
                 String startCallerMethod = JavaCG2ClassMethodUtil.genFullMethodWithReturnType(startCallerFullMethod, startCallerMethodReturnType);
                 List<MethodCallLineData4Er> methodCallLineData4ErList = allMethodCallLineData4ErMap.computeIfAbsent(startCallerMethod, k -> new ArrayList<>());
                 methodCallLineData4ErList.add(methodCallLineData4Er);
@@ -663,7 +663,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
      */
     private boolean genAllGraph4Caller(String startCallerMethodHash, String startCallerFullMethod, String startCallerMethodReturnType, int startLineNumStart, int startLineNumEnd
             , BufferedWriter callGraphWriter, BufferedWriter callGraphJsonWriter, JavaCG2Counter callGraphNumCounter) throws IOException {
-        // 方法调用链JSON格式
+        // 方法完整调用链JSON格式
         CallGraphJson callGraphJson = null;
         if (callGraphGenJsonCaller) {
             callGraphJson = new CallGraphJson();
@@ -689,7 +689,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
             recordedCalleeStack.push(new HashSet<>());
         }
 
-        // 记录需要写入文件的方法调用链内容
+        // 记录需要写入文件的方法完整调用链内容
         List<MethodCallLineData4Er> methodCallLineData4ErList = new ArrayList<>(JavaCG2Constants.SIZE_100);
 
         while (true) {
@@ -771,7 +771,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
                 continue;
             }
 
-            // 生成方法调用链当前行的数据
+            // 生成方法完整调用链当前行的数据
             MethodCallLineData4Er methodCallLineData4Er = new MethodCallLineData4Er(methodCallLevel, methodCall.getCallerSimpleClassName(), methodCall.getCallerLineNumber(),
                     actualCalleeFullMethod, rawCalleeMethodHash, actualCalleeMethodHash, methodCall.getRawReturnType(), methodCallId, callFlags, callType);
             // 生成被调用方法信息（包含方法注解信息、方法调用业务功能数据）
@@ -785,10 +785,10 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
                 continue;
             }
 
-            // 无论方法调用链是否写文件，都需要添加
+            // 无论方法完整调用链是否写文件，都需要添加
             methodCallLineData4ErList.add(methodCallLineData4Er);
             if (callGraphReturnInMemory) {
-                // 方法调用链当前行的数据记录到用于返回的列表
+                // 方法完整调用链当前行的数据记录到用于返回的列表
                 String startCallerMethod = JavaCG2ClassMethodUtil.genFullMethodWithReturnType(startCallerFullMethod, startCallerMethodReturnType);
                 List<MethodCallLineData4Er> tmpMethodCallLineData4ErList = allMethodCallLineData4ErMap.computeIfAbsent(startCallerMethod, k -> new ArrayList<>());
                 tmpMethodCallLineData4ErList.add(methodCallLineData4Er);
@@ -807,7 +807,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
             methodCallLineData4Er.setCycleCallLevel(cycleCallLevel);
 
             if (callGraphJson != null) {
-                // 记录方法调用链JSON格式
+                // 记录方法完整调用链JSON格式
                 recordCallGraphJson(callerFullMethod, methodCall.getCallerReturnType(), actualCalleeFullMethod, methodCall.getRawReturnType(), methodCall.getCallerLineNumber(),
                         methodCallLevel, callGraphJson);
             }
@@ -1165,7 +1165,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
                     // 将最后一行记录添加向下没有方法调用标记
                     methodCallLineData4Er.setNoDownwardCallee(true);
                 }
-                // 生成方法调用链每行数据字符串
+                // 生成方法完整调用链每行数据字符串
                 String lineData = genMethodCallLineStr(methodCallLineData4Er);
                 if (callGraphInfo != null) {
                     callGraphInfo.append(lineData).append(JavaCG2Constants.NEW_LINE);
@@ -1277,7 +1277,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
         return false;
     }
 
-    // 记录方法调用链JSON格式
+    // 记录方法完整调用链JSON格式
     private void recordCallGraphJson(String callerFullMethod, String callerReturnType, String calleeFullMethod, String calleeReturnType, int callerLineNumber,
                                      int methodCallLevel, CallGraphJson callGraphJson) {
         String callerMethodHash = JACGClassMethodUtil.genMethodHashWithLen(callerFullMethod, callerReturnType);
@@ -1360,7 +1360,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
         return true;
     }
 
-    // 生成方法调用链每行数据字符串，生成向下的方法调用链时使用
+    // 生成方法完整调用链每行数据字符串，生成向下的方法完整调用链时使用
     @Override
     protected String genMethodCallLineStr(MethodCallLineData methodCallLineData) {
         MethodCallLineData4Er methodCallLineData4Er = (MethodCallLineData4Er) methodCallLineData;
@@ -1397,7 +1397,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
     }
 
     /**
-     * 获取内存中保存的所有方法调用链当前行的数据，包含起始方法的信息
+     * 获取内存中保存的所有方法完整调用链当前行的数据，包含起始方法的信息
      * 因此实际调用链的数量需要减一
      *
      * @return

@@ -26,7 +26,7 @@ test.neo4j.runner.Test0WriteData2Neo4jAndDb
 test.neo4j.runner.TestNeo4jRunnerGenAllGraph4Caller
 ```
 
-# 4. 生成向下完整方法调用链时，验证方法参数作为被调用对象涉及多态时的类型替换
+# 4. 生成向下方法完整调用链时，验证方法参数作为被调用对象涉及多态时的类型替换
 
 - 示例类名
 
@@ -46,7 +46,7 @@ test.runbycode.callgraph.TestGenAllGraph4CallerByPackage
 
 首先查询指定包中的类的全部方法
 
-再为这些方法生成向下的完整方法调用链
+再为这些方法生成向下的方法完整调用链
 
 # 6. 仅创建数据库表
 
@@ -88,7 +88,7 @@ test.runbycode.extractor.callee.TestExtractCalleeGraphToEntry
 
 首先生成指定方法向上的完整方法链，即获取指定方法的被调用情况
 
-再从这些完整方法调用链中找到对应的入口方法（即向上没有被其他方法调用的方法）
+再从这些方法完整调用链中找到对应的入口方法（即向上没有被其他方法调用的方法）
 
 # 9. 获取直接或间接调用指定方法的Spring Controller方法
 
@@ -102,7 +102,7 @@ test.runbycode.extractor.callee.TestExtractCalleeGraphToSPC
 
 首先生成指定方法向上的完整方法链，即获取指定方法的被调用情况
 
-再从这些完整方法调用链向上找到Spring Controller方法
+再从这些方法完整调用链向上找到Spring Controller方法
 
 # 10. 获取直接或间接调用指定方法的Spring Controller文件下载方法
 
@@ -116,7 +116,7 @@ test.runbycode.extractor.callee.TestExtractCalleeGraphToSPCFileDownload
 
 首先生成指定方法向上的完整方法链，即获取指定方法的被调用情况
 
-再从这些完整方法调用链向上找到（可能的）Spring Controller文件下载方法
+再从这些方法完整调用链向上找到（可能的）Spring Controller文件下载方法
 
 # 11. 获取直接或间接调用指定方法的Spring Controller文件上传方法
 
@@ -130,7 +130,7 @@ test.runbycode.extractor.callee.TestExtractCalleeGraphToSPCFileUpload
 
 首先生成指定方法向上的完整方法链，即获取指定方法的被调用情况
 
-再从这些完整方法调用链向上找到（可能的）Spring Controller文件上传方法
+再从这些方法完整调用链向上找到（可能的）Spring Controller文件上传方法
 
 # 12. 获取直接或间接调用指定方法的Spring Controller文件下载方法，支持自定义筛选
 
@@ -144,7 +144,7 @@ test.runbycode.extractor.callee.TestMyCalleeGraphSPCFileDownloadExtractor
 
 首先生成指定方法向上的完整方法链，即获取指定方法的被调用情况
 
-再从这些完整方法调用链向上找到（可能的）Spring Controller文件下载方法
+再从这些方法完整调用链向上找到（可能的）Spring Controller文件下载方法
 
 对于需要查找的（可能的）Spring Controller文件下载方法，支持通过自定义处理进行筛选等操作
 
@@ -204,23 +204,7 @@ test.runbycode.spring.bean.TestSpringBeanInXmlRunnerWriteDbEl
 
 支持通过Bean名称、Bean类名、profile进行过滤
 
-## 16.1. 仅处理Bean名称匹配的记录
-
-- 示例方法名
-
-```
-onlyHandleBeanNameMatches
-```
-
-## 16.2. 全部都处理
-
-- 示例方法名
-
-```
-fixedFalseParseAll
-```
-
-## 16.3. 仅处理profile为空的记录
+## 16.1. 仅处理profile为空的记录
 
 - 示例方法名
 
@@ -228,15 +212,15 @@ fixedFalseParseAll
 onlyHandleProfileEmpty
 ```
 
-## 16.4. 仅处理profile匹配的记录，一级
+## 16.2. 仅处理Bean名称匹配的记录
 
 - 示例方法名
 
 ```
-onlyHandleProfileMatchesLevelOne
+onlyHandleBeanNameMatches
 ```
 
-## 16.5. 仅处理Bean类名匹配的记录
+## 16.3. 仅处理Bean类名匹配的记录
 
 - 示例方法名
 
@@ -244,12 +228,28 @@ onlyHandleProfileMatchesLevelOne
 onlyHandleClassNameMatches
 ```
 
-## 16.6. 仅处理profile匹配的记录，二级
+## 16.4. 仅处理profile匹配的记录，二级
 
 - 示例方法名
 
 ```
 onlyHandleProfileMatchesLevelTwo
+```
+
+## 16.5. 全部都处理
+
+- 示例方法名
+
+```
+fixedFalseParseAll
+```
+
+## 16.6. 仅处理profile匹配的记录，一级
+
+- 示例方法名
+
+```
+onlyHandleProfileMatchesLevelOne
 ```
 
 # 17. 解析代码并将结果写入数据库，简单模式
@@ -310,35 +310,23 @@ testElOnlyParseNonLibJarInJar
 
 gradlew gen_run_jar gen_jar_in_jar
 
-## 18.3. 仅解析指定包下的类
+## 18.3. 仅解析jar文件中指定路径下的jar文件
 
 - 示例方法名
 
 ```
-testElOnlyParseSomeClass
+testElOnlyParseLibJarInJar
 ```
 
 - 示例说明
 
-通过表达式实现，仅当类的包名以 test.callgraph.methodcall. 开头时不跳过
-
-## 18.4. 仅解析目录中指定路径下指定名称的jar文件
-
-- 示例方法名
-
-```
-testElOnlyParseSomeJarInDir
-```
-
-- 示例说明
-
-通过表达式实现，仅处理lib中文件名以commons-开头的jar文件
+通过表达式实现，当jar文件的目录名称不是'lib'，或当jar文件名称以'commons-'开头时才解析
 
 需要先执行以下命令生成包含jar文件的jar文件
 
-gradlew gen_run_jar
+gradlew gen_run_jar gen_jar_in_jar
 
-## 18.5. 仅解析war文件中指定路径下的jar文件
+## 18.4. 仅解析war文件中指定路径下的jar文件
 
 - 示例方法名
 
@@ -354,7 +342,7 @@ testElOnlyParseNonLibJarInWar
 
 gradlew gen_run_jar gen_jar_in_war
 
-## 18.6. 所有的内容都不解析
+## 18.5. 所有的内容都不解析
 
 - 示例方法名
 
@@ -365,6 +353,34 @@ testElFixedTrueParseNone
 - 示例说明
 
 通过表达式实现
+
+## 18.6. 仅解析指定包下的类
+
+- 示例方法名
+
+```
+testElOnlyParseSomeClass
+```
+
+- 示例说明
+
+通过表达式实现，仅当类的包名以 test.callgraph.methodcall. 开头时不跳过
+
+## 18.7. 仅解析目录中指定路径下指定名称的jar文件
+
+- 示例方法名
+
+```
+testElOnlyParseSomeJarInDir
+```
+
+- 示例说明
+
+通过表达式实现，仅处理lib中文件名以commons-开头的jar文件
+
+需要先执行以下命令生成包含jar文件的jar文件
+
+gradlew gen_run_jar
 
 # 19. 解析代码并将结果写入数据库
 
@@ -390,7 +406,7 @@ test.runbycodemain.TestRBCFindCallStackTrace4ee
 
 - 示例说明
 
-首先会生成指定方法向上的完整方法调用链
+首先会生成指定方法向上的方法完整调用链
 
 通过代码指定配置参数的主要功能示例
 
@@ -404,11 +420,11 @@ test.runbycodemain.TestRBCFindCallStackTrace4er
 
 - 示例说明
 
-首先会生成指定方法向下的完整方法调用链
+首先会生成指定方法向下的方法完整调用链
 
 通过代码指定配置参数的主要功能示例
 
-# 22. 生成指定方法向上的完整方法调用链
+# 22. 生成指定方法向上的方法完整调用链
 
 - 示例类名
 
@@ -420,27 +436,7 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4Callee
 
 通过代码指定配置参数的主要功能示例
 
-## 22.1. 方法调用链数据仅写入文件
-
-- 示例方法名
-
-```
-testWriteToFile
-```
-
-- 示例说明
-
-方法调用链数据不在内存中返回
-
-## 22.2. 方法调用链数据写入文件，也在内存中返回
-
-- 示例方法名
-
-```
-testBoth
-```
-
-## 22.3. 方法调用链数据仅在内存中返回，返回多个方法
+## 22.1. 方法完整调用链数据仅在内存中返回，返回多个方法
 
 - 示例方法名
 
@@ -450,9 +446,21 @@ testReturnInMemoryMulti
 
 - 示例说明
 
-方法调用链数据不写入文件
+方法完整调用链数据不写入文件
 
-## 22.4. 方法调用链数据仅写入文件，生成文件名使用更短的模式
+## 22.2. 方法完整调用链数据仅写入文件，示例代码
+
+- 示例方法名
+
+```
+testExampleWriteToFile
+```
+
+- 示例说明
+
+方法完整调用链数据不在内存中返回
+
+## 22.3. 方法完整调用链数据仅写入文件，生成文件名使用更短的模式
 
 - 示例方法名
 
@@ -462,9 +470,9 @@ testWriteToFileShortName
 
 - 示例说明
 
-方法调用链数据不在内存中返回
+方法完整调用链数据不在内存中返回
 
-## 22.5. 方法调用链数据仅在内存中返回
+## 22.4. 方法完整调用链数据仅在内存中返回
 
 - 示例方法名
 
@@ -474,9 +482,29 @@ testReturnInMemory
 
 - 示例说明
 
-方法调用链数据不写入文件
+方法完整调用链数据不写入文件
 
-# 23. 生成指定方法向上的完整方法调用链
+## 22.5. 方法完整调用链数据仅写入文件
+
+- 示例方法名
+
+```
+testWriteToFile
+```
+
+- 示例说明
+
+方法完整调用链数据不在内存中返回
+
+## 22.6. 方法完整调用链数据写入文件，也在内存中返回
+
+- 示例方法名
+
+```
+testBoth
+```
+
+# 23. 生成指定方法向上的方法完整调用链
 
 - 示例类名
 
@@ -486,11 +514,11 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4CalleeDetail0
 
 - 示例说明
 
-输出方法调用链格式使用最详细，包含返回类型
+输出方法完整调用链格式使用最详细，包含返回类型
 
 通过代码指定配置参数的主要功能示例
 
-# 24. 生成指定方法向上的完整方法调用链
+# 24. 生成指定方法向上的方法完整调用链
 
 - 示例类名
 
@@ -504,7 +532,7 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4CalleeEmpty
 
 通过代码指定配置参数的主要功能示例
 
-# 25. 生成指定方法向上的完整方法调用链
+# 25. 生成指定方法向上的方法完整调用链
 
 - 示例类名
 
@@ -514,23 +542,11 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4CalleeLimitDepth
 
 - 示例说明
 
-限制允许生成的方法调用链深度限制
+限制允许生成的方法完整调用链深度限制
 
 通过代码指定配置参数的主要功能示例
 
-## 25.1. 方法调用链数据仅写入文件
-
-- 示例方法名
-
-```
-testWriteToFile
-```
-
-- 示例说明
-
-方法调用链数据不在内存中返回
-
-## 25.2. 方法调用链数据仅在内存中返回
+## 25.1. 方法完整调用链数据仅在内存中返回
 
 - 示例方法名
 
@@ -540,9 +556,21 @@ testReturnInMemory
 
 - 示例说明
 
-方法调用链数据不写入文件
+方法完整调用链数据不写入文件
 
-# 26. 生成指定方法向上的完整方法调用链
+## 25.2. 方法完整调用链数据仅写入文件
+
+- 示例方法名
+
+```
+testWriteToFile
+```
+
+- 示例说明
+
+方法完整调用链数据不在内存中返回
+
+# 26. 生成指定方法向上的方法完整调用链
 
 - 示例类名
 
@@ -556,19 +584,7 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4CalleeLimitNum
 
 通过代码指定配置参数的主要功能示例
 
-## 26.1. 方法调用链数据仅写入文件
-
-- 示例方法名
-
-```
-testWriteToFile
-```
-
-- 示例说明
-
-方法调用链数据不在内存中返回
-
-## 26.2. 方法调用链数据仅在内存中返回
+## 26.1. 方法完整调用链数据仅在内存中返回
 
 - 示例方法名
 
@@ -578,9 +594,21 @@ testReturnInMemory
 
 - 示例说明
 
-方法调用链数据不写入文件
+方法完整调用链数据不写入文件
 
-# 27. 生成指定方法向上的完整方法调用链
+## 26.2. 方法完整调用链数据仅写入文件
+
+- 示例方法名
+
+```
+testWriteToFile
+```
+
+- 示例说明
+
+方法完整调用链数据不在内存中返回
+
+# 27. 生成指定方法向上的方法完整调用链
 
 - 示例类名
 
@@ -594,7 +622,7 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4CalleeNotFound
 
 通过代码指定配置参数的主要功能示例
 
-# 28. 生成指定方法向下的完整方法调用链
+# 28. 生成指定方法向下的方法完整调用链
 
 - 示例类名
 
@@ -606,27 +634,7 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4Caller
 
 通过代码指定配置参数的主要功能示例
 
-## 28.1. 方法调用链数据仅写入文件
-
-- 示例方法名
-
-```
-testWriteToFile
-```
-
-- 示例说明
-
-方法调用链数据不在内存中返回
-
-## 28.2. 方法调用链数据写入文件，也在内存中返回
-
-- 示例方法名
-
-```
-testBoth
-```
-
-## 28.3. 方法调用链数据仅在内存中返回，返回多个方法
+## 28.1. 方法完整调用链数据仅在内存中返回，返回多个方法
 
 - 示例方法名
 
@@ -636,9 +644,21 @@ testReturnInMemoryMulti
 
 - 示例说明
 
-方法调用链数据不写入文件
+方法完整调用链数据不写入文件
 
-## 28.4. 方法调用链数据仅写入文件，生成文件名使用更短的模式
+## 28.2. 方法完整调用链数据仅写入文件，示例代码
+
+- 示例方法名
+
+```
+testExampleWriteToFile
+```
+
+- 示例说明
+
+方法完整调用链数据不在内存中返回
+
+## 28.3. 方法完整调用链数据仅写入文件，生成文件名使用更短的模式
 
 - 示例方法名
 
@@ -648,9 +668,9 @@ testWriteToFileShortName
 
 - 示例说明
 
-方法调用链数据不在内存中返回
+方法完整调用链数据不在内存中返回
 
-## 28.5. 方法调用链数据仅在内存中返回
+## 28.4. 方法完整调用链数据仅在内存中返回
 
 - 示例方法名
 
@@ -660,9 +680,29 @@ testReturnInMemory
 
 - 示例说明
 
-方法调用链数据不写入文件
+方法完整调用链数据不写入文件
 
-# 29. 生成指定方法向下的完整方法调用链
+## 28.5. 方法完整调用链数据仅写入文件
+
+- 示例方法名
+
+```
+testWriteToFile
+```
+
+- 示例说明
+
+方法完整调用链数据不在内存中返回
+
+## 28.6. 方法完整调用链数据写入文件，也在内存中返回
+
+- 示例方法名
+
+```
+testBoth
+```
+
+# 29. 生成指定方法向下的方法完整调用链
 
 - 示例类名
 
@@ -672,11 +712,11 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4CallerDetail0
 
 - 示例说明
 
-输出方法调用链格式使用最详细，包含返回类型
+输出方法完整调用链格式使用最详细，包含返回类型
 
 通过代码指定配置参数的主要功能示例
 
-# 30. 生成指定方法向下的完整方法调用链
+# 30. 生成指定方法向下的方法完整调用链
 
 - 示例类名
 
@@ -690,7 +730,7 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4CallerEmpty
 
 通过代码指定配置参数的主要功能示例
 
-# 31. 生成指定方法向下的完整方法调用链
+# 31. 生成指定方法向下的方法完整调用链
 
 - 示例类名
 
@@ -700,23 +740,11 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4CallerLimitDepth
 
 - 示例说明
 
-限制允许生成的方法调用链深度限制
+限制允许生成的方法完整调用链深度限制
 
 通过代码指定配置参数的主要功能示例
 
-## 31.1. 方法调用链数据仅写入文件
-
-- 示例方法名
-
-```
-testWriteToFile
-```
-
-- 示例说明
-
-方法调用链数据不在内存中返回
-
-## 31.2. 方法调用链数据仅在内存中返回
+## 31.1. 方法完整调用链数据仅在内存中返回
 
 - 示例方法名
 
@@ -726,9 +754,21 @@ testReturnInMemory
 
 - 示例说明
 
-方法调用链数据不写入文件
+方法完整调用链数据不写入文件
 
-# 32. 生成指定方法向下的完整方法调用链
+## 31.2. 方法完整调用链数据仅写入文件
+
+- 示例方法名
+
+```
+testWriteToFile
+```
+
+- 示例说明
+
+方法完整调用链数据不在内存中返回
+
+# 32. 生成指定方法向下的方法完整调用链
 
 - 示例类名
 
@@ -742,19 +782,7 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4CallerLimitNum
 
 通过代码指定配置参数的主要功能示例
 
-## 32.1. 方法调用链数据仅写入文件
-
-- 示例方法名
-
-```
-testWriteToFile
-```
-
-- 示例说明
-
-方法调用链数据不在内存中返回
-
-## 32.2. 方法调用链数据仅在内存中返回
+## 32.1. 方法完整调用链数据仅在内存中返回
 
 - 示例方法名
 
@@ -764,9 +792,21 @@ testReturnInMemory
 
 - 示例说明
 
-方法调用链数据不写入文件
+方法完整调用链数据不写入文件
 
-# 33. 生成指定方法向下的完整方法调用链
+## 32.2. 方法完整调用链数据仅写入文件
+
+- 示例方法名
+
+```
+testWriteToFile
+```
+
+- 示例说明
+
+方法完整调用链数据不在内存中返回
+
+# 33. 生成指定方法向下的方法完整调用链
 
 - 示例类名
 

@@ -19,7 +19,7 @@ import java.util.Map;
  * @date 2025/2/16
  * @description:
  */
-@JACGExample(title = "生成指定方法向上的完整方法调用链",
+@JACGExample(title = "生成指定方法向上的方法完整调用链",
         desc = {"指定的方法或类不存在",
                 "通过代码指定配置参数的主要功能示例"})
 public class TestRBCRunnerGenAllGraph4CalleeNotFound extends TestRunByCodeBase {

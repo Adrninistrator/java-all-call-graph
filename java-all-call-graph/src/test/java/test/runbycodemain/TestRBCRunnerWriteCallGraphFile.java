@@ -3,6 +3,7 @@ package test.runbycodemain;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.runner.RunnerWriteCallGraphFile;
 import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
+import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
@@ -20,9 +21,21 @@ import test.runbycode.config.TestConfigGenerator;
                 "通过代码指定配置参数的主要功能示例"})
 public class TestRBCRunnerWriteCallGraphFile extends TestRunByCodeBase {
 
+    // 使用最简单的参数
     @Test
-    public void test() {
-        // 生成使用 java-callgraph2 的配置参数包装类
+    public void $test0WriteFile() {
+        // 生成 java-callgraph2 使用的配置参数包装类
+        JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = new JavaCG2ConfigureWrapper();
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
+                TestConfigGenerator.TEST_JAR_PATH);
+
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        Assert.assertTrue(new RunnerWriteCallGraphFile(javaCG2ConfigureWrapper, configureWrapper).run());
+    }
+
+    @Test
+    public void test2WriteFile() {
+        // 生成 java-callgraph2 使用的配置参数包装类
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = TestConfigGenerator.genJavaCG2ConfigureWrapper();
 
         ConfigureWrapper configureWrapper = new ConfigureWrapper();

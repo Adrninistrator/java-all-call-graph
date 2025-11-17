@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_method_return_call_id_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_method_return_call_id_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   return_call_id int NOT NULL COMMENT '方法返回值对应的方法调用序号，从1开始',

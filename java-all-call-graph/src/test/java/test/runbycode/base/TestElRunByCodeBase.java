@@ -1,5 +1,6 @@
 package test.runbycode.base;
 
+import com.adrninistrator.jacg.compatibility.runner.RunnerJarCompatibilityCheckFast;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
@@ -136,6 +137,13 @@ public abstract class TestElRunByCodeBase extends TestRunByCodeBase {
                 TestElExampleCallee1.class.getName() + ":testC()");
     }
 
+    protected void runCompatibilityCheckFast(boolean skipWriteDb) {
+        setConfig4ElText();
+        RunnerJarCompatibilityCheckFast runnerJarCompatibilityCheckFast = new RunnerJarCompatibilityCheckFast(javaCG2ConfigureWrapper, configureWrapper);
+        runnerJarCompatibilityCheckFast.setSkipWriteDb(skipWriteDb);
+        Assert.assertTrue(runnerJarCompatibilityCheckFast.run());
+    }
+
     /**
      * 生成向下的方法完整调用链，仅指定不超过一个方法
      */
@@ -194,16 +202,20 @@ public abstract class TestElRunByCodeBase extends TestRunByCodeBase {
         setConfig4ElText();
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, TestRunnerGenJarDiffCallGraphDiffSame.APP_NAME);
 
-        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLEE_GRAPH_DIR,
+        AbstractRunnerGenJarDiffCallGraph genJarDiffCallGraph;
+        OtherConfigFileUseListEnum otherConfigFileUseListEnumJarDiff;
+        if (genCalleeGraph) {
+            genJarDiffCallGraph = new RunnerGenJarDiffCalleeGraph(javaCG2ConfigureWrapper, configureWrapper, null, null);
+            otherConfigFileUseListEnumJarDiff = OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLEE_GRAPH_DIR;
+        } else {
+            genJarDiffCallGraph = new RunnerGenJarDiffCallerGraph(javaCG2ConfigureWrapper, configureWrapper);
+            otherConfigFileUseListEnumJarDiff = OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLER_GRAPH_DIR;
+        }
+
+        configureWrapper.setOtherConfigList(otherConfigFileUseListEnumJarDiff,
                 TestRunnerGenJarDiffCallGraphDiffSame.ROOT_JAR_DIR + TestRunnerGenJarDiffCallGraphDiffSame.DIR_NAME_OLD,
                 TestRunnerGenJarDiffCallGraphDiffSame.ROOT_JAR_DIR + TestRunnerGenJarDiffCallGraphDiffSame.DIR_NAME_NEW);
 
-        AbstractRunnerGenJarDiffCallGraph genJarDiffCallGraph;
-        if (genCalleeGraph) {
-            genJarDiffCallGraph = new RunnerGenJarDiffCalleeGraph(javaCG2ConfigureWrapper, configureWrapper, null, null);
-        } else {
-            genJarDiffCallGraph = new RunnerGenJarDiffCallerGraph(javaCG2ConfigureWrapper, configureWrapper);
-        }
         Assert.assertTrue(genJarDiffCallGraph.run());
         Map<String, List<ModifiedMethodInfo>> map = genJarDiffCallGraph.getJarModifiedMethodInfoMap();
         Set<String> containsFullMethodPrefixSet = new HashSet<>(Arrays.asList(containsFullMethodPrefixes));

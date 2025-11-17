@@ -44,7 +44,7 @@ public abstract class BaseExtractor {
     }
 
     /**
-     * 选择方法调用链方向
+     * 选择方法完整调用链方向
      *
      * @return true: 向上 false: 向下
      */

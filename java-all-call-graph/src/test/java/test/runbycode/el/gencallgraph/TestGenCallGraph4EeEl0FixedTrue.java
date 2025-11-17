@@ -22,12 +22,12 @@ public class TestGenCallGraph4EeEl0FixedTrue extends TestElRunByCodeBase {
 
     @Override
     protected String chooseTitle() {
-        return "生成向上完整方法调用链固定忽略全部";
+        return "生成向上方法完整调用链固定忽略全部";
     }
 
     @Override
     protected String chooseDesc() {
-        return "在生成向上完整方法调用链时，使用固定的表达式，忽略全部方法调用";
+        return "在生成向上方法完整调用链时，使用固定的表达式，忽略全部方法调用";
     }
 
     @Test

@@ -11,6 +11,7 @@ import java.util.Objects;
 public class DbConfInfo {
 
     private boolean useH2Db;
+    private boolean usePgDb;
     private String dbH2FilePath;
     private String driverClassName;
     private String dbUrl;
@@ -32,6 +33,7 @@ public class DbConfInfo {
         if (o == null || getClass() != o.getClass()) return false;
         DbConfInfo that = (DbConfInfo) o;
         return useH2Db == that.useH2Db
+                &&usePgDb==that.usePgDb
                 && Objects.equals(dbH2FilePath, that.dbH2FilePath)
                 && Objects.equals(driverClassName, that.driverClassName)
                 && Objects.equals(dbUrl, that.dbUrl)
@@ -52,6 +54,7 @@ public class DbConfInfo {
     public String toString() {
         return "DbConfInfo{" +
                 "useH2Db=" + useH2Db +
+                "usePgDb=" + usePgDb +
                 ", dbH2FilePath='" + dbH2FilePath + '\'' +
                 ", driverClassName='" + driverClassName + '\'' +
                 ", dbUrl='" + dbUrl + '\'' +
@@ -70,6 +73,14 @@ public class DbConfInfo {
 
     public void setUseH2Db(boolean useH2Db) {
         this.useH2Db = useH2Db;
+    }
+
+    public boolean isUsePgDb() {
+        return usePgDb;
+    }
+
+    public void setUsePgDb(boolean usePgDb) {
+        this.usePgDb = usePgDb;
     }
 
     public String getDbH2FilePath() {

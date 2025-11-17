@@ -27,12 +27,12 @@ public class TestGenCallGraph4ErElFixedFalse extends TestElRunByCodeBase {
 
     @Override
     protected String chooseTitle() {
-        return "生成向下完整方法调用链固定全部不忽略";
+        return "生成向下方法完整调用链固定全部不忽略";
     }
 
     @Override
     protected String chooseDesc() {
-        return "在生成向下完整方法调用链时，使用固定的表达式，方法调用全部不忽略";
+        return "在生成向下方法完整调用链时，使用固定的表达式，方法调用全部不忽略";
     }
 
     @Test

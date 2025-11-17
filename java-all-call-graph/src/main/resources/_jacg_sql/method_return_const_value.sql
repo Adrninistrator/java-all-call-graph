@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_method_return_const_value_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_method_return_const_value_{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   seq int NOT NULL COMMENT '某个方法返回的常量值序号，从0开始',

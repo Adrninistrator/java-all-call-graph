@@ -12,8 +12,8 @@ public class WriteDbData4MethodReturnFieldInfo implements BaseWriteDbData {
     private int recordId;
     private String methodHash;
     private int seq;
-    private boolean staticField;
-    private boolean fieldOfThis;
+    private int staticField;
+    private int fieldOfThis;
     private String fieldInSimpleClassName;
     private String simpleFieldTypeNad;
     private int fieldArrayDimensions;
@@ -47,19 +47,19 @@ public class WriteDbData4MethodReturnFieldInfo implements BaseWriteDbData {
         this.seq = seq;
     }
 
-    public boolean isStaticField() {
+    public int getStaticField() {
         return staticField;
     }
 
-    public void setStaticField(boolean staticField) {
+    public void setStaticField(int staticField) {
         this.staticField = staticField;
     }
 
-    public boolean isFieldOfThis() {
+    public int getFieldOfThis() {
         return fieldOfThis;
     }
 
-    public void setFieldOfThis(boolean fieldOfThis) {
+    public void setFieldOfThis(int fieldOfThis) {
         this.fieldOfThis = fieldOfThis;
     }
 

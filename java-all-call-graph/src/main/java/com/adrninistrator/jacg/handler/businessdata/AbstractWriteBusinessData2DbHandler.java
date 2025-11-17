@@ -148,9 +148,19 @@ public abstract class AbstractWriteBusinessData2DbHandler extends BaseHandler im
             SqlKeyEnum sqlKeyEnum = SqlKeyEnum.BD_DELETE_BY_TYPE;
             String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
             if (sql == null) {
-                sql = "delete from " + DbTableInfoEnum.DTIE_BUSINESS_DATA.getTableName() +
-                        " where " + DC.BD_DATA_TYPE + " = ?" +
-                        " limit ?";
+                if (!dbOperator.getDbConfInfo().isUsePgDb()) {
+                    // 增加前缀防止被识别为不允许使用 delete from limit ?
+                    sql = "/* mysql */ delete from " + DbTableInfoEnum.DTIE_BUSINESS_DATA.getTableName() +
+                            " where " + DC.BD_DATA_TYPE + " = ?" +
+                            " limit ?";
+                } else {
+                    sql = "DELETE FROM " + DbTableInfoEnum.DTIE_BUSINESS_DATA.getTableName() +
+                            " WHERE " + DC.BD_CALL_ID + " IN (" +
+                            " SELECT " + DC.BD_CALL_ID + " FROM " + DbTableInfoEnum.DTIE_BUSINESS_DATA.getTableName() +
+                            " WHERE " + DC.BD_DATA_TYPE + " = ?" +
+                            " LIMIT ?" +
+                            ")";
+                }
                 sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
             }
 

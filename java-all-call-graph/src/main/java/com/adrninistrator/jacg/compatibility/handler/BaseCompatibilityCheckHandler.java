@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.annotation.ListStringAnnotationAttribute;
+import com.adrninistrator.jacg.dto.annotation.OuterClassWithAnnotation;
 import com.adrninistrator.jacg.dto.compatibility.CompatibilityHandlerDto;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4ClassInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
@@ -161,8 +162,23 @@ public abstract class BaseCompatibilityCheckHandler extends BaseHandler {
      */
     protected List<String> queryConditionalOnClassValueList(String className) {
         List<String> valueList = new ArrayList<>();
-        Map<String, BaseAnnotationAttribute> annotationAttributeMap = annotationHandler.queryAnnotationAttributes4Class(className,
+        // 查询指定类上的注解
+        Map<String, BaseAnnotationAttribute> currentAnnotationAttributeMap = annotationHandler.queryAnnotationAttributes4Class(className,
                 JACGCommonNameConstants.SPRING_BOOT_CONDITIONAL_ON_CLASS);
+        handleConditionalOnClassValue(valueList, currentAnnotationAttributeMap);
+
+        // 查询指定类的外部类上的注解
+        List<OuterClassWithAnnotation> annotationAttributeList = annotationHandler.queryOuterClassesInfo(className, JACGCommonNameConstants.SPRING_BOOT_CONDITIONAL_ON_CLASS);
+        for (OuterClassWithAnnotation outerClassWithAnnotation : annotationAttributeList) {
+            handleConditionalOnClassValue(valueList, outerClassWithAnnotation.getAnnotationAttributeMap());
+        }
+        return valueList;
+    }
+
+    private void handleConditionalOnClassValue(List<String> valueList, Map<String, BaseAnnotationAttribute> annotationAttributeMap) {
+        if (annotationAttributeMap == null) {
+            return;
+        }
         BaseAnnotationAttribute annotationAttributeValue = annotationAttributeMap.get(JACGCommonNameConstants.ANNOTATION_ATTRIBUTE_NAME_VALUE);
         if (annotationAttributeValue instanceof ListStringAnnotationAttribute) {
             ListStringAnnotationAttribute listStringAnnotationAttributeValue = (ListStringAnnotationAttribute) annotationAttributeValue;
@@ -173,7 +189,6 @@ public abstract class BaseCompatibilityCheckHandler extends BaseHandler {
             ListStringAnnotationAttribute listStringAnnotationAttributeName = (ListStringAnnotationAttribute) annotationAttributeName;
             valueList.addAll(listStringAnnotationAttributeName.getAttributeList());
         }
-        return valueList;
     }
 
     /**

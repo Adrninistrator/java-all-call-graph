@@ -29,7 +29,7 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
             desc = {"通过表达式实现"})
     @Test
     public void testElFixedTrueParseNone() {
-        // 生成使用 java-callgraph2 的配置参数包装类
+        // 生成 java-callgraph2 使用的配置参数包装类
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = TestConfigGenerator.genJavaCG2ConfigureWrapper();
         // java-callgraph2表达式开启调试
         javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_EL_DEBUG_MODE, Boolean.TRUE.toString());
@@ -102,7 +102,24 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
         // java-callgraph2表达式开启调试
         javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_EL_DEBUG_MODE, Boolean.TRUE.toString());
         javaCG2ConfigureWrapper.setElConfigText(JavaCG2ElConfigEnum.ECE_MERGE_FILE_IGNORE_JAR_IN_JAR_WAR,
-                JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_DIR_PATH_IN_JAR_WAR.getVariableName() + "=='lib'"
+                JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_DIR_PATH_IN_JAR_WAR.getVariableName() + " == 'lib'"
+        );
+
+        commonWriteDbForce();
+    }
+
+    @JACGExample(title = "仅解析jar文件中指定路径下的jar文件",
+            desc = {"通过表达式实现，当jar文件的目录名称不是'lib'，或当jar文件名称以'commons-'开头时才解析",
+                    "需要先执行以下命令生成包含jar文件的jar文件",
+                    "gradlew gen_run_jar gen_jar_in_jar"})
+    @Test
+    public void testElOnlyParseLibJarInJar() {
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, "build/jar_output.jar");
+        // java-callgraph2表达式开启调试
+        javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_EL_DEBUG_MODE, Boolean.TRUE.toString());
+        javaCG2ConfigureWrapper.setElConfigText(JavaCG2ElConfigEnum.ECE_MERGE_FILE_IGNORE_JAR_IN_JAR_WAR,
+                JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_DIR_PATH_IN_JAR_WAR.getVariableName() + " == 'lib'" +
+                        " && !string.startsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_NAME.getVariableName() + ", 'commons-')"
         );
 
         commonWriteDbForce();
@@ -118,7 +135,7 @@ public class TestRBC0RunnerWriteDbEl extends TestRunByCodeBase {
         // java-callgraph2表达式开启调试
         javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_EL_DEBUG_MODE, Boolean.TRUE.toString());
         javaCG2ConfigureWrapper.setElConfigText(JavaCG2ElConfigEnum.ECE_MERGE_FILE_IGNORE_JAR_IN_JAR_WAR,
-                JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_DIR_PATH_IN_JAR_WAR.getVariableName() + "=='WEB-INF/lib'"
+                JavaCG2ElAllowedVariableEnum.EAVE_MF_FILE_DIR_PATH_IN_JAR_WAR.getVariableName() + " == 'WEB-INF/lib'"
         );
 
         commonWriteDbForce();

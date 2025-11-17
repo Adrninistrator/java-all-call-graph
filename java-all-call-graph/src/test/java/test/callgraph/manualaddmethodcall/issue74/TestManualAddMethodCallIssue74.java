@@ -1,5 +1,7 @@
 package test.callgraph.manualaddmethodcall.issue74;
 
+import org.junit.Test;
+
 /**
  * @author adrninistrator
  * @date 2025/4/23
@@ -7,24 +9,31 @@ package test.callgraph.manualaddmethodcall.issue74;
  */
 public class TestManualAddMethodCallIssue74 {
 
-    public static void main1(String[] args) {
+    @Test
+    public void test1() {
         NotFoundCallBack notFoundCallBack1 = new NotFoundCallBack() {
             @Override
             public void execute() {
                 doSomeThing();
             }
         };
+        notFoundCallBack1.execute();
     }
 
-    public static void main2(String[] args) {
+    @Test
+    public void test2() {
         NotFoundCallBack notFoundCallBack2 = () -> doSomeThing();
+        notFoundCallBack2.execute();
     }
 
-    public static void main3(String[] args) {
+    @Test
+    public void test3() {
         NotFoundCallBack notFoundCallBack3 = TestManualAddMethodCallIssue74::doSomeThing;
+        notFoundCallBack3.execute();
     }
 
     static void doSomeThing() {
-        System.getProperty("");
+        System.out.println("ok");
+        System.getProperty("test");
     }
 }

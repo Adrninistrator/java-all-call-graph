@@ -17,7 +17,9 @@ public abstract class AbstractSuperClassA {
         runD();
     }
 
-    protected abstract void runA();
+    protected void runA() {
+        System.getenv("superA");
+    }
 
     protected abstract void runB();
 

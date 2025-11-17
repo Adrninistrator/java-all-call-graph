@@ -23,9 +23,9 @@ public enum DefaultBusinessDataTypeEnum {
     private final String type;
     // 描述
     private final String desc;
-    // 支持在生成向上的完整方法调用链时使用
+    // 支持在生成向上的方法完整调用链时使用
     private final boolean supportEe;
-    // 支持在生成向下的完整方法调用链时使用
+    // 支持在生成向下的方法完整调用链时使用
     private final boolean supportEr;
 
     DefaultBusinessDataTypeEnum(String type, String desc, boolean supportEe, boolean supportEr) {

@@ -179,7 +179,7 @@ ConfigureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_KEYWO
 |---|---|
 |resources/_jacg_sql/method_line_number.sql|方法代码行号信息表|
 
-### 1.5.2. 支持指定方法名称生成向上方法调用链
+### 1.5.2. 支持指定方法名称生成向上方法完整调用链
 
 在`_jacg_config/o_g4callee_class_name.properties`配置文件中，支持指定类名+方法名前缀，代表需要处理指定类的对应方法
 
@@ -200,7 +200,7 @@ Test1:test(java.lang.String)
 
 配置文件`_jacg_config/config.properties`中的参数`gen.upwards.methods.file`不再使用
 
-### 1.5.3. 支持指定代码行号生成向上方法调用链
+### 1.5.3. 支持指定代码行号生成向上方法完整调用链
 
 在`_jacg_config/o_g4callee_class_name.properties`配置文件中，支持指定类名+代码行号，代表需要处理指定类的对应方法
 
@@ -218,7 +218,7 @@ Test1:test(java.lang.String)
 Test1:234
 ```
 
-### 1.5.4. 支持指定代码行号生成向下方法调用链
+### 1.5.4. 支持指定代码行号生成向下方法完整调用链
 
 在`_jacg_config/o_g4caller_entry_method.properties`配置文件中，支持指定类名+代码行号，代表需要处理指定类的对应方法
 
@@ -226,7 +226,7 @@ Test1:234
 
 ### 1.5.5. 生成配置文件中的任务信息与结果文件的映射关系
 
-每次生成方法调用链后，会在本次生成的目录中创建_mapping.txt 文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
+每次生成方法完整调用链后，会在本次生成的目录中创建_mapping.txt 文件，在该文件中记录了配置文件中的任务信息与结果文件的映射关系
 
 该文件内容包含两列，以“\t”进行分隔，第 1 列为配置文件中指定的任务信息，第 2 列为生成结果文件路径，内容如下所示：
 
@@ -243,7 +243,7 @@ RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 以上文件仅包含成功生成了调用链的任务及结果文件信息
 
-假如在生成向上方法调用链时，在配置文件中指定了生成某个类的全部方法的调用链，也不会出现在以上文件中
+假如在生成向上方法完整调用链时，在配置文件中指定了生成某个类的全部方法的调用链，也不会出现在以上文件中
 
 ## 1.6. (0.7.4)
 
@@ -279,7 +279,7 @@ RunnerGenAllGraph4Callee:doOperate	_jacg_o_er\20220505-211230.131\RunnerGenAllGr
 
 当开关为开时，以上调用关系会在当前文件中继续生成
 
-当开关为关时，以上调用关系会在单独的目录中生成，目录名格式为“[接口或父类名]@[方法名]@[完整方法名 HASH+长度]”，文件名格式为“[实现类或子类名]@[方法名]@[完整方法名 HASH+长度].txt”；原始方法调用链对应的文件中，会记录当前方法调用接口或父类方法的调用关系，使用特殊的标记，格式为“!ext_data!JUMP_MULTI_IMPL@[接口或父类名]@[方法名]@[完整方法名 HASH+长度]”
+当开关为关时，以上调用关系会在单独的目录中生成，目录名格式为“[接口或父类名]@[方法名]@[完整方法名 HASH+长度]”，文件名格式为“[实现类或子类名]@[方法名]@[完整方法名 HASH+长度].txt”；原始方法完整调用链对应的文件中，会记录当前方法调用接口或父类方法的调用关系，使用特殊的标记，格式为“!ext_data!JUMP_MULTI_IMPL@[接口或父类名]@[方法名]@[完整方法名 HASH+长度]”
 
 默认值为开
 
@@ -556,7 +556,7 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 
 #### 1.12.8.1. 方法循环调用
 
-#### 1.12.8.2. 生成方法调用链文件耗时太长的辅助信息
+#### 1.12.8.2. 生成方法完整调用链文件耗时太长的辅助信息
 
 ## 1.13. (1.0.14)
 
@@ -584,7 +584,7 @@ com.github.adrninistrator:mybatis-mysql-table-parser
 
 支持将 java-callgraph2 生成的文件的数据保存到 Neo4j 图数据库
 
-支持读取 Neo4j 保存的方法调用数据，生成向下的完整方法调用链
+支持读取 Neo4j 保存的方法调用数据，生成向下的方法完整调用链
 
 ## 1.19. (2.0.4)
 
@@ -633,7 +633,7 @@ _jacg_config/config.properties 配置文件增加参数
 
 - gen.call.graph.num.limit
 
-生成向上/向下的完整方法调用链时，每个方法允许生成的方法调用数量限制，默认为 0，小于等于 0 代表不限制
+生成向上/向下的方法完整调用链时，每个方法允许生成的方法调用数量限制，默认为 0，小于等于 0 代表不限制
 
 ### 1.24.3. 增加数据库表
 
@@ -680,7 +680,7 @@ com.adrninistrator.jacg.handler.enums.EnumsHandler:queryEnumFieldValue
 
 #### 1.26.2.1. call.graph.gen.separate.stack
 
-生成方法调用链时，是否需要为每个调用堆栈生成独立的文件，仅当 call.graph.output.detail=1 时支持
+生成方法完整调用链时，是否需要为每个调用堆栈生成独立的文件，仅当 call.graph.output.detail=1 时支持
 
 #### 1.26.2.2. parse.other.type.file
 
@@ -842,7 +842,7 @@ public class TestReflectionUtil1 {
 
 - 忽略 org.apache.commons.chain.Command:execute() 方法调用实现类方法的调用
 
-假如在解析 jar 文件时指定了 Apache Commons Chain 的 commons-chain-xx.jar，则需要通过 java-callgraph2 组件的表达式配置文件 _javacg2_parse_method_call_switch/parse_ignore_method_call_er.av 指定忽略 org.apache.commons.chain.Command:execute() 方法调用实现类方法的调用，以避免以上方法调用出现在生成的完整方法调用链中
+假如在解析 jar 文件时指定了 Apache Commons Chain 的 commons-chain-xx.jar，则需要通过 java-callgraph2 组件的表达式配置文件 _javacg2_parse_method_call_switch/parse_ignore_method_call_er.av 指定忽略 org.apache.commons.chain.Command:execute() 方法调用实现类方法的调用，以避免以上方法调用出现在生成的方法完整调用链中
 
 ### 1.29.2. 支持识别方法调用中被调用对象与参数使用的值（支持枚举）
 
@@ -914,7 +914,7 @@ test.runbycodemain.TestRBCRunnerGenAllGraph4Caller#testReturnInMemory
 
 生成方法完整调用链时，假如指定的类或方法不存在，也不会报错
 
-当生成的方法调用链为空（向下或向上没有被调用方法或调用方法）时，调用链文件（排除文件后缀）以“!empty”结尾
+当生成的方法完整调用链为空（向下或向上没有被调用方法或调用方法）时，调用链文件（排除文件后缀）以“!empty”结尾
 
 当指定的类或方法不存在时，调用链文件（排除文件后缀）以“!not_found”结尾
 
@@ -935,11 +935,11 @@ com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException: 当前类依赖�
 
 ## 1.32. (3.0.5)
 
-优化 _jacg_config/config.properties 配置文件参数 call.graph.write.to.file=false，call.graph.return.in.memory=true 时返回的内存中的方法调用链不包含方法注解的问题
+优化 _jacg_config/config.properties 配置文件参数 call.graph.write.to.file=false，call.graph.return.in.memory=true 时返回的内存中的方法完整调用链不包含方法注解的问题
 
 ## 1.33. (3.0.6)
 
-对比 jar 不同版本的方法变动并生成对应向上方法调用链，解决 jar 文件未修改时也被认为发生修改的问题
+对比 jar 不同版本的方法变动并生成对应向上方法完整调用链，解决 jar 文件未修改时也被认为发生修改的问题
 
 生成测试用 jar 文件时输出目录修改为 build
 
@@ -1016,13 +1016,13 @@ java-all-call-graph 会检查当前使用的特定组件是否为指定的版本
 
 参数名称    gen.call.graph.depth.limit
 
-参数作用    生成调用链文件时，允许生成的方法调用链深度限制，默认为 0，小于等于 0 代表不限制
+参数作用    生成调用链文件时，允许生成的方法完整调用链深度限制，默认为 0，小于等于 0 代表不限制
 
 ### 1.35.4. 生成的其他形式的调用堆栈文件修改
 
 #### 1.35.4.1. _jacg_config/config.properties 配置文件参数修改
 
-参数作用    生成方法调用链时，是否需要生成其他形式的调用堆栈文件
+参数作用    生成方法完整调用链时，是否需要生成其他形式的调用堆栈文件
 
 修改前的参数名称    call.graph.gen.separate.stack
 
@@ -1044,7 +1044,7 @@ _other_forms
 
 - 文件 1
 
-包含表头的，以 TAB 分隔的调用堆栈文件，对应生成向上的方法调用链
+包含表头的，以 TAB 分隔的调用堆栈文件，对应生成向上的方法完整调用链
 
 原有文件名	_stack_callee.md
 
@@ -1052,7 +1052,7 @@ _other_forms
 
 - 文件 2
 
-包含表头的，以 TAB 分隔的调用堆栈文件，对应生成向下的方法调用链
+包含表头的，以 TAB 分隔的调用堆栈文件，对应生成向下的方法完整调用链
 
 原有文件名	_stack_caller.md
 
@@ -1060,7 +1060,7 @@ _other_forms
 
 - 文件 3
 
-方法的调用堆栈信息汇总，对应生成向上的方法调用链
+方法的调用堆栈信息汇总，对应生成向上的方法完整调用链
 
 原有文件名	_summary_callee.md
 
@@ -1068,7 +1068,7 @@ _other_forms
 
 - 文件 4
 
-方法的调用堆栈信息汇总，对应生成向下的方法调用链
+方法的调用堆栈信息汇总，对应生成向下的方法完整调用链
 
 原有文件名	_summary_caller.md
 
@@ -1128,7 +1128,7 @@ _other_forms
 
 JarDiffResult 类中包含了每个发生变化的 jar 文件中发生变化的方法信息
 
-#### 1.35.6.6. JarDiff 功能支持生成向下的完整方法调用链
+#### 1.35.6.6. JarDiff 功能支持生成向下的方法完整调用链
 
 对应类为 com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCallerGraph
 
@@ -1152,7 +1152,7 @@ JarDiffResult 类中包含了每个发生变化的 jar 文件中发生变化的�
    configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, xxx.class.getName());
 ```
 
-- JarDiff 并生成向上的完整方法调用链及调用堆栈阶段处理
+- JarDiff 并生成向上的方法完整调用链及调用堆栈阶段处理
 
 在创建 com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCalleeGraph 对象时，需要在构造函数中传入 com.adrninistrator.jacg.handler.entrymethodinfo.AbstractEntryMethodInfoFiller 数组，即对入口方法信息填充的类
 
@@ -1184,9 +1184,9 @@ test.diffjar.task.TestTask1:test2()	{"type":"spt"}
 
 #### 1.35.6.8. JarDiff 功能支持比较 MyBatis XML 的 SQL 语句变化（使用 MySQL）
 
-- JarDiff 并生成向上的完整方法调用链及调用堆栈时支持以上变化
+- JarDiff 并生成向上的方法完整调用链及调用堆栈时支持以上变化
 
-对于使用 MySQL 的 MyBatis 的 XML 中的 SQL 语句，若发生变化，支持生成对应的 Mapper 方法向上的完整方法调用链及调用堆栈
+对于使用 MySQL 的 MyBatis 的 XML 中的 SQL 语句，若发生变化，支持生成对应的 Mapper 方法向上的方法完整调用链及调用堆栈
 
 - mybatis_ms_formated_sql 表增加字段
 
@@ -1320,7 +1320,7 @@ com.adrninistrator.jacg.handler.spring.SpringHandler#querySpringBeanByBeanName
 
 spring_bean 表增加字段 simple_class_name
 
-### 1.35.15. 在内存中返回方法调用链时，支持返回多个方法的结果
+### 1.35.15. 在内存中返回方法完整调用链时，支持返回多个方法的结果
 
 com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee:getAllMethodCallLineData4EeMap 方法返回类型修改为 `Map<String, List<MethodCallLineData4Ee>>`
 
@@ -1364,7 +1364,7 @@ test.diffjar.dao.TestJarDiffTableMapper:selectByPrimaryKey(java.lang.String)	{"t
 
 ### 1.37.4. JarDiff 功能支持将 MyBatis XML resultMap 变化映射到 Mapper 方法（支持 MySQL）
 
-若某个 MyBatis XML resultMap 发生变化，JarDiff 功能会认为对应的 Mapper 方法也发生了变化，并生成对应的完整方法调用链（支持 MySQL）
+若某个 MyBatis XML resultMap 发生变化，JarDiff 功能会认为对应的 Mapper 方法也发生了变化，并生成对应的方法完整调用链（支持 MySQL）
 
 #### 1.37.4.1. 数据库表修改
 
@@ -1455,7 +1455,7 @@ _jacg_config/config.properties 增加以下配置参数
 
 - call.graph.support.spring.aop
 
-生成方法调用链文件时，是否需要支持将 Spring AOP 相关的 advice 中的方法调用生成到方法调用链文件中
+生成方法完整调用链文件时，是否需要支持将 Spring AOP 相关的 advice 中的方法调用生成到方法完整调用链文件中
 
 #### 1.37.5.5. 增加配置文件
 
@@ -1487,7 +1487,7 @@ Conditional 注解可以指定 Spring Bean 有条件地创建，暂不处理
 
 - Around 通知中 ProceedingJoinPoint:proceed() 方法调用次数
 
-对于 Around 通知，只支持对 org.aspectj.lang.ProceedingJoinPoint:proceed() 方法调用一次，否则生成支持 Spring AOP 的方法调用链时，无法正确处理原有方法的调用
+对于 Around 通知，只支持对 org.aspectj.lang.ProceedingJoinPoint:proceed() 方法调用一次，否则生成支持 Spring AOP 的方法完整调用链时，无法正确处理原有方法的调用
 
 - jar 文件需要添加到配置参数中
 
@@ -1532,7 +1532,7 @@ java.lang.NoClassDefFoundError: javax/servlet/http/HttpSession
 - _jacg_jar_diff/jar_diff_callee_method_prefix.properties
 
 ```
-# （作用） JarDIff 比较新旧两个目录的 jar 文件，获得发生变化的方法的影响范围（生成向上的完整方法调用链及调用堆栈）使用的配置文件（每行指定一项配置，可指定多行）
+# （作用） JarDIff 比较新旧两个目录的 jar 文件，获得发生变化的方法的影响范围（生成向上的方法完整调用链及调用堆栈）使用的配置文件（每行指定一项配置，可指定多行）
 # （内容） 指定发生变化的方法中，需要进行处理的方法前缀（若未指定则不限制）
 # （格式） 可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数
 # （示例）
@@ -1548,7 +1548,7 @@ java.lang.NoClassDefFoundError: javax/servlet/http/HttpSession
 - _jacg_jar_diff/jar_diff_caller_method_prefix.properties
 
 ```
-# （作用） JarDIff 比较新旧两个目录的 jar 文件，获得发生变化的方法向下的完整方法调用链使用的配置文件（每行指定一项配置，可指定多行）
+# （作用） JarDIff 比较新旧两个目录的 jar 文件，获得发生变化的方法向下的方法完整调用链使用的配置文件（每行指定一项配置，可指定多行）
 # （内容） 指定发生变化的方法中，需要进行处理的方法前缀（若未指定则不限制）
 # （格式） 可指定包名，或包名+类名，或包名+类名+方法名，或包名+类名+方法名+参数
 # （示例）
@@ -1674,7 +1674,7 @@ java-all-call-graph 在解析 jar 文件时，将 java-all-call-graph 组件使�
 
 ### 1.39.10. 用于过滤的配置参数替换为表达式
 
-#### 1.39.10.1. 生成完整方法调用链过滤相关的配置文件
+#### 1.39.10.1. 生成方法完整调用链过滤相关的配置文件
 
 - 删除的配置文件
 
@@ -1741,7 +1741,7 @@ _jacg_jar_diff/jar_diff_gen_all_call_graph_ignore_caller.av
 
 可执行 test.runbycode.handler.methodcallargs.TestMethodCallArgInfoRecordHandler 类上进行验证
 
-### 1.39.14. 支持生成向下完整方法调用链时，方法参数作为被调用对象涉及多态时的类型替换
+### 1.39.14. 支持生成向下方法完整调用链时，方法参数作为被调用对象涉及多态时的类型替换
 
 - 增加配置文件
 
@@ -1751,7 +1751,7 @@ _jacg_gen_all_call_graph/caller_graph_callee_arg_type_polymorphism.properties
 
 在日常开发中，有时可能将某个公共方法的参数类型使用父类/接口的类型，在调用当前公共方法时，传入子类/实现类类型
 
-在这种情况下生成向下的完整方法调用链，需要专门进行处理，才能使方法调用中识别到的被调用类型，使用传入的子类/实现类的类型，而不是方法参数定义的父类/接口的类型
+在这种情况下生成向下的方法完整调用链，需要专门进行处理，才能使方法调用中识别到的被调用类型，使用传入的子类/实现类的类型，而不是方法参数定义的父类/接口的类型
 
 - 示例代码
 
@@ -1809,9 +1809,9 @@ public class CalleeArgTypePolymorphismService1 {
 }
 ```
 
-- 生成的完整方法调用链示例-不进行专门处理
+- 生成的方法完整调用链示例-不进行专门处理
 
-以下为 CalleeArgTypePolymorphismService1:testRun1Use1A() 方法向下的完整方法调用链，仅显示方法调用层级为 1~3 的 CalleeArgTypePolymorphismTool1:run1 方法相关调用链
+以下为 CalleeArgTypePolymorphismService1:testRun1Use1A() 方法向下的方法完整调用链，仅显示方法调用层级为 1~3 的 CalleeArgTypePolymorphismTool1:run1 方法相关调用链
 
 没有进行专门处理，解析到的 CalleeArgTypePolymorphismTool1:run1 方法中调用的 arg1.cmd1(); 、 arg1.cmd2(); 被调用对象类型都是接口 CalleeArgTypePolymorphismInterface1 ，之后关联到了该接口所有实现类的对应方法
 
@@ -1826,9 +1826,9 @@ public class CalleeArgTypePolymorphismService1 {
 [3]#      [CalleeArgTypePolymorphismInterface1:0]	test.callgraph.calleeargtypepolymorphism.superchild.CalleeArgTypePolymorphismChild1B:cmd2()
 ```
 
-- 生成的完整方法调用链示例-进行专门处理
+- 生成的方法完整调用链示例-进行专门处理
 
-以下为 CalleeArgTypePolymorphismService1:testRun1Use1A() 方法向下的完整方法调用链，仅显示方法调用层级为 1~3 的 CalleeArgTypePolymorphismTool1:run1 方法相关调用链
+以下为 CalleeArgTypePolymorphismService1:testRun1Use1A() 方法向下的方法完整调用链，仅显示方法调用层级为 1~3 的 CalleeArgTypePolymorphismTool1:run1 方法相关调用链
 
 对 CalleeArgTypePolymorphismTool1:run1 方法进行了专门处理，解析到的 CalleeArgTypePolymorphismTool1:run1 方法中调用的 arg1.cmd1(); 、 arg1.cmd2(); 被调用对象类型是实现类 CalleeArgTypePolymorphismChild1A
 
@@ -1854,3 +1854,35 @@ test.runbycode.callgraph.calleeargtypepolymorphism.TestGenCallerGraphCalleeArgTy
 test.runbycode.callgraph.calleeargtypepolymorphism.TestGenCallerGraphCalleeArgTypePolymorphism:testRun1Use1B
 test.runbycode.callgraph.calleeargtypepolymorphism.TestGenCallerGraphCalleeArgTypePolymorphism:testRun2Use1B23
 ```
+
+## 1.40. (4.0.1)
+
+### 1.40.1. 问题修复
+
+- 类的引用关系表唯一类名修复
+
+在之前的版本中，类的引用关系表 class_reference 的唯一类名在处理同名类时不正确，修复该问题
+
+### 1.40.2. 增加表达式
+
+- _jacg_jar_compatibility/compatibility_check_ignore_class_reference.av
+
+指定 Jar 兼容性检查快速模式时是否跳过记录特定的类引用关系
+
+### 1.40.3. Jar 兼容性检查快速模式，引用类上的@ConditionalOnClass 注解支持查询外部类的
+
+Jar 兼容性检查快速模式（仅检查被使用的类是否存在），假如某个类引用的被引用类找不到，在生成对应记录时，除了显示引用类上的@ConditionalOnClass 注解值外，也显示引用类对应的外部类上的@ConditionalOnClass 注解值
+
+### 1.40.4. 数据库表类名字段统一加长
+
+数据库表类名相关字段统一加长到 300 字符
+
+### 1.40.5. 支持 PostgreSQL 数据库
+
+假如需要使用 PostgreSQL 数据库，需要修改配置参数中指定的数据库驱动类名与 URL
+
+URL 中需要指定使用的 PostgreSQL 数据库的 schame 名称，可能需要禁用 SSL
+
+建表语句会自动转换为 PostgreSQL 数据库支持的形式，不需要人工修改
+
+之前的版本不支持数据库建表语句中的建表与添加索引分开处理，在当前版本开始支持这种情况

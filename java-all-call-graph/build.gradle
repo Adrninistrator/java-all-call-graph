@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "4.0.0"
+version = "4.0.1"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -56,7 +56,8 @@ List mysql = ['com.mysql:mysql-connector-j:8.4.0']
 
 List h2database = ["com.h2database:h2:2.2.220"]
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:4.0.0']
+// todo 4.0.1
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:4.0.1']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.1']
 
@@ -110,14 +111,14 @@ List lombok = ['org.projectlombok:lombok:1.18.24']
 
 List commons_chain = ['commons-chain:commons-chain:1.2']
 
-List mybatis = [
-        'org.mybatis:mybatis:3.5.9'
-]
+List mybatis = ['org.mybatis:mybatis:3.5.9']
+
+List pg = ['org.postgresql:postgresql:42.7.8']
 
 dependencies {
     api druid, mysql, h2database, java_callgraph, mybatis_parser, java_text_to_excel, jackson, jdom, spring_jdbc, spring
     compileOnly spring_data_neo4j
-    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, servlet, commons_bean_utils, spring_data_neo4j, lombok, commons_chain, mybatis
+    testImplementation log4j, disruptor, junit, spring_for_test, javax_inject, spring_test, servlet, commons_bean_utils, spring_data_neo4j, lombok, commons_chain, mybatis, pg
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
@@ -165,13 +166,13 @@ tasks.register('gen_run_jar', Jar) {
     }
 
     doLast {
-        def jacgConfigDirs = new File('src/main/resources').listFiles().findAll { File f -> (f.isDirectory() && f.name.startsWith('_jacg_')) }
         copy {
             from "${buildDir}/libs/run_jacg.jar"
             into "${jar_output_dir}/jar/"
         }
+        def jacgConfigDirs = new File('src/main/resources').listFiles().findAll
+                { File f -> (f.isDirectory() && (f.name.startsWith('_jacg_') || f.name.startsWith('_el_'))) }
         // 拷贝配置文件目录
-        // el
         jacgConfigDirs.each { jacgConfigDir ->
             def dirName = jacgConfigDir.getName()
 
