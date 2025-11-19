@@ -44,6 +44,14 @@ class_name == 'test.diffjar.controller.TestController1'
 JavaCG2ElAllowedVariableEnum.EAVE_PARSE_CLASS_NAME.getVariableName() + " == '" + test.diffjar.controller.TestController1.class.getName() + "'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER, 
+    JavaCG2ElAllowedVariableEnum.EAVE_PARSE_CLASS_NAME.getVariableName() + " == '" + test.diffjar.controller.TestController1.class.getName() + "'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.jardiff.TestGenJarDiffCallerGraph4ClassName
@@ -72,6 +80,14 @@ package_name == 'test.diffjar.controller'
 JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + " == 'test.diffjar.controller'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER, 
+    JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + " == 'test.diffjar.controller'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.jardiff.TestGenJarDiffCallerGraph4PackageName
@@ -96,6 +112,14 @@ simple_class_name == 'TestController1'
 
 ```java
 JavaCG2ElAllowedVariableEnum.EAVE_PARSE_SIMPLE_CLASS_NAME.getVariableName() + " == '" + test.diffjar.controller.TestController1.class.getSimpleName() + "'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER, 
+    JavaCG2ElAllowedVariableEnum.EAVE_PARSE_SIMPLE_CLASS_NAME.getVariableName() + " == '" + test.diffjar.controller.TestController1.class.getSimpleName() + "'"
+);
 ```
 
 - 表达式示例类名
@@ -126,6 +150,14 @@ method_name == 'get1'
 JavaCG2ElAllowedVariableEnum.EAVE_PARSE_METHOD_NAME.getVariableName() + " == 'get1'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER, 
+    JavaCG2ElAllowedVariableEnum.EAVE_PARSE_METHOD_NAME.getVariableName() + " == 'get1'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.jardiff.TestGenJarDiffCallerGraph4MethodName
@@ -152,6 +184,14 @@ method_arg_num == 0
 JavaCG2ElAllowedVariableEnum.EAVE_PARSE_METHOD_ARG_NUM.getVariableName() + " == 0"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER, 
+    JavaCG2ElAllowedVariableEnum.EAVE_PARSE_METHOD_ARG_NUM.getVariableName() + " == 0"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.jardiff.TestGenJarDiffCallerGraph4MethodArgNum
@@ -176,6 +216,14 @@ full_method == 'test.diffjar.controller.TestController1:get1()'
 
 ```java
 JavaCG2ElAllowedVariableEnum.EAVE_PARSE_FULL_METHOD.getVariableName() + " == '" + test.diffjar.controller.TestController1.class.getName() + ":get1()'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER, 
+    JavaCG2ElAllowedVariableEnum.EAVE_PARSE_FULL_METHOD.getVariableName() + " == '" + test.diffjar.controller.TestController1.class.getName() + ":get1()'"
+);
 ```
 
 - 表达式示例类名

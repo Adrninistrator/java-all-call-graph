@@ -8,6 +8,16 @@
 # 查看表达式忽略的数据
 若表达式用于忽略数据，则被忽略的数据会记录在日志文件中，保存在当前输出目录中，文件名为 el_ignore_data.log
 
+# 支持使用的表达式配置
+|表达式作用|表达式配置文件|表达式枚举常量名|
+|---|---|---|
+|指定生成方法完整调用链时是否跳过解析特定的方法调用，支持通过方法调用类型、调用方法或被调用方法等判断|_jacg_gen_all_call_graph/gen_call_graph_ignore_method_call.av|ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL|
+|指定解析Spring AOP影响方法时忽略哪些Spring Bean类，支持指定类名、包名、简单类名|_jacg_spring_aop/spring_aop_ignore_spring_bean_class.av|ElConfigEnum.ECE_SPRING_AOP_IGNORE_SPRING_BEAN_CLASS|
+|JarDiff获得发生变化的方法的影响范围时（生成向上的方法完整调用链及调用堆栈），指定发生变化的方法中，需要忽略的方法|_jacg_jar_diff/jar_diff_gen_all_call_graph_ignore_callee.av|ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLEE|
+|JarDiff获得发生变化的方法向下的方法完整调用链时，指定发生变化的方法中，需要忽略的方法|_jacg_jar_diff/jar_diff_gen_all_call_graph_ignore_caller.av|ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER|
+|指定Jar兼容性检查快速模式时是否跳过记录特定的类引用关系|_jacg_jar_compatibility/compatibility_check_ignore_class_reference.av|ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE|
+
+
 # 表达式示例
 
 字符串比较的表达式示例可参考 _el_example/string_compare.md

@@ -44,6 +44,14 @@ er_class_name != 'test.callgraph.extend.A1_1'
 CommonElAllowedVariableEnum.EAVE_MC_ER_CLASS_NAME.getVariableName() + " != '" + test.callgraph.extend.A1_1.class.getName() + "'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE, 
+    CommonElAllowedVariableEnum.EAVE_MC_ER_CLASS_NAME.getVariableName() + " != '" + test.callgraph.extend.A1_1.class.getName() + "'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.compatibilityfast.TestCompatibilityCheckFastErClassName
@@ -72,6 +80,14 @@ er_package_name != 'test.callgraph.extend'
 CommonElAllowedVariableEnum.EAVE_MC_ER_PACKAGE_NAME.getVariableName() + " != 'test.callgraph.extend'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE, 
+    CommonElAllowedVariableEnum.EAVE_MC_ER_PACKAGE_NAME.getVariableName() + " != 'test.callgraph.extend'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.compatibilityfast.TestCompatibilityCheckFastErPackageName
@@ -98,6 +114,14 @@ er_simple_class_name != 'A1_1'
 CommonElAllowedVariableEnum.EAVE_MC_ER_SIMPLE_CLASS_NAME.getVariableName() + " != '" + test.callgraph.extend.A1_1.class.getSimpleName() + "'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE, 
+    CommonElAllowedVariableEnum.EAVE_MC_ER_SIMPLE_CLASS_NAME.getVariableName() + " != '" + test.callgraph.extend.A1_1.class.getSimpleName() + "'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.compatibilityfast.TestCompatibilityCheckFastErSimpleClassName
@@ -122,6 +146,14 @@ ee_class_name != 'java.lang.System'
 
 ```java
 CommonElAllowedVariableEnum.EAVE_MC_EE_CLASS_NAME.getVariableName() + " != '" + java.lang.System.class.getName() + "'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE, 
+    CommonElAllowedVariableEnum.EAVE_MC_EE_CLASS_NAME.getVariableName() + " != '" + java.lang.System.class.getName() + "'"
+);
 ```
 
 - 表达式示例类名
@@ -152,6 +184,14 @@ ee_package_name != 'java.lang'
 CommonElAllowedVariableEnum.EAVE_MC_EE_PACKAGE_NAME.getVariableName() + " != 'java.lang'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE, 
+    CommonElAllowedVariableEnum.EAVE_MC_EE_PACKAGE_NAME.getVariableName() + " != 'java.lang'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.compatibilityfast.TestCompatibilityCheckFastEePackageName
@@ -176,6 +216,14 @@ ee_simple_class_name != 'System'
 
 ```java
 CommonElAllowedVariableEnum.EAVE_MC_EE_SIMPLE_CLASS_NAME.getVariableName() + " != '" + java.lang.System.class.getSimpleName() + "'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE, 
+    CommonElAllowedVariableEnum.EAVE_MC_EE_SIMPLE_CLASS_NAME.getVariableName() + " != '" + java.lang.System.class.getSimpleName() + "'"
+);
 ```
 
 - 表达式示例类名

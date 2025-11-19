@@ -44,6 +44,14 @@ class_name == 'test.callgraph.spring.aop.annopointcut1.service.TestSpringAOPAnno
 JavaCG2ElAllowedVariableEnum.EAVE_PARSE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.spring.aop.annopointcut1.service.TestSpringAOPAnnoPointcutUserServiceImpl1.class.getName() + "'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_SPRING_AOP_IGNORE_SPRING_BEAN_CLASS, 
+    JavaCG2ElAllowedVariableEnum.EAVE_PARSE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.spring.aop.annopointcut1.service.TestSpringAOPAnnoPointcutUserServiceImpl1.class.getName() + "'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.springaop.TestSpringAopEl4SpringBeanClassName
@@ -72,6 +80,14 @@ package_name == 'test.callgraph.spring.aop.annopointcut1.service'
 JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + " == 'test.callgraph.spring.aop.annopointcut1.service'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_SPRING_AOP_IGNORE_SPRING_BEAN_CLASS, 
+    JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + " == 'test.callgraph.spring.aop.annopointcut1.service'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.springaop.TestSpringAopEl4SpringBeanPackageName
@@ -96,6 +112,14 @@ simple_class_name == 'TestSpringAOPAnnoPointcutUserServiceImpl1'
 
 ```java
 JavaCG2ElAllowedVariableEnum.EAVE_PARSE_SIMPLE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.spring.aop.annopointcut1.service.TestSpringAOPAnnoPointcutUserServiceImpl1.class.getSimpleName() + "'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_SPRING_AOP_IGNORE_SPRING_BEAN_CLASS, 
+    JavaCG2ElAllowedVariableEnum.EAVE_PARSE_SIMPLE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.spring.aop.annopointcut1.service.TestSpringAOPAnnoPointcutUserServiceImpl1.class.getSimpleName() + "'"
+);
 ```
 
 - 表达式示例类名

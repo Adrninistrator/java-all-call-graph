@@ -46,6 +46,14 @@ method_call_type == 'STA'
 CommonElAllowedVariableEnum.EAVE_METHOD_CALL_TYPE.getVariableName() + " == '" + JavaCG2CallTypeEnum.CTE_RAW_INVOKE_STATIC.getType() + "'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_METHOD_CALL_TYPE.getVariableName() + " == '" + JavaCG2CallTypeEnum.CTE_RAW_INVOKE_STATIC.getType() + "'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElMethodCallType
@@ -70,6 +78,14 @@ er_class_name == 'test.callgraph.elexample.caller.TestElExampleCaller1'
 
 ```java
 CommonElAllowedVariableEnum.EAVE_MC_ER_CLASS_NAME.getVariableName() + " == '" + test.callgraph.elexample.caller.TestElExampleCaller1.class.getName() + "'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_ER_CLASS_NAME.getVariableName() + " == '" + test.callgraph.elexample.caller.TestElExampleCaller1.class.getName() + "'"
+);
 ```
 
 - 表达式示例类名
@@ -100,6 +116,14 @@ er_package_name == 'test.callgraph.elexample.caller'
 CommonElAllowedVariableEnum.EAVE_MC_ER_PACKAGE_NAME.getVariableName() + " == '" + "test.callgraph.elexample.caller" + "'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_ER_PACKAGE_NAME.getVariableName() + " == '" + "test.callgraph.elexample.caller" + "'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElErPackageName
@@ -124,6 +148,14 @@ er_simple_class_name == 'TestElExampleCaller1'
 
 ```java
 CommonElAllowedVariableEnum.EAVE_MC_ER_SIMPLE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.elexample.caller.TestElExampleCaller1.class.getSimpleName() + "'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_ER_SIMPLE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.elexample.caller.TestElExampleCaller1.class.getSimpleName() + "'"
+);
 ```
 
 - 表达式示例类名
@@ -154,6 +186,14 @@ er_method_name == 'test1'
 CommonElAllowedVariableEnum.EAVE_MC_ER_METHOD_NAME.getVariableName() + " == 'test1'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_ER_METHOD_NAME.getVariableName() + " == 'test1'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElErMethodName
@@ -178,6 +218,14 @@ er_method_arg_num == 1
 
 ```java
 CommonElAllowedVariableEnum.EAVE_MC_ER_METHOD_ARG_NUM.getVariableName() + " == 1"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_ER_METHOD_ARG_NUM.getVariableName() + " == 1"
+);
 ```
 
 - 表达式示例类名
@@ -208,6 +256,14 @@ er_full_method == 'test.callgraph.elexample.caller.TestElExampleCaller1:test1(ja
 CommonElAllowedVariableEnum.EAVE_MC_ER_FULL_METHOD.getVariableName() + " == '" + test.callgraph.elexample.caller.TestElExampleCaller1.class.getName() + ":test1(" + java.lang.String.class.getName() + ")'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_ER_FULL_METHOD.getVariableName() + " == '" + test.callgraph.elexample.caller.TestElExampleCaller1.class.getName() + ":test1(" + java.lang.String.class.getName() + ")'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElErFullMethod
@@ -232,6 +288,14 @@ ee_class_name == 'test.callgraph.elexample.callee.TestElExampleCallee1'
 
 ```java
 CommonElAllowedVariableEnum.EAVE_MC_EE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.elexample.callee.TestElExampleCallee1.class.getName() + "'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_EE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.elexample.callee.TestElExampleCallee1.class.getName() + "'"
+);
 ```
 
 - 表达式示例类名
@@ -262,6 +326,14 @@ ee_package_name == 'test.callgraph.elexample.callee'
 CommonElAllowedVariableEnum.EAVE_MC_EE_PACKAGE_NAME.getVariableName() + " == '" + "test.callgraph.elexample.callee" + "'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_EE_PACKAGE_NAME.getVariableName() + " == '" + "test.callgraph.elexample.callee" + "'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElEePackageName
@@ -286,6 +358,14 @@ ee_simple_class_name == 'TestElExampleCallee1'
 
 ```java
 CommonElAllowedVariableEnum.EAVE_MC_EE_SIMPLE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.elexample.callee.TestElExampleCallee1.class.getSimpleName() + "'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_EE_SIMPLE_CLASS_NAME.getVariableName() + " == '" + test.callgraph.elexample.callee.TestElExampleCallee1.class.getSimpleName() + "'"
+);
 ```
 
 - 表达式示例类名
@@ -316,6 +396,14 @@ ee_method_name == 'testA'
 CommonElAllowedVariableEnum.EAVE_MC_EE_METHOD_NAME.getVariableName() + " == 'testA'"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_EE_METHOD_NAME.getVariableName() + " == 'testA'"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElEeMethodName
@@ -340,6 +428,14 @@ ee_method_arg_num == 0
 
 ```java
 CommonElAllowedVariableEnum.EAVE_MC_EE_METHOD_ARG_NUM.getVariableName() + " == 0"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_EE_METHOD_ARG_NUM.getVariableName() + " == 0"
+);
 ```
 
 - 表达式示例类名
@@ -368,6 +464,14 @@ ee_full_method == 'test.callgraph.elexample.callee.TestElExampleCallee1:testC()'
 
 ```java
 CommonElAllowedVariableEnum.EAVE_MC_EE_FULL_METHOD.getVariableName() + " == '" + test.callgraph.elexample.callee.TestElExampleCallee1.class.getName() + ":testC()'"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    CommonElAllowedVariableEnum.EAVE_MC_EE_FULL_METHOD.getVariableName() + " == '" + test.callgraph.elexample.callee.TestElExampleCallee1.class.getName() + ":testC()'"
+);
 ```
 
 - 表达式示例类名
@@ -400,6 +504,14 @@ count(flags_enum) > 0
 "count(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ") > 0"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    "count(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ") > 0"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElFlagsExcludeAll
@@ -428,6 +540,14 @@ include(flags_enum, 'MCFE_EE_METHOD_ANNOTATION') && include(flags_enum, 'MCFE_ME
 
 ```java
 "include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.name() + "') && include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_METHOD_CALL_INFO.name() + "')"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    "include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.name() + "') && include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_METHOD_CALL_INFO.name() + "')"
+);
 ```
 
 - 表达式示例类名
@@ -460,6 +580,14 @@ include(flags_enum, 'MCFE_ER_METHOD_ANNOTATION') || include(flags_enum, 'MCFE_ME
 "include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.name() + "') || include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_METHOD_CALL_INFO.name() + "')"
 ```
 
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    "include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.name() + "') || include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_METHOD_CALL_INFO.name() + "')"
+);
+```
+
 - 表达式示例类名
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElFlagsExcludeMultiOr
@@ -488,6 +616,14 @@ include(flags_enum, 'MCFE_EE_DTO_GET_SET_METHOD')
 
 ```java
 "include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_EE_DTO_GET_SET_METHOD.name() + "')"
+```
+
+- 代码中指定表达式示例
+
+```java
+configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL, 
+    "include(" + ElAllowedVariableEnum.EAVE_MC_FLAGS_ENUM.getVariableName() + ", '" + MethodCallFlagsEnum.MCFE_EE_DTO_GET_SET_METHOD.name() + "')"
+);
 ```
 
 - 表达式示例类名
