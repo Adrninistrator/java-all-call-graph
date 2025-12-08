@@ -106,7 +106,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     // 处理数据库里的表名后缀
     private String handleAppName(String appName) {
         if (!APP_NAME_PATTERN.matcher(appName).matches()) {
-            logger.error("属性只支持字母、数字及下划线 {} {}", appName, genConfigUsage(ConfigKeyEnum.CKE_APP_NAME));
+            logger.error("属性只支持字母、数字及下划线 {} {}", appName, ConfigKeyEnum.CKE_APP_NAME.genConfigUsage());
             return null;
         }
         // 将app.name参数中的-替换为_
@@ -117,7 +117,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     private Integer handleThreadNum(String strThreadNum) {
         int threadNum = Integer.parseInt(strThreadNum);
         if (threadNum <= 0 || threadNum > JACGConstants.MAX_THREAD_NUM) {
-            logger.error("参数配置非法 {} 应在以下范围: (0,{}] {}", strThreadNum, JACGConstants.MAX_THREAD_NUM, genConfigUsage(ConfigKeyEnum.CKE_THREAD_NUM));
+            logger.error("参数配置非法1 {} 应在以下范围: (0,{}] {}", strThreadNum, JACGConstants.MAX_THREAD_NUM, ConfigKeyEnum.CKE_THREAD_NUM.genConfigUsage());
             return null;
         }
         return threadNum;
@@ -130,7 +130,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
         }
         // 使用指定的名称作为子目录名
         if (JavaCG2FileUtil.checkFilePathContainsSeparator(outputDirName)) {
-            logger.error("指定的目录名中不允许包含目录分隔符 {} {}", outputDirName, genConfigUsage(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME));
+            logger.error("指定的目录名中不允许包含目录分隔符 {} {}", outputDirName, ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.genConfigUsage());
             return null;
         }
         return outputDirName;
@@ -143,7 +143,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
         }
         // 使用指定的名称作为子目录名
         if (JavaCG2FileUtil.checkFilePathContainsSeparator(outputDirFlag)) {
-            logger.error("指定的目录标志中不允许包含目录分隔符 {} {}", outputDirFlag, genConfigUsage(ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG));
+            logger.error("指定的目录标志中不允许包含目录分隔符 {} {}", outputDirFlag, ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.genConfigUsage());
             return null;
         }
         return outputDirFlag;
@@ -153,7 +153,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     private Integer handleBatchInsertSize(String strDbBatchInsertSize) {
         int dbInsertBatchSize = Integer.parseInt(strDbBatchInsertSize);
         if (dbInsertBatchSize <= 0 || dbInsertBatchSize > JACGConstants.MAX_DB_INSERT_BATCH_SIZE) {
-            logger.error("参数配置非法 {} 应在以下范围: (0,{}] {}", strDbBatchInsertSize, JACGConstants.MAX_DB_INSERT_BATCH_SIZE, genConfigUsage(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE));
+            logger.error("参数配置非法2 {} 应在以下范围: (0,{}] {}", strDbBatchInsertSize, JACGConstants.MAX_DB_INSERT_BATCH_SIZE, ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.genConfigUsage());
             return null;
         }
         return dbInsertBatchSize;
@@ -162,7 +162,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     // 处理生成调用链时的详细程度
     private String handleOutputDetail(String outputDetail) {
         if (OutputDetailEnum.ODE_ILLEGAL == OutputDetailEnum.getFromDetail(outputDetail)) {
-            logger.error("参数配置非法 {} 可选值如下 {} {}", outputDetail, OutputDetailEnum.getValidValuesAndDesc(true), genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL));
+            logger.error("参数配置非法 {} 可选值如下 {} {}", outputDetail, OutputDetailEnum.getValidValuesAndDesc(true), ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.genConfigUsage());
             return null;
         }
         return outputDetail;
@@ -269,7 +269,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
 
     // 使用固定app.name的H2数据库文件
     public void useFixedAppNameH2Db() {
-        logger.info("使用H2数据库时，使用固定的参数 {} {}", genConfigUsage(ConfigKeyEnum.CKE_APP_NAME), JACGConstants.FIXED_APP_NAME);
+        logger.info("使用H2数据库时，使用固定的参数 {} {}", ConfigKeyEnum.CKE_APP_NAME.genConfigUsage(), JACGConstants.FIXED_APP_NAME);
         setMainConfig(ConfigKeyEnum.CKE_APP_NAME, JACGConstants.FIXED_APP_NAME);
         setMainConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.TRUE.toString());
     }

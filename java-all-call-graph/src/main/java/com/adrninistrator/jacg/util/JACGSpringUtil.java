@@ -169,7 +169,7 @@ public class JACGSpringUtil {
         String springBeanClassName = springBeanMap.get(springBeanName);
         if (springBeanClassName == null) {
             // 假如根据Spring Bean名称未获取到对应的类名，则将首字段修改为小写后继续尝试获取
-            String springBeanNameLower = JACGUtil.getFirstLetterLowerClassName(springBeanName);
+            String springBeanNameLower = JavaCG2ClassMethodUtil.getFirstLetterLowerClassName(springBeanName);
             springBeanClassName = springBeanMap.get(springBeanNameLower);
         }
         return springBeanClassName;

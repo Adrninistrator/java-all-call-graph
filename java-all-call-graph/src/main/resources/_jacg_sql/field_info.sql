@@ -17,5 +17,6 @@ CREATE TABLE IF NOT EXISTS jacg_field_info_{appName} (
   jar_num int NOT NULL COMMENT '字段所在的jar文件序号',
   PRIMARY KEY (record_id),
   INDEX idx_fi_scnftn_{appName}(simple_class_name(255), field_type_nad),
-  INDEX idx_fi_scnfn_{appName}(simple_class_name(255), field_name)
+  INDEX idx_fi_scnfn_{appName}(simple_class_name(255), field_name),
+  INDEX idx_fi_ftn_{appName}(field_type_nad)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='字段信息表';

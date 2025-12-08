@@ -46,7 +46,7 @@ public class CallerGraphBaseExtractor extends BaseExtractor implements StackFile
     protected ListWithResult<CallerExtractedFile> baseExtract(boolean needCloseDs) {
         List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER);
         if (keywordList.isEmpty()) {
-            logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER));
+            logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER.genConfigUsage());
             return ListWithResult.genFail();
         }
 

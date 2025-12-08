@@ -159,7 +159,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
         // 生成文件中指定的需要执行的任务信息
         List<CallerTaskInfo> callerTaskInfoList = genCallerTaskInfo();
         if (callerTaskInfoList == null) {
-            logger.error("执行失败，请检查配置文件 {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER));
+            logger.error("执行失败，请检查配置文件 {}", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER.genConfigUsage());
             return false;
         }
         if (callerTaskInfoList.isEmpty()) {
@@ -224,16 +224,16 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
         for (String config : configSet) {
             String[] array = StringUtils.splitPreserveAllTokens(config, JavaCG2Constants.FLAG_EQUAL);
             if (array.length != 2) {
-                logger.error("{} 配置参数非法，不是 xxx=yyy 格式 {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM), config);
+                logger.error("{} 配置参数非法，不是 xxx=yyy 格式 {}", OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM.genConfigUsage(), config);
                 return false;
             }
             if (!JavaCG2Util.isNumStr(array[1])) {
-                logger.error("{} 配置参数非法，不是合法的参数序号 {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM), config);
+                logger.error("{} 配置参数非法，不是合法的参数序号 {}", OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM.genConfigUsage(), config);
                 return false;
             }
             int argSeq = Integer.parseInt(array[1]);
             if (argSeq < JavaCG2Constants.METHOD_CALL_ARGUMENTS_START_SEQ) {
-                logger.error("{} 配置参数非法，参数序号应大于等于 {} {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM),
+                logger.error("{} 配置参数非法，参数序号应大于等于 {} {}", OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM.genConfigUsage(),
                         JavaCG2Constants.METHOD_CALL_ARGUMENTS_START_SEQ, config);
                 return false;
             }
@@ -259,7 +259,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
                 calleeArgTypePolymorphismInfo.setArgSeqSet(argSeqSet);
             }
             if (!argSeqSet.add(argSeq)) {
-                logger.error("{} 配置参数非法，每个被调用方法的每个方法参数序号只允许指定一次 {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM),
+                logger.error("{} 配置参数非法，每个被调用方法的每个方法参数序号只允许指定一次 {}", OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM.genConfigUsage(),
                         config);
                 return false;
             }
@@ -343,7 +343,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
 
             String[] arrayLeft = StringUtils.splitPreserveAllTokens(left, JavaCG2Constants.FLAG_COLON);
             if (arrayLeft.length != 2) {
-                logger.error("配置文件中指定的任务信息非法 {} 允许使用的格式请参考对应配置文件 {}", task, configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER));
+                logger.error("配置文件中指定的任务信息非法 {} 允许使用的格式请参考对应配置文件 {}", task, OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER.genConfigUsage());
                 return null;
             }
 
@@ -356,7 +356,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
             String arg2InTask = arrayLeft[1];
 
             if (StringUtils.isAnyBlank(callerClassName, arg2InTask)) {
-                logger.error("配置文件中指定的任务信息非法 {} 指定的类名+方法名存在空值，允许使用的格式请参考对应配置文件 {}", task, configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER));
+                logger.error("配置文件中指定的任务信息非法 {} 指定的类名+方法名存在空值，允许使用的格式请参考对应配置文件 {}", task, OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER.genConfigUsage());
                 return null;
             }
 
@@ -1389,7 +1389,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
         }
 
         if (methodCallLineData4Er.isNoDownwardCallee()) {
-            // 当前被调用方法向下没有被调用方法
+            // 当前被调用方法没有调用其他方法
             methodCallLineStr.append(JACGConstants.CALLEE_FLAG_NO_CALLEE);
         }
 

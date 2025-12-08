@@ -26,7 +26,6 @@ public class ListenerService1Impl implements ListenerService1 {
 
         testTableMapper.selectByPrimaryKey("");
         testTableMapper.selectByPrimaryKey("");
-        testTableMapper.selectByPrimaryKey2("");
 
         testTableMapper.selectByPrimaryKey("");
         testTable2Mapper.insert(null);

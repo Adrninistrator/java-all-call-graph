@@ -1,0 +1,56 @@
+package test.runbycode.mybatis;
+
+import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
+import com.adrninistrator.jacg.findstack.FindCallStackUpAndDown;
+import org.junit.Assert;
+import org.junit.Test;
+import test.callgraph.mybatis.dao.TestTable2Mapper;
+import test.callgraph.mybatis.dao.TestTableMapper;
+import test.runbycode.base.TestRunByCodeBase;
+
+/**
+ * @author adrninistrator
+ * @date 2025/5/24
+ * @description:
+ */
+public class TestMyBatisMapperFindCallStackUpAndDown extends TestRunByCodeBase {
+
+    @Test
+    public void $test0WriteDb() {
+        commonWriteDbForce();
+    }
+
+    @Test
+    public void testCallStackUpAndDown1() {
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
+                TestTableMapper.class.getName(),
+                TestTable2Mapper.class.getName()
+        );
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+                DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType()
+        );
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
+                JACGConstants.CALL_FLAG_BUSINESS_DATA + DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType()
+        );
+        FindCallStackUpAndDown findCallStackUpAndDown = new FindCallStackUpAndDown(configureWrapper);
+        CallStackFileResult callStackFileResult = findCallStackUpAndDown.find();
+        Assert.assertTrue(callStackFileResult.isSuccess());
+    }
+
+    @Test
+    public void testCallStackUpAndDown2() {
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
+                TestTableMapper.class.getName()
+        );
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
+                TestTableMapper.class.getName() + ":"
+        );
+        FindCallStackUpAndDown findCallStackUpAndDown = new FindCallStackUpAndDown(configureWrapper);
+        CallStackFileResult callStackFileResult = findCallStackUpAndDown.find();
+        Assert.assertTrue(callStackFileResult.isSuccess());
+    }
+}

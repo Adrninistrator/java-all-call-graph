@@ -2,6 +2,7 @@ package test.callgraph.reflectioncommonslang3.invoke;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.junit.Test;
+import test.callgraph.reflectioncommonslang3.example.TestReflectionCommonsLang3ExampleChild1;
 import test.callgraph.reflectioncommonslang3.example.TestReflectionCommonsLang3ExampleSuper1;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,5 +18,11 @@ public class TestReflectionCommonsLang3Invoke {
     public void testSuper1() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         TestReflectionCommonsLang3ExampleSuper1 testReflectionCommonsLang3ExampleSuper1 = new TestReflectionCommonsLang3ExampleSuper1();
         MethodUtils.invokeMethod(testReflectionCommonsLang3ExampleSuper1, "test1");
+    }
+
+    @Test
+    public void testSuper1WithChild() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        TestReflectionCommonsLang3ExampleSuper1 testReflectionCommonsLang3ExampleChild1 = new TestReflectionCommonsLang3ExampleChild1();
+        MethodUtils.invokeMethod(testReflectionCommonsLang3ExampleChild1, "test1");
     }
 }

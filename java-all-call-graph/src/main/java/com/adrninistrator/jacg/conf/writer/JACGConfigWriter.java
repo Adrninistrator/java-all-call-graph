@@ -3,9 +3,11 @@ package com.adrninistrator.jacg.conf.writer;
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.el.enums.ElConfigEnum;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
 import com.adrninistrator.javacg2.conf.writer.BaseConfigWriter;
+import com.adrninistrator.javacg2.el.enums.interfaces.ElConfigInterface;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 
@@ -51,5 +53,10 @@ public class JACGConfigWriter extends BaseConfigWriter {
     protected String chooseElDebugModeText() {
         return "将配置文件 " + ConfigKeyEnum.CKE_EL_DEBUG_MODE.getFileName() + " 的 " + ConfigKeyEnum.CKE_EL_DEBUG_MODE.getKey() + " 参数设置为 " +
                 Boolean.TRUE + " 可以使表达式执行时开启调试模式，会在应用日志中输出表达式执行时的详细信息";
+    }
+
+    @Override
+    protected ElConfigInterface[] chooseElConfigEnums() {
+        return ElConfigEnum.values();
     }
 }

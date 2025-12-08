@@ -13,7 +13,7 @@ public class MethodCallLineData4Er extends MethodCallLineData {
     @JsonIgnore
     private String calleeInfo;
 
-    // 当前被调用方法向下是否没有被调用方法
+    // 当前被调用方法向下是否没有调用其他方法
     private boolean noDownwardCallee;
 
     public MethodCallLineData4Er(int methodCallLevel, String callerSimpleClassName, Integer callerLineNumber, String actualFullMethod, String rawMethodHash,

@@ -439,6 +439,9 @@ public class JACGCallGraphFileUtil {
             } else if (JACGConstants.CALL_FLAG_RUN_IN_SPRING_TX_NO_TAB.equals(column)) {
                 // 在事务中执行
                 callGraphLineParsed.setRunInTransactionFlag(true);
+            } else if (JACGConstants.CALLEE_FLAG_NO_CALLEE_NO_TAB.equals(column)) {
+                // 没有没有调用其他方法
+                callGraphLineParsed.setNoCallee(true);
             }
         }
         callGraphLineParsed.setBusinessDataList(businessDataList);

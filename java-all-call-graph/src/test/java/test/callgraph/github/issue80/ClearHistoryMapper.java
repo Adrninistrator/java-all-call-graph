@@ -1,10 +1,10 @@
 package test.callgraph.github.issue80;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.DeleteProvider;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 

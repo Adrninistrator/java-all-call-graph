@@ -10,7 +10,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import test.runbycode.base.TestRunByCodeBase;
 import test.runbycode.parsedcustomdata.parser.TestCodeParserWithCustomData1;
-import test.runbycode.parsedcustomdata.parser.TestCodeParserWithCustomData1Child;
 import test.runbycode.parsedcustomdata.parser.TestParser4XmlCommand;
 
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.List;
 public class TestUseCodeParserWithCustomData1 extends TestRunByCodeBase {
 
     @Test
-    public void test() {
+    public void testWriteDb() {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_SKIP_WRITE_DB_WHEN_JAR_NOT_MODIFIED, Boolean.FALSE.toString());
         configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, TestCodeParserWithCustomData1.class.getName());
         Assert.assertTrue(new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper).run());
@@ -33,13 +32,5 @@ public class TestUseCodeParserWithCustomData1 extends TestRunByCodeBase {
             printListContent(list);
             Assert.assertFalse(JavaCG2Util.isCollectionEmpty(list));
         }
-    }
-
-    @Test
-    public void testDupError() {
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_SKIP_WRITE_DB_WHEN_JAR_NOT_MODIFIED, Boolean.FALSE.toString());
-        configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, TestCodeParserWithCustomData1.class.getName());
-        configureWrapper.addOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER, TestCodeParserWithCustomData1Child.class.getName());
-        Assert.assertFalse(new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper).run());
     }
 }

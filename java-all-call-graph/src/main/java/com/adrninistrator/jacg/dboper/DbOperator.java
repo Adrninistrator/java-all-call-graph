@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.exceptions.JACGSQLException;
 import com.adrninistrator.jacg.conf.DbConfInfo;
+import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.druidfilter.DruidMonitorFilter;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
@@ -346,8 +347,9 @@ public class DbOperator implements AutoCloseable {
             return true;
         } catch (Exception e) {
             if (!handleSpecialException(e, sql)) {
-                logger.error("插入失败 sql: [{}] ", sql, e);
+                logger.error("插入失败 sql: [{}]", sql);
             }
+            logger.error("插入数据出现异常，为定位导致插入失败的具体数据，可将以下配置参数值修改为 1 后再次执行 {}", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.genConfigUsage(), e);
             // 打印插入失败的数据
             for (int i = 0; i < argumentList.size(); i++) {
                 logger.error("插入失败的数据 序号: [{}] 数据: [{}]", i, StringUtils.join(argumentList.get(i), JACGConstants.FLAG_COMMA_WITH_SPACE));

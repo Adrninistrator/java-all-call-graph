@@ -125,7 +125,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
             boolean javaCG2ContinueWhenError = javaCG2ConfigureWrapper.getMainConfig(JavaCG2ConfigKeyEnum.CKE_CONTINUE_WHEN_ERROR);
             if (!javaCG2ContinueWhenError) {
                 logger.error("调用java-callgraph2生成jar包的方法调用关系失败，假如需要继续，可设置 java-callgraph2 组件配置文件参数值为 {} {}", Boolean.TRUE,
-                        configureWrapper.genConfigUsage(JavaCG2ConfigKeyEnum.CKE_CONTINUE_WHEN_ERROR));
+                        JavaCG2ConfigKeyEnum.CKE_CONTINUE_WHEN_ERROR.genConfigUsage());
                 return false;
             } else {
                 logger.warn("调用java-callgraph2生成jar包的方法调用关系失败");
@@ -150,7 +150,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         List<String> codeParserExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER);
         if (codeParserExtensionClassList.contains(MyBatisMySqlSqlInfoCodeParser.class.getName())) {
             logger.error("用于对代码进行解析的扩展类不能在配置文件中指定 {} {}", MyBatisMySqlSqlInfoCodeParser.class.getName(),
-                    configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER));
+                    OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_CODE_PARSER.genConfigUsage());
             return false;
         }
 
@@ -206,7 +206,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         Set<String> codeParserExtensionClassSet = new HashSet<>(methodCallExtensionClassList);
         if (methodCallExtensionClassList.size() != codeParserExtensionClassSet.size()) {
             logger.warn("指定的 java-callgraph2 组件方法调用处理扩展类存在重复 {} {}", StringUtils.join(methodCallExtensionClassList),
-                    configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JAVACG2_METHOD_CALL));
+                    OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JAVACG2_METHOD_CALL.genConfigUsage());
         }
 
         // 添加参数配置中的代码解析扩展类

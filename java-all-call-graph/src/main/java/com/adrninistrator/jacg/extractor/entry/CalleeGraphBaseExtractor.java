@@ -40,7 +40,7 @@ public class CalleeGraphBaseExtractor extends BaseExtractor implements StackFile
     public ListWithResult<CalleeExtractedFile> baseExtract() {
         List<String> keywordList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE);
         if (keywordList.isEmpty()) {
-            logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE));
+            logger.error("未在配置文件中指定生成方法调用堆栈时的搜索关键字 {}", OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE.genConfigUsage());
             return ListWithResult.genFail();
         }
 

@@ -69,29 +69,6 @@ public class JACGUtil {
     }
 
     /**
-     * 获取简单类名首字母小写后的结果
-     *
-     * @param simpleClassName 简单类名
-     * @return
-     */
-    public static String getFirstLetterLowerClassName(String simpleClassName) {
-        if (simpleClassName == null) {
-            return null;
-        }
-
-        if (simpleClassName.isEmpty()) {
-            return "";
-        }
-
-        String firstLetterLower = simpleClassName.substring(0, 1).toLowerCase();
-        if (simpleClassName.length() == 1) {
-            return firstLetterLower;
-        }
-
-        return firstLetterLower + simpleClassName.substring(1);
-    }
-
-    /**
      * 在字符串列表中查找字符串
      *
      * @param stringList 字符串列表

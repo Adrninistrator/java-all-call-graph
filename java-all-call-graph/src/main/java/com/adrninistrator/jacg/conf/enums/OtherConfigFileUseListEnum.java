@@ -2,10 +2,10 @@ package com.adrninistrator.jacg.conf.enums;
 
 import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter;
-import com.adrninistrator.jacg.annotation.formatter.HideAnnotationFormatter;
 import com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter;
 import com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter;
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extensions.findstackfilter.FindStackKeywordFilterInterface;
 import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.extensions.methodcall.AbstractJACGMethodCallExtension;
@@ -39,8 +39,7 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
             new String[]{"定义在生成方法完整调用链时，显示方法注解信息的扩展类完整类名（每行指定一项配置，可指定多行）",
                     "需要是 " + AbstractAnnotationFormatter.class.getName() + " 类的子类",
                     "假如需要显示方法上的注解，请将默认的方法注解处理类 " + DefaultAnnotationFormatter.class.getSimpleName() + " 在最后指定",
-                    "假如不需要显示方法上的注解，请只指定不显示方法注解的处理类 " + HideAnnotationFormatter.class.getSimpleName(),
-                    HideAnnotationFormatter.class.getName()}
+                    "假如不需要显示方法上的注解，请将当前参数值置为空"}
             , new String[]{SpringMvcRequestMappingFormatter.class.getName(),
             SpringTransactionalFormatter.class.getName(),
             DefaultAnnotationFormatter.class.getName()}),
@@ -123,6 +122,11 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
     @Override
     public String getConfigPrintInfo() {
         return fileName + " " + OtherConfigFileUseListEnum.class.getSimpleName() + "." + name();
+    }
+
+    @Override
+    public String genConfigUsage() {
+        return doGenConfigUsage(ConfigureWrapper.class);
     }
 
     @Override

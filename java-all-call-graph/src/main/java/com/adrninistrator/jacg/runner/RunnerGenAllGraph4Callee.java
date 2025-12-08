@@ -119,11 +119,11 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
         // 生成需要处理的任务信息
         Map<String, CalleeTaskInfo> calleeTaskInfoMap = genCalleeTaskInfo();
         if (calleeTaskInfoMap == null) {
-            logger.error("执行失败，请检查配置文件内容 {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE));
+            logger.error("执行失败，请检查配置文件内容 {}", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE.genConfigUsage());
             return false;
         }
         if (calleeTaskInfoMap.isEmpty()) {
-            logger.warn("查询需要执行的任务为空，请检查配置文件内容 {}", configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE));
+            logger.warn("查询需要执行的任务为空，请检查配置文件内容 {}", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE.genConfigUsage());
             return true;
         }
 
@@ -163,7 +163,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
         for (String task : taskSet) {
             String[] taskArray = StringUtils.splitPreserveAllTokens(task, JavaCG2Constants.FLAG_COLON);
             if (taskArray.length != 1 && taskArray.length != 2) {
-                logger.error("配置文件指定的任务信息非法 {} {}", task, configureWrapper.genConfigUsage(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE));
+                logger.error("配置文件指定的任务信息非法 {} {}", task, OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE.genConfigUsage());
                 return null;
             }
 

@@ -7,10 +7,10 @@ import com.adrninistrator.jacg.neo4j.runner.Neo4jRunnerGenAllGraph4Caller;
 import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
-import test.callgraph.extendcomplex2.TestUseService;
 import test.callgraph.extendsimple.ChildClassSA1;
 import test.callgraph.methodargument.TestArgumentGenerics1;
 import test.callgraph.methodcall.TestMCCaller;
+import test.callgraph.polymorphism.childoverride.TestUseChildOverride;
 import test.callgraph.spring.bean.beanannotation.variables.TestSPBVariablesDefine;
 import test.callgraph.spring.bean.use.complex.TestUseComplexService;
 import test.callgraph.superjdk.objectinputstream.TestReadObject1;
@@ -45,7 +45,7 @@ public class TestNeo4jRunnerGenAllGraph4Caller extends TestNeo4jBase {
                 TestSPBVariablesDefine.class.getName(),
                 ChildClassSA1.class.getName(),
                 TestUseComplexService.class.getName(),
-                TestUseService.class.getName(),
+                TestUseChildOverride.class.getName(),
                 TestType1.class.getName(),
                 TestReadObject1.class.getName(),
                 TestMCCaller.class.getName() + ":59 60-61"

@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.conf.enums;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
 import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
 
@@ -129,6 +130,11 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     @Override
     public String getConfigPrintInfo() {
         return key + " " + ConfigKeyEnum.class.getSimpleName() + "." + name();
+    }
+
+    @Override
+    public String genConfigUsage() {
+        return doGenConfigUsage(ConfigureWrapper.class);
     }
 
     @Override

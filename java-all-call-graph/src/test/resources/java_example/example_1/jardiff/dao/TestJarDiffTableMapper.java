@@ -1,0 +1,13 @@
+package test.jardiff.dao;
+
+import test.callgraph.mybatis.entity.TestTable;
+
+public interface TestJarDiffTableMapper {
+    TestTable selectByPrimaryKey(String id);
+
+    TestTable selectByPrimaryKeySame(String id);
+
+    TestTable select2(String id);
+
+    int deleteByFlag(String id);
+}

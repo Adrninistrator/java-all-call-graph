@@ -54,6 +54,11 @@ public class TestAnalyseJavaCG2JACG2CheckLogConfigKey {
                 if (!JavaCG2Util.isCollectionEmpty(methodCallWithInfoList2)) {
                     for (MethodCallWithInfo<WriteDbData4MethodCallStaticFieldMCR> methodCallWithInfo : methodCallWithInfoList2) {
                         WriteDbData4MethodCall methodCall = methodCallWithInfo.getMethodCall();
+                        WriteDbData4MethodCallStaticFieldMCR methodCallStaticFieldMCR = methodCallWithInfo.getInfo();
+                        if ("genConfigUsage".equals(methodCallStaticFieldMCR.getCalleeMethodName())) {
+                            // 允许使用com.adrninistrator.javacg2.conf.enums.interfaces.ConfigInterface.genConfigUsage方法打印，不允许使用其他方法
+                            continue;
+                        }
                         String callerClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(methodCall.getCallerFullMethod());
                         illegalCallerSet.add(callerClassName + ":" + methodCall.getCallerLineNumber());
                     }

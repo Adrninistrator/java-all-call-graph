@@ -160,7 +160,7 @@ public class FindCallStackTrace extends AbstractExecutor {
     public CallStackFileResult find() {
         if (Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_GEN_STACK_OTHER_FORMS))) {
             if (!OutputDetailEnum.ODE_0.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL))) {
-                logger.warn("自动设置参数值为 {} {}", OutputDetailEnum.ODE_0.getDetail(), configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL));
+                logger.warn("自动设置参数值为 {} {}", OutputDetailEnum.ODE_0.getDetail(), ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.genConfigUsage());
                 configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_0.getDetail());
             }
             logger.info("后续会生成其他形式的调用堆栈文件");
@@ -170,11 +170,11 @@ public class FindCallStackTrace extends AbstractExecutor {
         }
 
         if (!Boolean.TRUE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE))) {
-            logger.error("参数值需要设置为 {} {}", Boolean.TRUE, configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE));
+            logger.error("参数值需要设置为 {} {}", Boolean.TRUE, ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE.genConfigUsage());
             return CallStackFileResult.FAIL;
         }
         if (!Boolean.FALSE.equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY))) {
-            logger.error("参数值需要设置为 {} {}", Boolean.FALSE, configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY));
+            logger.error("参数值需要设置为 {} {}", Boolean.FALSE, ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY.genConfigUsage());
             return CallStackFileResult.FAIL;
         }
 

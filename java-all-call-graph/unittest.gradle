@@ -74,18 +74,18 @@ tasks.register('test_copy_example') {
         def exampleFlag = project.properties.get("example_flag")
         if (exampleFlag != null) {
             println 'example_flag: ' + exampleFlag
-            delete 'src/test/java/test/diffjar'
-            def srcJavaExampleDir = 'src/test/resources/java_example/example_' + exampleFlag + '/diffjar'
+            delete 'src/test/java/test/jardiff'
+            def srcJavaExampleDir = 'src/test/resources/java_example/example_' + exampleFlag + '/jardiff'
             def javaExampleDirs = new File("${srcJavaExampleDir}").listFiles().findAll { File f -> (f.isDirectory()) }
             javaExampleDirs.each { javaExampleDir ->
                 def dirName = javaExampleDir.getName()
                 println 'dir_name: ' + dirName
                 copy {
                     from "${srcJavaExampleDir}/" + dirName
-                    into 'src/test/java/test/diffjar/' + dirName
+                    into 'src/test/java/test/jardiff/' + dirName
                 }
             }
-            delete 'src/src/test/resources/jardiff_mybatis'
+            delete 'src/test/resources/jardiff_mybatis'
             def srcSqlExampleDir = 'src/test/resources/jardiff_mybatis_example/example_' + exampleFlag
             def sqlExampleDirs = new File("${srcSqlExampleDir}").listFiles().findAll { File f -> (f.isDirectory()) }
             sqlExampleDirs.each { javaExampleDir ->
@@ -113,7 +113,7 @@ tasks.register('test_gen_diff_jar', Jar) {
         delete "${buildDir}/" + jarName
     }
     from(sourceSets.test.output) {
-        include 'test/diffjar/**', 'xml_example/**', 'jardiff_mybatis/**'
+        include 'test/jardiff/**', 'xml_example/**', 'jardiff_mybatis/**'
         into '/'
     }
 }
@@ -130,7 +130,7 @@ tasks.register('test_gen_diff_jar_with_same', Jar) {
     }
     if (exampleFlag != null) {
         from(sourceSets.test.output) {
-            include 'test/diffjar/**', 'xml_example/**', 'jardiff_mybatis/**'
+            include 'test/jardiff/**', 'xml_example/**', 'jardiff_mybatis/**'
             into '/'
         }
         copy {

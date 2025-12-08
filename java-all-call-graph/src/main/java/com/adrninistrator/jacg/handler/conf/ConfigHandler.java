@@ -68,7 +68,7 @@ public class ConfigHandler extends BaseHandler {
      */
     public void noticeParseMethodCallTypeValue() {
         logger.error("使用 java-callgraph2 组件解析方法调用时未解析被调用对象和参数可能的类型与值，" +
-                "需要将 {} 参数值指定为 {}", configureWrapper.genConfigUsage(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE), Boolean.TRUE);
+                "需要将 {} 参数值指定为 {}", JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE.genConfigUsage(), Boolean.TRUE);
         throw new JavaCG2RuntimeException("使用 java-callgraph2 组件解析方法调用时未解析被调用对象和参数可能的类型与值，请按照日志提示处理");
     }
 }

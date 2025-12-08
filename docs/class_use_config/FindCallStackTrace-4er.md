@@ -547,7 +547,7 @@ OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM
 
 (作用) 即对被调用类型使用实际传入的子类类型替换方法参数定义的父类类型
 
-(前提) 使用 java-callgraph2 组件解析方法调用时需要将class java.lang.Boolean 参数值设置为 true
+(前提) 使用 java-callgraph2 组件解析方法调用时需要将 parse.method.call.type.value 参数值设置为 true
 
 (限制) 仅支持获取被调用方法被直接调用（没有嵌套多层调用）时的子类类型
 
@@ -576,11 +576,15 @@ OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER
 
 - 参数说明
 
-生成向下的方法完整调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据
+生成向下的方法完整调用链时，指定默认支持的业务功能数据需要显示哪些类型。若不指定则不显示
 
-默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEr=true的type
+默认支持的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEr=true的type
 
-method_call_info method_arg_generics_type method_return_generics_type mybatis_mysql_table mybatis_mysql_write_table
+method_call_info
+method_arg_generics_type
+method_return_generics_type
+mybatis_mysql_table
+mybatis_mysql_write_table
 
 - 当前使用参数值
 
@@ -624,9 +628,7 @@ OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER
 
 假如需要显示方法上的注解，请将默认的方法注解处理类 DefaultAnnotationFormatter 在最后指定
 
-假如不需要显示方法上的注解，请只指定不显示方法注解的处理类 HideAnnotationFormatter
-
-com.adrninistrator.jacg.annotation.formatter.HideAnnotationFormatter
+假如不需要显示方法上的注解，请将当前参数值置为空
 
 - 当前使用参数值
 

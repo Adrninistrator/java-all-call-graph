@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.conf.enums;
 
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
 import com.mysql.cj.jdbc.Driver;
 
@@ -79,6 +80,11 @@ public enum ConfigDbKeyEnum implements MainConfigInterface {
     @Override
     public String getConfigPrintInfo() {
         return key + " " + ConfigDbKeyEnum.class.getSimpleName() + "." + name();
+    }
+
+    @Override
+    public String genConfigUsage() {
+        return doGenConfigUsage(ConfigureWrapper.class);
     }
 
     @Override

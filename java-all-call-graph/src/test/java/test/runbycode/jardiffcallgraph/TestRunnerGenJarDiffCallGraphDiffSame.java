@@ -36,8 +36,8 @@ public class TestRunnerGenJarDiffCallGraphDiffSame extends TestAbstractRunnerGen
     public void testJarDiffCalleeGraphChooseMethod() {
         // 指定发生变化的方法中哪些需要处理
         configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLEE,
-                JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + " == 'test.diffjar.service' || " +
-                        "string.startsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + ", 'test.diffjar.service.')");
+                JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + " == 'test.jardiff.service' || " +
+                        "string.startsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + ", 'test.jardiff.service.')");
         super.testJarDiffCalleeGraph();
     }
 
@@ -45,8 +45,8 @@ public class TestRunnerGenJarDiffCallGraphDiffSame extends TestAbstractRunnerGen
     public void testJarDiffCallerGraphChooseMethod() {
         // 指定发生变化的方法中哪些需要处理
         configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLER,
-                JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + " == 'test.diffjar.controller' || " +
-                        "string.startsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + ", 'test.diffjar.controller.')");
+                JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + " == 'test.jardiff.controller' || " +
+                        "string.startsWith(" + JavaCG2ElAllowedVariableEnum.EAVE_PARSE_PACKAGE_NAME.getVariableName() + ", 'test.jardiff.controller.')");
         super.testJarDiffCallerGraph();
     }
 

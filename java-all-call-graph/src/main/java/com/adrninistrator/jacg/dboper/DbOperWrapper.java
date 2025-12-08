@@ -436,7 +436,7 @@ public class DbOperWrapper {
             // 当前指定的是完整类名，查找对应的简单类名
             String simpleClassName = querySimpleClassNameByFull(className);
             if (simpleClassName == null) {
-                logger.warn("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar文件未在配置文件中指定 {}", className, configureWrapper.genConfigUsage(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR));
+                logger.warn("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar文件未在配置文件中指定 {}", className, JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.genConfigUsage());
             }
             return simpleClassName;
         }
@@ -447,7 +447,7 @@ public class DbOperWrapper {
             logger.warn("指定的简单类名 {} 不存在，请检查，可能因为以下原因 " +
                             "1. 指定的类所在的jar文件未在配置文件中指定 {} " +
                             "2. 指定的类存在同名类，需要使用完整类名形式",
-                    className, configureWrapper.genConfigUsage(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR));
+                    className, JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.genConfigUsage());
             return className;
         }
         return simpleClassName;

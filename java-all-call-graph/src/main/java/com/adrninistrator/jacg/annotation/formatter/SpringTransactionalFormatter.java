@@ -10,7 +10,8 @@ import java.util.Map;
 /**
  * @author adrninistrator
  * @date 2023/2/16
- * @description:
+ * @description: 方法上的 spring-tx Transactional 注解格式化类，返回的注解内容为“@注解类名(propagation={事务传播行为})”
+ * 假如propagation为空，则返回的注解内容为“@注解类名”
  */
 public class SpringTransactionalFormatter extends AbstractAnnotationFormatter {
     @Override

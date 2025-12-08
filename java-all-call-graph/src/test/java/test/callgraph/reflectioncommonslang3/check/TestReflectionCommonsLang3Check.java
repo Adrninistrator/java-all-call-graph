@@ -23,8 +23,8 @@ public class TestReflectionCommonsLang3Check {
 
     @Test
     public void testSuper1WithChild() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        TestReflectionCommonsLang3ExampleSuper1 testReflectionCommonsLang3ExampleSuper1 = new TestReflectionCommonsLang3ExampleChild1();
-        MethodUtils.invokeMethod(testReflectionCommonsLang3ExampleSuper1, "test1");
+        TestReflectionCommonsLang3ExampleSuper1 testReflectionCommonsLang3ExampleChild1 = new TestReflectionCommonsLang3ExampleChild1();
+        MethodUtils.invokeMethod(testReflectionCommonsLang3ExampleChild1, "test1");
     }
 
     @Test

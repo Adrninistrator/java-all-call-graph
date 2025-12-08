@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * @author adrninistrator
  * @date 2022/4/8
- * @description: 默认的方法注解处理类，需要在最后处理，对于每个注解都处理，返回@注解类名
+ * @description: 默认的方法注解格式化类，需要指定在最后，对于每个注解都处理，返回的注解内容为“@注解类名”
  */
 public class DefaultAnnotationFormatter extends AbstractAnnotationFormatter {
     @Override

@@ -1,6 +1,6 @@
 # 1. 说明
 
-对部分功能进行了使用Neo4j的支持，包括导入方法调用相关数据库表到Neo4j，读取Neo4j生成向下的完整方法调用链等
+对部分功能进行了使用Neo4j的支持，包括导入方法调用相关数据库表到Neo4j，读取Neo4j生成向下的方法完整调用链等
 
 # 2. 组件依赖
 
@@ -34,6 +34,6 @@ password=xxx
 
 参考 test.neo4j.runner.Test0WriteData2Neo4jAndDb 类
 
-# 5. 读取Neo4j生成向下的完整方法调用链
+# 5. 读取Neo4j生成向下的方法完整调用链
 
 参考 test.neo4j.runner.TestNeo4jRunnerGenAllGraph4Caller 类

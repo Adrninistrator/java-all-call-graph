@@ -91,4 +91,8 @@ public class TestArgument2 {
             }
         }
     }
+
+    public void test5() {
+        System.setProperty("key", "value");
+    }
 }

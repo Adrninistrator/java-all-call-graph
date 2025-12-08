@@ -39,6 +39,9 @@ public class CallGraphLineParsed {
     // 是否在事务中执行
     private boolean runInTransactionFlag;
 
+    // 是否没有调用其他方法（向上的方法完整调用链有效）
+    private boolean noCallee;
+
     public String getCallerLineNumberStr() {
         if (callerLineNumber == null) {
             return JavaCG2Constants.DEFAULT_LINE_NUMBER_STR;
@@ -116,5 +119,13 @@ public class CallGraphLineParsed {
 
     public void setRunInTransactionFlag(boolean runInTransactionFlag) {
         this.runInTransactionFlag = runInTransactionFlag;
+    }
+
+    public boolean isNoCallee() {
+        return noCallee;
+    }
+
+    public void setNoCallee(boolean noCallee) {
+        this.noCallee = noCallee;
     }
 }

@@ -24,6 +24,7 @@ import test.callgraph.extendcomplex.ChildClassA2;
 import test.callgraph.extendcomplex.ChildClassB1;
 import test.callgraph.extendcomplex.ChildClassB2;
 import test.callgraph.extendcomplex.TestExtendComplex;
+import test.callgraph.innerclass.TestUseInnerClass;
 import test.callgraph.interfaces.interfaces.InterfaceSuper1;
 import test.callgraph.interfaces.interfaces.InterfaceSuper2;
 import test.callgraph.interfacesdefault.TestUseInterfaceDefault1;
@@ -36,8 +37,12 @@ import test.callgraph.methodargument.TestArgument2;
 import test.callgraph.methodargument.TestArgumentGenerics1;
 import test.callgraph.methodcall.TestMCCallee;
 import test.callgraph.methodcall.TestMCCaller;
+import test.callgraph.mybatis.service.impl.Service1BImpl;
+import test.callgraph.mybatis.service.listener.ListenerService1Impl;
+import test.callgraph.polymorphism.childoverride.TestUseChildOverride;
 import test.callgraph.spring.bean.use.complex.TestUseComplexService;
 import test.callgraph.spring.mvc.TestSpringController1;
+import test.callgraph.spring.tx.TestUseSpringTx;
 
 /**
  * @author adrninistrator
@@ -113,6 +118,7 @@ public class TestConfigGenerator {
                 TestMCCaller.class.getName() + ":1",
                 TestMCCaller.class.getName() + ":55",
                 TestArgument1.class.getName() + ":test",
+                TestArgument2.class.getName() + ":test",
                 TestArgument2.class.getName() + ":test(",
                 TestArgument2.class.getName() + ":test(",
                 TestArgument2.class.getName() + ":testNoCallee(",
@@ -137,6 +143,11 @@ public class TestConfigGenerator {
                 TestNoMethodClass1.class.getName(),
                 TestFixedManualAddMethodCall.class.getName(),
                 TestUnfixedManualAddMethodCall.class.getName(),
+                TestUseChildOverride.class.getName(),
+                TestUseSpringTx.class.getName(),
+                TestUseInnerClass.class.getName(),
+                Service1BImpl.class.getName(),
+                ListenerService1Impl.class.getName(),
                 TEST_NOT_EXISTS_CLASS_NAME
         );
     }

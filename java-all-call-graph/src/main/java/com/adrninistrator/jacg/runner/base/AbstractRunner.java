@@ -398,7 +398,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
 
             if (StringUtils.isNotBlank(outputDirName) && currentOutputDir.exists()) {
                 logger.error("输出目录已存在，若确实需要在该目录中输出，请先删除该目录 {} {} 对应配置参数为 {}", currentOutputDirPath, outputDirName,
-                        configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME));
+                        ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.genConfigUsage());
                 return false;
             }
         }

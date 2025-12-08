@@ -1,7 +1,7 @@
 package test.runbycode.extensions.methodcall.reflectioncustom2;
 
 import com.adrninistrator.jacg.extensions.methodcall.JavaCG2ObjInstanceMethodNameMCE;
-import test.callgraph.reflectioncustom.util.TestReflectionCustomUtil1;
+import test.callgraph.reflectioncustom.util.TestReflectionCustomUtil2;
 
 /**
  * @author adrninistrator
@@ -17,7 +17,7 @@ public class JavaCG2ReflectionCustom2MethodCallExtension extends JavaCG2ObjInsta
     @Override
     protected boolean checkHandleCalleeMethod(String calleeClassName, String calleeMethodName, String calleeMethodArgTypes) {
         return "runByReflection".equals(calleeMethodName) &&
-                TestReflectionCustomUtil1.class.getName().equals(calleeClassName) &&
+                TestReflectionCustomUtil2.class.getName().equals(calleeClassName) &&
                 "(java.lang.String,java.lang.Object,java.lang.String,java.lang.Object[])".equals(calleeMethodArgTypes);
     }
 

@@ -27,7 +27,7 @@ public abstract class AbstractRunnerWriteDbSpecialMode extends RunnerWriteDb {
         super(javaCG2ConfigureWrapper, configureWrapper);
         jarDirPathList = javaCG2ConfigureWrapper.getOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR);
         if (JavaCG2Util.isCollectionEmpty(jarDirPathList)) {
-            logger.error("需要配置参数 {}", javaCG2ConfigureWrapper.genConfigUsage(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR));
+            logger.error("需要配置参数 {}", JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR.genConfigUsage());
             throw new RuntimeException("配置参数不完整");
         }
         dbShowInfo = dbOperator.getDbConfInfo().getShowDbInfo();

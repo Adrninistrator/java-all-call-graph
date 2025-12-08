@@ -15,7 +15,9 @@ import java.util.Map;
 /**
  * @author adrninistrator
  * @date 2022/4/8
- * @description: 处理方法上的Spring MVC RequestMapping注解处理类，返回@注解类名("path")
+ * @description: 方法上的Spring MVC RequestMapping注解格式化类，返回的注解内容为“@注解类名({uri})”
+ * uri中会包含当前类及当前方法的RequestMapping相关注解的path
+ * 假如uri为空，则返回的注解内容为“@注解类名”
  */
 public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatter {
     private static final Logger logger = LoggerFactory.getLogger(SpringMvcRequestMappingFormatter.class);

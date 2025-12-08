@@ -1,6 +1,8 @@
-# 1. 比较 jar 文件修改的方法的调用链及影响范围-作用
+# 1. JarDiff 比较 jar 文件版本差异及代码影响范围（内容还需要修改）
 
-以下提供的功能，支持对比 jar 文件新旧版本，获得修改的方法，并生成这些方法向上或向下的完整方法调用链，分析
+## 1.1. 比较 jar 文件修改的方法的调用链及影响范围-作用
+
+以下提供的功能，支持对比 jar 文件新旧版本，获得修改的方法，并生成这些方法向上或向下的方法完整调用链，分析
 
 以下功能属于 java-all-call-graph 组件的一部分，项目地址参考
 
@@ -8,27 +10,27 @@ https://github.com/Adrninistrator/java-all-call-graph
 
 https://gitee.com/adrninistrator/java-all-call-graph
 
-# 2. 特性说明
+## 1.2. 特性说明
 
-## 2.1. jar 文件名比较
+### 1.2.1. jar 文件名比较
 
 在对比 jar 文件时，会忽略文件名中的版本号，仅比较文件名前缀，忽略“-数字及后面的内容”
 
 例如“jar-diff-2.0.0.jar”与“jar-diff-1.0.0.jar”的文件名前缀都是“jar-diff”，认为是同一个 jar 文件的不同版本
 
-## 2.2. 比较的类与方法
+### 1.2.2. 比较的类与方法
 
-若某个类的完整类名仅在新版 jar 文件中出现，未在旧版 jar 文件中出现时，则认为该类为新出现的类，该类的全部方法都会被用于生成完整方法调用链
+若某个类的完整类名仅在新版 jar 文件中出现，未在旧版 jar 文件中出现时，则认为该类为新出现的类，该类的全部方法都会被用于生成方法完整调用链
 
-若某个类的完整类名在新旧版 jar 文件中都有出现，则逐个比较方法，包括方法名称、方法参数类型、方法返回类型；若新版 jar 文件的某个方法在旧版 jar 文件中找不到以上信息完全相同的方法，则认为该方法为新出现的方法，该方法会被用于生成完整方法调用链
+若某个类的完整类名在新旧版 jar 文件中都有出现，则逐个比较方法，包括方法名称、方法参数类型、方法返回类型；若新版 jar 文件的某个方法在旧版 jar 文件中找不到以上信息完全相同的方法，则认为该方法为新出现的方法，该方法会被用于生成方法完整调用链
 
-若某个方法在新旧版 jar 文件中的以上信息均相同，则比较方法的代码，具体方式见下一条；若不相同，则该方法会被用于生成完整方法调用链
+若某个方法在新旧版 jar 文件中的以上信息均相同，则比较方法的代码，具体方式见下一条；若不相同，则该方法会被用于生成方法完整调用链
 
-## 2.3. 比较方法编译后的代码
+### 1.2.3. 比较方法编译后的代码
 
 在比较同一个方法在新旧版 jar 文件中是否修改时，会使用编译后的字节码进行比较，仅当方法的代码出现变化时才认为方法修改，代码格式化、空行等通常不会导致方法被认定为有修改
 
-## 2.4. 常量值修改是否影响认定方法修改
+### 1.2.4. 常量值修改是否影响认定方法修改
 
 假如方法中使用的常量值对应的类名与常量字段名称均未改变，但常量值内容改变时，也会使对应方法被认定为被修改
 
@@ -40,13 +42,13 @@ public void a() {
 }
 ```
 
-# 3. 生成结果
+## 1.3. 生成结果
 
-以下的“当前目录”都是指当前完整方法调用链文件所在目录
+以下的“当前目录”都是指当前方法完整调用链文件所在目录
 
-## 3.1. 比较 jar 文件修改的方法并生成向上的完整方法调用链与调用堆栈
+### 1.3.1. 比较 jar 文件修改的方法并生成向上的方法完整调用链与调用堆栈
 
-### 3.1.1. 文件-修改的方法基本信息-汇总
+#### 1.3.1.1. 文件-修改的方法基本信息-汇总
 
 生成的文件路径为`{当前目录}/_callee_jar_diff_summary/modified_methods_base.md`，每次执行只生成一个文件
 
@@ -64,7 +66,7 @@ jar-diff	jar-diff-2.0.0.jar	jar-diff-1.0.0.jar	test.diffjar.task.TestTask1:test1
 jar-diff	jar-diff-2.0.0.jar	jar-diff-1.0.0.jar	test.diffjar.task.TestTask1:test2()	true
 ```
 
-### 3.1.2. 文件-修改的方法向上的调用堆栈信息-汇总
+#### 1.3.1.2. 文件-修改的方法向上的调用堆栈信息-汇总
 
 生成的文件路径为`{当前目录}/_callee_jar_diff_summary/modified_methods_stack.md`，每次执行只生成一个文件
 
@@ -80,23 +82,23 @@ jar-diff-2.0.0.jar	test.diffjar.service.TestService1:testB()	000001	test.diffjar
 
 入口方法信息可通过后续内容说明的继承 AbstractEntryMethodInfoFiller 的插件类进行自定义处理
 
-### 3.1.3. 文件-向上的完整方法调用链文件
+#### 1.3.1.3. 文件-向上的方法完整调用链文件
 
 文件生成目录为`{当前目录}`，每个方法对应一个文件，文件名中包含了类名、方法名、完整方法 HASH
 
-文件内容代表从修改的方法开始向上查找到的所有的方法调用链，示例如下
+文件内容代表从修改的方法开始向上查找到的所有的方法完整调用链，示例如下
 
 ```
 test.diffjar.service.TestService1:testA()
 [0]#test.diffjar.service.TestService1:testA():java.lang.String
-[1]#  test.diffjar.controller.TestController1:test():java.lang.String	(TestController1:44)
-[2]#    test.diffjar.controller.TestController1:get1():java.lang.String@org.springframework.web.bind.annotation.GetMapping(/test1/get1)	(TestController1:29)	!entry!
-[1]#  test.diffjar.task.TestTask1:test1():void@org.springframework.scheduling.annotation.Scheduled	(TestTask1:23)	!entry!
+[1]##  test.diffjar.controller.TestController1:test():java.lang.String	(TestController1:44)
+[2]##    test.diffjar.controller.TestController1:get1():java.lang.String@org.springframework.web.bind.annotation.GetMapping(/test1/get1)	(TestController1:29)	!entry!
+[1]##  test.diffjar.task.TestTask1:test1():void@org.springframework.scheduling.annotation.Scheduled	(TestTask1:23)	!entry!
 ```
 
 文件格式说明见 [output_example.md](https://github.com/Adrninistrator/java-all-call-graph/blob/main/docs/output_example.md)
 
-### 3.1.4. 文件-修改的方法向上找入口方法的调用堆栈-Markdown 形式
+#### 1.3.1.4. 文件-修改的方法向上找入口方法的调用堆栈-Markdown 形式
 
 文件生成的目录为`{当前目录}/_stack`，每个方法对应一个文件，文件名中包含了类名、方法名、完整方法 HASH
 
@@ -108,21 +110,21 @@ test.diffjar.service.TestService1:testA()
 - 查找的关键字：
 	!entry!
 
-# 1. 调用链文件行号：4
+## 1. 调用链文件行号：4
 
-[2]#    test.diffjar.controller.TestController1:get1():java.lang.String@org.springframework.web.bind.annotation.GetMapping(/test1/get1)	(TestController1:29)	!entry!
-[1]#  test.diffjar.controller.TestController1:test():java.lang.String	(TestController1:44)
+[2]##    test.diffjar.controller.TestController1:get1():java.lang.String@org.springframework.web.bind.annotation.GetMapping(/test1/get1)	(TestController1:29)	!entry!
+[1]##  test.diffjar.controller.TestController1:test():java.lang.String	(TestController1:44)
 [0]#test.diffjar.service.TestService1:testA():java.lang.String
 
-# 2. 调用链文件行号：5
+## 2. 调用链文件行号：5
 
-[1]#  test.diffjar.task.TestTask1:test1():void@org.springframework.scheduling.annotation.Scheduled	(TestTask1:23)	!entry!
+[1]##  test.diffjar.task.TestTask1:test1():void@org.springframework.scheduling.annotation.Scheduled	(TestTask1:23)	!entry!
 [0]#test.diffjar.service.TestService1:testA():java.lang.String
 ```
 
 文件格式说明见 [other_functions.md](https://github.com/Adrninistrator/java-all-call-graph/blob/main/docs/other_functions.md)
 
-### 3.1.5. 文件-修改的方法向上到入口方法的调用堆栈-表格形式
+#### 1.3.1.5. 文件-修改的方法向上到入口方法的调用堆栈-表格形式
 
 文件生成的目录为`{当前目录}/_stack/_other_forms/{每个方法的目录}/callee_stack_table.md`，每个方法对应一个目录，目录名中包含了类名、方法名、完整方法 HASH
 
@@ -137,7 +139,7 @@ test.diffjar.service.TestService1:testA()
 000002	2	test.diffjar.service.TestService1:testA()	0
 ```
 
-### 3.1.6. 文件-修改的方法向上到入口方法的调用堆栈汇总信息
+#### 1.3.1.6. 文件-修改的方法向上到入口方法的调用堆栈汇总信息
 
 文件生成的目录为`{当前目录}/_stack/_other_forms/{每个方法的目录}/callee_stack_summary.md`，每个方法对应一个目录，目录名中包含了类名、方法名、完整方法 HASH
 
@@ -149,7 +151,7 @@ test.diffjar.service.TestService1:testA()
 000002	test.diffjar.service.TestService1:testA()	test.diffjar.task.TestTask1:test1()	test.diffjar.task.TestTask1:test1()	void
 ```
 
-### 3.1.7. 内存数据-修改的 jar 文件中修改的方法信息
+#### 1.3.1.7. 内存数据-修改的 jar 文件中修改的方法信息
 
 提供的方法返回类型为 com.adrninistrator.jacg.diff.dto.result.JarDiffResult
 
@@ -193,9 +195,9 @@ Map 中存在 key 为“jar-diff-2.0.0.jar”，value 如下的元素，fullMeth
 } ]
 ```
 
-## 3.2. 比较 jar 文件修改的方法并生成向下的完整方法调用链
+### 1.3.2. 比较 jar 文件修改的方法并生成向下的方法完整调用链
 
-### 3.2.1. 文件-修改的方法基本信息
+#### 1.3.2.1. 文件-修改的方法基本信息
 
 生成的文件路径为`{当前目录}/_caller_jar_diff_summary/modified_methods_base.md`，每次执行只生成一个文件
 
@@ -203,43 +205,43 @@ Map 中存在 key 为“jar-diff-2.0.0.jar”，value 如下的元素，fullMeth
 
 内容示例同上，略
 
-### 3.2.2. 文件-向下的完整方法调用链文件
+#### 1.3.2.2. 文件-向下的方法完整调用链文件
 
 文件生成目录为`{当前目录}`，每个方法对应一个文件，文件名中包含了类名、方法名、完整方法 HASH
 
-文件内容代表从修改的方法开始向下查找到的所有的方法调用链，示例如下
+文件内容代表从修改的方法开始向下查找到的所有的方法完整调用链，示例如下
 
 ```
 test.diffjar.controller.TestController1:post(java.lang.String)
 [0]#test.diffjar.controller.TestController1:post(java.lang.String):java.lang.String@org.springframework.web.bind.annotation.PostMapping(/test1/post)
-[1]#  [TestController1:39]	org.slf4j.Logger:info(java.lang.String,java.lang.Object):void	!no_callee!
-[1]#  [TestController1:40]	test.diffjar.service.TestService1:testB():int	!no_callee!
-[1]#  [TestController1:40]	java.lang.String:valueOf(int):java.lang.String	!no_callee!
+[1]##  [TestController1:39]	org.slf4j.Logger:info(java.lang.String,java.lang.Object):void	!no_callee!
+[1]##  [TestController1:40]	test.diffjar.service.TestService1:testB():int	!no_callee!
+[1]##  [TestController1:40]	java.lang.String:valueOf(int):java.lang.String	!no_callee!
 ```
 
 文件格式说明链接同上
 
-### 3.2.3. 内存数据-修改的 jar 文件中修改的方法信息
+#### 1.3.2.3. 内存数据-修改的 jar 文件中修改的方法信息
 
 同上，略
 
-# 4. 使用方式
+## 1.4. 使用方式
 
-## 4.1. 组件依赖等基础准备工作
+### 1.4.1. 组件依赖等基础准备工作
 
 参考 java-all-call-graph 组件说明
 
 以下生成的 _jacg_o_ee、_jacg_o_er 目录默认位置在当前目录
 
-## 4.2. 使用配置文件
+### 1.4.2. 使用配置文件
 
-### 4.2.1. 项目构建
+#### 1.4.2.1. 项目构建
 
 在控制台执行`gradlew gen_run_jar`命令
 
 会在项目根目录中生成 jar_output_dir 目录，其中保存了可以直接运行的程序、配置文件及脚本
 
-### 4.2.2. 比较 jar 文件修改的方法并生成向上的完整方法调用链与调用堆栈
+#### 1.4.2.2. 比较 jar 文件修改的方法并生成向上的方法完整调用链与调用堆栈
 
 进入以上目录，修改 _jacg_jar_diff/jar_diff_callee_graph_dir.properties 配置文件
 
@@ -249,7 +251,7 @@ test.diffjar.controller.TestController1:post(java.lang.String)
 
 生成的文件在 _jacg_o_ee 目录中创建的新目录中
 
-### 4.2.3. 比较 jar 文件修改的方法并生成向下的完整方法调用链
+#### 1.4.2.3. 比较 jar 文件修改的方法并生成向下的方法完整调用链
 
 进入以上目录，修改 _jacg_jar_diff/jar_diff_caller_graph_dir.properties 配置文件
 
@@ -259,7 +261,7 @@ test.diffjar.controller.TestController1:post(java.lang.String)
 
 生成的文件在 _jacg_o_er 目录中创建的新目录中
 
-## 4.3. 使用代码中的配置
+### 1.4.3. 使用代码中的配置
 
 测试类 TestAbstractRunnerGenJarDiffCallGraph 的子类用于验证 JarDiff 功能，以下为子类类名及用于验证的场景
 
@@ -270,13 +272,13 @@ test.diffjar.controller.TestController1:post(java.lang.String)
 |TestRunnerGenJarDiffCallGraphOneJarDiff|比较一个 jar 文件，新版本与旧版本不同|
 |TestRunnerGenJarDiffCallGraphOneJarSame|比较一个 jar 文件，新版本与旧版本相同|
 
-### 4.3.1. 比较 jar 文件修改的方法并生成向上的完整方法调用链与调用堆栈
+#### 1.4.3.1. 比较 jar 文件修改的方法并生成向上的方法完整调用链与调用堆栈
 
 参考 test.runbycode.jardiffcallgraph.TestAbstractRunnerGenJarDiffCallGraph:testJarDiffCalleeGraph 方法
 
 调用 com.adrninistrator.javacg2.conf.BaseConfigureWrapper:setOtherConfigList 方法，通过 OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLEE_GRAPH_DIR 枚举设置需要进行 JarDiff 功能的保存新旧版本 jar 文件的目录
 
-创建用于比较 jar 文件修改的方法并生成向上的完整方法调用链与调用堆栈的 com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCalleeGraph 类的实例，构造函数参数如下：
+创建用于比较 jar 文件修改的方法并生成向上的方法完整调用链与调用堆栈的 com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCalleeGraph 类的实例，构造函数参数如下：
 
 |参数序号|参数类型|参数作用|
 |---|---|---|
@@ -286,13 +288,13 @@ test.diffjar.controller.TestController1:post(java.lang.String)
 
 调用 RunnerGenJarDiffCalleeGraph 实例的 generate 方法，执行JarDiff处理
 
-### 4.3.2. 比较 jar 文件修改的方法并生成向下的完整方法调用链
+#### 1.4.3.2. 比较 jar 文件修改的方法并生成向下的方法完整调用链
 
 参考 test.runbycode.jardiffcallgraph.TestAbstractRunnerGenJarDiffCallGraph:testJarDiffCallerGraph 方法
 
 调用 com.adrninistrator.javacg2.conf.BaseConfigureWrapper:setOtherConfigList 方法，通过 OtherConfigFileUseListEnum.OCFULE_JAR_DIFF_CALLER_GRAPH_DIR 枚举设置需要进行 JarDiff 功能的保存新旧版本 jar 文件的目录
 
-创建用于比较 jar 文件修改的方法并生成向上的完整方法调用链与调用堆栈的 com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCallerGraph 类的实例，构造函数参数如下：
+创建用于比较 jar 文件修改的方法并生成向上的方法完整调用链与调用堆栈的 com.adrninistrator.jacg.diff.runner.RunnerGenJarDiffCallerGraph 类的实例，构造函数参数如下：
 
 |参数序号|参数类型|参数作用|
 |---|---|---|

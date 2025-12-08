@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.el.enums;
 
 import com.adrninistrator.jacg.common.enums.InputDirEnum;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.el.checker.ElChecker4JCCClassReference;
 import com.adrninistrator.jacg.el.checker.ElChecker4JarDiff;
 import com.adrninistrator.jacg.el.checker.ElChecker4MethodCall;
@@ -128,6 +129,11 @@ public enum ElConfigEnum implements ElConfigInterface {
     @Override
     public String getConfigPrintInfo() {
         return fileName + " " + ElConfigEnum.class.getSimpleName() + "." + name();
+    }
+
+    @Override
+    public String genConfigUsage() {
+        return doGenConfigUsage(ConfigureWrapper.class);
     }
 
     @Override

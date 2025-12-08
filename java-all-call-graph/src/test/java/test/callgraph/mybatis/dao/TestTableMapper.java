@@ -16,9 +16,5 @@ public interface TestTableMapper {
     int updateByPrimaryKey(TestTable record);
 
     //
-    TestTable selectByPrimaryKey2(String id);
-
-    int deleteByOtherTable(String id);
-
     int select1();
 }

@@ -80,7 +80,7 @@
     where id = #{id,jdbcType=VARCHAR}
   </update>
 
-  <select id="select1">
+  <select id="select1" resultType="java.lang.Integer">
     select 1
   </select>
 </mapper>

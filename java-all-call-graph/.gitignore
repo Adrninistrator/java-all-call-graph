@@ -18,5 +18,5 @@
 /src/test/resources/_javacg2_*
 /src/test/resources/jardiff_mybatis
 /src/test/resources/ogm.properties
-/src/test/java/test/diffjar/
+/src/test/java/test/jardiff/
 runlocal/

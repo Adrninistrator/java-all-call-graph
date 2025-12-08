@@ -1,7 +1,12 @@
 package test.runbycodemain;
 
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
+import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
 import test.runbycode.base.TestRunByCodeBase;
@@ -17,6 +22,22 @@ import test.runbycode.util.JACGTestUtil;
         desc = {"首先会生成指定方法向上的方法完整调用链",
                 "通过代码指定配置参数的主要功能示例"})
 public class TestRBCFindCallStackTrace4ee extends TestRunByCodeBase {
+
+    @Test
+    public void $test0WriteDb() {
+        commonWriteDb();
+    }
+
+    @Test
+    public void testExample() {
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, System.class.getName());
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4EE, JACGConstants.CALLEE_FLAG_ENTRY_NO_TAB);
+
+        FindCallStackTrace findCallStackTrace = new FindCallStackTrace(true, configureWrapper);
+        CallStackFileResult callStackFileResult = findCallStackTrace.find();
+        Assert.assertTrue(callStackFileResult.isSuccess());
+    }
 
     @Test
     public void test() {

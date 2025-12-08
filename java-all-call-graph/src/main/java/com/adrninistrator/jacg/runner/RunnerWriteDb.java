@@ -111,8 +111,8 @@ import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import com.adrninistrator.javacg2.dto.counter.JavaCG2Counter;
 import com.adrninistrator.javacg2.dto.output.JavaCG2OutputInfo;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
+import com.adrninistrator.javacg2.util.JavaCG2RunProcessUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
-import com.adrninistrator.javacg2.util.RunProcessUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -211,7 +211,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         delNumberInIndex = useH2Db || usePgDb;
         if (!useH2Db && !usePgDb && JACGSqlUtil.isMySQLDb(dbConfInfo.getDriverClassName())) {
             if (!dbConfInfo.getDbUrl().contains(JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS)) {
-                logger.error("使用MySQL时，需要在参数指定标志以开启批量插入 {} {}", JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS, configureWrapper.genConfigUsage(ConfigDbKeyEnum.CDKE_DB_URL));
+                logger.error("使用MySQL时，需要在参数指定标志以开启批量插入 {} {}", JACGConstants.MYSQL_REWRITEBATCHEDSTATEMENTS, ConfigDbKeyEnum.CDKE_DB_URL.genConfigUsage());
                 return false;
             }
         }
@@ -522,22 +522,22 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         dbOperator.closeDs(this);
 
         String[] args = new String[]{
-                RunProcessUtil.handleProcessArg(javaPath),
-                "-classpath", RunProcessUtil.handleProcessArg(newClassPath),
-                "-D" + JavaCG2Constants.JVM_PROP_KEY_INPUT_ROOT_PATH + "=" + RunProcessUtil.handleProcessArg(springAopConfigDirPath),
+                JavaCG2RunProcessUtil.handleProcessArg(javaPath),
+                "-classpath", JavaCG2RunProcessUtil.handleProcessArg(newClassPath),
+                "-D" + JavaCG2Constants.JVM_PROP_KEY_INPUT_ROOT_PATH + "=" + JavaCG2RunProcessUtil.handleProcessArg(springAopConfigDirPath),
                 "-D" + JACGConstants.JVM_PROP_KEY_LOG_FILE_SUFFIX + "=" + JACGConstants.DIR_SPRING_AOP_CONFIG,
                 "-Dfile.encoding=UTF-8",
                 RunnerWriteSpringAopAdviceAffectedMethod.class.getName()
         };
         // 启动进程
-        return RunProcessUtil.runProcess(args);
+        return JavaCG2RunProcessUtil.runProcess(args);
     }
 
     // 添加用于根据方法调用信息添加方法调用关系的处理类
     private boolean addManualAddMethodCallExtensions() {
         List<String> manualAddMethodCallClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1);
         if (JavaCG2Util.isCollectionEmpty(manualAddMethodCallClassList)) {
-            logger.info("未指定用于人工添加方法调用关系的处理类，跳过 {}", configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1));
+            logger.info("未指定用于人工添加方法调用关系的处理类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1.genConfigUsage());
             manualAddMethodCall1List = Collections.emptyList();
             return true;
         }
@@ -565,7 +565,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private boolean addJACGMethodCallExtensions() {
         List<String> jacgMethodCallExtensionClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL);
         if (JavaCG2Util.isCollectionEmpty(jacgMethodCallExtensionClassList)) {
-            logger.info("未指定 java-all-call-graph 组件处理方法调用的扩展类，跳过 {}", configureWrapper.genConfigUsage(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL));
+            logger.info("未指定 java-all-call-graph 组件处理方法调用的扩展类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_JACG_METHOD_CALL.genConfigUsage());
             jacgMethodCallExtensionList = Collections.emptyList();
             return true;
         }

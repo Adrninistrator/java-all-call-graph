@@ -502,11 +502,13 @@ OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE
 
 - 参数说明
 
-生成向上的方法完整调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据
+生成向上的方法完整调用链时，指定默认支持的业务功能数据需要显示哪些类型。若不指定则不显示
 
-默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEe=true的type
+默认支持的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEe=true的type
 
-method_call_info method_arg_generics_type method_return_generics_type
+method_call_info
+method_arg_generics_type
+method_return_generics_type
 
 - 当前使用参数值
 
@@ -550,9 +552,7 @@ OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER
 
 假如需要显示方法上的注解，请将默认的方法注解处理类 DefaultAnnotationFormatter 在最后指定
 
-假如不需要显示方法上的注解，请只指定不显示方法注解的处理类 HideAnnotationFormatter
-
-com.adrninistrator.jacg.annotation.formatter.HideAnnotationFormatter
+假如不需要显示方法上的注解，请将当前参数值置为空
 
 - 当前使用参数值
 

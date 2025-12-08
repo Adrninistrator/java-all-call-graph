@@ -1,9 +1,14 @@
 package test.runbycodemain;
 
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.dto.callstack.CallStackFileResult;
 import com.adrninistrator.jacg.findstack.FindCallStackTrace;
+import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
+import test.callgraph.branch.TestBranch1;
 import test.runbycode.base.TestRunByCodeBase;
 import test.runbycode.config.TestConfigGenerator;
 import test.runbycode.util.JACGTestUtil;
@@ -17,6 +22,18 @@ import test.runbycode.util.JACGTestUtil;
         desc = {"首先会生成指定方法向下的方法完整调用链",
                 "通过代码指定配置参数的主要功能示例"})
 public class TestRBCFindCallStackTrace4er extends TestRunByCodeBase {
+
+    @Test
+    public void testExample() {
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, TestBranch1.class.getName());
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER, System.class.getName()
+        );
+
+        FindCallStackTrace findCallStackTrace = new FindCallStackTrace(false, configureWrapper);
+        CallStackFileResult callStackFileResult = findCallStackTrace.find();
+        Assert.assertTrue(callStackFileResult.isSuccess());
+    }
 
     @Test
     public void test() {

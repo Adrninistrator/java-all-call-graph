@@ -58,7 +58,7 @@ public abstract class BaseExtractor {
     protected ListWithResult<String> findStack() {
         // 判断生成调用链时的详细程度是否为最详细
         if (!OutputDetailEnum.ODE_0.getDetail().equals(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL))) {
-            logger.warn("生成调用链时的详细程度自动设置为最详细 {} {}", OutputDetailEnum.ODE_0.getDetail(), configureWrapper.genConfigUsage(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL));
+            logger.warn("生成调用链时的详细程度自动设置为最详细 {} {}", OutputDetailEnum.ODE_0.getDetail(), ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.genConfigUsage());
             configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL, OutputDetailEnum.ODE_0.getDetail());
         }
 

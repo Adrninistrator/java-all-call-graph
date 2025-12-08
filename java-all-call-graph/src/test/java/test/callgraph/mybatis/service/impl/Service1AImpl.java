@@ -18,6 +18,6 @@ public class Service1AImpl extends AbstractService1 {
 
     @Override
     public void test1() {
-        testTableMapper.deleteByOtherTable("test");
+        testTableMapper.deleteByPrimaryKey("test");
     }
 }

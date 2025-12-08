@@ -611,7 +611,7 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
                     failNum.addAndGet();
                 }
             } catch (JACGSQLException e) {
-                logger.error("{} 出现异常 ", currentSimpleClassName, e);
+                logger.error("{} 插入数据出现异常", currentSimpleClassName);
                 failNum.addAndGet();
             }
         });

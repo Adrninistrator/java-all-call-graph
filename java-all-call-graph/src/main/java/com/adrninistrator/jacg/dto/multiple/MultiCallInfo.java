@@ -13,15 +13,22 @@ import java.util.Set;
 public class MultiCallInfo {
     private final String callerMethodHash;
 
+    private final String callerFullMethodWithReturnType;
+
     private final Set<FullMethodWithReturnType> calleeMethodSet;
 
-    public MultiCallInfo(String callerMethodHash, Set<FullMethodWithReturnType> calleeMethodSet) {
+    public MultiCallInfo(String callerMethodHash, String callerFullMethodWithReturnType, Set<FullMethodWithReturnType> calleeMethodSet) {
         this.callerMethodHash = callerMethodHash;
+        this.callerFullMethodWithReturnType = callerFullMethodWithReturnType;
         this.calleeMethodSet = calleeMethodSet;
     }
 
     public String getCallerMethodHash() {
         return callerMethodHash;
+    }
+
+    public String getCallerFullMethodWithReturnType() {
+        return callerFullMethodWithReturnType;
     }
 
     public Set<FullMethodWithReturnType> getCalleeMethodSet() {
