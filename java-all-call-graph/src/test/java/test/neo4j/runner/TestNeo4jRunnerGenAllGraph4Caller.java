@@ -7,20 +7,6 @@ import com.adrninistrator.jacg.neo4j.runner.Neo4jRunnerGenAllGraph4Caller;
 import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
-import test.callgraph.extendsimple.ChildClassSA1;
-import test.callgraph.methodargument.TestArgumentGenerics1;
-import test.callgraph.methodcall.TestMCCaller;
-import test.callgraph.polymorphism.childoverride.TestUseChildOverride;
-import test.callgraph.spring.bean.beanannotation.variables.TestSPBVariablesDefine;
-import test.callgraph.spring.bean.use.complex.TestUseComplexService;
-import test.callgraph.superjdk.objectinputstream.TestReadObject1;
-import test.callgraph.thread.callable.TestCallable;
-import test.callgraph.thread.runnable.TestRunnable;
-import test.callgraph.thread.thread.TestThread;
-import test.callgraph.thread.threadpool.TestThreadPool;
-import test.callgraph.thread.timertask.TestTimerTask;
-import test.callgraph.type.TestReturnTypeGenerics1;
-import test.callgraph.type.TestType1;
 import test.neo4j.base.TestNeo4jBase;
 
 /**
@@ -34,23 +20,6 @@ public class TestNeo4jRunnerGenAllGraph4Caller extends TestNeo4jBase {
 
     @Test
     public void test() {
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
-                TestTimerTask.class.getName(),
-                TestThreadPool.class.getName(),
-                TestThread.class.getName(),
-                TestRunnable.class.getName(),
-                TestCallable.class.getName(),
-                TestArgumentGenerics1.class.getName(),
-                TestReturnTypeGenerics1.class.getName(),
-                TestSPBVariablesDefine.class.getName(),
-                ChildClassSA1.class.getName(),
-                TestUseComplexService.class.getName(),
-                TestUseChildOverride.class.getName(),
-                TestType1.class.getName(),
-                TestReadObject1.class.getName(),
-                TestMCCaller.class.getName() + ":59 60-61"
-        );
-
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
                 DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType(),

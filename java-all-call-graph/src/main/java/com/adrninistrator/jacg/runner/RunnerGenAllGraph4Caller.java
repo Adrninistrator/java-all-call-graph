@@ -71,10 +71,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
     private static final Logger logger = LoggerFactory.getLogger(RunnerGenAllGraph4Caller.class);
 
-    private final ConfigHandler configHandler;
-
     // 简单类名及对应的完整类名Map
     private final Map<String, String> simpleAndClassNameMap = new ConcurrentHashMap<>();
+
+    private ConfigHandler configHandler;
 
     // 在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否需要忽略
     private boolean ignoreDupCalleeInOneCaller;
@@ -106,7 +106,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
 
     public RunnerGenAllGraph4Caller(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
-        configHandler = new ConfigHandler(dbOperWrapper);
+        if (!useNeo4j()) {
+            configHandler = new ConfigHandler(dbOperWrapper);
+        }
     }
 
     @Override
@@ -213,7 +215,7 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
 
         // 需要处理
         // 判断使用 java-callgraph2 组件解析方法调用时是否解析被调用对象和参数可能的类型与值
-        if (!configHandler.checkParseMethodCallTypeValue()) {
+        if (!useNeo4j() && !configHandler.checkParseMethodCallTypeValue()) {
             configHandler.noticeParseMethodCallTypeValue();
         }
 

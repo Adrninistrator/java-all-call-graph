@@ -26,7 +26,7 @@ public interface JACGMethodCallRepository extends Neo4jRepository<JACGMethodCall
             "WHERE caller.appName = $appName AND caller.methodHash = $callerMethodHash AND mc.callId > $callId " +
             "RETURN {callId: mc.callId, callType: mc.callType, enabled: mc.enabled, " +
             "calleeFullMethod: callee.fullMethod, calleeMethodHash: callee.methodHash, " +
-            "callerLineNumber: mc.callerLineNumber, callFlags: mc.callFlags, rawReturnType: caller.returnType} AS result " +
+            "callerSimpleClassName: caller.simpleClassName, callerLineNumber: mc.callerLineNumber, callerReturnType: caller.returnType, callFlags: mc.callFlags, rawReturnType: callee.returnType} AS result " +
             "ORDER BY mc.callId ASC " +
             "LIMIT 1")
     Map<String, Object> queryOneCalleeMethod(@Param("appName") String appName, @Param("callerMethodHash") String callerMethodHash, @Param("callId") int callId);
@@ -36,7 +36,7 @@ public interface JACGMethodCallRepository extends Neo4jRepository<JACGMethodCall
             "AND mc.callerLineNumber >= $lineNumStart AND mc.callerLineNumber <= $lineNumEnd " +
             "RETURN {callId: mc.callId, callType: mc.callType, enabled: mc.enabled, " +
             "calleeFullMethod: callee.fullMethod, calleeMethodHash: callee.methodHash, " +
-            "callerLineNumber: mc.callerLineNumber, callerReturnType: caller.returnType, callFlags: mc.callFlags, rawReturnType: caller.returnType} AS result " +
+            "callerSimpleClassName: caller.simpleClassName, callerLineNumber: mc.callerLineNumber, callerReturnType: caller.returnType, callFlags: mc.callFlags, rawReturnType: callee.returnType} AS result " +
             "ORDER BY mc.callId ASC " +
             "LIMIT 1")
     Map<String, Object> queryOneCalleeMethodByLine(@Param("appName") String appName, @Param("callerMethodHash") String callerMethodHash, @Param("callId") int callId,

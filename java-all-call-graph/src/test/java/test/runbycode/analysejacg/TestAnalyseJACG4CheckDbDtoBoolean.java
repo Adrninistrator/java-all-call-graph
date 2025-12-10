@@ -30,7 +30,6 @@ public class TestAnalyseJACG4CheckDbDtoBoolean {
 
     private static final Logger logger = LoggerFactory.getLogger(TestAnalyseJACG4CheckDbDtoBoolean.class);
 
-    // todo
     @Test
     public void test() throws Exception {
         ConfigureWrapper configureWrapper = new ConfigureWrapper();

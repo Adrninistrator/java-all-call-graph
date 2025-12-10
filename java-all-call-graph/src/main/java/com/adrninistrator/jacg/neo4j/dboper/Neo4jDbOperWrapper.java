@@ -172,6 +172,7 @@ public class Neo4jDbOperWrapper extends DbOperWrapper {
         writeDbData4MethodCall.setEnabled(getIntValue(methodCallMap, Neo4jColumnConstants.MC_CALL_ENABLED));
         writeDbData4MethodCall.setCalleeFullMethod(getStringValue(methodCallMap, Neo4jColumnConstants.MC_CALLEE_FULL_METHOD));
         writeDbData4MethodCall.setCalleeMethodHash(getStringValue(methodCallMap, Neo4jColumnConstants.MC_CALLEE_METHOD_HASH));
+        writeDbData4MethodCall.setCallerSimpleClassName(getStringValue(methodCallMap, Neo4jColumnConstants.MC_CALLER_SIMPLE_CLASS_NAME));
         writeDbData4MethodCall.setCallerLineNumber(getIntValue(methodCallMap, Neo4jColumnConstants.MC_CALLER_LINE_NUMBER));
         writeDbData4MethodCall.setCallFlags(getIntValue(methodCallMap, Neo4jColumnConstants.MC_CALL_FLAGS));
         writeDbData4MethodCall.setRawReturnType(getStringValue(methodCallMap, Neo4jColumnConstants.MC_RAW_RETURN_TYPE));

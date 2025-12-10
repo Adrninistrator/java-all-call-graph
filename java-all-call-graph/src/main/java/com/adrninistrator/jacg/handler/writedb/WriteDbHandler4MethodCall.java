@@ -111,7 +111,9 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     @Override
     public void init(WriteDbResult writeDbResult) {
         super.init(writeDbResult);
-        methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
+        if (!useNeo4j()) {
+            methodInfoHandler = new MethodInfoHandler(dbOperWrapper);
+        }
     }
 
     @Override
@@ -140,8 +142,8 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         Integer callerJarNum = JACGUtil.parseJarNum(callerJarNumStr);
         Integer calleeJarNum = JACGUtil.parseJarNum(calleeJarNumStr);
 
-        if (JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER.equals(rawReturnType) || JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER.equals(actualReturnType)) {
-            // 被调用方法返回类型使用占位符，需要查询被调用方法的参数类型与返回类型
+        if (!useNeo4j() && (JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER.equals(rawReturnType) || JACGConstants.RETURN_TYPE_FLAG_PLACE_HOLDER.equals(actualReturnType))) {
+            // 仅在不使用neo4j时处理，若被调用方法返回类型使用占位符，需要查询被调用方法的参数类型与返回类型
             String calleeMethodName = JavaCG2ClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
             List<WriteDbData4MethodInfo> methodInfoList = methodInfoHandler.queryMethodInfoByClassMethodSuperInterface(calleeClassName, calleeMethodName);
             if (JavaCG2Util.isCollectionEmpty(methodInfoList)) {

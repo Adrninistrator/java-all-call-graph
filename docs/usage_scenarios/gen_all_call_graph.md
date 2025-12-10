@@ -6,7 +6,9 @@
 
 IDEA 提供了显示调用指定 Java 方法向上的完整调用链的功能，可以通过“Navigate -> Call Hierarchy”菜单（快捷键：Ctrl+Alt+H） 使用；Eclipse 也提供了相同的功能。但以上都需要针对每个方法进行手工处理，不支持对方法进行过滤或者其他扩展功能
 
-当前项目能够通过静态分析的方式批量生成指定 Java 方法向下的完整调用链，对于关注的 Java 方法，能够生成其向下调用的方法信息，及被调用方法再向下调用的方法，直到最下层被调用的方法
+java-all-call-graph 项目能够通过静态分析的方式批量生成指定 Java 方法向下的完整调用链，对于关注的 Java 方法，能够生成其向下调用的方法信息，及被调用方法再向下调用的方法，直到最下层被调用的方法
+
+java-all-call-graph 项目地址为 [https://github.com/Adrninistrator/java-all-call-graph](https://github.com/Adrninistrator/java-all-call-graph)
 
 也可以生成调用指定 Java 类方法向上的完整调用链，对于关注的 Java 类的方法，能够生成调用对应方法的方法信息，及调用上述方法的信息，直到最上层未被其他方法调用的方法（通常是对外提供的服务，或定时任务等）
 
@@ -762,7 +764,32 @@ public class TestSpringController1 {
 [0]#test.callgraph.spring.mvc.TestSpringController1:get1()@org.springframework.web.bind.annotation.GetMapping(/test1/get1)@org.springframework.web.bind.annotation.ResponseBody
 ```
 
-#### 1.10.10.3. 方法上的 spring-tx Transactional 注解格式化类-SpringTransactionalFormatter
+#### 1.10.10.3. 方法上的 Spring MVC RequestMapping 注解格式化类-SpringMvcRequestMappingJsonFormatter
+
+以 JSON 格式打印 Spring Controller 的注解属性
+
+对应的 AbstractAnnotationFormatter 子类为 com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingJsonFormatter
+
+生成的注解内容为“@注解类名＠{uri}＠{注解属性的 JSON 字符串}”
+
+配置参数设置示例代码：
+
+```java
+configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
+        SpringMvcRequestMappingJsonFormatter.class.getName());
+```
+
+可参考 test.runbycodemain.TestRBCRunnerGenAllGraph4Caller:testWriteToFileSPCAnnotationJson 方法
+
+生成的注解内容示例：
+
+```java
+[0]#test.callgraph.spring.mvc.TestSpringController1:test2(test.callgraph.field.cycle.TestUseFieldGenericsCycle1)@org.springframework.web.bind.annotation.RequestMapping＠/test1/test2a＠{"method":{"attributeList":["POST"]},"value":{"attributeList":["/test2a","test2b","test2c"]}}
+```
+
+由于 RequestMapping 注解的属性有很多是数组格式，因此输出的 JSON 结构中会有 attributeList 属性
+
+#### 1.10.10.4. 方法上的 spring-tx Transactional 注解格式化类-SpringTransactionalFormatter
 
 com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter 是方法上的 spring-tx Transactional 注解格式化类，返回的注解内容为“@注解类名 (propagation={事务传播行为})”
 
@@ -788,7 +815,7 @@ public class TestSpringTx {
 [1]#  [TestUseSpringTx:13]	test.callgraph.spring.tx.TestSpringTx:test2()@org.springframework.transaction.annotation.Transactional(propagation=REQUIRES_NEW)	!run_in_spring_tx!
 ```
 
-#### 1.10.10.4. 默认的方法注解格式化类-DefaultAnnotationFormatter
+#### 1.10.10.5. 默认的方法注解格式化类-DefaultAnnotationFormatter
 
 com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter 是默认的方法注解格式化类，需要指定在最后，对于每个注解都处理，返回的注解内容为“@注解类名”
 

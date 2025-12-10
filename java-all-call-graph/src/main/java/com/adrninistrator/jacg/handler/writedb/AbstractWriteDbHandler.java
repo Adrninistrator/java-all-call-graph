@@ -286,7 +286,9 @@ public abstract class AbstractWriteDbHandler<T extends BaseWriteDbData> {
 
         writeDbResult.getWriteDbHandlerMap().put(currentSimpleClassName, this);
 
-        usePg = dbOperator.getDbConfInfo().isUsePgDb();
+        if (dbOperator != null) {
+            usePg = dbOperator.getDbConfInfo().isUsePgDb();
+        }
     }
 
     /**

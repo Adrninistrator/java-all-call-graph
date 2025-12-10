@@ -222,8 +222,9 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
         genCallGraphNumLimit = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_GEN_CALL_GRAPH_NUM_LIMIT);
         genCallGraphDepthLimit = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_GEN_CALL_GRAPH_DEPTH_LIMIT);
 
-        // todo
-        methodCallInfoHandler = new MethodCallInfoHandler(dbOperWrapper);
+        if (!useNeo4j()) {
+            methodCallInfoHandler = new MethodCallInfoHandler(dbOperWrapper);
+        }
         return true;
     }
 
@@ -591,7 +592,6 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
             }
         }
 
-        // todo
         if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType())) {
             // 初始化方法调用信息处理类
             methodCallInfoHandler = new MethodCallInfoHandler(dbOperWrapper);
@@ -899,12 +899,14 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
                         continue;
                     }
 
-                    ObjArgsInfoInMethodCall objArgsInfoInMethodCall = methodCallInfoHandler.queryObjArgsInfoInMethodCall(methodCallId);
-                    if (objArgsInfoInMethodCall != null) {
-                        addBusinessData2CallGraphInfo(businessDataType, objArgsInfoInMethodCall, callGraphInfo, methodCallLineData);
-                    } else if (callFlags != null) {
-                        logger.error("未查询到方法调用信息 {}", methodCallId);
-                        return false;
+                    if (!useNeo4j()) {
+                        ObjArgsInfoInMethodCall objArgsInfoInMethodCall = methodCallInfoHandler.queryObjArgsInfoInMethodCall(methodCallId);
+                        if (objArgsInfoInMethodCall != null) {
+                            addBusinessData2CallGraphInfo(businessDataType, objArgsInfoInMethodCall, callGraphInfo, methodCallLineData);
+                        } else if (callFlags != null) {
+                            logger.error("未查询到方法调用信息 {}", methodCallId);
+                            return false;
+                        }
                     }
                     break;
                 case BDTE_METHOD_ARG_GENERICS_TYPE:

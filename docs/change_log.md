@@ -1892,3 +1892,32 @@ URL 中需要指定使用的 PostgreSQL 数据库的 schame 名称，可能需�
 ### 1.41.1. 示例修改
 
 不影响功能
+
+## 1.42. (4.0.3)
+
+### 1.42.1. 修复 Neo4j 相关功能 Bug
+
+在前面的版本中，使用 Neo4j 时，代码执行过程中会出现异常，修复这个问题
+
+### 1.42.2. 生成调用链以 JSON 格式打印 Spring Controller 的注解属性
+
+对应的 AbstractAnnotationFormatter 子类为 com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingJsonFormatter
+
+生成的注解内容为“@注解类名＠{uri}＠{注解属性的 JSON 字符串}”
+
+配置参数设置示例代码：
+
+```java
+configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
+        SpringMvcRequestMappingJsonFormatter.class.getName());
+```
+
+可参考 test.runbycodemain.TestRBCRunnerGenAllGraph4Caller:testWriteToFileSPCAnnotationJson 方法
+
+生成的调用链内容示例：
+
+```java
+[0]#test.callgraph.spring.mvc.TestSpringController1:test2(test.callgraph.field.cycle.TestUseFieldGenericsCycle1)@org.springframework.web.bind.annotation.RequestMapping＠/test1/test2a＠{"method":{"attributeList":["POST"]},"value":{"attributeList":["/test2a","test2b","test2c"]}}
+```
+
+由于 RequestMapping 注解的属性有很多是数组格式，因此输出的 JSON 结构中会有 attributeList 属性

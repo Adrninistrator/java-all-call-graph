@@ -1,7 +1,9 @@
 package test.runbycodemain;
 
+import com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingJsonFormatter;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallLineData4Er;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller;
@@ -9,8 +11,21 @@ import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
+import test.callgraph.annotation.CallMethodWithAnnotation;
+import test.callgraph.annotation.MethodWithAnnotation;
+import test.callgraph.cyclecall.TestCycleCall1;
+import test.callgraph.extendcomplex.ChildClassA1;
+import test.callgraph.extendcomplex.ChildClassA2;
+import test.callgraph.extendcomplex.ChildClassB1;
+import test.callgraph.extendcomplex.ChildClassB2;
 import test.callgraph.extendcomplex.TestExtendComplex;
+import test.callgraph.interfaces.interfaces.InterfaceSuper1;
+import test.callgraph.interfaces.interfaces.InterfaceSuper2;
+import test.callgraph.methodargument.TestArgument1;
+import test.callgraph.methodargument.TestArgument2;
+import test.callgraph.methodargument.TestArgumentGenerics1;
 import test.callgraph.methodcall.TestMCCaller;
+import test.callgraph.spring.mvc.TestSpringController1;
 import test.runbycode.base.TestRunByCodeBase;
 import test.runbycode.config.TestConfigGenerator;
 import test.runbycode.util.JACGTestUtil;
@@ -62,6 +77,17 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
         int callGraphDirNumAfter = getCallGraphDirNum4Er();
         Assert.assertEquals(callGraphDirNumAfter, callGraphDirNumBefore + 1);
+    }
+
+    @JACGExample(title = "方法完整调用链数据仅写入文件，以JSON格式打印Spring Controller的注解属性",
+            desc = {"方法完整调用链数据不在内存中返回"})
+    @Test
+    public void testWriteToFileSPCAnnotationJson() {
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
+                TestSpringController1.class.getName());
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
+                SpringMvcRequestMappingJsonFormatter.class.getName());
+        Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
     }
 
     @JACGExample(title = "方法完整调用链数据仅写入文件，生成文件名使用更短的模式",
