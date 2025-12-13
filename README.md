@@ -112,7 +112,7 @@
 
 ## 5.1. DeepWiki
 
-提问不需要注册，但不再检索项目的最新内容
+提问不需要注册
 
 [https://deepwiki.com/Adrninistrator/java-all-call-graph](https://deepwiki.com/Adrninistrator/java-all-call-graph)
 
