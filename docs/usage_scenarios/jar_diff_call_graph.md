@@ -286,7 +286,7 @@ test.diffjar.controller.TestController1:post(java.lang.String)
 |2|ConfigureWrapper|java-all-call-graph 组件的配置参数包装类|
 |3|AbstractEntryMethodInfoFiller...|对入口方法信息进行填充的插件类数组，可为空|
 
-调用 RunnerGenJarDiffCalleeGraph 实例的 generate 方法，执行JarDiff处理
+调用 RunnerGenJarDiffCalleeGraph 实例的 generate 方法，执行 JarDiff 处理
 
 #### 1.4.3.2. 比较 jar 文件修改的方法并生成向下的方法完整调用链
 
@@ -301,4 +301,4 @@ test.diffjar.controller.TestController1:post(java.lang.String)
 |1|JavaCG2ConfigureWrapper|同上|
 |2|ConfigureWrapper|同上|
 
-调用 RunnerGenJarDiffCallerGraph 实例的 generate 方法，执行JarDiff处理
+调用 RunnerGenJarDiffCallerGraph 实例的 generate 方法，执行 JarDiff 处理
