@@ -381,7 +381,6 @@ _jacg_config/config_db.properties
     <groupId>com.github.adrninistrator</groupId>
     <artifactId>java-all-call-graph</artifactId>
     <version>版本号</version>
-    <type>pom</type>
 </dependency>
 ```
 
