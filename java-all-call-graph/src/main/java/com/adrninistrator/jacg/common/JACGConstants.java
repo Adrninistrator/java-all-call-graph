@@ -85,6 +85,8 @@ public class JACGConstants {
     public static final String CALL_FLAG_RUN_IN_OTHER_THREAD = JavaCG2Constants.FLAG_TAB + CALL_FLAG_RUN_IN_OTHER_THREAD_NO_TAB;
     public static final String CALL_FLAG_RUN_IN_SPRING_TX_NO_TAB = "!run_in_spring_tx!";
     public static final String CALL_FLAG_RUN_IN_SPRING_TX = JavaCG2Constants.FLAG_TAB + CALL_FLAG_RUN_IN_SPRING_TX_NO_TAB;
+    public static final String CALL_FLAG_THROW_NO_TAB = "!throw!";
+    public static final String CALL_FLAG_THROW = JavaCG2Constants.FLAG_TAB + CALL_FLAG_THROW_NO_TAB;
 
     public static final String MYSQL_FLAG = "mysql";
     public static final String MYSQL_REWRITEBATCHEDSTATEMENTS = "rewriteBatchedStatements=true";

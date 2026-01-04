@@ -15,5 +15,6 @@ CREATE TABLE IF NOT EXISTS jacg_method_throw_{appName} (
   PRIMARY KEY (record_id),
   INDEX idx_mt_mhcso_{appName}(method_hash, catch_start_offset),
   INDEX idx_mt_mhci_{appName}(method_hash, call_id),
+  INDEX idx_mt_ci_{appName}(call_id),
   INDEX idx_mt_scn_{appName}(simple_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法中throw的异常信息';

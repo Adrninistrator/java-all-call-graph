@@ -27,6 +27,7 @@ import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MyBatisMSWriteTable;
 import com.adrninistrator.jacg.handler.conf.ConfigHandler;
 import com.adrninistrator.jacg.handler.dto.mybatis.MyBatisMSTableInfo;
+import com.adrninistrator.jacg.handler.exception.MethodExceptionHandler;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenAllCallGraph;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
@@ -76,6 +77,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
 
     private ConfigHandler configHandler;
 
+    private MethodExceptionHandler methodExceptionHandler;
+
     // 在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否需要忽略
     private boolean ignoreDupCalleeInOneCaller;
 
@@ -101,13 +104,17 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
 
     public RunnerGenAllGraph4Caller() {
         super();
-        configHandler = new ConfigHandler(dbOperWrapper);
+        if (!useNeo4j()) {
+            configHandler = new ConfigHandler(dbOperWrapper);
+            methodExceptionHandler = new MethodExceptionHandler(dbOperWrapper);
+        }
     }
 
     public RunnerGenAllGraph4Caller(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
         if (!useNeo4j()) {
             configHandler = new ConfigHandler(dbOperWrapper);
+            methodExceptionHandler = new MethodExceptionHandler(dbOperWrapper);
         }
     }
 
@@ -1248,6 +1255,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
 
             // 为方法调用信息增加是否在事务中执行标志
             addRunInSpringTransaction(calleeInfo, methodCallId, callType, methodCallLineData4Er);
+
+            // 为方法调用信息增加是否被throw指令调用标志
+            addThrowFlag(calleeInfo, methodCallId);
         }
         String calleeInfoStr = calleeInfo.toString();
         methodCallLineData4Er.setCalleeInfo(calleeInfoStr);
@@ -1313,6 +1323,13 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
         String className = JavaCG2ClassMethodUtil.getClassNameFromMethod(fullMethod);
         simpleAndClassNameMap.putIfAbsent(callerSimpleClassName, className);
         return className;
+    }
+
+    // 为方法调用信息增加是否被throw指令调用标志
+    private void addThrowFlag(StringBuilder callInfo, int methodCallId) {
+        if (methodExceptionHandler.checkMethodCallIsThrow(methodCallId)) {
+            callInfo.append(JACGConstants.CALL_FLAG_THROW);
+        }
     }
 
     // 为向下的方法完整调用链添加默认的方法调用业务功能数据

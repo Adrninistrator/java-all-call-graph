@@ -1921,3 +1921,9 @@ configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS
 ```
 
 由于 RequestMapping 注解的属性有很多是数组格式，因此输出的 JSON 结构中会有 attributeList 属性
+
+## 1.43. (4.0.4)
+
+### 1.43.1. 生成向下的方法完整调用链时支持显示 throw 标志
+
+在生成向下的方法完整调用链时时，假如某个方法调用属于 throw 指令抛出异常时的方法调用，支持显示 throw 标志

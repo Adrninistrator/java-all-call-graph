@@ -193,6 +193,25 @@ public class MethodExceptionHandler extends BaseHandler {
     }
 
     /**
+     * 判断方法调用ID是否属于throw抛出异常的方法调用
+     *
+     * @param callId
+     * @return
+     */
+    public boolean checkMethodCallIsThrow(int callId) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MT_CHECK_METHOD_CALL_IS_THROW;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select count(*)" +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_THROW.getTableName() +
+                    " where " + DC.MT_CALL_ID + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        Integer row = dbOperator.queryObjectOneColumn(sql, Integer.class, callId);
+        return row == 1;
+    }
+
+    /**
      * 查询指定的方法catch的异常对象信息的使用情况
      *
      * @param methodCatch

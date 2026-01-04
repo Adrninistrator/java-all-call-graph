@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.callgraph.annotation.CallMethodWithAnnotation;
 import test.callgraph.annotation.MethodWithAnnotation;
+import test.callgraph.branch.TestExceptions;
 import test.callgraph.cyclecall.TestCycleCall1;
 import test.callgraph.empty.TestEmptyClass1;
 import test.callgraph.empty.TestNoMethodClass1;
@@ -132,6 +133,7 @@ public class TestConfigGenerator {
                 ChildClassA2.class.getName(),
                 ChildClassB1.class.getName(),
                 ChildClassB2.class.getName(),
+                TestExceptions.class.getName(),
                 TestExtendComplex.class.getName(),
                 test.callgraph.future.CallableImpl.class.getName() + ":call(",
                 TestSpringController1.class.getName(),

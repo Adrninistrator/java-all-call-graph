@@ -1220,6 +1220,49 @@ test.runbycode.businessdata.handler.WriteSystemSetProperty2DbHandler 是用于�
 
 可执行 test.runbycodemain.TestRBCRunnerGenAllGraph4Callee:testWriteToFile、test.runbycodemain.TestRBCRunnerGenAllGraph4Caller:testWriteToFile 方法用于验证
 
+### 1.10.15. 生成向下的调用链时显示 throw 标志
+
+在生成向下的方法完整调用链时，假如某个方法调用属于 throw 指令抛出异常时的方法调用，会显示对应的标志“!throw!”
+
+假如需要获取通过 throw 指令创建对象时调用构造函数的参数值，可在生成向下的方法完整调用链时，通过配置参数指定需要显示方法调用信息：
+
+```java
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType()
+        );
+```
+
+对应测试代码可参考 test.runbycode.callgraph.businessdata.TestCallGraphBusinessData4Er:testGenCallGraph 方法
+
+例如对于以下代码：
+
+```java
+    public static void test1da(int a) {
+        try {
+            System.out.println("ss1");
+            int b = 1 / (a - 1);
+            System.out.println(b);
+        } catch (ArithmeticException e) {
+            System.out.println("ArithmeticException");
+            throw e;
+        } catch (Exception e) {
+            System.out.println("Exception");
+            throw new RuntimeException("RuntimeException");
+        } finally {
+            print("ss2");
+        }
+        System.out.println("done1");
+    }
+```
+
+对第 210 行代码“throw new RuntimeException("RuntimeException");”解析的结果如下：
+
+```
+[1]#  [TestExceptions:210]	java.lang.RuntimeException:<init>(java.lang.String)	!busi_data!method_call_info@{"args":{"1":[{"vt":"java.lang.String","v":"RuntimeException"}]}}	!throw!	!no_callee!
+```
+
+可以看到有“!throw!”标志，且会显示 RuntimeException 类的构造函数被调用时，参数 1 的值为字符串“RuntimeException”
+
 ## 1.11. 无法正确处理的方法调用关系
 
 ### 1.11.1. 误识别为入口方法
