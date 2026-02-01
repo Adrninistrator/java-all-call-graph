@@ -80,7 +80,7 @@ public class TestAnalyseJACG2CheckHandlerInit {
             logger.info("检查通过");
             return;
         }
-        logger.error("检查不通过 {}", StringUtils.join(illegalMethodCallList, " "));
+        logger.error("检查不通过，构造函数中调用的BaseHandler子类的构造函数的参数不是 DbOperWrapper {}", StringUtils.join(illegalMethodCallList, " "));
         Assert.fail("检查不通过");
     }
 }

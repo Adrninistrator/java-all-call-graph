@@ -516,6 +516,20 @@ public enum DbTableInfoEnum {
             DC.PC_PROPERTIES_FILE_NAME,
             DC.PC_PROPERTIES_VALUE,
     }),
+    DTIE_XML_CONF("xml_conf", new String[]{
+            DC.XC_RECORD_ID,
+            DC.XC_XML_FILE_PATH,
+            DC.XC_XML_FILE_NAME,
+            DC.XC_XML_FILE_SEQ,
+            DC.XC_ELEMENT_SEQ,
+            DC.XC_PARENT_SEQ,
+            DC.XC_IN_ELEMENT_SEQ,
+            DC.XC_TYPE,
+            DC.XC_NESTED_ELEMENT_NAME,
+            DC.XC_ELEMENT_NAME,
+            DC.XC_ATTRIBUTE_NAME,
+            DC.XC_ELEMENT_VALUE
+    }),
     DTIE_MYBATIS_MS_SET_COLUMN("mybatis_ms_set_column", new String[]{
             DC.MMSETC_RECORD_ID,
             DC.MMSETC_MAPPER_SIMPLE_CLASS_NAME,

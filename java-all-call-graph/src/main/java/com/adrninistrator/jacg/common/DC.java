@@ -574,6 +574,19 @@ public class DC {
     public static final String PC_PROPERTIES_FILE_NAME = "properties_file_name";
     public static final String PC_PROPERTIES_VALUE = "properties_value";
 
+    public static final String XC_RECORD_ID = "record_id";
+    public static final String XC_XML_FILE_PATH = "xml_file_path";
+    public static final String XC_XML_FILE_NAME = "xml_file_name";
+    public static final String XC_XML_FILE_SEQ = "xml_file_seq";
+    public static final String XC_ELEMENT_SEQ = "element_seq";
+    public static final String XC_PARENT_SEQ = "parent_seq";
+    public static final String XC_IN_ELEMENT_SEQ = "in_element_seq";
+    public static final String XC_TYPE = "type";
+    public static final String XC_NESTED_ELEMENT_NAME = "nested_element_name";
+    public static final String XC_ELEMENT_NAME = "element_name";
+    public static final String XC_ATTRIBUTE_NAME = "attribute_name";
+    public static final String XC_ELEMENT_VALUE = "element_value";
+
     public static final String MMSETC_RECORD_ID = "record_id";
     public static final String MMSETC_MAPPER_SIMPLE_CLASS_NAME = "mapper_simple_class_name";
     public static final String MMSETC_MAPPER_METHOD_NAME = "mapper_method_name";

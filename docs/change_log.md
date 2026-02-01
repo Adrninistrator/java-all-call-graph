@@ -1927,3 +1927,11 @@ configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS
 ### 1.43.1. 生成向下的方法完整调用链时支持显示 throw 标志
 
 在生成向下的方法完整调用链时时，假如某个方法调用属于 throw 指令抛出异常时的方法调用，支持显示 throw 标志
+
+## 1.44. (4.0.5)
+
+### 1.44.1. 支持解析 XML 文件
+
+支持将 XML 文件内容解析为通用格式，保存到对应的数据库表 xml_conf
+
+可使用 com.adrninistrator.jacg.handler.conf.XmlConfHandler 类查询 XML 文件内容

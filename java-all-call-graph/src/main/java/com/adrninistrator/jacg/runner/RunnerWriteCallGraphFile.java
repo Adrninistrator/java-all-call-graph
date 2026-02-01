@@ -17,6 +17,7 @@ import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.MyBatisMy
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.PropertiesConfCodeParser;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.SpringXmlBeanParser;
 import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.SpringXmlCodeParser;
+import com.adrninistrator.jacg.extensions.codeparser.jarentryotherfile.XmlConfCodeParser;
 import com.adrninistrator.jacg.extensions.codeparser.methodannotation.MyBatisAnnotationCodeParser;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
@@ -184,6 +185,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
         extensionsManager.addCodeParser(new SpringXmlCodeParser());
         extensionsManager.addCodeParser(new MyBatisAnnotationCodeParser());
         extensionsManager.addCodeParser(new PropertiesConfCodeParser());
+        extensionsManager.addCodeParser(new XmlConfCodeParser());
         extensionsManager.setSpringXmlBeanParser(new SpringXmlBeanParser());
 
         // 添加参数配置中的代码解析扩展类

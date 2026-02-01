@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS jacg_xml_conf_{appName} (
+  record_id int NOT NULL COMMENT '记录id，从1开始',
+  xml_file_path varchar(500) NOT NULL COMMENT 'XML文件路径',
+  xml_file_name varchar(255) NOT NULL COMMENT 'XML文件名',
+  xml_file_seq int NOT NULL COMMENT 'XML文件序号，从1开始',
+  element_seq int COMMENT '元素序号，从1开始',
+  parent_seq int COMMENT '父元素序号，从1开始',
+  in_element_seq int COMMENT '所在元素序号，从1开始',
+  type varchar(10) NOT NULL COMMENT '类型（e:元素，ev:元素值，eav:元素属性值）',
+  nested_element_name varchar(500) NOT NULL COMMENT '嵌套的元素名称，包含所有上层元素的名称及当前元素的名称，各个元素名称之间使用"."分隔，例如"a.b.c"',
+  element_name varchar(100) NOT NULL COMMENT '当前的元素名称',
+  attribute_name varchar(100) COMMENT '当前的元素属性名称，为空代表不属于元素属性',
+  element_value text COLLATE utf8mb4_bin COMMENT '当前的元素值或元素属性值',
+  PRIMARY KEY (record_id),
+  INDEX idx_xc_xfn_{appName}(xml_file_name),
+  INDEX idx_xc_xfs_ps_{appName}(xml_file_seq, parent_seq),
+  INDEX idx_xc_xes_{appName}(xml_file_seq, element_seq),
+  INDEX idx_xc_xfs_ies_{appName}(xml_file_seq, in_element_seq),
+  INDEX idx_xc_enan_{appName}(element_name, attribute_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='XML文件配置内容表';

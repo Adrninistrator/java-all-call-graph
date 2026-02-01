@@ -99,6 +99,7 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringScanPackageJ
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringScanPackageXml;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringTaskJava;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringTaskXml;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4XmlConf;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
@@ -1246,7 +1247,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         }
         WriteDbHandler4PropertiesConf writeDbHandler4PropertiesConf = new WriteDbHandler4PropertiesConf(writeDbResult);
         initWriteDbHandler(writeDbHandler4PropertiesConf);
-        return writeDbHandler4PropertiesConf.handle(javaCG2OutputInfo);
+        if(!writeDbHandler4PropertiesConf.handle(javaCG2OutputInfo)){
+            return false;
+        }
+
+        WriteDbHandler4XmlConf writeDbHandler4XmlConf = new WriteDbHandler4XmlConf(writeDbResult);
+        initWriteDbHandler(writeDbHandler4XmlConf);
+        return writeDbHandler4XmlConf.handle(javaCG2OutputInfo);
     }
 
     // 处理解析jar文件时获取的自定义数据
