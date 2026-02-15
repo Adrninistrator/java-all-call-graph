@@ -1,6 +1,5 @@
 package test.runbycode.analysejacg;
 
-import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.JACGFileUtil;
@@ -12,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.runbycode.base.TestRunByCodeBase;
 
 import java.io.File;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.List;
  * @date 2025/5/28
  * @description: 解析java-all-call-graph组件jar文件并写入数据库
  */
-public class TestAnalyseJACG0WriteDb {
+public class TestAnalyseJACG0WriteDb extends TestRunByCodeBase {
 
     private static final Logger logger = LoggerFactory.getLogger(TestAnalyseJACG0WriteDb.class);
 
@@ -57,9 +57,9 @@ public class TestAnalyseJACG0WriteDb {
     public void test() {
 //        String jacgJarFilePath = getJACGJarFilePath();
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = new JavaCG2ConfigureWrapper();
-        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR, "out/production/classes");
+        javaCG2ConfigureWrapper.setOtherConfigList(JavaCG2OtherConfigFileUseListEnum.OCFULE_JAR_DIR,
+                "out/production/classes","out/test/classes/test/runbycode");
 
-        ConfigureWrapper configureWrapper = new ConfigureWrapper();
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_SKIP_WRITE_DB_WHEN_JAR_NOT_MODIFIED, Boolean.FALSE.toString());
         RunnerWriteDb runnerWriteDb = new RunnerWriteDb(javaCG2ConfigureWrapper, configureWrapper);
         Assert.assertTrue(runnerWriteDb.run());

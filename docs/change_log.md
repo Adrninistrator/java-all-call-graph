@@ -1935,3 +1935,25 @@ configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS
 支持将 XML 文件内容解析为通用格式，保存到对应的数据库表 xml_conf
 
 可使用 com.adrninistrator.jacg.handler.conf.XmlConfHandler 类查询 XML 文件内容
+
+## 1.45. (4.0.6)
+
+### 1.45.1. method_annotation 表增加字段
+
+方法所在的 jar 文件序号
+
+### 1.45.2. method_call_info 表增加字段
+
+```
+数组值组合序号
+数组维度
+数组下标
+```
+
+### 1.45.3. spring_controller 表增加字段
+
+方法所在的 jar 文件序号
+
+### 1.45.4. 支持解析反射的方法调用（原生使用方式）
+
+见 [Java静态分析解析反射方法调用](usage_scenarios/parse_reflection_call.md)

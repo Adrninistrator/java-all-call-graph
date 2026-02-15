@@ -35,7 +35,7 @@ public class TestRBC1RunnerWriteDb extends TestRunByCodeBase {
 
     // 支持使用本地参数
     @Test
-    public void test2WriteDb() {
+    public void test2WriteDbLocal() {
         // 生成 java-callgraph2 使用的配置参数包装类
         JavaCG2ConfigureWrapper javaCG2ConfigureWrapper = TestConfigGenerator.genJavaCG2ConfigureWrapper();
 

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS jacg_method_annotation_{appName} (
   attribute_value text DEFAULT NULL COMMENT '注解属性值',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
   return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
+  jar_num int NOT NULL COMMENT '方法所在的jar文件序号',
   simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
   PRIMARY KEY (record_id),
   INDEX idx_ma_1_{appName}(method_hash, annotation_name),

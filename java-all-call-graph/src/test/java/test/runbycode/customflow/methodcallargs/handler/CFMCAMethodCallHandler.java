@@ -67,7 +67,7 @@ public class CFMCAMethodCallHandler extends BaseHandler {
                 }
                 // 参数类型非空，添加方法调用关系
                 String calleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethod(argType, "handle", TestBaseCFMCARequestDto.class);
-                methodCallHandler.manualAddMethodCall(callerInfo.getCallerFullMethod(), callerInfo.getCallerReturnType(), calleeFullMethod, "void");
+                methodCallHandler.manualAddMethodCall(callerInfo.getCallerFullMethod(), callerInfo.getCallerReturnType(), calleeFullMethod, "void", "customflow");
             }
         }
     }

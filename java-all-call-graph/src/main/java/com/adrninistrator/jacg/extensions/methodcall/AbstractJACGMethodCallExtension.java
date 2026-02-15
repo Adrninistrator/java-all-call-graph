@@ -17,6 +17,24 @@ public abstract class AbstractJACGMethodCallExtension {
     }
 
     /**
+     * 返回对应的占位的方法调用类型
+     * 即 JavaCG2ObjInstanceMethodNameMCE 子类的 TYPE
+     *
+     * @return 方法调用类型
+     */
+    public abstract String getCallType();
+
+    /**
+     * 通过占位的方法调用类型，判断当前方法调用是否需要处理
+     *
+     * @param methodCall 方法调用信息
+     * @return true: 需要处理当前方法调用 false: 不需要处理当前方法调用
+     */
+    public boolean checkNeedHandle(WriteDbData4MethodCall methodCall) {
+        return getCallType().equals(methodCall.getCallType());
+    }
+
+    /**
      * 对方法调用进行处理
      *
      * @param methodCall

@@ -17,6 +17,7 @@ public class WriteDbData4SpringController implements BaseWriteDbData {
     private String methodPath;
     private String annotationName;
     private String simpleClassName;
+    private int jarNum;
     private String fullMethod;
     private String returnType;
     private int maybeFileUpload;
@@ -84,6 +85,14 @@ public class WriteDbData4SpringController implements BaseWriteDbData {
 
     public void setSimpleClassName(String simpleClassName) {
         this.simpleClassName = simpleClassName;
+    }
+
+    public int getJarNum() {
+        return jarNum;
+    }
+
+    public void setJarNum(int jarNum) {
+        this.jarNum = jarNum;
     }
 
     public String getFullMethod() {

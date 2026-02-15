@@ -59,6 +59,7 @@ public class DC {
     public static final String MA_ATTRIBUTE_VALUE = COMMON_ANNOTATION_ATTRIBUTE_VALUE;
     public static final String MA_FULL_METHOD = "full_method";
     public static final String MA_RETURN_TYPE = "return_type";
+    public static final String MA_JAR_NUM = "jar_num";
     public static final String MA_SIMPLE_CLASS_NAME = "simple_class_name";
 
     public static final String MAA_RECORD_ID = "record_id";
@@ -246,13 +247,16 @@ public class DC {
     public static final String MCI_CALL_ID = "call_id";
     public static final String MCI_OBJ_ARGS_SEQ = "obj_args_seq";
     public static final String MCI_SEQ = "seq";
-    public static final String MCI_CALLER_METHOD_HASH = "caller_method_hash";
     public static final String MCI_TYPE = "type";
     // H2数据库中array是关键字不能使用
     public static final String MCI_ARRAY_FLAG = "array_flag";
+    public static final String MCI_ARRAY_COLLECTION_SEQ = "array_collection_seq";
+    public static final String MCI_ARRAY_DIMENSIONS = "array_dimensions";
+    public static final String MCI_ARRAY_INDEX = "array_index";
     public static final String MCI_VALUE_TYPE = "value_type";
     // H2中使用"value"作为字段名会报错
     public static final String MCI_THE_VALUE = "the_value";
+    public static final String MCI_CALLER_METHOD_HASH = "caller_method_hash";
 
     public static final String SPB_RECORD_ID = "record_id";
     public static final String SPB_SPRING_BEAN_NAME = "spring_bean_name";
@@ -272,6 +276,7 @@ public class DC {
     public static final String SPC_METHOD_PATH = "method_path";
     public static final String SPC_ANNOTATION_ANNOTATION_NAME = "annotation_name";
     public static final String SPC_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String SPC_JAR_NUM = "jar_num";
     public static final String SPC_MAYBE_FILE_UPLOAD = "maybe_file_upload";
     public static final String SPC_MAYBE_FILE_DOWNLOAD = "maybe_file_download";
     public static final String SPC_FULL_METHOD = "full_method";

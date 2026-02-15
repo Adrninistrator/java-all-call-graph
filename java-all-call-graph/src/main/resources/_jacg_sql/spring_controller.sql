@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS jacg_spring_controller_{appName} (
   method_path varchar(250) NOT NULL COMMENT '方法上的注解path属性原始值',
   annotation_name varchar(255) NOT NULL COMMENT '注解类名',
   simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
+  jar_num int NOT NULL COMMENT '方法所在的jar文件序号',
   maybe_file_upload tinyint NOT NULL COMMENT '方法可能用于文件上传，1:是，0:否',
   maybe_file_download tinyint NOT NULL COMMENT '方法可能用于文件下载，1:是，0:否',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',

@@ -74,6 +74,43 @@ public class TestUseArray1 {
         useArray(TestReturnArray1.return3()[0]);
     }
 
+    private void testUse3() {
+        useArray(new int[]{3241, 3241});
+        useArray(new int[]{2896, 746});
+    }
+
+    private void testUse4() {
+        long a = System.currentTimeMillis();
+        String flag = "a";
+        if (a % 7 == 0) {
+            flag = "b";
+        } else {
+            flag = "3";
+        }
+
+        useArray(new int[]{3241, 3241});
+
+        System.out.println(flag);
+    }
+
+    private void testUse5() {
+        int a = 100;
+        int b = 200;
+        long v = System.currentTimeMillis();
+        if (v % 7 == 0) {
+            a = 111;
+            b = 112;
+        } else {
+            if (v % 3 == 0) {
+                a = 221;
+            }
+            if (v % 2 == 0) {
+                b = 332;
+            }
+        }
+        useArray(new int[]{a, b});
+    }
+
     private void useArray(Object obj) {
     }
 }

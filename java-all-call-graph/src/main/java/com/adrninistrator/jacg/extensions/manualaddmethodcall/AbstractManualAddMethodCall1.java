@@ -19,12 +19,14 @@ import java.util.List;
 public abstract class AbstractManualAddMethodCall1 {
     private static final Logger logger = LoggerFactory.getLogger(AbstractManualAddMethodCall1.class);
 
+    protected final String simpleClassName;
     protected final DbOperWrapper dbOperWrapper;
 
     protected final MethodCallHandler methodCallHandler;
     protected final JACGExtendsImplHandler jacgExtendsImplHandler;
 
     public AbstractManualAddMethodCall1(DbOperWrapper dbOperWrapper) {
+        simpleClassName = this.getClass().getSimpleName();
         this.dbOperWrapper = dbOperWrapper;
         methodCallHandler = new MethodCallHandler(dbOperWrapper);
         jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
@@ -79,7 +81,7 @@ public abstract class AbstractManualAddMethodCall1 {
                 String addCalleeFullMethod = JavaCG2ClassMethodUtil.formatFullMethodWithArgTypes(childOrImplClass, methodCallPair.getCalleeMethodAndArgs());
                 // 添加方法调用
                 if (!methodCallHandler.manualAddMethodCall(calleeFullMethod, methodCallPair.getCallerMethodReturnType(), addCalleeFullMethod,
-                        methodCallPair.getCalleeMethodReturnType())) {
+                        methodCallPair.getCalleeMethodReturnType(), simpleClassName)) {
                     return false;
                 }
             }

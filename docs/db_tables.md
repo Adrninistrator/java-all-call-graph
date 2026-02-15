@@ -560,6 +560,7 @@ jacg_method_annotation
 |attribute_value|TEXT|65535|注解属性值|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 |return_type|VARCHAR|255|方法返回类型，包含数组标志|
+|jar_num|INT|10|方法所在的jar文件序号|
 |simple_class_name|VARCHAR|300|唯一类名|
 
 # 26. jacg_method_arg_annotation 方法参数上的注解信息表
@@ -654,11 +655,14 @@ jacg_method_call_info
 |call_id|INT|10|方法调用序号，从1开始|
 |obj_args_seq|INT|10|被调用对象或参数序号，0代表被调用对象，1开始为参数|
 |seq|INT|10|序号，从0开始，大于0代表有多种可能|
-|caller_method_hash|VARCHAR|32|调用方，方法hash+字节数|
 |type|VARCHAR|10|类型，含义参考 JavaCG2MethodCallInfoTypeEnum 类|
 |array_flag|INT|10|是否为数组格式，1:是，0:否|
+|array_collection_seq|INT|10|数组值组合序号，从0开始，非数组时为-1|
+|array_dimensions|INT|10|数组维度，从1开始，非数组时为0|
+|array_index|VARCHAR|100|数组下标，逗号分隔，如"0"、"0,1"、"0,1,2"|
 |value_type|VARCHAR|30|值的类型，含义参考 JavaCG2ConstantTypeEnum 类|
 |the_value|TEXT|65535|对应的值|
+|caller_method_hash|VARCHAR|32|调用方，方法hash+字节数|
 
 # 30. jacg_method_call_method_call_return 方法调用使用方法调用返回值信息表
 
@@ -786,7 +790,7 @@ jacg_method_call
 |---|---|---|---|
 |call_id|INT|10|方法调用序号，从1开始|
 |enabled|TINYINT|3|是否启用，1:启用，0:未启用|
-|call_type|VARCHAR|10|调用类型，参考 JavaCG2CallTypeEnum 枚举类|
+|call_type|VARCHAR|50|调用类型，参考 JavaCG2CallTypeEnum 枚举类|
 |caller_method_hash|VARCHAR|32|调用方，方法hash+字节数|
 |caller_simple_class_name|VARCHAR|300|调用方，唯一类名（完整类名或简单类名）|
 |caller_method_name|VARCHAR|300|调用方，方法名|
@@ -1539,6 +1543,7 @@ Spring Controller信息表
 |method_path|VARCHAR|250|方法上的注解path属性原始值|
 |annotation_name|VARCHAR|255|注解类名|
 |simple_class_name|VARCHAR|300|唯一类名|
+|jar_num|INT|10|方法所在的jar文件序号|
 |maybe_file_upload|TINYINT|3|方法可能用于文件上传，1:是，0:否|
 |maybe_file_download|TINYINT|3|方法可能用于文件下载，1:是，0:否|
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
@@ -1583,4 +1588,29 @@ Spring定时任务信息表
 |full_method|TEXT|65535|完整方法（类名+方法名+参数）|
 |return_type|VARCHAR|255|方法返回类型，包含数组标志|
 |define_class_name_xml_path|VARCHAR|255|在Java代码中定义时所在的类名，或在XML中定义时对应的文件路径|
+
+# 70. jacg_xml_conf XML文件配置内容表
+
+- 表名前缀
+
+jacg_xml_conf
+
+- 注释
+
+XML文件配置内容表
+
+|字段名|字段类型|字段大小|字段注释|
+|---|---|---|---|
+|record_id|INT|10|记录id，从1开始|
+|xml_file_path|VARCHAR|500|XML文件路径|
+|xml_file_name|VARCHAR|255|XML文件名|
+|xml_file_seq|INT|10|XML文件序号，从1开始|
+|element_seq|INT|10|元素序号，从1开始|
+|parent_seq|INT|10|父元素序号，从1开始|
+|in_element_seq|INT|10|所在元素序号，从1开始|
+|type|VARCHAR|10|类型（e:元素，ev:元素值，eav:元素属性值）|
+|nested_element_name|VARCHAR|500|嵌套的元素名称，包含所有上层元素的名称及当前元素的名称，各个元素名称之间使用"."分隔，例如"a.b.c"|
+|element_name|VARCHAR|100|当前的元素名称|
+|attribute_name|VARCHAR|100|当前的元素属性名称，为空代表不属于元素属性|
+|element_value|TEXT|65535|当前的元素值或元素属性值|
 

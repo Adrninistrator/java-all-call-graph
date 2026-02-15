@@ -313,6 +313,15 @@ public abstract class TestRunByCodeBase {
         throw new RuntimeException("不会执行到这里");
     }
 
+    protected boolean checkCalleeGraphContainsCaller(List<MethodCallLineData4Ee> methodCallLineData4EeList, String callerFullMethod) {
+        for (MethodCallLineData4Ee methodCallLineData4Ee : methodCallLineData4EeList) {
+            if (methodCallLineData4Ee.getActualFullMethod().equals(callerFullMethod)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected boolean checkCallerGraphContainsCallee(List<MethodCallLineData4Er> methodCallLineData4ErList, String calleeFullMethod) {
         for (MethodCallLineData4Er methodCallLineData4Er : methodCallLineData4ErList) {
             if (methodCallLineData4Er.getActualFullMethod().equals(calleeFullMethod)) {

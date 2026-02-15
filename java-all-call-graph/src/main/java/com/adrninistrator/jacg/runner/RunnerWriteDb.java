@@ -14,6 +14,7 @@ import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.writer.JACGConfigWriter;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4JarInfo;
+import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MyBatisMSFormatedSql;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MybatisMSColumn;
 import com.adrninistrator.jacg.dto.writedb.WriteDbResult;
@@ -23,6 +24,7 @@ import com.adrninistrator.jacg.extensions.manualaddmethodcall.AbstractManualAddM
 import com.adrninistrator.jacg.extensions.methodcall.AbstractJACGMethodCallExtension;
 import com.adrninistrator.jacg.handler.fieldrelationship.MethodCallPassedFieldRelationshipHandler;
 import com.adrninistrator.jacg.handler.jarinfo.JarInfoHandler;
+import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMSJavaColumnHandler;
 import com.adrninistrator.jacg.handler.writedb.AbstractWriteDbHandler;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4ClassAnnotation;
@@ -140,6 +142,8 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     // 写数据库的结果信息
     protected final WriteDbResult writeDbResult = new WriteDbResult();
 
+    private final MethodCallHandler methodCallHandler;
+
     // 人工添加方法调用关系类列表
     private List<AbstractManualAddMethodCall1> manualAddMethodCall1List;
 
@@ -168,6 +172,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
      */
     public RunnerWriteDb() {
         super();
+        methodCallHandler = new MethodCallHandler(dbOperWrapper);
     }
 
     /**
@@ -178,6 +183,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
      */
     public RunnerWriteDb(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper) {
         super(javaCG2ConfigureWrapper, configureWrapper);
+        methodCallHandler = new MethodCallHandler(dbOperWrapper);
     }
 
     @Override
@@ -432,11 +438,17 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
+
         // 等待写入数据完成
         wait4TPEDone();
 
         // 人工添加方法调用关系（需要在方法调用关系文件处理完毕后执行）
         if (!manualAddMethodCall()) {
+            return false;
+        }
+
+        // 处理占位的方法调用，对被调用方法信息进行替换
+        if (!handlePlaceholderMethodCall()) {
             return false;
         }
 
@@ -1247,7 +1259,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         }
         WriteDbHandler4PropertiesConf writeDbHandler4PropertiesConf = new WriteDbHandler4PropertiesConf(writeDbResult);
         initWriteDbHandler(writeDbHandler4PropertiesConf);
-        if(!writeDbHandler4PropertiesConf.handle(javaCG2OutputInfo)){
+        if (!writeDbHandler4PropertiesConf.handle(javaCG2OutputInfo)) {
             return false;
         }
 
@@ -1404,6 +1416,43 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
                 return false;
             }
         }
+        return true;
+    }
+
+    // 处理占位的方法调用，对被调用方法信息进行替换
+    private boolean handlePlaceholderMethodCall() {
+        if (useNeo4j() || JavaCG2Util.isCollectionEmpty(jacgMethodCallExtensionList)) {
+            return true;
+        }
+
+        logger.info("开始处理占位的方法调用");
+
+        for (AbstractJACGMethodCallExtension jacgMethodCallExtension : jacgMethodCallExtensionList) {
+            String callType = jacgMethodCallExtension.getCallType();
+            logger.info("处理占位的方法调用类型: {}", callType);
+
+            // 循环查询直到没有数据
+            while (true) {
+                List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryMethodCallByCallType(callType);
+                if (JavaCG2Util.isCollectionEmpty(methodCallList)) {
+                    break;
+                }
+                logger.info("{} 占位的方法调用数量: {}", callType, methodCallList.size());
+                for (WriteDbData4MethodCall methodCall : methodCallList) {
+                    if (!jacgMethodCallExtension.handle(methodCall)) {
+                        logger.error("处理占位的方法调用失败 callId: {} callType: {}", methodCall.getCallId(), callType);
+                        return false;
+                    }
+                    // 调用updateMethodCall方法更新method_call表对应记录
+                    if (!methodCallHandler.updateMethodCall(methodCall)) {
+                        logger.error("更新方法调用表失败 callId: {} callType: {}", methodCall.getCallId(), callType);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        logger.info("处理占位的方法调用完成");
         return true;
     }
 

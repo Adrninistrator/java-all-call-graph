@@ -1,6 +1,5 @@
 package test.runbycode.analysejacg;
 
-import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
@@ -17,6 +16,7 @@ import org.junit.Test;
 import org.neo4j.ogm.annotation.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.List;
 import java.util.Map;
@@ -26,13 +26,12 @@ import java.util.Map;
  * @date 2025/11/15
  * @description:
  */
-public class TestAnalyseJACG4CheckDbDtoBoolean {
+public class TestAnalyseJACG4CheckDbDtoBoolean extends TestRunByCodeBase {
 
     private static final Logger logger = LoggerFactory.getLogger(TestAnalyseJACG4CheckDbDtoBoolean.class);
 
     @Test
     public void test() throws Exception {
-        ConfigureWrapper configureWrapper = new ConfigureWrapper();
         DbOperWrapper dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, false, this);
         try (JACGExtendsImplHandler jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
              FieldInfoHandler fieldInfoHandler = new FieldInfoHandler(dbOperWrapper);

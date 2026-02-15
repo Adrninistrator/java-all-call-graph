@@ -35,12 +35,13 @@ public class JACGApacheCommonsChainMethodCallExtension extends AbstractJACGMetho
     }
 
     @Override
-    public boolean handle(WriteDbData4MethodCall methodCall) {
-        if (!JavaCG2ApacheCommonsChainMethodCallExtension.TYPE.equals(methodCall.getCallType())) {
-            // 返回未处理当前方法调用
-            return false;
-        }
+    public String getCallType() {
+        // 使用对应的 JavaCG2ObjInstanceMethodNameMCE 子类的 TYPE
+        return JavaCG2ApacheCommonsChainMethodCallExtension.TYPE;
+    }
 
+    @Override
+    public boolean handle(WriteDbData4MethodCall methodCall) {
         // 获取对应的原始方法调用ID
         int rawMethodCallId = Integer.parseInt(methodCall.getDescription());
 

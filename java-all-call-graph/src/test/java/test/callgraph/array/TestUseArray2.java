@@ -93,6 +93,13 @@ public class TestUseArray2 {
         useArray(new short[1][2][3]);
     }
 
+    private void test4() {
+        useArray(new int[][]{
+                {111, 112},
+                {221, 200}
+        });
+    }
+
     private void useArray(Object obj) {
     }
 }

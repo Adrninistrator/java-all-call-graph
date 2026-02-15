@@ -127,9 +127,10 @@ public class MethodCallHandler extends BaseHandler {
      * @param callerReturnType 调用方方法返回类型
      * @param calleeFullMethod 被调用方完整方法
      * @param calleeReturnType 被调用方方法返回类型
+     * @param descSuffix 描述字段后缀，用于增加更具体的场景描述，可为空
      * @return
      */
-    public synchronized boolean manualAddMethodCall(String callerFullMethod, String callerReturnType, String calleeFullMethod, String calleeReturnType) {
+    public synchronized boolean manualAddMethodCall(String callerFullMethod, String callerReturnType, String calleeFullMethod, String calleeReturnType, String descSuffix) {
         if (StringUtils.isAnyBlank(callerFullMethod, calleeFullMethod)) {
             logger.error("调用方法与被调用方法不允许为空 {} {}", callerFullMethod, calleeFullMethod);
             return false;
@@ -154,6 +155,11 @@ public class MethodCallHandler extends BaseHandler {
         String calleeClassName = JavaCG2ClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
         int nextMaxCallId = maxCallId + 1;
         logger.info("人工向数据库方法调用表加入数据 {}\n{}\n{}", nextMaxCallId, callerFullMethod, calleeFullMethod);
+        // 构造描述字段
+        String desc = "人工添加的方法调用记录";
+        if (StringUtils.isNotBlank(descSuffix)) {
+            desc = desc + " " + descSuffix;
+        }
         // 人工向方法调用表写入数据，行号使用0，jar文件序号使用0
         WriteDbData4MethodCall writeDbData4MethodCall = WriteDbData4MethodCall.genInstance(
                 nextMaxCallId,
@@ -171,7 +177,7 @@ public class MethodCallHandler extends BaseHandler {
                 "",
                 null,
                 null,
-                "人工添加的方法调用记录"
+                desc
         );
         String sql = dbOperWrapper.genAndCacheInsertSql(DbTableInfoEnum.DTIE_METHOD_CALL, DbInsertMode.DIME_INSERT);
         return dbOperator.insert(sql, JACGSqlUtil.genMethodCallObjectArray(writeDbData4MethodCall));
@@ -823,5 +829,63 @@ public class MethodCallHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryObjectOneColumn(sql, String.class, callId);
+    }
+
+    /**
+     * 根据方法调用类型查询方法调用记录，limit 500
+     *
+     * @param callType 方法调用类型
+     * @return 方法调用记录列表
+     */
+    public List<WriteDbData4MethodCall> queryMethodCallByCallType(String callType) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_BY_CALL_TYPE;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALL_TYPE + " = ?" +
+                    " limit 500";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, callType);
+    }
+
+    /**
+     * 根据call_id修改method_call表对应记录的其他字段
+     *
+     * @param methodCall 方法调用信息
+     * @return 是否修改成功
+     */
+    public boolean updateMethodCall(WriteDbData4MethodCall methodCall) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_UPDATE_METHOD_CALL;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "update " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " set " + DC.MC_CALL_TYPE + " = ?," +
+                    DC.MC_CALLEE_METHOD_HASH + " = ?," +
+                    DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?," +
+                    DC.MC_CALLEE_METHOD_NAME + " = ?," +
+                    DC.MC_CALLEE_FULL_METHOD + " = ?," +
+                    DC.MC_RAW_RETURN_TYPE + " = ?," +
+                    DC.MC_ACTUAL_RETURN_TYPE + " = ?," +
+                    DC.MC_CALL_FLAGS + " = ?," +
+                    DC.MC_DESCRIPTION + " = ?" +
+                    " where " + DC.MC_CALL_ID + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        Integer row = dbOperator.update(sql,
+                methodCall.getCallType(),
+                methodCall.getCalleeMethodHash(),
+                methodCall.getCalleeSimpleClassName(),
+                methodCall.getCalleeMethodName(),
+                methodCall.getCalleeFullMethod(),
+                methodCall.getRawReturnType(),
+                methodCall.getActualReturnType(),
+                methodCall.getCallFlags(),
+                methodCall.getDescription(),
+                methodCall.getCallId());
+        logger.info("修改方法调用表记录 call_id: {} 行数: {}", methodCall.getCallId(), row);
+        return row != null && row > 0;
     }
 }

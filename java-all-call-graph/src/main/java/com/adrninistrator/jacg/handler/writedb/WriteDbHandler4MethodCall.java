@@ -182,18 +182,19 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
         // 对于递归调用，写入数据库，查询时有对死循环进行处理
 
-        int modifyTimes = 0;
-        // 使用扩展类对方法调用进行处理
+        // 判断是否需要处理占位的方法调用
+        boolean needHandlePlaceholder = false;
         if (useJACGMethodCallExtension) {
             for (AbstractJACGMethodCallExtension jacgMethodCallExtension : jacgMethodCallExtensionList) {
-                if (jacgMethodCallExtension.handle(writeDbData4MethodCall)) {
-                    modifyTimes++;
+                if (jacgMethodCallExtension.checkNeedHandle(writeDbData4MethodCall)) {
+                    needHandlePlaceholder = true;
+                    break;
                 }
             }
         }
 
-        if (modifyTimes == 0) {
-            // 生成方法调用标志
+        if (!needHandlePlaceholder) {
+            // 不需要处理占位的方法调用时，生成方法调用标志
             genCallFlags(callId, writeDbData4MethodCall);
         }
         return writeDbData4MethodCall;

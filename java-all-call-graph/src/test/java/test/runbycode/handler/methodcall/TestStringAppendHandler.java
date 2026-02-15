@@ -8,9 +8,7 @@ import com.adrninistrator.jacg.handler.methodcall.MethodCallHandler;
 import com.adrninistrator.jacg.handler.methodcall.StringAppendHandler;
 import com.adrninistrator.javacg2.common.JavaCG2CommonNameConstants;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,24 +45,6 @@ public class TestStringAppendHandler extends TestRunByCodeBase {
     public static final String EXPECTED_VALUE = "abcd";
     public static final String EXPECTED_VALUE2 = "ab" + DbStatementEnum.DSE_UPDATE.getStatement() + "cd";
     public static final String EXPECTED_VALUE3 = "ab" + DbStatementEnum.DSE_UPDATE.name() + "cd";
-
-    private StringAppendHandler stringAppendHandler;
-    private MethodInfoHandler methodInfoHandler;
-    private MethodCallHandler methodCallHandler;
-
-    @Before
-    public void init() {
-        stringAppendHandler = new StringAppendHandler(configureWrapper);
-        methodInfoHandler = new MethodInfoHandler(configureWrapper);
-        methodCallHandler = new MethodCallHandler(configureWrapper);
-    }
-
-    @After
-    public void after() {
-        stringAppendHandler.close();
-        methodInfoHandler.close();
-        methodCallHandler.close();
-    }
 
     @Test
     public void $test0WriteDb() {
@@ -159,29 +139,36 @@ public class TestStringAppendHandler extends TestRunByCodeBase {
     }
 
     public void doTest(String callerClassName, boolean parseArg, String... expectedValues) {
-        List<WriteDbData4MethodInfo> methodInfoList = methodInfoHandler.queryMethodInfoByClass(callerClassName);
-        for (WriteDbData4MethodInfo methodInfo : methodInfoList) {
-            if (JavaCG2CommonNameConstants.METHOD_NAME_INIT.equals(methodInfo.getMethodName())) {
-                continue;
-            }
-            if (parseArg) {
-                List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryByErHashEeClassesMethod(methodInfo.getMethodHash(), "println", PrintStream.class.getName());
-                for (WriteDbData4MethodCall methodCall : methodCallList) {
-                    List<StringAppendParseResult> stringAppendParseResultList = stringAppendHandler.parseStringAppend4MethodArg(methodCall.getCallId(), 1);
-                    Assert.assertEquals(stringAppendParseResultList.size(), expectedValues.length);
-                    for (int i = 0; i < stringAppendParseResultList.size(); i++) {
-                        checkResult(stringAppendParseResultList.get(i), methodInfo, expectedValues[i]);
-                    }
+        try (StringAppendHandler stringAppendHandler = new StringAppendHandler(configureWrapper);
+             MethodInfoHandler methodInfoHandler = new MethodInfoHandler(configureWrapper);
+             MethodCallHandler methodCallHandler = new MethodCallHandler(configureWrapper)
+        ) {
+            List<WriteDbData4MethodInfo> methodInfoList = methodInfoHandler.queryMethodInfoByClass(callerClassName);
+            for (WriteDbData4MethodInfo methodInfo : methodInfoList) {
+                if (JavaCG2CommonNameConstants.METHOD_NAME_INIT.equals(methodInfo.getMethodName())) {
+                    continue;
                 }
-                continue;
-            }
-            if (!JavaCG2CommonNameConstants.CLASS_NAME_STRING.equals(methodInfo.getReturnType())) {
-                continue;
-            }
-            List<StringAppendParseResult> stringAppendParseResultList = stringAppendHandler.parseStringAppend4MethodReturn(methodInfo.getFullMethod(), methodInfo.getReturnType());
-            Assert.assertEquals(stringAppendParseResultList.size(), expectedValues.length);
-            for (int i = 0; i < stringAppendParseResultList.size(); i++) {
-                checkResult(stringAppendParseResultList.get(i), methodInfo, expectedValues[i]);
+                if (parseArg) {
+                    List<WriteDbData4MethodCall> methodCallList = methodCallHandler.queryByErHashEeClassesMethod(methodInfo.getMethodHash(), "println",
+                            PrintStream.class.getName());
+                    for (WriteDbData4MethodCall methodCall : methodCallList) {
+                        List<StringAppendParseResult> stringAppendParseResultList = stringAppendHandler.parseStringAppend4MethodArg(methodCall.getCallId(), 1);
+                        Assert.assertEquals(stringAppendParseResultList.size(), expectedValues.length);
+                        for (int i = 0; i < stringAppendParseResultList.size(); i++) {
+                            checkResult(stringAppendParseResultList.get(i), methodInfo, expectedValues[i]);
+                        }
+                    }
+                    continue;
+                }
+                if (!JavaCG2CommonNameConstants.CLASS_NAME_STRING.equals(methodInfo.getReturnType())) {
+                    continue;
+                }
+                List<StringAppendParseResult> stringAppendParseResultList = stringAppendHandler.parseStringAppend4MethodReturn(methodInfo.getFullMethod(),
+                        methodInfo.getReturnType());
+                Assert.assertEquals(stringAppendParseResultList.size(), expectedValues.length);
+                for (int i = 0; i < stringAppendParseResultList.size(); i++) {
+                    checkResult(stringAppendParseResultList.get(i), methodInfo, expectedValues[i]);
+                }
             }
         }
     }

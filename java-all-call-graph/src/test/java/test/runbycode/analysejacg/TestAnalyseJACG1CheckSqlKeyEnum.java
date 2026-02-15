@@ -2,7 +2,6 @@ package test.runbycode.analysejacg;
 
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
-import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
@@ -12,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,13 +24,12 @@ import java.util.Set;
  * @date 2025/5/28
  * @description: 检查SqlKeyEnum枚举常量没有被重复使用
  */
-public class TestAnalyseJACG1CheckSqlKeyEnum {
+public class TestAnalyseJACG1CheckSqlKeyEnum extends TestRunByCodeBase {
 
     private static final Logger logger = LoggerFactory.getLogger(TestAnalyseJACG1CheckSqlKeyEnum.class);
 
     @Test
     public void test() throws Exception {
-        ConfigureWrapper configureWrapper = new ConfigureWrapper();
         DbOperWrapper dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, false, this);
         String sql = "select field_name from (" +
                 "select mcsf.field_name as field_name, count(mcsf.field_name) as cf" +
@@ -41,7 +40,7 @@ public class TestAnalyseJACG1CheckSqlKeyEnum {
                 " and mc.callee_simple_class_name = ? and mc.callee_method_name = ?" +
                 " group by mcsf.field_name" +
                 " having cf > 1" +
-                ")";
+                ") as t";
         sql = dbOperWrapper.formatSql(sql, true);
         try (DbOperator dbOperator = dbOperWrapper.getDbOperator()) {
             List<String> list1 = dbOperator.queryListOneColumn(sql, String.class, SqlKeyEnum.class.getSimpleName(), DbOperWrapper.class.getSimpleName(), "getCachedSql");

@@ -1,6 +1,5 @@
 package test.runbycode.analysejacg;
 
-import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.method.MethodDetailNoReturnType;
@@ -18,6 +17,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +27,13 @@ import java.util.List;
  * @date 2025/5/29
  * @description: 检查BaseHandler子类构造函数中调用其他BaseHandler子类构造函数时，使用参数类型为DbOperWrapper的构造函数
  */
-public class TestAnalyseJACG2CheckHandlerInit {
+public class TestAnalyseJACG2CheckHandlerInit extends TestRunByCodeBase {
 
     private static final Logger logger = LoggerFactory.getLogger(TestAnalyseJACG2CheckHandlerInit.class);
 
     @Test
     public void test() {
         List<String> illegalMethodCallList = new ArrayList<>();
-        ConfigureWrapper configureWrapper = new ConfigureWrapper();
         try (JACGExtendsImplHandler jacgExtendsImplHandler = new JACGExtendsImplHandler(configureWrapper);
              MethodInfoHandler methodInfoHandler = new MethodInfoHandler(configureWrapper);
              MethodCallHandler methodCallHandler = new MethodCallHandler(configureWrapper)) {

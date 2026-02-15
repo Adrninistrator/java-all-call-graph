@@ -34,12 +34,12 @@ public abstract class JACGObjInstanceMethodNameMCE extends AbstractJACGMethodCal
     }
 
     @Override
-    public boolean handle(WriteDbData4MethodCall methodCall) {
-        if (!methodCallType.equals(methodCall.getCallType())) {
-            // 返回未处理当前方法调用
-            return false;
-        }
+    public String getCallType() {
+        return methodCallType;
+    }
 
+    @Override
+    public boolean handle(WriteDbData4MethodCall methodCall) {
         // 获取对应的原始方法调用ID
         int rawMethodCallId = Integer.parseInt(methodCall.getDescription());
 

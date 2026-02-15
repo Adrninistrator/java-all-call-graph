@@ -23,8 +23,10 @@ import com.adrninistrator.javacg2.common.JavaCG2Constants;
 import com.adrninistrator.javacg2.common.enums.JavaCG2ConstantTypeEnum;
 import com.adrninistrator.javacg2.common.enums.JavaCG2MethodCallInfoTypeEnum;
 import com.adrninistrator.javacg2.exceptions.JavaCG2RuntimeException;
+import com.adrninistrator.javacg2.util.JavaCG2ClassMethodUtil;
 import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,36 @@ import java.util.Set;
  */
 public class MethodCallInfoHandler extends BaseHandler {
     private static final Logger logger = LoggerFactory.getLogger(MethodCallInfoHandler.class);
+
+    // TYPE字段名称
+    private static final String FIELD_NAME_TYPE = "TYPE";
+
+    // 包装类型到原始类型的映射
+    private static final Map<String, String> WRAPPER_TO_PRIMITIVE_MAP = new HashMap<>();
+
+    // 最终的静态字段到原始类型映射（用于查询转换）
+    private static final Map<String, String> STATIC_FIELD_TO_PRIMITIVE_MAP = new HashMap<>();
+
+    static {
+        // 初始化包装类型到原始类型的映射
+        WRAPPER_TO_PRIMITIVE_MAP.put(Integer.class.getName(), int.class.getName());
+        WRAPPER_TO_PRIMITIVE_MAP.put(Long.class.getName(), long.class.getName());
+        WRAPPER_TO_PRIMITIVE_MAP.put(Short.class.getName(), short.class.getName());
+        WRAPPER_TO_PRIMITIVE_MAP.put(Byte.class.getName(), byte.class.getName());
+        WRAPPER_TO_PRIMITIVE_MAP.put(Character.class.getName(), char.class.getName());
+        WRAPPER_TO_PRIMITIVE_MAP.put(Boolean.class.getName(), boolean.class.getName());
+        WRAPPER_TO_PRIMITIVE_MAP.put(Float.class.getName(), float.class.getName());
+        WRAPPER_TO_PRIMITIVE_MAP.put(Double.class.getName(), double.class.getName());
+        WRAPPER_TO_PRIMITIVE_MAP.put(Void.class.getName(), void.class.getName());
+
+        // 根据包装类型映射生成最终的静态字段到原始类型映射
+        for (Map.Entry<String, String> entry : WRAPPER_TO_PRIMITIVE_MAP.entrySet()) {
+            String wrapperClassName = entry.getKey();
+            String primitiveTypeName = entry.getValue();
+            String staticFieldKey = JavaCG2ClassMethodUtil.formatClassAndField(wrapperClassName, FIELD_NAME_TYPE);
+            STATIC_FIELD_TO_PRIMITIVE_MAP.put(staticFieldKey, primitiveTypeName);
+        }
+    }
 
     public MethodCallInfoHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
@@ -352,8 +384,8 @@ public class MethodCallInfoHandler extends BaseHandler {
             sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL_INFO) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName() +
                     " where " + DC.MCI_CALLER_METHOD_HASH + " = ?" +
-                    " and " + DC.MCI_TYPE + " in " + JACGSqlUtil.genQuestionString(types.length) +
                     " and " + DC.MCI_THE_VALUE + " = ?" +
+                    " and " + DC.MCI_TYPE + " in " + JACGSqlUtil.genQuestionString(types.length) +
                     " order by " + DC.MCI_RECORD_ID;
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql, types.length);
         }
@@ -534,6 +566,60 @@ public class MethodCallInfoHandler extends BaseHandler {
     }
 
     /**
+     * 查询指定方法调用的参数类型
+     * 对于Class.getMethod等方法的参数类型，需要处理两种情况：
+     * 1. 非基本类型（如String）：type="t"，theValue为参数类型字符串
+     * 2. 基本类型（如int）：type="sf"，theValue为基本类型对应的包装类型中的TYPE字段，如"java.lang.Integer:TYPE"
+     *
+     * @param callId     方法调用ID
+     * @param objArgsSeq 参数序号，1开始
+     * @return 参数类型列表，基本类型会转换为对应的基本类型名称（如int）
+     */
+    public List<String> queryMethodCallArgTypes(int callId, int objArgsSeq) {
+        List<String> resultList = new ArrayList<>();
+
+        // 查询非基本类型（type="t"）
+        List<String> typeList = queryMethodCallObjArgInfoByType(callId, objArgsSeq, JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType());
+        if (!JavaCG2Util.isCollectionEmpty(typeList)) {
+            resultList.addAll(typeList);
+        }
+
+        // 查询基本类型（type="sf"）
+        List<String> staticFieldList = queryMethodCallObjArgInfoByType(callId, objArgsSeq, JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD.getType());
+        if (!JavaCG2Util.isCollectionEmpty(staticFieldList)) {
+            for (String staticField : staticFieldList) {
+                String primitiveType = convertStaticFieldToPrimitiveType(staticField);
+                if (StringUtils.isNotBlank(primitiveType) && !resultList.contains(primitiveType)) {
+                    resultList.add(primitiveType);
+                }
+            }
+        }
+
+        return resultList;
+    }
+
+    /**
+     * 将静态字段值转换为基本类型名称
+     * 例如："java.lang.Integer:TYPE" -> "int"
+     *
+     * @param staticField 静态字段值
+     * @return 基本类型名称，如果不是基本类型对应的静态字段则返回原值
+     */
+    private String convertStaticFieldToPrimitiveType(String staticField) {
+        if (StringUtils.isBlank(staticField)) {
+            return null;
+        }
+
+        String primitiveType = STATIC_FIELD_TO_PRIMITIVE_MAP.get(staticField);
+        if (primitiveType != null) {
+            return primitiveType;
+        }
+
+        // 如果不是基本类型对应的TYPE字段，返回原值
+        return staticField;
+    }
+
+    /**
      * 查询指定方法调用的被调用对象，或参数的指定类型的信息
      *
      * @param callId     方法调用ID
@@ -650,5 +736,159 @@ public class MethodCallInfoHandler extends BaseHandler {
             }
         }
         return methodCallObjArgValueAndSource;
+    }
+
+    /**
+     * 查询指定方法调用的被调用对象或方法参数对应的数组元素类型
+     * 同时处理非基本类型（type="t"）和基本类型（type="sf"）
+     * 基本类型会自动转换：如 "java.lang.Integer:TYPE" -> "int"
+     *
+     * @param callId     方法调用ID
+     * @param objArgsSeq 0代表被调用对象，1开始为参数
+     * @return List中的元素代表数组元素结果的不同的集合，Map表示数组元素的序号及对应类型
+     *         Map的key为arrayIndex解析后的整数值，value为类型字符串
+     */
+    public List<Map<Integer, String>> queryMethodCallArrayElementTypes(int callId, int objArgsSeq) {
+        // 一次查询 type="t" 和 type="sf" 的数据
+        List<WriteDbData4MethodCallInfo> allDataList = queryMethodCallArrayElementData4Types(callId, objArgsSeq);
+
+        if (JavaCG2Util.isCollectionEmpty(allDataList)) {
+            return Collections.emptyList();
+        }
+
+        // 按array_collection_seq分组，直接使用一个Map记录，key使用arrayIndex解析后的整数值
+        Map<Integer, Map<Integer, String>> groupedMap = new HashMap<>();
+
+        for (WriteDbData4MethodCallInfo data : allDataList) {
+            int collectionSeq = data.getArrayCollectionSeq();
+            int arrayIndexInt = Integer.parseInt(data.getArrayIndex());
+
+            Map<Integer, String> elementMap = groupedMap.computeIfAbsent(collectionSeq, k -> new HashMap<>());
+
+            if (JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType().equals(data.getType())) {
+                // 处理非基本类型数据
+                elementMap.put(arrayIndexInt, data.getTheValue());
+            } else if (JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD.getType().equals(data.getType())) {
+                // 处理基本类型数据，转换为原始类型
+                String primitiveType = convertStaticFieldToPrimitiveType(data.getTheValue());
+                if (StringUtils.isNotBlank(primitiveType)) {
+                    elementMap.put(arrayIndexInt, primitiveType);
+                }
+            }
+        }
+
+        // 转换为List格式并按collectionSeq排序
+        List<Map<Integer, String>> resultList = new ArrayList<>();
+        List<Integer> collectionSeqList = new ArrayList<>(groupedMap.keySet());
+        Collections.sort(collectionSeqList);
+
+        for (Integer collectionSeq : collectionSeqList) {
+            Map<Integer, String> elementMap = groupedMap.get(collectionSeq);
+            if (!elementMap.isEmpty()) {
+                resultList.add(elementMap);
+            }
+        }
+
+        return resultList;
+    }
+
+    /**
+     * 查询指定方法调用的被调用对象或方法参数对应的数组元素值
+     *
+     * @param callId     方法调用ID
+     * @param objArgsSeq 0代表被调用对象，1开始为参数
+     * @return List中的元素代表数组元素结果的不同的集合，Map表示数组元素的序号及对应值
+     *         Map的key为arrayIndex解析后的整数值，value为对应值
+     */
+    public List<Map<Integer, String>> queryMethodCallArrayElementValues(int callId, int objArgsSeq) {
+        return queryMethodCallArrayElementInfo(callId, objArgsSeq, JavaCG2MethodCallInfoTypeEnum.MCIT_VALUE.getType());
+    }
+
+    /**
+     * 查询指定方法调用的被调用对象或方法参数对应的数组元素信息
+     *
+     * @param callId     方法调用ID
+     * @param objArgsSeq 0代表被调用对象，1开始为参数
+     * @param type       信息类型，如类型(t)或值等
+     * @return List中的元素代表数组元素结果的不同的集合，Map表示数组元素的序号及对应信息
+     *         Map的key为arrayIndex解析后的整数值，value为对应信息
+     */
+    public List<Map<Integer, String>> queryMethodCallArrayElementInfo(int callId, int objArgsSeq, String type) {
+        List<WriteDbData4MethodCallInfo> methodCallInfoList = queryMethodCallArrayElementData(callId, objArgsSeq, type);
+        if (JavaCG2Util.isCollectionEmpty(methodCallInfoList)) {
+            return Collections.emptyList();
+        }
+
+        // 按array_collection_seq分组
+        Map<Integer, Map<Integer, String>> groupedMap = new HashMap<>();
+        for (WriteDbData4MethodCallInfo methodCallInfo : methodCallInfoList) {
+            int arrayCollectionSeq = methodCallInfo.getArrayCollectionSeq();
+            int arrayIndexInt = Integer.parseInt(methodCallInfo.getArrayIndex());
+            groupedMap.computeIfAbsent(arrayCollectionSeq, k -> new HashMap<>()).put(arrayIndexInt, methodCallInfo.getTheValue());
+        }
+
+        // 转换为List<Map<Integer, String>>格式
+        List<Map<Integer, String>> resultList = new ArrayList<>();
+        List<Integer> collectionSeqList = new ArrayList<>(groupedMap.keySet());
+        Collections.sort(collectionSeqList);
+
+        for (Integer collectionSeq : collectionSeqList) {
+            Map<Integer, String> elementMap = groupedMap.get(collectionSeq);
+            if (!elementMap.isEmpty()) {
+                resultList.add(elementMap);
+            }
+        }
+
+        return resultList;
+    }
+
+    /**
+     * 查询指定方法调用的被调用对象或方法参数对应的数组元素原始数据
+     * 按array_collection_seq、array_dimensions、array_index排序
+     *
+     * @param callId     方法调用ID
+     * @param objArgsSeq 0代表被调用对象，1开始为参数
+     * @param type       信息类型
+     * @return 数组元素的原始数据列表
+     */
+    private List<WriteDbData4MethodCallInfo> queryMethodCallArrayElementData(int callId, int objArgsSeq, String type) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_ARRAY_ELEMENT_INFO;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName() +
+                    " where " + DC.MCI_CALL_ID + " = ?" +
+                    " and " + DC.MCI_OBJ_ARGS_SEQ + " = ?" +
+                    " and " + DC.MCI_TYPE + " = ?" +
+                    " and " + DC.MCI_ARRAY_FLAG + " = 1" +
+                    " order by " + DC.MCI_ARRAY_COLLECTION_SEQ + ", " + DC.MCI_ARRAY_DIMENSIONS + ", " + DC.MCI_ARRAY_INDEX;
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, callId, objArgsSeq, type);
+    }
+
+    /**
+     * 查询指定方法调用的被调用对象或方法参数对应的数组元素类型数据
+     * 一次查询 type="t" 和 type="sf" 的数据
+     * 按array_collection_seq、array_dimensions、array_index排序
+     *
+     * @param callId     方法调用ID
+     * @param objArgsSeq 0代表被调用对象，1开始为参数
+     * @return 数组元素的原始数据列表
+     */
+    private List<WriteDbData4MethodCallInfo> queryMethodCallArrayElementData4Types(int callId, int objArgsSeq) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MCI_QUERY_ARRAY_ELEMENT_INFO_4_TYPES;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL_INFO) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL_INFO.getTableName() +
+                    " where " + DC.MCI_CALL_ID + " = ?" +
+                    " and " + DC.MCI_OBJ_ARGS_SEQ + " = ?" +
+                    " and " + DC.MCI_TYPE + " in ('" + JavaCG2MethodCallInfoTypeEnum.MCIT_TYPE.getType() + "', '" + JavaCG2MethodCallInfoTypeEnum.MCIT_STATIC_FIELD.getType() + "')" +
+                    " and " + DC.MCI_ARRAY_FLAG + " = 1" +
+                    " order by " + DC.MCI_ARRAY_COLLECTION_SEQ + ", " + DC.MCI_ARRAY_DIMENSIONS + ", " + DC.MCI_ARRAY_INDEX;
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodCallInfo.class, callId, objArgsSeq);
     }
 }

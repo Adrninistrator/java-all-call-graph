@@ -1,6 +1,5 @@
 package test.runbycode.analysejacg;
 
-import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbInitializer;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
@@ -15,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.runbycode.base.TestRunByCodeBase;
 
 import java.util.List;
 
@@ -23,13 +23,12 @@ import java.util.List;
  * @date 2025/11/15
  * @description:
  */
-public class TestAnalyseJACG3CheckSqlSupportPg {
+public class TestAnalyseJACG3CheckSqlSupportPg extends TestRunByCodeBase {
 
     private static final Logger logger = LoggerFactory.getLogger(TestAnalyseJACG3CheckSqlSupportPg.class);
 
     @Test
     public void test() throws Exception {
-        ConfigureWrapper configureWrapper = new ConfigureWrapper();
         DbOperWrapper dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, false, this);
         try (MethodCallHandler methodCallHandler = new MethodCallHandler(dbOperWrapper);
              StringAppendHandler stringAppendHandler = new StringAppendHandler(dbOperWrapper)) {
