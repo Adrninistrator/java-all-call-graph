@@ -22,11 +22,13 @@ ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IGNORE_CALLEE
 
 以下为支持的表达式变量示例
 
-# 2. class_name - JarDiff生成向上方法完整调用链判断发生变化的方法类名
+# 2. class_name
 
 - 表达式变量说明
 
 完整类名
+
+## 2.1. JarDiff生成向上方法完整调用链判断发生变化的方法类名
 
 - 表达式示例说明
 
@@ -56,13 +58,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IG
 
 test.runbycode.el.jardiff.TestGenJarDiffCalleeGraph4ClassName
 
-# 3. package_name - JarDiff生成向上方法完整调用链判断发生变化的方法包名
+# 3. package_name
 
 - 表达式变量说明
 
 完整包名
 
 不会以.结束
+
+## 3.1. JarDiff生成向上方法完整调用链判断发生变化的方法包名
 
 - 表达式示例说明
 
@@ -92,11 +96,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IG
 
 test.runbycode.el.jardiff.TestGenJarDiffCalleeGraph4PackageName
 
-# 4. simple_class_name - JarDiff生成向上方法完整调用链判断发生变化的方法简单类名
+# 4. simple_class_name
 
 - 表达式变量说明
 
 简单类名
+
+## 4.1. JarDiff生成向上方法完整调用链判断发生变化的方法简单类名
 
 - 表达式示例说明
 
@@ -126,13 +132,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IG
 
 test.runbycode.el.jardiff.TestGenJarDiffCalleeGraph4SimpleClassName
 
-# 5. method_name - JarDiff生成向上方法完整调用链判断发生变化的方法名
+# 5. method_name
 
 - 表达式变量说明
 
 方法名
 
 不包括括号及方法参数
+
+## 5.1. JarDiff生成向上方法完整调用链判断发生变化的方法名
 
 - 表达式示例说明
 
@@ -162,11 +170,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IG
 
 test.runbycode.el.jardiff.TestGenJarDiffCalleeGraph4MethodName
 
-# 6. method_arg_num - JarDiff生成向上方法完整调用链判断发生变化的方法参数数量
+# 6. method_arg_num
 
 - 表达式变量说明
 
 方法参数数量
+
+## 6.1. JarDiff生成向上方法完整调用链判断发生变化的方法参数数量
 
 - 表达式示例说明
 
@@ -196,11 +206,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_JAR_DIFF_GEN_ALL_CALL_GRAPH_IG
 
 test.runbycode.el.jardiff.TestGenJarDiffCalleeGraph4MethodArgNum
 
-# 7. full_method - JarDiff生成向上方法完整调用链判断发生变化的完整方法
+# 7. full_method
 
 - 表达式变量说明
 
 完整方法
+
+## 7.1. JarDiff生成向上方法完整调用链判断发生变化的完整方法
 
 - 表达式示例说明
 

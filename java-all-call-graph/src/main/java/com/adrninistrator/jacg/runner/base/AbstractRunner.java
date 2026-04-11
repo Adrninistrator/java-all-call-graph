@@ -67,7 +67,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
     protected JarInfoHandler jarInfoHandler;
 
     public AbstractRunner() {
-        this(new ConfigureWrapper(false));
+        this(new ConfigureWrapper(false,null));
     }
 
     public AbstractRunner(ConfigureWrapper configureWrapper) {
@@ -384,7 +384,7 @@ public abstract class AbstractRunner extends AbstractExecutor {
                 String outputDirFlag = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG);
                 // 需要进行同步控制，避免创建同名目录
                 synchronized (AbstractRunner.class) {
-                    outputDirPrefix = outputDirPrefix + appName + outputDirFlag + JACGConstants.FLAG_UNDER_LINE + JavaCG2Util.currentTime();
+                    outputDirPrefix = outputDirPrefix + appName + outputDirFlag + JACGConstants.FLAG_UNDER_LINE + JACGUtil.currentTime();
                 }
             }
 

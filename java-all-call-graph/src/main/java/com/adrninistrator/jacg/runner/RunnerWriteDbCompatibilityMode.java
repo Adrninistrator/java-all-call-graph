@@ -16,7 +16,7 @@ public class RunnerWriteDbCompatibilityMode extends AbstractRunnerWriteDbSpecial
      * 构造函数，使用配置文件中的参数
      */
     public RunnerWriteDbCompatibilityMode() {
-        this(new JavaCG2ConfigureWrapper(false), new ConfigureWrapper(false));
+        this(new JavaCG2ConfigureWrapper(false, null), new ConfigureWrapper(false, null));
     }
 
     /**

@@ -22,11 +22,13 @@ ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLASS_REFERENCE
 
 以下为支持的表达式变量示例
 
-# 2. er_class_name - Jar兼容性检查快速模式判断引用类名
+# 2. er_class_name
 
 - 表达式变量说明
 
 调用方完整类名
+
+## 2.1. Jar兼容性检查快速模式判断引用类名
 
 - 表达式示例说明
 
@@ -56,13 +58,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLA
 
 test.runbycode.el.compatibilityfast.TestCompatibilityCheckFastErClassName
 
-# 3. er_package_name - Jar兼容性检查快速模式判断引用类包名
+# 3. er_package_name
 
 - 表达式变量说明
 
 调用方完整包名
 
 不会以.结束
+
+## 3.1. Jar兼容性检查快速模式判断引用类包名
 
 - 表达式示例说明
 
@@ -92,11 +96,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLA
 
 test.runbycode.el.compatibilityfast.TestCompatibilityCheckFastErPackageName
 
-# 4. er_simple_class_name - Jar兼容性检查快速模式判断引用类简单类名
+# 4. er_simple_class_name
 
 - 表达式变量说明
 
 调用方简单类名
+
+## 4.1. Jar兼容性检查快速模式判断引用类简单类名
 
 - 表达式示例说明
 
@@ -126,11 +132,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLA
 
 test.runbycode.el.compatibilityfast.TestCompatibilityCheckFastErSimpleClassName
 
-# 5. ee_class_name - Jar兼容性检查快速模式判断被引用类名
+# 5. ee_class_name
 
 - 表达式变量说明
 
 被调用方完整类名
+
+## 5.1. Jar兼容性检查快速模式判断被引用类名
 
 - 表达式示例说明
 
@@ -160,13 +168,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLA
 
 test.runbycode.el.compatibilityfast.TestCompatibilityCheckFast0EeClassName
 
-# 6. ee_package_name - Jar兼容性检查快速模式判断被引用类包名
+# 6. ee_package_name
 
 - 表达式变量说明
 
 被调用方完整包名
 
 不会以.结束
+
+## 6.1. Jar兼容性检查快速模式判断被引用类包名
 
 - 表达式示例说明
 
@@ -196,11 +206,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_COMPATIBILITY_CHECK_IGNORE_CLA
 
 test.runbycode.el.compatibilityfast.TestCompatibilityCheckFastEePackageName
 
-# 7. ee_simple_class_name - Jar兼容性检查快速模式判断被引用类简单类名
+# 7. ee_simple_class_name
 
 - 表达式变量说明
 
 被调用方简单类名
+
+## 7.1. Jar兼容性检查快速模式判断被引用类简单类名
 
 - 表达式示例说明
 

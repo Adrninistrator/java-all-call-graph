@@ -311,9 +311,9 @@ _jacg_config/config_db.properties
 
 参数值需要指定 EL 表达式，整个参数值是一个表达式
 
-### 9.2.3. 配置参数示例
+### 9.2.3. 配置参数使用说明
 
-参考 [配置参数示例](docs/_jacg_all_config.md)
+通过代码或配置文件配置参数的方式，参考 [配置参数使用说明](docs/_jacg_all_config.md)
 
 ### 9.2.4. EL 表达式使用通用说明文档
 
@@ -323,24 +323,25 @@ _jacg_config/config_db.properties
 
 参考 [EL 表达式字符串比较说明文档](java-all-call-graph/src/main/resources/_el_example/string_compare.md)
 
-### 9.2.6. 通过代码指定配置参数
-
-在代码中使用 com.adrninistrator.jacg.conf.ConfigureWrapper 类可以指定配置参数
-
-以下为 ConfigureWrapper 用于指定配置参数的方法
-
-|方法名称|方法作用|
-|---|---|
-|setMainConfig|设置 key value 形式的参数|
-|setOtherConfigList|设置区分顺序的参数|
-|setOtherConfigSet|设置不区分顺序的参数|
-|setElConfigText|设置 EL 表达式|
-
 ## 9.3. 运行方式
 
-不同场景下需要运行的类，参考“当前项目能够做什么”部分的对应文档
+### 9.3.1. 入口类
 
-### 9.3.1. 支持的运行方式
+|类名|说明|
+|---|---|
+|com.adrninistrator.jacg.runner.RunnerWriteDb|生成 Java 方法调用关系文件并写入数据库|
+|com.adrninistrator.jacg.runner.RunnerWriteCallGraphFile|生成 Java 方法调用关系文件|
+|com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee|生成调用指定类方法向上的完整调用链|
+|com.adrninistrator.jacg.runner.RunnerGenAllGraph4Caller|生成指定方法向下完整调用链|
+|com.adrninistrator.jacg.findstack.FindCallStackTrace|生成包含指定关键字的方法到起始方法之间的调用堆栈|
+|com.adrninistrator.jacg.jardiff.runner.RunnerGenJarDiffCalleeGraph|比较新旧两个目录中不同版本 jar 文件的方法修改情况，以及发生变化的方法的影响范围（生成向上的方法完整调用链及调用堆栈）|
+|com.adrninistrator.jacg.jardiff.runner.RunnerGenJarDiffCallerGraph|比较新旧两个目录中不同版本 jar 文件的方法修改情况，以及向下的方法完整调用链|
+
+也可以参考经过封装的类，在 test.jacg 包中
+
+具体信息可参考“当前项目能够做什么”部分的对应文档
+
+### 9.3.2. 支持的运行方式
 
 ```
 通过 IDE 打开项目源码运行
@@ -348,7 +349,7 @@ _jacg_config/config_db.properties
 使用项目源码构建后运行
 ```
 
-### 9.3.2. 各种运行方式支持的参数配置方式
+### 9.3.3. 各种运行方式支持的参数配置方式
 
 |运行方式|支持的参数配置方式|
 |---|---|
@@ -356,21 +357,11 @@ _jacg_config/config_db.properties
 |在其他项目中引用当前项目的库运行|通过配置文件指定<br>通过代码指定|
 |使用项目源码构建后运行|通过配置文件指定|
 
-### 9.3.3. 通过 IDE 打开项目源码运行
+### 9.3.4. 通过 IDE 打开项目源码运行
 
 通过 IDE 打开当前项目，由 Gradle 管理依赖库，可使用源码运行
 
-#### 9.3.3.1. 通过配置文件指定参数运行
-
-假如需要通过配置文件指定参数，可修改项目中的配置文件相关，再运行各种场景对应的入口类，在 test 模块的 test.jacg 包中
-
-项目运行模块需要选择 test，以使 test 模块中的 log4j2 配置文件生效
-
-#### 9.3.3.2. 通过代码指定参数运行
-
-假如需要通过代码指定参数，可直接执行各场景对应的示例方法，或者参考示例方法进行修改
-
-### 9.3.4. 在其他项目中引用当前项目的库运行
+### 9.3.5. 在其他项目中引用当前项目的库运行
 
 在其他的项目中，使用 Maven/Gradle 等管理依赖库，并添加对当前项目的依赖
 
@@ -396,7 +387,7 @@ implementation("com.github.adrninistrator:java-all-call-graph: 版本号")
 
 `由于 Maven 间接依赖的组件版本不会自动使用最大的版本号，因此可能需要在项目中手工指定 java-all-call-graph 依赖组件的版本号，避免因为依赖组件版本不一致导致问题，可通过 java-all-call-graph 与 java-callgraph2 的 pom 文件的 dependencies 元素查看依赖组件版本`
 
-#### 9.3.4.1. 通过配置文件指定参数运行
+#### 9.3.5.1. 通过配置文件指定参数运行
 
 执行依赖的 java-all-call-graph 库中的 com.adrninistrator.jacg.unzip.UnzipFile 类，执行模块选择当前项目引入 java-all-call-graph 库的对应模块
 
@@ -418,13 +409,13 @@ java-callgraph2 项目的配置文件会写入释放的根目录下的 resources
 
 修改配置文件相关参数后，可运行对应的入口类
 
-#### 9.3.4.2. 通过代码指定参数运行
+#### 9.3.5.2. 通过代码指定参数运行
 
 与“通过 IDE 打开项目源码运行”的说明相同
 
-### 9.3.5. 使用项目源码构建后运行
+### 9.3.6. 使用项目源码构建后运行
 
-#### 9.3.5.1. 构建方式
+#### 9.3.6.1. 构建方式
 
 在项目根目录执行以下命令
 
@@ -432,7 +423,7 @@ java-callgraph2 项目的配置文件会写入释放的根目录下的 resources
 gradlew gen_run_jar
 ```
 
-#### 9.3.5.2. 生成的文件
+#### 9.3.6.2. 生成的文件
 
 构建完成后，会在项目根目录 jar_output_dir 生成相关目录及文件
 
@@ -447,13 +438,90 @@ gradlew gen_run_jar
 |xxx.bat|不同场景用于执行的脚本|
 |xxx.sh|不同场景用于执行的脚本|
 
-#### 9.3.5.3. 通过配置文件指定参数运行
+#### 9.3.6.3. 通过配置文件指定参数运行
 
 对配置文件参数进行配置后，可执行对应的 xxx.bat 或 xxx.sh 脚本，调用对应的入口类
 
-### 9.3.6. 通过代码执行的其他示例
+### 9.3.7. 通过代码执行的其他示例
 
 参考 [通过代码执行的其他示例](docs/run_by_code_example.md)
+
+## 9.4. 配置参数指定方式
+
+### 9.4.1. 通过配置文件指定配置参数
+
+#### 9.4.1.1. 配置文件信息
+
+配置文件及对应的目录信息如下，可从项目目录`src/main/resources`复制
+
+|目录或文件类型|目录或文件名称|作用|
+|---|---|---|
+|目录|_jacg_config|基本的配置文件目录|
+|文件|app.name|当前应用的调用关系写入数据库里的表名后缀|
+|文件|db.use.h2|是否使用 H2 数据库，true: 使用，false: 不使用|
+|目录|_jacg_find_stack_keyword|保存需要查找的关键字的目录|
+|文件|_jacg_find_stack_keyword/find_stack_keyword_4ee.properties|生成向上的方法完整调用链文件后，从最底层被调用方法开始向上查找包含指定关键字的方法的调用堆栈时，使用的关键字|
+|文件|_jacg_find_stack_keyword/find_stack_keyword_4er.properties|生成向下的方法完整调用链文件后，从最顶层调用方法开始向下查找包含指定关键字的方法的调用堆栈时，使用的关键字|
+|目录|_jacg_extensions|保存扩展类配置文件的目录|
+|文件|_jacg_extensions/code_parser.properties|定义用于对代码进行解析的扩展类完整类名（每行指定一项配置，可指定多行）|
+|文件|_jacg_extensions/method_annotation_formatter.properties|定义在生成方法完整调用链时，显示方法注解信息的扩展类完整类名（每行指定一项配置，可指定多行）|
+|文件|_jacg_extensions/manual_add_method_call1.properties|在此定义人工添加方法调用关系的扩展类完整类名，处理特定的子类与实现类（每行指定一项配置，可指定多行）|
+|文件|_jacg_extensions/find_stack_keyword_filter.properties|在此定义用于对完整调用链文件生成调用堆栈时使用的过滤器扩展类完整类名，若未指定则使用配置参数中的关键字（每行指定一项配置，可指定多行）|
+|文件|_jacg_extensions/javacg2_method_call_extensions.properties|java-callgraph2 组件在处理方法调用时的扩展类（每行指定一项配置，可指定多行）|
+|文件|_jacg_extensions/jacg_method_call_extensions.properties|java-all-call-graph 组件在处理方法调用时的扩展类（每行指定一项配置，可指定多行）|
+|目录|_jacg_jar_diff|比较新旧两个目录中不同版本 jar 文件相关配置文件的目录|
+|文件|_jacg_jar_diff/jar_diff_callee_graph_dir.properties|（作用） 指定新旧两个目录，比较其中的不同版本 jar 文件的方法修改情况，获得发生变化的方法的影响范围（生成向上的方法完整调用链及调用堆栈）|
+|文件|_jacg_jar_diff/jar_diff_caller_graph_dir.properties|（作用） 指定新旧两个目录，比较其中的不同版本 jar 文件的方法修改情况，向下的方法完整调用链|
+|目录|_jacg_jar_compatibility|Jar 兼容性检查相关配置文件的目录|
+|文件|_jacg_jar_compatibility/other_h2_db_path.properties|（作用） 指定检查 Jar 兼容性时使用的其他 H2 数据库文件路径|
+|目录|_jacg_gen_all_call_graph|生成方法完整调用链相关开关配置文件所在目录|
+|文件|_jacg_gen_all_call_graph/method_class_4callee.properties|（作用） 生成调用指定类或方法向上的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）|
+|文件|_jacg_gen_all_call_graph/method_class_4caller.properties|（作用） 生成指定类调用或方法向下的方法完整调用链时的配置文件（每行指定一项配置，可指定多行）|
+|文件|_jacg_gen_all_call_graph/caller_graph_callee_arg_type_polymorphism.properties|（作用） 生成向下方法完整调用链时，指定哪些方法参数作为被调用对象涉及多态时的类型替换（每行指定一项配置，可指定多行）|
+|目录|_jacg_business_data_type|保存业务功能数据类型配置文件的目录|
+|文件|_jacg_business_data_type/business_data_type_show_4ee.properties|生成向上的方法完整调用链时，指定默认支持的业务功能数据需要显示哪些类型。若不指定则不显示|
+|文件|_jacg_business_data_type/business_data_type_show_4er.properties|生成向下的方法完整调用链时，指定默认支持的业务功能数据需要显示哪些类型。若不指定则不显示|
+|目录|_el_example|el 表达式配置说明文件所在目录|
+|文件|_el_example/el_usage.md|表达式示例文件|
+|文件|_jacg_gen_all_call_graph/gen_call_graph_ignore_method_call.av|指定生成方法完整调用链时是否跳过解析特定的方法调用，支持通过方法调用类型、调用方法或被调用方法等判断|
+|目录|_jacg_spring_aop|处理 Spring AOP 相关开关配置文件所在目录|
+|文件|_jacg_spring_aop/spring_aop_ignore_spring_bean_class.av|指定解析 Spring AOP 影响方法时忽略哪些 Spring Bean 类，支持指定类名、包名、简单类名|
+|文件|_jacg_jar_diff/jar_diff_gen_all_call_graph_ignore_callee.av|JarDiff 获得发生变化的方法的影响范围时（生成向上的方法完整调用链及调用堆栈），指定发生变化的方法中，需要忽略的方法|
+|文件|_jacg_jar_diff/jar_diff_gen_all_call_graph_ignore_caller.av|JarDiff 获得发生变化的方法向下的方法完整调用链时，指定发生变化的方法中，需要忽略的方法|
+|文件|_jacg_jar_compatibility/compatibility_check_ignore_class_reference.av|指定 Jar 兼容性检查快速模式时是否跳过记录特定的类引用关系|
+
+#### 9.4.1.2. 使用默认配置文件根目录路径
+
+创建入口类实例时，使用无参数构造函数，配置文件根目录路径使用默认路径，会尝试从当前目录或 classpath 对应目录读取配置文件
+
+#### 9.4.1.3. 通过 JVM 参数指定配置文件根目录路径
+
+支持通过 JVM 参数"input.root.path"指定配置文件根目录路径，参数结尾可不指定目录分隔符"/"或"\"
+
+例如配置文件根目录路径为"C:/test"，则可在 JVM 参数中通过以下方式指定
+
+```
+-Dinput.root.path=C:/test
+```
+
+#### 9.4.1.4. 通过代码指定配置文件根目录路径
+
+创建入口类实例时，使用有参数构造函数，ConfigureWrapper 实例创建时通过 inputRootPath 参数指定配置文件根目录路径
+
+可参考 test.jacgconf 包中的类
+
+### 9.4.2. 通过代码指定配置参数
+
+在代码中使用 com.adrninistrator.jacg.conf.ConfigureWrapper 类可以指定配置参数
+
+以下为 ConfigureWrapper 用于指定配置参数的方法
+
+|方法名称|方法作用|
+|---|---|
+|setMainConfig|设置 key value 形式的参数|
+|setOtherConfigList|设置区分顺序的参数|
+|setOtherConfigSet|设置不区分顺序的参数|
+|setElConfigText|设置 EL 表达式|
 
 # 10. 更新说明
 

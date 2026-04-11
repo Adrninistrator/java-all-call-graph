@@ -103,7 +103,7 @@ public class FindCallStackTrace extends AbstractExecutor {
      * @param order4ee true: 处理向上的方法完整调用链 false: 处理向下的方法完整调用链
      */
     public FindCallStackTrace(boolean order4ee) {
-        this(order4ee, new ConfigureWrapper(false));
+        this(order4ee, new ConfigureWrapper(false, null));
     }
 
     /**

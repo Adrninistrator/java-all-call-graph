@@ -66,7 +66,7 @@ public class RunnerWriteCallGraphFile extends AbstractRunner {
      */
     public RunnerWriteCallGraphFile() {
         super();
-        javaCG2ConfigureWrapper = new JavaCG2ConfigureWrapper(false);
+        javaCG2ConfigureWrapper = new JavaCG2ConfigureWrapper(false, null);
     }
 
     /**

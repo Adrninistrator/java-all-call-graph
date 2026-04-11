@@ -62,7 +62,7 @@ public class RunnerGenJarDiffCalleeGraph extends AbstractRunnerGenJarDiffCallGra
     private final AbstractCalleeMethodInfoFiller[] calleeMethodInfoFillers;
 
     public RunnerGenJarDiffCalleeGraph() {
-        this(new JavaCG2ConfigureWrapper(false), new ConfigureWrapper(false), null, null);
+        this(new JavaCG2ConfigureWrapper(false, null), new ConfigureWrapper(false, null), null, null);
     }
 
     public RunnerGenJarDiffCalleeGraph(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper,

@@ -22,13 +22,15 @@ ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL
 
 以下为支持的表达式变量示例
 
-# 2. method_call_type - 生成向上方法完整调用链判断调用类型
+# 2. method_call_type
 
 - 表达式变量说明
 
 方法调用类型
 
 参考 JavaCG2CallTypeEnum 类
+
+## 2.1. 生成向上方法完整调用链判断调用类型
 
 - 表达式示例说明
 
@@ -58,11 +60,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElMethodCallType
 
-# 3. er_class_name - 生成向下方法完整调用链判断调用类名
+# 3. er_class_name
 
 - 表达式变量说明
 
 调用方完整类名
+
+## 3.1. 生成向下方法完整调用链判断调用类名
 
 - 表达式示例说明
 
@@ -92,13 +96,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElErClassName
 
-# 4. er_package_name - 生成向上方法完整调用链判断调用类包名
+# 4. er_package_name
 
 - 表达式变量说明
 
 调用方完整包名
 
 不会以.结束
+
+## 4.1. 生成向上方法完整调用链判断调用类包名
 
 - 表达式示例说明
 
@@ -128,11 +134,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElErPackageName
 
-# 5. er_simple_class_name - 生成向上方法完整调用链判断调用类简单类名
+# 5. er_simple_class_name
 
 - 表达式变量说明
 
 调用方简单类名
+
+## 5.1. 生成向上方法完整调用链判断调用类简单类名
 
 - 表达式示例说明
 
@@ -162,13 +170,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElErSimpleClassName
 
-# 6. er_method_name - 生成向上方法完整调用链判断调用方法名
+# 6. er_method_name
 
 - 表达式变量说明
 
 调用方方法名
 
 不包括括号及方法参数
+
+## 6.1. 生成向上方法完整调用链判断调用方法名
 
 - 表达式示例说明
 
@@ -198,11 +208,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElErMethodName
 
-# 7. er_method_arg_num - 生成向上方法完整调用链判断调用方法参数数量
+# 7. er_method_arg_num
 
 - 表达式变量说明
 
 调用方方法参数数量
+
+## 7.1. 生成向上方法完整调用链判断调用方法参数数量
 
 - 表达式示例说明
 
@@ -232,13 +244,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElErMethodArgNum
 
-# 8. er_full_method - 生成向下方法完整调用链判断调用完整方法
+# 8. er_full_method
 
 - 表达式变量说明
 
 调用方完整方法
 
 包括括号及方法参数
+
+## 8.1. 生成向下方法完整调用链判断调用完整方法
 
 - 表达式示例说明
 
@@ -268,11 +282,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElErFullMethod
 
-# 9. ee_class_name - 生成向上方法完整调用链判断被调用类名
+# 9. ee_class_name
 
 - 表达式变量说明
 
 被调用方完整类名
+
+## 9.1. 生成向上方法完整调用链判断被调用类名
 
 - 表达式示例说明
 
@@ -302,13 +318,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElEeClassName
 
-# 10. ee_package_name - 生成向下方法完整调用链判断被调用类包名
+# 10. ee_package_name
 
 - 表达式变量说明
 
 被调用方完整包名
 
 不会以.结束
+
+## 10.1. 生成向下方法完整调用链判断被调用类包名
 
 - 表达式示例说明
 
@@ -338,11 +356,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElEePackageName
 
-# 11. ee_simple_class_name - 生成向下方法完整调用链判断被调用类简单类名
+# 11. ee_simple_class_name
 
 - 表达式变量说明
 
 被调用方简单类名
+
+## 11.1. 生成向下方法完整调用链判断被调用类简单类名
 
 - 表达式示例说明
 
@@ -372,13 +392,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElEeSimpleClassName
 
-# 12. ee_method_name - 生成向下方法完整调用链判断被调用方法名
+# 12. ee_method_name
 
 - 表达式变量说明
 
 被调用方方法名
 
 不包括括号及方法参数
+
+## 12.1. 生成向下方法完整调用链判断被调用方法名
 
 - 表达式示例说明
 
@@ -408,11 +430,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElEeMethodName
 
-# 13. ee_method_arg_num - 生成向下方法完整调用链判断被调用方法参数数量
+# 13. ee_method_arg_num
 
 - 表达式变量说明
 
 被调用方方法参数数量
+
+## 13.1. 生成向下方法完整调用链判断被调用方法参数数量
 
 - 表达式示例说明
 
@@ -442,13 +466,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElEeMethodArgNum
 
-# 14. ee_full_method - 生成向上方法完整调用链判断被调用完整方法
+# 14. ee_full_method
 
 - 表达式变量说明
 
 被调用方完整方法
 
 包括括号及方法参数
+
+## 14.1. 生成向上方法完整调用链判断被调用完整方法
 
 - 表达式示例说明
 
@@ -478,7 +504,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElEeFullMethod
 
-# 15. flags_enum - 生成向上方法完整调用链忽略所有调用标志
+# 15. flags_enum
 
 - 表达式变量说明
 
@@ -487,6 +513,8 @@ test.runbycode.el.gencallgraph.TestGenCallGraph4EeElEeFullMethod
 指定 MethodCallFlagsEnum 类的常量名称，代表需要处理包含/不包含哪些标志的方法调用
 
 如 MCFE_ER_METHOD_ANNOTATION
+
+## 15.1. 生成向上方法完整调用链忽略所有调用标志
 
 - 表达式示例说明
 
@@ -516,15 +544,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4EeElFlagsExcludeAll
 
-# 16. flags_enum - 生成向下方法完整调用链判断调用标志多个条件使用与
-
-- 表达式变量说明
-
-方法调用标志枚举
-
-指定 MethodCallFlagsEnum 类的常量名称，代表需要处理包含/不包含哪些标志的方法调用
-
-如 MCFE_ER_METHOD_ANNOTATION
+## 15.2. 生成向下方法完整调用链判断调用标志多个条件使用与
 
 - 表达式示例说明
 
@@ -554,15 +574,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElFlagsExcludeMultiAnd
 
-# 17. flags_enum - 生成向下方法完整调用链判断调用标志多个条件使用或
-
-- 表达式变量说明
-
-方法调用标志枚举
-
-指定 MethodCallFlagsEnum 类的常量名称，代表需要处理包含/不包含哪些标志的方法调用
-
-如 MCFE_ER_METHOD_ANNOTATION
+## 15.3. 生成向下方法完整调用链判断调用标志多个条件使用或
 
 - 表达式示例说明
 
@@ -592,15 +604,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.gencallgraph.TestGenCallGraph4ErElFlagsExcludeMultiOr
 
-# 18. flags_enum - 生成向下方法完整调用链判断调用标志
-
-- 表达式变量说明
-
-方法调用标志枚举
-
-指定 MethodCallFlagsEnum 类的常量名称，代表需要处理包含/不包含哪些标志的方法调用
-
-如 MCFE_ER_METHOD_ANNOTATION
+## 15.4. 生成向下方法完整调用链判断调用标志
 
 - 表达式示例说明
 

@@ -170,9 +170,9 @@ org.springframework.web.servlet.DispatcherServlet:doService
 
 指定需要生成向下的方法完整调用链的类或方法
 
-### 1.6.3. 配置参数示例
+### 1.6.3. 配置参数使用说明
 
-参考 [配置参数示例](../_jacg_all_config.md)
+通过代码或配置文件配置参数的方式，参考 [配置参数使用说明](../_jacg_all_config.md)
 
 ### 1.6.4. EL 表达式使用通用说明文档
 
@@ -698,7 +698,7 @@ test.callgraph.polymorphism.calleeargtype.CalleeArgTypePolymorphismService1:test
 
 对于涉及多态的以方法参数作为被调用对象的场景，需要在配置参数中进行配置
 
-在配置文件 _jacg_gen_all_call_graph/caller_graph_callee_arg_type_polymorphism.properties 指定哪些方法参数作为被调用对象涉及多态时的类型替换，或在代码中进行配置，具体格式可参考 [配置参数示例](../_jacg_all_config.md)
+在配置文件 _jacg_gen_all_call_graph/caller_graph_callee_arg_type_polymorphism.properties 指定哪些方法参数作为被调用对象涉及多态时的类型替换，或在代码中进行配置，具体格式可参考 [配置参数使用说明](../_jacg_all_config.md)
 
 可参考示例方法 test.runbycode.callgraph.calleeargtypepolymorphism.TestGenCallerGraphCalleeArgTypePolymorphism:testRun0Use1B，在代码中设置的参数如下
 

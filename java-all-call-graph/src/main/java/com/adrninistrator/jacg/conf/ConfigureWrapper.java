@@ -42,7 +42,7 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
      * 默认构造函数，仅使用代码中指定的参数，忽略配置文件中的参数
      */
     public ConfigureWrapper() {
-        super(true);
+        super(true, null);
     }
 
     /**
@@ -51,7 +51,17 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
      * @param onlyUseConfigInJavaCode true: 仅使用代码中指定的参数，忽略配置文件中的参数 false: 使用配置文件中的参数
      */
     public ConfigureWrapper(boolean onlyUseConfigInJavaCode) {
-        super(onlyUseConfigInJavaCode);
+        super(onlyUseConfigInJavaCode, null);
+    }
+
+    /**
+     * 构造函数，指定使用代码中指定的参数，还是使用配置文件中的参数，可指定配置文件根目录路径
+     *
+     * @param onlyUseConfigInJavaCode true: 仅使用代码中指定的参数，忽略配置文件中的参数 false: 使用配置文件中的参数
+     * @param inputRootPath           指定的配置文件根目录路径，可为空
+     */
+    public ConfigureWrapper(boolean onlyUseConfigInJavaCode, String inputRootPath) {
+        super(onlyUseConfigInJavaCode, inputRootPath);
     }
 
     @Override

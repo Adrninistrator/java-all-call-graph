@@ -10,7 +10,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -142,6 +144,21 @@ public class JACGUtil {
      */
     public static Integer parseJarNum(String jarNumStr) {
         return JavaCG2Constants.EMPTY_JAR_NUM.equals(jarNumStr) ? null : Integer.parseInt(jarNumStr);
+    }
+
+    /**
+     * 获取当前时间
+     *
+     * @return
+     */
+    public static String currentTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss.SSS");
+        return sdf.format(new Date());
+    }
+
+    public static String currentTime2() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        return sdf.format(new Date());
     }
 
     private JACGUtil() {

@@ -21,7 +21,7 @@ import java.util.Set;
 public class RunnerGenJarDiffCallerGraph extends AbstractRunnerGenJarDiffCallGraph {
 
     public RunnerGenJarDiffCallerGraph() {
-        this(new JavaCG2ConfigureWrapper(false), new ConfigureWrapper(false));
+        this(new JavaCG2ConfigureWrapper(false, null), new ConfigureWrapper(false, null));
     }
 
     public RunnerGenJarDiffCallerGraph(JavaCG2ConfigureWrapper javaCG2ConfigureWrapper, ConfigureWrapper configureWrapper) {

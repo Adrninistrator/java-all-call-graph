@@ -24,11 +24,13 @@ ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METHOD_CALL
 
 以下为支持的表达式变量示例
 
-# 2. er_class_name - 判断多个条件使用与
+# 2. er_class_name
 
 - 表达式变量说明
 
 调用方完整类名
+
+## 2.1. 判断多个条件使用与
 
 - 表达式示例说明
 
@@ -58,11 +60,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameAnd
 
-# 3. er_class_name - 判断包含关键字
-
-- 表达式变量说明
-
-调用方完整类名
+## 2.2. 判断包含关键字
 
 - 表达式示例说明
 
@@ -92,11 +90,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameContains
 
-# 4. er_class_name - 判断包含多个关键字之一
-
-- 表达式变量说明
-
-调用方完整类名
+## 2.3. 判断包含多个关键字之一
 
 - 表达式示例说明
 
@@ -126,11 +120,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameContainsAny
 
-# 5. er_class_name - 判断以关键字结尾
-
-- 表达式变量说明
-
-调用方完整类名
+## 2.4. 判断以关键字结尾
 
 - 表达式示例说明
 
@@ -160,11 +150,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameEndsWith
 
-# 6. er_class_name - 判断以多个关键字之一结尾
-
-- 表达式变量说明
-
-调用方完整类名
+## 2.5. 判断以多个关键字之一结尾
 
 - 表达式示例说明
 
@@ -194,11 +180,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameEndsWithAny
 
-# 7. er_class_name - 判断等于关键字
-
-- 表达式变量说明
-
-调用方完整类名
+## 2.6. 判断等于关键字
 
 - 表达式示例说明
 
@@ -228,11 +210,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameEquals
 
-# 8. er_class_name - 判断等于多个关键字之一
-
-- 表达式变量说明
-
-调用方完整类名
+## 2.7. 判断等于多个关键字之一
 
 - 表达式示例说明
 
@@ -262,11 +240,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameEqualsAny
 
-# 9. er_class_name - 判断多个条件使用或
-
-- 表达式变量说明
-
-调用方完整类名
+## 2.8. 判断多个条件使用或
 
 - 表达式示例说明
 
@@ -296,11 +270,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameOr
 
-# 10. er_class_name - 判断以关键字开头
-
-- 表达式变量说明
-
-调用方完整类名
+## 2.9. 判断以关键字开头
 
 - 表达式示例说明
 
@@ -330,11 +300,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameStartsWith
 
-# 11. er_class_name - 判断以多个关键字之一开头
-
-- 表达式变量说明
-
-调用方完整类名
+## 2.10. 判断以多个关键字之一开头
 
 - 表达式示例说明
 
@@ -364,13 +330,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErClassNameStartsWithAny
 
-# 12. er_package_name - 判断包含关键字（忽略大小写）
+# 3. er_package_name
 
 - 表达式变量说明
 
 调用方完整包名
 
 不会以.结束
+
+## 3.1. 判断包含关键字（忽略大小写）
 
 - 表达式示例说明
 
@@ -400,13 +368,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErPackageNameContainsIC
 
-# 13. er_package_name - 判断以关键字结尾（忽略大小写）
-
-- 表达式变量说明
-
-调用方完整包名
-
-不会以.结束
+## 3.2. 判断以关键字结尾（忽略大小写）
 
 - 表达式示例说明
 
@@ -436,13 +398,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErPackageNameEndsWithIC
 
-# 14. er_package_name - 判断等于关键字（忽略大小写）
-
-- 表达式变量说明
-
-调用方完整包名
-
-不会以.结束
+## 3.3. 判断等于关键字（忽略大小写）
 
 - 表达式示例说明
 
@@ -472,13 +428,7 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_GEN_ALL_CALL_GRAPH_IGNORE_METH
 
 test.runbycode.el.stringcompare.TestGenCallGraph4EeElErPackageNameEqualsIC
 
-# 15. er_package_name - 判断以关键字开头（忽略大小写）
-
-- 表达式变量说明
-
-调用方完整包名
-
-不会以.结束
+## 3.4. 判断以关键字开头（忽略大小写）
 
 - 表达式示例说明
 

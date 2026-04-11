@@ -702,9 +702,9 @@ OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE
 
 - 参数说明
 
-生成向上的方法完整调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据
+生成向上的方法完整调用链时，指定默认支持的业务功能数据需要显示哪些类型。若不指定则不显示
 
-默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEe=true的type
+默认支持的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEe=true的type
 
 method_call_info
 method_arg_generics_type
@@ -723,9 +723,9 @@ OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER
 
 - 参数说明
 
-生成向下的方法完整调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据
+生成向下的方法完整调用链时，指定默认支持的业务功能数据需要显示哪些类型。若不指定则不显示
 
-默认的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEr=true的type
+默认支持的业务功能数据类型参考 DefaultBusinessDataTypeEnum 枚举类，supportEr=true的type
 
 method_call_info
 method_arg_generics_type

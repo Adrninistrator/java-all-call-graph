@@ -22,11 +22,13 @@ ElConfigEnum.ECE_SPRING_AOP_IGNORE_SPRING_BEAN_CLASS
 
 以下为支持的表达式变量示例
 
-# 2. class_name - 解析Spring AOP影响方法判断受影响Bean类名
+# 2. class_name
 
 - 表达式变量说明
 
 完整类名
+
+## 2.1. 解析Spring AOP影响方法判断受影响Bean类名
 
 - 表达式示例说明
 
@@ -56,13 +58,15 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_SPRING_AOP_IGNORE_SPRING_BEAN_
 
 test.runbycode.el.springaop.TestSpringAopEl4SpringBeanClassName
 
-# 3. package_name - 解析Spring AOP影响方法判断受影响Bean包名
+# 3. package_name
 
 - 表达式变量说明
 
 完整包名
 
 不会以.结束
+
+## 3.1. 解析Spring AOP影响方法判断受影响Bean包名
 
 - 表达式示例说明
 
@@ -92,11 +96,13 @@ configureWrapper.setElConfigText(ElConfigEnum.ECE_SPRING_AOP_IGNORE_SPRING_BEAN_
 
 test.runbycode.el.springaop.TestSpringAopEl4SpringBeanPackageName
 
-# 4. simple_class_name - 解析Spring AOP影响方法判断受影响Bean简单类名
+# 4. simple_class_name
 
 - 表达式变量说明
 
 简单类名
+
+## 4.1. 解析Spring AOP影响方法判断受影响Bean简单类名
 
 - 表达式示例说明
 

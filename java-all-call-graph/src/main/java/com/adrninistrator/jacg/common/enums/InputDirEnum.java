@@ -1,11 +1,13 @@
 package com.adrninistrator.jacg.common.enums;
 
+import com.adrninistrator.javacg2.conf.enums.interfaces.DirInterface;
+
 /**
  * @author adrninistrator
  * @date 2022/8/21
  * @description:
  */
-public enum InputDirEnum {
+public enum InputDirEnum implements DirInterface {
     IDE_CONFIG("_jacg_config", "基本的配置文件目录"),
     IDE_SQL("_jacg_sql", "保存sql脚本的目录"),
     IDE_KEYWORD_CONF("_jacg_find_stack_keyword", "保存需要查找的关键字的目录"),
@@ -19,19 +21,21 @@ public enum InputDirEnum {
     ;
 
     private final String dirName;
-    private final String desc;
+    private final String description;
 
-    InputDirEnum(String dirName, String desc) {
+    InputDirEnum(String dirName, String description) {
         this.dirName = dirName;
-        this.desc = desc;
+        this.description = description;
     }
 
+    @Override
     public String getDirName() {
         return dirName;
     }
 
-    public String getDesc() {
-        return desc;
+    @Override
+    public String getDescription() {
+        return description;
     }
 
     @Override

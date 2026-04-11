@@ -1957,3 +1957,7 @@ configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS
 ### 1.45.4. 支持解析反射的方法调用（原生使用方式）
 
 见 [Java静态分析解析反射方法调用](usage_scenarios/parse_reflection_call.md)
+
+## 1.46. (4.0.7)
+
+使用配置文件指定配置参数时，支持通过代码指定配置文件根目录路径

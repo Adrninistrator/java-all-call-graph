@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.conf.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.el.enums.ElConfigEnum;
 import com.adrninistrator.javacg2.common.JavaCG2Constants;
+import com.adrninistrator.javacg2.conf.enums.interfaces.DirInterface;
 import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
 import com.adrninistrator.javacg2.conf.writer.BaseConfigWriter;
 import com.adrninistrator.javacg2.el.enums.interfaces.ElConfigInterface;
@@ -58,5 +59,10 @@ public class JACGConfigWriter extends BaseConfigWriter {
     @Override
     protected ElConfigInterface[] chooseElConfigEnums() {
         return ElConfigEnum.values();
+    }
+
+    @Override
+    protected DirInterface[] chooseConfigDirEnums() {
+        return InputDirEnum.values();
     }
 }

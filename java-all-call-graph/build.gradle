@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply from: 'unittest.gradle'
 
 group 'com.github.adrninistrator'
-version = "4.0.6"
+version = "4.0.7"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
@@ -56,7 +56,7 @@ List mysql = ['com.mysql:mysql-connector-j:8.4.0']
 
 List h2database = ["com.h2database:h2:2.2.220"]
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:4.0.4']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:4.0.5']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.1.1']
 
@@ -250,6 +250,7 @@ idea {
         excludeDirs += file("${jar_output_dir}")
         excludeDirs += file('bat')
         excludeDirs += file('shell')
+        excludeDirs += file('prompt')
         excludeDirs += file('log')
         excludeDirs += file('_unittest_output')
     }
