@@ -49,6 +49,17 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
 
             for (String key : keyList) {
                 String value = properties.getProperty(key);
+                if (JavaCG2Util.checkNeedBase64(key)) {
+                    /*
+                        com.ibm.mq.allclient-9.0.5.0.jar
+                        com/ibm/msg/client/commonservices/trace/controllerMessages.properties
+                        以上文件内容有问题，导致properties文件解析出来的key值为“\t”
+                        以上情况需要忽略
+                     */
+                    logger.warn("key值非法 [{}] value: [{}] 忽略{}文件 {}", key, value, JACGConstants.EXT_PROPERTIES, jarEntryPath);
+                    continue;
+                }
+
                 JavaCG2YesNoEnum useBase64 = JavaCG2YesNoEnum.NO;
                 if (JavaCG2Util.checkNeedBase64(value)) {
                     // 假如properties文件的值中包含回车换行Tab，则需要进行BASE64编码

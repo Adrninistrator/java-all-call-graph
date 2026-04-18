@@ -1956,8 +1956,12 @@ configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS
 
 ### 1.45.4. 支持解析反射的方法调用（原生使用方式）
 
-见 [Java静态分析解析反射方法调用](usage_scenarios/parse_reflection_call.md)
+见 [Java 静态分析解析反射方法调用](usage_scenarios/parse_reflection_call.md)
 
 ## 1.46. (4.0.7)
 
 使用配置文件指定配置参数时，支持通过代码指定配置文件根目录路径
+
+## 1.47. (4.0.8)
+
+com.ibm.mq.allclient-9.0.5.0.jar 的 com/ibm/msg/client/commonservices/trace/controllerMessages.properties 文件格式有问题，会导致解析失败，兼容这种情况
