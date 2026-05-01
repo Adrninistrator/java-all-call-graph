@@ -15,6 +15,7 @@ import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
+import com.adrninistrator.jacg.dto.callgraph.MethodCallGraphFilePathInfo;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
 import com.adrninistrator.jacg.dto.methodcall.MethodCallLineData;
 import com.adrninistrator.jacg.dto.methodcall.ObjArgsInfoInMethodCall;
@@ -154,6 +155,9 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
 
     // 保存已生成的过方法文件名
     protected Set<String> writtenFileNameSet = ConcurrentHashMap.newKeySet();
+
+    // 记录生成调用链的方法与文件完整路径，key: 完整方法（如a.b.C:f1(int)），value: 调用链文件路径信息
+    private final Map<String, MethodCallGraphFilePathInfo> methodCallGraphFilePathMap = new ConcurrentHashMap<>();
 
     // 输出结果展示详细程度枚举
     protected OutputDetailEnum outputDetailEnum;
@@ -1108,5 +1112,25 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
     // 获取生成向上/向下的方法完整调用链时，生成的方法调用数量超过限制的方法
     public List<String> getGenCallGraphNumExceedMethodListReadOnly() {
         return Collections.unmodifiableList(genCallGraphNumExceedMethodList);
+    }
+
+    /**
+     * 记录生成调用链的方法与文件完整路径
+     *
+     * @param fullMethod 完整方法，如a.b.C:f1(int)
+     * @param origText   当前方法在输入任务中指定的内容（仅当当前方法在输入任务中指定的是方法形式时才有值），可为null
+     * @param filePath   文件完整路径
+     */
+    protected void recordCallGraphFilePath(String fullMethod, String origText, String filePath) {
+        methodCallGraphFilePathMap.put(fullMethod, new MethodCallGraphFilePathInfo(origText, filePath));
+    }
+
+    /**
+     * 获取生成调用链的方法与文件完整路径的Map
+     *
+     * @return key: 完整方法，如a.b.C:f1(int) value: 调用链文件路径信息
+     */
+    public Map<String, MethodCallGraphFilePathInfo> getMethodCallGraphFilePathMap() {
+        return Collections.unmodifiableMap(methodCallGraphFilePathMap);
     }
 }

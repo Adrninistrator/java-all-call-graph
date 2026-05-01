@@ -146,7 +146,23 @@
 |参数默认值|false|
 |参数枚举名|CKE_EL_DEBUG_MODE|
 
-#### 1.2.1.9. gen.call.graph.depth.limit
+#### 1.2.1.9. el.ignore.data.max.line.num
+
+- 参数说明
+
+```
+EL表达式忽略数据文件的最大行数，默认10万行
+```
+
+|描述|内容|
+|---|---|
+|参数类型|Integer|
+|参数值是否必填|否|
+|当前使用参数值|100000|
+|参数默认值|100000|
+|参数枚举名|CKE_EL_IGNORE_DATA_MAX_LINE_NUM|
+
+#### 1.2.1.10. gen.call.graph.depth.limit
 
 - 参数说明
 
@@ -162,7 +178,7 @@
 |参数默认值|0|
 |参数枚举名|CKE_GEN_CALL_GRAPH_DEPTH_LIMIT|
 
-#### 1.2.1.10. gen.call.graph.num.limit
+#### 1.2.1.11. gen.call.graph.num.limit
 
 - 参数说明
 
@@ -178,7 +194,7 @@
 |参数默认值|0|
 |参数枚举名|CKE_GEN_CALL_GRAPH_NUM_LIMIT|
 
-#### 1.2.1.11. output.dir.flag
+#### 1.2.1.12. output.dir.flag
 
 - 参数说明
 
@@ -196,7 +212,7 @@
 |参数默认值||
 |参数枚举名|CKE_OUTPUT_DIR_FLAG|
 
-#### 1.2.1.12. output.dir.name
+#### 1.2.1.13. output.dir.name
 
 - 参数说明
 
@@ -214,7 +230,7 @@
 |参数默认值||
 |参数枚举名|CKE_OUTPUT_DIR_NAME|
 
-#### 1.2.1.13. output.root.path
+#### 1.2.1.14. output.root.path
 
 - 参数说明
 
@@ -231,7 +247,7 @@
 |参数默认值||
 |参数枚举名|CKE_OUTPUT_ROOT_PATH|
 
-#### 1.2.1.14. text.to.excel.width.px
+#### 1.2.1.15. text.to.excel.width.px
 
 - 参数说明
 
@@ -247,7 +263,7 @@
 |参数默认值|1920|
 |参数枚举名|CKE_TEXT_TO_EXCEL_WIDTH_PX|
 
-#### 1.2.1.15. thread.num
+#### 1.2.1.16. thread.num
 
 - 参数说明
 

@@ -345,6 +345,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
                 outputFilePath4Method = currentOutputDirPath + File.separator + outputFileName + JavaCG2Constants.EXT_TXT;
                 logger.info("当前方法输出的调用链文件名 {}", outputFilePath4Method);
 
+                // 记录生成调用链的方法与文件完整路径
+                recordCallGraphFilePath(startCalleeFullMethod, origTaskText, outputFilePath4Method);
+
                 // 判断文件是否生成过
                 if (!writtenFileNameSet.add(outputFilePath4Method)) {
                     logger.info("当前文件已生成过，不再处理 {} {} {}", origTaskText, startCalleeFullMethod, outputFilePath4Method);

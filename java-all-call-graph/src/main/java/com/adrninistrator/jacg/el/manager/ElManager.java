@@ -34,6 +34,11 @@ public class ElManager extends CommonElManager {
         return configureWrapper.getMainConfig(ConfigKeyEnum.CKE_EL_DEBUG_MODE);
     }
 
+    @Override
+    protected int chooseElIgnoreDataMaxLineNum(BaseConfigureWrapper configureWrapper) {
+        return configureWrapper.getMainConfig(ConfigKeyEnum.CKE_EL_IGNORE_DATA_MAX_LINE_NUM);
+    }
+
     /**
      * 检查是否需要跳过记录方法调用
      *

@@ -1965,3 +1965,13 @@ configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS
 ## 1.47. (4.0.8)
 
 com.ibm.mq.allclient-9.0.5.0.jar 的 com/ibm/msg/client/commonservices/trace/controllerMessages.properties 文件格式有问题，会导致解析失败，兼容这种情况
+
+## 1.48. (4.0.9)
+
+### 1.48.1. 生成调用链文件类增加方法
+
+生成调用链文件的类增加方法，用于获取方法及生成的调用链文件路径
+
+### 1.48.2. 增加配置参数限制 EL 表达式忽略数据文件的最大行数
+
+在配置文件 _jacg_config/config.properties 中增加配置参数 el.ignore.data.max.line.num，默认 10 万行

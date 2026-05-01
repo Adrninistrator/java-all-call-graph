@@ -60,7 +60,23 @@
 |参数默认值|false|
 |参数枚举名|CKE_EL_DEBUG_MODE|
 
-#### 1.2.1.4. output.dir.flag
+#### 1.2.1.4. el.ignore.data.max.line.num
+
+- 参数说明
+
+```
+EL表达式忽略数据文件的最大行数，默认10万行
+```
+
+|描述|内容|
+|---|---|
+|参数类型|Integer|
+|参数值是否必填|否|
+|当前使用参数值|100000|
+|参数默认值|100000|
+|参数枚举名|CKE_EL_IGNORE_DATA_MAX_LINE_NUM|
+
+#### 1.2.1.5. output.dir.flag
 
 - 参数说明
 
@@ -78,7 +94,7 @@
 |参数默认值||
 |参数枚举名|CKE_OUTPUT_DIR_FLAG|
 
-#### 1.2.1.5. output.dir.name
+#### 1.2.1.6. output.dir.name
 
 - 参数说明
 
@@ -96,7 +112,7 @@
 |参数默认值||
 |参数枚举名|CKE_OUTPUT_DIR_NAME|
 
-#### 1.2.1.6. output.root.path
+#### 1.2.1.7. output.root.path
 
 - 参数说明
 
@@ -113,7 +129,7 @@
 |参数默认值||
 |参数枚举名|CKE_OUTPUT_ROOT_PATH|
 
-#### 1.2.1.7. text.to.excel.width.px
+#### 1.2.1.8. text.to.excel.width.px
 
 - 参数说明
 
@@ -129,7 +145,7 @@
 |参数默认值|1920|
 |参数枚举名|CKE_TEXT_TO_EXCEL_WIDTH_PX|
 
-#### 1.2.1.8. thread.num
+#### 1.2.1.9. thread.num
 
 - 参数说明
 

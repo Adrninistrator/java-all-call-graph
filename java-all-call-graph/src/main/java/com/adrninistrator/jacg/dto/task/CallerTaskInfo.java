@@ -30,6 +30,9 @@ public class CallerTaskInfo {
     // 当前任务需要保存的目录
     private String saveDirPath;
 
+    // 在输入任务中指定的内容，仅当指定的是方法形式时有值（如 com.test.ClassA:method1()）
+    private String methodSpecifiedInTask;
+
     public String getOrigText() {
         return origText;
     }
@@ -92,5 +95,13 @@ public class CallerTaskInfo {
 
     public void setSaveDirPath(String saveDirPath) {
         this.saveDirPath = saveDirPath;
+    }
+
+    public String getMethodSpecifiedInTask() {
+        return methodSpecifiedInTask;
+    }
+
+    public void setMethodSpecifiedInTask(String methodSpecifiedInTask) {
+        this.methodSpecifiedInTask = methodSpecifiedInTask;
     }
 }

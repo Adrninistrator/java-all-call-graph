@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
 import test.callgraph.extendcomplex.TestExtendComplex;
+import test.callgraph.methodcall.TestMCCallee;
 import test.callgraph.methodcall.TestMCCaller;
 import test.callgraph.spring.mvc.TestSpringController1;
 import test.runbycode.base.TestRunByCodeBase;
@@ -38,9 +39,15 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
         new TestRBC1RunnerWriteDb().$test0WriteDb();
 
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, TestMCCaller.class.getName());
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
+                TestMCCaller.class.getName(),
+                TestMCCallee.class.getName() + ":test2("
+        );
 
-        Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
+        RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
+        Assert.assertTrue(runnerGenAllGraph4Caller.run());
+
+        printMapContent(runnerGenAllGraph4Caller.getMethodCallGraphFilePathMap());
     }
 
     @JACGExample(title = "方法完整调用链数据仅写入文件",
@@ -75,7 +82,10 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
                 TestSpringController1.class.getName());
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 SpringMvcRequestMappingJsonFormatter.class.getName());
-        Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
+        RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
+        Assert.assertTrue(runnerGenAllGraph4Caller.run());
+
+        printMapContent(runnerGenAllGraph4Caller.getMethodCallGraphFilePathMap());
     }
 
     @JACGExample(title = "方法完整调用链数据仅写入文件，生成文件名使用更短的模式",
@@ -83,7 +93,10 @@ public class TestRBCRunnerGenAllGraph4Caller extends TestRunByCodeBase {
     @Test
     public void testWriteToFileShortName() {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_FILE_SHORT_MODE, Boolean.TRUE.toString());
-        Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
+        RunnerGenAllGraph4Caller runnerGenAllGraph4Caller = new RunnerGenAllGraph4Caller(configureWrapper);
+        Assert.assertTrue(runnerGenAllGraph4Caller.run());
+
+        printMapContent(runnerGenAllGraph4Caller.getMethodCallGraphFilePathMap());
     }
 
     @JACGExample(title = "方法完整调用链数据仅在内存中返回",

@@ -56,7 +56,7 @@ public class PropertiesConfCodeParser extends AbstractSaveData2FileParser {
                         以上文件内容有问题，导致properties文件解析出来的key值为“\t”
                         以上情况需要忽略
                      */
-                    logger.warn("key值非法 [{}] value: [{}] 忽略{}文件 {}", key, value, JACGConstants.EXT_PROPERTIES, jarEntryPath);
+                    logger.warn("key值非法 [{}] value: [{}] 忽略{}文件对应值 {}", key, value, JACGConstants.EXT_PROPERTIES, jarEntryPath);
                     continue;
                 }
 

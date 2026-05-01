@@ -43,6 +43,11 @@ public class JACGConfigWriter extends BaseConfigWriter {
     }
 
     @Override
+    protected String chooseElIgnoreDataMaxLineNumText() {
+        return "通过配置文件 " + ConfigKeyEnum.CKE_EL_IGNORE_DATA_MAX_LINE_NUM.getFileName() + " 中的配置参数 " + ConfigKeyEnum.CKE_EL_IGNORE_DATA_MAX_LINE_NUM.getKey();
+    }
+
+    @Override
     protected String chooseElExampleText() {
         return JavaCG2Constants.NEW_LINE_WINDOWS + "字符串比较的表达式示例可参考 " + InputDirEnum.IDE_EL_EXAMPLE.getDirName() + "/" + JavaCG2Constants.EL_STRING_COMPARE_MD_FILE_NAME +
                 JavaCG2Constants.NEW_LINE_WINDOWS +

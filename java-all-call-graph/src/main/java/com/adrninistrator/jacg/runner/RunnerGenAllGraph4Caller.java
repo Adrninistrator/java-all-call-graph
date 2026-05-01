@@ -379,6 +379,8 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
             CallerTaskInfo callerTaskInfo = new CallerTaskInfo();
             callerTaskInfo.setOrigText(task);
             callerTaskInfo.setCallerSimpleClassName(simpleClassName);
+            // 输入任务中指定的是方法形式
+            callerTaskInfo.setMethodSpecifiedInTask(task);
             if (JavaCG2Util.isNumStr(arg2InTask)) {
                 // 任务中指定的第二个参数为全数字，作为代码行号处理
                 callerTaskInfo.setMethodLineNumber(Integer.parseInt(arg2InTask));
@@ -523,6 +525,9 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
                 }
                 outputFilePath = currentOutputDirPath + File.separator + outputFilePathTail + JavaCG2Constants.EXT_TXT;
                 logger.info("当前输出的调用链文件名 {} {}", outputFilePath, startCallerFullMethod);
+
+                // 记录生成调用链的方法与文件完整路径
+                recordCallGraphFilePath(startCallerFullMethod, callerTaskInfo.getMethodSpecifiedInTask(), outputFilePath);
 
                 // 判断文件是否生成过
                 if (!writtenFileNameSet.add(outputFilePath)) {

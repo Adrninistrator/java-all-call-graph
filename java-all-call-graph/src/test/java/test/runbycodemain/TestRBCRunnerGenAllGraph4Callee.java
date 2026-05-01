@@ -9,6 +9,7 @@ import com.adrninistrator.javacg2.util.JavaCG2Util;
 import org.junit.Assert;
 import org.junit.Test;
 import test.annotation.JACGExample;
+import test.callgraph.methodcall.TestMCCallee;
 import test.runbycode.base.TestRunByCodeBase;
 import test.runbycode.config.TestConfigGenerator;
 import test.runbycode.util.JACGTestUtil;
@@ -33,9 +34,15 @@ public class TestRBCRunnerGenAllGraph4Callee extends TestRunByCodeBase {
         new TestRBC1RunnerWriteDb().$test0WriteDb();
 
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE, System.class.getName());
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
+                System.class.getName(),
+                TestMCCallee.class.getName() + ":test2("
+        );
 
-        Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapper).run());
+        RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee(configureWrapper);
+        Assert.assertTrue(runnerGenAllGraph4Callee.run());
+
+        printMapContent(runnerGenAllGraph4Callee.getMethodCallGraphFilePathMap());
     }
 
     @JACGExample(title = "方法完整调用链数据仅写入文件",
@@ -65,7 +72,10 @@ public class TestRBCRunnerGenAllGraph4Callee extends TestRunByCodeBase {
     @Test
     public void testWriteToFileShortName() {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_FILE_SHORT_MODE, Boolean.TRUE.toString());
-        Assert.assertTrue(new RunnerGenAllGraph4Callee(configureWrapper).run());
+        RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee(configureWrapper);
+        Assert.assertTrue(runnerGenAllGraph4Callee.run());
+
+        printMapContent(runnerGenAllGraph4Callee.getMethodCallGraphFilePathMap());
     }
 
     @JACGExample(title = "方法完整调用链数据仅在内存中返回",
