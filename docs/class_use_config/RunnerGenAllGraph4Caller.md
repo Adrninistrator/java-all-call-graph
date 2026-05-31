@@ -296,7 +296,7 @@ PostgreSQL 使用 org.postgresql.Driver
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|com.mysql.cj.jdbc.Driver|
 |参数默认值|com.mysql.cj.jdbc.Driver|
 |参数枚举名|CDKE_DB_DRIVER_NAME|
@@ -307,7 +307,7 @@ PostgreSQL 使用 org.postgresql.Driver
 
 ```
 H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.mv.db”支持指定，也支持不指定
-需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头
+需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头，为相对当前运行的Java应用根目录的相对路径
 示例：D:/build/jacg_h2db.mv.db
 示例：./build/jacg_h2db.mv.db
 示例：D:/build/jacg_h2db
@@ -317,7 +317,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|./build/jacg_h2db_rbc|
 |参数默认值|./build/jacg_h2db|
 |参数枚举名|CDKE_DB_H2_FILE_PATH|
@@ -333,7 +333,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值||
 |参数默认值||
 |参数枚举名|CDKE_DB_PASSWORD|
@@ -368,7 +368,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true|
 |参数默认值|jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true|
 |参数枚举名|CDKE_DB_URL|
@@ -400,7 +400,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值||
 |参数默认值||
 |参数枚举名|CDKE_DB_USERNAME|
@@ -469,13 +469,15 @@ OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER
 
 (格式1) {类名}
 
-(格式2) {类名}:{方法名} {起始代码行号}-{结束代码行号}
+(格式2) {类名}:{方法名}
 
-(格式3) {类名}:{方法名}({参数}) {起始代码行号}-{结束代码行号}
+(格式3) {类名}:{方法名}({参数})
 
-(格式3) {类名}:{方法名}({参数}):{方法返回类型} {起始代码行号}-{结束代码行号}
+(格式4) {类名}:{方法名}({参数}):{方法返回类型}
 
-(格式4) {类名}:{代码行号} {起始代码行号}-{结束代码行号}
+(格式5) {类名}:{代码行号}
+
+(格式6) 以上格式2~5可后缀 {起始代码行号}-{结束代码行号}，用于控制输出范围
 
 (格式说明) 假如仅指定了{类名}，则会处理对应类的所有方法
 
@@ -483,9 +485,9 @@ OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER
 
 (格式说明) 若存在同名方法，则需要指定方法参数以区分
 
-(格式说明) {起始代码行号}-{结束代码行号}为可选参数，若不指定则输出指定的整个方法向下的方法完整调用链；若指定则输出方法指定行号范围内向下的方法完整调用链，即 >= 起始代码行号 且 <= 结束代码行号的范围
+(格式说明) {代码行号}用于定位对应的方法，不是控制输出范围；如C:f1()方法代码起止行号范围为{100,203}，则可指定以上范围的任意数字代表需要处理C:f1()方法
 
-(格式说明) {代码行号}可指定某个方法对应的任意代码行号，如C:f1()方法代码起止行号范围为{100,203}，则可指定以上范围的任意数字代表需要处理C:f1()方法
+(格式说明) {起始代码行号}-{结束代码行号}为可选参数，仅向下调用链支持；若不指定则输出指定的整个方法向下的方法完整调用链；若指定则输出方法指定行号范围内向下的方法完整调用链，即 >= 起始代码行号 且 <= 结束代码行号的范围
 
 (格式说明) {方法返回类型}需要指定完整类型
 
@@ -495,11 +497,15 @@ Test1
 
 com.test.Test1
 
+Test1:func1
+
 Test1:func1 139-492
 
 Test1:func1(
 
 Test1:func1(java.lang.String)
+
+Test1:func1(java.lang.String) 139-492
 
 com.test.Test1:func1 395-1358
 
@@ -508,6 +514,8 @@ com.test.Test1:func1(
 com.test.Test1:func1(java.lang.String)
 
 com.test.Test1:func1(java.lang.String):java.lang.String
+
+com.test.Test1:func1(java.lang.String):java.lang.String 395-1358
 
 Test1:139
 
@@ -556,7 +564,7 @@ a.b.C:f1(int,a.b.Super):java.lang.String=1
 
 - 配置文件枚举类名与常量名
 
-OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER
+OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER
 
 - 参数说明
 

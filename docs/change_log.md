@@ -1975,3 +1975,22 @@ com.ibm.mq.allclient-9.0.5.0.jar 的 com/ibm/msg/client/commonservices/trace/con
 ### 1.48.2. 增加配置参数限制 EL 表达式忽略数据文件的最大行数
 
 在配置文件 _jacg_config/config.properties 中增加配置参数 el.ignore.data.max.line.num，默认 10 万行
+
+## 1.49. (4.1.0)
+
+### 1.49.1. 表达式配置参数增加默认值
+
+当前项目的表达式配置参数默认值都是空
+
+### 1.49.2. 配置参数赋值优化
+
+当配置参数赋值为非法值时，优化错误提示
+
+### 1.49.3. 配置参数枚举常量名称修改
+
+com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum 枚举常量名称修改（原有名称不规范）
+
+|修改前名称|修改后名称|
+|---|---|
+|OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE|OCFUSE_BUSINESS_DATA_TYPE_SHOW_4EE|
+|OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER|OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER|

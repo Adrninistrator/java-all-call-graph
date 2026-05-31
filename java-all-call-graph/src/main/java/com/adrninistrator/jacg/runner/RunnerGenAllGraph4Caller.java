@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
+import com.adrninistrator.jacg.conf.ConfChecker;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum;
@@ -229,23 +230,13 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
         calleeArgTypePolymorphismFlag = true;
         calleeArgTypePolymorphismMap = new HashMap<>(configSet.size());
 
+        // 检查方法参数作为被调用对象涉及多态时的类型替换时使用的配置
+        ConfChecker.checkCalleeArgTypePolymorphism(configureWrapper);
+
         // 处理指定的配置
         for (String config : configSet) {
             String[] array = StringUtils.splitPreserveAllTokens(config, JavaCG2Constants.FLAG_EQUAL);
-            if (array.length != 2) {
-                logger.error("{} 配置参数非法，不是 xxx=yyy 格式 {}", OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM.genConfigUsage(), config);
-                return false;
-            }
-            if (!JavaCG2Util.isNumStr(array[1])) {
-                logger.error("{} 配置参数非法，不是合法的参数序号 {}", OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM.genConfigUsage(), config);
-                return false;
-            }
             int argSeq = Integer.parseInt(array[1]);
-            if (argSeq < JavaCG2Constants.METHOD_CALL_ARGUMENTS_START_SEQ) {
-                logger.error("{} 配置参数非法，参数序号应大于等于 {} {}", OtherConfigFileUseSetEnum.OCFUSE_CALLER_GRAPH_CALLEE_ARG_TYPE_POLYMORPHISM.genConfigUsage(),
-                        JavaCG2Constants.METHOD_CALL_ARGUMENTS_START_SEQ, config);
-                return false;
-            }
 
             String calleeFullMethodSupportReturnType = array[0];
             // 查询方法信息，支持完整方法，或完整方法+方法返回类型

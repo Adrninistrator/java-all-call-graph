@@ -6,7 +6,7 @@
 
 [https://github.com/Adrninistrator/java-all-call-graph](https://github.com/Adrninistrator/java-all-call-graph)
 
-增加 java-all-call-graph Web界面版，可参考 [https://github.com/Adrninistrator/java-all-call-graph-server](https://github.com/Adrninistrator/java-all-call-graph-server)
+增加 java-all-call-graph Web 界面版，可参考 [https://github.com/Adrninistrator/java-all-call-graph-server](https://github.com/Adrninistrator/java-all-call-graph-server)
 
 # 2. 使用案例
 
@@ -317,9 +317,13 @@ _jacg_config/config_db.properties
 
 通过代码或配置文件配置参数的方式，参考 [配置参数使用说明](docs/_jacg_all_config.md)
 
-### 9.2.4. EL 表达式使用通用说明文档
+### 9.2.4. EL 表达式使用说明文档
 
-参考 [EL 表达式使用通用说明文档](java-all-call-graph/src/main/resources/_el_example/el_usage.md)
+参考以下文档
+
+[表达式使用通用说明文档](java-all-call-graph/src/main/resources/_el_example/el_usage.md)
+
+[java-all-call-graph 表达式使用说明文档](java-all-call-graph/src/main/resources/_el_example/el_usage_jacg.md)
 
 ### 9.2.5. EL 表达式字符串比较说明文档
 

@@ -263,7 +263,7 @@ PostgreSQL 使用 org.postgresql.Driver
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|com.mysql.cj.jdbc.Driver|
 |参数默认值|com.mysql.cj.jdbc.Driver|
 |参数枚举名|CDKE_DB_DRIVER_NAME|
@@ -274,7 +274,7 @@ PostgreSQL 使用 org.postgresql.Driver
 
 ```
 H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.mv.db”支持指定，也支持不指定
-需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头
+需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头，为相对当前运行的Java应用根目录的相对路径
 示例：D:/build/jacg_h2db.mv.db
 示例：./build/jacg_h2db.mv.db
 示例：D:/build/jacg_h2db
@@ -284,7 +284,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|./build/jacg_h2db_rbc|
 |参数默认值|./build/jacg_h2db|
 |参数枚举名|CDKE_DB_H2_FILE_PATH|
@@ -300,7 +300,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值||
 |参数默认值||
 |参数枚举名|CDKE_DB_PASSWORD|
@@ -335,7 +335,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true|
 |参数默认值|jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true|
 |参数枚举名|CDKE_DB_URL|
@@ -367,7 +367,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值||
 |参数默认值||
 |参数枚举名|CDKE_DB_USERNAME|
@@ -440,9 +440,9 @@ OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE
 
 (格式3) {类名}:{方法名}({参数})
 
-(格式4) {类名}:{代码行号}
+(格式4) {类名}:{方法名}({参数}):{方法返回类型}
 
-(格式5) {类名}:{方法名}({参数}):{方法返回类型}
+(格式5) {类名}:{代码行号}
 
 (格式说明) 假如只指定了类名，没有指定方法名或代码行号，则处理指定类的全部方法
 
@@ -450,7 +450,7 @@ OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE
 
 (格式说明) {类名}可指定简单类名或完整类名；若存在同名类，则需要指定完整类名
 
-(格式说明) {代码行号}可指定某个方法对应的任意代码行号，如C:f1()方法代码起止行号范围为{100,203}，则可指定以上范围的任意数字代表需要处理C:f1()方法
+(格式说明) {代码行号}用于定位对应的方法，不是控制输出范围；如C:f1()方法代码起止行号范围为{100,203}，则可指定以上范围的任意数字代表需要处理C:f1()方法
 
 (格式说明) {方法返回类型}需要指定完整类型
 
@@ -482,7 +482,7 @@ test.callgraph.methodcall.TestMCCallee
 
 - 配置文件枚举类名与常量名
 
-OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE
+OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4EE
 
 - 参数说明
 

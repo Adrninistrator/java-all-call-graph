@@ -30,7 +30,7 @@ public class TestMyBatisMapperFindCallStackUpAndDown extends TestRunByCodeBase {
                 TestTableMapper.class.getName(),
                 TestTable2Mapper.class.getName()
         );
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType()
         );
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,

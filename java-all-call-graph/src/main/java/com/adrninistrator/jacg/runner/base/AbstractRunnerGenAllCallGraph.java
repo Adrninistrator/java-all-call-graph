@@ -10,6 +10,7 @@ import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.comparator.Comparator4FullMethodWithReturnType;
+import com.adrninistrator.jacg.conf.ConfChecker;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.conf.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.enums.OtherConfigFileUseListEnum;
@@ -190,12 +191,10 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
 
     // 公共预处理
     protected boolean commonPreHandle() {
+        // 检查生成调用链时生成文件或在内存返回配置参数
+        ConfChecker.cheCallGraphFileOrMemory(configureWrapper);
         callGraphWriteToFile = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_WRITE_TO_FILE);
         callGraphReturnInMemory = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_RETURN_IN_MEMORY);
-        if (!callGraphWriteToFile && !callGraphReturnInMemory) {
-            logger.error("是否将生成的调用链数据写入文件的开关，与是否将生成的调用链数据在内存中返回的开关，不允许都设置为true");
-            return false;
-        }
 
         callGraphFileShortMode = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_FILE_SHORT_MODE);
         outputDetailEnum = OutputDetailEnum.getFromDetail(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL));
@@ -565,8 +564,8 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
 
     // 初始化默认的处理业务功能数据的类
     private boolean initDefaultBusinessDataHandler() {
-        businessDataTypeSet = configureWrapper.getOtherConfigSet(order4ee ? OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE :
-                OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER, true);
+        businessDataTypeSet = configureWrapper.getOtherConfigSet(order4ee ? OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4EE :
+                OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER, true);
         if (businessDataTypeSet.isEmpty()) {
             // 没有指定需要处理的业务功能数据类型
             businessDataTypeList = Collections.emptyList();
@@ -585,12 +584,12 @@ public abstract class AbstractRunnerGenAllCallGraph extends AbstractRunner {
                 // 找到默认的业务功能数据类型
                 if (order4ee && !businessDataTypeEnum.isSupportEe()) {
                     logger.error("当前指定的业务功能数据类型 {} 不支持在生成向上的方法完整调用链时显示，请删除 {}", businessDataTypeEnum,
-                            OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE.genConfigUsage());
+                            OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4EE.genConfigUsage());
                     return false;
                 }
                 if (!order4ee && !businessDataTypeEnum.isSupportEr()) {
                     logger.error("当前指定的业务功能数据类型 {} 不支持在生成向下的方法完整调用链时显示，请删除 {}", businessDataTypeEnum,
-                            OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER.genConfigUsage());
+                            OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER.genConfigUsage());
                     return false;
                 }
             }

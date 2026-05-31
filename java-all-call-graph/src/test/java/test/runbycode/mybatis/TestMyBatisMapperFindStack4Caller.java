@@ -28,7 +28,7 @@ public class TestMyBatisMapperFindStack4Caller extends TestRunByCodeBase {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 ListenerService1Impl.class.getName()
         );
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType()
         );
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,

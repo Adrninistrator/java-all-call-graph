@@ -38,7 +38,7 @@ public class TestCallerBusinessDataExtractor extends TestRunByCodeBase implement
     }
 
     private void doTestBusinessDataExtractorMethodCallInfo() {
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER, DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType());
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER, DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType());
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 "\tjava.lang.System:"
         );
@@ -52,7 +52,7 @@ public class TestCallerBusinessDataExtractor extends TestRunByCodeBase implement
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,
                 TestEmptyClass1.class.getName(),
                 "not_exists_class_name");
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER, DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType());
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER, DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType());
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 "nafdno32540324n0erinf0349j5324inogfwdngr329041h324n3214in3214oi21n4k321n4"
         );
@@ -64,7 +64,7 @@ public class TestCallerBusinessDataExtractor extends TestRunByCodeBase implement
     @Test
     public void testBusinessDataExtractorMethodArgGenericsType() {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER, TestArgumentGenerics1.class.getName());
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(), DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType());
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_FIND_STACK_KEYWORD_4ER,
                 "\tjava.io.PrintStream:"

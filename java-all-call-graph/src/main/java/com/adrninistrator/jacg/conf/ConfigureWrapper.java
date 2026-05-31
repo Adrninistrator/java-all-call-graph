@@ -15,6 +15,7 @@ import com.adrninistrator.javacg2.conf.BaseConfigureWrapper;
 import com.adrninistrator.javacg2.conf.enums.interfaces.MainConfigInterface;
 import com.adrninistrator.javacg2.conf.enums.interfaces.OtherConfigInterface;
 import com.adrninistrator.javacg2.el.enums.interfaces.ElConfigInterface;
+import com.adrninistrator.javacg2.exceptions.JavaCG2ConfigException;
 import com.adrninistrator.javacg2.exceptions.JavaCG2Error;
 import com.adrninistrator.javacg2.markdown.writer.MarkdownWriter;
 import com.adrninistrator.javacg2.util.JavaCG2FileUtil;
@@ -70,33 +71,35 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     }
 
     @Override
-    protected Object customGenMainConfigValue(MainConfigInterface mainConfig, String strValue) {
+    protected Object customGenMainConfigValue(MainConfigInterface mainConfig, String strValue) throws JavaCG2ConfigException {
+        String mainConfigInfo = mainConfig.getFileName() + " " + mainConfig.getConfigPrintInfo();
+
         if (ConfigKeyEnum.CKE_APP_NAME == mainConfig) {
-            return handleAppName(strValue);
+            return handleAppName(strValue, mainConfigInfo);
         }
 
         if (ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL == mainConfig) {
-            return handleOutputDetail(strValue);
+            return handleOutputDetail(strValue, mainConfigInfo);
         }
 
         if (ConfigKeyEnum.CKE_THREAD_NUM == mainConfig) {
             // 处理线程数
-            return handleThreadNum(strValue);
+            return handleThreadNum(strValue, mainConfigInfo);
         }
 
         if (ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE == mainConfig) {
             // 处理批量写入数据库时每次插入的数量
-            return handleBatchInsertSize(strValue);
+            return handleBatchInsertSize(strValue, mainConfigInfo);
         }
 
         if (ConfigKeyEnum.CKE_OUTPUT_DIR_NAME == mainConfig) {
             // 处理生成调用链文件的目录名
-            return handleOutputDirName(strValue);
+            return handleOutputDirName(strValue, mainConfigInfo);
         }
 
         if (ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG == mainConfig) {
             // 处理生成调用链文件的目录名
-            return handleOutputDirFlag(strValue);
+            return handleOutputDirFlag(strValue, mainConfigInfo);
         }
 
         if (ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH == mainConfig) {
@@ -114,66 +117,77 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
     }
 
     // 处理数据库里的表名后缀
-    private String handleAppName(String appName) {
+    private String handleAppName(String appName, String mainConfigInfo) throws JavaCG2ConfigException {
         if (!APP_NAME_PATTERN.matcher(appName).matches()) {
-            logger.error("属性只支持字母、数字及下划线 {} {}", appName, ConfigKeyEnum.CKE_APP_NAME.genConfigUsage());
-            return null;
+            String errorMsg = "属性只支持字母、数字及下划线 " + mainConfigInfo + " " + appName;
+            logger.error(errorMsg);
+            throw new JavaCG2ConfigException(errorMsg);
         }
-        // 将app.name参数中的-替换为_
-        return appName.replace("-", "_");
+        // 将app.name参数不允许包含-
+        if (appName.contains("-")) {
+            String errorMsg = "属性不允许包含- " + mainConfigInfo + " " + appName;
+            logger.error(errorMsg);
+            throw new JavaCG2ConfigException(errorMsg);
+        }
+        return appName;
     }
 
     // 处理线程数
-    private Integer handleThreadNum(String strThreadNum) {
+    private Integer handleThreadNum(String strThreadNum, String mainConfigInfo) throws JavaCG2ConfigException {
         int threadNum = Integer.parseInt(strThreadNum);
         if (threadNum <= 0 || threadNum > JACGConstants.MAX_THREAD_NUM) {
-            logger.error("参数配置非法1 {} 应在以下范围: (0,{}] {}", strThreadNum, JACGConstants.MAX_THREAD_NUM, ConfigKeyEnum.CKE_THREAD_NUM.genConfigUsage());
-            return null;
+            String errorMsg = "参数配置非法 应在以下范围: (0," + JACGConstants.MAX_THREAD_NUM + "] " + mainConfigInfo + " " + strThreadNum;
+            logger.error(errorMsg);
+            throw new JavaCG2ConfigException(errorMsg);
         }
         return threadNum;
     }
 
     // 处理生成调用链文件的目录名
-    private String handleOutputDirName(String outputDirName) {
+    private String handleOutputDirName(String outputDirName, String mainConfigInfo) throws JavaCG2ConfigException {
         if (StringUtils.isBlank(outputDirName)) {
             return "";
         }
         // 使用指定的名称作为子目录名
         if (JavaCG2FileUtil.checkFilePathContainsSeparator(outputDirName)) {
-            logger.error("指定的目录名中不允许包含目录分隔符 {} {}", outputDirName, ConfigKeyEnum.CKE_OUTPUT_DIR_NAME.genConfigUsage());
-            return null;
+            String errorMsg = "指定的目录名中不允许包含目录分隔符 " + mainConfigInfo + " " + outputDirName;
+            logger.error(errorMsg);
+            throw new JavaCG2ConfigException(errorMsg);
         }
         return outputDirName;
     }
 
     // 处理生成调用链文件的目录名
-    private String handleOutputDirFlag(String outputDirFlag) {
+    private String handleOutputDirFlag(String outputDirFlag, String mainConfigInfo) throws JavaCG2ConfigException {
         if (StringUtils.isBlank(outputDirFlag)) {
             return "";
         }
         // 使用指定的名称作为子目录名
         if (JavaCG2FileUtil.checkFilePathContainsSeparator(outputDirFlag)) {
-            logger.error("指定的目录标志中不允许包含目录分隔符 {} {}", outputDirFlag, ConfigKeyEnum.CKE_OUTPUT_DIR_FLAG.genConfigUsage());
-            return null;
+            String errorMsg = "指定的目录标志中不允许包含目录分隔符 " + mainConfigInfo + " " + outputDirFlag;
+            logger.error(errorMsg);
+            throw new JavaCG2ConfigException(errorMsg);
         }
         return outputDirFlag;
     }
 
     // 处理批量写入数据库时每次插入的数量
-    private Integer handleBatchInsertSize(String strDbBatchInsertSize) {
+    private Integer handleBatchInsertSize(String strDbBatchInsertSize, String mainConfigInfo) throws JavaCG2ConfigException {
         int dbInsertBatchSize = Integer.parseInt(strDbBatchInsertSize);
         if (dbInsertBatchSize <= 0 || dbInsertBatchSize > JACGConstants.MAX_DB_INSERT_BATCH_SIZE) {
-            logger.error("参数配置非法2 {} 应在以下范围: (0,{}] {}", strDbBatchInsertSize, JACGConstants.MAX_DB_INSERT_BATCH_SIZE, ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.genConfigUsage());
-            return null;
+            String errorMsg = "参数配置非法 应在以下范围: (0," + JACGConstants.MAX_DB_INSERT_BATCH_SIZE + "] " + mainConfigInfo + " " + strDbBatchInsertSize;
+            logger.error(errorMsg);
+            throw new JavaCG2ConfigException(errorMsg);
         }
         return dbInsertBatchSize;
     }
 
     // 处理生成调用链时的详细程度
-    private String handleOutputDetail(String outputDetail) {
+    private String handleOutputDetail(String outputDetail, String mainConfigInfo) throws JavaCG2ConfigException {
         if (OutputDetailEnum.ODE_ILLEGAL == OutputDetailEnum.getFromDetail(outputDetail)) {
-            logger.error("参数配置非法 {} 可选值如下 {} {}", outputDetail, OutputDetailEnum.getValidValuesAndDesc(true), ConfigKeyEnum.CKE_CALL_GRAPH_OUTPUT_DETAIL.genConfigUsage());
-            return null;
+            String errorMsg = "参数配置非法 可选值如下 " + OutputDetailEnum.getValidValuesAndDesc(true) + " " + mainConfigInfo + " " + outputDetail;
+            logger.error(errorMsg);
+            throw new JavaCG2ConfigException(errorMsg);
         }
         return outputDetail;
     }

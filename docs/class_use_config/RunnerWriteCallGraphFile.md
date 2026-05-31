@@ -298,6 +298,10 @@ JavaCG2OtherConfigFileUseSetEnum.OCFUSE_FR_EQ_CONVERSION_METHOD
 
 (格式) {完整类名}:{方法名}={被调用对象或方法参数序号}
 
+(示例) java.lang.Boolean:<init>=1
+
+(示例) java.lang.Boolean:valueOf=1
+
 - 当前使用参数值
 
 ```
@@ -560,7 +564,7 @@ JavaCG2ElConfigEnum.ECE_MERGE_FILE_IGNORE_JAR_WAR_BY_CLASS_DIR_PREFIX
 
 相当于通过jar、war文件中类的包名控制是否跳过合并当前jar、war文件
 
-以下参数为jar、war文件中的class文件对应指定层级的目录路径集合。在表达式中可通过“include”方法判断集合中是否包含指定元素
+以下参数为jar、war文件中的class文件对应指定层级的目录路径集合。在表达式中可通过"include"方法判断集合中是否包含指定元素
 
 集合中的元素类型为字符串，以/作为分隔符，不会以分隔符开头或结尾
 
@@ -630,7 +634,7 @@ JavaCG2ElConfigEnum.ECE_PARSE_IGNORE_METHOD
 - 当前使用参数值
 
 ```
-
+string.endsWithAny(full_method, 'hashCode()', 'equals(java.lang.Object)')
 ```
 
 #### 1.1.4.11. _javacg2_parse_method_call_switch/parse_ignore_method_call.av

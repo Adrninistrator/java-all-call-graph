@@ -295,7 +295,7 @@ PostgreSQL 使用 org.postgresql.Driver
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|com.mysql.cj.jdbc.Driver|
 |参数默认值|com.mysql.cj.jdbc.Driver|
 |参数枚举名|CDKE_DB_DRIVER_NAME|
@@ -306,7 +306,7 @@ PostgreSQL 使用 org.postgresql.Driver
 
 ```
 H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.mv.db”支持指定，也支持不指定
-需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头
+需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头，为相对当前运行的Java应用根目录的相对路径
 示例：D:/build/jacg_h2db.mv.db
 示例：./build/jacg_h2db.mv.db
 示例：D:/build/jacg_h2db
@@ -316,7 +316,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|./build/jacg_h2db_rbc|
 |参数默认值|./build/jacg_h2db|
 |参数枚举名|CDKE_DB_H2_FILE_PATH|
@@ -332,7 +332,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|123456|
 |参数默认值||
 |参数枚举名|CDKE_DB_PASSWORD|
@@ -367,7 +367,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|jdbc:mysql://127.0.0.1:3307/testdb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true|
 |参数默认值|jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true|
 |参数枚举名|CDKE_DB_URL|
@@ -399,7 +399,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|test|
 |参数默认值||
 |参数枚举名|CDKE_DB_USERNAME|

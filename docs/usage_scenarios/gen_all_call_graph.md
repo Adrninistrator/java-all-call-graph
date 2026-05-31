@@ -873,7 +873,7 @@ public class MethodWithAnnotation extends TestParentClass1 {
 - 配置参数（通过代码指定）
 
 ```java
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4EE,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType()
         );
 ```
@@ -924,7 +924,7 @@ method_call_info
 - 配置参数（通过代码指定）
 
 ```java
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4EE,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()
         );
 ```
@@ -962,7 +962,7 @@ method_arg_generics_type
 - 配置参数（通过代码指定）
 
 ```java
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4EE,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType()
         );
 ```
@@ -1031,7 +1031,7 @@ MyBatis Mapper 对应的 XML 文件中操作的写数据库表名（支持 MySQL
 - 配置参数（通过代码指定）
 
 ```java
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType()
         );
 ```
@@ -1080,7 +1080,7 @@ mybatis_ms_table
 - 配置参数（通过代码指定）
 
 ```java
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_WRITE_TABLE.getType()
         );
 ```
@@ -1227,7 +1227,7 @@ test.runbycode.businessdata.handler.WriteSystemSetProperty2DbHandler 是用于�
 假如需要获取通过 throw 指令创建对象时调用构造函数的参数值，可在生成向下的方法完整调用链时，通过配置参数指定需要显示方法调用信息：
 
 ```java
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType()
         );
 ```

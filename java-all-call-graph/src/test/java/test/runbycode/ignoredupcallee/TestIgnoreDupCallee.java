@@ -21,7 +21,7 @@ public class TestIgnoreDupCallee extends TestRunByCodeBase {
     public void test() {
         commonWriteDb();
 
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(), DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER, Boolean.FALSE.toString());
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, className + "-data_no-ignore_no");
@@ -31,7 +31,7 @@ public class TestIgnoreDupCallee extends TestRunByCodeBase {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_DIR_NAME, className + "-data_no-ignore_yes");
         Assert.assertTrue(new RunnerGenAllGraph4Caller(configureWrapper).run());
 
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(),
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_RETURN_GENERICS_TYPE.getType(),
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType());

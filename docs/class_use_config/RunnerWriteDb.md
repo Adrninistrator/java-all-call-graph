@@ -298,6 +298,10 @@ JavaCG2OtherConfigFileUseSetEnum.OCFUSE_FR_EQ_CONVERSION_METHOD
 
 (格式) {完整类名}:{方法名}={被调用对象或方法参数序号}
 
+(示例) java.lang.Boolean:<init>=1
+
+(示例) java.lang.Boolean:valueOf=1
+
 - 当前使用参数值
 
 ```
@@ -560,7 +564,7 @@ JavaCG2ElConfigEnum.ECE_MERGE_FILE_IGNORE_JAR_WAR_BY_CLASS_DIR_PREFIX
 
 相当于通过jar、war文件中类的包名控制是否跳过合并当前jar、war文件
 
-以下参数为jar、war文件中的class文件对应指定层级的目录路径集合。在表达式中可通过“include”方法判断集合中是否包含指定元素
+以下参数为jar、war文件中的class文件对应指定层级的目录路径集合。在表达式中可通过"include"方法判断集合中是否包含指定元素
 
 集合中的元素类型为字符串，以/作为分隔符，不会以分隔符开头或结尾
 
@@ -630,7 +634,7 @@ JavaCG2ElConfigEnum.ECE_PARSE_IGNORE_METHOD
 - 当前使用参数值
 
 ```
-
+string.endsWithAny(full_method, 'hashCode()', 'equals(java.lang.Object)')
 ```
 
 #### 1.1.4.11. _javacg2_parse_method_call_switch/parse_ignore_method_call.av
@@ -838,7 +842,7 @@ PostgreSQL 使用 org.postgresql.Driver
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|com.mysql.cj.jdbc.Driver|
 |参数默认值|com.mysql.cj.jdbc.Driver|
 |参数枚举名|CDKE_DB_DRIVER_NAME|
@@ -849,7 +853,7 @@ PostgreSQL 使用 org.postgresql.Driver
 
 ```
 H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.mv.db”支持指定，也支持不指定
-需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头
+需要使用绝对路径或相对路径。若指定为相对路径，则需要以 ./ 开头，为相对当前运行的Java应用根目录的相对路径
 示例：D:/build/jacg_h2db.mv.db
 示例：./build/jacg_h2db.mv.db
 示例：D:/build/jacg_h2db
@@ -859,7 +863,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|./build/jacg_h2db_rbc|
 |参数默认值|./build/jacg_h2db|
 |参数枚举名|CDKE_DB_H2_FILE_PATH|
@@ -875,7 +879,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值||
 |参数默认值||
 |参数枚举名|CDKE_DB_PASSWORD|
@@ -910,7 +914,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值|jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true|
 |参数默认值|jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true|
 |参数枚举名|CDKE_DB_URL|
@@ -942,7 +946,7 @@ H2数据库文件路径（仅当使用H2数据库时需要指定），后缀“.
 |描述|内容|
 |---|---|
 |参数类型|String|
-|参数值是否必填|是|
+|参数值是否必填|否|
 |当前使用参数值||
 |参数默认值||
 |参数枚举名|CDKE_DB_USERNAME|
