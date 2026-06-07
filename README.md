@@ -6,7 +6,7 @@
 
 [https://github.com/Adrninistrator/java-all-call-graph](https://github.com/Adrninistrator/java-all-call-graph)
 
-增加 java-all-call-graph Web 界面版，可参考 [https://github.com/Adrninistrator/java-all-call-graph-server](https://github.com/Adrninistrator/java-all-call-graph-server)
+增加 java-all-call-graph Web Web 界面及 MCP 版，可参考 [https://github.com/Adrninistrator/java-all-call-graph-server](https://github.com/Adrninistrator/java-all-call-graph-server)
 
 # 2. 使用案例
 
