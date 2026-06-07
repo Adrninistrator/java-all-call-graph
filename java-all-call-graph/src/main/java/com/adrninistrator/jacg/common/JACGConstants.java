@@ -70,6 +70,8 @@ public class JACGConstants {
     public static final String EXT_PROPERTIES = ".properties";
     public static final String EXT_JSON = ".json";
 
+    public static final String CONFIG_KEY_CALL_GRAPH_RETURN_IN_MEMORY = "call.graph.return.in.memory";
+
     // 调用链文件中，每个级别之间的缩进，两个空格
     public static final String OUTPUT_SPLIT_FLAG = FLAG_SPACE + FLAG_SPACE;
 

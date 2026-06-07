@@ -1994,3 +1994,7 @@ com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum 枚举常量名称�
 |---|---|
 |OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE|OCFUSE_BUSINESS_DATA_TYPE_SHOW_4EE|
 |OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER|OCFUSE_BUSINESS_DATA_TYPE_SHOW_4ER|
+
+## 1.50. (4.1.1)
+
+配置参数描述优化
