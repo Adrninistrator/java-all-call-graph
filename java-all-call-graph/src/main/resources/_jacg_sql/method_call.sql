@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_method_call_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_method_call{appName} (
   call_id int NOT NULL COMMENT '方法调用序号，从1开始',
   enabled tinyint NOT NULL COMMENT '是否启用，1:启用，0:未启用',
   call_type varchar(50) NOT NULL COMMENT '调用类型，参考 JavaCG2CallTypeEnum 枚举类',
@@ -21,11 +21,11 @@ CREATE TABLE IF NOT EXISTS jacg_method_call_{appName} (
   callee_jar_num int DEFAULT NULL COMMENT '被调用方法jar文件序号',
   description varchar(255) NOT NULL COMMENT '描述信息，默认为空',
   PRIMARY KEY (call_id),
-  INDEX idx_mc_rmh_{appName}(caller_method_hash),
-  INDEX idx_mc_hash_{appName}(callee_method_hash, caller_method_hash),
-  INDEX idx_mc_rscn_{appName}(caller_simple_class_name(255)),
+  INDEX idx_mc_rmh{appName}(caller_method_hash),
+  INDEX idx_mc_hash{appName}(callee_method_hash, caller_method_hash),
+  INDEX idx_mc_rscn{appName}(caller_simple_class_name(255)),
   -- 需要使用的单列索引
-  INDEX idx_mc_escn_{appName}(callee_simple_class_name(255)),
+  INDEX idx_mc_escn{appName}(callee_simple_class_name(255)),
   -- call_type 单列索引，用于占位方法调用处理
-  INDEX idx_mc_call_type_{appName}(call_type)
+  INDEX idx_mc_call_type{appName}(call_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用关系表';

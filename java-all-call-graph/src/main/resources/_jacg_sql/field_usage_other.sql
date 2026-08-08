@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_field_usage_other_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_field_usage_other{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
   method_return_type varchar(255) NOT NULL COMMENT '方法返回类型类名（包含数组标志）',
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS jacg_field_usage_other_{appName} (
   class_jar_num int DEFAULT NULL COMMENT '类所在的jar文件序号',
   field_jar_num int DEFAULT NULL COMMENT '被使用的字段所在的jar文件序号',
   PRIMARY KEY (record_id),
-  INDEX idx_fuo_scn_{appName}(simple_class_name(255)),
+  INDEX idx_fuo_scn{appName}(simple_class_name(255)),
   -- 需要使用的单列索引
-  INDEX idx_fuo_fiscn_{appName}(field_in_simple_class_name(255))
+  INDEX idx_fuo_fiscn{appName}(field_in_simple_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='使用其他类中字段的使用情况表';

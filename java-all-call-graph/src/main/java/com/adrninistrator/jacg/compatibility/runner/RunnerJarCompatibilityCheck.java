@@ -141,8 +141,8 @@ public class RunnerJarCompatibilityCheck extends AbstractRunner {
         }
         for (String h2DbFilePath : otherH2DbFilePathList) {
             ConfigureWrapper tmpConfigureWrapper = new ConfigureWrapper();
-            // 使用固定app.name的H2数据库文件
-            tmpConfigureWrapper.useFixedAppNameH2Db();
+            // 使用H2数据库文件，app.name留空（表名固定为 jacg_关键字）
+            tmpConfigureWrapper.useEmptyAppNameH2Db();
             tmpConfigureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_H2_FILE_PATH, h2DbFilePath);
             // 访问其他H2数据库时，使用只读模式
             DbOperWrapper tmpDbOperWrapper = DbInitializer.genDbOperWrapper(tmpConfigureWrapper, false, true, this);

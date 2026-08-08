@@ -114,12 +114,18 @@ public class JACGSqlUtil {
      * @return
      */
     public static String replaceFlagInSql(String sql, String appName, String tableSuffix) {
-        String appNameAndTableSuffix = appName;
+        String flag = (appName == null ? "" : appName);
         if (StringUtils.isNotBlank(tableSuffix)) {
             // 指定的表名后缀非空，拼接到appName后面
-            appNameAndTableSuffix += tableSuffix;
+            flag += tableSuffix;
         }
-        return sql.replace(JACGConstants.REPLACE_SQL_FLAG_APP_NAME, appNameAndTableSuffix);
+        if (flag.isEmpty()) {
+            // 后缀为空：{appName} 替换为空串，结果即 jacg_method_call（无残留下划线）
+            return sql.replace(JACGConstants.REPLACE_SQL_FLAG_APP_NAME, "");
+        }
+        // 非空：补分隔符。flag 以 "_" 开头（jar diff _1/_2）不重复补，避免双下划线
+        String sep = flag.startsWith("_") ? "" : JACGConstants.FLAG_UNDER_LINE;
+        return sql.replace(JACGConstants.REPLACE_SQL_FLAG_APP_NAME, sep + flag);
     }
 
     /**
@@ -387,6 +393,7 @@ public class JACGSqlUtil {
         // 8. 拼接最终SQL
         return String.join("\n", sqlParts);
     }
+
 
     /**
      * 构建字段定义SQL

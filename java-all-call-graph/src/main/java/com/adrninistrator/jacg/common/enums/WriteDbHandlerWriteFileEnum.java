@@ -4,6 +4,8 @@ package com.adrninistrator.jacg.common.enums;
  * @author adrninistrator
  * @date 2024/5/16
  * @description: 写数据库的类所写的文件枚举
+ * 仅记录"加工生成"的文件（readFile=false 的 WriteDbHandler 在处理过程中自行写出的文件），
+ * 不包含 JavaCG2Entry 直接生成的中间文件（readFile=true 的 Handler 读取的文件不在此枚举中）
  */
 public enum WriteDbHandlerWriteFileEnum {
     WDHWFE_MYBATIS_MS_GET_SET("mybatis_ms_get_set"),

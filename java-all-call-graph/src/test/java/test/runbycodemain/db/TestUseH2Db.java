@@ -7,14 +7,17 @@ import com.adrninistrator.javacg2.conf.JavaCG2ConfigureWrapper;
 import com.adrninistrator.javacg2.conf.enums.JavaCG2OtherConfigFileUseListEnum;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import test.annotation.JACGExample;
 import test.runbycode.config.TestConfigGenerator;
+import test.runbycode.junit.JUnit4ClassRunnerSortMethod;
 
 /**
  * @author adrninistrator
  * @date 2025/11/19
  * @description:
  */
+@RunWith(JUnit4ClassRunnerSortMethod.class)
 @JACGExample(title = "解析测试代码并将结果写入H2数据库",
         desc = {})
 public class TestUseH2Db {

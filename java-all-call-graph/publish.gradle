@@ -1,24 +1,45 @@
+apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 apply from: 'build.gradle'
 
-// 指定编译时源码仅使用以下目录的
-//sourceSets {
-//    main {
-//        java {
-//            include 'com/adrninistrator/jacg/**'
-//        }
-//    }
-//}
+// 强制指定源文件编码为 UTF-8，避免 Windows 下 GBK 默认编码导致乱码编译错误
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+// javadoc 任务同样需要指定 UTF-8 编码，否则读取中文注释会报"不可映射字符"
+// 同时关闭 doclint 以避免 @date、@description 等自定义标签导致构建失败
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    // 禁用所有 doclint 检查，解决 @date、@description 等非标准标签报错问题
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
 
 tasks.register('sourcesJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    archiveClassifier.set('sources')
 
-    doFirst {
-        archiveClassifier.set('sources')
-        from sourceSets.main.allJava
-    }
+    from sourceSets.main.allJava
+}
+
+tasks.register('javadocJar', Jar) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    archiveClassifier.set('javadoc')
+
+    dependsOn javadoc
+    from javadoc.destinationDir
+}
+
+// 显式声明 generateMetadataFileForMavenJavaPublication 依赖 sourcesJar、javadocJar，
+// 避免 Gradle 的 task dependency validation 报错
+// 该任务由 maven-publish 插件在 afterEvaluate 阶段动态创建，需使用延迟匹配
+tasks.matching { it.name == 'generateMetadataFileForMavenJavaPublication' }.configureEach {
+    dependsOn 'sourcesJar', 'javadocJar'
 }
 
 publishing {
@@ -27,8 +48,10 @@ publishing {
             groupId project.group
             artifactId project.name
             version "${version}"
+            // from components.java 会将 api/implementation 依赖写入 POM 的 <dependencies> 中
             from components.java
             artifact sourcesJar
+            artifact javadocJar
 
             pom {
                 name = "java-all-call-graph"
@@ -56,6 +79,10 @@ publishing {
         }
     }
     repositories {
+        maven {
+            name = 'localDir'
+            url = "${rootProject.projectDir}/build/local-maven-repo"
+        }
         maven {
             name 'sonatypeRepository'
             url 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'

@@ -170,11 +170,11 @@ public class TestConfigInvalid {
         logger.error("error ", e);
     }
 
-    // 测试不允许为空的参数传入空字符串
+    // 测试不允许为空的参数传入空字符串（app.name允许留空，需使用notBlank=true的参数验证，如thread.num）
     @Test
     public void testNotBlankEmptyValue() {
         JavaCG2ConfigException e = Assert.assertThrows(JavaCG2ConfigException.class,
-                () -> configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME, ""));
+                () -> configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM, ""));
         logger.error("error ", e);
     }
 

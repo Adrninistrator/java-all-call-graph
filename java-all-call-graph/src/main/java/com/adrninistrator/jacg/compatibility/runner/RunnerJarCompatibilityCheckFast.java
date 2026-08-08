@@ -110,8 +110,8 @@ public class RunnerJarCompatibilityCheckFast extends RunnerJarCompatibilityCheck
      */
     @Override
     protected void configConfigureWrapper(ConfigureWrapper configureWrapper) {
-        // 使用固定app.name的H2数据库文件
-        configureWrapper.useFixedAppNameH2Db();
+        // 使用H2数据库文件，app.name留空（表名固定为 jacg_关键字）
+        configureWrapper.useEmptyAppNameH2Db();
     }
 
     /**

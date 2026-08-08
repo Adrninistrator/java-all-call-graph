@@ -8,7 +8,7 @@ import com.adrninistrator.javacg2.conf.enums.JavaCG2ConfigKeyEnum;
 /**
  * @author adrninistrator
  * @date 2025/8/10
- * @description: 使用Jar兼容性检查模式，仅解析类相关信息并写入数据库，写入H2数据库文件，app.name固定为jacg
+ * @description: 使用Jar兼容性检查模式，仅解析类相关信息并写入数据库，写入H2数据库文件，app.name留空（表名固定为 jacg_关键字）
  */
 public class RunnerWriteDbOnlyClassMode extends AbstractRunnerWriteDbSpecialMode {
 
@@ -37,7 +37,7 @@ public class RunnerWriteDbOnlyClassMode extends AbstractRunnerWriteDbSpecialMode
      */
     @Override
     protected void configConfigureWrapper(ConfigureWrapper configureWrapper) {
-        // 使用固定app.name的H2数据库文件
-        configureWrapper.useFixedAppNameH2Db();
+        // 使用H2数据库文件，app.name留空（表名固定为 jacg_关键字）
+        configureWrapper.useEmptyAppNameH2Db();
     }
 }

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_class_annotation_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_class_annotation{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
   annotation_name varchar(255) NOT NULL COMMENT '注解类名',
@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS jacg_class_annotation_{appName} (
   attribute_value text DEFAULT NULL COMMENT '注解属性值',
   class_name varchar(300) NOT NULL COMMENT '完整类名',
   PRIMARY KEY (record_id),
-  INDEX idx_ca_1_{appName}(simple_class_name(255), annotation_name),
-  INDEX idx_ca_aaa_{appName}(annotation_name(255), attribute_name, attribute_value(255))
+  INDEX idx_ca_1{appName}(simple_class_name(255), annotation_name),
+  INDEX idx_ca_aaa{appName}(annotation_name(255), attribute_name, attribute_value(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='类上的注解信息表';

@@ -268,6 +268,17 @@ public class DC {
     public static final String SPB_ANNOTATION_CLASS_NAME = "annotation_class_name";
     public static final String SPB_DEFINE_CLASS_NAME_XML_PATH = "define_class_name_xml_path";
 
+    // Spring依赖注入字段信息
+    public static final String SDI_RECORD_ID = "record_id";
+    public static final String SDI_CLASS_NAME = "class_name";
+    public static final String SDI_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String SDI_FIELD_TYPE = "field_type";
+    public static final String SDI_SIMPLE_FIELD_TYPE = "simple_field_type";
+    public static final String SDI_FIELD_NAME = "field_name";
+    public static final String SDI_BEAN_TYPE = "bean_type";
+    public static final String SDI_SIMPLE_BEAN_TYPE = "simple_bean_type";
+    public static final String SDI_SAME_TYPE = "same_type";
+
     public static final String SPC_RECORD_ID = "record_id";
     public static final String SPC_METHOD_HASH = "method_hash";
     public static final String SPC_SEQ = "seq";
@@ -748,6 +759,17 @@ public class DC {
     public static final String MCF_SIMPLE_FIELD_TYPE = "simple_field_type";
     public static final String MCF_CLASS_NAME = "class_name";
     public static final String MCF_FIELD_TYPE = "field_type";
+
+    // 方法调用被调用对象为非静态字段时的实际类型（运行时多态）
+    public static final String MCFAT_RECORD_ID = "record_id";
+    public static final String MCFAT_CALLER_SIMPLE_CLASS_NAME = "caller_simple_class_name";
+    public static final String MCFAT_CALLER_CLASS_NAME = "caller_class_name";
+    public static final String MCFAT_CALLER_METHOD_NAME = "caller_method_name";
+    public static final String MCFAT_CALLER_FULL_METHOD = "caller_full_method";
+    public static final String MCFAT_CALLER_LINE_NUMBER = "caller_line_number";
+    public static final String MCFAT_FIELD_TYPE = "field_type";
+    public static final String MCFAT_FIELD_NAME = "field_name";
+    public static final String MCFAT_FIELD_ACTUAL_TYPE = "field_actual_type";
 
     public static final String[] METHOD_CALL_FIELD_COLUMNS = new String[]{
             MCF_RECORD_ID,

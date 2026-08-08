@@ -176,6 +176,8 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenAllCallGraph {
             String simpleClassName = dbOperWrapper.querySimpleClassNameInTask(className);
             if (StringUtils.isBlank(simpleClassName)) {
                 logger.error("未查询到唯一类名 {}", task);
+                // 使用任务中指定的类名，避免后续生成!not_found文件时文件名中出现null
+                simpleClassName = className;
             }
             CalleeTaskInfo calleeTaskInfo = calleeTaskInfoMap.computeIfAbsent(simpleClassName, k -> new CalleeTaskInfo());
             if (taskArray.length == 1) {

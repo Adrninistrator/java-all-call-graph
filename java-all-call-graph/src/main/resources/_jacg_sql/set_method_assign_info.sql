@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_set_method_assign_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_set_method_assign_info{appName} (
   set_record_id int NOT NULL COMMENT 'set方法记录id，从1开始',
   set_method_call_id int NOT NULL COMMENT 'set方法被调用时的方法调用序号，从1开始',
   seq int NOT NULL COMMENT 'set方法当前被调用时被赋值情况的序号，从0开始',
@@ -17,6 +17,6 @@ CREATE TABLE IF NOT EXISTS jacg_set_method_assign_info_{appName} (
   assign_info text NOT NULL COMMENT 'set方法被调用时的赋值信息',
   equivalent_conversion tinyint NOT NULL COMMENT '是否属于等值转换前的数据，1:是，0:否',
   PRIMARY KEY (set_record_id, set_method_call_id, seq, step),
-  INDEX idx_smai_rmh_{appName}(caller_method_hash),
-  INDEX idx_smai_smh_{appName}(set_method_hash)
+  INDEX idx_smai_rmh{appName}(caller_method_hash),
+  INDEX idx_smai_smh{appName}(set_method_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='dto的set方法被调用时的赋值信息';

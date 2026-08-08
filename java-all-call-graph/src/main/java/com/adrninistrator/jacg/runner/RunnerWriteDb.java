@@ -57,6 +57,7 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodArgAnnotatio
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodArgGenericsType;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodArgument;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCall;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCallFieldActualType;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCallInfo;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCallMethodCallReturn;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4MethodCallNonStaticField;
@@ -97,6 +98,7 @@ import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopPointcutJ
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringAopPointcutXml;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringBean;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringController;
+import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringDIField;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringScanPackageJava;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringScanPackageXml;
 import com.adrninistrator.jacg.handler.writedb.WriteDbHandler4SpringTaskJava;
@@ -157,6 +159,12 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private boolean usePgDb;
 
     private boolean delNumberInIndex;
+
+    // 写库阶段开始时间（operate 开始时记录，用于耗时拆分观测）
+    private long writeDbStartMillis;
+
+    // 解析阶段（java-callgraph2生成中间文件）耗时，用于耗时拆分观测
+    private long parseSpendMillis;
 
     // 写数据库次数
     private int writeDbTimes = 0;
@@ -234,6 +242,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
     // 执行实际处理
     private boolean operate() {
+        // 记录写库阶段开始时间，用于耗时拆分观测
+        writeDbStartMillis = System.currentTimeMillis();
+        parseSpendMillis = 0;
         boolean skipWhenNotModified = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_SKIP_WRITE_DB_WHEN_JAR_NOT_MODIFIED);
         // 判断需要解析的jar文件没有变化时是否跳过写数据库操作
         if (skipWhenNotModified) {
@@ -299,13 +310,22 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
                 javaCG2ConfigureWrapper.setMainConfig(JavaCG2ConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.TRUE.toString());
             }
             // 调用java-callgraph2生成jar文件的方法调用关系
+            long parseStartTime = System.currentTimeMillis();
             if (!callJavaCallGraph2()) {
                 return false;
             }
+            // 观测：记录解析阶段（java-callgraph2生成中间文件）耗时，用于评估解析 vs 写库占比
+            parseSpendMillis = System.currentTimeMillis() - parseStartTime;
         }
 
-        // 创建线程池，参数固定指定为10，即使用10个线程
-        createThreadPoolExecutor(10);
+        // 创建线程池
+        // H2 数据库为单文件存储，写入并发过高会因文件锁争用退化（实测16线程退化），限制为较小并发数；
+        // 其他数据库（MySQL/PostgreSQL）使用 thread.num 配置参数控制并发数（不限制上限）
+        if (useH2Db) {
+            createThreadPoolExecutor(JACGConstants.H2_WRITE_DB_THREAD_NUM);
+        } else {
+            createThreadPoolExecutor(null);
+        }
 
         // 处理组件使用的配置参数
         if (!useNeo4j() && !handleConfig()) {
@@ -468,6 +488,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         // 检查执行结果
         if (!checkResult()) {
             return false;
+        }
+
+        // 观测：打印解析阶段与写库阶段耗时占比，用于评估提速方向（解析 vs 写库）
+        if (parseSpendMillis > 0) {
+            long totalSpendMillis = System.currentTimeMillis() - writeDbStartMillis;
+            long writeSpendMillis = totalSpendMillis - parseSpendMillis;
+            logger.info("耗时拆分：解析阶段（java-callgraph2生成中间文件）{} 毫秒，写库阶段（各表写入）{} 毫秒，总耗时 {} 毫秒", parseSpendMillis, writeSpendMillis, totalSpendMillis);
         }
 
         if (useH2Db) {
@@ -918,6 +945,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
             return false;
         }
 
+        // 处理方法调用被调用对象为非静态字段时的实际类型（运行时多态）
+        WriteDbHandler4MethodCallFieldActualType writeDbHandler4MethodCallFieldActualType = new WriteDbHandler4MethodCallFieldActualType(writeDbResult);
+        initWriteDbHandler(writeDbHandler4MethodCallFieldActualType);
+        if (!writeDbHandler4MethodCallFieldActualType.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
         // 处理方法调用（的被调用对象或参数）中使用静态字段的方法调用返回值信息
         WriteDbHandler4MethodCallStaticFieldMCR writeDbHandler4MethodCallStaticFieldMcr = new WriteDbHandler4MethodCallStaticFieldMCR(writeDbResult);
         initWriteDbHandler(writeDbHandler4MethodCallStaticFieldMcr);
@@ -1051,6 +1085,13 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         initWriteDbHandler(writeDbHandler4SpringBean);
         writeDbHandler4SpringBean.setSpringBeanMap(springBeanMap);
         if (!writeDbHandler4SpringBean.handle(javaCG2OutputInfo)) {
+            return false;
+        }
+
+        // 处理Spring依赖注入字段信息
+        WriteDbHandler4SpringDIField writeDbHandler4SpringDIField = new WriteDbHandler4SpringDIField(writeDbResult);
+        initWriteDbHandler(writeDbHandler4SpringDIField);
+        if (!writeDbHandler4SpringDIField.handle(javaCG2OutputInfo)) {
             return false;
         }
 

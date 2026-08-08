@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_xml_conf_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_xml_conf{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   xml_file_path varchar(500) NOT NULL COMMENT 'XML文件路径',
   xml_file_name varchar(255) NOT NULL COMMENT 'XML文件名',
@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS jacg_xml_conf_{appName} (
   attribute_name varchar(100) COMMENT '当前的元素属性名称，为空代表不属于元素属性',
   element_value text COLLATE utf8mb4_bin COMMENT '当前的元素值或元素属性值',
   PRIMARY KEY (record_id),
-  INDEX idx_xc_xfn_{appName}(xml_file_name),
-  INDEX idx_xc_xfs_ps_{appName}(xml_file_seq, parent_seq),
-  INDEX idx_xc_xes_{appName}(xml_file_seq, element_seq),
-  INDEX idx_xc_xfs_ies_{appName}(xml_file_seq, in_element_seq),
-  INDEX idx_xc_enan_{appName}(element_name, attribute_name)
+  INDEX idx_xc_xfn{appName}(xml_file_name),
+  INDEX idx_xc_xfs_ps{appName}(xml_file_seq, parent_seq),
+  INDEX idx_xc_xes{appName}(xml_file_seq, element_seq),
+  INDEX idx_xc_xfs_ies{appName}(xml_file_seq, in_element_seq),
+  INDEX idx_xc_enan{appName}(element_name, attribute_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='XML文件配置内容表';

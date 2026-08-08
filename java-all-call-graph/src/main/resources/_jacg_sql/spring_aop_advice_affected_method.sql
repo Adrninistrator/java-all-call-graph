@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_spring_aop_advice_affected_method_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_spring_aop_advice_affected_method{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   type varchar(1) NOT NULL COMMENT '类型，j: 在Java代码中定义，x: 在XML文件中定义',
   xml_aspect_id varchar(255) NOT NULL COMMENT 'XML中定义的aspect的ID',
@@ -17,5 +17,5 @@ CREATE TABLE IF NOT EXISTS jacg_spring_aop_advice_affected_method_{appName} (
   affected_method_return_type varchar(255) NOT NULL COMMENT '影响的方法的返回类型',
   affected_method_hash varchar(32) NOT NULL COMMENT '影响的方法hash+字节数',
   PRIMARY KEY (record_id),
-  INDEX idx_saadam_ad_{appName}(advice_type)
+  INDEX idx_saadam_ad{appName}(advice_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Spring AOP advice影响的方法';

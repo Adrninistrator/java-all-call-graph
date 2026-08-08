@@ -10,6 +10,7 @@ import com.adrninistrator.jacg.comparator.Comparator4FullMethodWithReturnType;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method.FullMethodWithReturnType;
+import com.adrninistrator.jacg.dto.methodcall.MethodCallCountInfo;
 import com.adrninistrator.jacg.dto.writedb.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
@@ -34,6 +35,9 @@ import java.util.List;
  */
 public class MethodCallHandler extends BaseHandler {
     private static final Logger logger = LoggerFactory.getLogger(MethodCallHandler.class);
+
+    // 默认查询行数上限，与 DbOperWrapper.queryData 的 QUERY_MAX_ROWS 对齐
+    private static final int DEFAULT_QUERY_LIMIT = 1000;
 
     public MethodCallHandler(ConfigureWrapper configureWrapper) {
         super(configureWrapper);
@@ -380,6 +384,193 @@ public class MethodCallHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryList(sql, WriteDbData4MethodCall.class, JACGClassMethodUtil.genMethodHashWithLen(calleeFullMethod, calleeReturnType));
+    }
+
+    /**
+     * 查找谁调用了指定方法（向上调用链），按类名+方法名查询，返回全部字段。
+     * 主入口，直接查 method_call，不依赖 method_info，外部库方法也能查到（修复 F1）。
+     * 支持简单类名或完整类名；同名类须使用完整类名，简单类名输入会抛出 JavaCG2RuntimeException。
+     *
+     * @param calleeClassName  被调用类名（简单或完整）
+     * @param calleeMethodName 被调用方法名
+     * @return 调用方方法调用记录列表
+     */
+    public List<WriteDbData4MethodCall> queryCallers(String calleeClassName, String calleeMethodName) {
+        return queryCallers(calleeClassName, calleeMethodName, 0, DEFAULT_QUERY_LIMIT);
+    }
+
+    /**
+     * 查找谁调用了指定方法（向上调用链），支持分页。
+     *
+     * @param calleeClassName  被调用类名（简单或完整，同名类须完整）
+     * @param calleeMethodName 被调用方法名
+     * @param offset           起始偏移量（从 0 开始）
+     * @param limit            返回数量上限
+     * @return 调用方方法调用记录列表
+     */
+    public List<WriteDbData4MethodCall> queryCallers(String calleeClassName, String calleeMethodName, int offset, int limit) {
+        checkDuplicateSimpleClassName(calleeClassName);
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLERS_BY_CLASS_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.MC_CALLEE_METHOD_NAME + " = ?" +
+                    " order by " + DC.MC_CALL_ID +
+                    " limit ? offset ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        String simpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, simpleClassName, calleeMethodName, limit, offset);
+    }
+
+    /**
+     * 查找指定方法调用了哪些方法（向下调用链），按类名+方法名查询，返回全部字段。
+     * 主入口，直接查 method_call，不依赖 method_info。
+     * 支持简单类名或完整类名；同名类须使用完整类名，简单类名输入会抛出 JavaCG2RuntimeException。
+     *
+     * @param callerClassName  调用类名（简单或完整）
+     * @param callerMethodName 调用方法名
+     * @return 被调用方方法调用记录列表
+     */
+    public List<WriteDbData4MethodCall> queryCallees(String callerClassName, String callerMethodName) {
+        return queryCallees(callerClassName, callerMethodName, 0, DEFAULT_QUERY_LIMIT);
+    }
+
+    /**
+     * 查找指定方法调用了哪些方法（向下调用链），支持分页。
+     *
+     * @param callerClassName  调用类名（简单或完整，同名类须完整）
+     * @param callerMethodName 调用方法名
+     * @param offset           起始偏移量（从 0 开始）
+     * @param limit            返回数量上限
+     * @return 被调用方方法调用记录列表
+     */
+    public List<WriteDbData4MethodCall> queryCallees(String callerClassName, String callerMethodName, int offset, int limit) {
+        checkDuplicateSimpleClassName(callerClassName);
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLEES_BY_CLASS_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLER_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.MC_CALLER_METHOD_NAME + " = ?" +
+                    " order by " + DC.MC_CALL_ID +
+                    " limit ? offset ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        String simpleClassName = dbOperWrapper.querySimpleClassName(callerClassName);
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, simpleClassName, callerMethodName, limit, offset);
+    }
+
+    /**
+     * 统计谁调用了指定方法（向上调用链）的记录总数，按类名+方法名查询。
+     * 与 queryCallers 同 WHERE 的 SELECT COUNT(*)，供服务端返回 totalCount、判断是否需翻页（F4）。
+     * 不加 order by/limit/offset（COUNT 不需要排序）；同名类简单输入与 queryCallers 同步抛出 JavaCG2RuntimeException。
+     *
+     * @param calleeClassName  被调用类名（简单或完整，同名类须完整）
+     * @param calleeMethodName 被调用方法名
+     * @return 调用方方法调用记录总数
+     */
+    public long countCallers(String calleeClassName, String calleeMethodName) {
+        checkDuplicateSimpleClassName(calleeClassName);
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_COUNT_CALLERS_BY_CLASS_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select count(*) from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.MC_CALLEE_METHOD_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        String simpleClassName = dbOperWrapper.querySimpleClassName(calleeClassName);
+        Long count = dbOperator.queryObjectOneColumn(sql, Long.class, simpleClassName, calleeMethodName);
+        return count != null ? count : 0L;
+    }
+
+    /**
+     * 统计指定方法调用了哪些方法（向下调用链）的记录总数，按类名+方法名查询。
+     * 与 queryCallees 同 WHERE 的 SELECT COUNT(*)，对称新增（F4 totalCount）。
+     *
+     * @param callerClassName  调用类名（简单或完整，同名类须完整）
+     * @param callerMethodName 调用方法名
+     * @return 被调用方方法调用记录总数
+     */
+    public long countCallees(String callerClassName, String callerMethodName) {
+        checkDuplicateSimpleClassName(callerClassName);
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_COUNT_CALLEES_BY_CLASS_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select count(*) from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLER_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.MC_CALLER_METHOD_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        String simpleClassName = dbOperWrapper.querySimpleClassName(callerClassName);
+        Long count = dbOperator.queryObjectOneColumn(sql, Long.class, simpleClassName, callerMethodName);
+        return count != null ? count : 0L;
+    }
+
+    /**
+     * 根据被调用方完整方法HASH+长度，从方法调用表获取对应的方法调用（精确查单重载，无 objType 过滤）。
+     * 使用独立的 SqlKeyEnum.MC_QUERY_MC_BY_CALLEE_HASH 缓存（与 queryMethodCallByCalleeMethodWithReturn 的
+     * MC_QUERY_METHOD_CALL_BY_CALLEE_HASH 区分，避免同一枚举被多个方法共用而被 SqlKeyEnum 重复性检查判为重复）。
+     *
+     * @param calleeMethodHash 被调用方完整方法HASH+长度
+     * @return 方法调用记录列表
+     */
+    public List<WriteDbData4MethodCall> queryMethodCallByCalleeHash(String calleeMethodHash) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_MC_BY_CALLEE_HASH;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.getTableAllColumns(DbTableInfoEnum.DTIE_METHOD_CALL) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " where " + DC.MC_CALLEE_METHOD_HASH + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, WriteDbData4MethodCall.class, calleeMethodHash);
+    }
+
+    /**
+     * 查找被调用最多或调用最多的方法（热点方法统计）。
+     * byCallee=true: 被调用最多（按 callee_method_hash 分组）；
+     * byCallee=false: 调用最多（按 caller_method_hash 分组）。
+     * 按方向使用不同的 SqlKeyEnum 缓存（两方向 SQL 列不同，不能共用缓存）。
+     *
+     * @param byCallee true: 统计被调用最多的方法；false: 统计调用最多的方法
+     * @param limit    返回数量
+     * @return 热点方法列表，按调用次数降序
+     */
+    public List<MethodCallCountInfo> queryTopMethods(boolean byCallee, int limit) {
+        SqlKeyEnum sqlKeyEnum = byCallee ? SqlKeyEnum.MC_QUERY_TOP_CALLEE_METHODS : SqlKeyEnum.MC_QUERY_TOP_CALLER_METHODS;
+        String fullMethodColumn = byCallee ? DC.MC_CALLEE_FULL_METHOD : DC.MC_CALLER_FULL_METHOD;
+        String hashColumn = byCallee ? DC.MC_CALLEE_METHOD_HASH : DC.MC_CALLER_METHOD_HASH;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + fullMethodColumn + " as full_method" +
+                    ", " + hashColumn + " as method_hash" +
+                    ", count(*) as call_count" +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                    " group by " + hashColumn +
+                    " order by call_count desc" +
+                    " limit ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, MethodCallCountInfo.class, limit);
+    }
+
+    /**
+     * 检查简单类名输入是否为同名类，若是则抛出异常，提示使用完整类名。
+     * 同名类在 method_call.simple_class_name 列中按完整类名存储，简单类名输入会查不到。
+     */
+    private void checkDuplicateSimpleClassName(String className) {
+        if (className == null || className.contains(JavaCG2Constants.FLAG_DOT)) {
+            // 完整类名输入，无需检查
+            return;
+        }
+        if (dbOperWrapper.isDuplicateSimpleClassName(className)) {
+            throw new JavaCG2RuntimeException("类名 " + className + " 存在同名类，请使用完整类名形式");
+        }
     }
 
     /**

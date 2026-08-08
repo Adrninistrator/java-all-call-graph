@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_get_method_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_get_method{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
   method_name varchar(200) NOT NULL COMMENT '方法名',
@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS jacg_get_method_{appName} (
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
   return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
-  INDEX idx_gm_cm_{appName}(simple_class_name(255), method_name),
-  INDEX idx_gm_cf_{appName}(simple_class_name(255), field_name),
-  INDEX idx_gm_sft_{appName}(simple_field_type_nad),
-  INDEX idx_gm_mh_{appName}(method_hash)
+  INDEX idx_gm_cm{appName}(simple_class_name(255), method_name),
+  INDEX idx_gm_cf{appName}(simple_class_name(255), field_name),
+  INDEX idx_gm_sft{appName}(simple_field_type_nad),
+  INDEX idx_gm_mh{appName}(method_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='dto的get方法及字段';

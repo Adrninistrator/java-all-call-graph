@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_column_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_column{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   result_map_id varchar(100) NOT NULL COMMENT 'XML的resultMap ID',
   entity_simple_class_name varchar(300) NOT NULL COMMENT 'MyBatis Entity类唯一类名',
@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_column_{appName} (
   xml_file_name varchar(255) NOT NULL COMMENT 'MyBatis XML文件名',
   xml_file_path varchar(500) NOT NULL COMMENT 'MyBatis XML文件路径',
   PRIMARY KEY (record_id),
-  INDEX idx_mmc_escf_{appName}(entity_simple_class_name(255), entity_field_name),
-  INDEX idx_mmc_xfn_{appName}(xml_file_name)
+  INDEX idx_mmc_escf{appName}(entity_simple_class_name(255), entity_field_name),
+  INDEX idx_mmc_xfn{appName}(xml_file_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='MyBatis的Entity与数据库字段名信息（使用MySQL）';

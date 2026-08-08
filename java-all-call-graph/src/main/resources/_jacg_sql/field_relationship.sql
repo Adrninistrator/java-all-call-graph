@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_field_relationship_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_field_relationship{appName} (
   fld_relationship_id int NOT NULL COMMENT '字段关联关系id，从1开始',
   get_method_call_id int NOT NULL COMMENT 'get方法调用序号，从1开始',
   set_method_call_id int NOT NULL COMMENT 'set方法调用序号，从1开始',
@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS jacg_field_relationship_{appName} (
   bean_util_call_id int NOT NULL COMMENT 'BeanUtil方法调用序号，从1开始',
   bean_util_method text DEFAULT NULL COMMENT 'BeanUtil属性拷贝方法',
   PRIMARY KEY (fld_relationship_id),
-  INDEX idx_gsr_gmci_{appName}(get_method_call_id),
-  INDEX idx_gsr_smci_{appName}(set_method_call_id),
-  INDEX idx_gsr_scm_{appName}(set_simple_class_name(255), set_method_name),
-  INDEX idx_gsr_gcm_{appName}(get_simple_class_name(255), get_method_name)
+  INDEX idx_gsr_gmci{appName}(get_method_call_id),
+  INDEX idx_gsr_smci{appName}(set_method_call_id),
+  INDEX idx_gsr_scm{appName}(set_simple_class_name(255), set_method_name),
+  INDEX idx_gsr_gcm{appName}(get_simple_class_name(255), get_method_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='通过get/set方法关联的字段关系';

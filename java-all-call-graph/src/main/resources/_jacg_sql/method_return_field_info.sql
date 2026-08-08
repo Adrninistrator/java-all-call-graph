@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_method_return_field_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_method_return_field_info{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   seq int NOT NULL COMMENT '某个方法返回的字段信息序号，从0开始',
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS jacg_method_return_field_info_{appName} (
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
   return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
-  INDEX idx_mrfi_mhs_{appName}(method_hash, seq),
-  INDEX idx_mrfi_fiscn_{appName}(field_in_simple_class_name(255)),
-  INDEX idx_mrfi_fst_{appName}(simple_field_type_nad)
+  INDEX idx_mrfi_mhs{appName}(method_hash, seq),
+  INDEX idx_mrfi_fiscn{appName}(field_in_simple_class_name(255)),
+  INDEX idx_mrfi_fst{appName}(simple_field_type_nad)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法返回的字段（含枚举）';

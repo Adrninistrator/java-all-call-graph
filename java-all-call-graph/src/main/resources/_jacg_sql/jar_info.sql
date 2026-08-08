@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_jar_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_jar_info{appName} (
   jar_num int NOT NULL COMMENT 'jar文件序号',
   jar_type varchar(5) NOT NULL COMMENT 'jar文件类型，J: jar/war文件，D: 目录，JIJ: jar/war文件中的jar，R: 解析结果文件保存目录',
   jar_path_hash varchar(32) NOT NULL COMMENT '外层jar文件路径HASH+字节数',
@@ -12,6 +12,6 @@ CREATE TABLE IF NOT EXISTS jacg_jar_info_{appName} (
   inner_jar_file_name varchar(255) NOT NULL COMMENT 'jar/war文件中的jar文件名',
   import_time datetime(3) NOT NULL COMMENT '导入时间',
   PRIMARY KEY (jar_num),
-  INDEX idx_ji_jph_{appName}(jar_path_hash),
-  INDEX idx_ji_jfn_{appName}(jar_file_name)
+  INDEX idx_ji_jph{appName}(jar_path_hash),
+  INDEX idx_ji_jfn{appName}(jar_file_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='jar文件信息表';

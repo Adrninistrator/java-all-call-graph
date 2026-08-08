@@ -305,10 +305,10 @@ public class TestConfigDbInvalid extends TestRunByCodeBase {
         }
     }
 
-    // 使用固定app.name的H2数据库文件，调用DbInitializer.genDbOperWrapper
+    // 使用H2数据库文件，app.name留空（表名固定为 jacg_关键字），调用DbInitializer.genDbOperWrapper
     @Test
     public void testUseFixedAppNameH2Db_GenDbOperWrapper() {
-        configureWrapper.useFixedAppNameH2Db();
+        configureWrapper.useEmptyAppNameH2Db();
         DbOperWrapper dbOperWrapper = DbInitializer.genDbOperWrapper(configureWrapper, false, true, this);
         Assert.assertNotNull(dbOperWrapper);
     }
@@ -424,11 +424,11 @@ public class TestConfigDbInvalid extends TestRunByCodeBase {
         }
     }
 
-    // ===== useFixedAppNameH2Db 测试 =====
+    // ===== useEmptyAppNameH2Db 测试 =====
 
-    // 测试使用固定app.name的H2数据库文件
+    // 测试使用H2数据库文件，app.name留空（表名固定为 jacg_关键字）
     @Test
     public void testUseFixedAppNameH2Db() {
-        configureWrapper.useFixedAppNameH2Db();
+        configureWrapper.useEmptyAppNameH2Db();
     }
 }

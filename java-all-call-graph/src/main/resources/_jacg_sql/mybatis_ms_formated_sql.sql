@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_formated_sql_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_formated_sql{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   xml_file_name varchar(255) NOT NULL COMMENT 'MyBatis XML文件名',
   sql_id varchar(200) NOT NULL COMMENT 'MyBatis XML中的sql id，即Mapper的方法名',
@@ -12,6 +12,6 @@ CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_formated_sql_{appName} (
   result_map_id varchar(100) NULL COMMENT 'XML的resultMap ID',
   result_map_hash varchar(32) NULL COMMENT 'XML对应的resultMap内容hash+字节数',
   PRIMARY KEY (record_id),
-  INDEX idx_mmfs_xfnsi_{appName}(xml_file_name, sql_id),
-  INDEX idx_mmfs_scnsi_{appName}(mapper_simple_class_name(255), sql_id)
+  INDEX idx_mmfs_xfnsi{appName}(xml_file_name, sql_id),
+  INDEX idx_mmfs_scnsi{appName}(mapper_simple_class_name(255), sql_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='MyBatis XML的sql、Mapper相关信息（使用MySQL）';

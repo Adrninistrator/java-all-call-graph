@@ -76,7 +76,11 @@ public class DbOperator implements AutoCloseable {
         dataSource.setMaxActive(dbConfInfo.getMaxActive());
         dataSource.setTestOnBorrow(false);
         dataSource.setTestOnReturn(false);
-        dataSource.setTestWhileIdle(false);
+        dataSource.setTestWhileIdle(true);
+        dataSource.setValidationQuery("SELECT 1");
+        dataSource.setTimeBetweenEvictionRunsMillis(60000);
+        dataSource.setMinEvictableIdleTimeMillis(300000);
+        dataSource.setKeepAlive(true);
         dataSource.setProxyFilters(Collections.singletonList(new DruidMonitorFilter(dbConfInfo.isUseH2Db())));
         initDataSource();
 
@@ -544,7 +548,47 @@ public class DbOperator implements AutoCloseable {
         return closed;
     }
 
+    /**
+     * 检查数据库连接是否可用
+     * 通过获取连接并调用 Connection.isValid() 验证，同时检查数据源内部状态
+     *
+     * @return true: 连接可用 false: 连接不可用
+     */
+    public boolean isConnectionAvailable() {
+        if (closed) {
+            logger.info("[{}] 数据源已关闭（closed=true）", objSeq);
+            return false;
+        }
+        if (dataSource.isClosed()) {
+            logger.info("[{}] DruidDataSource 已关闭", objSeq);
+            return false;
+        }
+        try (Connection conn = dataSource.getConnection()) {
+            if (conn == null) {
+                logger.info("[{}] 获取数据库连接返回null", objSeq);
+                return false;
+            }
+            boolean available = conn.isValid(5);
+            if (!available) {
+                logger.info("[{}] Connection.isValid() 返回false", objSeq);
+            }
+            return available;
+        } catch (Exception e) {
+            logger.error("[{}] 数据库连接不可用", objSeq, e);
+            return false;
+        }
+    }
+
     public boolean isUseH2Db() {
         return dbConfInfo.isUseH2Db();
+    }
+
+    /**
+     * 获取JdbcTemplate对象
+     *
+     * @return
+     */
+    public JdbcTemplateQuiet getJdbcTemplate() {
+        return jdbcTemplate;
     }
 }

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_extends_impl_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_extends_impl{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
   class_name varchar(300) NOT NULL COMMENT '完整类名',
@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS jacg_extends_impl_{appName} (
   upward_simple_class_name varchar(300) NOT NULL COMMENT '父类或接口的唯一类名',
   upward_class_name varchar(300) NOT NULL COMMENT '父类或接口的完整类名',
   PRIMARY KEY (record_id),
-  INDEX idx_ei_scn_{appName}(simple_class_name(255)),
-  INDEX idx_ei_uscn_{appName}(upward_simple_class_name(255))
+  INDEX idx_ei_scn{appName}(simple_class_name(255)),
+  INDEX idx_ei_uscn{appName}(upward_simple_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='继承与实现相关信息表';

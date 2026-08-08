@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_entity_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_entity{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   mapper_simple_class_name varchar(300) NOT NULL COMMENT 'MyBatis Mapper唯一类名',
   entity_simple_class_name varchar(300) NOT NULL COMMENT 'MyBatis Entity类唯一类名',
@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS jacg_mybatis_ms_entity_{appName} (
   xml_file_name varchar(255) NOT NULL COMMENT 'MyBatis XML文件名',
   xml_file_path varchar(500) NOT NULL COMMENT 'MyBatis XML文件路径',
   PRIMARY KEY (record_id),
-  INDEX idx_mme_msc_{appName}(mapper_simple_class_name(255)),
-  INDEX idx_mme_esc_{appName}(entity_simple_class_name(255)),
-  INDEX idx_mme_tn_{appName}(table_name),
-  INDEX idx_mme_xfn_{appName}(xml_file_name)
+  INDEX idx_mme_msc{appName}(mapper_simple_class_name(255)),
+  INDEX idx_mme_esc{appName}(entity_simple_class_name(255)),
+  INDEX idx_mme_tn{appName}(table_name),
+  INDEX idx_mme_xfn{appName}(xml_file_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='MyBatis的Entity与Mapper、表名（使用MySQL）';

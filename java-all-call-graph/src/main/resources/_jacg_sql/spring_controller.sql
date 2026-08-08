@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_spring_controller_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_spring_controller{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   seq int NOT NULL COMMENT '序号，从0开始，大于0代表有多种可能',
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS jacg_spring_controller_{appName} (
   full_method text NOT NULL COMMENT '完整方法（类名+方法名+参数）',
   return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   PRIMARY KEY (record_id),
-  INDEX idx_spc_mhs_{appName}(method_hash, seq),
-  INDEX idx_spc_su_{appName}(show_uri),
-  INDEX idx_spc_scn_{appName}(simple_class_name(255))
+  INDEX idx_spc_mhs{appName}(method_hash, seq),
+  INDEX idx_spc_su{appName}(show_uri),
+  INDEX idx_spc_scn{appName}(simple_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Spring Controller信息表';

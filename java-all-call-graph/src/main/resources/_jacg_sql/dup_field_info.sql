@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_dup_field_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_dup_field_info{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
   field_name varchar(350) NOT NULL COMMENT '字段名称',
@@ -16,5 +16,5 @@ CREATE TABLE IF NOT EXISTS jacg_dup_field_info_{appName} (
   class_name varchar(300) NOT NULL COMMENT '完整类名',
   jar_num int NOT NULL COMMENT '字段所在的jar文件序号',
   PRIMARY KEY (record_id),
-  INDEX idx_dfi_jnscn_{appName}(jar_num, simple_class_name(255))
+  INDEX idx_dfi_jnscn{appName}(jar_num, simple_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='重复同名类的字段信息表';

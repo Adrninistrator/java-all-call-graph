@@ -81,8 +81,7 @@ public enum OtherConfigFileUseListEnum implements OtherConfigInterface {
                     "(顺序) JDK的jar文件解析生成的H2数据库文件在最后指定",
                     "(示例) build/jacg_h2db_tomcat_compatibility_mode.mv.db",
                     "(示例) build/jacg_h2db_jdk_compatibility_mode.mv.db",
-                    "(示例) D:/jacg_h2db_jdk_compatibility_mode.mv.db",
-                    "(示例) D:/test/build/jar-diff-version-2"}
+                    "(示例) D:/jacg_h2db_jdk_compatibility_mode.mv.db"}
             , null),
     ;
 

@@ -291,10 +291,10 @@ public class ConfigureWrapper extends BaseConfigureWrapper {
         );
     }
 
-    // 使用固定app.name的H2数据库文件
-    public void useFixedAppNameH2Db() {
-        logger.info("使用H2数据库时，使用固定的参数 {} {}", ConfigKeyEnum.CKE_APP_NAME.genConfigUsage(), JACGConstants.FIXED_APP_NAME);
-        setMainConfig(ConfigKeyEnum.CKE_APP_NAME, JACGConstants.FIXED_APP_NAME);
+    // 使用H2数据库文件，app.name留空，表名固定为 jacg_关键字（无后缀），便于跨项目复用与AI查询
+    public void useEmptyAppNameH2Db() {
+        logger.info("使用H2数据库时，{}留空，表名固定为 jacg_关键字", ConfigKeyEnum.CKE_APP_NAME.genConfigUsage());
+        setMainConfig(ConfigKeyEnum.CKE_APP_NAME, "");
         setMainConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.TRUE.toString());
     }
 

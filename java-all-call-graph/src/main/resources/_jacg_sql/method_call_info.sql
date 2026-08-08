@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_method_call_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_method_call_info{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   call_id int NOT NULL COMMENT '方法调用序号，从1开始',
   obj_args_seq int NOT NULL COMMENT '被调用对象或参数序号，0代表被调用对象，1开始为参数',
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS jacg_method_call_info_{appName} (
   the_value text COLLATE utf8mb4_bin NOT NULL COMMENT '对应的值',
   caller_method_hash varchar(32) NOT NULL COMMENT '调用方，方法hash+字节数',
   PRIMARY KEY (record_id),
-  INDEX idx_mci_cios_{appName}(call_id, obj_args_seq, seq),
-  INDEX idx_mci_value_{appName}(the_value(191)),
-  INDEX idx_mci_ermhos_{appName}(caller_method_hash, obj_args_seq, seq)
+  INDEX idx_mci_cios{appName}(call_id, obj_args_seq, seq),
+  INDEX idx_mci_value{appName}(the_value(191)),
+  INDEX idx_mci_ermhos{appName}(caller_method_hash, obj_args_seq, seq)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用信息表';

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_sf_field_method_call_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_sf_field_method_call{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
   field_name varchar(200) NOT NULL COMMENT '字段名',
@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS jacg_sf_field_method_call_{appName} (
   callee_class_name varchar(300) NOT NULL COMMENT '初始化方法被调类名',
   callee_method_name varchar(200) NOT NULL COMMENT '初始化方法被调用方法名',
   PRIMARY KEY (record_id),
-  INDEX idx_sffmc_scf_{appName}(simple_class_name(255), field_name)
+  INDEX idx_sffmc_scf{appName}(simple_class_name(255), field_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='static、final字段初始化方法信息表（含枚举）';

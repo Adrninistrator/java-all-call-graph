@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_spring_task_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_spring_task{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   spring_bean_name varchar(255) NOT NULL COMMENT 'Spring Bean的名称',
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS jacg_spring_task_{appName} (
   return_type varchar(255) NOT NULL COMMENT '方法返回类型，包含数组标志',
   define_class_name_xml_path varchar(255) NOT NULL COMMENT '在Java代码中定义时所在的类名，或在XML中定义时对应的文件路径',
   PRIMARY KEY (record_id),
-  INDEX idx_spt_mh_{appName}(method_hash),
-  INDEX idx_spt_sbn_{appName}(spring_bean_name),
-  INDEX idx_spt_cm_{appName}(class_name(255), method_name)
+  INDEX idx_spt_mh{appName}(method_hash),
+  INDEX idx_spt_sbn{appName}(spring_bean_name),
+  INDEX idx_spt_cm{appName}(class_name(255), method_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Spring定时任务信息表';

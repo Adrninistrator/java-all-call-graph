@@ -90,6 +90,8 @@ public class JACGConstants {
     public static final String CALL_FLAG_THROW_NO_TAB = "!throw!";
     public static final String CALL_FLAG_THROW = JavaCG2Constants.FLAG_TAB + CALL_FLAG_THROW_NO_TAB;
 
+    public static final String ILLEGAL_CLASS_FLAG = "!illegal_class!";
+
     public static final String MYSQL_FLAG = "mysql";
     public static final String MYSQL_REWRITEBATCHEDSTATEMENTS = "rewriteBatchedStatements=true";
 
@@ -155,11 +157,12 @@ public class JACGConstants {
     // 输出的注解信息文件，多一列其他信息，不包含属性时的列数
     public static final int ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE_4 = 4;
 
-    public static final String FIXED_APP_NAME = "jacg";
-
     public static final String H2_PROTOCOL = "jdbc:h2:file:";
     public static final String H2_SCHEMA = "jacg";
     public static final String H2_FILE_EXT = ".mv.db";
+
+    // H2 数据库写入时使用的线程数上限。H2 为单文件存储，写入并发过高会因文件锁争用退化（实测16线程退化、4线程最优），故限制为较小值
+    public static final int H2_WRITE_DB_THREAD_NUM = 4;
 
     public static final String THREAD_NAME_PREFIX_WORKER = "jacg_worker";
 

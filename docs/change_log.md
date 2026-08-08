@@ -1998,3 +1998,25 @@ com.adrninistrator.jacg.conf.enums.OtherConfigFileUseSetEnum 枚举常量名称�
 ## 1.50. (4.1.1)
 
 配置参数描述优化
+
+## 1.51. (4.1.2)
+
+### 1.51.1. 配置参数相关
+
+#### 1.51.1.1. app.name 参数优化
+
+_jacg_config\config.properties 配置文件中的 app.name 参数支持为空，且默认值使用空
+
+### 1.51.2. 增加数据库相关功能
+
+增加查询数据库表名、建表语句、根据任意 SQL 语句查询数据功能
+
+### 1.51.3. 增加数据库表
+
+- method_call_field_actual_type
+
+方法调用被调用对象为非静态字段时的实际类型（运行时多态）
+
+- spring_di_field
+
+Spring 依赖注入字段信息

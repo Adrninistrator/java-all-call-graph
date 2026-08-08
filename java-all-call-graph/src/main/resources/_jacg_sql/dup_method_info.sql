@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_dup_method_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_dup_method_info{appName} (
   record_id int NOT NULL COMMENT '记录id，从1开始',
   method_hash varchar(32) NOT NULL COMMENT '方法hash+字节数',
   simple_class_name varchar(300) NOT NULL COMMENT '唯一类名',
@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS jacg_dup_method_info_{appName} (
   method_instructions_hash varchar(32) NOT NULL COMMENT '方法指令的HASH值（MD5），可能为空字符串',
   jar_num int NOT NULL COMMENT '方法所在的jar文件序号',
   PRIMARY KEY (record_id),
-  INDEX idx_dmi_jncn_{appName}(jar_num, simple_class_name(255))
+  INDEX idx_dmi_jncn{appName}(jar_num, simple_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='重复同名类的方法信息表';

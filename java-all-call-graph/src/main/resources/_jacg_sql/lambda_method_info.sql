@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS jacg_lambda_method_info_{appName} (
+CREATE TABLE IF NOT EXISTS jacg_lambda_method_info{appName} (
   call_id int NOT NULL COMMENT '方法调用序号，从1开始',
   lambda_callee_class_name varchar(300) NOT NULL COMMENT 'Lambda表达式被调用方类名',
   lambda_callee_method_name varchar(200) NOT NULL COMMENT 'Lambda表达式被调用方方法名',
@@ -10,6 +10,6 @@ CREATE TABLE IF NOT EXISTS jacg_lambda_method_info_{appName} (
   lambda_next_is_intermediate tinyint DEFAULT NULL COMMENT '下一个被调用方法是否为Stream的intermediate（中间）操作，1:是，0:否',
   lambda_next_is_terminal tinyint DEFAULT NULL COMMENT '下一个被调用方法是否为Stream的terminal（终端）操作，1:是，0:否',
   PRIMARY KEY (call_id),
-  INDEX idx_lmi_ecn_{appName}(lambda_callee_class_name(255)),
-  INDEX idx_lmi_ncn_{appName}(lambda_next_class_name(255))
+  INDEX idx_lmi_ecn{appName}(lambda_callee_class_name(255)),
+  INDEX idx_lmi_ncn{appName}(lambda_next_class_name(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Lambda表达式方法信息表';

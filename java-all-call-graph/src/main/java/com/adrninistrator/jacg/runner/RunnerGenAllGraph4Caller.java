@@ -362,6 +362,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
 
             // 获取唯一类名（简单类名或完整类名）
             String simpleClassName = dbOperWrapper.querySimpleClassNameInTask(callerClassName);
+            if (StringUtils.isBlank(simpleClassName)) {
+                logger.error("未查询到唯一类名 {}", task);
+                // 使用任务中指定的类名，避免后续生成!not_found文件时文件名中出现null
+                simpleClassName = callerClassName;
+            }
             if (handledClassNameSet.contains(simpleClassName)) {
                 logger.warn("当前类的全部方法已添加至任务，不需要再指定 {} {}", simpleClassName, task);
                 continue;
@@ -393,6 +398,11 @@ public class RunnerGenAllGraph4Caller extends AbstractRunnerGenAllCallGraph {
     private boolean addAllMethodsInClass2Task(String className, Set<String> handledClassNameSet, List<CallerTaskInfo> callerTaskInfoList) {
         // 获取唯一类名（简单类名或完整类名）
         String simpleClassName = dbOperWrapper.querySimpleClassNameInTask(className);
+        if (StringUtils.isBlank(simpleClassName)) {
+            logger.error("未查询到唯一类名 {}", className);
+            // 使用任务中指定的类名，避免后续生成!not_found文件时文件名中出现null
+            simpleClassName = className;
+        }
         if (!handledClassNameSet.add(simpleClassName)) {
             // 已处理过的类不再处理
             logger.warn("当前类已处理过，不需要再指定 {} {}", simpleClassName, className);
